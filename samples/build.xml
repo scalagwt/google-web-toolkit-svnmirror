@@ -1,0 +1,61 @@
+<project name="samples" default="build" basedir=".">
+	<property name="gwt.root" location=".." />
+	<property name="project.tail" value="samples" />
+	<import file="${gwt.root}/common.ant.xml" />
+
+	<!-- "build" is the default when subprojects are directly targetted -->
+	<property name="target" value="build" />
+
+	<target name="dynatable" description="Build dynatable">
+		<gwt.ant dir="dynatable" />
+	</target>
+
+	<target name="hello" description="Build hello">
+		<gwt.ant dir="hello" />
+	</target>
+
+	<target name="i18n" description="Build i18n">
+		<gwt.ant dir="i18n" />
+	</target>
+
+	<target name="json" description="Build json">
+		<gwt.ant dir="json" />
+	</target>
+
+	<target name="kitchensink" description="Build kitchensink">
+		<gwt.ant dir="kitchensink" />
+	</target>
+
+	<target name="mail" description="Build mail">
+		<gwt.ant dir="mail" />
+	</target>
+
+	<target name="simplexml" description="Build simplexml">
+		<gwt.ant dir="simplexml" />
+	</target>
+
+	<target name="-do" depends="dynatable, hello, i18n, json, kitchensink, mail, simplexml" description="Run all subprojects" />
+
+	<target name="build" description="Builds GWT">
+		<antcall target="-do">
+			<param name="target" value="build" />
+		</antcall>
+	</target>
+
+	<target name="checkstyle" description="Static analysis of GWT source">
+		<antcall target="-do">
+			<param name="target" value="checkstyle" />
+		</antcall>
+	</target>
+
+	<target name="test" depends="build" description="Test GWT">
+		<antcall target="-do">
+			<param name="target" value="test" />
+		</antcall>
+	</target>
+
+	<target name="clean" description="Cleans this project's intermediate and output files">
+		<delete dir="${project.build}" />
+		<delete dir="${gwt.build.out}/samples-scripts" />
+	</target>
+</project>
