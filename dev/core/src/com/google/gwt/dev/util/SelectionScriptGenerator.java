@@ -48,15 +48,10 @@ public class SelectionScriptGenerator {
    * same generated code for the same set of compilations.
    */
   private final Map propertyValuesSetByStrongName = new TreeMap();
-
   private final Property[] orderedProps;
-
   private final Properties moduleProps;
-
   private final String moduleName;
-
   private final Scripts scripts;
-
   private final Styles styles;
 
   /**
@@ -95,36 +90,13 @@ public class SelectionScriptGenerator {
   /**
    * Generates a selection script based on the current settings.
    * 
-   * @return an html document whose contents are the definition of a
-   *         module.nocache.html file
+   * @return an javascript whose contents are the definition of a module.js file
    */
   public String generateSelectionScript() {
     StringWriter src = new StringWriter();
     PrintWriter pw = new PrintWriter(src, true);
 
-    pw.println("<html>");
-
-    // Emit the head and script.
-    //
-    pw.println("<head><script>");
-    String onloadExpr = genScript(pw);
-    pw.println("</script></head>");
-
-    // Emit the body.
-    //
-    pw.print("<body onload='");
-    pw.print(onloadExpr);
-    pw.println("'>");
-
-    // This body text won't be seen unless you open the html alone.
-    pw.print("<font face='arial' size='-1'>");
-    pw.print("This script is part of module</font> <code>");
-    pw.print(moduleName);
-    pw.println("</code>");
-
-    pw.println("</body>");
-
-    pw.println("</html>");
+    genScript(pw);
 
     pw.close();
     String html = src.toString();
@@ -191,6 +163,37 @@ public class SelectionScriptGenerator {
     }
   }
 
+  private void genInitHandlers(PrintWriter pw) {
+    pw.println("function __gwt_initHandlers(resize, beforeunload, unload) {");
+    pw.println("  var oldOnResize = window.onresize;");
+    pw.println("  window.onresize = function() {");
+    pw.println("    resize();");
+    pw.println("    if (oldOnResize)");
+    pw.println("      oldOnResize();");
+    pw.println("  };");
+    pw.println();
+    pw.println("  var oldOnBeforeUnload = window.onbeforeunload;");
+    pw.println("  window.onbeforeunload = function() {");
+    pw.println("    var ret = beforeunload();");
+    pw.println();
+    pw.println("    var oldRet;");
+    pw.println("    if (oldOnBeforeUnload)");
+    pw.println("      oldRet = oldOnBeforeUnload();");
+    pw.println();
+    pw.println("    if (ret !== null)");
+    pw.println("      return ret;");
+    pw.println("    return oldRet;");
+    pw.println("  };");
+    pw.println();
+    pw.println("  var oldOnUnload = window.onunload;");
+    pw.println("  window.onunload = function() {");
+    pw.println("    unload();");
+    pw.println("    if (oldOnUnload)");
+    pw.println("      oldOnUnload();");
+    pw.println("  };");
+    pw.println("}");
+  }
+
   /**
    * Generates a function that injects calls to a shared file-injection
    * functions.
@@ -198,95 +201,140 @@ public class SelectionScriptGenerator {
    * @param pw generate source onto this writer
    */
   private void genInjectExternalFiles(PrintWriter pw) {
-    pw.println();
-    pw.println("function injectExternalFiles() {");
-    pw.println("  var mcb = $wnd.__gwt_tryGetModuleControlBlock(location.search);");
-    pw.println("  if (!mcb) return;");
-    pw.println("  var base = mcb.getBaseURL();");
+    if (!hasExternalFiles()) {
+      return;
+    }
 
-    // Styles come first to give them a little more time to load.
-    pw.println("  mcb.addStyles([");
-    boolean needComma = false;
+    pw.println("function __gwt_injectExternalFiles() {");
+
     for (Iterator iter = styles.iterator(); iter.hasNext();) {
       String src = (String) iter.next();
-      if (needComma) {
-        pw.println(",");
-      }
-      needComma = true;
-
-      pw.print("    ");
-      if (isRelativeURL(src)) {
-        pw.print("base+");
-      }
-      pw.print("'");
-      pw.print(src);
-      pw.print("'");
+      printDocumentWrite(pw, "  ", "<link rel='stylesheet' href='" + src + "'>");
     }
-    pw.println();
-    pw.println("    ]);");
 
-    // Scripts
-    pw.println("  mcb.addScripts([");
-    needComma = false;
     for (Iterator iter = scripts.iterator(); iter.hasNext();) {
       Script script = (Script) iter.next();
-      if (needComma) {
-        pw.println(",");
-      }
-      needComma = true;
-
-      // Emit the src followed by the module-ready function.
-      // Note that the module-ready function is a string because it gets
-      // eval'ed in the context of the host html window. This is absolutely
-      // required because otherwise in web mode (IE) you get an
-      // "cannot execute code from a freed script" error.
-      String src = script.getSrc();
-      pw.print("    ");
-      if (isRelativeURL(src)) {
-        pw.print("base+");
-      }
-      pw.print("'");
-      pw.print(src);
-      pw.print("', \"");
-      String readyFnJs = Jsni.generateEscapedJavaScript(script.getJsReadyFunction());
-      pw.print(readyFnJs);
-      pw.print("\"");
+      printDocumentWrite(pw, "  ", "<script language='javascript' src='"
+          + script.getSrc() + "'></script>");
     }
-    pw.println();
-    pw.println("    ]);");
 
     pw.println("}");
   }
 
-  private void genOnLoad(PrintWriter pw) {
-    // Emit the onload() function.
-    pw.println();
-    pw.println("function onLoad() {");
-
-    // Early out (or fall through below) if the page is loaded out of context.
-    pw.println("  if (!$wnd.__gwt_isHosted) return;");
-
-    // Maybe inject scripts.
-    if (hasExternalFiles()) {
-      pw.println("  injectExternalFiles();");
-    }
-
-    // If we're in web mode, run the compilation selector logic.
-    // The compilation will call mcb.compilationLoaded() itself.
-    pw.println("  if (!$wnd.__gwt_isHosted()) {");
-    pw.println("    selectScript();");
+  private void genOnBadLoad(PrintWriter pw) {
+    pw.println("function __gwt_onBadLoad(moduleName) {");
+    pw.println("  if (__gwt_onLoadError) {");
+    pw.println("    __gwt_onLoadError(moduleName);");
+    pw.println("    return;");
+    pw.println("  } else {");
+    pw.println("    alert('Failed to load module \\\"' + moduleName + ");
+    pw.println("      '\\\".\\nPlease see the log in the development shell for details.');");
     pw.println("  }");
+    pw.println("}");
+    pw.println();
+  }
 
-    // If we're in hosted mode, notify $wnd that we're ready to go.
-    // Requires that we get the module control block.
-    pw.println("  else {");
-    pw.println("    var mcb = $wnd.__gwt_tryGetModuleControlBlock(location.search);");
-    pw.println("    if (mcb) {");
-    pw.println("      $moduleName = mcb.getName();");
-    pw.println("      mcb.compilationLoaded(window);");
+  private void genOnBadProperty(PrintWriter pw) {
+    pw.println();
+    pw.println("function __gwt_onBadProperty(moduleName, propName, allowedValues, badValue) {");
+    pw.println("  if (__gwt_onPropertyError) {");
+    pw.println("    __gwt_onPropertyError(moduleName, propName, allowedValues, badValue);");
+    pw.println("    return;");
+    pw.println("  } else {");
+    pw.println("    var msg = 'While attempting to load module \\\"' + moduleName + '\\\", ';");
+    pw.println("    if (badValue != null) {");
+    pw.println("      msg += 'property \\\"' + propName + '\\\" was set to the unexpected value \\\"'");
+    pw.println("        + badValue + '\\\"';");
+    pw.println("    } else {");
+    pw.println("      msg += 'property \\\"' + propName + '\\\" was not specified';");
+    pw.println("    }");
+    pw.println();
+    pw.println("    msg += 'Allowed values: ' + allowedValues;");
+    pw.println();
+    pw.println("    alert(msg);");
+    pw.println("  }");
+    pw.println("}");
+    pw.println();
+  }
+
+  private void genOnLoadFunctions(PrintWriter pw) {
+    pw.println("function __gwt_onInjectionDone(moduleName) {");
+    pw.println("  var iframe = document.getElementById(moduleName);");
+    pw.println("  window.__gwt_scriptsDone = true;");
+    pw.println("  if (window.__gwt_loadDone)");
+    pw.println("    iframe.contentWindow.gwtOnLoad(function() { __gwt_onBadLoad(moduleName) }, moduleName);");
+    pw.println("}");
+    pw.println();
+    pw.println("function __gwt_onScriptLoad(wnd, moduleName) {");
+    pw.println("  if (window.external && window.external.gwtOnLoad) {");
+    pw.println("    if (!window.external.gwtOnLoad(wnd, moduleName)) {");
+    pw.println("      if (__gwt_onLoadError) {");
+    pw.println("        __gwt_onLoadError(name);");
+    pw.println("      } else {");
+    pw.println("        alert('Failed to load module " + moduleName
+        + ". Please see the log in the development shell for details.');");
+    pw.println("      }");
+    pw.println("    }");
+    pw.println("    return;");
+    pw.println("  }");
+    pw.println("  var iframe = document.getElementById(moduleName);");
+    pw.println("  window.__gwt_loadDone = true;");
+    pw.println("  if (window.__gwt_scriptsDone)");
+    pw.println("    iframe.contentWindow.gwtOnLoad(function() { __gwt_onBadLoad(moduleName) }, moduleName);");
+    pw.println("}");
+    pw.println();
+  }
+
+  private void genProcessMetas(PrintWriter pw) {
+    pw.println("function __gwt_processMetas() {");
+    pw.println("  if (!!window.__gwt_metaProps) {");
+    pw.println("    return;");
+    pw.println("  }");
+    pw.println("  window.__gwt_metaProps = {};");
+    pw.println();
+    pw.println("  var metas = document.getElementsByTagName('meta');");
+    pw.println();
+    pw.println("  for (var i = 0, n = metas.length; i < n; ++i) {");
+    pw.println("    var meta = metas[i];");
+    pw.println("    var name = meta.getAttribute('name');");
+    pw.println();
+    pw.println("    if (name) {");
+    pw.println("      if (name == 'gwt:property') {");
+    pw.println("        var content = meta.getAttribute('content');");
+    pw.println("        if (content) {");
+    pw.println("          var name = content, value = '';");
+    pw.println("          var eq = content.indexOf('=');");
+    pw.println("          if (eq != -1) {");
+    pw.println("            name = content.substring(0, eq);");
+    pw.println("            value = content.substring(eq+1);");
+    pw.println("          }");
+    pw.println("          __gwt_metaProps[name] = value;");
+    pw.println("        }");
+    pw.println("      } else if (name == 'gwt:onPropertyErrorFn') {");
+    pw.println("        var content = meta.getAttribute('content');");
+    pw.println("        if (content) {");
+    pw.println("          try {");
+    pw.println("            __gwt_onPropertyError = eval(content);");
+    pw.println("          } catch (e) {");
+    pw.println("            alert('Bad handler \\\"' + content +");
+    pw.println("              '\\\" for \\\"gwt:onPropertyErrorFn\\\"');");
+    pw.println("          }");
+    pw.println("        }");
+    pw.println("      } else if (name == 'gwt:onLoadErrorFn') {");
+    pw.println("        var content = meta.getAttribute('content');");
+    pw.println("        if (content) {");
+    pw.println("          try {");
+    pw.println("            __gwt_onLoadError = eval(content);");
+    pw.println("          } catch (e) {");
+    pw.println("            alert('Bad handler \\\"' + content +");
+    pw.println("              '\\\" for \\\"gwt:onLoadErrorFn\\\"');");
+    pw.println("          }");
+    pw.println("        }");
+    pw.println("      }");
     pw.println("    }");
     pw.println("  }");
     pw.println("}");
+    pw.println();
   }
 
   private void genPropProviders(PrintWriter pw) {
@@ -336,7 +384,7 @@ public class SelectionScriptGenerator {
         pw.println("  var a = new Array(" + knownValues.length + ");");
         pw.println("  for (var k in ok)");
         pw.println("    a[ok[k]] = k;");
-        pw.print("  $wnd.__gwt_onBadProperty(");
+        pw.print("  __gwt_onBadProperty(");
         pw.print(literal(moduleName));
         pw.print(", ");
         pw.print(literal(prop.getName()));
@@ -380,16 +428,22 @@ public class SelectionScriptGenerator {
    * a compilation.
    * 
    * @param pw
-   * @return an expression that should be called as the body's onload handler
    */
-  private String genScript(PrintWriter pw) {
-    // Emit $wnd and $doc for dynamic property providers.
-    pw.println("var $wnd = parent;");
-    pw.println("var $doc = $wnd.document;");
-    pw.println("var $moduleName = null;");
+  private void genScript(PrintWriter pw) {
+    // Emit __gwt_initHandlers().
+    genInitHandlers(pw);
 
-    // Emit property providers; these are used in both modes.
+    // Emit property providers.
     genPropProviders(pw);
+
+    genOnBadProperty(pw);
+    genOnBadLoad(pw);
+    genProcessMetas(pw);
+    genOnLoadFunctions(pw);
+
+    // Emit dynamic file injection logic.
+    genInjectExternalFiles(pw);
+    pw.println();
 
     // If the ordered props are specified, then we're generating for both modes.
     if (orderedProps != null) {
@@ -410,17 +464,37 @@ public class SelectionScriptGenerator {
       }
     } else {
       // Hosted mode only, so there is no strong name selection (i.e. because
-      // there is no compiled JavaScript); do nothing
+      // there is no compiled JavaScript);
+      pw.println("function __gwt_go() {");
+      printDocumentWrite(pw, "  ", "<iframe id='" + moduleName
+          + "' style='width:0;height:0;border:0' src='" + moduleName
+          + ".cache.html'></iframe>");
     }
 
-    // Emit dynamic file injection logic; same logic is used in both modes.
-    if (hasExternalFiles()) {
-      genInjectExternalFiles(pw);
+    pw.println();
+    printDocumentWrite(pw, "  ",
+        "<script>__gwt_onInjectionDone('" + moduleName + "')</script>");
+    pw.println("}");
+
+    pw.println();
+    if (orderedProps != null) {
+      // Web mode.
+      if (hasExternalFiles()) {
+        pw.println("__gwt_injectExternalFiles();");
+      }
+      pw.println("__gwt_go();");
+    } else {
+      // Hosted mode: test to see if we're actually running in web mode so we
+      // can swap out to the compiled web mode script.
+      pw.println("if (!window.external || !window.external.gwtOnLoad) {");
+      pw.println("  document.write('<script src=\"" + moduleName + ".js?compiled\"></script>');");
+      pw.println("} else {");
+      if (hasExternalFiles()) {
+        pw.println("  __gwt_injectExternalFiles();");
+      }
+      pw.println("  __gwt_go();");
+      pw.println("}");
     }
-
-    genOnLoad(pw);
-
-    return "onLoad()";
   }
 
   /**
@@ -430,10 +504,12 @@ public class SelectionScriptGenerator {
    *          exactly one permutation, specified by this parameter
    */
   private void genSrcSetFunction(PrintWriter pw, String oneAndOnlyStrongName) {
+    pw.println("function __gwt_go() {");
+    pw.println("  try {");
+    pw.println("    __gwt_processMetas();");
     pw.println();
-    pw.println("function selectScript() {");
+
     if (oneAndOnlyStrongName == null) {
-      pw.println("  try {");
       genPropValues(pw);
       pw.println();
       genAnswers(pw);
@@ -446,17 +522,18 @@ public class SelectionScriptGenerator {
       pw.println("    var query = location.search;");
       pw.println("    query = query.substring(0, query.indexOf('&'));");
       pw.println("    var newUrl = strongName + '.cache.html' + query;");
-      pw.println("    location.replace(newUrl);");
-      pw.println("  } catch (e) {");
-      pw.println("    // intentionally silent on property failure");
-      pw.println("  }");
+      pw.println("    document.write('<iframe id=\"" + moduleName + "\" style=\"width:0;height:0;border:0\" src=\"\' + strongName + \'.cache.html\"></iframe>');");
     } else {
       // There is exactly one compilation, so it is unconditionally selected.
-      //
       String scriptToLoad = oneAndOnlyStrongName + ".cache.html";
-      pw.println("  location.replace('" + scriptToLoad + "');");
+      printDocumentWrite(pw, "  ", "<iframe id='" + moduleName
+          + "' style='width:0;height:0;border:0' src='\" + "
+          + oneAndOnlyStrongName + " + \".cache.html'></iframe>");
     }
-    pw.println("}");
+
+    pw.println("  } catch (e) {");
+    pw.println("    // intentionally silent on property failure");
+    pw.println("  }");
   }
 
   private boolean hasExternalFiles() {
@@ -492,5 +569,10 @@ public class SelectionScriptGenerator {
 
   private String literal(String lit) {
     return "\"" + lit + "\"";
+  }
+
+  private void printDocumentWrite(PrintWriter pw, String prefix, String payLoad) {
+    payLoad = payLoad.replace("'", "\\'");
+    pw.println(prefix + "document.write('" + payLoad + "');");
   }
 }

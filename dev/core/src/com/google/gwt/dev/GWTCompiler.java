@@ -480,11 +480,7 @@ public class GWTCompiler extends ToolBase {
 
     // Generate the call to tell the bootstrap code that we're ready to go.
     sb.append("\n");
-    sb.append("if ($wnd.__gwt_tryGetModuleControlBlock) {\n");
-    sb.append("  var $mcb = $wnd.__gwt_tryGetModuleControlBlock(location.search);\n");
-    sb.append("  if ($mcb) $mcb.compilationLoaded(window);\n");
-    sb.append("}\n");
-
+    sb.append("parent.__gwt_onScriptLoad(window, '" + module.getName() + "');\n");
     sb.append("--></script></body></html>\n");
 
     String s = sb.toString();
@@ -784,7 +780,7 @@ public class GWTCompiler extends ToolBase {
   private void writeSelectionScript(TreeLogger logger,
       SelectionScriptGenerator selGen) {
     String html = selGen.generateSelectionScript();
-    String fn = module.getName() + ".nocache.html";
+    String fn = module.getName() + ".js";
     File selectionFile = new File(outDir, fn);
     Util.writeStringAsFile(selectionFile, html);
     String msg = "Compilation selection script written to "

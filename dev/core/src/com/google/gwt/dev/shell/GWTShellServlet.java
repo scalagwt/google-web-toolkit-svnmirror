@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -71,13 +72,6 @@ public class GWTShellServlet extends HttpServlet {
       throw new UnableToCompleteException();
     }
   }
-
-  /**
-   * When the GWT bootstrap JavaScript starts in hosted mode, it appends this
-   * query param to the url for the nocache file so that this servlet can
-   * generate one on-the-fly.
-   */
-  private static final String HOSTED_MODE_QUERY_PARAM = "h";
 
   private final Map loadedModulesByName = new HashMap();
 
@@ -316,6 +310,49 @@ public class GWTShellServlet extends HttpServlet {
     // Done.
   }
 
+  /**
+   * Handle auto-generated resources. 
+   * @return <code>true</code> if a resource was generated
+   */
+  private boolean autoGenerateResources(HttpServletRequest request,
+      HttpServletResponse response, TreeLogger logger, String partialPath,
+      String moduleName) throws IOException {
+
+    // If the request is of the form ".../moduleName.js", then
+    // we generate the selection script for them.
+    if (partialPath.equals(moduleName + ".js")) {
+      // If the '?compiled' request property is specified, don't auto-generate.
+      if (request.getParameter("compiled") == null) {
+        // Generate the .js file.
+        try {
+          String js = genSelectionScript(logger, moduleName);
+          response.setStatus(HttpServletResponse.SC_OK);
+          response.setContentType("text/javascript");
+          response.getWriter().println(js);
+          return true;
+        } catch (UnableToCompleteException e) {
+          // Quietly continue, since this could actually be a request for a
+          // static file that happens to have an unfortunately confusing name.
+        }
+      }
+    }
+
+    // Auto-generate [module-name.cache.html].
+    if (partialPath.equals(moduleName + ".cache.html")) {
+      try {
+        String html = genHostedCacheHtml(logger, moduleName);
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.setContentType("text/html");
+        response.getWriter().println(html);
+        return true;
+      } catch (UnableToCompleteException e) {
+        // Quietly coninue, since this could also be a static file request.
+      }
+    }
+
+    return false;
+  }
+
   private void doGetPublicFile(HttpServletRequest request,
       HttpServletResponse response, TreeLogger logger, String partialPath,
       String moduleName) throws IOException {
@@ -325,23 +362,9 @@ public class GWTShellServlet extends HttpServlet {
         + partialPath + "' in module '" + moduleName + "' ";
     logger = logger.branch(TreeLogger.TRACE, msg, null);
 
-    // If the request is of the form ".../moduleName.nocache.html[?...]", then
-    // we generate the selection script for them.
-    if (partialPath.equals(moduleName + ".nocache.html")) {
-      // Only generate a selection script for a hosted-mode client.
-      // Otherwise, fall through.
-      if (request.getParameterMap().containsKey(HOSTED_MODE_QUERY_PARAM)) {
-        // Generate the .nocache.html file.
-        try {
-          String html = genSelectionPage(logger, moduleName);
-          response.setContentType("text/html");
-          response.getWriter().println(html);
-          return;
-        } catch (UnableToCompleteException e) {
-          // Quietly continue, since this could actually be a request for a
-          // static file that happens to have an unfortunately confusing name.
-        }
-      }
+    // Handle auto-generation of resources.
+    if (autoGenerateResources(request, response, logger, partialPath, moduleName)) {
+      return;
     }
 
     URL foundResource;
@@ -456,19 +479,41 @@ public class GWTShellServlet extends HttpServlet {
   }
 
   /**
-   * Generates a nocache file on the fly. Note that the nocache file that is
+   * Generates a module.js file on the fly. Note that the nocache file that is
    * generated that can only be used for hosted mode. It cannot produce a web
    * mode version, since this servlet doesn't know strong names, since by
    * definition of "hosted mode" JavaScript hasn't been compiled at this point.
    */
-  private String genSelectionPage(TreeLogger logger, String moduleName)
+  private String genSelectionScript(TreeLogger logger, String moduleName)
       throws UnableToCompleteException {
-    String msg = "Generating a selector page for module " + moduleName;
+    String msg = "Generating a selection script for module " + moduleName;
     logger.log(TreeLogger.TRACE, msg, null);
 
     ModuleDef moduleDef = getModuleDef(logger, moduleName);
     SelectionScriptGenerator gen = new SelectionScriptGenerator(moduleDef);
     return gen.generateSelectionScript();
+  }
+
+  private String genHostedCacheHtml(TreeLogger logger, String moduleName)
+      throws UnableToCompleteException {
+    String msg = "Generating a cache.html for module " + moduleName;
+    logger.log(TreeLogger.TRACE, msg, null);
+
+    StringWriter src = new StringWriter();
+    PrintWriter pw = new PrintWriter(src, true);
+
+    pw.println("<html>");
+    pw.println("<script>");
+    pw.println("window.$wnd = parent;");
+    pw.println("window.$doc = parent.document;");
+    pw.println("function __gwt_getProperty(name) { return parent[name]() };");
+    pw.println("parent.__gwt_onScriptLoad(window, '" + moduleName + "');");
+    pw.println("</script>");
+    pw.println("</html>");
+
+    pw.close();
+    String html = src.toString();
+    return html;
   }
 
   private synchronized TreeLogger getLogger() {
