@@ -59,7 +59,7 @@ public class JMethod extends JAbstractMethod {
     }
     return getReadableDeclaration(bits);
   }
-
+  
   public JType getReturnType() {
     return returnType;
   }

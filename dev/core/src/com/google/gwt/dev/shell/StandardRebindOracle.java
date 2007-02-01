@@ -52,7 +52,7 @@ public class StandardRebindOracle implements RebindOracle {
     private final List usedTypeNames = new ArrayList();
 
     public Rebinder(TypeOracle typeOracle, PropertyOracle propOracle) {
-      genCtx = new StandardGeneratorContext(typeOracle, propOracle, genDir,
+      genCtx = new StandardGeneratorContext(typeOracle, propOracle, genDir, outDir,
           cacheManager);
     }
 
@@ -142,12 +142,15 @@ public class StandardRebindOracle implements RebindOracle {
 
   private final TypeOracle typeOracle;
 
+  private final File outDir;
+
   public StandardRebindOracle(TypeOracle typeOracle, PropertyOracle propOracle,
-      Rules rules, File genDir, CacheManager cacheManager) {
+      Rules rules, File genDir, File moduleOutDir, CacheManager cacheManager) {
     this.typeOracle = typeOracle;
     this.propOracle = propOracle;
     this.rules = rules;
     this.genDir = genDir;
+    this.outDir = moduleOutDir;
     if (cacheManager != null) {
       this.cacheManager = cacheManager;
     } else {
@@ -156,9 +159,9 @@ public class StandardRebindOracle implements RebindOracle {
   }
 
   public StandardRebindOracle(TypeOracle typeOracle,
-      StaticPropertyOracle propOracle, Rules rules, File genDir) {
+      StaticPropertyOracle propOracle, Rules rules, File genDir, File moduleOutDir) {
     // This is a path used for non-hosted mode execution; therefore no caching.
-    this(typeOracle, propOracle, rules, genDir, null);
+    this(typeOracle, propOracle, rules, genDir, moduleOutDir, null);
   }
 
   public String rebind(TreeLogger logger, String typeName)

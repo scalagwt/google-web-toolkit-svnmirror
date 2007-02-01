@@ -38,19 +38,30 @@ public final class HttpHeaders {
 
   public static final String CONTENT_ENCODING = "Content-Encoding";
   public static final String CONTENT_ENCODING_GZIP = "gzip";
-
+  
+  public static final String CONTENT_LENGTH = "Content-Length";
+  
   public static final long MS_SEC = 1000;
   public static final long MS_MIN = MS_SEC * 60;
   public static final long MS_HR = MS_MIN * 60;
   public static final long MS_DAY = MS_HR * 24;
 
+  public static final long SEC_MIN = 60;
+  public static final long SEC_HR = SEC_MIN * 60;
+  public static final long SEC_DAY = SEC_HR * 24;
+  public static final long SEC_YR = SEC_DAY * 365;
+
   public static final String CACHE_CONTROL = "Cache-Control";
   public static final String CACHE_CONTROL_NO_CACHE = "no-cache";
   public static final String CACHE_CONTROL_PRIVATE = "private";
+  public static final String CACHE_CONTROL_PUBLIC = "public";
   public static final String CACHE_CONTROL_MUST_REVALIDATE = "must-revalidate";
-  public static final String CACHE_FOREVER = "max-age="
-      + String.valueOf(90 * MS_DAY);
-  public static final String CACHE_MINUTE = "max-age=" + String.valueOf(MS_MIN);
+  /*
+   * "Forever" = 1 year according to
+   * http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.21
+   */
+  public static final String CACHE_CONTROL_MAXAGE_FOREVER = "max-age=" + SEC_YR;
+  public static final String CACHE_CONTROL_MAXAGE_EXPIRED = "max-age=0";
 
   public static final String LAST_MODIFIED = "Last-Modified";
 

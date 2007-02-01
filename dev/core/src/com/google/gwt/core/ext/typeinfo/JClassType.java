@@ -18,10 +18,10 @@ package com.google.gwt.core.ext.typeinfo;
 import com.google.gwt.core.ext.UnableToCompleteException;
 
 import java.io.UnsupportedEncodingException;
-
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -111,6 +111,8 @@ public class JClassType extends JType implements HasMetaData {
 
   private JClassType superclass;
 
+  private JMethod[] cachedLeafMethods;
+
   public JClassType(TypeOracle oracle, CompilationUnitProvider cup,
       JPackage declaringPackage, JClassType enclosingType, boolean isLocalType,
       String name, int declStart, int declEnd, int bodyStart, int bodyEnd,
@@ -194,6 +196,29 @@ public class JClassType extends JType implements HasMetaData {
     return findNestedTypeImpl(parts, 0);
   }
 
+  /**
+   * Iterates over the most-derived version of each unique method available in
+   * the type hierarchy of the specified type, including those found in
+   * superclasses and superinterfaces. Note that the behavior does not match
+   * {@link Class#getMethod(String, Class[])}, which does not return the most
+   * derived method in some cases.
+   * 
+   * @return The leaf {@link JMethod} objects as an array
+   */
+  public JMethod[] getAllMethods() {
+    if (cachedLeafMethods == null) {
+      Map methodsBySignature = new HashMap();
+      getMethodsOnInterfaces(methodsBySignature);
+      if (isClass() != null) {
+        getMethodsOnClasses(methodsBySignature);
+      }
+      int size = methodsBySignature.size();
+      Collection leafMethods = methodsBySignature.values();
+      cachedLeafMethods = (JMethod[]) leafMethods.toArray(new JMethod[size]);
+    }
+    return cachedLeafMethods;
+  }
+
   public int getBodyEnd() {
     return bodyEnd;
   }
@@ -233,6 +258,12 @@ public class JClassType extends JType implements HasMetaData {
     return (JField[]) fields.values().toArray(TypeOracle.NO_JFIELDS);
   }
 
+  /**
+   * Gets the interfaces implemented (if this a class) or extended (if this is
+   * an interface).
+   * 
+   * @return zero or more types; never <code>null</code>
+   */
   public JClassType[] getImplementedInterfaces() {
     return (JClassType[]) interfaces.toArray(TypeOracle.NO_JCLASSES);
   }
@@ -518,6 +549,61 @@ public class JClassType extends JType implements HasMetaData {
   private void acceptSubtype(JClassType me) {
     allSubtypes.add(me);
     notifySuperTypesOf(me);
+  }
+
+  private String computeInternalSignature(JMethod method) {
+    StringBuffer sb = new StringBuffer();
+    sb.setLength(0);
+    sb.append(method.getName());
+    JParameter[] params = method.getParameters();
+    for (int j = 0; j < params.length; j++) {
+      JParameter param = params[j];
+      sb.append("/");
+      sb.append(param.getType().getQualifiedSourceName());
+    }
+    return sb.toString();
+  }
+
+  private void getMethodsOnClasses(Map methodsBySignature) {
+    // Recurse first so that more derived methods will clobber less derived
+    // methods.
+    JClassType superClass = getSuperclass();
+    if (superClass != null) {
+      superClass.getMethodsOnClasses(methodsBySignature);
+    }
+
+    JMethod[] declaredMethods = getMethods();
+    for (int i = 0; i < declaredMethods.length; i++) {
+      JMethod method = declaredMethods[i];
+      String sig = computeInternalSignature(method);
+      methodsBySignature.put(sig, method);
+    }
+  }
+
+  private void getMethodsOnInterfaces(Map methodsBySignature) {
+    // Recurse first so that more derived methods will clobber less derived
+    // methods.
+    JClassType[] superIntfs = getImplementedInterfaces();
+    for (int i = 0; i < superIntfs.length; i++) {
+      JClassType superIntf = superIntfs[i];
+      superIntf.getMethodsOnInterfaces(methodsBySignature);
+    }
+
+    JMethod[] declaredMethods = getMethods();
+    for (int i = 0; i < declaredMethods.length; i++) {
+      JMethod method = declaredMethods[i];
+      String sig = computeInternalSignature(method);
+      JMethod existing = (JMethod) methodsBySignature.get(sig);
+      if (existing != null) {
+        JClassType existingType = existing.getEnclosingType();
+        JClassType thisType = method.getEnclosingType();
+        if (thisType.isAssignableFrom(existingType)) {
+          // The existing method is in a more-derived type, so don't replace it.
+          continue;
+        }
+      }
+      methodsBySignature.put(sig, method);
+    }
   }
 
   private String makeCompoundName(JClassType type) {

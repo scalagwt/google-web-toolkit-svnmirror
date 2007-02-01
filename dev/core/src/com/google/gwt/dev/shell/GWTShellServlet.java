@@ -392,9 +392,13 @@ public class GWTShellServlet extends HttpServlet {
       logger.log(TreeLogger.TRACE, msg, null);
     }
 
-    // Maybe serve it up. Don't let the client cache anything because
-    // this servlet is for development (so files change a lot), and we do at
-    // least honor "If-Modified-Since".
+    // Maybe serve it up. Don't let the client cache anything other than
+    // xxx.cache.yyy files because this servlet is for development (so user
+    // files are assumed to change a lot), although we do honor
+    // "If-Modified-Since".
+
+    boolean infinitelyCacheable = isInfinitelyCacheable(path);
+
     InputStream is = null;
     try {
       // Check for up-to-datedness.
@@ -402,11 +406,14 @@ public class GWTShellServlet extends HttpServlet {
       long lastModified = conn.getLastModified();
       if (isNotModified(request, lastModified)) {
         response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+        if (infinitelyCacheable) {
+          response.setHeader(HttpHeaders.CACHE_CONTROL,
+              HttpHeaders.CACHE_CONTROL_MAXAGE_FOREVER);
+        }
         return;
       }
 
       // Set up headers to really send it.
-      //
       response.setStatus(HttpServletResponse.SC_OK);
       long now = new Date().getTime();
       response.setHeader(HttpHeaders.DATE,
@@ -414,13 +421,26 @@ public class GWTShellServlet extends HttpServlet {
       response.setContentType(mimeType);
       String lastModifiedStr = HttpHeaders.toInternetDateFormat(lastModified);
       response.setHeader(HttpHeaders.LAST_MODIFIED, lastModifiedStr);
-      final long jan2nd1980 = 315637200000L;
-      String inThePastStr = HttpHeaders.toInternetDateFormat(jan2nd1980);
-      response.setHeader(HttpHeaders.EXPIRES, inThePastStr);
 
-      // Send the bytes. To keep it simple, we don't compute the length.
-      // This prevents keep-alive.
-      //
+      // Expiration header. Either immediately stale (requiring an
+      // "If-Modified-Since") or infinitely cacheable (not requiring even a
+      // freshness check).
+      String maxAgeStr;
+      if (infinitelyCacheable) {
+        maxAgeStr = HttpHeaders.CACHE_CONTROL_MAXAGE_FOREVER;
+      } else {
+        maxAgeStr = HttpHeaders.CACHE_CONTROL_MAXAGE_EXPIRED;
+      }
+      response.setHeader(HttpHeaders.CACHE_CONTROL, maxAgeStr);
+
+      // Content length.
+      int contentLength = conn.getContentLength();
+      if (contentLength >= 0) {
+        response.setHeader(HttpHeaders.CONTENT_LENGTH,
+            Integer.toString(contentLength));
+      }
+
+      // Send the bytes.
       is = foundResource.openStream();
       streamOut(is, response.getOutputStream(), 1024 * 8);
     } finally {
@@ -665,6 +685,20 @@ public class GWTShellServlet extends HttpServlet {
     mimeTypes.put("Z", "application/x-compress");
     mimeTypes.put("z", "application/x-compress");
     mimeTypes.put("zip", "application/zip");
+  }
+
+  /**
+   * A file is infinitely cacheable if it ends with ".cache.xxx", where "xxx"
+   * can be any extension.
+   */
+  private boolean isInfinitelyCacheable(String path) {
+    int lastDot = path.lastIndexOf('.');
+    if (lastDot >= 0) {
+      if (path.substring(0, lastDot).endsWith(".cache")) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**

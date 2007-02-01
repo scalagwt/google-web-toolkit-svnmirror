@@ -122,19 +122,25 @@ public abstract class JAbstractMethod implements HasMetaData {
   public boolean isDefaultAccess() {
     return 0 == (modifierBits & (TypeOracle.MOD_PUBLIC | TypeOracle.MOD_PRIVATE | TypeOracle.MOD_PROTECTED));
   }
+
   public abstract JMethod isMethod();
+
   public boolean isPrivate() {
     return 0 != (modifierBits & TypeOracle.MOD_PRIVATE);
   }
+
   public boolean isProtected() {
     return 0 != (modifierBits & TypeOracle.MOD_PROTECTED);
   }
+
   public boolean isPublic() {
     return 0 != (modifierBits & TypeOracle.MOD_PUBLIC);
   }
+
   protected int getModifierBits() {
     return modifierBits;
   }
+
   protected void toStringParamsAndThrows(StringBuffer sb) {
     sb.append("(");
     boolean needComma = false;
@@ -165,9 +171,11 @@ public abstract class JAbstractMethod implements HasMetaData {
       }
     }
   }
+
   void addParameter(JParameter param) {
     params.add(param);
   }
+
   boolean hasParamTypes(JType[] paramTypes) {
     if (params.size() != paramTypes.length) {
       return false;
@@ -178,6 +186,21 @@ public abstract class JAbstractMethod implements HasMetaData {
       // Identity tests are ok since identity is durable within an oracle.
       //
       if (candidate.getType() != paramTypes[i]) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  boolean hasSameParamTypes(JParameter[] otherParams) {
+    if (params.size() != otherParams.length) {
+      return false;
+    }
+
+    for (int i = 0; i < otherParams.length; i++) {
+      JParameter candidate = (JParameter) params.get(i);
+      // Identity tests are ok since identity is durable within an oracle.
+      if (candidate.getType() != otherParams[i].getType()) {
         return false;
       }
     }

@@ -51,15 +51,22 @@ public class ShellModuleSpaceHost implements ModuleSpaceHost {
 
   private ModuleSpace space;
 
+  private final File outDir;
+
   /**
    * @param module the module associated with the hosted module space
+   * @param outDir
    */
   public ShellModuleSpaceHost(TreeLogger logger, TypeOracle typeOracle,
-      ModuleDef module, File genDir) {
+      ModuleDef module, File genDir, File outDir) {
     this.logger = logger;
     this.typeOracle = typeOracle;
     this.module = module;
     this.genDir = genDir;
+
+    // Combine the user's output dir with the module name to get the
+    // module-specific output dir.
+    this.outDir = new File(outDir, module.getName());
   }
 
   public CompilingClassLoader getClassLoader() {
@@ -100,7 +107,7 @@ public class ShellModuleSpaceHost implements ModuleSpaceHost {
     //
     Rules rules = module.getRules();
     rebindOracle = new StandardRebindOracle(typeOracle, propOracle, rules,
-        genDir, module.getCacheManager());
+        genDir, outDir, module.getCacheManager());
 
     // Create a completely isolated class loader which owns all classes
     // associated with a particular module. This effectively builds a

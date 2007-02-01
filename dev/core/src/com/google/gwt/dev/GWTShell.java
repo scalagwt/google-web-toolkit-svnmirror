@@ -210,7 +210,7 @@ public class GWTShell extends ToolBase {
         //
         TypeOracle typeOracle = moduleDef.getTypeOracle(logger);
         ShellModuleSpaceHost host = doCreateShellModuleSpaceHost(logger,
-            typeOracle, moduleDef, genDir);
+            typeOracle, moduleDef, genDir, outDir);
         return host;
       } finally {
         Cursor normalCursor = display.getSystemCursor(SWT.CURSOR_ARROW);
@@ -587,8 +587,8 @@ public class GWTShell extends ToolBase {
    * @return
    */
   protected ShellModuleSpaceHost doCreateShellModuleSpaceHost(
-      TreeLogger logger, TypeOracle typeOracle, ModuleDef moduleDef, File genDir) {
-    return new ShellModuleSpaceHost(logger, typeOracle, moduleDef, genDir);
+      TreeLogger logger, TypeOracle typeOracle, ModuleDef moduleDef, File genDir, File outDir) {
+    return new ShellModuleSpaceHost(logger, typeOracle, moduleDef, genDir, outDir);
   }
 
   /**

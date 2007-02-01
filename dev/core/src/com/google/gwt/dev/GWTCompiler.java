@@ -109,7 +109,7 @@ public class GWTCompiler extends ToolBase {
     private Compilation compilation;
 
     public CompilationRebindOracle() {
-      super(typeOracle, propOracle, rules, genDir, cacheManager);
+      super(typeOracle, propOracle, rules, genDir, outDir, cacheManager);
     }
 
     /**
@@ -156,7 +156,7 @@ public class GWTCompiler extends ToolBase {
       RebindPermutationOracle {
 
     private final StandardRebindOracle rebindOracle = new StandardRebindOracle(
-        typeOracle, propOracle, rules, genDir, cacheManager) {
+        typeOracle, propOracle, rules, genDir, outDir, cacheManager) {
 
       /**
        * Record generated types.
