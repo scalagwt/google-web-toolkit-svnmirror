@@ -15,14 +15,14 @@
  */
 package com.google.gwt.dev.shell;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.google.gwt.core.ext.BadPropertyValueException;
 import com.google.gwt.core.ext.PropertyOracle;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.dev.cfg.Properties;
 import com.google.gwt.dev.cfg.Property;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Implements a {@link PropertyOracle} in terms of a module space, which makes

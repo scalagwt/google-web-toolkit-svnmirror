@@ -253,6 +253,50 @@ public class GWTShellServlet extends HttpServlet {
     }
   }
 
+  /**
+   * Handle auto-generated resources.
+   * 
+   * @return <code>true</code> if a resource was generated
+   */
+  private boolean autoGenerateResources(HttpServletRequest request,
+      HttpServletResponse response, TreeLogger logger, String partialPath,
+      String moduleName) throws IOException {
+
+    // If the request is of the form ".../moduleName.js", then
+    // we generate the selection script for them.
+    if (partialPath.equals(moduleName + ".js")) {
+      // If the '?compiled' request property is specified, don't auto-generate.
+      if (request.getParameter("compiled") == null) {
+        // Generate the .js file.
+        try {
+          String js = genSelectionScript(logger, moduleName);
+          response.setStatus(HttpServletResponse.SC_OK);
+          response.setContentType("text/javascript");
+          response.getWriter().println(js);
+          return true;
+        } catch (UnableToCompleteException e) {
+          // Quietly continue, since this could actually be a request for a
+          // static file that happens to have an unfortunately confusing name.
+        }
+      }
+    }
+
+    // Auto-generate [module-name.cache.html].
+    if (partialPath.equals(moduleName + ".cache.html")) {
+      try {
+        String html = genHostedCacheHtml(logger, moduleName);
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.setContentType("text/html");
+        response.getWriter().println(html);
+        return true;
+      } catch (UnableToCompleteException e) {
+        // Quietly coninue, since this could also be a static file request.
+      }
+    }
+
+    return false;
+  }
+
   private void doGetModule(HttpServletRequest request,
       HttpServletResponse response, TreeLogger logger, RequestParts parts)
       throws IOException {
@@ -310,49 +354,6 @@ public class GWTShellServlet extends HttpServlet {
     // Done.
   }
 
-  /**
-   * Handle auto-generated resources. 
-   * @return <code>true</code> if a resource was generated
-   */
-  private boolean autoGenerateResources(HttpServletRequest request,
-      HttpServletResponse response, TreeLogger logger, String partialPath,
-      String moduleName) throws IOException {
-
-    // If the request is of the form ".../moduleName.js", then
-    // we generate the selection script for them.
-    if (partialPath.equals(moduleName + ".js")) {
-      // If the '?compiled' request property is specified, don't auto-generate.
-      if (request.getParameter("compiled") == null) {
-        // Generate the .js file.
-        try {
-          String js = genSelectionScript(logger, moduleName);
-          response.setStatus(HttpServletResponse.SC_OK);
-          response.setContentType("text/javascript");
-          response.getWriter().println(js);
-          return true;
-        } catch (UnableToCompleteException e) {
-          // Quietly continue, since this could actually be a request for a
-          // static file that happens to have an unfortunately confusing name.
-        }
-      }
-    }
-
-    // Auto-generate [module-name.cache.html].
-    if (partialPath.equals(moduleName + ".cache.html")) {
-      try {
-        String html = genHostedCacheHtml(logger, moduleName);
-        response.setStatus(HttpServletResponse.SC_OK);
-        response.setContentType("text/html");
-        response.getWriter().println(html);
-        return true;
-      } catch (UnableToCompleteException e) {
-        // Quietly coninue, since this could also be a static file request.
-      }
-    }
-
-    return false;
-  }
-
   private void doGetPublicFile(HttpServletRequest request,
       HttpServletResponse response, TreeLogger logger, String partialPath,
       String moduleName) throws IOException {
@@ -363,7 +364,8 @@ public class GWTShellServlet extends HttpServlet {
     logger = logger.branch(TreeLogger.TRACE, msg, null);
 
     // Handle auto-generation of resources.
-    if (autoGenerateResources(request, response, logger, partialPath, moduleName)) {
+    if (autoGenerateResources(request, response, logger, partialPath,
+        moduleName)) {
       return;
     }
 
@@ -478,22 +480,6 @@ public class GWTShellServlet extends HttpServlet {
     }
   }
 
-  /**
-   * Generates a module.js file on the fly. Note that the nocache file that is
-   * generated that can only be used for hosted mode. It cannot produce a web
-   * mode version, since this servlet doesn't know strong names, since by
-   * definition of "hosted mode" JavaScript hasn't been compiled at this point.
-   */
-  private String genSelectionScript(TreeLogger logger, String moduleName)
-      throws UnableToCompleteException {
-    String msg = "Generating a selection script for module " + moduleName;
-    logger.log(TreeLogger.TRACE, msg, null);
-
-    ModuleDef moduleDef = getModuleDef(logger, moduleName);
-    SelectionScriptGenerator gen = new SelectionScriptGenerator(moduleDef);
-    return gen.generateSelectionScript();
-  }
-
   private String genHostedCacheHtml(TreeLogger logger, String moduleName)
       throws UnableToCompleteException {
     String msg = "Generating a cache.html for module " + moduleName;
@@ -514,6 +500,22 @@ public class GWTShellServlet extends HttpServlet {
     pw.close();
     String html = src.toString();
     return html;
+  }
+
+  /**
+   * Generates a module.js file on the fly. Note that the nocache file that is
+   * generated that can only be used for hosted mode. It cannot produce a web
+   * mode version, since this servlet doesn't know strong names, since by
+   * definition of "hosted mode" JavaScript hasn't been compiled at this point.
+   */
+  private String genSelectionScript(TreeLogger logger, String moduleName)
+      throws UnableToCompleteException {
+    String msg = "Generating a selection script for module " + moduleName;
+    logger.log(TreeLogger.TRACE, msg, null);
+
+    ModuleDef moduleDef = getModuleDef(logger, moduleName);
+    SelectionScriptGenerator gen = new SelectionScriptGenerator(moduleDef);
+    return gen.generateSelectionScript();
   }
 
   private synchronized TreeLogger getLogger() {
