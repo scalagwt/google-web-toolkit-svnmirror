@@ -13,9 +13,9 @@
 		try {
           var locale;
           
-          //Look for the locale as a url argument
-          if(locale==null) {
-            var args = parent.location.search;
+          // Look for the locale as a url argument
+          if (locale == null) {
+            var args = window.location.search;
             var startLang = args.indexOf("locale");
             if(startLang>=0){
                 var language = args.substring(startLang);
@@ -27,16 +27,17 @@
                 locale = language.substring(begin, end);
             }
           }      
-          if(locale == null){  
-           //Look for the locale on the web page
-            locale = parent.__gwt_getMetaProperty("locale")   
+          
+          if (locale == null) {  
+            //L ook for the locale on the web page
+            locale = window.__gwt_getMetaProperty("locale")   
           }
            
-          if(locale == null){
+          if(locale == null) {
             return "default";
           }
            
-          while(!parent.__gwt_isKnownPropertyValue(window, "locale",  locale)){
+          while(!window.__gwt_isKnownPropertyValue(window, "locale",  locale)){
             var lastIndex = locale.lastIndexOf("_");
             if(lastIndex == -1){
           	  locale = "default";
@@ -47,7 +48,7 @@
           }
           return locale;
         } catch(e){
-          $wnd.alert("Unexpected exception in locale creator, using default: " + e);
+          window.alert("Unexpected exception in locale detection, using default: " + e);
           return "default";
         }
 		]]>
