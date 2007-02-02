@@ -499,6 +499,7 @@ public class SelectionScriptGenerator {
       // Hosted mode only, so there is no strong name selection (i.e. because
       // there is no compiled JavaScript);
       pw.println("function __gwt_go() {");
+      pw.println("  __gwt_processMetas();");
       printDocumentWrite(pw, "  ", "<iframe id='" + moduleName
           + "' style='width:0;height:0;border:0' src='" + moduleName
           + ".cache.html'></iframe>");
