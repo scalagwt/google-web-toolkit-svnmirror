@@ -609,7 +609,7 @@ public class SelectionScriptGenerator {
   }
 
   private void printDocumentWrite(PrintWriter pw, String prefix, String payLoad) {
-    payLoad = payLoad.replace("'", "\\'");
+    payLoad = payLoad.replaceAll("\'", "\\'");
     pw.println(prefix + "document.write('" + payLoad + "');");
   }
 }
