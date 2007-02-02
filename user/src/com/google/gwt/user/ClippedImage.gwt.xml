@@ -1,0 +1,20 @@
+<!--                                                                        -->
+<!-- Copyright 2006 Google Inc. All Rights Reserved.                        -->
+<!-- Deferred binding rules for browser selection.                          -->
+<!--                                                                        -->
+<!-- This module is typically inherited via com.google.gwt.user.User        -->
+<!--                                                                        -->
+<module>
+	<inherits name="com.google.gwt.core.Core" />
+	<inherits name="com.google.gwt.user.UserAgent" />
+
+	<!-- IE needs a different implementation -->
+	<!-- The transparent  formulation isn't rock solid yet, no this isn't ready...
+	<replace-with
+		class="com.google.gwt.user.client.ui.impl.ClippedImageImplIE6">
+		<when-type-is
+			class="com.google.gwt.user.client.ui.impl.ClippedImageImpl" />
+		<when-property-is name="user.agent" value="ie6" />
+	</replace-with>
+	-->
+</module>

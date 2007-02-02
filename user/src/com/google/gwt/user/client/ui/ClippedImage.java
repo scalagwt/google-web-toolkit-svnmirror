@@ -16,8 +16,7 @@
 package com.google.gwt.user.client.ui;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Element;
+import com.google.gwt.user.client.ui.impl.ClippedImageImpl;
 
 /**
  * An image that reveals a rectangle within a larger image, used to implement
@@ -37,66 +36,9 @@ import com.google.gwt.user.client.Element;
  */
 public class ClippedImage extends AbstractImage {
 
-  /**
-   * Uses a combination of a clear image and a background image to clip all
-   * except a desired portion of an underlying image.
-   */
-  private static class Impl {
+  private static final ClippedImageImpl impl = (ClippedImageImpl) GWT.create(ClippedImageImpl.class);
 
-    public Element createStructure(String url, int left, int top, int width,
-        int height) {
-      Element img = DOM.createImg();
-
-      // The actual 'src' attribute is a transparent pixel, resized.
-      DOM.setAttribute(img, "src", "clear.cache.gif");
-
-      // The image we want to really display is the background image.
-      DOM.setStyleAttribute(img, "backgroundImage", "url(" + url + ")");
-
-      // Specify the coordinates for the viewport.
-      String pos = (-left + "px ") + (-top + "px");
-      DOM.setStyleAttribute(img, "backgroundPosition", pos);
-      DOM.setStyleAttribute(img, "width", width + "px");
-      DOM.setStyleAttribute(img, "height", height + "px");
-
-      return img;
-    }
-  }
-
-  /**
-   * Implements the clipped image as a IMG inside a SPAN because we can't use
-   * the IE PNG transparency filter on background-image images.
-   */
-  private static class ImplIE {
-
-    public Element createStructure(String url, int left, int top, int width,
-        int height) {
-      debugger();
-      
-      // Create a span that can clip.
-      Element span = DOM.createSpan();
-      DOM.setStyleAttribute(span, "overflow", "hidden");
-      DOM.setStyleAttribute(span, "width", width + "px");
-      DOM.setStyleAttribute(span, "height", height + "px");
-
-      // Create an image capable of showing transparent PNGs.
-      Element img = DOM.createImg();
-      DOM.setStyleAttribute(img, "filter",
-          "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + url
-              + "',sizingMethod='crop')");
-      DOM.setStyleAttribute(img, "width", width + "px");
-      DOM.setStyleAttribute(img, "height", height + "px");
-      DOM.setStyleAttribute(img, "marginLeft", -left + "px");
-      DOM.setStyleAttribute(img, "marginTop", -left + "px");
-
-      DOM.appendChild(span, img);
-      return span;
-    }
-    
-    private native void debugger() /*-{ debugger; }-*/; 
-  }
-
-  private static final Impl impl = (Impl) GWT.create(Impl.class);
+  // NOTE: Compiler bug if ClippedImageImplIE6 doesn't extend ClippedImageImpl.
 
   /**
    * Creates an image with a specified URL and a viewport.
