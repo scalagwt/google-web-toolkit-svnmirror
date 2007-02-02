@@ -26,8 +26,9 @@ public class ClippedImageImplIE6 extends ClippedImageImpl {
 
   public Element createStructure(String url, int left, int top, int width,
       int height) {
-    // Create a span that can clip.
-    Element span = DOM.createDiv();
+    // Create a benign element that we can use to clip the contained image.
+    Element span = DOM.createElement("nobr");
+
     DOM.setStyleAttribute(span, "overflow", "hidden");
     DOM.setStyleAttribute(span, "width", width + "px");
     DOM.setStyleAttribute(span, "height", height + "px");
