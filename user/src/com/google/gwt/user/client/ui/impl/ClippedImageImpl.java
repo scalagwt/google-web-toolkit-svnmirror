@@ -26,20 +26,27 @@ public class ClippedImageImpl {
 
   public Element createStructure(String url, int left, int top, int width,
       int height) {
-    Element img = DOM.createImg();
-
-    // The actual 'src' attribute is a transparent pixel, resized.
-    DOM.setAttribute(img, "src", "clear.cache.gif");
-
-    // The image we want to really display is the background image.
-    DOM.setStyleAttribute(img, "backgroundImage", "url(" + url + ")");
-
-    // Specify the coordinates for the viewport.
     String pos = (-left + "px ") + (-top + "px");
-    DOM.setStyleAttribute(img, "backgroundPosition", pos);
-    DOM.setStyleAttribute(img, "width", width + "px");
-    DOM.setStyleAttribute(img, "height", height + "px");
 
-    return img;
+    Element tmp = DOM.createSpan();
+    DOM.setInnerHTML(tmp, "<img src='clear.cache.gif' style='width:" + width +
+        "px;height:" + height + "px;background-image:url(" + url + ");background-position:" + pos + "'>");
+    return tmp;
+
+//    Element img = DOM.getFirstChild(tmp);
+
+//    // The actual 'src' attribute is a transparent pixel, resized.
+//    DOM.setAttribute(img, "src", "clear.cache.gif");
+//
+//    // The image we want to really display is the background image.
+//    DOM.setStyleAttribute(img, "backgroundImage", "url(" + url + ")");
+//
+//    // Specify the coordinates for the viewport.
+//    String pos = (-left + "px ") + (-top + "px");
+//    DOM.setStyleAttribute(img, "backgroundPosition", pos);
+//    DOM.setStyleAttribute(img, "width", width + "px");
+//    DOM.setStyleAttribute(img, "height", height + "px");
+
+//    return img;
   }
 }
