@@ -163,6 +163,21 @@ public class SelectionScriptGenerator {
     }
   }
 
+  /**
+   * Generates scripts that determines the value of a deferred binding client
+   * property specified statically in host html.
+   */
+  private void genGetMetaProperty(PrintWriter pw) {
+    pw.println("function __gwt_getMetaProperty(name) {");
+    pw.println("  var value = __gwt_metaProps[name];");
+    pw.println("  if (value) {");
+    pw.println("    return value;");
+    pw.println("  } else {");
+    pw.println("    return null;");
+    pw.println("  }");
+    pw.println("}");
+  }
+
   private void genInitHandlers(PrintWriter pw) {
     pw.println("function __gwt_initHandlers(resize, beforeunload, unload) {");
     pw.println("  var oldOnResize = window.onresize;");
@@ -218,6 +233,19 @@ public class SelectionScriptGenerator {
           + script.getSrc() + "'></script>");
     }
 
+    pw.println("}");
+  }
+
+  /**
+   * Determines whether or not a particular property value is allowed.
+   * 
+   * @param wnd the caller's window object (not $wnd!)
+   * @param propName the name of the property being checked
+   * @param propValue the property value being tested
+   */
+  private void genIsKnownPropertyValue(PrintWriter pw) {
+    pw.println("function __gwt_isKnownPropertyValue(wnd, propName, propValue) {");
+    pw.println("  return propValue in wnd['values$' + propName];");
     pw.println("}");
   }
 
@@ -430,12 +458,17 @@ public class SelectionScriptGenerator {
    * @param pw
    */
   private void genScript(PrintWriter pw) {
+    // Emit well-known global variables.
+    pw.println("var __gwt_onLoadError = null;");
+
     // Emit __gwt_initHandlers().
     genInitHandlers(pw);
 
     // Emit property providers.
     genPropProviders(pw);
 
+    genGetMetaProperty(pw);
+    genIsKnownPropertyValue(pw);
     genOnBadProperty(pw);
     genOnBadLoad(pw);
     genProcessMetas(pw);
@@ -472,8 +505,8 @@ public class SelectionScriptGenerator {
     }
 
     pw.println();
-    printDocumentWrite(pw, "  ",
-        "<script>__gwt_onInjectionDone('" + moduleName + "')</script>");
+    printDocumentWrite(pw, "  ", "<script>__gwt_onInjectionDone('" + moduleName
+        + "')</script>");
     pw.println("}");
 
     pw.println();
@@ -487,7 +520,8 @@ public class SelectionScriptGenerator {
       // Hosted mode: test to see if we're actually running in web mode so we
       // can swap out to the compiled web mode script.
       pw.println("if (!window.external || !window.external.gwtOnLoad) {");
-      pw.println("  document.write('<script src=\"" + moduleName + ".js?compiled\"></script>');");
+      pw.println("  document.write('<script src=\"" + moduleName
+          + ".js?compiled\"></script>');");
       pw.println("} else {");
       if (hasExternalFiles()) {
         pw.println("  __gwt_injectExternalFiles();");
@@ -522,7 +556,9 @@ public class SelectionScriptGenerator {
       pw.println("    var query = location.search;");
       pw.println("    query = query.substring(0, query.indexOf('&'));");
       pw.println("    var newUrl = strongName + '.cache.html' + query;");
-      pw.println("    document.write('<iframe id=\"" + moduleName + "\" style=\"width:0;height:0;border:0\" src=\"\' + strongName + \'.cache.html\"></iframe>');");
+      pw.println("    document.write('<iframe id=\""
+          + moduleName
+          + "\" style=\"width:0;height:0;border:0\" src=\"\' + strongName + \'.cache.html\"></iframe>');");
     } else {
       // There is exactly one compilation, so it is unconditionally selected.
       String scriptToLoad = oneAndOnlyStrongName + ".cache.html";
