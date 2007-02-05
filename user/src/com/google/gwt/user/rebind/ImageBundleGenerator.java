@@ -29,7 +29,7 @@ public class ImageBundleGenerator extends Generator {
 
   private static final String CLIPPEDIMAGE_QNAME = "com.google.gwt.user.client.ui.ClippedImage";
 
-  private static final String IMAGEBUNDLE_QNAME = "com.google.gwt.imagebundle.client.ImageBundle";
+  private static final String IMAGEBUNDLE_QNAME = "com.google.gwt.user.client.ImageBundle";
 
   private static final String METADATA_TAG = "gwt.resource";
 
