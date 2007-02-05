@@ -1,0 +1,10 @@
+<module>
+	<!-- Inherit User to make Image available -->
+	<inherits name="com.google.gwt.user.User" />
+
+	<generate-with
+		class="com.google.gwt.user.rebind.ImageBundleGenerator">
+		<when-type-assignable
+			class="com.google.gwt.user.client.ImageBundle" />
+	</generate-with>
+</module>

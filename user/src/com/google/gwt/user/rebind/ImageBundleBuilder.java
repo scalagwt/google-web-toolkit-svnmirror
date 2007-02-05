@@ -1,0 +1,222 @@
+package com.google.gwt.user.rebind;
+
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.UnableToCompleteException;
+import com.google.gwt.dev.util.Util;
+
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.imageio.ImageIO;
+
+/**
+ * Accumulates state for the bundled image.
+ */
+class ImageBundleBuilder {
+
+  /**
+   * The rectangle at which the original image is placed into the composite
+   * image.
+   */
+  public static class ImageRect {
+
+    public final BufferedImage image;
+
+    public int left;
+    public final int width;
+    public final int height;
+
+    public ImageRect(BufferedImage image) {
+      this.image = image;
+      this.width = image.getWidth();
+      this.height = image.getHeight();
+    }
+  }
+
+  private final Map imageNameToImageRectMap = new HashMap();
+  private final List orderedImageRects = new ArrayList();
+  private final MessageDigest md5;
+
+  public ImageBundleBuilder() {
+    try {
+      md5 = MessageDigest.getInstance("MD5");
+    } catch (NoSuchAlgorithmException e) {
+      throw new RuntimeException("Error initializing MD5", e);
+    }
+  }
+
+  private ImageRect addImage(TreeLogger logger, String imageName)
+      throws UnableToCompleteException {
+
+    logger = logger.branch(TreeLogger.TRACE,
+        "Adding image '" + imageName + "'", null);
+
+    // Fetch the image.
+    BufferedImage image = null;
+    try {
+      // Could turn this lookup logic into an externally-supplied policy for
+      // increased generality.
+      URL imageUrl = getClass().getClassLoader().getResource(imageName);
+      if (imageUrl == null) {
+        logger.log(
+            TreeLogger.ERROR,
+            "Resource not found on classpath (is the name specified as Class.getResource() would expect?)",
+            null);
+        throw new UnableToCompleteException();
+      }
+
+      // Assimilate this file's bytes into the MD5.
+      InputStream is = imageUrl.openStream();
+      BufferedInputStream bis = new BufferedInputStream(is);
+      byte imgByte;
+      while ((imgByte = (byte) bis.read()) != -1) {
+        md5.update(imgByte);
+      }
+      is.close();
+
+      // Load the image from the URL instead of the stream (with the assumption
+      // that having the URL provides a tiny bit more context to the parser).
+      image = ImageIO.read(imageUrl);
+      if (image == null) {
+        logger.log(TreeLogger.ERROR, "Unrecognized image file format", null);
+        throw new UnableToCompleteException();
+      }
+
+    } catch (IOException e) {
+      logger.log(TreeLogger.ERROR, "Unable to read image resource", null);
+      throw new UnableToCompleteException();
+    }
+
+    // Map the URL to its image so that even if the same URL is used more than
+    // once, we only include the referenced image once in the bundled image.
+    ImageRect imageRect = new ImageRect(image);
+    orderedImageRects.add(imageRect);
+    imageNameToImageRectMap.put(imageName, imageRect);
+    return imageRect;
+  }
+
+  private ImageRect findImageUrl(String imageUrl) {
+    return (ImageRect) imageNameToImageRectMap.get(imageUrl);
+  }
+
+  public ImageRect getMapping(String imageName) {
+    return (ImageRect) imageNameToImageRectMap.get(imageName);
+  }
+
+  private void putMapping(String imageName, ImageRect rect) {
+    imageNameToImageRectMap.put(imageName, rect);
+  }
+
+  public String writeBundledImage(TreeLogger logger, GeneratorContext context)
+      throws UnableToCompleteException {
+
+    // Determine how big the composited image should be by taking the
+    // sum of the widths and the max of the heights.
+    int nextLeft = 0;
+    int maxHeight = 0;
+    for (Iterator iter = orderedImageRects.iterator(); iter.hasNext();) {
+      ImageRect imageRect = (ImageRect) iter.next();
+      imageRect.left = nextLeft;
+      nextLeft += imageRect.width;
+      if (imageRect.height > maxHeight) {
+        maxHeight = imageRect.height;
+      }
+    }
+
+    // Create the bundled image.
+    BufferedImage bundledImage = new BufferedImage(nextLeft, maxHeight,
+        BufferedImage.TYPE_INT_ARGB_PRE);
+    Graphics2D g2d = bundledImage.createGraphics();
+
+    for (Iterator iter = orderedImageRects.iterator(); iter.hasNext();) {
+      ImageRect imageRect = (ImageRect) iter.next();
+      g2d.drawImage(imageRect.image, imageRect.left, 0, null);
+    }
+    g2d.dispose();
+
+    // Compute the strong name as the hex version of the hash.
+    byte[] hash = md5.digest();
+    char[] strongName = new char[2 * hash.length];
+    int j = 0;
+    for (int i = 0; i < hash.length; i++) {
+      strongName[j++] = Util.HEX_CHARS[(hash[i] & 0xF0) >> 4];
+      strongName[j++] = Util.HEX_CHARS[hash[i] & 0x0F];
+    }
+
+    // Only PNG is supported right now, but still we introduce a variable to
+    // anticipate an update when the best output file type is inferred.
+    String bundleFileType = "png";
+
+    // Compute the file name. The '.cache' part indicates that it can be
+    // permanently cached.
+    String bundleFileName = new String(strongName) + ".cache." + bundleFileType;
+
+    OutputStream outStream = context.tryCreateResource(logger, bundleFileName,
+        true);
+
+    if (outStream != null) {
+      try {
+        // Write the image bytes to the pending stream.
+        if (!ImageIO.write(bundledImage, bundleFileType, outStream)) {
+          logger.log(TreeLogger.ERROR, "Unsupported output file type", null);
+          throw new UnableToCompleteException();
+        }
+
+        // Commit the stream.
+        context.commit(logger, outStream);
+
+      } catch (IOException e) {
+        logger.log(TreeLogger.ERROR, "Failed while writing", e);
+        throw new UnableToCompleteException();
+      }
+    } else {
+      logger.log(
+          TreeLogger.WARN,
+          "Unexpectedly unable to write image bundle resource because tryCreateResource() returned null; subsequent problems may result",
+          null);
+    }
+
+    return bundleFileName;
+  }
+
+  /**
+   * Assimilates the image associated with a particular image method into the
+   * master composite. If the method names an image that has already been
+   * assimilated, the existing image rectangle is reused.
+   * 
+   * @param logger
+   * @param imageUrl
+   * @throws UnableToCompleteException
+   */
+  public void assimilate(TreeLogger logger, String imageName)
+      throws UnableToCompleteException {
+
+    /*
+     * Decide whether or not we need to add to the composite image. Either way,
+     * we associated it with the rectangle of the specified image as it exists
+     * within the composite image. Note that the coordinates of the rectangle
+     * aren't computed until the composite it written.
+     */
+    ImageRect rect = findImageUrl(imageName);
+    if (rect == null) {
+      // Assimilate the image into the composite.
+      rect = addImage(logger, imageName);
+    }
+
+    putMapping(imageName, rect);
+  }
+
+}
