@@ -312,6 +312,12 @@ public class GWTShell extends ToolBase {
 
   protected File outDir;
 
+  protected final List startupUrls = new ArrayList();
+
+  protected boolean obfuscate;
+
+  protected boolean prettyNames;
+
   private BrowserWidgetHostImpl browserHost = new BrowserWidgetHostImpl();
 
   private ShellMainWindow mainWnd;
@@ -320,19 +326,13 @@ public class GWTShell extends ToolBase {
 
   private final List browserShells = new ArrayList();
 
-  private final List startupUrls = new ArrayList();
-
   private File genDir;
 
   private boolean headlessMode = false;
 
   private TreeLogger.Type logLevel;
 
-  private boolean obfuscate;
-
   private int port;
-
-  private boolean prettyNames;
 
   private boolean started;
 

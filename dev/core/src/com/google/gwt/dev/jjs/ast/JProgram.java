@@ -198,6 +198,8 @@ public class JProgram extends JNode {
 
   private JClassType typeSpecialJavaScriptObject;
 
+  private JClassType typeSpecialProfiler;
+
   private JClassType typeString;
 
   private final JPrimitiveType typeVoid = new JPrimitiveType(this, "void", "V",
@@ -250,6 +252,9 @@ public class JProgram extends JNode {
       specialTypes.add(x);
     } else if (sname.equals("com.google.gwt.lang.Exceptions")) {
       typeSpecialExceptions = x;
+      specialTypes.add(x);
+    } else if (sname.equals("com.google.gwt.lang.Profiler")) {
+      typeSpecialProfiler = x;
       specialTypes.add(x);
     }
 
@@ -498,6 +503,10 @@ public class JProgram extends JNode {
 
   public JMethod getSpecialMethod(String string) {
     return (JMethod) specialMethods.get(string);
+  }
+
+  public JClassType getSpecialProfiler() {
+    return typeSpecialProfiler;
   }
 
   public JMethod getStaticImpl(JMethod method) {

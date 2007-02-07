@@ -29,6 +29,9 @@ import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.internal.mozilla.nsIWebBrowser;
 import org.eclipse.swt.widgets.Shell;
 
+import java.util.Map;
+import java.util.HashMap;
+
 /**
  * Represents an individual browser window and all of its controls.
  */
@@ -36,8 +39,128 @@ public class BrowserWidgetMoz extends BrowserWidget {
 
   private class ExternalObjectImpl implements ExternalObject {
 
+    private int scriptObject;
+
+    /**
+     * The profiler API used by the compiler-instrumented JavaScript to record
+     * profiling information. We make it available on window.external.
+     *
+     */
+    private LowLevelMoz.DispatchObject profiler = new LowLevelMoz.DispatchObject() {
+
+      private LowLevelMoz.DispatchMethod onAppLoad = new LowLevelMoz.DispatchMethod() {
+        public int invoke(int jsthis, int[] jsargs) {
+          try {
+            getProfiler().onAppLoad();
+          } catch (Exception e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+          }
+          return LowLevelMoz.JSVAL_VOID;
+        }
+      };
+
+      private LowLevelMoz.DispatchMethod moduleLoadBegin = new LowLevelMoz.DispatchMethod() {
+        public int invoke(int jsthis, int[] jsargs) {
+          try {
+            String name = LowLevelMoz.coerceToString(scriptObject, jsargs[0]);
+            getProfiler().moduleLoadBegin( name );
+          } catch (Exception e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+          }
+          return LowLevelMoz.JSVAL_VOID;
+        }
+      };
+
+      private LowLevelMoz.DispatchMethod moduleLoadEnd = new LowLevelMoz.DispatchMethod() {
+        public int invoke(int jsthis, int[] jsargs) {
+          try {
+            String name = LowLevelMoz.coerceToString(scriptObject, jsargs[0]);
+            getProfiler().moduleLoadEnd( name );
+          } catch (Exception e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+          }
+          return LowLevelMoz.JSVAL_VOID;
+        }
+      };
+
+      private LowLevelMoz.DispatchMethod enteredMethod = new LowLevelMoz.DispatchMethod() {
+        public int invoke(int jsthis, int[] jsargs) {
+          try {
+            String methodKlass = LowLevelMoz.coerceToString(scriptObject, jsargs[0]);
+            String methodName = LowLevelMoz.coerceToString(scriptObject, jsargs[1]);
+            String methodSignature = LowLevelMoz.coerceToString(scriptObject, jsargs[2]);
+            getProfiler().methodEntered( methodKlass, methodName, methodSignature );
+          } catch (Exception e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+          }
+          return LowLevelMoz.JSVAL_VOID;
+        }
+      };
+
+      private LowLevelMoz.DispatchMethod exitedMethod = new LowLevelMoz.DispatchMethod() {
+        public int invoke(int jsthis, int[] jsargs) {
+          try {
+            String methodKlass = LowLevelMoz.coerceToString(scriptObject, jsargs[0]);
+            String methodName = LowLevelMoz.coerceToString(scriptObject, jsargs[1]);
+            String methodSignature = LowLevelMoz.coerceToString(scriptObject, jsargs[2]);
+            getProfiler().methodExited( methodKlass, methodName, methodSignature );
+          } catch (Exception e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+          }
+          return LowLevelMoz.JSVAL_VOID;
+        }
+      };
+
+      class MethodCache {
+        LowLevelMoz.DispatchMethod method;
+        int methodId = -1;
+        MethodCache( LowLevelMoz.DispatchMethod method ) {
+          this.method = method;
+        }
+      }
+
+      private Map methods = new HashMap();
+      {
+        methods.put( "onAppLoad", new MethodCache( onAppLoad ) );
+        methods.put( "moduleLoadBegin", new MethodCache( moduleLoadBegin ) );
+        methods.put( "moduleLoadEnd", new MethodCache( moduleLoadEnd ) );
+        methods.put( "methodEntered", new MethodCache( enteredMethod ) );
+        methods.put( "methodExited", new MethodCache( exitedMethod ) );
+      }
+
+      public int getField(String name) {
+        // Can happen if profiling calls somehow get invoked from hosted mode
+        // instead of profiling mode. This shouldn't really happen.
+        if ( getProfiler() == null ) {
+          getLogger().log( TreeLogger.WARN, "Ignoring a profiling call made in hosted mode.", null );
+          return LowLevelMoz.JSVAL_VOID;
+        }
+
+        MethodCache cache = (MethodCache) methods.get(name);
+
+        if ( cache == null ) {
+          return LowLevelMoz.JSVAL_VOID;
+        }
+
+        // if ( cache.methodId == -1 ) {
+          cache.methodId = LowLevelMoz.wrapFunction(scriptObject, name, cache.method);
+        // }
+
+        return cache.methodId;
+      }
+
+      public Object getTarget() {
+        return null;
+      }
+
+      public void setField(String name, int value) {
+      }
+    };
+
     public boolean gwtOnLoad(int scriptObject, String moduleName) {
       try {
+        this.scriptObject = scriptObject;
+
         if (moduleName == null) {
           // Indicates the page is being unloaded.
           //
@@ -64,6 +187,9 @@ public class BrowserWidgetMoz extends BrowserWidget {
     }
 
     public int resolveReference(String ident) {
+      if (ident.equals("profiler")) {
+        return LowLevelMoz.wrapDispatch(scriptObject, profiler);
+      }
       return LowLevelMoz.JSVAL_VOID;
     }
   }

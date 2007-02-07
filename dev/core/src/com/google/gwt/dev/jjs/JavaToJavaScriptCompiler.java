@@ -47,6 +47,7 @@ import com.google.gwt.dev.jjs.impl.Pruner;
 import com.google.gwt.dev.jjs.impl.ReplaceRebinds;
 import com.google.gwt.dev.jjs.impl.TypeMap;
 import com.google.gwt.dev.jjs.impl.TypeTightener;
+import com.google.gwt.dev.jjs.impl.ProfileInstrumenter;
 import com.google.gwt.dev.js.FullNamingStrategy;
 import com.google.gwt.dev.js.JsSourceGenerationVisitor;
 import com.google.gwt.dev.js.NamingStrategy;
@@ -177,15 +178,17 @@ public class JavaToJavaScriptCompiler {
 
   private final boolean prettyNames;
 
+  private final boolean profile;
+
   public JavaToJavaScriptCompiler(final TreeLogger logger,
       final WebModeCompilerFrontEnd compiler, final String[] declEntryPts)
       throws UnableToCompleteException {
-    this(logger, compiler, declEntryPts, true, false);
+    this(logger, compiler, declEntryPts, true, false, false);
   }
 
   public JavaToJavaScriptCompiler(final TreeLogger logger,
       final WebModeCompilerFrontEnd compiler, final String[] declEntryPts,
-      boolean obfuscate, boolean prettyNames) throws UnableToCompleteException {
+      boolean obfuscate, boolean prettyNames, boolean profile) throws UnableToCompleteException {
 
     if (declEntryPts.length == 0) {
       throw new IllegalArgumentException("entry point(s) required");
@@ -199,6 +202,7 @@ public class JavaToJavaScriptCompiler {
     //
     this.obfuscate = obfuscate;
     this.prettyNames = prettyNames;
+    this.profile = profile;
 
     // Find all the possible rebound entry points.
     //
@@ -213,11 +217,12 @@ public class JavaToJavaScriptCompiler {
     // Add intrinsics needed for code gen.
     //
     int k = entryPts.length;
-    String[] seedTypeNames = new String[k + 3];
+    String[] seedTypeNames = new String[k + 4];
     System.arraycopy(entryPts, 0, seedTypeNames, 0, k);
     seedTypeNames[k++] = "com.google.gwt.lang.Array";
     seedTypeNames[k++] = "com.google.gwt.lang.Cast";
     seedTypeNames[k++] = "com.google.gwt.lang.Exceptions";
+    seedTypeNames[k++] = "com.google.gwt.lang.Profiler";
 
     // Compile the source and get the compiler so we can get the parse tree
     //
@@ -355,6 +360,10 @@ public class JavaToJavaScriptCompiler {
       JavaScriptObjectCaster.exec(jprogram);
       CastNormalizer.exec(jprogram);
       ArrayNormalizer.exec(jprogram);
+
+      if ( profile ) {
+        ProfileInstrumenter.exec(jprogram);
+      }
 
       // (6) Perform furthur post-normalization optimizations
       // Prune everything

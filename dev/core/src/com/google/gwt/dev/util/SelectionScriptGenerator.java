@@ -212,7 +212,7 @@ public class SelectionScriptGenerator {
   /**
    * Generates a function that injects calls to a shared file-injection
    * functions.
-   * 
+   *
    * @param pw generate source onto this writer
    */
   private void genInjectExternalFiles(PrintWriter pw) {
@@ -238,7 +238,7 @@ public class SelectionScriptGenerator {
 
   /**
    * Determines whether or not a particular property value is allowed.
-   * 
+   *
    * @param wnd the caller's window object (not $wnd!)
    * @param propName the name of the property being checked
    * @param propValue the property value being tested
@@ -294,8 +294,9 @@ public class SelectionScriptGenerator {
     pw.println("}");
     pw.println();
     pw.println("function __gwt_onScriptLoad(wnd, moduleName) {");
-    pw.println("  if (window.external && window.external.gwtOnLoad) {");
-    pw.println("    if (!window.external.gwtOnLoad(wnd, moduleName)) {");
+    pw.println("  if (window.external && window.external.gwtOnLoad && ! __gwt_profile ) {");
+    pw.println("    var rc=window.external.gwtOnLoad(wnd, moduleName);");
+    pw.println("    if (!rc) {");
     pw.println("      if (__gwt_onLoadError) {");
     pw.println("        __gwt_onLoadError(name);");
     pw.println("      } else {");
@@ -305,10 +306,18 @@ public class SelectionScriptGenerator {
     pw.println("    }");
     pw.println("    return;");
     pw.println("  }");
+    // pw.println("  alert('above var iframe' );");
     pw.println("  var iframe = document.getElementById(moduleName);");
+    // pw.println("  alert('iframe: ' + iframe );");
     pw.println("  window.__gwt_loadDone = true;");
-    pw.println("  if (window.__gwt_scriptsDone)");
+    // pw.println("  alert('checking scriptsDone' );");
+    pw.println("  if (window.__gwt_scriptsDone) {");
+    // pw.println("    alert('scriptsDone = true' );");
+    // pw.println("    alert('contentWindow ' + iframe.contentWindow );");
+    // pw.println("    alert('gwtOnLoad ' + iframe.contentWindow.gwtOnLoad );");
     pw.println("    iframe.contentWindow.gwtOnLoad(function() { __gwt_onBadLoad(moduleName) }, moduleName);");
+    pw.println("  }");
+    // pw.println("  alert('finished checking scriptsDone' );");
     pw.println("}");
     pw.println();
   }
@@ -454,12 +463,13 @@ public class SelectionScriptGenerator {
   /**
    * Emits all the script required to set up the module and, in web mode, select
    * a compilation.
-   * 
+   *
    * @param pw
    */
   private void genScript(PrintWriter pw) {
     // Emit well-known global variables.
     pw.println("var __gwt_onLoadError = null;");
+    pw.println("var __gwt_profile = document.location.href.indexOf( 'compiled' ) != -1 && window.external;" );
 
     // Emit __gwt_initHandlers().
     genInitHandlers(pw);
@@ -499,6 +509,11 @@ public class SelectionScriptGenerator {
       // Hosted mode only, so there is no strong name selection (i.e. because
       // there is no compiled JavaScript);
       pw.println("function __gwt_go() {");
+      pw.println("  if ( __gwt_profile ) { " );
+      pw.println("    window.external.gwtOnLoad( window, null );" );
+      pw.println("    window.external.profiler.onAppLoad();" );
+      pw.println("    window.external.profiler.methodEntered( '__gwt_go', '', '' );" );
+      pw.println("  }");
       pw.println("  __gwt_processMetas();");
       printDocumentWrite(pw, "  ", "<iframe id='" + moduleName
           + "' style='width:0;height:0;border:0' src='" + moduleName
@@ -508,6 +523,9 @@ public class SelectionScriptGenerator {
     pw.println();
     printDocumentWrite(pw, "  ", "<script>__gwt_onInjectionDone('" + moduleName
         + "')</script>");
+    pw.println("  if ( __gwt_profile ) { " );
+    pw.println("    window.external.profiler.methodExited( '__gwt_go', '', '' );" );
+    pw.println("  }");
     pw.println("}");
 
     pw.println();
@@ -540,6 +558,12 @@ public class SelectionScriptGenerator {
    */
   private void genSrcSetFunction(PrintWriter pw, String oneAndOnlyStrongName) {
     pw.println("function __gwt_go() {");
+    // pw.println( " alert( 'Hey' );");
+    pw.println("  if ( __gwt_profile ) { " );
+    pw.println("    window.external.gwtOnLoad( window, null );" );
+    pw.println("    window.external.profiler.onAppLoad();" );
+    pw.println("    window.external.profiler.methodEntered( '__gwt_go', '', '' );" );
+    pw.println("  }");
     pw.println("  try {");
     pw.println("    __gwt_processMetas();");
     pw.println();
@@ -557,6 +581,7 @@ public class SelectionScriptGenerator {
       pw.println("    var query = location.search;");
       pw.println("    query = query.substring(0, query.indexOf('&'));");
       pw.println("    var newUrl = strongName + '.cache.html' + query;");
+      // pw.println("    alert( 'document.writing ' );" );
       pw.println("    document.write('<iframe id=\""
           + moduleName
           + "\" style=\"width:0;height:0;border:0\" src=\"\' + strongName + \'.cache.html\"></iframe>');");
@@ -569,6 +594,7 @@ public class SelectionScriptGenerator {
     }
 
     pw.println("  } catch (e) {");
+    // pw.println( "   alert( e );");
     pw.println("    // intentionally silent on property failure");
     pw.println("  }");
   }
@@ -579,7 +605,7 @@ public class SelectionScriptGenerator {
 
   /**
    * Determines whether or not the URL is relative.
-   * 
+   *
    * @param src the test url
    * @return <code>true</code> if the URL is relative, <code>false</code> if
    *         not

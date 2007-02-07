@@ -243,6 +243,8 @@ public class GWTCompiler extends ToolBase {
 
   private PropertyPermutations perms;
 
+  private boolean profile;
+
   private boolean prettyNames;
 
   private Properties properties;
@@ -329,7 +331,7 @@ public class GWTCompiler extends ToolBase {
     WebModeCompilerFrontEnd frontEnd = new WebModeCompilerFrontEnd(
         sourceOracle, rebindPermOracle);
     jjs = new JavaToJavaScriptCompiler(logger, frontEnd, declEntryPts,
-        obfuscate, prettyNames);
+        obfuscate, prettyNames, profile);
     initCompilations(logger);
 
     // Compile for every permutation of properties.
@@ -377,6 +379,10 @@ public class GWTCompiler extends ToolBase {
 
   public void setOutDir(File outDir) {
     this.outDir = outDir;
+  }
+
+  public void setProfile(boolean profile) {
+    this.profile = profile;
   }
 
   public void setStyleDetailed() {
@@ -480,6 +486,7 @@ public class GWTCompiler extends ToolBase {
 
     // Generate the call to tell the bootstrap code that we're ready to go.
     sb.append("\n");
+    // sb.append("alert('Before __gwt_onScriptLoad');");
     sb.append("parent.__gwt_onScriptLoad(window, '" + module.getName() + "');\n");
     sb.append("--></script></body></html>\n");
 

@@ -18,6 +18,7 @@ package com.google.gwt.dev.shell;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.dev.util.Util;
+import com.google.gwt.dev.shell.profiler.ProfilerImpl;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
@@ -222,6 +223,8 @@ public abstract class BrowserWidget extends Composite {
 
   private Map moduleSpacesByName = new HashMap();
 
+  private ProfilerImpl profiler;
+
   public BrowserWidget(Composite parent, BrowserWidgetHost host) {
     super(parent, SWT.NONE);
 
@@ -276,6 +279,10 @@ public abstract class BrowserWidget extends Composite {
     return host;
   }
 
+  public ProfilerImpl getProfiler() {
+    return profiler;
+  }
+
   /**
    * Go to a given url, possibly rewriting it if it can be served from any
    * project's public directory.
@@ -301,6 +308,10 @@ public abstract class BrowserWidget extends Composite {
     });
   }
 
+  public void setProfiler( ProfilerImpl profiler ) {
+    this.profiler = profiler;
+  }
+
   /**
    * Initializes and attaches module space to this browser widget. Called by
    * subclasses in response to calls from JavaScript.
@@ -319,6 +330,10 @@ public abstract class BrowserWidget extends Composite {
     // Enable the compile button since we successfully loaded.
     //
     toolbar.openWebModeButton.setEnabled(true);
+  }
+
+  protected TreeLogger getLogger() {
+    return logger;
   }
 
   /**

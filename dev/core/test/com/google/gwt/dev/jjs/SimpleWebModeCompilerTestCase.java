@@ -12,7 +12,7 @@ import junit.framework.TestCase;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class SimpleWebModeCompilerTestCase extends TestCase {
+public abstract class svn aSimpleWebModeCompilerTestCase extends TestCase {
 
   protected void compile(String appClass, Map rebinds)
       throws UnableToCompleteException {
@@ -23,7 +23,7 @@ public abstract class SimpleWebModeCompilerTestCase extends TestCase {
     RebindPermOracleImpl rpoi = new RebindPermOracleImpl(rebinds);
     WebModeCompilerFrontEnd astCompiler = new WebModeCompilerFrontEnd(soi, rpoi);
     JavaToJavaScriptCompiler jjs = new JavaToJavaScriptCompiler(logger,
-      astCompiler, new String[]{appClass}, false, false);
+      astCompiler, new String[]{appClass}, false, false, false);
     String result = jjs.compile(logger, rpoi);
 
     // print source
