@@ -12,7 +12,7 @@ import junit.framework.TestCase;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class svn aSimpleWebModeCompilerTestCase extends TestCase {
+public abstract class SimpleWebModeCompilerTestCase extends TestCase {
 
   protected void compile(String appClass, Map rebinds)
       throws UnableToCompleteException {
