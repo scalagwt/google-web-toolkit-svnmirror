@@ -206,7 +206,7 @@ public class JProgram extends JNode {
       null);
 
   public JProgram(TreeLogger logger, RebindOracle rebindOracle) {
-    super(null);
+    super(null, null);
     this.logger = logger;
     this.rebindOracle = rebindOracle;
   }
@@ -220,17 +220,17 @@ public class JProgram extends JNode {
   /**
    * Helper to create an assignment, used to initalize fields, etc.
    */
-  public JExpressionStatement createAssignmentStmt(JExpression lhs,
-      JExpression rhs) {
-    JBinaryOperation assign = new JBinaryOperation(this, lhs.getType(),
+  public JExpressionStatement createAssignmentStmt(JSourceInfo info,
+      JExpression lhs, JExpression rhs) {
+    JBinaryOperation assign = new JBinaryOperation(this, info, lhs.getType(),
         JBinaryOperator.ASG, lhs, rhs);
-    return new JExpressionStatement(this, assign);
+    return new JExpressionStatement(this, info, assign);
   }
 
-  public JClassType createClass(char[][] name, boolean isAbstract,
-      boolean isFinal) {
+  public JClassType createClass(JSourceInfo info, char[][] name,
+      boolean isAbstract, boolean isFinal) {
     String sname = dotify(name);
-    JClassType x = new JClassType(this, sname, isAbstract, isFinal);
+    JClassType x = new JClassType(this, info, sname, isAbstract, isFinal);
 
     allTypes.add(x);
     putIntoTypeMap(sname, x);
@@ -261,8 +261,9 @@ public class JProgram extends JNode {
     return x;
   }
 
-  public JField createField(char[] name, JReferenceType enclosingType,
-      JType type, boolean isStatic, boolean isFinal, boolean hasInitializer) {
+  public JField createField(JSourceInfo info, char[] name,
+      JReferenceType enclosingType, JType type, boolean isStatic,
+      boolean isFinal, boolean hasInitializer) {
     assert (name != null);
     assert (enclosingType != null);
     assert (type != null);
@@ -278,8 +279,8 @@ public class JProgram extends JNode {
     }
 
     String sname = String.valueOf(name);
-    JField x = new JField(this, sname, enclosingType, type, isStatic, isFinal,
-        hasInitializer);
+    JField x = new JField(this, info, sname, enclosingType, type, isStatic,
+        isFinal, hasInitializer);
 
     if (isSpecialField) {
       specialFields.put(enclosingType.getShortName() + '.' + sname, x);
@@ -290,9 +291,9 @@ public class JProgram extends JNode {
     return x;
   }
 
-  public JInterfaceType createInterface(char[][] name) {
+  public JInterfaceType createInterface(JSourceInfo info, char[][] name) {
     String sname = dotify(name);
-    JInterfaceType x = new JInterfaceType(this, sname);
+    JInterfaceType x = new JInterfaceType(this, info, sname);
 
     allTypes.add(x);
     putIntoTypeMap(sname, x);
@@ -300,13 +301,13 @@ public class JProgram extends JNode {
     return x;
   }
 
-  public JLocal createLocal(char[] name, JType type, boolean isFinal,
-      JMethod enclosingMethod) {
+  public JLocal createLocal(JSourceInfo info, char[] name, JType type,
+      boolean isFinal, JMethod enclosingMethod) {
     assert (name != null);
     assert (type != null);
     assert (enclosingMethod != null);
 
-    JLocal x = new JLocal(this, String.valueOf(name), type, isFinal,
+    JLocal x = new JLocal(this, info, String.valueOf(name), type, isFinal,
         enclosingMethod);
 
     enclosingMethod.locals.add(x);
@@ -314,9 +315,9 @@ public class JProgram extends JNode {
     return x;
   }
 
-  public JMethod createMethod(char[] name, JReferenceType enclosingType,
-      JType returnType, boolean isAbstract, boolean isStatic, boolean isFinal,
-      boolean isPrivate, boolean isNative) {
+  public JMethod createMethod(JSourceInfo info, char[] name,
+      JReferenceType enclosingType, JType returnType, boolean isAbstract,
+      boolean isStatic, boolean isFinal, boolean isPrivate, boolean isNative) {
     assert (name != null);
     assert (returnType != null);
     assert (!isAbstract || !isNative);
@@ -324,10 +325,10 @@ public class JProgram extends JNode {
     JMethod x;
     String sname = String.valueOf(name);
     if (isNative) {
-      x = new JsniMethod(this, sname, enclosingType, returnType, isStatic,
-          isFinal, isPrivate);
+      x = new JsniMethod(this, info, sname, enclosingType, returnType,
+          isStatic, isFinal, isPrivate);
     } else {
-      x = new JMethod(this, sname, enclosingType, returnType, isAbstract,
+      x = new JMethod(this, info, sname, enclosingType, returnType, isAbstract,
           isStatic, isFinal, isPrivate);
     }
 
@@ -346,14 +347,14 @@ public class JProgram extends JNode {
     return x;
   }
 
-  public JParameter createParameter(char[] name, JType type, boolean isFinal,
-      JMethod enclosingMethod) {
+  public JParameter createParameter(JSourceInfo info, char[] name, JType type,
+      boolean isFinal, JMethod enclosingMethod) {
     assert (name != null);
     assert (type != null);
     assert (enclosingMethod != null);
 
-    JParameter x = new JParameter(this, String.valueOf(name), type, isFinal,
-        enclosingMethod);
+    JParameter x = new JParameter(this, info, String.valueOf(name), type,
+        isFinal, enclosingMethod);
 
     enclosingMethod.params.add(x);
 
@@ -379,8 +380,8 @@ public class JProgram extends JNode {
     return allTypes;
   }
 
-  public JThisRef getExpressionThisRef(JClassType enclosingType) {
-    return new JThisRef(this, enclosingType);
+  public JThisRef getExprThisRef(JSourceInfo info, JClassType enclosingType) {
+    return new JThisRef(this, info, enclosingType);
   }
 
   public JReferenceType getFromTypeMap(String qualifiedBinaryOrSourceName) {
@@ -454,16 +455,16 @@ public class JProgram extends JNode {
 
   public JField getNullField() {
     if (nullField == null) {
-      nullField = new JField(this, "nullField", null, typeNull, false, true,
-          true);
+      nullField = new JField(this, null, "nullField", null, typeNull, false,
+          true, true);
     }
     return nullField;
   }
 
   public JMethod getNullMethod() {
     if (nullMethod == null) {
-      nullMethod = new JsniMethod(this, "nullMethod", null, typeNull, false,
-          true, true);
+      nullMethod = new JsniMethod(this, null, "nullMethod", null, typeNull,
+          false, true, true);
     }
     return nullMethod;
   }
@@ -697,18 +698,12 @@ public class JProgram extends JNode {
     return type1;
   }
 
-  public void traverse(JVisitor visitor) {
-    if (visitor.visit(this)) {
-      for (int i = 0; i < entryMethods.size(); ++i) {
-        JMethod method = (JMethod) entryMethods.get(i);
-        method.traverse(visitor);
-      }
-      for (int i = 0; i < allTypes.size(); ++i) {
-        JReferenceType type = (JReferenceType) allTypes.get(i);
-        type.traverse(visitor);
-      }
+  public void traverse(JVisitor visitor, Context ctx) {
+    if (visitor.visit(this, ctx)) {
+      visitor.accept(entryMethods);
+      visitor.accept(allTypes);
     }
-    visitor.endVisit(this);
+    visitor.endVisit(this, ctx);
   }
 
   JReferenceType generalizeTypes(JReferenceType type1, JReferenceType type2) {
