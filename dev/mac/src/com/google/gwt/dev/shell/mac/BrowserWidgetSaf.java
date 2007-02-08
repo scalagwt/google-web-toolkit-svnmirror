@@ -1,12 +1,12 @@
 /*
  * Copyright 2006 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -27,15 +27,171 @@ import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.WebKit;
 import org.eclipse.swt.widgets.Shell;
 
+import java.util.Map;
+import java.util.HashMap;
+
 /**
  * Represents an individual browser window and all of its controls.
  */
 public class BrowserWidgetSaf extends BrowserWidget {
+
+    /**
+     * The profiler API used by the compiler-instrumented JavaScript to record
+     * profiling information. We make it available on window.external.
+     *
+     */
+    private LowLevelSaf.DispatchObject profiler = new LowLevelSaf.DispatchObject() {
+
+      private LowLevelSaf.DispatchMethod onAppLoad = new LowLevelSaf.DispatchMethod() {
+        public int invoke(int execState, int jsthis, int[] jsargs) {
+          int jsFalse = LowLevelSaf.convertBoolean(false);
+          LowLevelSaf.pushExecState(execState);
+          try {
+            getProfiler().onAppLoad();
+          } catch (Exception e) {
+            e.printStackTrace();
+            return jsFalse;
+          }
+          finally {
+            LowLevelSaf.popExecState(execState);
+          }
+          return jsFalse;
+        }
+      };
+
+      private LowLevelSaf.DispatchMethod moduleLoadBegin = new LowLevelSaf.DispatchMethod() {
+        public int invoke(int execState, int jsthis, int[] jsargs) {
+            int jsFalse = LowLevelSaf.convertBoolean(false);
+            LowLevelSaf.pushExecState(execState);
+            try {
+              String name = LowLevelSaf.coerceToString(execState, jsargs[0]);
+              getProfiler().moduleLoadBegin( name );
+            } catch (Exception e) {
+              e.printStackTrace();
+              return jsFalse;
+            }
+            finally {
+              LowLevelSaf.popExecState(execState);
+            }
+            return jsFalse;
+        }
+      };
+
+      private LowLevelSaf.DispatchMethod moduleLoadEnd = new LowLevelSaf.DispatchMethod() {
+        public int invoke(int execState, int jsthis, int[] jsargs) {
+            int jsFalse = LowLevelSaf.convertBoolean(false);
+            LowLevelSaf.pushExecState(execState);
+            try {
+              String name = LowLevelSaf.coerceToString(execState, jsargs[0]);
+              getProfiler().moduleLoadEnd( name );
+            } catch (Exception e) {
+              e.printStackTrace();
+              return jsFalse;
+            }
+            finally {
+              LowLevelSaf.popExecState(execState);
+            }
+            return jsFalse;
+        }
+      };
+
+        private LowLevelSaf.DispatchMethod enteredMethod = new LowLevelSaf.DispatchMethod() {
+          public int invoke(int execState, int jsthis, int[] jsargs) {
+              int jsFalse = LowLevelSaf.convertBoolean(false);
+              LowLevelSaf.pushExecState(execState);
+              try {
+                String klass = LowLevelSaf.coerceToString(execState, jsargs[0]);
+                String name = LowLevelSaf.coerceToString(execState, jsargs[1]);
+                String signature = LowLevelSaf.coerceToString(execState, jsargs[2]);
+                getProfiler().methodEntered( klass, name, signature );
+              } catch (Exception e) {
+                e.printStackTrace();
+                return jsFalse;
+              }
+              finally {
+                LowLevelSaf.popExecState(execState);
+              }
+              return jsFalse;
+          }
+        };
+
+        private LowLevelSaf.DispatchMethod exitedMethod = new LowLevelSaf.DispatchMethod() {
+          public int invoke(int execState, int jsthis, int[] jsargs) {
+              int jsFalse = LowLevelSaf.convertBoolean(false);
+              LowLevelSaf.pushExecState(execState);
+              try {
+                String klass = LowLevelSaf.coerceToString(execState, jsargs[0]);
+                String name = LowLevelSaf.coerceToString(execState, jsargs[1]);
+                String signature = LowLevelSaf.coerceToString(execState, jsargs[2]);
+                getProfiler().methodExited( klass, name, signature );
+              } catch (Exception e) {
+                e.printStackTrace();
+                return jsFalse;
+              }
+              finally {
+                LowLevelSaf.popExecState(execState);
+              }
+              return jsFalse;
+          }
+        };
+
+        class MethodCache {
+          LowLevelSaf.DispatchMethod method;
+          int methodId = -1;
+          MethodCache( LowLevelSaf.DispatchMethod method ) {
+            this.method = method;
+          }
+        }
+
+        private Map methods = new HashMap();
+        {
+          methods.put( "onAppLoad", new MethodCache( onAppLoad ) );
+          methods.put( "moduleLoadBegin", new MethodCache( moduleLoadBegin ) );
+          methods.put( "moduleLoadEnd", new MethodCache( moduleLoadEnd ) );
+          methods.put( "methodEntered", new MethodCache( enteredMethod ) );
+          methods.put( "methodExited", new MethodCache( exitedMethod ) );
+        }
+
+
+      public int getField(String name) {
+        int jsFalse = LowLevelSaf.convertBoolean(false);
+
+        // Can happen if profiling calls somehow get invoked from hosted mode
+        // instead of profiling mode. This shouldn't really happen.
+        if ( getProfiler() == null ) {
+          getLogger().log( TreeLogger.WARN, "Ignoring a profiling call made in hosted mode.", null );
+          return jsFalse;
+        }
+
+        MethodCache cache = (MethodCache) methods.get(name);
+
+        if ( cache == null ) {
+          return jsFalse;
+        }
+
+        // if ( cache.methodId == -1 ) {
+          cache.methodId = LowLevelSaf.wrapFunction(name, cache.method);
+        // }
+
+        return cache.methodId;
+      }
+
+      public Object getTarget() {
+        return null;
+      }
+
+      public void setField(String name, int value) {
+      }
+    };
+
   private class ExternalObject implements DispatchObject {
 
     public int getField(String name) {
       if ("gwtonload".equalsIgnoreCase(name)) {
         return LowLevelSaf.wrapFunction("gwtOnload", new GwtOnLoad());
+      }
+      if ("profiler".equals(name) ) {
+        return LowLevelSaf.wrapDispatch(profiler);
       }
       return 0;
     }
@@ -64,7 +220,7 @@ public class BrowserWidgetSaf extends BrowserWidget {
         // We do catch Throwable intentionally because there are a ton of things
         // that can go wrong trying to load a module, including Error-dervied
         // things like NoClassDefFoundError.
-        // 
+        //
         getHost().getLogger().log(TreeLogger.ERROR,
             "Failure to load module '" + moduleName + "'", e);
         return false;
