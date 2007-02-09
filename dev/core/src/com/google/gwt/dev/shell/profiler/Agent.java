@@ -42,8 +42,10 @@ public interface Agent {
    * @param klass The name of the class.
    * @param name The name of the method.
    * @param signature The type signature of the method.
+   * @param overheadNanos The amount of profiling overhead spent to reach
+   * this method.
    */
-  void methodEntered( String klass, String name, String signature );
+  void methodEntered( String klass, String name, String signature, long overheadNanos );
 
   /**
    * Called when a method has been exited, normally or by exception.
@@ -51,8 +53,10 @@ public interface Agent {
    * @param klass The name of the class.
    * @param name The name of the method.
    * @param signature The type signature of the method.
+   * @param overheadNanos The amount of profiling overhead spent to reach
+   * this method. 
    */
-  void methodExited( String klass, String name, String signature );
+  void methodExited( String klass, String name, String signature, long overheadNanos );
 
   void moduleLoadBegin( String name );
   void moduleLoadEnd( String name );

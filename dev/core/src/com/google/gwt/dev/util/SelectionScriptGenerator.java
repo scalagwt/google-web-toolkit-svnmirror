@@ -469,7 +469,11 @@ public class SelectionScriptGenerator {
   private void genScript(PrintWriter pw) {
     // Emit well-known global variables.
     pw.println("var __gwt_onLoadError = null;");
+    // pw.println("    alert( 'Beginning' );");
     pw.println("var __gwt_profile = document.location.href.indexOf( 'compiled' ) != -1 && window.external;" );
+    // pw.println("    alert( '__gwt_profile ' + __gwt_profile );");
+    pw.println("var __gwt_methodEntered;" );
+    pw.println("var __gwt_methodExited;" );
 
     // Emit __gwt_initHandlers().
     genInitHandlers(pw);
@@ -510,7 +514,20 @@ public class SelectionScriptGenerator {
       // there is no compiled JavaScript);
       pw.println("function __gwt_go() {");
       pw.println("  if ( __gwt_profile ) { " );
+      // pw.println("    alert( 'about to call gwtOnLoad' );");
       pw.println("    window.external.gwtOnLoad( window, null );" );
+      // pw.println("    alert( 'about to set timingCall' );");
+      pw.println("    var timingCall = window.external.profiler.timingCall;");
+      // pw.println("    alert( 'about to call timingBegin' );");
+      pw.println("    window.external.profiler.timingBegin();");
+      pw.println("    for ( var i = 0; i < 10000; ++i ) {");
+      // pw.println("      alert( 'about to call timingCall' );");
+      pw.println("      timingCall();");
+      pw.println("    }");
+      // pw.println("    alert( 'about to call timingEnd' );");
+      pw.println("    window.external.profiler.timingEnd();");
+      pw.println("  __gwt_methodEntered = window.external.profiler.methodEntered;" );
+      pw.println("  __gwt_methodExited = window.external.profiler.methodExited;" );
       pw.println("    window.external.profiler.onAppLoad();" );
       pw.println("    window.external.profiler.methodEntered( '__gwt_go', '', '' );" );
       pw.println("  }");
@@ -558,9 +575,21 @@ public class SelectionScriptGenerator {
    */
   private void genSrcSetFunction(PrintWriter pw, String oneAndOnlyStrongName) {
     pw.println("function __gwt_go() {");
-    // pw.println( " alert( 'Hey' );");
     pw.println("  if ( __gwt_profile ) { " );
+    // pw.println("    alert( 'about to call gwtOnLoad' );");
     pw.println("    window.external.gwtOnLoad( window, null );" );
+    // pw.println("    alert( 'about to set timingCall' );");
+    pw.println("    var timingCall = window.external.profiler.timingCall;");
+    // pw.println("    alert( 'about to call timingBegin' );");
+    pw.println("    window.external.profiler.timingBegin();");
+    pw.println("    for ( var i = 0; i < 10000; ++i ) {");
+    // pw.println("      alert( 'about to call timingCall' );");
+    pw.println("      timingCall();");
+    pw.println("    }");
+    // pw.println("    alert( 'about to call timingEnd' );");
+    pw.println("    window.external.profiler.timingEnd();");
+    pw.println("  __gwt_methodEntered = window.external.profiler.methodEntered;" );
+    pw.println("  __gwt_methodExited = window.external.profiler.methodExited;" );
     pw.println("    window.external.profiler.onAppLoad();" );
     pw.println("    window.external.profiler.methodEntered( '__gwt_go', '', '' );" );
     pw.println("  }");

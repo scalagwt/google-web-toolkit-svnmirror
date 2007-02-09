@@ -97,6 +97,7 @@ public class ProfilerShell extends GWTShell {
     BrowserWidget widget = super.openNewBrowserWindow();
     getBrowserHost().compile( new String[] { module } );
     ProfilerImpl profiler = new ProfilerImpl();
+    profiler.setTopLogger(getTopLogger());
     Agent agent = createProfilingAgent();
     profiler.setAgent( agent );
     agent.onLoad( profiler );

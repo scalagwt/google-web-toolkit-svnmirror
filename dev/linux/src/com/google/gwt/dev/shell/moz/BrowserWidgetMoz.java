@@ -21,6 +21,7 @@ import com.google.gwt.dev.shell.BrowserWidgetHost;
 import com.google.gwt.dev.shell.LowLevel;
 import com.google.gwt.dev.shell.ModuleSpace;
 import com.google.gwt.dev.shell.ModuleSpaceHost;
+import com.google.gwt.dev.shell.profiler.Timer;
 import com.google.gwt.dev.shell.moz.LowLevelMoz.ExternalFactory;
 import com.google.gwt.dev.shell.moz.LowLevelMoz.ExternalObject;
 
@@ -48,12 +49,45 @@ public class BrowserWidgetMoz extends BrowserWidget {
      */
     private LowLevelMoz.DispatchObject profiler = new LowLevelMoz.DispatchObject() {
 
+      private LowLevelMoz.DispatchMethod timingBegin = new LowLevelMoz.DispatchMethod() {
+        public int invoke(int jsthis, int[] jsargs) {
+          try {
+            getProfiler().timingBegin();
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+          return LowLevelMoz.JSVAL_VOID;
+        }
+      };
+
+      private LowLevelMoz.DispatchMethod timingEnd = new LowLevelMoz.DispatchMethod() {
+        public int invoke(int jsthis, int[] jsargs) {
+          try {
+            getProfiler().timingEnd();
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+          return LowLevelMoz.JSVAL_VOID;
+        }
+      };
+
+      private LowLevelMoz.DispatchMethod timingCall = new LowLevelMoz.DispatchMethod() {
+        public int invoke(int jsthis, int[] jsargs) {
+          try {
+            getProfiler().timingCall();
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+          return LowLevelMoz.JSVAL_VOID;
+        }
+      };
+
       private LowLevelMoz.DispatchMethod onAppLoad = new LowLevelMoz.DispatchMethod() {
         public int invoke(int jsthis, int[] jsargs) {
           try {
             getProfiler().onAppLoad();
           } catch (Exception e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
           }
           return LowLevelMoz.JSVAL_VOID;
         }
@@ -65,7 +99,7 @@ public class BrowserWidgetMoz extends BrowserWidget {
             String name = LowLevelMoz.coerceToString(scriptObject, jsargs[0]);
             getProfiler().moduleLoadBegin( name );
           } catch (Exception e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
           }
           return LowLevelMoz.JSVAL_VOID;
         }
@@ -77,7 +111,7 @@ public class BrowserWidgetMoz extends BrowserWidget {
             String name = LowLevelMoz.coerceToString(scriptObject, jsargs[0]);
             getProfiler().moduleLoadEnd( name );
           } catch (Exception e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
           }
           return LowLevelMoz.JSVAL_VOID;
         }
@@ -91,7 +125,7 @@ public class BrowserWidgetMoz extends BrowserWidget {
             String methodSignature = LowLevelMoz.coerceToString(scriptObject, jsargs[2]);
             getProfiler().methodEntered( methodKlass, methodName, methodSignature );
           } catch (Exception e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
           }
           return LowLevelMoz.JSVAL_VOID;
         }
@@ -105,7 +139,7 @@ public class BrowserWidgetMoz extends BrowserWidget {
             String methodSignature = LowLevelMoz.coerceToString(scriptObject, jsargs[2]);
             getProfiler().methodExited( methodKlass, methodName, methodSignature );
           } catch (Exception e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
           }
           return LowLevelMoz.JSVAL_VOID;
         }
@@ -121,6 +155,9 @@ public class BrowserWidgetMoz extends BrowserWidget {
 
       private Map methods = new HashMap();
       {
+        methods.put( "timingBegin", new MethodCache( timingBegin ) );
+        methods.put( "timingEnd", new MethodCache( timingEnd ) );
+        methods.put( "timingCall", new MethodCache( timingCall ) );
         methods.put( "onAppLoad", new MethodCache( onAppLoad ) );
         methods.put( "moduleLoadBegin", new MethodCache( moduleLoadBegin ) );
         methods.put( "moduleLoadEnd", new MethodCache( moduleLoadEnd ) );
@@ -188,6 +225,7 @@ public class BrowserWidgetMoz extends BrowserWidget {
 
     public int resolveReference(String ident) {
       if (ident.equals("profiler")) {
+        getProfiler().setProfileCallBeginNanos(Timer.nanoTime());
         return LowLevelMoz.wrapDispatch(scriptObject, profiler);
       }
       return LowLevelMoz.JSVAL_VOID;

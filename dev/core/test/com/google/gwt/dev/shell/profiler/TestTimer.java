@@ -1,8 +1,6 @@
 
 package com.google.gwt.dev.shell.profiler;
 
-import com.google.gwt.dev.shell.profiler.Timer;
-
 import junit.framework.TestCase;
 
 /*
@@ -27,7 +25,6 @@ import junit.framework.TestCase;
 public class TestTimer extends TestCase {
 
   public final void testTimer() {
-
     long sleepMillis = 100;
 
     long startTime = Timer.nanoTime();
@@ -41,5 +38,19 @@ public class TestTimer extends TestCase {
     long endTime = Timer.nanoTime();
     long elapsedTime = endTime - startTime;
     assertTrue( elapsedTime >= sleepMillis * 1000000 );
+  }
+
+  // Benchmark the timer itself
+  public final void testTimer2() {
+    long totalNanos = 0;
+    long currentNanos = Timer.nanoTime();
+    int totalIterations = 1000000;
+    for ( int i = 0; i < totalIterations; ++i ) {
+      long newNanos = Timer.nanoTime();
+      totalNanos += newNanos - currentNanos;
+      currentNanos = newNanos;
+    }
+    double totalNanosDouble = totalNanos;
+    System.out.println( "Timer invoke cost: " + totalNanosDouble / totalIterations + "(ns)" );
   }
 }

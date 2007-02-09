@@ -15,6 +15,8 @@
  */
 package com.google.gwt.dev.shell.profiler;
 
+import com.google.gwt.core.ext.TreeLogger;
+
 /**
  * The public Profiler API for profiling Agents. Provides Agents with
  * the capability to register or de-register from profiling events
@@ -33,6 +35,8 @@ public interface Profiler {
   int EVENT_HTTP_RESPONSE = 7;
   int EVENT_RPC_REQUEST = 8;
   int EVENT_RPC_RESPONSE = 9;
+
+  public TreeLogger getTopLogger();
 
   public void register( int event, boolean enable, String filter );
 }

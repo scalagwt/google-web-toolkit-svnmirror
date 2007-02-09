@@ -15,6 +15,8 @@
  */
 package com.google.gwt.dev.shell.profiler;
 
+import com.google.gwt.core.ext.TreeLogger;
+
 /**
  * Implements the public Profiler API. Receives profiling information gathered
  * during the execution of a GWT application and dispatches it to a
@@ -25,6 +27,19 @@ public class ProfilerImpl implements Profiler {
 
   // Potentially a list of agents in the future?
   private Agent agent;
+
+  private TreeLogger logger;
+
+  private long numTimingCalls;
+
+  /**
+   * Records the time at which a profiling call was first received,
+   * before being dispatched to the profiler. Helps the profiler
+   * account for any overhead involved in profiling.
+   */
+  private long profileCallBeginNanos;
+  private long timingBeginNanos;
+  private long timingOverheadNanos;
 
   public ProfilerImpl() {
   }
@@ -41,6 +56,10 @@ public class ProfilerImpl implements Profiler {
     agent.exceptionThrown( type );
   }
 
+  public TreeLogger getTopLogger() {
+    return logger;
+  }
+
   // Do we need to know from what line of code these were made?
   // How do we tie HTTP requests and responses together?
   public void httpRequest( String requestUrl ) {
@@ -54,11 +73,21 @@ public class ProfilerImpl implements Profiler {
   // These should be changed to accept JMethod
   // But first we need to make the TypeOracle generally accessible
   public void methodEntered( String klass, String name, String signature ) {
-    agent.methodEntered( klass, name, signature );
+    long overhead = timingOverheadNanos;
+    if ( profileCallBeginNanos != 0 ) {
+      overhead += Timer.nanoTime() - profileCallBeginNanos;
+    }
+    agent.methodEntered( klass, name, signature, overhead );
+    profileCallBeginNanos = 0;
   }
 
   public void methodExited( String klass, String name, String signature ) {
-    agent.methodExited( klass, name, signature );
+    long overhead = timingOverheadNanos;
+    if ( profileCallBeginNanos != 0 ) {
+      overhead = Timer.nanoTime() - profileCallBeginNanos;
+    }
+    agent.methodExited( klass, name, signature, overhead );
+    profileCallBeginNanos = 0;
   }
 
   // Module events
@@ -89,5 +118,26 @@ public class ProfilerImpl implements Profiler {
 
   public void setAgent( Agent agent ) {
     this.agent = agent;
+  }
+
+  public void setProfileCallBeginNanos( long nanos ) {
+    profileCallBeginNanos = nanos;
+  }
+
+  public void setTopLogger( TreeLogger logger ) {
+    this.logger = logger;
+  }
+
+  public void timingBegin() {
+    timingBeginNanos = Timer.nanoTime();
+    numTimingCalls = 0;
+  }
+
+  public void timingCall() {
+    ++numTimingCalls;
+  }
+
+  public void timingEnd() {
+    timingOverheadNanos = (Timer.nanoTime() - timingBeginNanos) / numTimingCalls;
   }
 }

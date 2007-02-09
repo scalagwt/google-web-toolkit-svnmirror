@@ -27,12 +27,14 @@ public class MethodInvoke {
     long lastEntryTimeNanos;
     long aggregateExecutionTimeNanos;
     long numInvocations = 1;
+    long overheadNanos = 0;
 
-    public MethodInvoke( String klass, String name, String signature, long entryTimeNanos ) {
+    public MethodInvoke( String klass, String name, String signature, long entryTimeNanos, long overheadNanos ) {
       this.klass = klass;
       this.name = name;
       this.signature = signature;
       this.lastEntryTimeNanos = entryTimeNanos;
+      this.overheadNanos = overheadNanos;
     }
 
     public String getKey() {

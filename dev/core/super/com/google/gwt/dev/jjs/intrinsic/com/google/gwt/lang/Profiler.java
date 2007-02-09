@@ -39,12 +39,7 @@ public class Profiler {
    */
 
   private static native void methodEntered( String klass, String name, String signature ) /*-{
-    try {
-      $wnd.external.profiler.methodEntered( klass, name, signature );
-    }
-    catch ( e ) {
-      alert( 'error in methodEntered: ' + e );
-    }
+    $wnd.__gwt_methodEntered( klass, name, signature );
   }-*/;
 
   /**
@@ -55,12 +50,7 @@ public class Profiler {
    * @param signature The type signature of the method.
    */
   private static native void methodExited( String klass, String name, String signature ) /*-{
-    try {
-      $wnd.external.profiler.methodExited( klass, name, signature );
-    }
-    catch ( e ) {
-      alert( 'error in methodExited: ' + e );
-    }
+    $wnd.__gwt_methodExited( klass, name, signature );
   }-*/;
 
   // Should probably be JClassType
