@@ -364,7 +364,7 @@ public class JavaToJavaScriptCompiler {
       ArrayNormalizer.exec(jprogram);
 
       if ( profile ) {
-        ProfileInstrumenter.exec(jprogram);
+        ProfileInstrumenter.exec(jprogram, jsProgram);
       }
 
       // (6) Perform furthur post-normalization optimizations

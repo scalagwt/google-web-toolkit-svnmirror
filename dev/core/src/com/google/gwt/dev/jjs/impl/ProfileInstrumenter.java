@@ -28,6 +28,20 @@ import com.google.gwt.dev.jjs.ast.JTryStatement;
 import com.google.gwt.dev.jjs.ast.JVisitor;
 import com.google.gwt.dev.jjs.ast.Context;
 import com.google.gwt.dev.jjs.ast.JSourceInfo;
+import com.google.gwt.dev.jjs.ast.js.JsniMethod;
+import com.google.gwt.dev.js.ast.JsFunction;
+import com.google.gwt.dev.js.ast.JsBlock;
+import com.google.gwt.dev.js.ast.JsTry;
+import com.google.gwt.dev.js.ast.JsExpression;
+import com.google.gwt.dev.js.ast.JsInvocation;
+import com.google.gwt.dev.js.ast.JsScope;
+import com.google.gwt.dev.js.ast.JsStatements;
+import com.google.gwt.dev.js.ast.JsExpressions;
+import com.google.gwt.dev.js.ast.JsName;
+import com.google.gwt.dev.js.ast.JsNameRef;
+import com.google.gwt.dev.js.ast.JsProgram;
+import com.google.gwt.dev.js.ast.JsStringLiteral;
+import com.google.gwt.dev.js.ast.JsExprStmt;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -50,8 +64,51 @@ public class ProfileInstrumenter {
       super.endVisit(method, ctx);
     }
 
+    public boolean visit(JsniMethod method, Context ctx) {
+
+      // Add calls to
+      // $wnd.__gwt_methodEntered( klass, name, signature );
+      // $wnd.__gwt_methodExited( klass, name, signature );
+
+      if (method.getEnclosingType().getName()
+          .equals("com.google.gwt.lang.Profiler")) {
+        return super.visit(method, ctx);
+      }
+
+      didChange = true;
+
+      JsStringLiteral methodName = jsProgram.getStringLiteral(method.getName());
+      JReferenceType enclosingType = method.getEnclosingType();
+      JsExpression typeName = enclosingType == null ? jsProgram.getNullLiteral()
+          : (JsExpression) jsProgram.getStringLiteral(enclosingType.getName());
+      JsExpression signature = jsProgram.getStringLiteral("");
+
+      JsFunction func = method.getFunc();
+      JsBlock block = func.getBody();
+      JsScope scope = func.getScope();
+
+      JsInvocation methodEnteredCall = createProfileInvoke(scope,
+          "__gwt_methodEntered", typeName, methodName, signature);
+
+      JsTry tryBlock = new JsTry();
+      tryBlock.setTryBlock(block);
+      JsBlock finallyBlock = new JsBlock();
+      tryBlock.setFinallyBlock(finallyBlock);
+
+      JsInvocation methodExitedCall = createProfileInvoke(scope,
+          "__gwt_methodExited", typeName, methodName, signature);
+      finallyBlock.getStatements().add(0, new JsExprStmt(methodExitedCall));
+
+      JsBlock newMethodBody = new JsBlock();
+      JsStatements statements = newMethodBody.getStatements();
+      statements.add(new JsExprStmt(methodEnteredCall));
+      statements.add(tryBlock);
+      func.setBody(newMethodBody);
+
+      return super.visit(method, ctx);
+    }
+
     public boolean visit(JMethod method, Context ctx) {
-      // TODO(tobyr): implement native methods
       if (method.isAbstract() || method.isNative()) {
         return super.visit(method, ctx);
       }
@@ -103,6 +160,26 @@ public class ProfileInstrumenter {
       return super.visit(method, ctx);
     }
 
+    private JsInvocation createProfileInvoke(JsScope scope,
+        String profilerMethod, JsExpression typeName, JsExpression methodName,
+        JsExpression signature) {
+      JsName wnd = scope.getOrCreateUnobfuscatableName("$wnd");
+      JsName profileMethodName = scope
+          .getOrCreateUnobfuscatableName(profilerMethod);
+      JsNameRef methodTarget = new JsNameRef(profileMethodName);
+      JsNameRef wndTarget = new JsNameRef(wnd);
+      methodTarget.setQualifier(wndTarget);
+
+      JsInvocation call = new JsInvocation();
+      call.setQualifier(methodTarget);
+      JsExpressions args = call.getArguments();
+      args.add(typeName);
+      args.add(methodName);
+      args.add(signature);
+
+      return call;
+    }
+
     private JStringLiteral getStringLiteral(String str) {
       char[] chars = new char[ str.length() ];
       str.getChars(0, str.length(), chars, 0);
@@ -110,9 +187,11 @@ public class ProfileInstrumenter {
     }
   }
 
-  public static void exec(JProgram program) {
-    new ProfileInstrumenter(program).execImpl();
+  public static void exec(JProgram program, JsProgram jsProgram) {
+    new ProfileInstrumenter(program, jsProgram).execImpl();
   }
+
+  private final JsProgram jsProgram;
 
   private final JProgram program;
 
@@ -120,8 +199,9 @@ public class ProfileInstrumenter {
 
   private JMethod profilerExitMethod;
 
-  private ProfileInstrumenter(JProgram program) {
+  private ProfileInstrumenter(JProgram program, JsProgram jsProgram) {
     this.program = program;
+    this.jsProgram = jsProgram;
 
     // JReferenceType profiler = program.getFromTypeMap( "com.google.gwt.core.client.Profiler" );
     JReferenceType profiler = program.getSpecialProfiler();
