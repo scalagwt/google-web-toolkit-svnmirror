@@ -18,6 +18,7 @@ package com.google.gwt.dev.shell.profiler;
 import com.google.gwt.dev.GWTShell;
 import com.google.gwt.dev.BootStrapPlatform;
 import com.google.gwt.dev.GWTCompiler;
+import com.google.gwt.dev.util.NetProxy;
 import com.google.gwt.dev.cfg.ModuleDef;
 import com.google.gwt.dev.shell.BrowserWidget;
 import com.google.gwt.dev.shell.profiler.agent.ProfilingAgent;
@@ -95,6 +96,14 @@ public class ProfilerShell extends GWTShell {
 
   public BrowserWidget openNewBrowserWindow() throws UnableToCompleteException {
     BrowserWidget widget = super.openNewBrowserWindow();
+    int proxyPort = getPort() + 1;
+    widget.setHttpProxy( "localhost", proxyPort);
+    final NetProxy proxy = new NetProxy(proxyPort, "localhost", getPort(), false);
+    new Thread() {
+      public void run() {
+        proxy.run();
+      }
+    }.start();
     getBrowserHost().compile( new String[] { module } );
     ProfilerImpl profiler = new ProfilerImpl();
     profiler.setTopLogger(getTopLogger());
