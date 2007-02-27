@@ -15,20 +15,27 @@
 // This startup script should be included in host pages either just after
 // <body> or inside the <head> after module <meta> tags.
 //
-
 function __gwt_processMetas() {
 	var metas = document.getElementsByTagName("meta");
-	
+
 	for (var i = 0, n = metas.length; i < n; ++i) {
-	  var meta = metas[i];
-	  var name = meta.getAttribute("name");
-	  if (name) {
-	    if (name == "gwt:module") {
-	      var moduleName = meta.getAttribute("content");
-	      if (moduleName) {
-	        document.write('<script src="' + moduleName + '.js"></script>');
-	      }
-	    }
+		var meta = metas[i];
+		var name = meta.getAttribute("name");
+		if (name) {
+			if (name == "gwt:module") {
+				var moduleName = meta.getAttribute("content");
+				if (moduleName) {
+					var eqPos = moduleName.lastIndexOf("=");
+					if (eqPos != -1) {
+            var base = moduleName.substring(0, eqPos);
+            moduleName = moduleName.substring(eqPos + 1);
+            window.__gwt_base = { };
+            window.__gwt_base[moduleName] = base;
+            moduleName = base + '/' + moduleName;
+          }
+          document.write('<script src="' + moduleName + '.nocache.js"></script>');
+				}
+			}
 	  }
 	}
 }

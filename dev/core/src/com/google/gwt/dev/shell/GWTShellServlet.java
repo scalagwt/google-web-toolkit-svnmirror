@@ -264,7 +264,7 @@ public class GWTShellServlet extends HttpServlet {
 
     // If the request is of the form ".../moduleName.js", then
     // we generate the selection script for them.
-    if (partialPath.equals(moduleName + ".js")) {
+    if (partialPath.equals(moduleName + ".nocache.js")) {
       // If the '?compiled' request property is specified, don't auto-generate.
       if (request.getParameter("compiled") == null) {
         // Generate the .js file.
@@ -488,12 +488,16 @@ public class GWTShellServlet extends HttpServlet {
     StringWriter src = new StringWriter();
     PrintWriter pw = new PrintWriter(src, true);
 
+    String moduleFunction = moduleName.replace('.', '_') ;
+
     pw.println("<html>");
     pw.println("<script>");
     pw.println("window.$wnd = parent;");
     pw.println("window.$doc = parent.document;");
-    pw.println("function __gwt_getProperty(name) { return parent[name]() };");
-    pw.println("parent.__gwt_onScriptLoad(window, '" + moduleName + "');");
+    pw.println("function __gwt_getProperty(name) {\n");
+    pw.println("  return parent." + moduleFunction + ".providers[name]();\n");
+    pw.println("}");
+    pw.println("parent." + moduleFunction + ".onScriptLoad(window);");
     pw.println("</script>");
     pw.println("</html>");
 
