@@ -228,6 +228,10 @@ public class ModuleDef {
     return name;
   }
 
+  public synchronized String getFunctionName() {
+    return name.replace('.', '_');
+  }
+
   /**
    * The properties that have been defined.
    */
@@ -379,7 +383,7 @@ public class ModuleDef {
           if (prop.getProvider() == null) {
             // Create a default provider.
             //
-            prop.setProvider(new DefaultPropertyProvider(prop));
+            prop.setProvider(new DefaultPropertyProvider(this, prop));
           }
         } else {
           prop.setActiveValue(knownValues[0]);

@@ -90,7 +90,7 @@ public class SelectionScriptGenerator {
    */
   public SelectionScriptGenerator(ModuleDef moduleDef) {
     this.moduleName = moduleDef.getName();
-    this.moduleFunction = moduleName.replace('.', '_');
+    this.moduleFunction = moduleDef.getFunctionName();
     this.scripts = moduleDef.getScripts();
     this.styles = moduleDef.getStyles();
     this.moduleProps = moduleDef.getProperties();

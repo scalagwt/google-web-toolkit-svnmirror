@@ -15,20 +15,11 @@
  */
 package com.google.gwt.dev.shell;
 
-import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.UnableToCompleteException;
-import com.google.gwt.dev.cfg.ModuleDef;
-import com.google.gwt.dev.cfg.ModuleDefLoader;
-import com.google.gwt.dev.util.HttpHeaders;
-import com.google.gwt.dev.util.SelectionScriptGenerator;
-import com.google.gwt.dev.util.log.ServletContextTreeLogger;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -42,6 +33,14 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.UnableToCompleteException;
+import com.google.gwt.dev.cfg.ModuleDef;
+import com.google.gwt.dev.cfg.ModuleDefLoader;
+import com.google.gwt.dev.util.HttpHeaders;
+import com.google.gwt.dev.util.SelectionScriptGenerator;
+import com.google.gwt.dev.util.log.ServletContextTreeLogger;
 
 /**
  * Built-in servlet for convenient access to the public path of a specified
@@ -281,18 +280,18 @@ public class GWTShellServlet extends HttpServlet {
       }
     }
 
-    // Auto-generate [module-name.cache.html].
-    if (partialPath.equals(moduleName + ".cache.html")) {
-      try {
-        String html = genHostedCacheHtml(logger, moduleName);
-        response.setStatus(HttpServletResponse.SC_OK);
-        response.setContentType("text/html");
-        response.getWriter().println(html);
-        return true;
-      } catch (UnableToCompleteException e) {
-        // Quietly coninue, since this could also be a static file request.
-      }
-    }
+//    // Auto-generate [module-name.cache.html].
+//    if (partialPath.equals(moduleName + ".cache.html")) {
+//      try {
+//        String html = genHostedCacheHtml(logger, moduleName);
+//        response.setStatus(HttpServletResponse.SC_OK);
+//        response.setContentType("text/html");
+//        response.getWriter().println(html);
+//        return true;
+//      } catch (UnableToCompleteException e) {
+//        // Quietly coninue, since this could also be a static file request.
+//      }
+//    }
 
     return false;
   }
@@ -480,31 +479,31 @@ public class GWTShellServlet extends HttpServlet {
     }
   }
 
-  private String genHostedCacheHtml(TreeLogger logger, String moduleName)
-      throws UnableToCompleteException {
-    String msg = "Generating a cache.html for module " + moduleName;
-    logger.log(TreeLogger.TRACE, msg, null);
-
-    StringWriter src = new StringWriter();
-    PrintWriter pw = new PrintWriter(src, true);
-
-    String moduleFunction = moduleName.replace('.', '_') ;
-
-    pw.println("<html>");
-    pw.println("<script>");
-    pw.println("window.$wnd = parent;");
-    pw.println("window.$doc = parent.document;");
-    pw.println("function __gwt_getProperty(name) {\n");
-    pw.println("  return parent." + moduleFunction + ".providers[name]();\n");
-    pw.println("}");
-    pw.println("parent." + moduleFunction + ".onScriptLoad(window);");
-    pw.println("</script>");
-    pw.println("</html>");
-
-    pw.close();
-    String html = src.toString();
-    return html;
-  }
+//  private String genHostedCacheHtml(TreeLogger logger, String moduleName)
+//      throws UnableToCompleteException {
+//    String msg = "Generating a cache.html for module " + moduleName;
+//    logger.log(TreeLogger.TRACE, msg, null);
+//
+//    StringWriter src = new StringWriter();
+//    PrintWriter pw = new PrintWriter(src, true);
+//
+//    String moduleFunction = moduleName.replace('.', '_') ;
+//
+//    pw.println("<html>");
+//    pw.println("<script>");
+//    pw.println("window.$wnd = parent;");
+//    pw.println("window.$doc = parent.document;");
+//    pw.println("function __gwt_getProperty(name) {\n");
+//    pw.println("  return parent." + moduleFunction + ".providers[name]();\n");
+//    pw.println("}");
+//    pw.println("parent." + moduleFunction + ".onScriptLoad(window);");
+//    pw.println("</script>");
+//    pw.println("</html>");
+//
+//    pw.close();
+//    String html = src.toString();
+//    return html;
+//  }
 
   /**
    * Generates a module.js file on the fly. Note that the nocache file that is

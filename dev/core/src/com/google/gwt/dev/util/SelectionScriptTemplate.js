@@ -16,15 +16,6 @@
 if (!window.__gwt_stylesLoaded) { window.__gwt_stylesLoaded = {}; }
 if (!window.__gwt_scriptsLoaded) { window.__gwt_scriptsLoaded = {}; }
 
-__gwt_getMetaProperty = function(name) {
-  var value = __gwt_metaProps[name];
-  if (value) {
-    return value;
-  } else {
-    return null;
-  }
-}
-
 // Called from compiled code to hook the window's resize & load events (the
 // code running in the script frame is not allowed to hook these directly).
 //
@@ -71,7 +62,6 @@ function __MODULE_FUNC__() {
     document.write('<script src="__MODULE_NAME__.nocache.js?compiled"></script>');
     return;
   }
-  __MODULE_FUNC__.providers = providers;
 // __SHELL_SERVLET_ONLY_END__
 
 // __PROPERTIES_BEGIN__
@@ -82,9 +72,17 @@ function __MODULE_FUNC__() {
 
   var strongName;
   if (__MODULE_FUNC__.isHostedMode()) {
-    strongName = '__MODULE_NAME__';
+    // In hosted mode, inject the script frame directly.
+    var iframe = document.createElement('iframe');
+    document.body.appendChild(iframe);
+    iframe.style.width = iframe.style.height = iframe.style.border = '0px';
+    var wnd = iframe.contentWindow;
+    wnd.$wnd = window;
+    wnd.$doc = window.document;
+    wnd.__gwt_getProperty = function(name) { return providers[name](); };
+    wnd.onunload = function() { alert('unload!'); };
+    __MODULE_FUNC__.onScriptLoad(wnd);
   } else {
-
     // Deferred-binding mapper function.
     //
     function O(a,v) {
@@ -100,7 +98,7 @@ function __MODULE_FUNC__() {
       answer[a[n]] = v;
     }
     O.answers = [];
-    
+
     try {
 // __PERMUTATIONS_BEGIN__
       // Permutation logic
@@ -109,23 +107,32 @@ function __MODULE_FUNC__() {
       // intentionally silent on property failure
       return;
     }  
-  }
 
-  // TODO: do we still need this query stuff?
-  var query = location.search;
-  query = query.substring(0, query.indexOf('&'));
+	  // TODO: do we still need this query stuff?
+	  var query = location.search;
+	  query = query.substring(0, query.indexOf('&'));
 
-  var base;
-  if (window.__gwt_base) {
-    base = __gwt_base['__MODULE_NAME__'];
+	  var base;
+	  if (window.__gwt_base) {
+	    base = __gwt_base['__MODULE_NAME__'];
+	  }
+	  var newUrl = (base ? base + '/' : '') + strongName + '.cache.html' + query;
+	  document.write('<iframe id="__MODULE_NAME__" style="width:0;height:0;border:0" src="' + newUrl + '"></iframe>');
   }
-  var newUrl = (base ? base + '/' : '') + strongName + '.cache.html' + query;
-  document.write('<iframe id="__MODULE_NAME__" style="width:0;height:0;border:0" src="' + newUrl + '"></iframe>');
 
 // __MODULE_DEPS_BEGIN__
   // Module dependencies, such as scripts and css
 // __MODULE_DEPS_END__
   document.write('<script>__MODULE_FUNC__.onInjectionDone(\'__MODULE_NAME__\')</script>');
+}
+
+__MODULE_FUNC__.getMetaProperty = function(name) {
+  var value = __MODULE_FUNC__.metaProps[name];
+  if (value) {
+    return value;
+  } else {
+    return null;
+  }
 }
 
 // This is global because it is needed by onScriptLoad().
@@ -182,10 +189,7 @@ __MODULE_FUNC__.onInjectionDone = function() {
 // gwt:property, gwt:base, gwt:onPropertyErrorFn, gwt:onLoadErrorFn
 //
 __MODULE_FUNC__.processMetas = function() {
-  if (!!window.__gwt_metaProps) {
-    return;
-  }
-  window.__gwt_metaProps = {};
+  __MODULE_FUNC__.metaProps = {};
 
   var metas = document.getElementsByTagName('meta');
 
@@ -203,7 +207,7 @@ __MODULE_FUNC__.processMetas = function() {
             name = content.substring(0, eq);
             value = content.substring(eq+1);
           }
-          __gwt_metaProps[name] = value;
+          __MODULE_FUNC__.metaProps[name] = value;
         }
       } else if (name == 'gwt:onPropertyErrorFn') {
         var content = meta.getAttribute('content');

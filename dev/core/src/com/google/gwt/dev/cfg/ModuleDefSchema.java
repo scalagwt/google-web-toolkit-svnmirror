@@ -145,7 +145,7 @@ public class ModuleDefSchema extends Schema {
     }
 
     protected Schema __property_provider_begin(Property property) {
-      property.setProvider(new PropertyProvider(property));
+      property.setProvider(new PropertyProvider(moduleDef, property));
       return fChild = new PropertyProviderBodySchema();
     }
 
