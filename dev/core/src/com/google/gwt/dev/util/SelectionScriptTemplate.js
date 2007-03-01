@@ -239,7 +239,7 @@ function __MODULE_FUNC__() {
         external.gwtOnLoad(frameWnd, null);
       };
 
-      __MODULE_FUNC__.onScriptDone();
+      __MODULE_FUNC__.onScriptLoad();
     };
   } else {
     try {
