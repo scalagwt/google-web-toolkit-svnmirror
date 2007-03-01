@@ -17,6 +17,8 @@ package com.google.gwt.dev.shell.profiler;
 
 import com.google.gwt.core.ext.TreeLogger;
 
+import java.net.URI;
+
 /**
  * Implements the public Profiler API. Receives profiling information gathered
  * during the execution of a GWT application and dispatches it to a
@@ -40,6 +42,8 @@ public class ProfilerImpl implements Profiler {
   private long profileCallBeginNanos;
   private long timingBeginNanos;
   private long timingOverheadNanos;
+
+  private ProxyServer proxy;
 
   public ProfilerImpl() {
   }
@@ -122,6 +126,20 @@ public class ProfilerImpl implements Profiler {
 
   public void setProfileCallBeginNanos( long nanos ) {
     profileCallBeginNanos = nanos;
+  }
+
+  public void setProxy(ProxyServer proxy) {
+    this.proxy = proxy;
+    proxy.setListener( new ProxyServer.RequestListener() {
+      public void requestFinished(URI request, int requestId, int bytesToServer, int bytesToClient,
+          boolean failed) {
+        System.out.println("HTTP request finished (bytesOut=" +
+            bytesToServer + ", bytesIn=" + bytesToClient + "): " + request);
+      }
+      public void requestStarted(URI request, int requestId) {
+        System.out.println("HTTP request begin: " + request);
+      }
+    });
   }
 
   public void setTopLogger( TreeLogger logger ) {
