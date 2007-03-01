@@ -40,7 +40,7 @@ public class DefaultPropertyProvider extends PropertyProvider {
   public DefaultPropertyProvider(ModuleDef module, Property property) {
     super(module, property);
     String src = "function () {";
-    src += "return " + getModule().getName() + ".getMetaProperty(\"";
+    src += "return getMetaProperty(\"";
     src += property.getName();
     src += "\"); }";
     setBody(parseFunction(src));

@@ -1,4 +1,4 @@
-// Copyright 2006 Google Inc.
+// Copyright 2007 Google Inc.
 // 
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not
 // use this file except in compliance with the License. You may obtain a copy of
@@ -15,7 +15,7 @@
 // This startup script should be included in host pages either just after
 // <body> or inside the <head> after module <meta> tags.
 //
-function __gwt_processMetas() {
+(function(){
 	var metas = document.getElementsByTagName("meta");
 
 	for (var i = 0, n = metas.length; i < n; ++i) {
@@ -27,17 +27,15 @@ function __gwt_processMetas() {
 				if (moduleName) {
 					var eqPos = moduleName.lastIndexOf("=");
 					if (eqPos != -1) {
-            var base = moduleName.substring(0, eqPos);
-            moduleName = moduleName.substring(eqPos + 1);
-            window.__gwt_base = { };
-            window.__gwt_base[moduleName] = base;
-            moduleName = base + '/' + moduleName;
-          }
-          document.write('<script src="' + moduleName + '.nocache.js"></script>');
+						var base = moduleName.substring(0, eqPos);
+						moduleName = moduleName.substring(eqPos + 1);
+						window.__gwt_base = { };
+						window.__gwt_base[moduleName] = base;
+						moduleName = base + '/' + moduleName;
+					}
+					document.write('<script src="' + moduleName + '.nocache.js"></script>');
 				}
 			}
-	  }
+		}
 	}
-}
-
-__gwt_processMetas();
+})();

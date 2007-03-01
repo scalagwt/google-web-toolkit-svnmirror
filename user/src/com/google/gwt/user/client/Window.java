@@ -249,7 +249,7 @@ public class Window {
   }
 
   private static native void init() /*-{
-    $wnd.__gwt_initHandlers(
+    __gwt_initHandlers(
       function() {
         @com.google.gwt.user.client.Window::onResize()();
       },

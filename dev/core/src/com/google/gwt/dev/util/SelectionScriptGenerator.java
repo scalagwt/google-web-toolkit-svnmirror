@@ -320,7 +320,7 @@ public class SelectionScriptGenerator {
             pw.println();
             genAnswers(pw);
             pw.println();
-            pw.print("      strongName = O.answers");
+            pw.print("      strongName = answers");
             for (int i = 0; i < orderedProps.length; i++) {
               pw.print("[I[" + i + "]]");
             }
