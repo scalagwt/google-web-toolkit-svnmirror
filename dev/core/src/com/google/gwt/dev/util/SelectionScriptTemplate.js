@@ -15,7 +15,6 @@
  */
 
 function __MODULE_FUNC__() {
-
   // ---------------- INTERNAL GLOBALS ----------------
   
   // Cache symbols locally for good obfuscation
@@ -209,25 +208,35 @@ function __MODULE_FUNC__() {
   var strongName;
   if (isHostedMode()) {
     // In hosted mode, inject the script frame directly.
-    var iframe = document.createElement('<iframe id="__MODULE_NAME__" style="width:0;height:0;border:0">');
+    var iframe = document.createElement('iframe');
+    iframe.id = '__MODULE_NAME__';
+    iframe.style.width = '0px';
+    iframe.style.height = '0px';
+    iframe.style.border = '0px';
     document.body.appendChild(iframe);
+
     var frameWnd = iframe.contentWindow;
     frameWnd.$wnd = wnd;
     frameWnd.$doc = wnd.document;
+
     // inject hosted mode property evaluation function
     frameWnd.__gwt_getProperty = function(name) {
       return providers[name]();
     };
+
     // inject gwtOnLoad
     frameWnd.gwtOnLoad = function(errFn, modName) {
       if (!external.gwtOnLoad(frameWnd, modName)) {
         errFn(modName);
       }
     }
-    // TODO: remove debugging
+
+    // Hook the iframe's onunload, so that the hosted browser has a chance
+    // to clean up its ModuleSpaces.
     frameWnd.onunload = function() {
-      alert('unload!');
+      external.gwtOnLoad(frameWnd, null);
     };
+
     // Don't bother trying to start the module; script loading is definitely not done
     loadDone = true;
   } else {
