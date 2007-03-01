@@ -637,7 +637,11 @@ public class JsParser {
     String fromFnName = fromFnNameNode.getString();
     JsName toFnName = null;
     if (fromFnName != null && fromFnName.length() > 0) {
-      toFnName = getScope().getOrCreateObfuscatableName(fromFnName);
+      // HACK: DO NOT MERGE INTO TRUNK
+      toFnName = getScope().findExistingName(fromFnName);
+      if (toFnName == null) {
+        toFnName = getScope().getOrCreateObfuscatableName(fromFnName);
+      }
     }
 
     // Create it, and set the params.

@@ -14,20 +14,13 @@
  * the License.
  */
 
-// ------------------- TRUE GLOBALS -------------------
-
-// Maps to synchronize the loading of styles and scripts; resources are loaded
-// only once, even when multiple modules depend on them.  This API must not
-// change across GWT versions.
-if (!window.__gwt_stylesLoaded) { window.__gwt_stylesLoaded = {}; }
-if (!window.__gwt_scriptsLoaded) { window.__gwt_scriptsLoaded = {}; }
-
 function __MODULE_FUNC__() {
 
   // ---------------- INTERNAL GLOBALS ----------------
   
-  // Cache the symbol locally for good obfuscation
-  var external = window.external;
+  // Cache symbols locally for good obfuscation
+  var wnd = window;
+  var external = wnd.external;
   
   // These two variables gate calling gwtOnLoad; both must be true to start
   var scriptsDone, loadDone;
@@ -47,6 +40,14 @@ function __MODULE_FUNC__() {
   
   // Property answers go here
   var answers = [];
+
+  // ------------------ TRUE GLOBALS ------------------
+
+  // Maps to synchronize the loading of styles and scripts; resources are loaded
+  // only once, even when multiple modules depend on them.  This API must not
+  // change across GWT versions.
+  if (!wnd.__gwt_stylesLoaded) { wnd.__gwt_stylesLoaded = {}; }
+  if (!wnd.__gwt_scriptsLoaded) { wnd.__gwt_scriptsLoaded = {}; }
 
   // --------------- INTERNAL FUNCTIONS ---------------
 
@@ -84,9 +85,9 @@ function __MODULE_FUNC__() {
   function maybeStartModule() {
     if (scriptsDone && loadDone) {
       var iframe = document.getElementById('__MODULE_NAME__');
-      var wnd = iframe.contentWindow;
+      var frameWnd = iframe.contentWindow;
       // copy the init handlers function into the iframe
-      wnd.__gwt_initHandlers = __MODULE_FUNC__.__gwt_initHandlers;
+      frameWnd.__gwt_initHandlers = __MODULE_FUNC__.__gwt_initHandlers;
       // remove this whole function from the global namespace to allow GC
       __MODULE_FUNC__ = null;
       iframe.contentWindow.gwtOnLoad(__gwt_onLoadError, '__MODULE_NAME__');
@@ -210,22 +211,21 @@ function __MODULE_FUNC__() {
     // In hosted mode, inject the script frame directly.
     var iframe = document.createElement('<iframe id="__MODULE_NAME__" style="width:0;height:0;border:0">');
     document.body.appendChild(iframe);
-//    iframe.style.width = iframe.style.height = iframe.style.border = '0px';
-    var wnd = iframe.contentWindow;
-    wnd.$wnd = window;
-    wnd.$doc = window.document;
+    var frameWnd = iframe.contentWindow;
+    frameWnd.$wnd = wnd;
+    frameWnd.$doc = wnd.document;
     // inject hosted mode property evaluation function
-    wnd.__gwt_getProperty = function(name) {
+    frameWnd.__gwt_getProperty = function(name) {
       return providers[name]();
     };
     // inject gwtOnLoad
-    wnd.gwtOnLoad = function(errFn, modName) {
-      if (!external.gwtOnLoad(wnd, modName)) {
+    frameWnd.gwtOnLoad = function(errFn, modName) {
+      if (!external.gwtOnLoad(frameWnd, modName)) {
         errFn(modName);
       }
     }
     // TODO: remove debugging
-    wnd.onunload = function() {
+    frameWnd.onunload = function() {
       alert('unload!');
     };
     // Don't bother trying to start the module; script loading is definitely not done
@@ -244,10 +244,7 @@ function __MODULE_FUNC__() {
 	  var query = location.search;
 	  query = query.substring(0, query.indexOf('&'));
 
-	  var base;
-	  if (window.__gwt_base) {
-	    base = __gwt_base['__MODULE_NAME__'];
-	  }
+	  var base = __gwt_base['__MODULE_NAME__'];
 	  var newUrl = (base ? base + '/' : '') + strongName + '.cache.html' + query;
 	  document.write('<iframe id="__MODULE_NAME__" style="width:0;height:0;border:0" src="' + newUrl + '"></iframe>');
   }
@@ -270,15 +267,16 @@ function __MODULE_FUNC__() {
 // 3) This function will be copied directly into the script frame window!
 //
 __MODULE_FUNC__.__gwt_initHandlers = function(resize, beforeunload, unload) {
-  var oldOnResize = window.onresize;
-  window.onresize = function() {
+  var wnd = window;
+  var oldOnResize = wnd.onresize;
+  wnd.onresize = function() {
    resize();
    if (oldOnResize)
      oldOnResize();
   };
   
-  var oldOnBeforeUnload = window.onbeforeunload;
-  window.onbeforeunload = function() {
+  var oldOnBeforeUnload = wnd.onbeforeunload;
+  wnd.onbeforeunload = function() {
    var ret = beforeunload();
   
    var oldRet;
@@ -290,8 +288,8 @@ __MODULE_FUNC__.__gwt_initHandlers = function(resize, beforeunload, unload) {
    return oldRet;
   };
   
-  var oldOnUnload = window.onunload;
-  window.onunload = function() {
+  var oldOnUnload = wnd.onunload;
+  wnd.onunload = function() {
    unload();
    if (oldOnUnload)
      oldOnUnload();

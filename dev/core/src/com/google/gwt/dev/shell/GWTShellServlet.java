@@ -518,7 +518,7 @@ public class GWTShellServlet extends HttpServlet {
 
     ModuleDef moduleDef = getModuleDef(logger, moduleName);
     SelectionScriptGenerator gen = new SelectionScriptGenerator(moduleDef);
-    return gen.generateSelectionScript();
+    return gen.generateSelectionScript(false);
   }
 
   private synchronized TreeLogger getLogger() {

@@ -22,9 +22,20 @@ import com.google.gwt.dev.cfg.PropertyProvider;
 import com.google.gwt.dev.cfg.Script;
 import com.google.gwt.dev.cfg.Scripts;
 import com.google.gwt.dev.cfg.Styles;
+import com.google.gwt.dev.js.FullNamingStrategy;
+import com.google.gwt.dev.js.JsParser;
+import com.google.gwt.dev.js.JsParserException;
+import com.google.gwt.dev.js.JsSourceGenerationVisitor;
+import com.google.gwt.dev.js.NamingStrategy;
+import com.google.gwt.dev.js.ObfuscatedNamingStrategy;
+import com.google.gwt.dev.js.ast.JsProgram;
+import com.google.gwt.dev.js.ast.JsScope;
 import com.google.gwt.util.tools.Utility;
 
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -119,17 +130,50 @@ public class SelectionScriptGenerator {
   /**
    * Generates a selection script based on the current settings.
    * 
-   * @return an javascript whose contents are the definition of a module.js file
+   * @return an JavaScript whose contents are the definition of a module.js file
    */
-  public String generateSelectionScript() {
-    StringWriter src = new StringWriter();
-    PrintWriter pw = new PrintWriter(src, true);
+  public String generateSelectionScript(boolean obfuscate) {
+    try {
+      String rawSource;
+      {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw, true);
 
-    genScript(pw);
+        String template = Utility.getFileFromClassPath("com/google/gwt/dev/util/SelectionScriptTemplate.js");
+        genScript(pw, template);
 
-    pw.close();
-    String html = src.toString();
-    return html;
+        pw.close();
+        rawSource = sw.toString();
+      }
+
+      {
+        JsParser parser = new JsParser();
+        Reader r = new StringReader(rawSource);
+        JsProgram jsProgram = new JsProgram();
+        JsScope rootScope = jsProgram.getScope();
+        rootScope.getOrCreateUnobfuscatableName(moduleFunction);
+
+        parser.parseInto(rootScope, jsProgram.getGlobalBlock(), r, 1);
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw, true);
+        TextOutputOnPrintWriter out = new TextOutputOnPrintWriter(pw, obfuscate);
+        NamingStrategy ns;
+        if (obfuscate) {
+          ns = new ObfuscatedNamingStrategy();
+        } else {
+          ns = new FullNamingStrategy();
+        }
+        JsSourceGenerationVisitor v = new JsSourceGenerationVisitor(out, ns);
+        jsProgram.traverse(v);
+        return sw.toString();
+      }
+    } catch (IOException e) {
+      throw new RuntimeException("Error processing selection script template.",
+          e);
+    } catch (JsParserException e) {
+      throw new RuntimeException("Error processing selection script template.",
+          e);
+    }
   }
 
   /**
@@ -264,92 +308,86 @@ public class SelectionScriptGenerator {
    * 
    * @param pw
    */
-  private void genScript(PrintWriter mainPw) {
-    try {
-      String src = Utility.getFileFromClassPath("com/google/gwt/dev/util/SelectionScriptTemplate.js");
-      StringBuffer buf = new StringBuffer(src);
-      replaceAll(buf, "__MODULE_FUNC__", moduleFunction);
-      replaceAll(buf, "__MODULE_NAME__", moduleName);
+  private void genScript(PrintWriter mainPw, String template) {
+    StringBuffer buf = new StringBuffer(template);
+    replaceAll(buf, "__MODULE_FUNC__", moduleFunction);
+    replaceAll(buf, "__MODULE_NAME__", moduleName);
 
-      // Remove hosted mode only stuff
-      if (orderedProps != null) {
-        int startPos = buf.indexOf("// __SHELL_SERVLET_ONLY_BEGIN__");
-        int endPos = buf.indexOf("// __SHELL_SERVLET_ONLY_END__");
-        buf.delete(startPos, endPos);
-      }
-
-      // Add external dependencies
-      int startPos = buf.indexOf("// __MODULE_DEPS_END__");
-      for (Iterator iter = styles.iterator(); iter.hasNext();) {
-        String style = (String) iter.next();
-        String text = cssInjector(style);
-        buf.insert(startPos, text);
-        startPos += text.length();
-      }
-
-      for (Iterator iter = scripts.iterator(); iter.hasNext();) {
-        Script script = (Script) iter.next();
-        String text = scriptInjector(script.getSrc());
-        buf.insert(startPos, text);
-        startPos += text.length();
-      }
-
-      // Add property providers
-      {
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw, true);
-        genPropProviders(pw);
-        pw.close();
-        String stuff = sw.toString();
-        startPos = buf.indexOf("// __PROPERTIES_END__");
-        buf.insert(startPos, stuff);
-      }
-
-      // Add permutations
-      {
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw, true);
-
-        // If the ordered props are specified, then we're generating for both
-        // modes.
-        if (orderedProps != null) {
-          // Web mode or hosted mode.
-          if (orderedProps.length > 0) {
-            pw.println();
-            genPropValues(pw);
-            pw.println();
-            genAnswers(pw);
-            pw.println();
-            pw.print("      strongName = answers");
-            for (int i = 0; i < orderedProps.length; i++) {
-              pw.print("[I[" + i + "]]");
-            }
-          } else {
-            // Rare case of no properties; happens if you inherit from Core
-            // alone.
-            assert (orderedProps.length == 0);
-            Set entrySet = propertyValuesSetByStrongName.entrySet();
-            assert (entrySet.size() == 1);
-            Map.Entry entry = (Entry) entrySet.iterator().next();
-            String strongName = (String) entry.getKey();
-            // There is exactly one compilation, so it is unconditionally
-            // selected.
-            pw.print("    strongName = " + literal(strongName));
-          }
-          pw.println(";");
-        }
-
-        pw.close();
-        String stuff = sw.toString();
-        startPos = buf.indexOf("// __PERMUTATIONS_END__");
-        buf.insert(startPos, stuff);
-      }
-
-      mainPw.print(buf.toString());
-    } catch (Throwable e) {
-      throw new RuntimeException("Error processing selection script template.",
-          e);
+    // Remove hosted mode only stuff
+    if (orderedProps != null) {
+      int startPos = buf.indexOf("// __SHELL_SERVLET_ONLY_BEGIN__");
+      int endPos = buf.indexOf("// __SHELL_SERVLET_ONLY_END__");
+      buf.delete(startPos, endPos);
     }
+
+    // Add external dependencies
+    int startPos = buf.indexOf("// __MODULE_DEPS_END__");
+    for (Iterator iter = styles.iterator(); iter.hasNext();) {
+      String style = (String) iter.next();
+      String text = cssInjector(style);
+      buf.insert(startPos, text);
+      startPos += text.length();
+    }
+
+    for (Iterator iter = scripts.iterator(); iter.hasNext();) {
+      Script script = (Script) iter.next();
+      String text = scriptInjector(script.getSrc());
+      buf.insert(startPos, text);
+      startPos += text.length();
+    }
+
+    // Add property providers
+    {
+      StringWriter sw = new StringWriter();
+      PrintWriter pw = new PrintWriter(sw, true);
+      genPropProviders(pw);
+      pw.close();
+      String stuff = sw.toString();
+      startPos = buf.indexOf("// __PROPERTIES_END__");
+      buf.insert(startPos, stuff);
+    }
+
+    // Add permutations
+    {
+      StringWriter sw = new StringWriter();
+      PrintWriter pw = new PrintWriter(sw, true);
+
+      // If the ordered props are specified, then we're generating for both
+      // modes.
+      if (orderedProps != null) {
+        // Web mode or hosted mode.
+        if (orderedProps.length > 0) {
+          pw.println();
+          genPropValues(pw);
+          pw.println();
+          genAnswers(pw);
+          pw.println();
+          pw.print("      strongName = answers");
+          for (int i = 0; i < orderedProps.length; i++) {
+            pw.print("[I[" + i + "]]");
+          }
+        } else {
+          // Rare case of no properties; happens if you inherit from Core
+          // alone.
+          assert (orderedProps.length == 0);
+          Set entrySet = propertyValuesSetByStrongName.entrySet();
+          assert (entrySet.size() == 1);
+          Map.Entry entry = (Entry) entrySet.iterator().next();
+          String strongName = (String) entry.getKey();
+          // There is exactly one compilation, so it is unconditionally
+          // selected.
+          pw.print("    strongName = " + literal(strongName));
+        }
+        pw.println(";");
+      }
+
+      pw.close();
+      String stuff = sw.toString();
+      startPos = buf.indexOf("// __PERMUTATIONS_END__");
+      buf.insert(startPos, stuff);
+    }
+
+    mainPw.print(buf.toString());
   }
 
   /**

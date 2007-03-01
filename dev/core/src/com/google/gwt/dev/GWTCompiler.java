@@ -786,7 +786,7 @@ public class GWTCompiler extends ToolBase {
 
   private void writeSelectionScript(TreeLogger logger,
       SelectionScriptGenerator selGen) {
-    String html = selGen.generateSelectionScript();
+    String html = selGen.generateSelectionScript(obfuscate);
     String fn = module.getName() + ".nocache.js";
     File selectionFile = new File(outDir, fn);
     Util.writeStringAsFile(selectionFile, html);
