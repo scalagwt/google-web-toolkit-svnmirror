@@ -216,6 +216,7 @@ function __MODULE_FUNC__() {
     document.body.appendChild(iframe);
 
     var frameWnd = iframe.contentWindow;
+	frameWnd.location.replace('blank.html');
     frameWnd.$wnd = wnd;
     frameWnd.$doc = wnd.document;
 
