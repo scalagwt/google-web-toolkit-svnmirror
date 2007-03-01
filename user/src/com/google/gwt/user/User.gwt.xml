@@ -16,4 +16,7 @@
    <inherits name="com.google.gwt.user.Focus"/>
    <inherits name="com.google.gwt.user.ImageBundle"/>
    <inherits name="com.google.gwt.user.ClippedImage"/>
+   <inherits name="com.google.gwt.i18n.I18N"/>
+   <inherits name="com.google.gwt.user.RichText"/>
+   
 </module>
