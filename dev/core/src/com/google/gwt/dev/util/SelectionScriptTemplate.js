@@ -24,16 +24,10 @@ if (!window.__gwt_scriptsLoaded) { window.__gwt_scriptsLoaded = {}; }
 
 function __MODULE_FUNC__() {
 
-// __SHELL_SERVLET_ONLY_BEGIN__
-  // Force shell servlet to serve compiled output for web mode
-  if (!isHostedMode()) {
-    document.write('<script src="__MODULE_NAME__.nocache.js?compiled"></script>');
-    return;
-  }
-// __SHELL_SERVLET_ONLY_END__
-
-  
   // ---------------- INTERNAL GLOBALS ----------------
+  
+  // Cache the symbol locally for good obfuscation
+  var external = window.external;
   
   // These two variables gate calling gwtOnLoad; both must be true to start
   var scriptsDone, loadDone;
@@ -200,6 +194,14 @@ function __MODULE_FUNC__() {
   }
   
   // --------------- STRAIGHT-LINE CODE ---------------
+
+// __SHELL_SERVLET_ONLY_BEGIN__
+  // Force shell servlet to serve compiled output for web mode
+  if (!isHostedMode()) {
+    document.write('<script src="__MODULE_NAME__.nocache.js?compiled"></script>');
+    return;
+  }
+// __SHELL_SERVLET_ONLY_END__
 
   processMetas();
 
