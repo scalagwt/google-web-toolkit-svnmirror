@@ -215,31 +215,34 @@ function __MODULE_FUNC__() {
     iframe.style.border = '0px';
     document.body.appendChild(iframe);
 
-    var frameWnd = iframe.contentWindow;
-	frameWnd.location.replace('blank.html');
-    frameWnd.$wnd = wnd;
-    frameWnd.$doc = wnd.document;
+    iframe.src = 'blank.html';
+    iframe.onload = function() {
+      var frameWnd = iframe.contentWindow;
+      frameWnd.$wnd = wnd;
+      frameWnd.$doc = wnd.document;
 
-    // inject hosted mode property evaluation function
-    frameWnd.__gwt_getProperty = function(name) {
-      return providers[name]();
-    };
+      // inject hosted mode property evaluation function
+      frameWnd.__gwt_getProperty = function(name) {
+        return providers[name]();
+      };
 
-    // inject gwtOnLoad
-    frameWnd.gwtOnLoad = function(errFn, modName) {
-      if (!external.gwtOnLoad(frameWnd, modName)) {
-        errFn(modName);
+      // inject gwtOnLoad
+      frameWnd.gwtOnLoad = function(errFn, modName) {
+        if (!external.gwtOnLoad(frameWnd, modName)) {
+          errFn(modName);
+        }
       }
-    }
 
-    // Hook the iframe's onunload, so that the hosted browser has a chance
-    // to clean up its ModuleSpaces.
-    frameWnd.onunload = function() {
-      external.gwtOnLoad(frameWnd, null);
+      // Hook the iframe's onunload, so that the hosted browser has a chance
+      // to clean up its ModuleSpaces.
+      frameWnd.onunload = function() {
+        external.gwtOnLoad(frameWnd, null);
+      };
+
+      // Don't bother trying to start the module; script loading is definitely not done
+      loadDone = true;
+      maybeStartModule();
     };
-
-    // Don't bother trying to start the module; script loading is definitely not done
-    loadDone = true;
   } else {
     try {
 // __PERMUTATIONS_BEGIN__
