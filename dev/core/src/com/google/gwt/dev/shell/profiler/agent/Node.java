@@ -68,4 +68,8 @@ public class Node {
   public Node getParent() {
     return parent;
   }
+
+  public String toString() {
+    return data.toString();
+  }
 }

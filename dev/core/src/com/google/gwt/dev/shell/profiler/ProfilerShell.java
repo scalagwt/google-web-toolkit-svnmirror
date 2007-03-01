@@ -98,17 +98,18 @@ public class ProfilerShell extends GWTShell {
     BrowserWidget widget = super.openNewBrowserWindow();
     int proxyPort = getPort() + 1;
     widget.setHttpProxy( "localhost", proxyPort);
-    final NetProxy proxy = new NetProxy(proxyPort, "localhost", getPort(), false);
+    final ProxyServer proxy = new ProxyServer(proxyPort);
+    ProfilerImpl profiler = new ProfilerImpl();
+    profiler.setProxy(proxy);
+    profiler.setTopLogger(getTopLogger());
+    Agent agent = createProfilingAgent();
+    profiler.setAgent( agent );
     new Thread() {
       public void run() {
         proxy.run();
       }
     }.start();
     getBrowserHost().compile( new String[] { module } );
-    ProfilerImpl profiler = new ProfilerImpl();
-    profiler.setTopLogger(getTopLogger());
-    Agent agent = createProfilingAgent();
-    profiler.setAgent( agent );
     agent.onLoad( profiler );
     widget.setProfiler( profiler );
 
