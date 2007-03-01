@@ -1,0 +1,133 @@
+.misspelledWord {
+  background-color: yellow; 
+}
+
+.verb {
+  background-color: lightblue; 
+}
+
+.inanimateObject {
+  color: green;
+}
+
+
+.gwt-SuggestPopup {
+	background-color: #CAE1FF;
+	border-bottom: 1px solid black;
+	border-left: 1px solid black;
+	border-right: 1px solid black;
+}
+
+/** Note: IE will not respect mouse events correctly if width is not set to 100%. 
+    Mozilla then won't display if width is set to 100%. So here using a css hack 
+    to apply style on to IE.
+*/
+* html .gwt-SuggestPopup .item,* html .gwt-SuggestPopup .selected {
+	width: 100%;
+}
+
+.gwt-SuggestPopup .item,.gwt-SuggestPopup .selected {
+	padding-top: 3px;
+	padding-left: 8px;
+	padding-right: 8px;
+	white-space: nowrap;
+	display: block;
+}
+
+.gwt-SuggestPopup .selected {
+	background-color: #3A5FCD;
+	color: white;
+}
+
+.gwt-RichTextEditor .toolBar {
+	background-color: #74aed6;
+	color: #3A5FCD;
+	width: 100%;
+}
+
+.gwt-RichText {
+	width: 100%;
+	height: 20em;
+}
+
+.spellCheck {
+	cursor: pointer;
+	cursor: hand;
+	color: white;
+	font: bold;
+	padding-right: 1 em;
+}
+
+.gwt-RichTextEditor {
+	width: 40em;
+}
+
+.gwt-RichTextEditor .noMisspellings {
+	color: green;
+}
+
+.gwt-RichTextEditor .misspelledWord {
+	background-color: #CDAD00;
+}
+
+.misspelledWord {
+	background-color: #CDAD00;
+}
+
+.gwt-RichTextEditor-NoSuggestions .selected {
+	color: green;
+	font: italic;
+}
+
+.gwt-ColorPickerPopup .selected {
+	border: 1px solid white;
+	height: 15px;
+	width: 15px;
+}
+
+.gwt-ColorPickerPopup .item {
+	border: 1px solid #74aed6;
+	height: 15px;
+	width: 15px;
+}
+
+/** IE bug requires that width be defined,  or not all of the button is clickable.*/
+.gwt-ComplexButton-up,.gwt-ComplexButton-up-hover,.gwt-ComplexButton-up-disabled,.gwt-ComplexButton-down,.gwt-ComplexButton-down-hover,.gwt-ComplexButton-down-disabled
+	{
+	padding: 2px;
+	display: block;
+	width: 100%;
+	border: 1px solid navy;
+	text-align: center;
+	border: 1px solid navy;
+}
+
+.gwt-ComplexButton-up .html-face,.gwt-ComplexButton-up-hover .html-face,.gwt-ComplexButton-up-disabled .html-face,.gwt-ComplexButton-down .html-face,.gwt-ComplexButton-down-hover .html-face,.gwt-ComplexButton-down-disabled .html-face
+	{
+	padding: 10px;
+	background-color: #74aed6;
+	white-space: nowrap;
+}
+
+.gwt-ComplexButton-up,.gwt-ComplexButton-up-disabled,.gwt-ComplexButton-up-hover
+	{
+	color: white;
+}
+
+.gwt-ComplexButton-down,.gwt-ComplexButton-down-disabled,.gwt-ComplexButton-down-hover
+	{
+	color: black;
+}
+
+.gwt-ComplexButton-up,.gwt-ComplexButton-down {
+	background-color: #74aed6;
+}
+
+.gwt-ComplexButton-up-hover,.gwt-ComplexButton-down-hover {
+	background-color: #3A5FCD;
+}
+
+.gwt-ComplexButton-up-disabled,.gwt-ComplexButton-down-disabled {
+	background-color: gray;
+	font-style: italic;
+}

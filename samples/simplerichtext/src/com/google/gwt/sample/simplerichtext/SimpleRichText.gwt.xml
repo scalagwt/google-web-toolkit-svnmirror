@@ -1,0 +1,6 @@
+<module>
+	<inherits name="com.google.gwt.user.User"/>
+	<inherits name="com.google.gwt.i18n.I18N"/>
+	<inherits name="com.google.gwt.user.RichText"/>
+	<entry-point class="com.google.gwt.sample.simplerichtext.client.SimpleRichText"/>
+</module>
