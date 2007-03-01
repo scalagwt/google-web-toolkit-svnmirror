@@ -224,12 +224,12 @@ public class ModuleDef {
     return (String[]) entryPointTypeNames.toArray(new String[n]);
   }
 
-  public synchronized String getName() {
-    return name;
-  }
-
   public synchronized String getFunctionName() {
     return name.replace('.', '_');
+  }
+
+  public synchronized String getName() {
+    return name;
   }
 
   /**

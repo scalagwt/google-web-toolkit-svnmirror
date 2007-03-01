@@ -1,3 +1,18 @@
+/*
+ * Copyright 2007 Google Inc.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.google.gwt.user.rebind;
 
 import com.google.gwt.core.ext.GeneratorContext;
@@ -33,11 +48,11 @@ class ImageBundleBuilder {
    */
   public static class ImageRect {
 
-    public final BufferedImage image;
+    public final int height;
 
+    public final BufferedImage image;
     public int left;
     public final int width;
-    public final int height;
 
     public ImageRect(BufferedImage image) {
       this.image = image;
@@ -47,8 +62,8 @@ class ImageBundleBuilder {
   }
 
   private final Map imageNameToImageRectMap = new HashMap();
-  private final List orderedImageRects = new ArrayList();
   private final MessageDigest md5;
+  private final List orderedImageRects = new ArrayList();
 
   public ImageBundleBuilder() {
     try {
@@ -58,66 +73,35 @@ class ImageBundleBuilder {
     }
   }
 
-  private ImageRect addImage(TreeLogger logger, String imageName)
+  /**
+   * Assimilates the image associated with a particular image method into the
+   * master composite. If the method names an image that has already been
+   * assimilated, the existing image rectangle is reused.
+   * 
+   * @param logger
+   * @param imageUrl
+   * @throws UnableToCompleteException
+   */
+  public void assimilate(TreeLogger logger, String imageName)
       throws UnableToCompleteException {
 
-    logger = logger.branch(TreeLogger.TRACE,
-        "Adding image '" + imageName + "'", null);
-
-    // Fetch the image.
-    BufferedImage image = null;
-    try {
-      // Could turn this lookup logic into an externally-supplied policy for
-      // increased generality.
-      URL imageUrl = getClass().getClassLoader().getResource(imageName);
-      if (imageUrl == null) {
-        logger.log(
-            TreeLogger.ERROR,
-            "Resource not found on classpath (is the name specified as Class.getResource() would expect?)",
-            null);
-        throw new UnableToCompleteException();
-      }
-
-      // Assimilate this file's bytes into the MD5.
-      InputStream is = imageUrl.openStream();
-      BufferedInputStream bis = new BufferedInputStream(is);
-      byte imgByte;
-      while ((imgByte = (byte) bis.read()) != -1) {
-        md5.update(imgByte);
-      }
-      is.close();
-
-      // Load the image from the URL instead of the stream (with the assumption
-      // that having the URL provides a tiny bit more context to the parser).
-      image = ImageIO.read(imageUrl);
-      if (image == null) {
-        logger.log(TreeLogger.ERROR, "Unrecognized image file format", null);
-        throw new UnableToCompleteException();
-      }
-
-    } catch (IOException e) {
-      logger.log(TreeLogger.ERROR, "Unable to read image resource", null);
-      throw new UnableToCompleteException();
+    /*
+     * Decide whether or not we need to add to the composite image. Either way,
+     * we associated it with the rectangle of the specified image as it exists
+     * within the composite image. Note that the coordinates of the rectangle
+     * aren't computed until the composite it written.
+     */
+    ImageRect rect = findImageUrl(imageName);
+    if (rect == null) {
+      // Assimilate the image into the composite.
+      rect = addImage(logger, imageName);
     }
 
-    // Map the URL to its image so that even if the same URL is used more than
-    // once, we only include the referenced image once in the bundled image.
-    ImageRect imageRect = new ImageRect(image);
-    orderedImageRects.add(imageRect);
-    imageNameToImageRectMap.put(imageName, imageRect);
-    return imageRect;
-  }
-
-  private ImageRect findImageUrl(String imageUrl) {
-    return (ImageRect) imageNameToImageRectMap.get(imageUrl);
+    putMapping(imageName, rect);
   }
 
   public ImageRect getMapping(String imageName) {
     return (ImageRect) imageNameToImageRectMap.get(imageName);
-  }
-
-  private void putMapping(String imageName, ImageRect rect) {
-    imageNameToImageRectMap.put(imageName, rect);
   }
 
   public String writeBundledImage(TreeLogger logger, GeneratorContext context)
@@ -192,31 +176,62 @@ class ImageBundleBuilder {
     return bundleFileName;
   }
 
-  /**
-   * Assimilates the image associated with a particular image method into the
-   * master composite. If the method names an image that has already been
-   * assimilated, the existing image rectangle is reused.
-   * 
-   * @param logger
-   * @param imageUrl
-   * @throws UnableToCompleteException
-   */
-  public void assimilate(TreeLogger logger, String imageName)
+  private ImageRect addImage(TreeLogger logger, String imageName)
       throws UnableToCompleteException {
 
-    /*
-     * Decide whether or not we need to add to the composite image. Either way,
-     * we associated it with the rectangle of the specified image as it exists
-     * within the composite image. Note that the coordinates of the rectangle
-     * aren't computed until the composite it written.
-     */
-    ImageRect rect = findImageUrl(imageName);
-    if (rect == null) {
-      // Assimilate the image into the composite.
-      rect = addImage(logger, imageName);
+    logger = logger.branch(TreeLogger.TRACE,
+        "Adding image '" + imageName + "'", null);
+
+    // Fetch the image.
+    BufferedImage image = null;
+    try {
+      // Could turn this lookup logic into an externally-supplied policy for
+      // increased generality.
+      URL imageUrl = getClass().getClassLoader().getResource(imageName);
+      if (imageUrl == null) {
+        logger.log(
+            TreeLogger.ERROR,
+            "Resource not found on classpath (is the name specified as Class.getResource() would expect?)",
+            null);
+        throw new UnableToCompleteException();
+      }
+
+      // Assimilate this file's bytes into the MD5.
+      InputStream is = imageUrl.openStream();
+      BufferedInputStream bis = new BufferedInputStream(is);
+      byte imgByte;
+      while ((imgByte = (byte) bis.read()) != -1) {
+        md5.update(imgByte);
+      }
+      is.close();
+
+      // Load the image from the URL instead of the stream (with the assumption
+      // that having the URL provides a tiny bit more context to the parser).
+      image = ImageIO.read(imageUrl);
+      if (image == null) {
+        logger.log(TreeLogger.ERROR, "Unrecognized image file format", null);
+        throw new UnableToCompleteException();
+      }
+
+    } catch (IOException e) {
+      logger.log(TreeLogger.ERROR, "Unable to read image resource", null);
+      throw new UnableToCompleteException();
     }
 
-    putMapping(imageName, rect);
+    // Map the URL to its image so that even if the same URL is used more than
+    // once, we only include the referenced image once in the bundled image.
+    ImageRect imageRect = new ImageRect(image);
+    orderedImageRects.add(imageRect);
+    imageNameToImageRectMap.put(imageName, imageRect);
+    return imageRect;
+  }
+
+  private ImageRect findImageUrl(String imageUrl) {
+    return (ImageRect) imageNameToImageRectMap.get(imageUrl);
+  }
+
+  private void putMapping(String imageName, ImageRect rect) {
+    imageNameToImageRectMap.put(imageName, rect);
   }
 
 }

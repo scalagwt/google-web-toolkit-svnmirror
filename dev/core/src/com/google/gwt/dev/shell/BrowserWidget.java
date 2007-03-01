@@ -17,8 +17,8 @@ package com.google.gwt.dev.shell;
 
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
-import com.google.gwt.dev.util.Util;
 import com.google.gwt.dev.shell.profiler.ProfilerImpl;
+import com.google.gwt.dev.util.Util;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
@@ -54,8 +54,6 @@ import org.eclipse.swt.widgets.ToolItem;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.FileWriter;
-import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -68,11 +66,8 @@ public abstract class BrowserWidget extends Composite {
 
   private class Toolbar extends HeaderBarBase implements SelectionListener {
     private final ToolItem backButton;
-
     private final ToolItem forwardButton;
-
     private final ToolItem openWebModeButton;
-
     private final ToolItem refreshButton;
     private final ToolItem stopButton;
 
@@ -272,7 +267,7 @@ public abstract class BrowserWidget extends Composite {
 
   /**
    * Gets the browser object wrapped by this window.
-   *
+   * 
    * @return a non-null Browser
    */
   public Browser getBrowser() {
@@ -290,7 +285,7 @@ public abstract class BrowserWidget extends Composite {
   /**
    * Go to a given url, possibly rewriting it if it can be served from any
    * project's public directory.
-   *
+   * 
    * @param target The URL to go to.
    */
   public void go(String target) {
@@ -316,40 +311,43 @@ public abstract class BrowserWidget extends Composite {
 
   /**
    * Sets the Http Proxy for this browser.
-   *
+   * 
    * @param proxy The host of the proxy
    * @param port The port of the proxy
-   *
+   * 
    */
   public void setHttpProxy(String proxy, int port) {
-    /*
-    // Write out a PAC file (http://en.wikipedia.org/wiki/Proxy_auto-config)
-    // For browsers which we might have a hard time automatically configuring,
-    // users can point their browsers to this PAC file manually.
+    // /*
+    // * Write out a PAC file (http://en.wikipedia.org/wiki/Proxy_auto-config)
+    // For
+    // * browsers which we might have a hard time automatically configuring,
+    // users
+    // * can point their browsers to this PAC file manually.
+    // *
+    // * For example, IE appears to require registry editing to update the proxy
+    // * settings. If the user doesn't have permission to write to their
+    // registry,
+    // * that will fail.
+    // */
+    // PrintWriter w = null;
+    // String pacPath = System.getProperty("user.dir") + File.separator
+    // + ".gwt.pac";
     //
-    // For example, IE appears to require registry editing to update the proxy
-    // settings. If the user doesn't have permission to write to their
-    // registry, that will fail.
-    //
-
-    PrintWriter w = null;
-    String pacPath = System.getProperty("user.dir") + File.separator + ".gwt.pac";
-
-    try {
-      w = new PrintWriter( new FileWriter( pacPath ) );
-      w.println( "FindProxyForURL(url, host) {" +
-                 "  return \"PROXY " + proxy + ":" + port + "; DIRECT\"" +
-                 "}" );
-    } catch ( IOException e ) {
-      getLogger().log(TreeLogger.WARN, "Configurable proxy settings are not enabled for this browser.", e);
-    } finally {
-      w.close();
-    }
-    */
-    getLogger().log(TreeLogger.WARN, "Configurable proxy settings are not enabled for this browser.", null);
+    // try {
+    // w = new PrintWriter(new FileWriter(pacPath));
+    // w.println("FindProxyForURL(url, host) {" + " return \"PROXY " + proxy
+    // + ":" + port + "; DIRECT\"" + "}");
+    // } catch (IOException e) {
+    // getLogger().log(TreeLogger.WARN,
+    // "Configurable proxy settings are not enabled for this browser.", e);
+    // } finally {
+    // w.close();
+    // }
+    getLogger().log(TreeLogger.WARN,
+        "Configurable proxy settings are not enabled for this browser.", null);
   }
 
-  public void setProfiler( ProfilerImpl profiler ) {
+  public void setProfiler(ProfilerImpl profiler) {
     this.profiler = profiler;
   }
 

@@ -24,8 +24,8 @@ public class PropertyProvider {
 
   private JsBlock body;
 
-  private final Property property;
   private final ModuleDef module;
+  private final Property property;
 
   public PropertyProvider(ModuleDef module, Property property) {
     this.module = module;
@@ -36,15 +36,15 @@ public class PropertyProvider {
     return body;
   }
 
+  public ModuleDef getModule() {
+    return module;
+  }
+
   public Property getProperty() {
     return property;
   }
 
   public void setBody(JsBlock body) {
     this.body = body;
-  }
-
-  public ModuleDef getModule() {
-    return module;
   }
 }
