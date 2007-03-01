@@ -239,9 +239,7 @@ function __MODULE_FUNC__() {
         external.gwtOnLoad(frameWnd, null);
       };
 
-      // Don't bother trying to start the module; script loading is definitely not done
-      loadDone = true;
-      maybeStartModule();
+      __MODULE_FUNC__.onScriptDone();
     };
   } else {
     try {
