@@ -17,9 +17,11 @@ package com.google.gwt.user.client.ui.richtext;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.Constants;
+import com.google.gwt.user.client.ui.ColorPickerPopup;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.ComplexButton;
-import com.google.gwt.user.client.ui.SpellCheckDriver;
+import com.google.gwt.user.client.ui.CustomButton;
+import com.google.gwt.user.client.ui.SelectablePopupButton;
+import com.google.gwt.user.client.ui.SuggestionsPopup;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 /**
@@ -33,138 +35,142 @@ public class RichTextEditor extends Composite {
   public interface ButtonProvider {
 
     /**
-     * Button for background color.
-     *
+     * Button for background color. *
+     * 
+     * @param popup popup to use
      * @return the button for background color.
      */
-    public ComplexButton backgroundColor();
+    public SelectablePopupButton backgroundColor(ColorPickerPopup popup);
 
     /**
      * Button for block style.
-     *
+     * 
+     * @param popup popup to use
      * @return the button for block style.
      */
-    public ComplexButton blockStyle();
+    public SelectablePopupButton blockStyle(SuggestionsPopup popup);
 
     /**
      * Button for bold.
-     *
+     * 
      * @return the button for bold.
      */
-    public ComplexButton bold();
+    public CustomButton bold();
 
     /**
      * Button for bulleted list.
-     *
+     * 
      * @return the button for bulleted list.
      */
-    public ComplexButton bulletList();
+    public CustomButton bulletList();
 
     /**
      * Button for font color.
-     *
+     * 
+     * @param popup popup to use
      * @return the button for font color.
      */
-    public ComplexButton fontColor();
+    public SelectablePopupButton fontColor(ColorPickerPopup popup);
 
     /**
      * Button for font family.
-     *
+     * 
      * @return the button for font family.
      */
-    public ComplexButton fontFamily();
+    public SelectablePopupButton fontFamily();
 
     /**
      * Button for font size.
-     *
+     * 
+     * @param popup popup to use
      * @return the button for font size.
      */
-    public ComplexButton fontSize();
+    public SelectablePopupButton fontSize(SuggestionsPopup popup);
 
     /**
      * Button for insert horizontal rule.
-     *
+     * 
      * @return the button for insert horizontal rule.
      */
-    public ComplexButton insertHRule();
+    public CustomButton insertHRule();
 
     /**
      * Button for italics.
-     *
+     * 
      * @return the button for italics.
      */
-    public ComplexButton italics();
+    public CustomButton italics();
 
     /**
      * Button for justify center.
-     *
+     * 
      * @return the button for justify center.
      */
-    public ComplexButton justifyCenter();
+    public CustomButton justifyCenter();
 
     /**
      * Button for justify left.
-     *
+     * 
      * @return the button for justify left.
      */
-    public ComplexButton justifyLeft();
+    public CustomButton justifyLeft();
 
     /**
      * Button for justify right.
-     *
+     * 
      * @return the button for justify right.
      */
-    public ComplexButton justifyRight();
+    public CustomButton justifyRight();
 
     /**
      * Button for left indent.
-     *
+     * 
      * @return the button for left indent.
      */
-    public ComplexButton leftIndent();
+    public CustomButton leftIndent();
 
     /**
      * Button for link.
-     *
+     * 
      * @return the button for link.
      */
-    public ComplexButton link();
+    public CustomButton link();
 
     /**
      * Button for ordered list.
-     *
+     * 
      * @return the button for ordered list.
      */
-    public ComplexButton orderedList();
+    public CustomButton orderedList();
 
     /**
      * Button for right indent.
-     *
+     * 
      * @return the button for right indent.
      */
-    public ComplexButton rightIndent();
-    
+    public CustomButton rightIndent();
+
     /**
      * Button for underline.
-     *
+     * 
      * @return the button for underline.
      */
-    public ComplexButton underline();
+    public CustomButton underline();
   }
 
   /**
-   * Supplies text constants for the rich text editor.
+   * Supplies text constants for the rich +text editor.
    */
-  public interface LabelProvider extends Constants {
+  public interface LabelProvider extends Constants, SpellCheck.LabelProvider {
 
     public String addressFormatStyle();
-    
+
     public String alignCenterIconText();
-    
+
     public String alignLeftIconText();
-    
+
     public String alignRightIconText();
-    
+
     public String blockStyleIconText();
 
     public String boldIconText();
@@ -246,7 +252,7 @@ public class RichTextEditor extends Composite {
    * Constructor for {@link RichTextEditor}.
    */
   public RichTextEditor() {
-    this((String)null);
+    this((String) null);
   }
 
   /**
@@ -256,8 +262,8 @@ public class RichTextEditor extends Composite {
    * @param buttonProvider custom button provider
    */
   public RichTextEditor(ButtonProvider buttonProvider) {
-    this((String)null, buttonProvider);
-    }
+    this((String) null, buttonProvider);
+  }
 
   /**
    * 
@@ -266,8 +272,9 @@ public class RichTextEditor extends Composite {
    * @param buttonProvider custom button provider
    * @param labelProvider custom label provider
    */
-  public RichTextEditor(ButtonProvider buttonProvider, LabelProvider labelProvider) {
-    this((String)null, buttonProvider, labelProvider);
+  public RichTextEditor(ButtonProvider buttonProvider,
+      LabelProvider labelProvider) {
+    this((String) null, buttonProvider, labelProvider);
   }
 
   /**
@@ -276,7 +283,7 @@ public class RichTextEditor extends Composite {
    * @param labelProvider custom label provider
    */
   public RichTextEditor(LabelProvider labelProvider) {
-    this((String)null, labelProvider);
+    this((String) null, labelProvider);
   }
 
   /**
@@ -313,7 +320,8 @@ public class RichTextEditor extends Composite {
    * @param buttonProvider custom button provider
    * @param labelProvider custom label provider
    */
-  public RichTextEditor(String cssURL, ButtonProvider buttonProvider, LabelProvider labelProvider) {
+  public RichTextEditor(String cssURL, ButtonProvider buttonProvider,
+      LabelProvider labelProvider) {
     richTextArea = new RichTextArea(cssURL);
     impl.setButtonProvider(buttonProvider);
     impl.setTextProvider(labelProvider);
@@ -332,7 +340,7 @@ public class RichTextEditor extends Composite {
     impl.useDefaultButtonProvider();
     setup();
   }
-  
+
   /**
    * Get the rich text widget associated with this editor.
    * 
@@ -340,16 +348,6 @@ public class RichTextEditor extends Composite {
    */
   public RichTextArea getRichTextArea() {
     return richTextArea;
-  }
-
-  /**
-   * Returns the current <code>SpellCheckDriver</code>.
-   * 
-   * @return SpellCheckDriver returns the current <code>SpellCheckDriver</code>,
-   *         or null if spell checking is not supported
-   */
-  public SpellCheckDriver getSpellCheckDriver() {
-    return impl.getSpellCheckDriver();
   }
 
   /**
@@ -362,15 +360,12 @@ public class RichTextEditor extends Composite {
   }
 
   /**
-   * Sets the spell check broker.
+   * Sets the spell check model.
    * 
-   * @param broker the broker to set
+   * @param spellCheckModel spell check model to set
    */
-  public void setSpellCheckBroker(SpellCheckDriver.Broker broker) {
-    SpellCheckDriver spellCheck = getSpellCheckDriver();
-    if (spellCheck != null) {
-      spellCheck.setBroker(broker);
-    }
+  public void setSpellCheckModel(SpellCheck.Model spellCheckModel) {
+    impl.setSpellCheckModel(spellCheckModel);
   }
 
   protected void onAttach() {
