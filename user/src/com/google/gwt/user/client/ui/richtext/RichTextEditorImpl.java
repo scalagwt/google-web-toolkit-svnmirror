@@ -17,9 +17,9 @@
 package com.google.gwt.user.client.ui.richtext;
 
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.SpellCheckDriver;
 import com.google.gwt.user.client.ui.richtext.RichTextEditor.ButtonProvider;
 import com.google.gwt.user.client.ui.richtext.RichTextEditor.LabelProvider;
+import com.google.gwt.user.client.ui.richtext.SpellCheck.Model;
 
 /**
  * This is the implementation class for RichTextEditor, to be replaced via
@@ -42,16 +42,12 @@ class RichTextEditorImpl {
 
   /**
    * Creates the tool bar to expose functionality supported by the underlying
-   * {@link RichTextArea} implementation.  This will vary by browser.
+   * {@link RichTextArea} implementation. This will vary by browser.
    * 
    * @param editor the editor being used to edit rich text
-   * @param panel the panel within the editor that will contain the tool bar 
+   * @param panel the panel within the editor that will contain the tool bar
    */
   protected void createToolBar(RichTextEditor editor, Panel panel) {
-  }
-
-  SpellCheckDriver getSpellCheckDriver() {
-    return null;
   }
 
   LabelProvider getTextProvider() {
@@ -72,12 +68,15 @@ class RichTextEditorImpl {
   void setButtonProvider(ButtonProvider provider) {
   }
 
+  void setSpellCheckModel(Model spellCheckModel) {
+  }
+
   /**
    * Sets the current spell check state.
    * 
    * @param state the spell check state
    */
-  void setSpellCheckState(SpellCheckDriver.State state) {
+  void setSpellCheckState(SpellCheck.State state) {
     return;
   }
 

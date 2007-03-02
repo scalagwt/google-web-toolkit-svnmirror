@@ -22,7 +22,7 @@ import com.google.gwt.user.client.ui.ChangeListener;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.ClippedImage;
 import com.google.gwt.user.client.ui.ColorPickerPopup;
-import com.google.gwt.user.client.ui.SelectablePopupButton;
+import com.google.gwt.user.client.ui.CustomButton;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
@@ -30,12 +30,10 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.KeyboardListenerAdapter;
 import com.google.gwt.user.client.ui.MouseListenerAdapter;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.ComplexButton;
 import com.google.gwt.user.client.ui.SelectablePopup;
-import com.google.gwt.user.client.ui.SpellCheckDriver;
+import com.google.gwt.user.client.ui.SelectablePopupButton;
 import com.google.gwt.user.client.ui.SuggestionsPopup;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.client.ui.SpellCheckDriver.SpellCheckable;
 import com.google.gwt.user.client.ui.richtext.RichTextArea.BlockFormat;
 import com.google.gwt.user.client.ui.richtext.RichTextArea.FontSize;
 import com.google.gwt.user.client.ui.richtext.RichTextEditor.ButtonProvider;
@@ -224,73 +222,78 @@ public class RichTextEditorImplStandard extends RichTextEditorImpl {
 
     private Images images = (Images) GWT.create(Images.class);
 
-    public ComplexButton backgroundColor() {
-      return new ComplexButton(images.colorUp(), images.colorDown());
+    public SelectablePopupButton backgroundColor(ColorPickerPopup popup) {
+      return new SelectablePopupButton(images.colorUp(), images.colorDown(),
+          popup);
     }
 
-    public ComplexButton blockStyle() {
-      return new ComplexButton(images.blockStyleUp(), images.blockStyleDown());
+    public SelectablePopupButton blockStyle(SuggestionsPopup popup) {
+      return new SelectablePopupButton(images.blockStyleUp(),
+          images.blockStyleDown(), popup);
     };
 
-    public ComplexButton bold() {
-      return new ComplexButton(images.boldUp(), images.boldDown());
+    public CustomButton bold() {
+      return new CustomButton(images.boldUp(), images.boldDown());
     }
 
-    public ComplexButton bulletList() {
-      return new ComplexButton(images.listUp(), images.listDown());
+    public CustomButton bulletList() {
+      return new CustomButton(images.listUp(), images.listDown());
     }
 
-    public ComplexButton fontColor() {
-      return new ComplexButton(images.colorUp(), images.colorDown());
+    public SelectablePopupButton fontColor(ColorPickerPopup popup) {
+      return new SelectablePopupButton(images.colorUp(), images.colorDown(),
+          popup);
     };
 
-    public ComplexButton fontFamily() {
-      return new ComplexButton(images.fontUp(), images.fontDown());
+    public SelectablePopupButton fontFamily() {
+      return new SelectablePopupButton(images.fontUp(), images.fontDown(), null);
     }
 
-    public ComplexButton fontSize() {
-      return new ComplexButton(images.sizeUp(), images.sizeDown());
+    public SelectablePopupButton fontSize(SuggestionsPopup popup) {
+      return new SelectablePopupButton(images.sizeUp(), images.sizeDown(),
+          popup);
     }
 
-    public ComplexButton insertHRule() {
-      return new ComplexButton(images.insertHRuleUp(), images.insertHRuleDown());
+    public CustomButton insertHRule() {
+      return new CustomButton(images.insertHRuleUp(), images.insertHRuleDown());
     }
 
-    public ComplexButton italics() {
-      return new ComplexButton(images.italicUp(), images.italicDown());
+    public CustomButton italics() {
+      return new CustomButton(images.italicUp(), images.italicDown());
     }
 
-    public ComplexButton justifyCenter() {
-      return new ComplexButton(images.justifyCenterUp(),
+    public CustomButton justifyCenter() {
+      return new CustomButton(images.justifyCenterUp(),
           images.justifyCenterDown());
     }
 
-    public ComplexButton justifyLeft() {
-      return new ComplexButton(images.justifyLeftUp(), images.justifyLeftDown());
+    public CustomButton justifyLeft() {
+      return new CustomButton(images.justifyLeftUp(), images.justifyLeftDown());
     }
 
-    public ComplexButton justifyRight() {
-      return new ComplexButton(images.justifyRightUp(), images.justifyRightDown());
+    public CustomButton justifyRight() {
+      return new CustomButton(images.justifyRightUp(),
+          images.justifyRightDown());
     }
 
-    public ComplexButton leftIndent() {
-      return new ComplexButton(images.indentLeftUp(), images.indentLeftDown());
+    public CustomButton leftIndent() {
+      return new CustomButton(images.indentLeftUp(), images.indentLeftDown());
     }
 
-    public ComplexButton link() {
-      return new ComplexButton(images.linkUp(), images.linkDown());
+    public CustomButton link() {
+      return new CustomButton(images.linkUp(), images.linkDown());
     }
 
-    public ComplexButton orderedList() {
-      return new ComplexButton(images.orderedListUp(), images.orderedListDown());
+    public CustomButton orderedList() {
+      return new CustomButton(images.orderedListUp(), images.orderedListDown());
     }
 
-    public ComplexButton rightIndent() {
-      return new ComplexButton(images.indentRightUp(), images.indentRightDown());
+    public CustomButton rightIndent() {
+      return new CustomButton(images.indentRightUp(), images.indentRightDown());
     }
 
-    public ComplexButton underline() {
-      return new ComplexButton(images.underlineUp(), images.underlineDown());
+    public CustomButton underline() {
+      return new CustomButton(images.underlineUp(), images.underlineDown());
     }
   }
 
@@ -306,9 +309,9 @@ public class RichTextEditorImplStandard extends RichTextEditorImpl {
      * @param toolTip the tooltip to give the button
      * @param popup the popup to use to get the desired choice
      */
-    public HookupDropDownButton(final ComplexButton button, String toolTip,
+    public HookupDropDownButton(final CustomButton button, String toolTip,
         final SelectablePopup popup) {
-      final SelectablePopupButton dropDown = new SelectablePopupButton(button, popup);
+      final SelectablePopupButton dropDown = (SelectablePopupButton) button;
       button.setTitle(toolTip);
       popup.addChangeListener(new ChangeListener() {
         public void onChange(Widget sender) {
@@ -331,7 +334,7 @@ public class RichTextEditorImplStandard extends RichTextEditorImpl {
    * 
    */
   private abstract class HookupListeningButton {
-    ComplexButton button;
+    CustomButton button;
 
     /**
      * Wires a tooltip to a button, and makes it adjust to the underlying state.
@@ -339,7 +342,7 @@ public class RichTextEditorImplStandard extends RichTextEditorImpl {
      * @param button the button to use
      * @param toolTip the tooltip to give the button
      */
-    public HookupListeningButton(final ComplexButton button, String toolTip) {
+    public HookupListeningButton(final CustomButton button, String toolTip) {
       this.button = button;
       // Click Listener
       button.addClickListener(new ClickListener() {
@@ -359,7 +362,8 @@ public class RichTextEditorImplStandard extends RichTextEditorImpl {
     public abstract void toggle();
 
     /**
-     * The callback responsible for updating the button to match the underlying state.
+     * The callback responsible for updating the button to match the underlying
+     * state.
      */
     public abstract void updateButton();
   }
@@ -369,8 +373,8 @@ public class RichTextEditorImplStandard extends RichTextEditorImpl {
    */
   private abstract class HookupPressButton {
 
-    HookupPressButton(final ComplexButton button, String toolTip) {
-      button.setToggleButton(false);
+    HookupPressButton(final CustomButton button, String toolTip) {
+      button.setToggleBehavior(false);
       buttons.add(button);
       button.setTitle(toolTip);
       button.addClickListener(new ClickListener() {
@@ -386,8 +390,8 @@ public class RichTextEditorImplStandard extends RichTextEditorImpl {
     public abstract void toggle();
   }
 
-  private class SpellCheckWidget implements SpellCheckable {
-    private SpellCheckDriver spellCheckDriver;
+  private class SpellCheckControl {
+    private SpellCheck spellCheck;
     private HTML spell;
     private HTML noMisspellingsFound;
     private Panel recheckSpelling;
@@ -410,31 +414,12 @@ public class RichTextEditorImplStandard extends RichTextEditorImpl {
       return noSuggestions;
     }
 
-    /**
-     * Gets the spell check driver.
-     * 
-     * @return the spell check driver
-     */
-    public SpellCheckDriver getSpellCheckDriver() {
-      return spellCheckDriver;
+    public SpellCheck getSpellCheck() {
+      return spellCheck;
     }
 
     public String getText() {
       return richTextArea.getText();
-    }
-
-    public void setState(SpellCheckDriver.State state) {
-      if (state == SpellCheckDriver.State.NO_MISSPELLING) {
-        setSpellCheckWidget(noMisspellingsFound);
-      } else if (state == SpellCheckDriver.State.RECHECK) {
-        setSpellCheckWidget(recheckSpelling);
-      } else if (state == SpellCheckDriver.State.SPELLCHECK) {
-        setSpellCheckWidget(spell);
-      } else if (state == SpellCheckDriver.State.CHECKING) {
-        setSpellCheckWidget(checking);
-      } else {
-        throw new RuntimeException("Unknown state: " + state);
-      }
     }
 
     /**
@@ -451,7 +436,7 @@ public class RichTextEditorImplStandard extends RichTextEditorImpl {
       spell = new HTML(labelProvider.spellingAction());
       ClickListener requestSpellCheck = new ClickListener() {
         public void onClick(Widget sender) {
-          spellCheckDriver.requestSpellCheck();
+          spellCheck.requestSpellCheck();
         }
       };
 
@@ -479,24 +464,38 @@ public class RichTextEditorImplStandard extends RichTextEditorImpl {
       spellCheckDone.setStyleName("spellCheck");
       spellCheckDone.addClickListener(new ClickListener() {
         public void onClick(Widget sender) {
-          spellCheckDriver.finishSpellCheck();
+          spellCheck.finishSpellCheck();
         }
       });
       recheckSpelling.add(spellCheckDone);
       setSpellCheckWidget(spell);
-      spellCheckDriver = new SpellCheckDriver(this);
+      spellCheck = new SpellCheck(richTextArea, labelProvider,
+          new SpellCheck.StateListener() {
+
+            public void onChange(SpellCheck.State state) {
+              if (state == SpellCheck.State.NO_MISSPELLING) {
+                setSpellCheckWidget(noMisspellingsFound);
+              } else if (state == SpellCheck.State.RECHECK) {
+                setSpellCheckWidget(recheckSpelling);
+              } else if (state == SpellCheck.State.SPELLCHECK) {
+                setSpellCheckWidget(spell);
+              } else if (state == SpellCheck.State.CHECKING) {
+                setSpellCheckWidget(checking);
+              } else {
+                throw new RuntimeException("Unknown state: " + state);
+              }
+            }
+          });
     }
   }
 
-  private static final int COLOR_POPUP_ROW_COUNT = 12;
-
-  SpellCheckWidget spellCheckWidget;
+  SpellCheckControl spellCheckWidget;
 
   private ButtonProvider buttonProvider;
 
   private LabelProvider labelProvider;
-  private HorizontalPanel buttons;
 
+  private HorizontalPanel buttons;
   private List listeningButtons = new ArrayList();
 
   // Using FlexTable for layout as HorizontalPanel had a weird alignment bug,
@@ -529,15 +528,16 @@ public class RichTextEditorImplStandard extends RichTextEditorImpl {
 
     layout.setWidget(0, 0, buttons);
 
-    spellCheckWidget = new SpellCheckWidget();
+    spellCheckWidget = new SpellCheckControl();
     spellCheckWidget.setup();
 
     layout.getCellFormatter().setHorizontalAlignment(0, 1,
         HasHorizontalAlignment.ALIGN_RIGHT);
   }
 
-  public SpellCheckDriver getSpellCheckDriver() {
-    return spellCheckWidget.getSpellCheckDriver();
+  // Used only to
+  public SpellCheck getSpellCheck() {
+    return spellCheckWidget.getSpellCheck();
   }
 
   public LabelProvider getTextProvider() {
@@ -587,6 +587,10 @@ public class RichTextEditorImplStandard extends RichTextEditorImpl {
     addFormatBlock();
   }
 
+  void setSpellCheckModel(SpellCheck.Model spellCheckModel) {
+    spellCheckWidget.getSpellCheck().setModel(spellCheckModel);
+  }
+
   /**
    * Adds left, right and center text alignment buttons.
    */
@@ -617,8 +621,8 @@ public class RichTextEditorImplStandard extends RichTextEditorImpl {
    * Adds button to change the color of the background color.
    */
   private void addBackColor() {
-    ColorPickerPopup colorPopup = new ColorPickerPopup(COLOR_POPUP_ROW_COUNT);
-    new HookupDropDownButton(buttonProvider.backgroundColor(),
+    ColorPickerPopup colorPopup = new ColorPickerPopup();
+    new HookupDropDownButton(buttonProvider.backgroundColor(colorPopup),
         labelProvider.fontColorIconText(), colorPopup) {
       public void change(Object selected) {
         String color = (String) selected;
@@ -645,9 +649,9 @@ public class RichTextEditorImplStandard extends RichTextEditorImpl {
 
   private void addFontColor() {
 
-    ColorPickerPopup colorPopup = new ColorPickerPopup(COLOR_POPUP_ROW_COUNT);
+    ColorPickerPopup colorPopup = new ColorPickerPopup();
 
-    new HookupDropDownButton(buttonProvider.fontColor(),
+    new HookupDropDownButton(buttonProvider.fontColor(colorPopup),
         labelProvider.fontColorIconText(), colorPopup) {
       public void change(Object selected) {
         String color = (String) selected;
@@ -673,8 +677,8 @@ public class RichTextEditorImplStandard extends RichTextEditorImpl {
         + labelProvider.fontCourierNew() + "</div>");
     values.add("Courier new, monospace");
 
-    labels.add("<div style='font-family:cursive'>" + labelProvider.fontCursive()
-        + "</div>");
+    labels.add("<div style='font-family:cursive'>"
+        + labelProvider.fontCursive() + "</div>");
     values.add("cursive");
 
     SuggestionsPopup popup = new SuggestionsPopup();
@@ -711,7 +715,7 @@ public class RichTextEditorImplStandard extends RichTextEditorImpl {
     SuggestionsPopup popup = new SuggestionsPopup();
     popup.setItems(labels);
     popup.setValues(values);
-    new HookupDropDownButton(buttonProvider.fontSize(),
+    new HookupDropDownButton(buttonProvider.fontSize(popup),
         labelProvider.fontSizeIconText(), popup) {
       public void change(Object selected) {
         FontSize font = (FontSize) selected;
@@ -745,7 +749,7 @@ public class RichTextEditorImplStandard extends RichTextEditorImpl {
     SuggestionsPopup popup = new SuggestionsPopup();
     popup.setItems(labels);
     popup.setValues(values);
-    new HookupDropDownButton(buttonProvider.blockStyle(),
+    new HookupDropDownButton(buttonProvider.blockStyle(popup),
         labelProvider.blockStyleIconText(), popup) {
       public void change(Object selected) {
         BlockFormat blockFormat = (BlockFormat) selected;
