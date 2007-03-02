@@ -1,2 +1,3 @@
 initial revision is 332
-merged from trunk at revision 382
+merged from trunk at revision 382 (hcc)
+merged only startup optimizations to trunk at revision 539
