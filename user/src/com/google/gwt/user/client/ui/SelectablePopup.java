@@ -28,8 +28,17 @@ import java.util.List;
 public abstract class SelectablePopup extends PopupPanel implements
     SourcesChangeEvents {
 
+  private static final String STYLE_SELECTED_ITEM = "selected";
+  private static final String STYLE_ITEM = "item";
+
   /**
-   * Controls the items that display in the selectable popup.
+   * Controls the items that display in a <code>SelectablePopup</code>. In
+   * general a controlling widget will either always use
+   * <code>ItemController.showBelow(...)</code> to display the popup or always
+   * use the <code>SelectablePopup.showBelow(...)</code> to display the popup,
+   * not both. A single <code>ItemController</code> can be used to control
+   * multiple <code>SelectablePopup</code> instances.
+   * 
    */
   public abstract static class ItemController {
     /*
@@ -38,7 +47,6 @@ public abstract class SelectablePopup extends PopupPanel implements
      * suggestions.
      * 
      */
-
     private int limit = 20;
 
     /**
@@ -60,30 +68,16 @@ public abstract class SelectablePopup extends PopupPanel implements
     }
 
     /**
-     * Configures and displays a popup.
+     * Configures and displays a popup. As the same <code>ItemController</code>
+     * may be used to control several different popups, the popup to display is
+     * passed into the <code>showBelow</code> method.
      * 
      * @param popup popup to show
      * @param input represents the input to the controller
      * @param showBelow <code>UIObject</code> to show the popup below
      */
-    public void showBelow(SelectablePopup popup, String input,
-        UIObject showBelow) {
-      List filteredItems = computeItemsFor(input);
-      if (filteredItems.size() > 0) {
-        popup.setItems(filteredItems);
-        popup.showBelow(showBelow);
-      } else {
-        popup.hide();
-      }
-    }
-
-    /**
-     * Returns a list of items associated with the given input.
-     * 
-     * @param input the given input
-     * @return list of items
-     */
-    protected abstract List computeItemsFor(String input);
+    public abstract void showBelow(SelectablePopup popup, String input,
+        UIObject showBelow);
   }
 
   /**
@@ -106,7 +100,7 @@ public abstract class SelectablePopup extends PopupPanel implements
     public Item(int index) {
       this.index = index;
       this.setStyleName(itemStyle);
-      this.addMouseListener(defaultMouseListener);
+      this.addMouseListener(itemMouseListener);
       items.add(index, this);
     }
 
@@ -138,16 +132,18 @@ public abstract class SelectablePopup extends PopupPanel implements
   }
 
   private Item selectedItem;
-
-  private String selectedStyle;
-
-  private String itemStyle;
-
+  private final String selectedStyle;
+  private final String itemStyle;
   private final FlexTable layout = new FlexTable();
-  private final MouseListener defaultMouseListener = new MouseListenerAdapter() {
+
+  /**
+   * Each item is given this mouse listener in order to allow the mouse to
+   * highlight each item in turn.
+   */
+  private final MouseListener itemMouseListener = new MouseListenerAdapter() {
 
     public void onMouseDown(Widget sender, int x, int y) {
-      fireChange();
+      click();
     }
 
     public void onMouseEnter(Widget sender) {
@@ -155,6 +151,7 @@ public abstract class SelectablePopup extends PopupPanel implements
       setSelection(item);
     }
   };
+
   private ChangeListenerCollection changeListeners = new ChangeListenerCollection();
   private List values;
   private List items = new ArrayList();
@@ -164,7 +161,7 @@ public abstract class SelectablePopup extends PopupPanel implements
    * default item style, and "selected" as the default selected item style.
    */
   public SelectablePopup() {
-    this("item", "selected");
+    this(STYLE_ITEM, STYLE_SELECTED_ITEM);
   }
 
   /**
@@ -194,9 +191,10 @@ public abstract class SelectablePopup extends PopupPanel implements
   }
 
   /**
-   * Fires all registered change listeners.
+   * Equivalent to "clicking" on an item in the popup. Note, this does not call
+   * the raw JavaScript <code>click</code> method.
    */
-  public void fireChange() {
+  public void click() {
     if (selectedItem == null) {
       throw new RuntimeException("No element is selected");
     }
@@ -210,27 +208,41 @@ public abstract class SelectablePopup extends PopupPanel implements
    * @return number of items
    */
   public int getItemCount() {
-
     return items.size();
   }
 
   /**
    * Gets the currently selected index.
    * 
-   * @return selected index
+   * @return selected index, or -1 if no index is selected
    */
   public final int getSelectedIndex() {
+    if (getSelectedItem() == null) {
+      return -1;
+    }
     return getSelectedItem().getIndex();
   }
 
   /**
    * Gets the value associated with the currently selected index.
    * 
-   * @return current value
+   * @return current selected value, or null if no value is selected
    */
   public final Object getSelectedValue() {
+    if (getSelectedItem() == null) {
+      return null;
+    }
     return getSelectedItem().getValue();
   }
+
+  /**
+   * Navigate through the popup based upon a key code.
+   * 
+   * @param keyCode key code for navigation
+   * @return <code>true</code> if the key code was used to navigate through
+   *         the popup, <code>false</code> otherwise
+   */
+  public abstract boolean navigate(char keyCode);
 
   public void removeChangeListener(ChangeListener listener) {
     this.changeListeners.remove(listener);
@@ -244,16 +256,33 @@ public abstract class SelectablePopup extends PopupPanel implements
   public abstract void setItems(List items);
 
   /**
-   * Sets the values associated with each item.
+   * Sets the value associated with each item. The ith value in the values list
+   * is associated with the ith selectable item.
    * 
-   * @param values values associated with each item
+   * @param values values associated with the selectable items
    */
   public void setValues(List values) {
     this.values = values;
   }
 
   /**
-   * Shows the popup, automatically selecting the first item.
+   * Shifts the current selection by the given amount, unless that would put the
+   * user past the beginning or end of the list.
+   * 
+   * @param shift the amount to shift the current selection by.
+   */
+  public void shiftSelection(int offset) {
+    int newIndex = getSelectedIndex() + offset;
+    if (newIndex < 0 || newIndex >= getItemCount()) {
+      return;
+    } else {
+      Item item = getItem(newIndex);
+      setSelection(item);
+    }
+  }
+
+  /**
+   * Shows the popup, by default <code>show</code> selects the first item.
    */
   public void show() {
     Item item = getItem(0);
@@ -276,12 +305,9 @@ public abstract class SelectablePopup extends PopupPanel implements
     final int left = showBelow.getAbsoluteLeft();
     int overshootLeft = Math.max(0, (left + getOffsetWidth())
         - Window.getClientWidth());
-
     final int top = showBelow.getAbsoluteTop() + showBelow.getOffsetHeight();
-
     final int overshootTop = Math.max(0, (top + getOffsetHeight())
         - Window.getClientHeight());
-
     setPopupPosition(left - overshootLeft, top - overshootTop);
   }
 
@@ -294,6 +320,12 @@ public abstract class SelectablePopup extends PopupPanel implements
     return layout;
   }
 
+  /**
+   * Gets the ith item.
+   * 
+   * @param index index of item
+   * @return the ith item
+   */
   Item getItem(int index) {
     return (Item) items.get(index);
   }
@@ -307,17 +339,11 @@ public abstract class SelectablePopup extends PopupPanel implements
     return selectedItem;
   }
 
-  /**
-   * Navigate through the popup based upon a key code.
-   * 
-   * @param keyCode navigation key code
-   */
-  abstract boolean navigate(char keyCode);
-
   void setSelection(Item item) {
     if (selectedItem == item) {
       return;
     }
+
     // Remove old selected item.
     if (selectedItem != null) {
       selectedItem.setStyleName(itemStyle);
@@ -327,22 +353,6 @@ public abstract class SelectablePopup extends PopupPanel implements
     selectedItem = item;
     if (selectedItem != null) {
       selectedItem.setStyleName(selectedStyle);
-    }
-  }
-
-  /**
-   * Shifts the current selection by the given amount, unless that would put the
-   * user past the beginning or end of the list.
-   * 
-   * @param shift the amount to shift the current selection by.
-   */
-  void shiftSelection(int offset) {
-    int newIndex = getSelectedIndex() + offset;
-    if (newIndex < 0 || newIndex >= getItemCount()) {
-      return;
-    } else {
-      Item item = getItem(newIndex);
-      setSelection(item);
     }
   }
 
