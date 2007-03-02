@@ -19,7 +19,7 @@ package com.google.gwt.user.client.ui;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Event;
-
+ 
 /**
  * Style Button with built in support for pressed, disabled, and hovering
  * attributes. By default, a <code>StyleButton</code> acts as a toggle button.
@@ -274,6 +274,16 @@ public class CustomButton extends FocusWidget implements SourcesKeyboardEvents {
 
   /**
    * 
+   * Constructor for <code>CustomButton</code>.
+   */
+  public CustomButton() {
+    super(FocusWidget.getFocusImpl().createFocusable());
+    sinkEvents(Event.ONCLICK | Event.MOUSEEVENTS);
+    setUp(createState(null, "up", UP));
+  }
+
+  /**
+   * 
    * Constructor for <code>StyleButton</code>. The supplied image is used as
    * the default face for all states.
    * 
@@ -282,7 +292,6 @@ public class CustomButton extends FocusWidget implements SourcesKeyboardEvents {
   public CustomButton(AbstractImage upImage) {
     this();
     getUp().setFace(upImage);
-    finishSetup();
   }
 
   /**
@@ -333,7 +342,6 @@ public class CustomButton extends FocusWidget implements SourcesKeyboardEvents {
   public CustomButton(String htmlFace) {
     this();
     getUp().setFace(htmlFace);
-    finishSetup();
   }
 
   /**
@@ -351,11 +359,12 @@ public class CustomButton extends FocusWidget implements SourcesKeyboardEvents {
   /**
    * 
    * Constructor for <code>CustomButton</code>.
+   * 
+   * @param string
+   * @param string2
    */
-  public CustomButton() {
-    super(FocusWidget.getFocusImpl().createFocusable());
-    sinkEvents(Event.ONCLICK | Event.MOUSEEVENTS);
-    setUp(createState(null, "up", UP));
+  public CustomButton(String upText, String downText) {
+    this(upText);
   }
 
   /**
@@ -531,6 +540,17 @@ public class CustomButton extends FocusWidget implements SourcesKeyboardEvents {
    */
   public void setToggleBehavior(boolean togglingBehavior) {
     this.toggling = togglingBehavior;
+  }
+
+  /**
+   * Overridden on attach to ensure that a button state has been chosen before
+   * the button is displayed.
+   */
+  protected void onAttach() {
+    if (curState == null) {
+      finishSetup();
+    }
+    super.onAttach();
   }
 
   /**
