@@ -50,14 +50,14 @@ import com.google.gwt.user.client.ui.SelectablePopup.ItemController;
  * 
  */
 public class SuggestBox extends Composite {
-  private int limit = 15;
   private int selectStart;
   private int selectEnd;
-  private SuggestionsPopup popup;
   private ItemController itemController;
-  private char[] seperators;
+  private char[] separators;
   private String cachedValue;
-  private TextBoxBase box;
+  private final SuggestionsPopup popup;
+  private final TextBoxBase box;
+  private String separatorPadding = " ";
 
   /**
    * 
@@ -66,24 +66,34 @@ public class SuggestBox extends Composite {
    * @param itemController supplies suggestions based upon the current contents
    *          of the text widget. Note, a single itemController may be used with
    *          multiple suggest boxes.
-   * @param textWidget the text widget
+   * @param box the text widget
    */
-  public SuggestBox(ItemController itemController, TextBoxBase textWidget) {
-    initPopup();
-    this.box = textWidget;
-    initWidget(textWidget);
+  public SuggestBox(ItemController itemController, TextBoxBase box) {
+    popup = new SuggestionsPopup();
+    this.box = box;
+    box.addFocusListener(new FocusListener() {
+      public void onFocus(Widget sender) {
+      }
+
+      public void onLostFocus(Widget sender) {
+        popup.hide();
+      }
+
+    });
+    addPopupChangeListener();
+    initWidget(box);
     addKeyBoardSupport();
     setController(itemController);
   }
 
   /**
-   * Gets the maximum number of suggestions that can be displayed by the
-   * suggestion popup.
+   * Returns the current padding that is inserted after a separator. In most
+   * cases this is a single space. However it can be overridden by the user.
    * 
-   * @return maximum number of suggestions
+   * @return current padding
    */
-  public int getLimit() {
-    return limit;
+  public String getSeparatorPadding() {
+    return separatorPadding;
   }
 
   /**
@@ -96,21 +106,41 @@ public class SuggestBox extends Composite {
   }
 
   /**
-   * Sets the maximum number of suggestions that can be displayed.
+   * In general, separators are followed by a single whitespace. However, it is
+   * possible to override this behavior by substituting in another string,
+   * including the empty string, for the separator padding value.
    * 
-   * @param limit maximum number of suggestions
+   * @param padding new separator padding
    */
-  public void setLimit(int limit) {
-    this.limit = limit;
+  public void setSeparatorPadding(String padding) {
+    if (padding == null) {
+      throw new NullPointerException();
+    }
+    this.separatorPadding = padding;
   }
 
   /**
-   * Sets the separators for the text area.
+   * Sets the separators for the text area. The most common separator is
+   * <code>","</code>.
+   * <p>
+   * Note: Until a KeyboardHandler is introduced that allows keyPress to detect
+   * unicode characters over 16 bits, separators are restricted to 16 bit
+   * values.
    * 
-   * @param seperators separators for the text are
+   * @param separators separators for the text. The String is treated as a array
+   *          of characters
    */
-  public void setSeperators(char[] seperators) {
-    this.seperators = seperators;
+
+  public void setSeparators(String separators) {
+    /*
+     * Implementation note: As currently we cannot support non-char unicode
+     * separators, we use the more efficient char[] separators to store our
+     * separators, this will change in the future.
+     */
+    this.separators = new char[separators.length()];
+    for (int i = 0; i < separators.length(); i++) {
+      this.separators[i] = separators.charAt(i);
+    }
   }
 
   private void addKeyBoardSupport() {
@@ -123,115 +153,136 @@ public class SuggestBox extends Composite {
 
       public void onKeyPress(Widget sender, char keyCode, int modifiers) {
         if (pendingCancel) {
+          // IE does not allow cancel key on key down, so we have pended the
+          // cancellation of the key until the associated key press.
           box.cancelKey();
           pendingCancel = false;
         } else if (popup.isAttached()) {
-          if (seperators != null && isSeperator(keyCode)) {
-            // onKeyDown/onKeyUps's keyCode for ',' comes back '1/4' so must use
-            // onKeyPress instead.
-            popup.fireChange();
+          if (separators != null && isSeparator(keyCode)) {
+            // onKeyDown/onKeyUps's keyCode for ',' comes back '1/4', so unlike
+            // navigation, we use key press events to determine when the user
+            // wants to simulate clicking on the popup.
+            popup.click();
 
-            // The separator will be added after the popup is activated, so
-            // manually suppressing the popup's creation of the separator.
+            // The separator will be added after the popup is activated, so the
+            // popup will have already added a new separator. Therefore, the
+            // original separator should not be added as well.
             box.cancelKey();
           }
         }
       }
 
       public void onKeyUp(Widget sender, char keyCode, int modifiers) {
-        modifyText();
+        // After every user key input, refresh the popup's suggestions.
+        refreshSuggestions();
       }
 
-      private String findChangeWithSeperators(String text) {
-        String completeMe;
-        int getCursor = Math.min(box.getCursorPos(), text.length());
-        selectStart = 0;
-        for (int i = getCursor - 1; i >= 0; i--) {
-          char last = text.charAt(i);
-          if (SuggestBox.this.isSeperator(last)) {
-            selectStart = i + 1;
-            break;
-          }
+      /**
+       * In the presence of separators, Returns the active search selection.
+       */
+      private String getActiveSelection(String text) {
+        selectEnd = box.getCursorPos();
+
+        // Find the last instance of a separator.
+        selectStart = -1;
+        for (int i = 0; i < separators.length; i++) {
+          selectStart = Math.max(text.lastIndexOf(separators[i], selectEnd),
+              selectStart);
         }
-        selectEnd = getCursor;
-        completeMe = text.substring(selectStart, selectEnd).trim();
-        return completeMe;
+        ++selectStart;
+
+        String selection = text.substring(selectStart, selectEnd).trim();
+        return selection;
       }
 
-      private void modifyText() {
-        // Find text.
-        String text = box.getText().trim();
+      private void refreshSuggestions() {
+        // Get the raw text.
+        String text = box.getText();
         if (text.equals(cachedValue)) {
           return;
         } else {
           cachedValue = text;
         }
 
-        // Find candidate to replace.
-        String completeMe;
-        if (seperators == null) {
-          completeMe = text;
+        // Find selection to replace.
+        String selection;
+        if (separators == null) {
+          selection = text;
         } else {
-          completeMe = findChangeWithSeperators(text);
+          selection = getActiveSelection(text);
         }
 
-        if (completeMe.length() > 0) {
-          itemController.showBelow(popup, completeMe, SuggestBox.this);
+        // Activate the item controller with the given selection in order to
+        // show the correct items.
+        if (selection.length() > 0) {
+          itemController.showBelow(popup, selection, SuggestBox.this);
         } else {
           popup.hide();
         }
       }
-
     });
   }
 
-  private void initPopup() {
-    popup = new SuggestionsPopup();
+  /**
+   * Adds a standard popup listener to the suggest box's popup.
+   */
+  private void addPopupChangeListener() {
     popup.addChangeListener(new ChangeListener() {
-
       public void onChange(Widget sender) {
-        String newValue = (String) popup.getSelectedValue();
-        if (seperators != null) {
-          onChangeWithSeperators(newValue);
+        if (separators != null) {
+          onChangeWithSeparators();
         } else {
+          String newValue = (String) popup.getSelectedValue();
           cachedValue = newValue;
           box.setText(cachedValue);
         }
       }
 
-      private void onChangeWithSeperators(String newValue) {
-        String text = box.getText().trim();
+      private void onChangeWithSeparators() {
+        String newValue = (String) popup.getSelectedValue();
+
         StringBuffer accum = new StringBuffer();
+        String text = box.getText();
+
+        // Add all text up to the selection start.
         accum.append(text.substring(0, selectStart));
 
         // Add one space if not at start.
         if (selectStart > 0) {
-          accum.append(" ");
+          accum.append(separatorPadding);
         }
+        // Add the new value.
         accum.append(newValue);
-        String ender = text.substring(selectEnd).trim();
+
+        // Find correct cursor position.
         int savedCursorPos = accum.length();
-        // If there is more content after the entry, insert it.
-        if (ender.length() == 0 || !isSeperator(ender.charAt(0))) {
+
+        // Add all text after the selection end
+        String ender = text.substring(selectEnd).trim();
+        if (ender.length() == 0 || !isSeparator(ender.charAt(0))) {
           // Add a separator if the first char of the ender is not already a
           // separator.
-          accum.append(seperators[0] + " ");
+          accum.append(separators[0] + separatorPadding);
+          savedCursorPos = accum.length();
         }
-        savedCursorPos = accum.length();
-
         accum.append(ender);
 
-        cachedValue = accum.toString();
-        box.setText(cachedValue);
+        // Set the text and cursor pos to correct location.
+        String replacement = accum.toString();
+        cachedValue = replacement.trim();
+        box.setText(replacement);
         box.setCursorPos(savedCursorPos);
       }
     });
   }
 
-  private boolean isSeperator(char candidate) {
+  /**
+   * Convenience method for identifying if a character is a separator.
+   */
+  private boolean isSeparator(char candidate) {
     // An int map would be very handy right here...
-    for (int i = 0; i < seperators.length; i++) {
-      if (candidate == seperators[i]) {
+    for (int i = 0; i < separators.length; i++) {
+      if (candidate == separators[i]) {
         return true;
       }
     }
