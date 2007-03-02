@@ -34,11 +34,12 @@ public class ColorPickerPopup extends SelectablePopup {
 
     public Object getValue() {
       return DOM.getStyleAttribute(getElement(), "background");
-    }
+    }  
   }
 
   /**
-   * Default colors supplied to the color picker popup.
+   * Default colors supplied to the color picker popup. The default colors are a
+   * selection of 60 web-safe CSS color styles.
    */
   public static final String[] DEFAULT_COLORS = {
       "#ffffcc", "#ffff66", "#ffcc66", "#F2984C", "#E1771E", "#B47B10",
@@ -83,6 +84,37 @@ public class ColorPickerPopup extends SelectablePopup {
     setItems(colors);
   }
 
+  public boolean navigate(char keyCode) {
+    if (isAttached()) {
+      switch (keyCode) {
+        case KeyboardListener.KEY_DOWN:
+          shiftSelection(numColumns);
+          break;
+        case KeyboardListener.KEY_UP:
+          shiftSelection(-numColumns);
+          break;
+        case KeyboardListener.KEY_LEFT:
+          shiftSelection(-1);
+          break;
+        case KeyboardListener.KEY_RIGHT:
+          shiftSelection(1);
+          break;
+        case KeyboardListener.KEY_ENTER:
+          click();
+          break;
+        case KeyboardListener.KEY_ESCAPE:
+          hide();
+          break;
+        default:
+          // Avoid shared post processing.
+          return false;
+      }
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   /**
    * Sets the items in the <code> ColorPickerPopup</code>. Each item should
    * represent a CSS color.
@@ -110,43 +142,6 @@ public class ColorPickerPopup extends SelectablePopup {
         ++i;
       }
       ++row;
-    }
-  }
-
-  /**
-   * Control the popup based upon the supplied key code.
-   * 
-   * @param keyCode supplied key code
-   * @return whether the keyCode effected navigation
-   */
-  boolean navigate(char keyCode) {
-    if (isAttached()) {
-      switch (keyCode) {
-        case KeyboardListener.KEY_DOWN:
-          shiftSelection(numColumns);
-          break;
-        case KeyboardListener.KEY_UP:
-          shiftSelection(-numColumns);
-          break;
-        case KeyboardListener.KEY_LEFT:
-          shiftSelection(-1);
-          break;
-        case KeyboardListener.KEY_RIGHT:
-          shiftSelection(1);
-          break;
-        case KeyboardListener.KEY_ENTER:
-          fireChange();
-          break;
-        case KeyboardListener.KEY_ESCAPE:
-          hide();
-          break;
-        default:
-          // Avoid shared post processing.
-          return false;
-      }
-      return true;
-    } else {
-      return false;
     }
   }
 
