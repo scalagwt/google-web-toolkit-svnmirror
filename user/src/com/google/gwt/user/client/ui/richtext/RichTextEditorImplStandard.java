@@ -245,8 +245,8 @@ public class RichTextEditorImplStandard extends RichTextEditorImpl {
           popup);
     };
 
-    public SelectablePopupButton fontFamily() {
-      return new SelectablePopupButton(images.fontUp(), images.fontDown(), null);
+    public SelectablePopupButton fontFamily(SuggestionsPopup popup) {
+      return new SelectablePopupButton(images.fontUp(), images.fontDown(), popup);
     }
 
     public SelectablePopupButton fontSize(SuggestionsPopup popup) {
@@ -684,7 +684,7 @@ public class RichTextEditorImplStandard extends RichTextEditorImpl {
     SuggestionsPopup popup = new SuggestionsPopup();
     popup.setItems(labels);
     popup.setValues(values);
-    new HookupDropDownButton(buttonProvider.fontFamily(),
+    new HookupDropDownButton(buttonProvider.fontFamily(popup),
         labelProvider.fontIconText(), popup) {
       public void change(Object selected) {
         String value = (String) selected;
