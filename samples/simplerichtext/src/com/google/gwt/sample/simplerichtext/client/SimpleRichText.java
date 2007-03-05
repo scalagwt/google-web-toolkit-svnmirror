@@ -15,15 +15,19 @@
  */
 package com.google.gwt.sample.simplerichtext.client;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.SpellCheckDriver;
 import com.google.gwt.user.client.ui.TextArea;
-import com.google.gwt.user.client.ui.SpellCheckDriver.Handler;
-import com.google.gwt.user.client.ui.SpellCheckDriver.Misspelling;
 import com.google.gwt.user.client.ui.richtext.Highlight;
 import com.google.gwt.user.client.ui.richtext.HighlightCategory;
 import com.google.gwt.user.client.ui.richtext.HighlightClickEvent;
@@ -31,12 +35,11 @@ import com.google.gwt.user.client.ui.richtext.HighlightClickHandler;
 import com.google.gwt.user.client.ui.richtext.HighlightMouseEvent;
 import com.google.gwt.user.client.ui.richtext.HighlightMouseHandler;
 import com.google.gwt.user.client.ui.richtext.RichTextEditor;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import com.google.gwt.user.client.ui.richtext.SpellCheck;
+import com.google.gwt.user.client.ui.richtext.SpellCheck.CallBack;
+import com.google.gwt.user.client.ui.richtext.SpellCheck.Misspelling;
+import com.google.gwt.user.client.ui.richtext.SpellCheck.Request;
+import com.google.gwt.user.client.ui.richtext.SpellCheck.Response;
 
 /**
  * Simple rich text editor demonstration.
@@ -65,13 +68,16 @@ public class SimpleRichText implements EntryPoint {
     // Each RichTextEditor can also customize where it gets it spell check
     // information from.
 
-    b.setSpellCheckBroker(new SpellCheckDriver.Broker() {
-      public void request(final Handler handler) {
-        handler.handle(new SpellCheckDriver.Response() {
-          public Misspelling[] getEntries() {
-            return demoSpellCheck(handler.getRequest());
+    b.setSpellCheckModel(new SpellCheck.Model() {
+
+      public void spellCheck(final Request request, CallBack callback) {
+
+        Response response = new SpellCheck.Response() {
+          public Misspelling[] getMisspellings() {
+            return demoSpellCheck(request);
           }
-        });
+        };
+        callback.processSpellCheckResponse(request, response);
       }
     });
 
@@ -88,7 +94,7 @@ public class SimpleRichText implements EntryPoint {
             int count = 0;
 
             public void onClick(HighlightClickEvent event) {
-              String num = (count == 0) ? "no" : ("" + count);              
+              String num = (count == 0) ? "no" : ("" + count);
               String s = "";
               if (count != 1) {
                 s = "s";
@@ -131,7 +137,7 @@ public class SimpleRichText implements EntryPoint {
   /**
    * A client side demo spell checker that has a very tiny dictionary.
    */
-  private Misspelling[] demoSpellCheck(SpellCheckDriver.Request request) {
+  private Misspelling[] demoSpellCheck(Request request) {
     ArrayList accum = new ArrayList();
     String[] words = request.getText().split(" ");
     for (int i = 0; i < words.length; i++) {
