@@ -237,4 +237,7 @@ class RichTextAreaImpl {
 
   void unhookEvents(Element elem, ForeignDOMHost host) {
   }
+
+  public void selectAll(Element element) {    
+  }
 }

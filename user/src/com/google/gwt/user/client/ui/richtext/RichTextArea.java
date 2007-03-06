@@ -258,6 +258,14 @@ public class RichTextArea extends FocusWidget implements HasHTML,
     return impl.addHighlights(getElement(), this, items, category);
   }
 
+  /**
+   * Selects all the text. Not public as we have not settled on a selection API.
+   * Used in testing.
+   */
+  void selectAll() {
+    impl.selectAll(getElement());
+  }
+
   public void addKeyboardListener(KeyboardListener listener) {
     if (keyboardListeners == null) {
       keyboardListeners = new KeyboardListenerCollection();
@@ -610,6 +618,6 @@ public class RichTextArea extends FocusWidget implements HasHTML,
   }
 
   private native void previewEvent(Event evt) /*-{
-    @com.google.gwt.user.client.DOM::previewEvent(Lcom/google/gwt/user/client/Event;)(evt);
-  }-*/;
+   @com.google.gwt.user.client.DOM::previewEvent(Lcom/google/gwt/user/client/Event;)(evt);
+   }-*/;
 }

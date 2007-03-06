@@ -28,6 +28,10 @@ import java.util.List;
  */
 class RichTextAreaImplStandard extends RichTextAreaImpl {
 
+  public void selectAll(Element element) {
+    execCommand(element, "selectall", null);
+  }
+
   /**
    * The constant tag used to mark highlighted areas.
    */

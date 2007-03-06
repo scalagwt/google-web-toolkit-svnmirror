@@ -75,9 +75,10 @@ public class RichTextEditor extends Composite {
     /**
      * Button for font family.
      * 
+     * @param popup popup to use
      * @return the button for font family.
      */
-    public SelectablePopupButton fontFamily();
+    public SelectablePopupButton fontFamily(SuggestionsPopup popup);
 
     /**
      * Button for font size.
