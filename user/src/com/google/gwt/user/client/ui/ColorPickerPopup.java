@@ -19,6 +19,7 @@ package com.google.gwt.user.client.ui;
 import com.google.gwt.user.client.DOM;
 
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -34,7 +35,7 @@ public class ColorPickerPopup extends SelectablePopup {
 
     public Object getValue() {
       return DOM.getStyleAttribute(getElement(), "background");
-    }  
+    }
   }
 
   /**
@@ -81,7 +82,7 @@ public class ColorPickerPopup extends SelectablePopup {
   public ColorPickerPopup(List colors, int numColumns) {
     this.numColumns = numColumns;
     setStyleName("gwt-ColorPickerPopup");
-    setItems(colors);
+    setItems(colors.iterator());
   }
 
   public boolean navigate(char keyCode) {
@@ -121,22 +122,18 @@ public class ColorPickerPopup extends SelectablePopup {
    * 
    * @param colors list of colors.
    */
-  public void setItems(List colors) {
-    int size = colors.size();
-    if (numColumns == -1) {
-      numColumns = (int) Math.ceil(Math.sqrt(size));
-      numColumns = Math.max(numColumns, 1);
-    }
+  public void setItems(Iterator colors) {
+
     int row = 0;
     int i = 0;
 
     while (true) {
       for (int column = 0; column < numColumns; column++) {
-        if (i == size) {
+        if (!colors.hasNext()) {
           // All items have been placed.
           return;
         }
-        String color = (String) colors.get(i);
+        String color = (String) colors.next();
         ColorItem item = new ColorItem(i, color);
         getLayout().setWidget(row, column, item);
         ++i;

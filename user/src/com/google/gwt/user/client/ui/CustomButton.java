@@ -19,122 +19,151 @@ package com.google.gwt.user.client.ui;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Event;
- 
+
 /**
- * Style Button with built in support for pressed, disabled, and hovering
- * attributes. By default, a <code>StyleButton</code> acts as a toggle button.
- * Once a button is pressed it will not be depressed until the button is clicked
- * again or <code>setPressed(true)</code> is called.
+ * Custom Button is a base button class with built in support for a set number
+ * of button faces.
  * <p>
- * The three attributes are displayed using the display states defined below.
+ * The supported faces are defined below:
  * 
  * <table border=4>
  * <tr>
- * <td><b>attributes</b></td>
- * <td><b>state</b></td>
+ * 
+ * <td><b>face name</b></td>
+ * <td><b>description of face</b></td>
  * </tr>
  * 
  * <tr>
- * <td> none</td>
  * <td>up</td>
+ * <td>face shown when button is up</td>
+ * 
  * </tr>
  * 
  * <tr>
- * <td>pressed</td>
  * <td>down</td>
+ * <td>face shown when button is down</td>
+ * 
  * </tr>
  * 
  * <tr>
- * <td>hovering</td>
  * <td>upHover</td>
+ * <td>face shown when button is up and hovering</td>
+ * 
  * </tr>
  * 
  * 
  * <tr>
- * <td>disabled</td>
  * <td>upDisabled</td>
+ * <td>face shown when button is up and disabled</td>
+ * 
  * </tr>
  * 
  * <tr>
- * <td>pressed, hovering</td>
  * <td>downHover</td>
+ * <td>face shown when button is down and hovering</td>
+ * 
  * </tr>
  * 
  * <tr>
- * <td>pressed, disabled</td>
  * <td>downDisabled</td>
+ * <td>face shown when button is down and disabled</td>
+ * 
  * </tr>
  * </table>
  * <p>
  * 
  * 
  * 
- * Each state has it's own style. For example, downHover is assigned, by
- * default, the css class <code> gwt-StyleButton-downHover </code>. Optionally,
- * each state can be assigned is own image or html face.
+ * Each face has it's own style modifier. For example, <code>downHover</code>
+ * is assigned the css modifier <i>downHover</i>. So, if the button's overall
+ * style name is <i>gwt-PushButton</i> then when showing the
+ * <code>downHover</code> face, the button's style is <i>
+ * gwt-PushButton-downHover</i>.
+ * <p>
+ * Each button face can be assigned is own image, text, or html contents. If no
+ * content is defined for a face, then the face will use the contents of another
+ * face. For example, if <code>downHover</code> does not have defined
+ * contents, it will use the contents defined by the <code>down</code> face.
  * 
- * 
- * ButtonStyle.setPressed(true); ButtonStyle.setHover(false);
- * ButtonStyle.setFace(boolean isPressed, boolean
  * 
  */
-public class CustomButton extends FocusWidget implements SourcesKeyboardEvents {
+public abstract class CustomButton extends ButtonBase implements
+    SourcesKeyboardEvents {
   /**
-   * Represents the button's current state.
+   * Represents a button's face. Each face is associated with its own style
+   * modifier and, optionally, its own contents html, text, or image.
    */
-  public abstract static class State {
+  public abstract static class Face implements HasHTML, HasText {
     private static final String STYLE_HTML_FACE = "html-face";
-    private final State delegateTo;
+    private final Face delegateTo;
     private Element face;
 
     /**
-     * Constructor for <code>State</code>. Creates a new state that delegates
-     * to the supplied state.
+     * Constructor for <code>Face</code>. Creates a new face that delegates
+     * to the supplied face.
      * 
-     * @param delegateTo default display face provider
+     * @param delegateTo default content provider
      */
-    private State(State delegateTo) {
+    private Face(Face delegateTo) {
       this.delegateTo = delegateTo;
     }
 
     /**
-     * Set the state's face display as an image.
+     * Gets the face's contents as html.
      * 
-     * @param image image to set as state display
+     * @return face's contents as html
+     * 
      */
-    public final void setFace(AbstractImage image) {
+    public String getHTML() {
+      return DOM.getInnerHTML(getFace());
+    }
+
+    /**
+     * Gets the face's contents as text.
+     * 
+     * @return face's contents as text
+     * 
+     */
+    public String getText() {
+      return DOM.getInnerText(getFace());
+    }
+
+    /**
+     * Set the face's contents as html.
+     * 
+     * @param html html to set as face's contents html
+     * 
+     */
+    public void setHTML(String html) {
+      face = DOM.createDiv();
+      DOM.setInnerHTML(face, html);
+      UIObject.setStyleName(face, STYLE_HTML_FACE, true);
+    }
+
+    /**
+     * Set the face's contents as an image.
+     * 
+     * @param image image to set as face contents
+     */
+    public final void setImage(AbstractImage image) {
       // Cloning face in order to suppress extra click events.
       face = image.getElement();
       DOM.sinkEvents(face, 0);
     }
 
     /**
-     * Sets the state's display face as text.
+     * Sets the face's contents as text.
      * 
-     * @param text text to set as state's display text
+     * @param text text to set as face's contents
      */
-    public final void setFace(String text) {
-      setFace(text, false);
-    }
-
-    /**
-     * Set the state's display face as text.
-     * 
-     * @param text text to set as state's display text
-     * @param asHTML <code>true</code> to treat the specified text as html
-     */
-    public void setFace(String text, boolean asHTML) {
+    public final void setText(String text) {
       face = DOM.createDiv();
-      if (asHTML) {
-        DOM.setInnerHTML(face, text);
-      } else {
-        DOM.setInnerText(face, text);
-      }
+      DOM.setInnerText(face, text);
       UIObject.setStyleName(face, STYLE_HTML_FACE, true);
     }
 
     /**
-     * Sets the state's display face.
+     * Sets the face's contents.
      */
 
     public final String toString() {
@@ -142,25 +171,25 @@ public class CustomButton extends FocusWidget implements SourcesKeyboardEvents {
     }
 
     /**
-     * Get the name of the state. This property is also used as a modifier on
-     * the <code>StyleButton</code> style.
+     * Gets the ID associated with this face. This will be a bitwise and of all
+     * of the attributes that comprise this face.
+     */
+    abstract int getFaceID();
+
+    /**
+     * Get the name of the face. This property is also used as a modifier on the
+     * <code>CustomButton</code> style.
      * <p>
-     * For instance, if the <code>StyleButton</code> style is "gwt-PushButton"
-     * and the state name is "up", then the CSS class name will be
-     * "gwt-StyleButton-up".
+     * For instance, if the <code>CustomButton</code> style is
+     * "gwt-PushButton" and the face name is "up", then the CSS class name will
+     * be "gwt-CustomButton-up".
      * 
-     * @return the state's name
+     * @return the face's name
      */
     abstract String getName();
 
     /**
-     * Gets the ID associated with this state. This will be a bitwise and of all
-     * of the attributes that comprise this state.
-     */
-    abstract int getStateID();
-
-    /**
-     * Gets the display face associated with this state.
+     * Gets the contents associated with this face.
      */
     private Element getFace() {
       if (face == null) {
@@ -177,10 +206,12 @@ public class CustomButton extends FocusWidget implements SourcesKeyboardEvents {
     }
   }
 
+  private static final String STYLENAME_DEFAULT = "gwt-CustomButton";
+
   /**
    * Pressed Attribute bit.
    */
-  private static final int PRESSED_ATTRIBUTE = 1;
+  private static final int DOWN_ATTRIBUTE = 1;
 
   /**
    * Hovering Attribute bit.
@@ -193,138 +224,123 @@ public class CustomButton extends FocusWidget implements SourcesKeyboardEvents {
   private static final int DISABLED_ATTRIBUTE = 4;
 
   /**
-   * ID for up state.
+   * ID for up face.
    */
   private static final int UP = 0;
 
   /**
-   * ID for down state.
+   * ID for down face.
    */
-  private static final int DOWN = PRESSED_ATTRIBUTE;
+  private static final int DOWN = DOWN_ATTRIBUTE;
 
   /**
-   * ID for upHover state.
+   * ID for upHovering face.
    */
-  private static final int UP_HOVER = HOVERING_ATTRIBUTE;
+  private static final int UP_HOVERING = HOVERING_ATTRIBUTE;
 
   /**
-   * ID for downHover state.
+   * ID for downHovering face.
    */
-  private static final int DOWN_HOVER = PRESSED_ATTRIBUTE | HOVERING_ATTRIBUTE;
+  private static final int DOWN_HOVERING = DOWN_ATTRIBUTE | HOVERING_ATTRIBUTE;
 
   /**
-   * ID for upDisabled state.
+   * ID for upDisabled face.
    */
   private static final int UP_DISABLED = DISABLED_ATTRIBUTE;
 
   /**
-   * ID for downDisabled state.
+   * ID for downDisabled face.
    */
   private static final int DOWN_DISABLED = DOWN | DISABLED_ATTRIBUTE;
 
   /**
-   * Should the button act as a toggle button?
-   */
-  private boolean toggling = false;
-
-  /**
-   * Base style name. By default gwt-StyleButton.
+   * Base style name. By default gwt-CustomButton.
    */
   private String baseStyleName;
 
   /**
    * The button's current face.
    */
-  private Element curFace;
+  private Element curFaceElement;
 
   /**
-   * The button's current state.
+   * The button's current face.
    */
-  private State curState;
+  private Face curFace;
 
   /**
-   * State for up.
+   * Face for up.
    */
-  private State up;
+  private Face up;
 
   /**
-   * State for down.
+   * Face for down.
    */
-  private State down;
+  private Face down;
 
   /**
-   * State for downHover.
+   * Face for downHover.
    */
-  private State downHover;
+  private Face downHovering;
 
   /**
-   * State for upHover.
+   * Face for upHover.
    */
-  private State upHover;
+  private Face upHovering;
 
   /**
-   * State for upDisabled.
+   * Face for upDisabled.
    */
-  private State upDisabled;
+  private Face upDisabled;
 
   /**
-   * State for downDisabled.
+   * Face for downDisabled.
    */
-  private State downDisabled;
+  private Face downDisabled;
 
   /**
    * 
-   * Constructor for <code>CustomButton</code>.
-   */
-  public CustomButton() {
-    super(FocusWidget.getFocusImpl().createFocusable());
-    sinkEvents(Event.ONCLICK | Event.MOUSEEVENTS);
-    setUp(createState(null, "up", UP));
-  }
-
-  /**
-   * 
-   * Constructor for <code>StyleButton</code>. The supplied image is used as
-   * the default face for all states.
+   * Constructor for <code>CustomButton</code>. The supplied image is used to
+   * construct the default face.
    * 
    * @param upImage image for the default face of the button
    */
   public CustomButton(AbstractImage upImage) {
     this();
-    getUp().setFace(upImage);
+    getUpFace().setImage(upImage);
   }
 
   /**
    * 
-   * Constructor for <code>StyleButton</code>.
+   * Constructor for <code>CustomButton</code>.
    * 
-   * @param upImage image for the default face of the button
-   * @param downImage image for the down state of the button
+   * @param upImage image for the default(up) face of the button
+   * @param downImage image for the down face of the button
    */
   public CustomButton(AbstractImage upImage, AbstractImage downImage) {
     this(upImage);
-    getDown().setFace(downImage);
+    getDownFace().setImage(downImage);
   }
 
   /**
-   * Constructor for <code>StyleButton</code>.
+   * Constructor for <code>CustomButton</code>.
    * 
-   * @param upImage image for the default face of the button
-   * @param downImage image for the down state of the button
+   * @param upImage image for the default(up) face of the button
+   * @param downImage image for the down face of the button
    * @param listener clickListener
    */
   public CustomButton(AbstractImage upImage, AbstractImage downImage,
       ClickListener listener) {
     this(upImage, listener);
-    getDown().setFace(downImage);
+    getDownFace().setImage(downImage);
   }
 
   /**
    * 
-   * Constructor for <code>StyleButton</code>. The supplied image is used as
-   * the default face for all states.
+   * Constructor for <code>CustomButton</code>. The supplied image is used to
+   * construct the default face of the button.
    * 
-   * @param upImage the default face of the button.
+   * @param upImage image for the default (up) face of the button
    * @param listener the click listener
    */
   public CustomButton(AbstractImage upImage, ClickListener listener) {
@@ -334,25 +350,25 @@ public class CustomButton extends FocusWidget implements SourcesKeyboardEvents {
 
   /**
    * 
-   * Constructor for <code>StyleButton</code>. The supplied html is used as
-   * the default face for all states.
+   * Constructor for <code>CustomButton</code>. The supplied text is used to
+   * construct the default face of the button.
    * 
-   * @param htmlFace the default face of the button.
+   * @param upText the text for the default (up) face of the button.
    */
-  public CustomButton(String htmlFace) {
+  public CustomButton(String upText) {
     this();
-    getUp().setFace(htmlFace);
+    getUpFace().setText(upText);
   }
 
   /**
-   * Constructor for <code>StyleButton</code>. The supplied html is used as
-   * the default face for all states.
+   * Constructor for <code>CustomButton</code>. The supplied text is used to
+   * construct the default face of the button.
    * 
-   * @param htmlFace the default face of the button
+   * @param upText the text for the default (up) face of the button
    * @param listener the click listener
    */
-  public CustomButton(String htmlFace, ClickListener listener) {
-    this(htmlFace);
+  public CustomButton(String upText, ClickListener listener) {
+    this(upText);
     addClickListener(listener);
   }
 
@@ -360,117 +376,124 @@ public class CustomButton extends FocusWidget implements SourcesKeyboardEvents {
    * 
    * Constructor for <code>CustomButton</code>.
    * 
-   * @param string
-   * @param string2
+   * @param upText the text for the default (up) face of the button
+   * @param downText the text for down face of the button
    */
   public CustomButton(String upText, String downText) {
     this(upText);
   }
 
   /**
-   * Gets the down state.
-   * 
-   * @return the down state
+   * Constructor for <code>CustomButton</code>.
    */
-  public final State getDown() {
-    if (down == null) {
-      setDown(createState(getUp(), "down", DOWN));
-    }
-    return down;
+  protected CustomButton() {
+    super(FocusPanel.impl.createFocusable());
+    sinkEvents(Event.ONCLICK | Event.MOUSEEVENTS);
+    setUpFace(createFace(null, "up", UP));
+    setStyleName(STYLENAME_DEFAULT);
   }
 
   /**
-   * Gets the downDisabled state.
+   * Gets the downDisabled face of the button.
    * 
-   * @return the downDisabled state
+   * @return the downDisabled face
    */
-  public final State getDownDisabled() {
+  public final Face getDownDisabledFace() {
     if (downDisabled == null) {
-      setDownDisabled(createState(getDown(), "down-disabled", DOWN_DISABLED));
+      setDownDisabledFace(createFace(getDownFace(), "down-disabled",
+          DOWN_DISABLED));
     }
     return downDisabled;
   }
 
   /**
-   * Gets the downHover state.
+   * Gets the down face of the button.
    * 
-   * @return the downHover state
+   * @return the down face
    */
-  public final State getDownHover() {
-    if (downHover == null) {
-      setDownHover(createState(getDown(), "down-hover", DOWN_HOVER));
+  public final Face getDownFace() {
+    if (down == null) {
+      setDownFace(createFace(getUpFace(), "down", DOWN));
     }
-    return downHover;
+    return down;
+  }
+
+  /**
+   * Gets the downHovering face of the button.
+   * 
+   * @return the downHovering face
+   */
+  public final Face getDownHoveringFace() {
+    if (downHovering == null) {
+      setDownHoveringFace(createFace(getDownFace(), "down-hovering",
+          DOWN_HOVERING));
+    }
+    return downHovering;
+  }
+
+  /**
+   * Gets the current face's html.
+   * 
+   * @return current face's html
+   */
+  public String getHTML() {
+    return getCurrentFace().getHTML();
   }
 
   public final String getStyleName() {
     return baseStyleName;
   }
 
-  /**
-   * Gets the up state.
-   * 
-   * @return the up state
-   */
-  public final State getUp() {
-    return up;
+  public int getTabIndex() {
+    return FocusPanel.impl.getTabIndex(getElement());
   }
 
   /**
-   * Gets the upDisabled state.
+   * Gets the current face's text.
    * 
-   * @return the upDisabled state
+   * @return current face's text
    */
-  public final State getUpDisabled() {
+  public String getText() {
+    return getCurrentFace().getText();
+  }
+
+  /**
+   * Gets the upDisabled face of the button.
+   * 
+   * @return the upDisabled face
+   */
+  public final Face getUpDisabledFace() {
     if (upDisabled == null) {
-      setUpDisabled(createState(getUp(), "up-disabled", UP_DISABLED));
+      setUpDisabledFace(createFace(getUpFace(), "up-disabled", UP_DISABLED));
     }
     return upDisabled;
   }
 
   /**
-   * Gets the upHover state.
+   * Gets the up face of the button.
    * 
-   * @return the upHover state
+   * @return the up face
    */
-  public final State getUpHover() {
-    if (upHover == null) {
-      setUpHover(createState(getUp(), "up-hover", UP_HOVER));
+  public final Face getUpFace() {
+    return up;
+  }
+
+  /**
+   * Gets the upHovering face of the button.
+   * 
+   * @return the upHovering face
+   */
+  public final Face getUpHoveringFace() {
+    if (upHovering == null) {
+      setUpHoveringFace(createFace(getUpFace(), "up-hovering", UP_HOVERING));
     }
-    return upHover;
-  }
-
-  /**
-   * Is this button disabled?
-   * 
-   * @return <code>true</code> if the button is disabled
-   */
-  public final boolean isDisabled() {
-    return (DISABLED_ATTRIBUTE & curState.getStateID()) > 0;
-  }
-
-  /**
-   * Is this button pressed?
-   * 
-   * @return <code>true</code> if the button is pressed
-   */
-  public final boolean isPressed() {
-    return (PRESSED_ATTRIBUTE & curState.getStateID()) > 0;
-  }
-
-  /**
-   * Is this button a toggle button?
-   * 
-   * @return whether this button is a toggle button. Defaults to true
-   */
-  public boolean isToggleButton() {
-    return toggling;
+    return upHovering;
   }
 
   public void onBrowserEvent(Event event) {
     // Should not act on button if disabled.
-    if (isDisabled()) {
-      return;
+    if (isEnabled() == false) {
+      throw new RuntimeException("Do we ever act on disabled buttons?");
     }
 
     int type = DOM.eventGetType(event);
@@ -481,85 +504,115 @@ public class CustomButton extends FocusWidget implements SourcesKeyboardEvents {
       case Event.ONMOUSEOVER:
         setHovering(true);
         break;
-      case Event.ONMOUSEDOWN:
-      case Event.ONMOUSEUP:
-
-        if (!toggling) {
-          setPressed(type == Event.ONMOUSEDOWN);
-        }
-        break;
-      case Event.ONCLICK:
-        if (toggling) {
-          togglePress();
-        }
-        break;
     }
     super.onBrowserEvent(event);
   }
 
+  public void setAccessKey(char key) {
+    DOM.setAttribute(getElement(), "accessKey", "" + key);
+  }
+
   /**
-   * Sets whether this button is disabled.
+   * Sets whether this button is enabled.
    * 
-   * @param disabled <code>true</code> to disabled the button,
-   *          <code>false</code> to disable it
+   * @param enabled <code>true</code> to enable the button, <code>false</code>
+   *          to disable it
    */
-  public final void setDisabled(boolean disabled) {
-    if (isDisabled() != disabled) {
+  public final void setEnabled(boolean enabled) {
+    if (isEnabled() != enabled) {
       toggleDisabled();
+      super.setEnabled(enabled);
+    }
+  }
+
+  public void setFocus(boolean focused) {
+    if (focused) {
+      FocusPanel.impl.focus(getElement());
+    } else {
+      FocusPanel.impl.blur(getElement());
     }
   }
 
   /**
-   * Sets whether this button is pressed.
+   * Sets the current face's html.
    * 
-   * @param pressed <code>true</code> to press the button, <code>false</code>
-   *          otherwise
+   * @param html html to set
    */
-  public final void setPressed(boolean pressed) {
-    if (pressed != isPressed()) {
-      togglePress();
-    }
+  public void setHTML(String html) {
+    getCurrentFace().setHTML(html);
   }
 
   public final void setStyleName(String styleName) {
     if (styleName == null) {
-      throw new IllegalStateException("Illegal State");
+      throw new IllegalStateException("Cannot set the base style name to null");
     }
-
     baseStyleName = styleName;
-    // force state refresh
-    State temp = curState;
-    curState = null;
-    setCurrentState(temp);
+
+    // If initialized, force refresh.
+    if (curFace != null) {
+      Face temp = curFace;
+      curFace = null;
+      setCurrentFace(temp);
+    }
+  }
+
+  public void setTabIndex(int index) {
+    FocusPanel.impl.setTabIndex(getElement(), index);
   }
 
   /**
-   * Sets whether this button behaves as a toggle button.
+   * Sets the current face's text.
    * 
-   * @param togglingBehavior is this button a toggle button
+   * @param text text to set
    */
-  public void setToggleBehavior(boolean togglingBehavior) {
-    this.toggling = togglingBehavior;
+  public void setText(String text) {
+    getCurrentFace().setText(text);
   }
 
   /**
-   * Overridden on attach to ensure that a button state has been chosen before
+   * Overridden on attach to ensure that a button face has been chosen before
    * the button is displayed.
    */
   protected void onAttach() {
-    if (curState == null) {
-      finishSetup();
-    }
+    finishSetup();
     super.onAttach();
   }
 
   /**
-   * Gets the current state. Used for debugging
+   * Toggle the up/down attribute.
    * 
-   * @return the current state
    */
-  State getCurrentState() {
-    return curState;
+  protected void toggleDown() {
+    int newFaceID = curFace.getFaceID() ^ DOWN_ATTRIBUTE;
+    setCurrentFace(newFaceID);
+  }
+
+  /**
+   * Common setup between constructors.
+   */
+  void finishSetup() {
+    setCurrentFace(getUpFace());
+  }
+
+  /**
+   * Gets the current face of the button. Used for debugging
+   * 
+   * @return the current face
+   */
+  Face getCurrentFace() {
+    if (curFace == null) {
+      finishSetup();
+    }
+    return curFace;
+  }
+
+  /**
+   * Is this button down?
+   * 
+   * @return <code>true</code> if the button is down
+   */
+  boolean isDown() {
+    return (DOWN_ATTRIBUTE & curFace.getFaceID()) > 0;
   }
 
   /**
@@ -568,7 +621,19 @@ public class CustomButton extends FocusWidget implements SourcesKeyboardEvents {
    * @return <code>true</code> if the mouse is hovering
    */
   final boolean isHovering() {
-    return (HOVERING_ATTRIBUTE & curState.getStateID()) > 0;
+    return (HOVERING_ATTRIBUTE & curFace.getFaceID()) > 0;
+  }
+
+  /**
+   * Sets whether this button is down.
+   * 
+   * @param down <code>true</code> to press the button, <code>false</code>
+   *          otherwise
+   */
+  void setDown(boolean down) {
+    if (down != isDown()) {
+      toggleDown();
+    }
   }
 
   /**
@@ -578,129 +643,119 @@ public class CustomButton extends FocusWidget implements SourcesKeyboardEvents {
    */
   final void setHovering(boolean hovering) {
     if (hovering != isHovering()) {
-      toggleHovering();
+      toggleHover();
     }
   }
 
-  private State createState(State delegateTo, final String name,
-      final int stateID) {
-    return new State(delegateTo) {
+  private Face createFace(Face delegateTo, final String name, final int faceID) {
+    return new Face(delegateTo) {
 
       public String getName() {
         return name;
       }
 
-      int getStateID() {
-        return stateID;
+      int getFaceID() {
+        return faceID;
       }
     };
   }
 
-  /**
-   * Common setup between constructors.
-   */
-  private void finishSetup() {
-    setCurrentState(getUp());
-    setStyleName("gwt-StyleButton");
-  }
-
-  private State getStateFromID(int id) {
+  private Face getFaceFromID(int id) {
     switch (id) {
       case DOWN:
-        return getDown();
+        return getDownFace();
       case UP:
-        return getUp();
-      case DOWN_HOVER:
-        return getDownHover();
-      case UP_HOVER:
-        return getUpHover();
+        return getUpFace();
+      case DOWN_HOVERING:
+        return getDownHoveringFace();
+      case UP_HOVERING:
+        return getUpHoveringFace();
       case UP_DISABLED:
-        return getUpDisabled();
+        return getUpDisabledFace();
       case DOWN_DISABLED:
-        return getDownDisabled();
+        return getDownDisabledFace();
       default:
-        throw new IllegalStateException(id + " is not a known state id.");
+        throw new IllegalStateException(id + " is not a known face id.");
     }
   }
 
-  /**
-   * Sets the current state based on the stateID.
-   * 
-   * @param stateID sets the new state of the button
-   */
-  private void setCurrentState(int stateID) {
-    State newState = getStateFromID(stateID);
-    setCurrentState(newState);
-  }
-
-  private void setCurrentState(State newState) {
-    if (curState != newState) {
-      curState = newState;
-      Element newFace = newState.getFace();
-      if (curFace != newFace) {
-        if (curFace != null) {
-          DOM.removeChild(getElement(), curFace);
+  private void setCurrentFace(Face newFace) {
+    if (curFace != newFace) {
+      curFace = newFace;
+      Element newFaceElement = newFace.getFace();
+      if (curFaceElement != newFaceElement) {
+        if (curFaceElement != null) {
+          DOM.removeChild(getElement(), curFaceElement);
         }
-        curFace = newFace;
-        DOM.appendChild(getElement(), curFace);
+        curFaceElement = newFaceElement;
+        DOM.appendChild(getElement(), curFaceElement);
       }
-
-      super.setStyleName(baseStyleName + "-" + curState.getName());
+      super.setStyleName(baseStyleName + "-" + curFace.getName());
     }
   }
 
   /**
-   * Sets the down state.
+   * Sets the current face based on the faceID.
    * 
-   * @param down the down state
+   * @param faceID sets the new face of the button
    */
-  private void setDown(State down) {
-    this.down = down;
+  private void setCurrentFace(int faceID) {
+    Face newFace = getFaceFromID(faceID);
+    setCurrentFace(newFace);
   }
 
   /**
-   * Sets the downDisabled state.
+   * Sets the downDisabled face of the button.
    * 
-   * @param downDisabled downDisabled state
+   * @param downDisabled downDisabled face
    */
-  private void setDownDisabled(State downDisabled) {
+  private void setDownDisabledFace(Face downDisabled) {
     this.downDisabled = downDisabled;
   }
 
   /**
-   * Sets the downHover state.
+   * Sets the down face of the button.
    * 
-   * @param hoverDown hoverDown state
+   * @param down the down face
    */
-  private void setDownHover(State hoverDown) {
-    this.downHover = hoverDown;
+  private void setDownFace(Face down) {
+    this.down = down;
   }
 
   /**
-   * Sets the up state.
+   * Sets the downHovering face of the button.
    * 
-   * @param up up state
+   * @param downHovering hoverDown face
    */
-  private void setUp(State up) {
-    this.up = up;
+  private void setDownHoveringFace(Face downHovering) {
+    this.downHovering = downHovering;
   }
 
   /**
-   * Sets the upDisabled state.
+   * Sets the upDisabled face of the button.
    * 
-   * @param upDisabled upDisabled state
+   * @param upDisabled upDisabled face
    */
-  private void setUpDisabled(State upDisabled) {
+  private void setUpDisabledFace(Face upDisabled) {
     this.upDisabled = upDisabled;
   }
 
   /**
-   * Sets the upHover state.
+   * Sets the up face of the button.
    * 
-   * @param upHover upHover state
+   * @param up up face
    */
-  private void setUpHover(State upHover) {
-    this.upHover = upHover;
+  private void setUpFace(Face up) {
+    this.up = up;
+  }
+
+  /**
+   * Sets the upHovering face of the button.
+   * 
+   * @param upHovering upHovering face
+   */
+  private void setUpHoveringFace(Face upHovering) {
+    this.upHovering = upHovering;
   }
 
   /**
@@ -708,33 +763,24 @@ public class CustomButton extends FocusWidget implements SourcesKeyboardEvents {
    */
   private void toggleDisabled() {
     // Add disabled.
-    int newStateID = curState.getStateID() ^ DISABLED_ATTRIBUTE;
+    int newFaceID = curFace.getFaceID() ^ DISABLED_ATTRIBUTE;
 
     // Remove hovering.
-    newStateID &= ~HOVERING_ATTRIBUTE;
+    newFaceID &= ~HOVERING_ATTRIBUTE;
 
-    // Sets the current state.
-    setCurrentState(newStateID);
+    // Sets the current face.
+    setCurrentFace(newFaceID);
   }
 
   /**
    * Toggle the hovering attribute.
    */
-  private void toggleHovering() {
+  private void toggleHover() {
     // Add hovering.
-    int newStateID = curState.getStateID() ^ HOVERING_ATTRIBUTE;
+    int newFaceID = curFace.getFaceID() ^ HOVERING_ATTRIBUTE;
 
     // Remove disabled.
-    newStateID &= ~DISABLED_ATTRIBUTE;
-    setCurrentState(newStateID);
-  }
-
-  /**
-   * Toggle the pressed attribute.
-   * 
-   */
-  private void togglePress() {
-    int newStateID = curState.getStateID() ^ PRESSED_ATTRIBUTE;
-    setCurrentState(newStateID);
+    newFaceID &= ~DISABLED_ATTRIBUTE;
+    setCurrentFace(newFaceID);
   }
 }

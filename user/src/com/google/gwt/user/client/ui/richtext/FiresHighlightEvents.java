@@ -23,7 +23,7 @@ package com.google.gwt.user.client.ui.richtext;
  * the {@link com.google.gwt.user.client.ui.richtext.HighlightClickHandler}
  * interface.
  */
-public interface FiresHighlightEvents {
+interface FiresHighlightEvents {
 
   /**
    * Adds a handler for click events.

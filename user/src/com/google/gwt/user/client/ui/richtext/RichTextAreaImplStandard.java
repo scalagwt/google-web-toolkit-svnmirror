@@ -28,10 +28,6 @@ import java.util.List;
  */
 class RichTextAreaImplStandard extends RichTextAreaImpl {
 
-  public void selectAll(Element element) {
-    execCommand(element, "selectall", null);
-  }
-
   /**
    * The constant tag used to mark highlighted areas.
    */
@@ -76,6 +72,10 @@ class RichTextAreaImplStandard extends RichTextAreaImpl {
 
   public String getHighlightId(Element possibleHighlight) {
     return DOMUtil.getAttribute(possibleHighlight, HIGHLIGHT_ID);
+  }
+
+  public void selectAll(Element element) {
+    execCommand(element, "selectall", null);
   }
 
   Iterator addHighlights(Element elem, RichTextArea rich, List words,
@@ -208,12 +208,12 @@ class RichTextAreaImplStandard extends RichTextAreaImpl {
       parent = parent.parentNode;
     }
  
-  // Must cover both Standard and Quirks mode. 
+    // Must cover both Standard and Quirks mode. 
     return left + doc.body.scrollLeft + doc.documentElement.scrollLeft;
   }-*/;
 
-  int getAbsoluteLeft(Highlight highlight, Element elem) {
-    return getAbsoluteLeft(highlight.getElement()) + DOM.getAbsoluteLeft(elem);
+  int getAbsoluteLeft(Element childElement, Element elem) {
+    return getAbsoluteLeft(childElement) + DOM.getAbsoluteLeft(elem);
   }
 
   native int getAbsoluteTop(Element elem) /*-{
@@ -232,8 +232,8 @@ class RichTextAreaImplStandard extends RichTextAreaImpl {
     return top + doc.body.scrollTop + doc.documentElement.scrollTop;
   }-*/;
 
-  int getAbsoluteTop(Highlight highlight, Element elem) {
-    return getAbsoluteTop(highlight.getElement()) + DOM.getAbsoluteTop(elem);
+  int getAbsoluteTop(Element childElement, Element elem) {
+    return getAbsoluteTop(childElement) + DOM.getAbsoluteTop(elem);
   }
 
   String getBackColor(Element elem) {
@@ -416,10 +416,11 @@ class RichTextAreaImplStandard extends RichTextAreaImpl {
   }
 
   native void setFocus(Element elem, boolean focused) /*-{
-    if (focused)
+    if (focused) {
       elem.contentWindow.focus();
-    else
+    } else {
       elem.contentWindow.blur();
+    } 
   }-*/;
 
   void setFontName(Element elem, String name) {
@@ -478,7 +479,8 @@ class RichTextAreaImplStandard extends RichTextAreaImpl {
     return DOMUtil.getFirstChildRaw(div);
   }
 
-  private native void execCommandAssumingFocus(Element elem, String cmd, String param) /*-{
+  private native void execCommandAssumingFocus(Element elem, String cmd,
+      String param) /*-{
     elem.contentWindow.document.execCommand(cmd, false, param);
   }-*/;
 
@@ -499,7 +501,7 @@ class RichTextAreaImplStandard extends RichTextAreaImpl {
   }
 
   private native boolean queryCommandStateAssumingFocus(Element elem, String cmd) /*-{
-      return !!elem.contentWindow.document.queryCommandState(cmd); 
+    return !!elem.contentWindow.document.queryCommandState(cmd); 
   }-*/;
 
   private native String queryCommandValueAssumingFocus(Element elem, String cmd) /*-{

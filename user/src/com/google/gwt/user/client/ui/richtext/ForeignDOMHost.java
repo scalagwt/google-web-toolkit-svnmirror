@@ -21,13 +21,13 @@ import com.google.gwt.user.client.Event;
 /**
  * Interface for classes to implement to handle raw events from a foreign DOM.
  */
-public interface ForeignDOMHost {
+interface ForeignDOMHost {
   /**
    * An raw event method similar to
-   * {@link com.google.gwt.user.client.ui.Widget#onBrowserEvent(Event)}.  The events
-   * may be preventDefault'ed, which will prevent the firing of the listeners, although
-   * this must be done with {@link DOMUtil#eventPreventDefault(Event)} to
-   * correctly mark the event.
+   * {@link com.google.gwt.user.client.ui.Widget#onBrowserEvent(Event)}. The
+   * events may be preventDefault'ed, which will prevent the firing of the
+   * listeners, although this must be done with
+   * {@link DOMUtil#eventPreventDefault(Event)} to correctly mark the event.
    * 
    * @param sender the element sending the event
    * @param event the DOM event being sent

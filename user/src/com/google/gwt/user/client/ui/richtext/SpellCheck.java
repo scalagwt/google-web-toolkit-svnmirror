@@ -357,7 +357,7 @@ public class SpellCheck {
     SuggestionsPopup noSuggestions = new SuggestionsPopup();
     List noSuggestionsList = new ArrayList();
     noSuggestionsList.add(labels.noSuggestions());
-    noSuggestions.setItems(noSuggestionsList);
+    noSuggestions.setItems(noSuggestionsList.iterator());
     noSuggestions.setStyleName("gwt-RichTextEditor-NoSuggestions");
     return noSuggestions;
   }
@@ -416,7 +416,7 @@ public class SpellCheck {
         List suggestions = (List) wordsToSuggestions.get(key);
         if (suggestions.size() > 0) {
           noSuggestions.hide();
-          noSuggestions.setItems(suggestions);
+          noSuggestions.setItems(suggestions.iterator());
           noSuggestions.showBelow(selected);
         } else {
           noSuggestions.hide();

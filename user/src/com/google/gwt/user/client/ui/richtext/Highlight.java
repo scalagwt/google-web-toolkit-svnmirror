@@ -83,14 +83,14 @@ public class Highlight extends UIObject implements FiresHighlightEvents,
     // The absoluteLeft and absoluteTop are local to their iframe, hence the
     // addition, and the document-specific getAbsoluteLeft. DOM methods cannot
     // be used here because of the iframe.
-    return owner.getAbsoluteLeft(this);
+    return owner.getAbsoluteLeft(this.getElement());
   }
 
   public int getAbsoluteTop() {
     // The absoluteTop and absoluteTop are local to their iframe, hence the
     // addition, and the document-specific getAbsoluteTop. DOM methods cannot be
     // used here because of the iframe.
-    return owner.getAbsoluteTop(this);
+    return owner.getAbsoluteTop(this.getElement());
   }
 
   /**

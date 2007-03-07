@@ -19,8 +19,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.Constants;
 import com.google.gwt.user.client.ui.ColorPickerPopup;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.CustomButton;
-import com.google.gwt.user.client.ui.SelectablePopupButton;
+import com.google.gwt.user.client.ui.PushButton;
+import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.SuggestionsPopup;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
@@ -30,7 +30,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 public class RichTextEditor extends Composite {
 
   /**
-   * Supplies push buttons for use in the tool bar.
+   * Provides buttons for use in the tool bar.
    */
   public interface ButtonProvider {
 
@@ -40,7 +40,7 @@ public class RichTextEditor extends Composite {
      * @param popup popup to use
      * @return the button for background color.
      */
-    public SelectablePopupButton backgroundColor(ColorPickerPopup popup);
+    public DropDownButton backgroundColor(ColorPickerPopup popup);
 
     /**
      * Button for block style.
@@ -48,21 +48,21 @@ public class RichTextEditor extends Composite {
      * @param popup popup to use
      * @return the button for block style.
      */
-    public SelectablePopupButton blockStyle(SuggestionsPopup popup);
+    public DropDownButton blockStyle(SuggestionsPopup popup);
 
     /**
      * Button for bold.
      * 
      * @return the button for bold.
      */
-    public CustomButton bold();
+    public ToggleButton bold();
 
     /**
      * Button for bulleted list.
      * 
      * @return the button for bulleted list.
      */
-    public CustomButton bulletList();
+    public ToggleButton bulletList();
 
     /**
      * Button for font color.
@@ -70,15 +70,15 @@ public class RichTextEditor extends Composite {
      * @param popup popup to use
      * @return the button for font color.
      */
-    public SelectablePopupButton fontColor(ColorPickerPopup popup);
+    public DropDownButton fontColor(ColorPickerPopup popup);
 
     /**
-     * Button for font family.
+     * Button for font family. *
      * 
      * @param popup popup to use
      * @return the button for font family.
      */
-    public SelectablePopupButton fontFamily(SuggestionsPopup popup);
+    public DropDownButton fontFamily(SuggestionsPopup popup);
 
     /**
      * Button for font size.
@@ -86,77 +86,77 @@ public class RichTextEditor extends Composite {
      * @param popup popup to use
      * @return the button for font size.
      */
-    public SelectablePopupButton fontSize(SuggestionsPopup popup);
+    public DropDownButton fontSize(SuggestionsPopup popup);
 
     /**
      * Button for insert horizontal rule.
      * 
      * @return the button for insert horizontal rule.
      */
-    public CustomButton insertHRule();
+    public PushButton insertHRule();
 
     /**
      * Button for italics.
      * 
      * @return the button for italics.
      */
-    public CustomButton italics();
+    public ToggleButton italics();
 
     /**
      * Button for justify center.
      * 
      * @return the button for justify center.
      */
-    public CustomButton justifyCenter();
+    public ToggleButton justifyCenter();
 
     /**
      * Button for justify left.
      * 
      * @return the button for justify left.
      */
-    public CustomButton justifyLeft();
+    public ToggleButton justifyLeft();
 
     /**
      * Button for justify right.
      * 
      * @return the button for justify right.
      */
-    public CustomButton justifyRight();
+    public ToggleButton justifyRight();
 
     /**
      * Button for left indent.
      * 
      * @return the button for left indent.
      */
-    public CustomButton leftIndent();
+    public ToggleButton leftIndent();
 
     /**
      * Button for link.
      * 
      * @return the button for link.
      */
-    public CustomButton link();
+    public ToggleButton link();
 
     /**
      * Button for ordered list.
      * 
      * @return the button for ordered list.
      */
-    public CustomButton orderedList();
+    public ToggleButton orderedList();
 
     /**
      * Button for right indent.
      * 
      * @return the button for right indent.
      */
-    public CustomButton rightIndent();
+    public ToggleButton rightIndent();
 
     /**
      * Button for underline.
      * 
      * @return the button for underline.
      */
-    public CustomButton underline();
+    public ToggleButton underline();
   }
 
   /**
@@ -325,7 +325,7 @@ public class RichTextEditor extends Composite {
       LabelProvider labelProvider) {
     richTextArea = new RichTextArea(cssURL);
     impl.setButtonProvider(buttonProvider);
-    impl.setTextProvider(labelProvider);
+    impl.setLabels(labelProvider);
     setup();
   }
 
@@ -337,7 +337,7 @@ public class RichTextEditor extends Composite {
    */
   public RichTextEditor(String cssURL, LabelProvider labelProvider) {
     richTextArea = new RichTextArea(cssURL);
-    impl.setTextProvider(labelProvider);
+    impl.setLabels(labelProvider);
     impl.useDefaultButtonProvider();
     setup();
   }
@@ -352,15 +352,6 @@ public class RichTextEditor extends Composite {
   }
 
   /**
-   * Returns the current label provider.
-   * 
-   * @return the current label provider.
-   */
-  public LabelProvider getTextProvider() {
-    return impl.getTextProvider();
-  }
-
-  /**
    * Sets the spell check model.
    * 
    * @param spellCheckModel spell check model to set
@@ -372,6 +363,15 @@ public class RichTextEditor extends Composite {
   protected void onAttach() {
     super.onAttach();
     impl.updateImages();
+  }
+
+  /**
+   * Returns the current label provider.
+   * 
+   * @return the current label provider.
+   */
+  LabelProvider getTextProvider() {
+    return impl.getLabels();
   }
 
   /**

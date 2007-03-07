@@ -13,11 +13,18 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.gwt.user.client.ui.richtext;
+
+package com.google.gwt.user.client.ui;
 
 /**
- * Safari implementation of rich-text editing. Safari is not supported.
+ * An object that implements this interface has a {@link SuggestOracle} that it
+ * uses to display suggestions.
  */
-class RichTextAreaImplSafari extends RichTextAreaImpl {
-
+public interface HasSuggestOracle {
+  /**
+   * Gets the associated {@link SuggestOracle}.
+   * 
+   * @return the oracle
+   */
+  SuggestOracle getOracle();
 }

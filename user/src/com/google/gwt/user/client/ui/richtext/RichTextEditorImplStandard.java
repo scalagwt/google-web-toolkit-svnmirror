@@ -22,7 +22,6 @@ import com.google.gwt.user.client.ui.ChangeListener;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.ClippedImage;
 import com.google.gwt.user.client.ui.ColorPickerPopup;
-import com.google.gwt.user.client.ui.CustomButton;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
@@ -30,9 +29,9 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.KeyboardListenerAdapter;
 import com.google.gwt.user.client.ui.MouseListenerAdapter;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.SelectablePopup;
-import com.google.gwt.user.client.ui.SelectablePopupButton;
+import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.SuggestionsPopup;
+import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.richtext.RichTextArea.BlockFormat;
 import com.google.gwt.user.client.ui.richtext.RichTextArea.FontSize;
@@ -46,18 +45,18 @@ import java.util.List;
 /**
  * Standard Editor for rich text.
  */
-public class RichTextEditorImplStandard extends RichTextEditorImpl {
+class RichTextEditorImplStandard extends RichTextEditorImpl {
   /**
    * Default button provider.
    * 
    */
-  public static class ButtonProviderImpl implements ButtonProvider {
+  static class ButtonProviderImpl implements ButtonProvider {
 
     /**
      * Images for the default button case.
      * 
      */
-    public interface Images extends ImageBundle {
+    interface Images extends ImageBundle {
 
       /**
        * @gwt.resource com/google/gwt/user/client/ui/richtext/style-button-depressed-small.gif
@@ -222,78 +221,75 @@ public class RichTextEditorImplStandard extends RichTextEditorImpl {
 
     private Images images = (Images) GWT.create(Images.class);
 
-    public SelectablePopupButton backgroundColor(ColorPickerPopup popup) {
-      return new SelectablePopupButton(images.colorUp(), images.colorDown(),
-          popup);
+    public DropDownButton backgroundColor(ColorPickerPopup popup) {
+      return new DropDownButton(images.colorUp(), images.colorDown(), popup);
     }
 
-    public SelectablePopupButton blockStyle(SuggestionsPopup popup) {
-      return new SelectablePopupButton(images.blockStyleUp(),
-          images.blockStyleDown(), popup);
-    };
-
-    public CustomButton bold() {
-      return new CustomButton(images.boldUp(), images.boldDown());
-    }
-
-    public CustomButton bulletList() {
-      return new CustomButton(images.listUp(), images.listDown());
-    }
-
-    public SelectablePopupButton fontColor(ColorPickerPopup popup) {
-      return new SelectablePopupButton(images.colorUp(), images.colorDown(),
+    public DropDownButton blockStyle(SuggestionsPopup popup) {
+      return new DropDownButton(images.blockStyleUp(), images.blockStyleDown(),
           popup);
     };
 
-    public SelectablePopupButton fontFamily(SuggestionsPopup popup) {
-      return new SelectablePopupButton(images.fontUp(), images.fontDown(), popup);
+    public ToggleButton bold() {
+      return new ToggleButton(images.boldUp(), images.boldDown());
     }
 
-    public SelectablePopupButton fontSize(SuggestionsPopup popup) {
-      return new SelectablePopupButton(images.sizeUp(), images.sizeDown(),
-          popup);
+    public ToggleButton bulletList() {
+      return new ToggleButton(images.listUp(), images.listDown());
     }
 
-    public CustomButton insertHRule() {
-      return new CustomButton(images.insertHRuleUp(), images.insertHRuleDown());
+    public DropDownButton fontColor(ColorPickerPopup popup) {
+      return new DropDownButton(images.colorUp(), images.colorDown(), popup);
+    };
+
+    public DropDownButton fontFamily(SuggestionsPopup popup) {
+      return new DropDownButton(images.fontUp(), images.fontDown(), popup);
     }
 
-    public CustomButton italics() {
-      return new CustomButton(images.italicUp(), images.italicDown());
+    public DropDownButton fontSize(SuggestionsPopup popup) {
+      return new DropDownButton(images.sizeUp(), images.sizeDown(), popup);
     }
 
-    public CustomButton justifyCenter() {
-      return new CustomButton(images.justifyCenterUp(),
+    public PushButton insertHRule() {
+      return new PushButton(images.insertHRuleUp(), images.insertHRuleDown());
+    }
+
+    public ToggleButton italics() {
+      return new ToggleButton(images.italicUp(), images.italicDown());
+    }
+
+    public ToggleButton justifyCenter() {
+      return new ToggleButton(images.justifyCenterUp(),
           images.justifyCenterDown());
     }
 
-    public CustomButton justifyLeft() {
-      return new CustomButton(images.justifyLeftUp(), images.justifyLeftDown());
+    public ToggleButton justifyLeft() {
+      return new ToggleButton(images.justifyLeftUp(), images.justifyLeftDown());
     }
 
-    public CustomButton justifyRight() {
-      return new CustomButton(images.justifyRightUp(),
+    public ToggleButton justifyRight() {
+      return new ToggleButton(images.justifyRightUp(),
           images.justifyRightDown());
     }
 
-    public CustomButton leftIndent() {
-      return new CustomButton(images.indentLeftUp(), images.indentLeftDown());
+    public ToggleButton leftIndent() {
+      return new ToggleButton(images.indentLeftUp(), images.indentLeftDown());
     }
 
-    public CustomButton link() {
-      return new CustomButton(images.linkUp(), images.linkDown());
+    public ToggleButton link() {
+      return new ToggleButton(images.linkUp(), images.linkDown());
     }
 
-    public CustomButton orderedList() {
-      return new CustomButton(images.orderedListUp(), images.orderedListDown());
+    public ToggleButton orderedList() {
+      return new ToggleButton(images.orderedListUp(), images.orderedListDown());
     }
 
-    public CustomButton rightIndent() {
-      return new CustomButton(images.indentRightUp(), images.indentRightDown());
+    public ToggleButton rightIndent() {
+      return new ToggleButton(images.indentRightUp(), images.indentRightDown());
     }
 
-    public CustomButton underline() {
-      return new CustomButton(images.underlineUp(), images.underlineDown());
+    public ToggleButton underline() {
+      return new ToggleButton(images.underlineUp(), images.underlineDown());
     }
   }
 
@@ -309,13 +305,11 @@ public class RichTextEditorImplStandard extends RichTextEditorImpl {
      * @param toolTip the tooltip to give the button
      * @param popup the popup to use to get the desired choice
      */
-    public HookupDropDownButton(final CustomButton button, String toolTip,
-        final SelectablePopup popup) {
-      final SelectablePopupButton dropDown = (SelectablePopupButton) button;
-      button.setTitle(toolTip);
-      popup.addChangeListener(new ChangeListener() {
+    HookupDropDownButton(final DropDownButton dropDown, String toolTip) {
+      dropDown.setTitle(toolTip);
+      dropDown.getPopup().addChangeListener(new ChangeListener() {
         public void onChange(Widget sender) {
-          change(popup.getSelectedValue());
+          change(dropDown.getPopup().getSelectedValue());
         }
       });
       buttons.add(dropDown);
@@ -326,7 +320,7 @@ public class RichTextEditorImplStandard extends RichTextEditorImpl {
      * 
      * @param object the selection made
      */
-    protected abstract void change(Object object);
+    abstract void change(Object object);
   }
 
   /**
@@ -334,7 +328,7 @@ public class RichTextEditorImplStandard extends RichTextEditorImpl {
    * 
    */
   private abstract class HookupListeningButton {
-    CustomButton button;
+    ToggleButton button;
 
     /**
      * Wires a tooltip to a button, and makes it adjust to the underlying state.
@@ -342,12 +336,12 @@ public class RichTextEditorImplStandard extends RichTextEditorImpl {
      * @param button the button to use
      * @param toolTip the tooltip to give the button
      */
-    public HookupListeningButton(final CustomButton button, String toolTip) {
+    HookupListeningButton(final ToggleButton button, String toolTip) {
       this.button = button;
       // Click Listener
       button.addClickListener(new ClickListener() {
         public void onClick(Widget sender) {
-          toggle();
+          click();
           updateButton();
         }
       });
@@ -359,27 +353,36 @@ public class RichTextEditorImplStandard extends RichTextEditorImpl {
     /**
      * The callback to perform when the button is toggled.
      */
-    public abstract void toggle();
+    abstract void click();
 
     /**
      * The callback responsible for updating the button to match the underlying
      * state.
      */
-    public abstract void updateButton();
+    abstract void updateButton();
   }
 
   /**
    * Hook up a push button.
    */
   private abstract class HookupPressButton {
-
-    HookupPressButton(final CustomButton button, String toolTip) {
-      button.setToggleBehavior(false);
+    HookupPressButton(final PushButton button, String toolTip) {
       buttons.add(button);
       button.setTitle(toolTip);
       button.addClickListener(new ClickListener() {
         public void onClick(Widget sender) {
-          toggle();
+          click();
+        }
+      });
+    }
+
+    // HACK, all should be converted over in time
+    HookupPressButton(final ToggleButton button, String toolTip) {
+      buttons.add(button);
+      button.setTitle(toolTip);
+      button.addClickListener(new ClickListener() {
+        public void onClick(Widget sender) {
+          click();
         }
       });
     }
@@ -387,7 +390,7 @@ public class RichTextEditorImplStandard extends RichTextEditorImpl {
     /**
      * The callback to perform when the button is toggled.
      */
-    public abstract void toggle();
+    abstract void click();
   }
 
   private class SpellCheckControl {
@@ -401,24 +404,15 @@ public class RichTextEditorImplStandard extends RichTextEditorImpl {
       setup();
     }
 
-    public Iterator addHighlights(List words, HighlightCategory category) {
+    Iterator addHighlights(List words, HighlightCategory category) {
       return richTextArea.addHighlights(words, category);
     }
 
-    public SuggestionsPopup getNoSuggestionsPopup() {
-      SuggestionsPopup noSuggestions = new SuggestionsPopup();
-      List noSuggestionsList = new ArrayList();
-      noSuggestionsList.add(labelProvider.noSuggestions());
-      noSuggestions.setItems(noSuggestionsList);
-      noSuggestions.setStyleName("gwt-RichTextEditor-NoSuggestions");
-      return noSuggestions;
-    }
-
-    public SpellCheck getSpellCheck() {
+    SpellCheck getSpellCheck() {
       return spellCheck;
     }
 
-    public String getText() {
+    String getText() {
       return richTextArea.getText();
     }
 
@@ -427,7 +421,7 @@ public class RichTextEditorImplStandard extends RichTextEditorImpl {
      * 
      * @param widget the widget to be used to start a spellcheck
      */
-    protected void setSpellCheckWidget(Widget widget) {
+    void setSpellCheckWidget(Widget widget) {
       layout.setWidget(0, 1, widget);
     }
 
@@ -489,7 +483,7 @@ public class RichTextEditorImplStandard extends RichTextEditorImpl {
     }
   }
 
-  SpellCheckControl spellCheckWidget;
+  private SpellCheckControl spellCheckControl;
 
   private ButtonProvider buttonProvider;
 
@@ -502,7 +496,7 @@ public class RichTextEditorImplStandard extends RichTextEditorImpl {
   // spelling would not align correctly.
   private FlexTable layout;
 
-  public void addListenersToRichText() {
+  void addListenersToRichText() {
     richTextArea.addKeyboardListener(new KeyboardListenerAdapter() {
 
       public void onKeyUp(Widget sender, char keyCode, int modifiers) {
@@ -517,60 +511,10 @@ public class RichTextEditorImplStandard extends RichTextEditorImpl {
     });
   }
 
-  public void createToolBar(RichTextEditor editor, Panel root) {
-    layout = new FlexTable();
-    layout.setCellPadding(0);
-    layout.setCellSpacing(0);
-    layout.setStyleName("toolBar");
-    root.add(layout);
-
-    createFormattingButtons();
-
-    layout.setWidget(0, 0, buttons);
-
-    spellCheckWidget = new SpellCheckControl();
-    spellCheckWidget.setup();
-
-    layout.getCellFormatter().setHorizontalAlignment(0, 1,
-        HasHorizontalAlignment.ALIGN_RIGHT);
-  }
-
-  // Used only to
-  public SpellCheck getSpellCheck() {
-    return spellCheckWidget.getSpellCheck();
-  }
-
-  public LabelProvider getTextProvider() {
-    return labelProvider;
-  }
-
-  public void setButtonProvider(ButtonProvider buttonProvider) {
-    this.buttonProvider = buttonProvider;
-  }
-
-  public void setTextProvider(LabelProvider labelProvider) {
-    this.labelProvider = labelProvider;
-  }
-
-  public void updateImages() {
-    for (int i = 0; i < listeningButtons.size(); i++) {
-      HookupListeningButton factory = (HookupListeningButton) listeningButtons.get(i);
-      factory.updateButton();
-    }
-  }
-
-  public void useDefaultButtonProvider() {
-    buttonProvider = new ButtonProviderImpl();
-  }
-
-  public void useDefaultTextProvider() {
-    this.labelProvider = (LabelProvider) GWT.create(LabelProvider.class);
-  }
-
   /**
    * Adds the buttons to the toolbar.
    */
-  protected void createFormattingButtons() {
+  void createFormattingButtons() {
     buttons = new HorizontalPanel();
     addBold();
     addItalics();
@@ -587,8 +531,57 @@ public class RichTextEditorImplStandard extends RichTextEditorImpl {
     addFormatBlock();
   }
 
+  void createToolBar(RichTextEditor editor, Panel root) {
+    layout = new FlexTable();
+    layout.setCellPadding(0);
+    layout.setCellSpacing(0);
+    layout.setStyleName("toolBar");
+    root.add(layout);
+
+    createFormattingButtons();
+
+    layout.setWidget(0, 0, buttons);
+
+    spellCheckControl = new SpellCheckControl();
+    spellCheckControl.setup();
+
+    layout.getCellFormatter().setHorizontalAlignment(0, 1,
+        HasHorizontalAlignment.ALIGN_RIGHT);
+  }
+
+  LabelProvider getLabels() {
+    return labelProvider;
+  }
+
+  SpellCheck getSpellCheck() {
+    return spellCheckControl.getSpellCheck();
+  }
+
+  void setButtonProvider(ButtonProvider buttonProvider) {
+    this.buttonProvider = buttonProvider;
+  }
+
+  void setLabels(LabelProvider labelProvider) {
+    this.labelProvider = labelProvider;
+  }
+
   void setSpellCheckModel(SpellCheck.Model spellCheckModel) {
-    spellCheckWidget.getSpellCheck().setModel(spellCheckModel);
+    spellCheckControl.getSpellCheck().setModel(spellCheckModel);
+  }
+
+  void updateImages() {
+    for (int i = 0; i < listeningButtons.size(); i++) {
+      HookupListeningButton factory = (HookupListeningButton) listeningButtons.get(i);
+      factory.updateButton();
+    }
+  }
+
+  void useDefaultButtonProvider() {
+    buttonProvider = new ButtonProviderImpl();
+  }
+
+  void useDefaultTextProvider() {
+    this.labelProvider = (LabelProvider) GWT.create(LabelProvider.class);
   }
 
   /**
@@ -597,21 +590,21 @@ public class RichTextEditorImplStandard extends RichTextEditorImpl {
   private void addAlignments() {
     new HookupPressButton(buttonProvider.justifyLeft(),
         labelProvider.alignLeftIconText()) {
-      public void toggle() {
+      void click() {
         richTextArea.setJustification(RichTextArea.Justification.LEFT);
       }
     };
 
     new HookupPressButton(buttonProvider.justifyCenter(),
         labelProvider.alignCenterIconText()) {
-      public void toggle() {
+      void click() {
         richTextArea.setJustification(RichTextArea.Justification.CENTER);
       }
     };
 
     new HookupPressButton(buttonProvider.justifyRight(),
         labelProvider.alignRightIconText()) {
-      public void toggle() {
+      void click() {
         richTextArea.setJustification(RichTextArea.Justification.RIGHT);
       }
     };
@@ -623,8 +616,8 @@ public class RichTextEditorImplStandard extends RichTextEditorImpl {
   private void addBackColor() {
     ColorPickerPopup colorPopup = new ColorPickerPopup();
     new HookupDropDownButton(buttonProvider.backgroundColor(colorPopup),
-        labelProvider.fontColorIconText(), colorPopup) {
-      public void change(Object selected) {
+        labelProvider.fontColorIconText()) {
+      void change(Object selected) {
         String color = (String) selected;
         richTextArea.setBackColor(color);
       }
@@ -637,12 +630,12 @@ public class RichTextEditorImplStandard extends RichTextEditorImpl {
   private void addBold() {
     new HookupListeningButton(buttonProvider.bold(),
         labelProvider.boldIconText()) {
-      public void toggle() {
+      void click() {
         richTextArea.toggleBold();
       }
 
-      public void updateButton() {
-        button.setPressed(richTextArea.isBold());
+      void updateButton() {
+        button.setDown(richTextArea.isBold());
       }
     };
   }
@@ -652,8 +645,8 @@ public class RichTextEditorImplStandard extends RichTextEditorImpl {
     ColorPickerPopup colorPopup = new ColorPickerPopup();
 
     new HookupDropDownButton(buttonProvider.fontColor(colorPopup),
-        labelProvider.fontColorIconText(), colorPopup) {
-      public void change(Object selected) {
+        labelProvider.fontColorIconText()) {
+      void change(Object selected) {
         String color = (String) selected;
         richTextArea.setForeColor(color);
       }
@@ -682,11 +675,12 @@ public class RichTextEditorImplStandard extends RichTextEditorImpl {
     values.add("cursive");
 
     SuggestionsPopup popup = new SuggestionsPopup();
-    popup.setItems(labels);
+    popup.setItems(labels.iterator());
     popup.setValues(values);
+
     new HookupDropDownButton(buttonProvider.fontFamily(popup),
-        labelProvider.fontIconText(), popup) {
-      public void change(Object selected) {
+        labelProvider.fontIconText()) {
+      void change(Object selected) {
         String value = (String) selected;
         richTextArea.setFontName(value);
       }
@@ -713,11 +707,11 @@ public class RichTextEditorImplStandard extends RichTextEditorImpl {
     values.add(RichTextArea.FontSize.SIZE_7);
 
     SuggestionsPopup popup = new SuggestionsPopup();
-    popup.setItems(labels);
+    popup.setItems(labels.iterator());
     popup.setValues(values);
     new HookupDropDownButton(buttonProvider.fontSize(popup),
-        labelProvider.fontSizeIconText(), popup) {
-      public void change(Object selected) {
+        labelProvider.fontSizeIconText()) {
+      void change(Object selected) {
         FontSize font = (FontSize) selected;
         richTextArea.setFontSize(font);
       }
@@ -747,11 +741,11 @@ public class RichTextEditorImplStandard extends RichTextEditorImpl {
     labels.add("<address>" + labelProvider.addressFormatStyle() + "</address>");
     values.add(RichTextArea.BlockFormat.ADDRESS);
     SuggestionsPopup popup = new SuggestionsPopup();
-    popup.setItems(labels);
+    popup.setItems(labels.iterator());
     popup.setValues(values);
     new HookupDropDownButton(buttonProvider.blockStyle(popup),
-        labelProvider.blockStyleIconText(), popup) {
-      public void change(Object selected) {
+        labelProvider.blockStyleIconText()) {
+      void change(Object selected) {
         BlockFormat blockFormat = (BlockFormat) selected;
         richTextArea.formatBlock(blockFormat);
       }
@@ -759,27 +753,25 @@ public class RichTextEditorImplStandard extends RichTextEditorImpl {
   }
 
   private void addHRuleButton() {
-    new HookupListeningButton(buttonProvider.insertHRule(),
+    new HookupPressButton(buttonProvider.insertHRule(),
         labelProvider.insertHRuleIconText()) {
-      public void toggle() {
+      void click() {
         richTextArea.insertHorizontalRule();
       }
 
-      public void updateButton() {
-      }
     };
   }
 
   private void addIndentButtons() {
     new HookupPressButton(buttonProvider.rightIndent(),
         labelProvider.indentIconText()) {
-      public void toggle() {
+      void click() {
         richTextArea.rightIndent();
       }
     };
     new HookupPressButton(buttonProvider.leftIndent(),
         labelProvider.outdentIconText()) {
-      public void toggle() {
+      void click() {
         richTextArea.leftIndent();
       }
     };
@@ -788,13 +780,13 @@ public class RichTextEditorImplStandard extends RichTextEditorImpl {
   private void addItalics() {
     new HookupListeningButton(buttonProvider.italics(),
         labelProvider.italicsIconText()) {
-      public void toggle() {
+      void click() {
         richTextArea.toggleItalic();
         updateButton();
       }
 
-      public void updateButton() {
-        button.setPressed(richTextArea.isItalic());
+      void updateButton() {
+        button.setDown(richTextArea.isItalic());
       }
     };
   }
@@ -802,7 +794,7 @@ public class RichTextEditorImplStandard extends RichTextEditorImpl {
   private void addLink() {
     new HookupPressButton(buttonProvider.link(),
         labelProvider.htmlLinkIconText()) {
-      public void toggle() {
+      void click() {
         richTextArea.createLink(richTextArea.getSelectedHTML());
       }
     };
@@ -811,13 +803,13 @@ public class RichTextEditorImplStandard extends RichTextEditorImpl {
   private void addLists() {
     new HookupPressButton(buttonProvider.bulletList(),
         labelProvider.bulletedListIconText()) {
-      public void toggle() {
+      void click() {
         richTextArea.insertUnorderedList();
       }
     };
     new HookupPressButton(buttonProvider.orderedList(),
         labelProvider.orderedListIconText()) {
-      public void toggle() {
+      void click() {
         richTextArea.insertOrderedList();
       }
     };
@@ -826,12 +818,12 @@ public class RichTextEditorImplStandard extends RichTextEditorImpl {
   private void addUnderline() {
     new HookupListeningButton(buttonProvider.underline(),
         labelProvider.underlineIconText()) {
-      public void toggle() {
+      void click() {
         richTextArea.toggleUnderline();
       }
 
-      public void updateButton() {
-        button.setPressed(richTextArea.isUnderlined());
+      void updateButton() {
+        button.setDown(richTextArea.isUnderlined());
       }
     };
   }

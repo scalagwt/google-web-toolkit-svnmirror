@@ -19,66 +19,18 @@ package com.google.gwt.user.client.ui;
 import com.google.gwt.user.client.Window;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
- * Abstract class to represent a popup with selectable items and an optional
- * item controller.
+ * Abstract class to represent a popup with selectable items that support mouse
+ * and keyboard navigation.
  */
 public abstract class SelectablePopup extends PopupPanel implements
     SourcesChangeEvents {
 
   private static final String STYLE_SELECTED_ITEM = "selected";
   private static final String STYLE_ITEM = "item";
-
-  /**
-   * Controls the items that display in a <code>SelectablePopup</code>. In
-   * general a controlling widget will either always use
-   * <code>ItemController.showBelow(...)</code> to display the popup or always
-   * use the <code>SelectablePopup.showBelow(...)</code> to display the popup,
-   * not both. A single <code>ItemController</code> can be used to control
-   * multiple <code>SelectablePopup</code> instances.
-   * 
-   */
-  public abstract static class ItemController {
-    /*
-     * Implementation note: To allow for an eventual async implementation of a
-     * controller, the controller itself must display the actual list of
-     * suggestions.
-     * 
-     */
-    private int limit = 20;
-
-    /**
-     * Gets the limit on the number of items displayed for a specific input.
-     * 
-     * @return the limit
-     */
-    public int getLimit() {
-      return limit;
-    }
-
-    /**
-     * Sets the limit on the number of items displayed for a specific input.
-     * 
-     * @param limit the limit
-     */
-    public void setLimit(int limit) {
-      this.limit = limit;
-    }
-
-    /**
-     * Configures and displays a popup. As the same <code>ItemController</code>
-     * may be used to control several different popups, the popup to display is
-     * passed into the <code>showBelow</code> method.
-     * 
-     * @param popup popup to show
-     * @param input represents the input to the controller
-     * @param showBelow <code>UIObject</code> to show the popup below
-     */
-    public abstract void showBelow(SelectablePopup popup, String input,
-        UIObject showBelow);
-  }
 
   /**
    * Selectable item.
@@ -191,8 +143,10 @@ public abstract class SelectablePopup extends PopupPanel implements
   }
 
   /**
-   * Equivalent to "clicking" on an item in the popup. Note, this does not call
-   * the raw JavaScript <code>click</code> method.
+   * 
+   * Programmatic equivalent of the user clicking on the selected item in the
+   * popup. Note, this does not call the raw JavaScript <code>click</code>
+   * method.
    */
   public void click() {
     if (selectedItem == null) {
@@ -253,7 +207,7 @@ public abstract class SelectablePopup extends PopupPanel implements
    * 
    * @param items items to be displayed
    */
-  public abstract void setItems(List items);
+  public abstract void setItems(Iterator items);
 
   /**
    * Sets the value associated with each item. The ith value in the values list
@@ -266,8 +220,8 @@ public abstract class SelectablePopup extends PopupPanel implements
   }
 
   /**
-   * Shifts the current selection by the given amount, unless that would put the
-   * user past the beginning or end of the list.
+   * Shifts the current selection by the given amount, unless that would make
+   * the selected index invalid.
    * 
    * @param shift the amount to shift the current selection by.
    */

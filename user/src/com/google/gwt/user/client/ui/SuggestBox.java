@@ -16,7 +16,7 @@
 
 package com.google.gwt.user.client.ui;
 
-import com.google.gwt.user.client.ui.SelectablePopup.ItemController;
+import java.util.Iterator;
 
 /**
  * Wrapper for a <code>TextBox</code> or <code>TextArea</code> with a built
@@ -49,41 +49,110 @@ import com.google.gwt.user.client.ui.SelectablePopup.ItemController;
  * popup with "Cat" and "Canary".
  * 
  */
-public class SuggestBox extends Composite {
+public class SuggestBox extends Composite implements HasText, HasFocus,
+    HasSuggestOracle, SourcesClickEvents, SourcesFocusEvents,
+    SourcesChangeEvents, SourcesKeyboardEvents {
+
+  private int limit = 20;
   private int selectStart;
   private int selectEnd;
-  private ItemController itemController;
+  private SuggestOracle oracle;
   private char[] separators;
   private String cachedValue;
   private final SuggestionsPopup popup;
   private final TextBoxBase box;
+
   private String separatorPadding = " ";
+
+  private final SuggestOracleCallback callBack = new SuggestOracleCallback() {
+
+    public void onSuggestionsRecieved(SuggestOracleRequest request,
+        SuggestOracleResponse response) {
+      showSuggestions(response.iterator());
+    }
+
+  };
+
+  /**
+   * Constructor for <code>SuggestBox</code>.
+   */
+  public SuggestBox() {
+    this(new DefaultOracle());
+  }
 
   /**
    * 
    * Constructor for <code>SuggestBox</code>.
    * 
-   * @param itemController supplies suggestions based upon the current contents
-   *          of the text widget. Note, a single itemController may be used with
+   * @param oracle oracle
+   */
+
+  public SuggestBox(SuggestOracle oracle) {
+    this(oracle, new TextBox());
+  }
+
+  /**
+   * 
+   * Constructor for <code>SuggestBox</code>.
+   * 
+   * @param oracle supplies suggestions based upon the current contents of the
+   *          text widget. Note, a single itemController may be used with
    *          multiple suggest boxes.
+   * @param popup popup to use for this SuggestBox
    * @param box the text widget
    */
-  public SuggestBox(ItemController itemController, TextBoxBase box) {
-    popup = new SuggestionsPopup();
+  public SuggestBox(SuggestOracle oracle, SuggestionsPopup popup,
+      TextBoxBase box) {
+    this.popup = popup;
     this.box = box;
     box.addFocusListener(new FocusListener() {
       public void onFocus(Widget sender) {
       }
 
       public void onLostFocus(Widget sender) {
-        popup.hide();
+        SuggestBox.this.popup.hide();
       }
 
     });
     addPopupChangeListener();
     initWidget(box);
     addKeyBoardSupport();
-    setController(itemController);
+    setOracle(oracle);
+  }
+
+  /**
+   * 
+   * Constructor for <code>SuggestBox</code>.
+   * 
+   * @param oracle the oracle
+   * @param box the box
+   */
+  public SuggestBox(SuggestOracle oracle, TextBoxBase box) {
+    this(oracle, new SuggestionsPopup(), box);
+  }
+
+  public void addChangeListener(ChangeListener listener) {
+    box.addChangeListener(listener);
+  }
+
+  public void addClickListener(ClickListener listener) {
+    box.addClickListener(listener);
+  }
+
+  public void addFocusListener(FocusListener listener) {
+    box.addFocusListener(listener);
+  }
+
+  public void addKeyboardListener(KeyboardListener listener) {
+    box.addKeyboardListener(listener);
+  }
+
+  public int getLimit() {
+    return limit;
+  }
+
+  public SuggestOracle getOracle() {
+    return oracle;
   }
 
   /**
@@ -96,13 +165,49 @@ public class SuggestBox extends Composite {
     return separatorPadding;
   }
 
+  public int getTabIndex() {
+    return box.getTabIndex();
+  }
+
+  public String getText() {
+    return box.getText();
+  }
+
+  public void removeChangeListener(ChangeListener listener) {
+    box.removeChangeListener(listener);
+  }
+
+  public void removeClickListener(ClickListener listener) {
+    box.removeClickListener(listener);
+  }
+
+  public void removeFocusListener(FocusListener listener) {
+    box.removeFocusListener(listener);
+  }
+
+  public void removeKeyboardListener(KeyboardListener listener) {
+    box.removeKeyboardListener(listener);
+  }
+
+  public void setAccessKey(char key) {
+    box.setAccessKey(key);
+  }
+
+  public void setFocus(boolean focused) {
+    box.setFocus(focused);
+  }
+
+  public void setLimit(int limit) {
+    this.limit = limit;
+  }
+
   /**
-   * Sets the controller used to configure suggestions.
+   * Sets the suggestion oracle used to create suggestions.
    * 
-   * @param controller the controller
+   * @param oracle the controller
    */
-  public void setController(ItemController controller) {
-    this.itemController = controller;
+  public void setOracle(SuggestOracle oracle) {
+    this.oracle = oracle;
   }
 
   /**
@@ -120,7 +225,7 @@ public class SuggestBox extends Composite {
   }
 
   /**
-   * Sets the separators for the text area. The most common separator is
+   * Sets the separators for the text. The most common separator is
    * <code>","</code>.
    * <p>
    * Note: Until a KeyboardHandler is introduced that allows keyPress to detect
@@ -141,6 +246,26 @@ public class SuggestBox extends Composite {
     for (int i = 0; i < separators.length(); i++) {
       this.separators[i] = separators.charAt(i);
     }
+  }
+
+  public void setTabIndex(int index) {
+    box.setTabIndex(index);
+  }
+
+  public void setText(String text) {
+    box.setText(text);
+  }
+
+  /**
+   * Show the given list of suggestions. The {@link SuggestionsPopup} must be
+   * able to parse the list of suggestions or a runtime error will result. The
+   * default {@link SuggestionsPopup} only can parse a list of strings.
+   * 
+   * @param suggestions suggestions to show
+   */
+  protected void showSuggestions(Iterator suggestions) {
+    popup.setItems(suggestions);
+    popup.showBelow(this);
   }
 
   private void addKeyBoardSupport() {
@@ -196,6 +321,7 @@ public class SuggestBox extends Composite {
       }
 
       private void refreshSuggestions() {
+
         // Get the raw text.
         String text = box.getText();
         if (text.equals(cachedValue)) {
@@ -215,7 +341,7 @@ public class SuggestBox extends Composite {
         // Activate the item controller with the given selection in order to
         // show the correct items.
         if (selection.length() > 0) {
-          itemController.showBelow(popup, selection, SuggestBox.this);
+          showSuggestions(selection);
         } else {
           popup.hide();
         }
@@ -287,5 +413,9 @@ public class SuggestBox extends Composite {
       }
     }
     return false;
+  }
+
+  private void showSuggestions(String query) {
+    oracle.requestSuggestions(new SuggestOracleRequest(query, limit), callBack);
   }
 }

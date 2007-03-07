@@ -16,10 +16,9 @@
 
 package com.google.gwt.user.client.ui.richtext;
 
-
 /**
  * Rich text editing under Safari doesn't work yet.
  */
-public class RichTextEditorImplSafari extends RichTextEditor {
+class RichTextEditorImplSafari extends RichTextEditor {
 
 }

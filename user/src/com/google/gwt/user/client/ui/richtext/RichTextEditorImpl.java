@@ -31,13 +31,13 @@ class RichTextEditorImpl {
   /**
    * The rich text editor that this is implementing the functionality of.
    */
-  protected RichTextArea richTextArea;
+  RichTextArea richTextArea;
 
   /**
    * Adds the appropriate listeners to the editor so the button states get
    * updated in a timely manner.
    */
-  protected void addListenersToRichText() {
+  void addListenersToRichText() {
   }
 
   /**
@@ -47,10 +47,10 @@ class RichTextEditorImpl {
    * @param editor the editor being used to edit rich text
    * @param panel the panel within the editor that will contain the tool bar
    */
-  protected void createToolBar(RichTextEditor editor, Panel panel) {
+  void createToolBar(RichTextEditor editor, Panel panel) {
   }
 
-  LabelProvider getTextProvider() {
+  LabelProvider getLabels() {
     return null;
   }
 
@@ -68,6 +68,14 @@ class RichTextEditorImpl {
   void setButtonProvider(ButtonProvider provider) {
   }
 
+  /**
+   * Sets the label provider.
+   * 
+   * @param provider the new label provider
+   */
+  void setLabels(LabelProvider provider) {
+  }
+
   void setSpellCheckModel(Model spellCheckModel) {
   }
 
@@ -78,14 +86,6 @@ class RichTextEditorImpl {
    */
   void setSpellCheckState(SpellCheck.State state) {
     return;
-  }
-
-  /**
-   * Sets the text provider.
-   * 
-   * @param provider the new text provider
-   */
-  void setTextProvider(LabelProvider provider) {
   }
 
   /**

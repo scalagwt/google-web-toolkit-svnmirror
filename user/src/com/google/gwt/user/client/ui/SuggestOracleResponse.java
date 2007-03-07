@@ -13,11 +13,13 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.gwt.user.client.ui.richtext;
 
-/**
- * Safari implementation of rich-text editing. Safari is not supported.
- */
-class RichTextAreaImplSafari extends RichTextAreaImpl {
+package com.google.gwt.user.client.ui;
 
+import com.google.gwt.user.client.rpc.IsSerializable;
+
+import java.util.Iterator;
+
+public abstract class SuggestOracleResponse implements IsSerializable {
+  public abstract Iterator iterator();
 }

@@ -15,6 +15,8 @@
  */
 package com.google.gwt.user.client.ui.richtext;
 
+import com.google.gwt.user.client.Element;
+
 import java.util.Iterator;
 import java.util.List;
 
@@ -24,11 +26,11 @@ import java.util.List;
  * iframe boundaries. Highlights are owned and created by the
  * {@link HasHighlights} object.
  */
-interface HasHighlights {
+public interface HasHighlights {
 
   /**
-   *Adds highlights of a specific category. The highlights
-   * created are returned in the resulting {@link Iterator}.
+   * Adds highlights of a specific category. The highlights created are returned
+   * in the resulting {@link Iterator}.
    * 
    * @param items the items to be highlighted
    * @param category the category to be used for the {@link Highlight}
@@ -55,25 +57,24 @@ interface HasHighlights {
   void disownHighlight(Highlight highlight);
 
   /**
-   * Gets the highlight's absolute left position in pixels, as measured from the
-   * owner's body. The highlight's owner may not be part of the same document,
-   * which may necessitate the use of methods not in
+   * Gets the child element's absolute left coordinate in the main document's
+   * coordinate system. The element's owner may not be part of the same
+   * document, which may necessitate the use of methods not in
    * {@link com.google.gwt.user.client.DOM}.
    * 
-   * @param highlight the highlight to report the position of
-   * @return the highlight's absolute left position
+   * @param childElement the element to report the position of
+   * @return the element's absolute left position
    */
-  int getAbsoluteLeft(Highlight highlight);
+  int getAbsoluteLeft(Element childElement);
 
   /**
-   * Gets the highlight's top position in pixels, as measured from the owner's
-   * body. The highlight's owner may not be part of the same document, which may
-   * necessitate the use of methods not in
+   * Gets the child element's absolute top coordinate in the main document's
+   * coordinate system. The element's owner may not be part of the same
+   * document, which may necessitate the use of methods not in
    * {@link com.google.gwt.user.client.DOM}.
    * 
-   * @param highlight the highlight to report the position of
-   * @return the highlight's relative top position
+   * @param childElement the element to report the position of
+   * @return the element's absolute top position
    */
-  int getAbsoluteTop(Highlight highlight);
-
+  int getAbsoluteTop(Element childElement);
 }

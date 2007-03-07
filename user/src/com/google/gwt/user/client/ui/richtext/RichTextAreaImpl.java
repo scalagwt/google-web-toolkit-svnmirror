@@ -30,6 +30,9 @@ import java.util.List;
  */
 class RichTextAreaImpl {
 
+  public void selectAll(Element element) {
+  }
+
   Iterator addHighlights(Element elem, RichTextArea rich, List words,
       HighlightCategory category) {
     // return an empty Iterator so usage is consistent
@@ -93,14 +96,14 @@ class RichTextAreaImpl {
   void formatBlock(Element elem, String format) {
   }
 
-  int getAbsoluteLeft(Highlight highlight, Element elem) {
+  int getAbsoluteLeft(Element childElement, Element elem) {
     // No rich text means no iframe and hence no separate document offset.
-    return DOM.getAbsoluteLeft(highlight.getElement());
+    return DOM.getAbsoluteLeft(childElement);
   }
 
-  int getAbsoluteTop(Highlight highlight, Element elem) {
+  int getAbsoluteTop(Element childElement, Element elem) {
     // No rich text means no iframe and hence no separate document offset.
-    return DOM.getAbsoluteTop(highlight.getElement());
+    return DOM.getAbsoluteTop(childElement);
   }
 
   String getBackColor(Element element) {
@@ -236,8 +239,5 @@ class RichTextAreaImpl {
   }
 
   void unhookEvents(Element elem, ForeignDOMHost host) {
-  }
-
-  public void selectAll(Element element) {    
   }
 }
