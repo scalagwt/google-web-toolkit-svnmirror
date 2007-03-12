@@ -17,11 +17,8 @@ package com.google.gwt.user.client.ui.richtext;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.Constants;
-import com.google.gwt.user.client.ui.ColorPickerPopup;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.PushButton;
-import com.google.gwt.user.client.ui.ToggleButton;
-import com.google.gwt.user.client.ui.SuggestionsPopup;
+import com.google.gwt.user.client.ui.CustomButton;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 /**
@@ -32,131 +29,126 @@ public class RichTextEditor extends Composite {
   /**
    * Provides buttons for use in the tool bar.
    */
-  public interface ButtonProvider {
+  public interface ButtonCustomizer {
 
     /**
      * Button for background color. *
      * 
-     * @param popup popup to use
-     * @return the button for background color.
+     * @param button the button for background color.
      */
-    public DropDownButton backgroundColor(ColorPickerPopup popup);
+    public void backgroundColor(CustomButton button);
 
     /**
      * Button for block style.
      * 
-     * @param popup popup to use
-     * @return the button for block style.
+     * @param button the button for block style.
      */
-    public DropDownButton blockStyle(SuggestionsPopup popup);
+    public void blockStyle(CustomButton button);
 
     /**
      * Button for bold.
      * 
-     * @return the button for bold.
+     * @param button the button for bold.
      */
-    public ToggleButton bold();
+    public void bold(CustomButton button);
 
     /**
      * Button for bulleted list.
      * 
-     * @return the button for bulleted list.
+     * @param button the button for bulleted list.
      */
-    public ToggleButton bulletList();
+    public void bulletList(CustomButton button);
 
     /**
      * Button for font color.
      * 
-     * @param popup popup to use
-     * @return the button for font color.
+     * @param button the button for font color.
      */
-    public DropDownButton fontColor(ColorPickerPopup popup);
+    public void fontColor(CustomButton button);
 
     /**
      * Button for font family. *
      * 
-     * @param popup popup to use
-     * @return the button for font family.
+     * @param button the button for font family.
      */
-    public DropDownButton fontFamily(SuggestionsPopup popup);
+    public void fontFamily(CustomButton button);
 
     /**
      * Button for font size.
      * 
-     * @param popup popup to use
-     * @return the button for font size.
+      * @param button the button for font size.
      */
-    public DropDownButton fontSize(SuggestionsPopup popup);
+    public void fontSize(CustomButton button);
 
     /**
      * Button for insert horizontal rule.
      * 
-     * @return the button for insert horizontal rule.
+     * @param button the button for insert horizontal rule.
      */
-    public PushButton insertHRule();
+    public void insertHRule(CustomButton button);
 
     /**
      * Button for italics.
      * 
-     * @return the button for italics.
+     * @param button the button for italics.
      */
-    public ToggleButton italics();
+    public void italics(CustomButton button);
 
     /**
      * Button for justify center.
      * 
-     * @return the button for justify center.
+     * @param button the button for justify center.
      */
-    public ToggleButton justifyCenter();
+    public void justifyCenter(CustomButton button);
 
     /**
      * Button for justify left.
      * 
-     * @return the button for justify left.
+     * @param button the button for justify left.
      */
-    public ToggleButton justifyLeft();
+    public void justifyLeft(CustomButton button);
 
     /**
      * Button for justify right.
      * 
-     * @return the button for justify right.
+     * @param button the button for justify right.
      */
-    public ToggleButton justifyRight();
+    public void justifyRight(CustomButton button);
 
     /**
      * Button for left indent.
      * 
-     * @return the button for left indent.
+     * @param button the button for left indent.
      */
-    public ToggleButton leftIndent();
+    public void leftIndent(CustomButton button);
 
     /**
      * Button for link.
      * 
-     * @return the button for link.
+     * @param button the button for link.
      */
-    public ToggleButton link();
+    public void link(CustomButton button);
 
     /**
      * Button for ordered list.
      * 
-     * @return the button for ordered list.
+     * @param button the button for ordered list.
      */
-    public ToggleButton orderedList();
+    public void orderedList(CustomButton button);
 
     /**
      * Button for right indent.
      * 
-     * @return the button for right indent.
+     * @param button the button for right indent.
      */
-    public ToggleButton rightIndent();
+    public void rightIndent(CustomButton button);
 
     /**
      * Button for underline.
      * 
-     * @return the button for underline.
+     * @param button the button for underline.
      */
-    public ToggleButton underline();
+    public void underline(CustomButton button);
   }
 
   /**
@@ -262,7 +254,7 @@ public class RichTextEditor extends Composite {
    * 
    * @param buttonProvider custom button provider
    */
-  public RichTextEditor(ButtonProvider buttonProvider) {
+  public RichTextEditor(ButtonCustomizer buttonProvider) {
     this((String) null, buttonProvider);
   }
 
@@ -273,7 +265,7 @@ public class RichTextEditor extends Composite {
    * @param buttonProvider custom button provider
    * @param labelProvider custom label provider
    */
-  public RichTextEditor(ButtonProvider buttonProvider,
+  public RichTextEditor(ButtonCustomizer buttonProvider,
       LabelProvider labelProvider) {
     this((String) null, buttonProvider, labelProvider);
   }
@@ -306,7 +298,7 @@ public class RichTextEditor extends Composite {
    * @param cssURL the css file to use for styling the edited highlighted item
    * @param buttonProvider custom button provider
    */
-  public RichTextEditor(String cssURL, ButtonProvider buttonProvider) {
+  public RichTextEditor(String cssURL, ButtonCustomizer buttonProvider) {
     richTextArea = new RichTextArea(cssURL);
     impl.setButtonProvider(buttonProvider);
     impl.useDefaultTextProvider();
@@ -321,7 +313,7 @@ public class RichTextEditor extends Composite {
    * @param buttonProvider custom button provider
    * @param labelProvider custom label provider
    */
-  public RichTextEditor(String cssURL, ButtonProvider buttonProvider,
+  public RichTextEditor(String cssURL, ButtonCustomizer buttonProvider,
       LabelProvider labelProvider) {
     richTextArea = new RichTextArea(cssURL);
     impl.setButtonProvider(buttonProvider);
@@ -356,7 +348,7 @@ public class RichTextEditor extends Composite {
    * 
    * @param spellCheckModel spell check model to set
    */
-  public void setSpellCheckModel(SpellCheck.Model spellCheckModel) {
+  public void setSpellCheckModel(SpellCheckOracle spellCheckModel) {
     impl.setSpellCheckModel(spellCheckModel);
   }
 

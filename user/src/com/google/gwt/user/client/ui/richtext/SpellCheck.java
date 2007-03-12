@@ -17,10 +17,10 @@
 package com.google.gwt.user.client.ui.richtext;
 
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.rpc.IsSerializable;
 import com.google.gwt.user.client.ui.ChangeListener;
-import com.google.gwt.user.client.ui.SuggestionsPopup;
+import com.google.gwt.user.client.ui.SuggestPicker;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.impl.ItemPickerDropDownImpl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,160 +32,8 @@ import java.util.Map;
 /**
  * Spell Check for {@link RichTextArea}.
  */
-public class SpellCheck {
+class SpellCheck {
 
-  /**
-   * Represents a single misspelled word and the set of suggestions associated
-   * with that word.
-   */
-  public static class Misspelling implements IsSerializable {
-    private String word;
-    private String[] suggestions;
-
-    /**
-     * Gets the suggestions associated with the current misspelling.
-     * 
-     * @return the suggestions
-     */
-    public String[] getSuggestions() {
-      return suggestions;
-    }
-
-    /**
-     * Gets the misspelled word.
-     * 
-     * @return misspelled word.
-     */
-    public String getWord() {
-      return word;
-    }
-
-    /**
-     * Sets the suggestions associated with the current misspelling.
-     * 
-     * @param suggestions
-     */
-    public void setSuggestions(String[] suggestions) {
-      this.suggestions = suggestions;
-    }
-
-    /**
-     * Sets the misspelled word.
-     * 
-     * @param word the word
-     */
-    public void setWord(String word) {
-      this.word = word;
-    }
-
-    public String toString() {
-      return getWord() + Arrays.asList(getSuggestions()).toString();
-    }
-  }
-
-  /**
-   * Allows the spell check to communicate with a user's data source. Most
-   * implementations of {@link Model} should be a simple delegations to the
-   * user's server communication infrastructure, such as an RPC Service.
-   */
-  public interface Model {
-
-    /**
-     * Requests a new spell check. The model is responsible for creating a spell
-     * check <code>Response</code> object and passing it into
-     * {@link CallBack#processSpellCheckResponse(com.google.gwt.user.client.ui.richtext.SpellCheck.Request, com.google.gwt.user.client.ui.richtext.SpellCheck.Response)}
-     */
-    public void spellCheck(Request request, CallBack callback);
-  }
-
-  /**
-   * Spell check request. The request fields represent a snapshot of the spell
-   * check state when the request was generated.
-   * 
-   */
-  public static class Request implements IsSerializable {
-    /**
-     * Locale used for spell checking engine.
-     */
-    private String locale;
-
-    /**
-     * Text to extract misspelled words from.
-     */
-    private String text;
-
-    /**
-     * Requests should only be created by {@link SpellCheck}.
-     */
-    Request() {
-    }
-
-    /**
-     * Gets the locale for spell checking.
-     * 
-     * @return spell check locale
-     */
-    public String getLocale() {
-      return locale;
-    }
-
-    /**
-     * Gets the text to extract misspelled words from.
-     * 
-     * @return returned text
-     */
-    public String getText() {
-      return text;
-    }
-
-    /**
-     * Sets the locale for spell checking. As there may be an arbitrary delay
-     * between the request for a spell check and its activation, we must cache
-     * the spell check driver's locale.
-     * 
-     * @param locale spell check locale
-     */
-    public void setLocale(String locale) {
-      this.locale = locale;
-    }
-
-    /**
-     * Sets the text to extract misspelled words from. As there may be an
-     * arbitrary delay between the request for a spell check and it's
-     * activation, we must cache the spellcheckable's text.
-     * 
-     * @param text the text
-     */
-    public void setText(String text) {
-      this.text = text;
-    }
-  }
-
-  /**
-   * Spell check response. Created by {@link Model}. Comprises all misspelled
-   * words represented in the corresponding {@link Request}.
-   */
-  public static class Response implements IsSerializable {
-    private Misspelling[] misspellings;
-
-    /**
-     * Gets the misspelled words.
-     */
-    public Misspelling[] getMisspellings() {
-      return misspellings;
-    }
-
-    /**
-     * Sets the misspelled words.
-     */
-    public void setMisspellings(Misspelling[] entries) {
-      this.misspellings = entries;
-    }
-
-    public String toString() {
-      return Arrays.asList(getMisspellings()).toString();
-    }
-  }
   /**
    * Provides the labels needed for spell check.
    */
@@ -229,31 +77,13 @@ public class SpellCheck {
     void onChange(State state);
   }
 
-  /**
-   * Callback used by {@link Model} for spell checking.
-   */
-  public class CallBack {
-    private CallBack() {
-    }
-
-    /**
-     * CallBack used by {@link Model} once the {@link Response} has been
-     * created.
-     * 
-     * @param response response
-     */
-    public void processSpellCheckResponse(Request request, Response response) {
-      startSpellCheck(response.getMisspellings());
-    }
-  }
-
   private static final int MILLISECONDS_DELAY = 500;
-  private Model model;
+  private SpellCheckOracle model;
   private List highlights;
   private String locale = "en";
   private StateListener stateListener;
 
-  private RichTextArea target;
+  private final RichTextArea target;
 
   private LabelProvider labels;
 
@@ -268,6 +98,7 @@ public class SpellCheck {
   SpellCheck(RichTextArea target, LabelProvider labels,
       StateListener stateListener) {
     this.stateListener = stateListener;
+    this.target = target;
   }
 
   /**
@@ -293,10 +124,10 @@ public class SpellCheck {
   void requestSpellCheck() {
     stateListener.onChange(State.CHECKING);
     clearHighlights();
-    Request request = new Request();
+    SpellCheckRequest request = new SpellCheckRequest();
     request.setText(target.getText());
     request.setLocale(locale);
-    final CallBack callBack = new CallBack();
+    final SpellCheckCallback callBack = new SpellCheckCallback(this);
 
     if (model == null) {
       throw new IllegalStateException(
@@ -319,7 +150,7 @@ public class SpellCheck {
    * 
    * @param model the model
    */
-  void setModel(Model model) {
+  void setModel(SpellCheckOracle model) {
     this.model = model;
   }
 
@@ -353,13 +184,13 @@ public class SpellCheck {
     }
   }
 
-  private SuggestionsPopup createNoSuggestionsPopup() {
-    SuggestionsPopup noSuggestions = new SuggestionsPopup();
+  private ItemPickerDropDownImpl createNoSuggestionsPopup() {
+    SuggestPicker noSuggestions = new SuggestPicker();
     List noSuggestionsList = new ArrayList();
     noSuggestionsList.add(labels.noSuggestions());
     noSuggestions.setItems(noSuggestionsList.iterator());
     noSuggestions.setStyleName("gwt-RichTextEditor-NoSuggestions");
-    return noSuggestions;
+    return new ItemPickerDropDownImpl(target, noSuggestions);
   }
 
   private void process(Misspelling[] entries) {
@@ -389,7 +220,7 @@ public class SpellCheck {
 
     HighlightClickAndKeyboardHandler spellCheck = new HighlightClickAndKeyboardHandler() {
       Highlight selected;
-      final SuggestionsPopup noSuggestions = createNoSuggestionsPopup();
+      final ItemPickerDropDownImpl noSuggestions = createNoSuggestionsPopup();
       {
         noSuggestions.addChangeListener(new ChangeListener() {
           public void onChange(Widget sender) {

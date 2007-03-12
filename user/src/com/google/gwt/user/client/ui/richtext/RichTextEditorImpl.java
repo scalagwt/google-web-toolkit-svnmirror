@@ -17,9 +17,8 @@
 package com.google.gwt.user.client.ui.richtext;
 
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.richtext.RichTextEditor.ButtonProvider;
+import com.google.gwt.user.client.ui.richtext.RichTextEditor.ButtonCustomizer;
 import com.google.gwt.user.client.ui.richtext.RichTextEditor.LabelProvider;
-import com.google.gwt.user.client.ui.richtext.SpellCheck.Model;
 
 /**
  * This is the implementation class for RichTextEditor, to be replaced via
@@ -65,7 +64,7 @@ class RichTextEditorImpl {
    * 
    * @param provider the new button provider
    */
-  void setButtonProvider(ButtonProvider provider) {
+  void setButtonProvider(ButtonCustomizer provider) {
   }
 
   /**
@@ -76,7 +75,7 @@ class RichTextEditorImpl {
   void setLabels(LabelProvider provider) {
   }
 
-  void setSpellCheckModel(Model spellCheckModel) {
+  void setSpellCheckModel(SpellCheckOracle spellCheckModel) {
   }
 
   /**

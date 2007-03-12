@@ -59,47 +59,47 @@ public class RichTextArea extends FocusWidget implements HasHTML,
     /**
      * Represents an address.
      */
-    public static final BlockFormat ADDRESS = new BlockFormat("<ADDRESS>");
+    public static final BlockFormat ADDRESS = new BlockFormat("ADDRESS");
 
     /**
      * Represents a primary headline.
      */
-    public static final BlockFormat H1 = new BlockFormat("<H1>");
+    public static final BlockFormat H1 = new BlockFormat("H1");
 
     /**
      * Represents a secondary headline.
      */
-    public static final BlockFormat H2 = new BlockFormat("<H2>");
+    public static final BlockFormat H2 = new BlockFormat("H2");
 
     /**
      * Represents a tertiary headline.
      */
-    public static final BlockFormat H3 = new BlockFormat("<H3>");
+    public static final BlockFormat H3 = new BlockFormat("H3");
 
     /**
      * Represents a quaternary headline.
      */
-    public static final BlockFormat H4 = new BlockFormat("<H4>");
+    public static final BlockFormat H4 = new BlockFormat("H4");
 
     /**
      * Represents a quinary headline.
      */
-    public static final BlockFormat H5 = new BlockFormat("<H5>");
+    public static final BlockFormat H5 = new BlockFormat("H5");
 
     /**
      * Represents a senary headline.
      */
-    public static final BlockFormat H6 = new BlockFormat("<H6>");
+    public static final BlockFormat H6 = new BlockFormat("H6");
 
     /**
      * Represents a paragraph.
      */
-    public static final BlockFormat PARAGRAPH = new BlockFormat("<P>");
+    public static final BlockFormat PARAGRAPH = new BlockFormat("P");
 
     /**
      * Represents a preformatted block.
      */
-    public static final BlockFormat PRE = new BlockFormat("<PRE>");
+    public static final BlockFormat PRE = new BlockFormat("PRE");
 
     private String tag;
 
@@ -342,12 +342,16 @@ public class RichTextArea extends FocusWidget implements HasHTML,
    * @return the justification
    */
   public Justification getJustification() {
-    if (impl.isJustifiedLeft(getElement())) {
+    Element e = getElement();
+    if (impl.isJustifiedLeft(e)) {
       return Justification.LEFT;
-    } else if (impl.isJustifiedRight(getElement())) {
+    } else if (impl.isJustifiedRight(e)) {
       return Justification.RIGHT;
+    } else if (impl.isJustifiedCenter(e)) {
+      return Justification.CENTER;
+    } else {
+      return null;
     }
-    return Justification.CENTER;
   }
 
   /**
