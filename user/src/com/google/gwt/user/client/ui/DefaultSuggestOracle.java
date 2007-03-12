@@ -12,7 +12,7 @@ import java.util.List;
  * Return potential suggestions based on substrings of words. Also modifies the
  * returned text to show which prefix matched the search term.
  */
-public class DefaultOracle extends SuggestOracle {
+public class DefaultSuggestOracle extends SuggestOracle {
   /*
    * Implementation note: The SuggestionsController works by breaking
    * suggestions down into their component words using whitespace, finding all
@@ -107,12 +107,12 @@ public class DefaultOracle extends SuggestOracle {
   /**
    * Constructor for <code>DefaultOracle</code>.
    */
-  public DefaultOracle() {
+  public DefaultSuggestOracle() {
   }
 
   /**
-   * Constructor for <code>DefaultOracle</code> which takes in a set of masks
-   * that filter its input.
+   * Constructor for <code>DefaultSuggestOracle</code> which takes in a set of
+   * masks that filter its input.
    * <p>
    * Example: If <code>&lt;b&gt;,&lt;/b&gt; </code> are passed in as masks,
    * then the string <code>&lt;b&gt;Dog&lt;/b&gt</code> would <strong>not</strong>
@@ -121,12 +121,43 @@ public class DefaultOracle extends SuggestOracle {
    * @param masks the HTML tags and other strings to ignore for the purpose of
    *          matching
    */
-  public DefaultOracle(String[] masks) {
+
+  public DefaultSuggestOracle(Collection masks) {
+    this.masks = new String[masks.size()];
+    Iterator maskIter = masks.iterator();
+    for (int i = 0; i < this.masks.length; i++) {
+      this.masks[i] = (String) maskIter.next();
+    }
+  }
+
+  /**
+   * Constructor for <code>DefaultSuggestOracle</code> which takes in a set of
+   * masks that filter its input.
+   * <p>
+   * Example: If <code>&lt;b&gt;,&lt;/b&gt; </code> are passed in as masks,
+   * then the string <code>&lt;b&gt;Dog&lt;/b&gt</code> would <strong>not</strong>
+   * match the search string "b".
+   * 
+   * @param masks the HTML tags and other strings to ignore for the purpose of
+   *          matching
+   */
+  public DefaultSuggestOracle(String[] masks) {
     setMasks(masks);
   }
 
   /**
-   * Adds a suggestion to the controller.
+   * Adds all items specified in the iterator.
+   * 
+   * @param iterator the iterator
+   */
+  public void add(Iterator iterator) {
+    while (iterator.hasNext()) {
+      add((String) iterator.next());
+    }
+  }
+
+  /**
+   * Adds a suggestion to the oracle.
    * 
    * @param suggestion the suggestion
    */
@@ -144,6 +175,31 @@ public class DefaultOracle extends SuggestOracle {
         toCandidates.put(word, l);
       }
       l.add(candidate);
+    }
+  }
+
+  /**
+   * Compute the suggestions that are matches for a given search string.
+   * 
+   * @param search search string
+   * @return matching suggestions
+   */
+  public List computeItemsFor(String search, int limit) {
+    search = normalizeSearch(search);
+    List candidates = createCandidatesFromSearch(search, limit);
+
+    if (candidates.size() == 0) {
+      // All candidates eliminated.
+      List suggestions = candidates;
+      if (isShowAllOnEmpty()) {
+        suggestions.addAll(toFormattedSuggestions.values());
+        Collections.sort(suggestions);
+      }
+
+      return suggestions;
+    } else {
+      // Convert candidates to suggestions.
+      return convertToFormattedSuggestions(search, candidates);
     }
   }
 
@@ -180,29 +236,6 @@ public class DefaultOracle extends SuggestOracle {
    */
   public void setShowAllOnEmpty(boolean showAllOnEmpty) {
     this.showAllOnEmpty = showAllOnEmpty;
-  }
-
-  /**
-   * Compute the suggestions that are matches for a given search string.
-   * 
-   * @param search search string
-   * @return matching suggestions
-   */
-  private List computeItemsFor(String search, int limit) {
-    search = normalizeSearch(search);
-    List candidates = createCandidatesFromSearch(search, limit);
-
-    if (candidates.size() == 0) {
-      // All candidates eliminated.
-      List suggestions = candidates;
-      if (isShowAllOnEmpty()) {
-        suggestions.addAll(toFormattedSuggestions.values());
-      }
-      return suggestions;
-    } else {
-      // Convert candidates to suggestions.
-      return convertToFormattedSuggestions(search, candidates);
-    }
   }
 
   /**

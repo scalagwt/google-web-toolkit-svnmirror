@@ -9,16 +9,15 @@ package com.google.gwt.user.client.ui;
  * 
  */
 public abstract class SuggestOracle {
-
   private int limit = 20;
 
   /**
-   * Creates the suggestions associated with the given query.
+   * Generate a {@link SuggestOracleResponse} based on a specific
+   * {@link SuggestOracleRequest}.
    * 
-   * @param query the query string
-   * @param callback the callback
+   * @param request the request
+   * @param callback the callback to use for the response
    */
   public abstract void requestSuggestions(SuggestOracleRequest request,
       SuggestOracleCallback callback);
-
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 Google Inc.
+ * Copyright 2006 Google Inc.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -21,14 +21,11 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Abstract class to represent a popup with selectable items that support mouse
- * and keyboard navigation.
+ * Helpful base implementation of the {@link ItemPicker} interface.
+ * 
  */
-public abstract class SelectablePopup extends PopupPanel implements
-    SourcesChangeEvents {
-
-  private static final String STYLE_SELECTED_ITEM = "selected";
-  private static final String STYLE_ITEM = "item";
+public abstract class AbstractItemPicker extends Composite implements
+    ItemPicker {
 
   /**
    * Selectable item.
@@ -49,7 +46,7 @@ public abstract class SelectablePopup extends PopupPanel implements
      */
     public Item(int index) {
       this.index = index;
-      this.setStyleName(itemStyle);
+      this.setStyleName(itemStyleName);
       this.addMouseListener(itemMouseListener);
       items.add(index, this);
     }
@@ -61,6 +58,10 @@ public abstract class SelectablePopup extends PopupPanel implements
      */
     public int getIndex() {
       return index;
+    }
+
+    public AbstractItemPicker getOwner() {
+      return AbstractItemPicker.this;
     }
 
     /**
@@ -81,56 +82,71 @@ public abstract class SelectablePopup extends PopupPanel implements
     }
   }
 
-  private Item selectedItem;
-  private final String selectedStyle;
-  private final String itemStyle;
-  private final FlexTable layout = new FlexTable();
-
   /**
    * Each item is given this mouse listener in order to allow the mouse to
    * highlight each item in turn.
    */
-  private final MouseListener itemMouseListener = new MouseListenerAdapter() {
-
+  private static final MouseListener itemMouseListener = new MouseListenerAdapter() {
     public void onMouseDown(Widget sender, int x, int y) {
-      click();
+      // Unlike buttons, a item picker is selected as soon as the mouse down is
+      // fired.
+
+      Item item = (Item) sender;
+      item.getOwner().click();
     }
 
     public void onMouseEnter(Widget sender) {
       Item item = (Item) sender;
-      setSelection(item);
+      item.getOwner().setSelection(item);
+    }
+  };
+  private static final ClickListener itemClickListener = new ClickListener() {
+    public void onClick(Widget sender) {
+      Item item = (Item) sender;
+      item.getOwner().clickListeners.fireClick(item);
     }
   };
 
+  private static final String STYLE_SELECTED_ITEM = "selected";
+
+  private static final String STYLE_ITEM = "item";
+
   private ChangeListenerCollection changeListeners = new ChangeListenerCollection();
+  private ClickListenerCollection clickListeners = new ClickListenerCollection();
+  private Item selectedItem;
+  private final String selectedStyleName;
+  private final String itemStyleName;
+
   private List values;
   private List items = new ArrayList();
 
+  {
+    initWidget(new FlexTable());
+  }
+
   /**
-   * Constructor for <code>SelectablePopup</code>. Provides "item" as the
-   * default item style, and "selected" as the default selected item style.
+   * Constructor for <code>ItemPicker</code>. Provides "item" as the default
+   * item style, and "selected" as the default selected item style.
    */
-  public SelectablePopup() {
+  public AbstractItemPicker() {
     this(STYLE_ITEM, STYLE_SELECTED_ITEM);
   }
 
   /**
    * 
-   * Constructor for <code>SelectablePopup</code>.
+   * Constructor for <code>ItemPicker</code>.
    * 
-   * @param itemStyle CSS class name for default items
-   * @param selectedItemStyle CSS class name for the currently selected item
+   * @param itemStyleName CSS class name for default items
+   * @param selectedItemStyleName CSS class name for the currently selected item
    */
-  public SelectablePopup(String itemStyle, String selectedItemStyle) {
-    super(true);
-    this.selectedStyle = selectedItemStyle;
-    this.itemStyle = itemStyle;
+  public AbstractItemPicker(String itemStyleName, String selectedItemStyleName) {
+    this.selectedStyleName = selectedItemStyleName;
+    this.itemStyleName = itemStyleName;
 
     // CSS does not effect padding and spacing correctly. So setting to 0
     // here.
-    layout.setCellPadding(0);
-    layout.setCellSpacing(0);
-    this.setWidget(layout);
+    getLayout().setCellPadding(0);
+    getLayout().setCellSpacing(0);
   }
 
   public void addChangeListener(ChangeListener listener) {
@@ -140,34 +156,24 @@ public abstract class SelectablePopup extends PopupPanel implements
     changeListeners.add(listener);
   }
 
-  /**
-   * 
-   * Programmatic equivalent of the user clicking on the selected item in the
-   * popup. Note, this does not call the raw JavaScript <code>click</code>
-   * method.
-   */
+  public void addClickListener(ClickListener listener) {
+    if (clickListeners == null) {
+      clickListeners = new ClickListenerCollection();
+    }
+    clickListeners.add(listener);
+  }
+
   public void click() {
     if (selectedItem == null) {
       throw new RuntimeException("No element is selected");
     }
     changeListeners.fireChange(this);
-    this.hide();
   }
 
-  /**
-   * Gets the number of items in this selectable popup.
-   * 
-   * @return number of items
-   */
   public int getItemCount() {
     return items.size();
   }
 
-  /**
-   * Gets the currently selected index.
-   * 
-   * @return selected index, or -1 if no index is selected
-   */
   public final int getSelectedIndex() {
     if (getSelectedItem() == null) {
       return -1;
@@ -175,11 +181,6 @@ public abstract class SelectablePopup extends PopupPanel implements
     return getSelectedItem().getIndex();
   }
 
-  /**
-   * Gets the value associated with the currently selected index.
-   * 
-   * @return current selected value, or null if no value is selected
-   */
   public final Object getSelectedValue() {
     if (getSelectedItem() == null) {
       return null;
@@ -187,42 +188,29 @@ public abstract class SelectablePopup extends PopupPanel implements
     return getSelectedItem().getValue();
   }
 
-  /**
-   * Navigate through the popup based upon a key code.
-   * 
-   * @param keyCode key code for navigation
-   * @return <code>true</code> if the key code was used to navigate through
-   *         the popup, <code>false</code> otherwise
-   */
+  public final Object getValue(int index) {
+    return getItem(index).getValue();
+  }
+
   public abstract boolean navigate(char keyCode);
 
   public void removeChangeListener(ChangeListener listener) {
     this.changeListeners.remove(listener);
   }
 
-  /**
-   * Sets the items to be displayed.
-   * 
-   * @param items items to be displayed
-   */
-  public abstract void setItems(Iterator items);
-
-  /**
-   * Sets the value associated with each item. The ith value in the values list
-   * is associated with the ith selectable item.
-   * 
-   * @param values values associated with the selectable items
-   */
-  public void setValues(List values) {
-    this.values = values;
+  public void removeClickListener(ClickListener listener) {
+    if (clickListeners != null) {
+      clickListeners.remove(listener);
+    }
   }
 
-  /**
-   * Shifts the current selection by the given amount, unless that would make
-   * the selected index invalid.
-   * 
-   * @param shift the amount to shift the current selection by.
-   */
+  public abstract void setItems(Iterator items);
+
+  public void setSelectedIndex(int index) {
+    Item item = getItem(index);
+    setSelection(item);
+  }
+
   public void shiftSelection(int offset) {
     int newIndex = getSelectedIndex() + offset;
     if (newIndex < 0 || newIndex >= getItemCount()) {
@@ -233,14 +221,8 @@ public abstract class SelectablePopup extends PopupPanel implements
     }
   }
 
-
-  /**
-   * Returns the table that is used to actually render the item layout.
-   * 
-   * @return layout table
-   */
   protected FlexTable getLayout() {
-    return layout;
+    return (FlexTable) getWidget();
   }
 
   /**
@@ -262,6 +244,11 @@ public abstract class SelectablePopup extends PopupPanel implements
     return selectedItem;
   }
 
+  /**
+   * Sets the current selection.
+   * 
+   * @param item item to set
+   */
   void setSelection(Item item) {
     if (selectedItem == item) {
       return;
@@ -269,14 +256,13 @@ public abstract class SelectablePopup extends PopupPanel implements
 
     // Remove old selected item.
     if (selectedItem != null) {
-      selectedItem.setStyleName(itemStyle);
+      selectedItem.setStyleName(itemStyleName);
     }
 
     // Add new selected item.
     selectedItem = item;
     if (selectedItem != null) {
-      selectedItem.setStyleName(selectedStyle);
+      selectedItem.setStyleName(selectedStyleName);
     }
   }
-
 }

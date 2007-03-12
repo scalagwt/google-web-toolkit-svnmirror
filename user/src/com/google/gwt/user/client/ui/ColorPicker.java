@@ -25,7 +25,7 @@ import java.util.List;
 /**
  * Color picker popup. Items are represented as CSS colors.
  */
-public class ColorPickerPopup extends SelectablePopup {
+public class ColorPicker extends AbstractItemPicker {
   private class ColorItem extends Item {
 
     public ColorItem(int index, String color) {
@@ -57,29 +57,29 @@ public class ColorPickerPopup extends SelectablePopup {
   private int numColumns = -1;
 
   /**
-   * Constructor for <code>ColorPickerPopup</code>.
+   * Constructor for {@link ColorPicker}.
    */
-  public ColorPickerPopup() {
+  public ColorPicker() {
     this(12);
   }
 
   /**
-   * Constructor for <code>ColorPickerPopup</code>.
+   * Constructor for {@link ColorPicker}F
    * 
    * @param numColumns number of columns to be displayed
    */
-  public ColorPickerPopup(int numColumns) {
+  public ColorPicker(int numColumns) {
     this(Arrays.asList(DEFAULT_COLORS), numColumns);
   }
 
   /**
    * 
-   * Constructor for <code>ColorPickerPopup</code>.
+   * Constructor for {@link ColorPicker}
    * 
    * @param colors colors list of colors
    * @param numColumns number of columns to be displayed
    */
-  public ColorPickerPopup(List colors, int numColumns) {
+  public ColorPicker(List colors, int numColumns) {
     this.numColumns = numColumns;
     setStyleName("gwt-ColorPickerPopup");
     setItems(colors.iterator());
@@ -99,12 +99,6 @@ public class ColorPickerPopup extends SelectablePopup {
           break;
         case KeyboardListener.KEY_RIGHT:
           shiftSelection(1);
-          break;
-        case KeyboardListener.KEY_ENTER:
-          click();
-          break;
-        case KeyboardListener.KEY_ESCAPE:
-          hide();
           break;
         default:
           // Avoid shared post processing.

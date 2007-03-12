@@ -16,37 +16,37 @@
 
 package com.google.gwt.user.client.ui;
 
+import com.google.gwt.user.client.ui.impl.ItemPickerDropDownImpl;
+
 import java.util.Iterator;
 
 /**
- * Wrapper for a <code>TextBox</code> or <code>TextArea</code> with a built
- * in <code>SuggestionPopup</code>.
+ * Wrapper for a {@link TextBox} or {@link TextArea} with a built in
+ * {@link SuggestOracle}.
  * 
  * <p>
- * A user must supply a <code>ItemController</code> to configure the
- * <code>SuggestionPopup</code>. For convenience, most users use an instance
- * of <code>SuggestionsController</code> as their controller. Below we show
- * how a <code>SuggestionsController</code> can be configured:
+ * Be default, the {@link SuggestBox} uses a {@link DefaultSuggestOracle} as its
+ * oracle. Below we show how a {@link DefaultSuggestOracle} can be configured:
  * 
  * <pre> 
- *   SuggestionsController controller = new SuggestionsController();  
- *   controller.add("Cat");
- *   controller.add("Dog");
- *   controller.add("Horse");
- *   controller.add("Canary");
+ *   DefaultSuggestOracle oracle = new DefaultSuggestOracle();  
+ *   oracle.add("Cat");
+ *   oracle.add("Dog");
+ *   oracle.add("Horse");
+ *   oracle.add("Canary");
  * </pre>
  * 
  * Using the example above, if the user types "C" into the text widget, the
- * controller will configure the suggestions popup with the "Cat" and "Canary"
+ * oracle will configure the suggestions popup with the "Cat" and "Canary"
  * suggestions. Specifically, whenever the user types a key into the text
- * widget, the value is submitted to the <code>SuggestionsController</code>.
+ * widget, the value is submitted to the <code>DefaultSuggestOracle</code>.
  * <p>
  * The user may optionally provide separators to the <code>SuggestBox</code>
  * widget. When separators are defined, only the text between the nearest
- * separators is sent to the controller rather than the entire text widget. So,
- * to continue the example above, if "," is a separator and the text widget
- * contains "dog, ca" then again the controller will configure the suggestion
- * popup with "Cat" and "Canary".
+ * separators is sent to the oracle rather than the entire text widget. So, to
+ * continue the example above, if "," is a separator and the text widget
+ * contains "dog, ca" then again the oracle will configure the suggestion popup
+ * with "Cat" and "Canary".
  * 
  */
 public class SuggestBox extends Composite implements HasText, HasFocus,
@@ -59,7 +59,7 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
   private SuggestOracle oracle;
   private char[] separators;
   private String cachedValue;
-  private final SuggestionsPopup popup;
+  private final ItemPickerDropDownImpl popup;
   private final TextBoxBase box;
 
   private String separatorPadding = " ";
@@ -77,7 +77,7 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
    * Constructor for <code>SuggestBox</code>.
    */
   public SuggestBox() {
-    this(new DefaultOracle());
+    this(new DefaultSuggestOracle());
   }
 
   /**
@@ -98,22 +98,12 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
    * @param oracle supplies suggestions based upon the current contents of the
    *          text widget. Note, a single itemController may be used with
    *          multiple suggest boxes.
-   * @param popup popup to use for this SuggestBox
+   * @param picker popup to use for this SuggestBox
    * @param box the text widget
    */
-  public SuggestBox(SuggestOracle oracle, SuggestionsPopup popup,
-      TextBoxBase box) {
-    this.popup = popup;
+  public SuggestBox(SuggestOracle oracle, SuggestPicker picker, TextBoxBase box) {
     this.box = box;
-    box.addFocusListener(new FocusListener() {
-      public void onFocus(Widget sender) {
-      }
-
-      public void onLostFocus(Widget sender) {
-        SuggestBox.this.popup.hide();
-      }
-
-    });
+    this.popup = new ItemPickerDropDownImpl(this, picker);
     addPopupChangeListener();
     initWidget(box);
     addKeyBoardSupport();
@@ -128,7 +118,7 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
    * @param box the box
    */
   public SuggestBox(SuggestOracle oracle, TextBoxBase box) {
-    this(oracle, new SuggestionsPopup(), box);
+    this(oracle, new SuggestPicker(), box);
   }
 
   public void addChangeListener(ChangeListener listener) {
@@ -204,7 +194,7 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
   /**
    * Sets the suggestion oracle used to create suggestions.
    * 
-   * @param oracle the controller
+   * @param oracle the oracle
    */
   public void setOracle(SuggestOracle oracle) {
     this.oracle = oracle;
@@ -257,15 +247,15 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
   }
 
   /**
-   * Show the given list of suggestions. The {@link SuggestionsPopup} must be
-   * able to parse the list of suggestions or a runtime error will result. The
-   * default {@link SuggestionsPopup} only can parse a list of strings.
+   * Show the given list of suggestions. The {@link SuggestPicker} must be able
+   * to parse the list of suggestions or a runtime error will result. The
+   * default {@link SuggestPicker} only can parse a list of strings.
    * 
    * @param suggestions suggestions to show
    */
   protected void showSuggestions(Iterator suggestions) {
     popup.setItems(suggestions);
-    popup.showBelow(this);
+    popup.show();
   }
 
   private void addKeyBoardSupport() {
@@ -311,8 +301,8 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
         // Find the last instance of a separator.
         selectStart = -1;
         for (int i = 0; i < separators.length; i++) {
-          selectStart = Math.max(text.lastIndexOf(separators[i], selectEnd),
-              selectStart);
+          selectStart = Math.max(
+              text.lastIndexOf(separators[i], selectEnd - 1), selectStart);
         }
         ++selectStart;
 
@@ -337,13 +327,11 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
         } else {
           selection = getActiveSelection(text);
         }
-
-        // Activate the item controller with the given selection in order to
-        // show the correct items.
-        if (selection.length() > 0) {
-          showSuggestions(selection);
-        } else {
+        // If we have no text, let's not show the suggestions.
+        if (selection.length() == 0) {
           popup.hide();
+        } else {
+          showSuggestions(selection);
         }
       }
     });

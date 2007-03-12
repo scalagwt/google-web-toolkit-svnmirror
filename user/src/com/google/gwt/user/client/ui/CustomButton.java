@@ -23,30 +23,46 @@ import com.google.gwt.user.client.Event;
 /**
  * Custom Button is a base button class with built in support for a set number
  * of button faces.
- * <p>
- * The supported faces are defined below:
  * 
- * <table border=4>
+ * Each face has its own style modifier. For example, <code>downHover</code>
+ * is assigned the CSS modifier <i>downHover</i>. So, if the button's overall
+ * style name is <i>gwt-PushButton</i> then when showing the
+ * <code>downHover</code> face, the button's style is <i>
+ * gwt-PushButton-downHover</i>.
+ * 
+ * <p>
+ * Each button face can be assigned is own image, text, or html contents. If no
+ * content is defined for a face, then the face will use the contents of another
+ * face. For example, if <code>downHovering</code> does not have defined
+ * contents, it will use the contents defined by the <code>down</code> face.
+ * 
+ * 
+ * <p>
+ * The supported faces are defined below: <table border=4>
  * <tr>
  * 
- * <td><b>face name</b></td>
+ * <td><b>CSS style name</b></td>
+ * <td><b>Getter method</b></td>
  * <td><b>description of face</b></td>
  * </tr>
  * 
  * <tr>
  * <td>up</td>
+ * <td> {@link #getUpFace()} </td>
  * <td>face shown when button is up</td>
  * 
  * </tr>
  * 
  * <tr>
  * <td>down</td>
+ * <td> {@link #getDownFace()} </td>
  * <td>face shown when button is down</td>
  * 
  * </tr>
  * 
  * <tr>
- * <td>upHover</td>
+ * <td>upHovering</td>
+ * <td> {@link #getUpHoveringFace()} </td>
  * <td>face shown when button is up and hovering</td>
  * 
  * </tr>
@@ -54,18 +70,21 @@ import com.google.gwt.user.client.Event;
  * 
  * <tr>
  * <td>upDisabled</td>
+ * <td> {@link #getUpDisabledFace()} </td>
  * <td>face shown when button is up and disabled</td>
  * 
  * </tr>
  * 
  * <tr>
- * <td>downHover</td>
+ * <td>downHovering</td>
+ * <td> {@link #getDownHoveringFace()} </td>
  * <td>face shown when button is down and hovering</td>
  * 
  * </tr>
  * 
  * <tr>
  * <td>downDisabled</td>
+ * <td> {@link #getDownDisabledFace()} </td>
  * <td>face shown when button is down and disabled</td>
  * 
  * </tr>
@@ -73,17 +92,6 @@ import com.google.gwt.user.client.Event;
  * <p>
  * 
  * 
- * 
- * Each face has it's own style modifier. For example, <code>downHover</code>
- * is assigned the css modifier <i>downHover</i>. So, if the button's overall
- * style name is <i>gwt-PushButton</i> then when showing the
- * <code>downHover</code> face, the button's style is <i>
- * gwt-PushButton-downHover</i>.
- * <p>
- * Each button face can be assigned is own image, text, or html contents. If no
- * content is defined for a face, then the face will use the contents of another
- * face. For example, if <code>downHover</code> does not have defined
- * contents, it will use the contents defined by the <code>down</code> face.
  * 
  * 
  */
@@ -388,9 +396,18 @@ public abstract class CustomButton extends ButtonBase implements
    */
   protected CustomButton() {
     super(FocusPanel.impl.createFocusable());
-    sinkEvents(Event.ONCLICK | Event.MOUSEEVENTS);
+    sinkEvents(Event.ONCLICK | Event.MOUSEEVENTS | Event.FOCUSEVENTS);
     setUpFace(createFace(null, "up", UP));
     setStyleName(STYLENAME_DEFAULT);
+    addFocusListener(new FocusListener() {
+      public void onFocus(Widget sender) {
+        setHovering(true);
+      }
+
+      public void onLostFocus(Widget sender) {
+        setHovering(false);
+      }
+    });
   }
 
   /**
@@ -493,7 +510,8 @@ public abstract class CustomButton extends ButtonBase implements
   public void onBrowserEvent(Event event) {
     // Should not act on button if disabled.
     if (isEnabled() == false) {
-      throw new RuntimeException("Do we ever act on disabled buttons?");
+      // This can happen when events are bubbled up from non-disabled children
+      return;
     }
 
     int type = DOM.eventGetType(event);
@@ -570,6 +588,15 @@ public abstract class CustomButton extends ButtonBase implements
   }
 
   /**
+   * Is this button down?
+   * 
+   * @return <code>true</code> if the button is down
+   */
+  protected boolean isDown() {
+    return (DOWN_ATTRIBUTE & curFace.getFaceID()) > 0;
+  }
+
+  /**
    * Overridden on attach to ensure that a button face has been chosen before
    * the button is displayed.
    */
@@ -579,12 +606,15 @@ public abstract class CustomButton extends ButtonBase implements
   }
 
   /**
-   * Toggle the up/down attribute.
+   * Sets whether this button is down.
    * 
+   * @param down <code>true</code> to press the button, <code>false</code>
+   *          otherwise
    */
-  protected void toggleDown() {
-    int newFaceID = curFace.getFaceID() ^ DOWN_ATTRIBUTE;
-    setCurrentFace(newFaceID);
+  protected void setDown(boolean down) {
+    if (down != isDown()) {
+      toggleDown();
+    }
   }
 
   /**
@@ -607,33 +637,12 @@ public abstract class CustomButton extends ButtonBase implements
   }
 
   /**
-   * Is this button down?
-   * 
-   * @return <code>true</code> if the button is down
-   */
-  boolean isDown() {
-    return (DOWN_ATTRIBUTE & curFace.getFaceID()) > 0;
-  }
-
-  /**
    * Is the mouse hovering over this button?
    * 
    * @return <code>true</code> if the mouse is hovering
    */
   final boolean isHovering() {
     return (HOVERING_ATTRIBUTE & curFace.getFaceID()) > 0;
-  }
-
-  /**
-   * Sets whether this button is down.
-   * 
-   * @param down <code>true</code> to press the button, <code>false</code>
-   *          otherwise
-   */
-  void setDown(boolean down) {
-    if (down != isDown()) {
-      toggleDown();
-    }
   }
 
   /**
@@ -645,6 +654,15 @@ public abstract class CustomButton extends ButtonBase implements
     if (hovering != isHovering()) {
       toggleHover();
     }
+  }
+
+  /**
+   * Toggle the up/down attribute.
+   * 
+   */
+  void toggleDown() {
+    int newFaceID = curFace.getFaceID() ^ DOWN_ATTRIBUTE;
+    setCurrentFace(newFaceID);
   }
 
   private Face createFace(Face delegateTo, final String name, final int faceID) {

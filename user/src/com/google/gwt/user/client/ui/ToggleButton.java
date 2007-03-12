@@ -115,7 +115,7 @@ public class ToggleButton extends CustomButton {
   /**
    * Constructor for <code>ToggleButton</code>.
    */
-  protected ToggleButton() {
+  public ToggleButton() {
     super();
     setStyleName(STYLENAME_DEFAULT);
   }
@@ -134,7 +134,7 @@ public class ToggleButton extends CustomButton {
     super.onBrowserEvent(event);
   }
 
-  public void setDown(boolean b) {
-    super.setDown(true);
+  public void setDown(boolean isDown) {
+    super.setDown(isDown);
   }
 }

@@ -19,21 +19,21 @@ package com.google.gwt.user.client.ui;
 import java.util.Iterator;
 
 /**
- * Popup list of suggestions.
+ * Selectable suggestions.
  */
-public class SuggestionsPopup extends SelectablePopup {
+public class SuggestPicker extends AbstractItemPicker {
 
   /**
    * Default style for the suggestion popup.
    */
-  private static final String STYLE_DEFAULT = "gwt-SuggestionsPopup";
+  private static final String STYLE_DEFAULT = "gwt-SuggestPicker";
 
   private int startInvisible = Integer.MAX_VALUE;
 
   /**
    * Constructor for <code>SuggestPopup</code>.
    */
-  public SuggestionsPopup() {
+  public SuggestPicker() {
     setStyleName(STYLE_DEFAULT);
   }
 
@@ -42,24 +42,13 @@ public class SuggestionsPopup extends SelectablePopup {
       switch (keyCode) {
         case KeyboardListener.KEY_DOWN:
           shiftSelection(1);
-          break;
+          return true;
         case KeyboardListener.KEY_UP:
           shiftSelection(-1);
-          break;
-        case KeyboardListener.KEY_ENTER:
-          click();
-          break;
-        case KeyboardListener.KEY_ESCAPE:
-          hide();
-          break;
-        default:
-          // Avoid shared post processing.
-          return false;
+          return true;
       }
-      return true;
-    } else {
-      return false;
     }
+    return false;
   }
 
   /**

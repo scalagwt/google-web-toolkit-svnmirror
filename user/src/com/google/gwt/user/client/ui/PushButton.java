@@ -27,6 +27,16 @@ public class PushButton extends CustomButton {
 
   private static final String STYLENAME_DEFAULT = "gwt-PushButton";
 
+  private boolean waitingForMouseUp = false;
+
+  /**
+   * Constructor for <code>PushButton</code>.
+   */
+  public PushButton() {
+    super();
+    setStyleName(STYLENAME_DEFAULT);
+  }
+
   /**
    * 
    * Constructor for <code>PushButton</code>. The supplied image is used to
@@ -112,14 +122,6 @@ public class PushButton extends CustomButton {
     this(upText);
   }
 
-  /**
-   * Constructor for <code>PushButton</code>.
-   */
-  protected PushButton() {
-    super();
-    setStyleName(STYLENAME_DEFAULT);
-  }
-
   public void onBrowserEvent(Event event) {
     // Should not act on button if disabled.
     if (isEnabled() == false) {
@@ -129,11 +131,20 @@ public class PushButton extends CustomButton {
     switch (type) {
 
       case Event.ONMOUSEDOWN:
+        waitingForMouseUp = true;
         setDown(true);
         break;
       case Event.ONMOUSEUP:
+        waitingForMouseUp = false;
         setDown(false);
         break;
+      case Event.ONMOUSEOUT:
+        setDown(false);
+        break;
+      case Event.ONMOUSEOVER:
+        if (waitingForMouseUp) {
+          setDown(true);
+        }
     }
     super.onBrowserEvent(event);
   }
