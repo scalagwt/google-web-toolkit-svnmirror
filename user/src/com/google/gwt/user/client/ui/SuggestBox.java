@@ -16,6 +16,7 @@
 
 package com.google.gwt.user.client.ui;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.impl.ItemPickerDropDownImpl;
 
 import java.util.Iterator;
@@ -61,6 +62,10 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
   private String cachedValue;
   private final ItemPickerDropDownImpl popup;
   private final TextBoxBase box;
+  private CompositeClickListenerCollection clickListeners;
+  private CompositeChangeListenerCollection changeListeners;
+  private CompositeFocusListenerCollection focusListeners;
+  private CompositeKeyboardListenerCollection keyboardListeners;
 
   private String separatorPadding = " ";
 
@@ -103,9 +108,9 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
    */
   public SuggestBox(SuggestOracle oracle, SuggestPicker picker, TextBoxBase box) {
     this.box = box;
+    initWidget(box);
     this.popup = new ItemPickerDropDownImpl(this, picker);
     addPopupChangeListener();
-    initWidget(box);
     addKeyBoardSupport();
     setOracle(oracle);
   }
@@ -122,19 +127,31 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
   }
 
   public void addChangeListener(ChangeListener listener) {
-    box.addChangeListener(listener);
+    if (changeListeners == null) {
+      changeListeners = new CompositeChangeListenerCollection(this);
+    }
+    changeListeners.add(listener);
   }
 
   public void addClickListener(ClickListener listener) {
-    box.addClickListener(listener);
+    if (clickListeners == null) {
+      clickListeners = new CompositeClickListenerCollection(this);
+    }
+    clickListeners.add(listener);
   }
 
   public void addFocusListener(FocusListener listener) {
-    box.addFocusListener(listener);
+    if (focusListeners == null) {
+      focusListeners = new CompositeFocusListenerCollection(this);
+    }
+    focusListeners.add(listener);
   }
 
   public void addKeyboardListener(KeyboardListener listener) {
-    box.addKeyboardListener(listener);
+    if (keyboardListeners == null) {
+      keyboardListeners = new CompositeKeyboardListenerCollection(this);
+    }
+    keyboardListeners.add(listener);
   }
 
   public int getLimit() {
@@ -164,11 +181,15 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
   }
 
   public void removeChangeListener(ChangeListener listener) {
-    box.removeChangeListener(listener);
+    if (clickListeners != null) {
+      clickListeners.remove(listener);
+    }
   }
 
   public void removeClickListener(ClickListener listener) {
-    box.removeClickListener(listener);
+    if (clickListeners != null) {
+      clickListeners.remove(listener);
+    }
   }
 
   public void removeFocusListener(FocusListener listener) {
@@ -246,6 +267,10 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
     box.setText(text);
   }
 
+  public String toString() {
+    return GWT.getTypeName(this) + this.getText();
+  }
+
   /**
    * Show the given list of suggestions. The {@link SuggestPicker} must be able
    * to parse the list of suggestions or a runtime error will result. The
@@ -311,7 +336,6 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
       }
 
       private void refreshSuggestions() {
-
         // Get the raw text.
         String text = box.getText();
         if (text.equals(cachedValue)) {
@@ -349,6 +373,9 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
           String newValue = (String) popup.getSelectedValue();
           cachedValue = newValue;
           box.setText(cachedValue);
+        }
+        if (changeListeners != null) {
+          changeListeners.fireChange(SuggestBox.this);
         }
       }
 
