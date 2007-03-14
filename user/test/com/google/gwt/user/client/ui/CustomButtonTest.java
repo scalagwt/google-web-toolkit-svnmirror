@@ -35,14 +35,25 @@ public class CustomButtonTest extends GWTTestCase {
     faces.put("upHovering", b.getUpHoveringFace());
     faces.put("downHovering", b.getDownHoveringFace());
     Iterator entries = faces.entrySet().iterator();
-
     // Set all faces as text.
     while (entries.hasNext()) {
       Map.Entry entry = (Entry) entries.next();
       Face f = (Face) entry.getValue();
       b.setCurrentFace(f);
       assertEquals("random-" + f.getName(), DOM.getAttribute(b.getElement(),
-          "className"));
+          "className").trim());
+    }
+
+    entries = faces.entrySet().iterator();
+    b.addStyleName("fobar");
+    // Set all faces as text.
+    while (entries.hasNext()) {
+      Map.Entry entry = (Entry) entries.next();
+      Face f = (Face) entry.getValue();
+      b.setCurrentFace(f);
+      String computedStyleName = DOM.getAttribute(b.getElement(), "className");
+      assertTrue(computedStyleName.indexOf("random-" + f.getName()) >= 0);
+      assertTrue(computedStyleName.indexOf("fobar") >= 0);
     }
   }
 
