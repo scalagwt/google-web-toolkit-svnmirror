@@ -24,11 +24,11 @@ import com.google.gwt.user.client.Event;
  * Custom Button is a base button class with built in support for a set number
  * of button faces.
  * 
- * Each face has its own style modifier. For example, <code>downHover</code>
- * is assigned the CSS modifier <i>downHover</i>. So, if the button's overall
- * style name is <i>gwt-PushButton</i> then when showing the
- * <code>downHover</code> face, the button's style is <i>
- * gwt-PushButton-downHover</i>.
+ * Each face has its own style modifier. For example, <code>downHovering</code>
+ * is assigned the CSS modifier <i>downHovering</i>. So, if the button's
+ * overall style name is <i>gwt-PushButton</i> then when showing the
+ * <code>downHovering</code> face, the button's style is <i>
+ * gwt-PushButton-downHovering</i>.
  * 
  * <p>
  * Each button face can be assigned is own image, text, or html contents. If no
@@ -44,27 +44,28 @@ import com.google.gwt.user.client.Event;
  * <td><b>CSS style name</b></td>
  * <td><b>Getter method</b></td>
  * <td><b>description of face</b></td>
+ * <td><b>defaults to contents of face</b></td>
  * </tr>
  * 
  * <tr>
  * <td>up</td>
  * <td> {@link #getUpFace()} </td>
  * <td>face shown when button is up</td>
- * 
+ * <td> none</td>
  * </tr>
  * 
  * <tr>
  * <td>down</td>
  * <td> {@link #getDownFace()} </td>
  * <td>face shown when button is down</td>
- * 
+ * <td> up </td>
  * </tr>
  * 
  * <tr>
  * <td>upHovering</td>
  * <td> {@link #getUpHoveringFace()} </td>
  * <td>face shown when button is up and hovering</td>
- * 
+ * <td> up </td>
  * </tr>
  * 
  * 
@@ -72,21 +73,21 @@ import com.google.gwt.user.client.Event;
  * <td>upDisabled</td>
  * <td> {@link #getUpDisabledFace()} </td>
  * <td>face shown when button is up and disabled</td>
- * 
+ * <td> up</td>
  * </tr>
  * 
  * <tr>
  * <td>downHovering</td>
  * <td> {@link #getDownHoveringFace()} </td>
  * <td>face shown when button is down and hovering</td>
- * 
+ * <td> down</td>
  * </tr>
  * 
  * <tr>
  * <td>downDisabled</td>
  * <td> {@link #getDownDisabledFace()} </td>
  * <td>face shown when button is down and disabled</td>
- * 
+ * <td>down</td>
  * </tr>
  * </table>
  * <p>
@@ -102,7 +103,7 @@ public abstract class CustomButton extends ButtonBase implements
    * modifier and, optionally, its own contents html, text, or image.
    */
   public abstract static class Face implements HasHTML, HasText {
-    private static final String STYLE_HTML_FACE = "html-face";
+    private static final String STYLENAME_HTML_FACE = "html-face";
     private final Face delegateTo;
     private Element face;
 
@@ -145,7 +146,7 @@ public abstract class CustomButton extends ButtonBase implements
     public void setHTML(String html) {
       face = DOM.createDiv();
       DOM.setInnerHTML(face, html);
-      UIObject.setStyleName(face, STYLE_HTML_FACE, true);
+      UIObject.setStyleName(face, STYLENAME_HTML_FACE, true);
     }
 
     /**
@@ -167,12 +168,8 @@ public abstract class CustomButton extends ButtonBase implements
     public final void setText(String text) {
       face = DOM.createDiv();
       DOM.setInnerText(face, text);
-      UIObject.setStyleName(face, STYLE_HTML_FACE, true);
+      UIObject.setStyleName(face, STYLENAME_HTML_FACE, true);
     }
-
-    /**
-     * Sets the face's contents.
-     */
 
     public final String toString() {
       return this.getName();
@@ -308,10 +305,9 @@ public abstract class CustomButton extends ButtonBase implements
 
   /**
    * 
-   * Constructor for <code>CustomButton</code>. The supplied image is used to
-   * construct the default face.
+   * Constructor for <code>CustomButton</code>.
    * 
-   * @param upImage image for the default face of the button
+   * @param upImage image for the default(up) face of the button
    */
   public CustomButton(AbstractImage upImage) {
     this();
@@ -345,8 +341,7 @@ public abstract class CustomButton extends ButtonBase implements
 
   /**
    * 
-   * Constructor for <code>CustomButton</code>. The supplied image is used to
-   * construct the default face of the button.
+   * Constructor for <code>CustomButton</code>.
    * 
    * @param upImage image for the default (up) face of the button
    * @param listener the click listener
@@ -358,8 +353,7 @@ public abstract class CustomButton extends ButtonBase implements
 
   /**
    * 
-   * Constructor for <code>CustomButton</code>. The supplied text is used to
-   * construct the default face of the button.
+   * Constructor for <code>CustomButton</code>.
    * 
    * @param upText the text for the default (up) face of the button.
    */
@@ -369,8 +363,7 @@ public abstract class CustomButton extends ButtonBase implements
   }
 
   /**
-   * Constructor for <code>CustomButton</code>. The supplied text is used to
-   * construct the default face of the button.
+   * Constructor for <code>CustomButton</code>.
    * 
    * @param upText the text for the default (up) face of the button
    * @param listener the click listener
@@ -385,7 +378,7 @@ public abstract class CustomButton extends ButtonBase implements
    * Constructor for <code>CustomButton</code>.
    * 
    * @param upText the text for the default (up) face of the button
-   * @param downText the text for down face of the button
+   * @param downText the text for the down face of the button
    */
   public CustomButton(String upText, String downText) {
     this(upText);
@@ -395,19 +388,12 @@ public abstract class CustomButton extends ButtonBase implements
    * Constructor for <code>CustomButton</code>.
    */
   protected CustomButton() {
+    // Use FocusPanel.impl rather than FocusWidget because only FocusPanel.impl
+    // works across browsers to create a focusable element.
     super(FocusPanel.impl.createFocusable());
     sinkEvents(Event.ONCLICK | Event.MOUSEEVENTS | Event.FOCUSEVENTS);
     setUpFace(createFace(null, "up", UP));
     setStyleName(STYLENAME_DEFAULT);
-    addFocusListener(new FocusListener() {
-      public void onFocus(Widget sender) {
-        setHovering(true);
-      }
-
-      public void onLostFocus(Widget sender) {
-        setHovering(false);
-      }
-    });
   }
 
   /**
@@ -457,6 +443,13 @@ public abstract class CustomButton extends ButtonBase implements
     return getCurrentFace().getHTML();
   }
 
+  /**
+   * Gets the style name associated with the object. The actual CSS style name
+   * for the button will be this name + "-" + current face name.
+   * 
+   * @return the object's style name
+   * @see #setStyleName(String)
+   */
   public final String getStyleName() {
     return baseStyleName;
   }
@@ -517,9 +510,11 @@ public abstract class CustomButton extends ButtonBase implements
     int type = DOM.eventGetType(event);
     switch (type) {
       case Event.ONMOUSEOUT:
+      case Event.ONBLUR:
         setHovering(false);
         break;
       case Event.ONMOUSEOVER:
+      case Event.ONFOCUS:
         setHovering(true);
         break;
     }
@@ -560,13 +555,20 @@ public abstract class CustomButton extends ButtonBase implements
     getCurrentFace().setHTML(html);
   }
 
+  /**
+   * Sets the style name associated with the object. The actual CSS style name
+   * for the button will be this name + "-" + current face name.
+   * 
+   * @param styleName the object's style name
+   * @see #setStyleName(String)
+   */
   public final void setStyleName(String styleName) {
     if (styleName == null) {
       throw new IllegalStateException("Cannot set the base style name to null");
     }
     baseStyleName = styleName;
 
-    // If initialized, force refresh.
+    // If already initialized, force refresh.
     if (curFace != null) {
       Face temp = curFace;
       curFace = null;
@@ -593,7 +595,7 @@ public abstract class CustomButton extends ButtonBase implements
    * @return <code>true</code> if the button is down
    */
   protected boolean isDown() {
-    return (DOWN_ATTRIBUTE & curFace.getFaceID()) > 0;
+    return (DOWN_ATTRIBUTE & getCurrentFace().getFaceID()) > 0;
   }
 
   /**
@@ -625,11 +627,16 @@ public abstract class CustomButton extends ButtonBase implements
   }
 
   /**
-   * Gets the current face of the button. Used for debugging
+   * Gets the current face of the button.
    * 
    * @return the current face
    */
+
   Face getCurrentFace() {
+    /*
+     * Implementation note: Package protected so we can use it when testing the
+     * button.
+     */
     if (curFace == null) {
       finishSetup();
     }
@@ -642,7 +649,25 @@ public abstract class CustomButton extends ButtonBase implements
    * @return <code>true</code> if the mouse is hovering
    */
   final boolean isHovering() {
-    return (HOVERING_ATTRIBUTE & curFace.getFaceID()) > 0;
+    return (HOVERING_ATTRIBUTE & getCurrentFace().getFaceID()) > 0;
+  }
+
+  void setCurrentFace(Face newFace) {
+    /*
+     * Implementation note: default access for testing.
+     */
+    if (curFace != newFace) {
+      curFace = newFace;
+      Element newFaceElement = newFace.getFace();
+      if (curFaceElement != newFaceElement) {
+        if (curFaceElement != null) {
+          DOM.removeChild(getElement(), curFaceElement);
+        }
+        curFaceElement = newFaceElement;
+        DOM.appendChild(getElement(), curFaceElement);
+      }
+      super.setStyleName(baseStyleName + "-" + curFace.getName());
+    }
   }
 
   /**
@@ -658,10 +683,9 @@ public abstract class CustomButton extends ButtonBase implements
 
   /**
    * Toggle the up/down attribute.
-   * 
    */
   void toggleDown() {
-    int newFaceID = curFace.getFaceID() ^ DOWN_ATTRIBUTE;
+    int newFaceID = getCurrentFace().getFaceID() ^ DOWN_ATTRIBUTE;
     setCurrentFace(newFaceID);
   }
 
@@ -694,21 +718,6 @@ public abstract class CustomButton extends ButtonBase implements
         return getDownDisabledFace();
       default:
         throw new IllegalStateException(id + " is not a known face id.");
-    }
-  }
-
-  private void setCurrentFace(Face newFace) {
-    if (curFace != newFace) {
-      curFace = newFace;
-      Element newFaceElement = newFace.getFace();
-      if (curFaceElement != newFaceElement) {
-        if (curFaceElement != null) {
-          DOM.removeChild(getElement(), curFaceElement);
-        }
-        curFaceElement = newFaceElement;
-        DOM.appendChild(getElement(), curFaceElement);
-      }
-      super.setStyleName(baseStyleName + "-" + curFace.getName());
     }
   }
 
@@ -781,7 +790,7 @@ public abstract class CustomButton extends ButtonBase implements
    */
   private void toggleDisabled() {
     // Add disabled.
-    int newFaceID = curFace.getFaceID() ^ DISABLED_ATTRIBUTE;
+    int newFaceID = getCurrentFace().getFaceID() ^ DISABLED_ATTRIBUTE;
 
     // Remove hovering.
     newFaceID &= ~HOVERING_ATTRIBUTE;
@@ -795,7 +804,7 @@ public abstract class CustomButton extends ButtonBase implements
    */
   private void toggleHover() {
     // Add hovering.
-    int newFaceID = curFace.getFaceID() ^ HOVERING_ATTRIBUTE;
+    int newFaceID = getCurrentFace().getFaceID() ^ HOVERING_ATTRIBUTE;
 
     // Remove disabled.
     newFaceID &= ~DISABLED_ATTRIBUTE;

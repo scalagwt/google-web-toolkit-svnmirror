@@ -27,6 +27,17 @@ import com.google.gwt.user.client.Event;
 public class ToggleButton extends CustomButton {
   private static String STYLENAME_DEFAULT = "gwt-ToggleButton";
 
+  {
+    setStyleName(STYLENAME_DEFAULT);
+  }
+
+  /**
+   * Constructor for <code>ToggleButton</code>.
+   */
+  public ToggleButton() {
+    super();
+  }
+
   /**
    * 
    * Constructor for <code>ToggleButton</code>. The supplied image is used to
@@ -35,8 +46,7 @@ public class ToggleButton extends CustomButton {
    * @param upImage image for the default face of the button
    */
   public ToggleButton(AbstractImage upImage) {
-    this();
-    getUpFace().setImage(upImage);
+    super(upImage);
   }
 
   /**
@@ -47,8 +57,7 @@ public class ToggleButton extends CustomButton {
    * @param downImage image for the down face of the button
    */
   public ToggleButton(AbstractImage upImage, AbstractImage downImage) {
-    this(upImage);
-    getDownFace().setImage(downImage);
+    super(upImage, downImage);
   }
 
   /**
@@ -60,8 +69,7 @@ public class ToggleButton extends CustomButton {
    */
   public ToggleButton(AbstractImage upImage, AbstractImage downImage,
       ClickListener listener) {
-    this(upImage, listener);
-    getDownFace().setImage(downImage);
+    super(upImage, downImage, listener);
   }
 
   /**
@@ -73,8 +81,7 @@ public class ToggleButton extends CustomButton {
    * @param listener the click listener
    */
   public ToggleButton(AbstractImage upImage, ClickListener listener) {
-    this(upImage);
-    addClickListener(listener);
+    super(upImage, listener);
   }
 
   /**
@@ -85,8 +92,7 @@ public class ToggleButton extends CustomButton {
    * @param upText the text for the default (up) face of the button.
    */
   public ToggleButton(String upText) {
-    this();
-    getUpFace().setText(upText);
+    super(upText);
   }
 
   /**
@@ -97,8 +103,7 @@ public class ToggleButton extends CustomButton {
    * @param listener the click listener
    */
   public ToggleButton(String upText, ClickListener listener) {
-    this(upText);
-    addClickListener(listener);
+    super(upText, listener);
   }
 
   /**
@@ -109,15 +114,7 @@ public class ToggleButton extends CustomButton {
    * @param downText the text for down face of the button
    */
   public ToggleButton(String upText, String downText) {
-    this(upText);
-  }
-
-  /**
-   * Constructor for <code>ToggleButton</code>.
-   */
-  public ToggleButton() {
-    super();
-    setStyleName(STYLENAME_DEFAULT);
+    super(upText, downText);
   }
 
   public boolean isDown() {

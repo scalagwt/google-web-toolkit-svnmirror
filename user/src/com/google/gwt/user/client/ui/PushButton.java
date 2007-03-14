@@ -21,7 +21,6 @@ import com.google.gwt.user.client.Event;
 
 /**
  * A normal push button with custom styling.
- * 
  */
 public class PushButton extends CustomButton {
 
@@ -29,24 +28,25 @@ public class PushButton extends CustomButton {
 
   private boolean waitingForMouseUp = false;
 
+  {
+    setStyleName(STYLENAME_DEFAULT);
+  }
+
   /**
    * Constructor for <code>PushButton</code>.
    */
   public PushButton() {
     super();
-    setStyleName(STYLENAME_DEFAULT);
   }
 
   /**
    * 
-   * Constructor for <code>PushButton</code>. The supplied image is used to
-   * construct the default face.
+   * Constructor for <code>PushButton</code>.
    * 
-   * @param upImage image for the default face of the button
+   * @param upImage image for the default(up) face of the button
    */
   public PushButton(AbstractImage upImage) {
     this();
-    getUpFace().setImage(upImage);
   }
 
   /**
@@ -57,8 +57,7 @@ public class PushButton extends CustomButton {
    * @param downImage image for the down face of the button
    */
   public PushButton(AbstractImage upImage, AbstractImage downImage) {
-    this(upImage);
-    getDownFace().setImage(downImage);
+    super(upImage, downImage);
   }
 
   /**
@@ -70,8 +69,7 @@ public class PushButton extends CustomButton {
    */
   public PushButton(AbstractImage upImage, AbstractImage downImage,
       ClickListener listener) {
-    this(upImage, listener);
-    getDownFace().setImage(downImage);
+    super(upImage, listener);
   }
 
   /**
@@ -83,8 +81,7 @@ public class PushButton extends CustomButton {
    * @param listener the click listener
    */
   public PushButton(AbstractImage upImage, ClickListener listener) {
-    this(upImage);
-    addClickListener(listener);
+    super(upImage, listener);
   }
 
   /**
@@ -95,8 +92,7 @@ public class PushButton extends CustomButton {
    * @param upText the text for the default (up) face of the button.
    */
   public PushButton(String upText) {
-    this();
-    getUpFace().setText(upText);
+    super(upText);
   }
 
   /**
@@ -107,8 +103,7 @@ public class PushButton extends CustomButton {
    * @param listener the click listener
    */
   public PushButton(String upText, ClickListener listener) {
-    this(upText);
-    addClickListener(listener);
+    super(upText, listener);
   }
 
   /**
@@ -119,11 +114,12 @@ public class PushButton extends CustomButton {
    * @param downText the text for down face of the button
    */
   public PushButton(String upText, String downText) {
-    this(upText);
+    super(upText, downText);
   }
 
   public void onBrowserEvent(Event event) {
-    // Should not act on button if disabled.
+    // Should not act on button if the button is disabled. This can happen
+    // because an event is bubbled up from a non-disabled interior component.
     if (isEnabled() == false) {
       return;
     }
