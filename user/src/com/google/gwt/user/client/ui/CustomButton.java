@@ -566,13 +566,12 @@ public abstract class CustomButton extends ButtonBase implements
     if (styleName == null) {
       throw new IllegalStateException("Cannot set the base style name to null");
     }
-    baseStyleName = styleName;
-
-    // If already initialized, force refresh.
     if (curFace != null) {
-      Face temp = curFace;
-      curFace = null;
-      setCurrentFace(temp);
+      super.removeStyleName(getCSSStyleName());
+      baseStyleName = styleName;
+      super.addStyleName(getCSSStyleName());
+    } else {
+      baseStyleName = styleName;
     }
   }
 
@@ -657,6 +656,9 @@ public abstract class CustomButton extends ButtonBase implements
      * Implementation note: default access for testing.
      */
     if (curFace != newFace) {
+      if (curFace != null) {
+        super.removeStyleName(getCSSStyleName());
+      }
       curFace = newFace;
       Element newFaceElement = newFace.getFace();
       if (curFaceElement != newFaceElement) {
@@ -666,7 +668,7 @@ public abstract class CustomButton extends ButtonBase implements
         curFaceElement = newFaceElement;
         DOM.appendChild(getElement(), curFaceElement);
       }
-      super.setStyleName(baseStyleName + "-" + curFace.getName());
+      super.addStyleName(getCSSStyleName());
     }
   }
 
@@ -700,6 +702,15 @@ public abstract class CustomButton extends ButtonBase implements
         return faceID;
       }
     };
+  }
+
+  /**
+   * Gets the modified style name.
+   * 
+   * @return the modified style name
+   */
+  private String getCSSStyleName() {
+    return baseStyleName + "-" + curFace.getName();
   }
 
   private Face getFaceFromID(int id) {
