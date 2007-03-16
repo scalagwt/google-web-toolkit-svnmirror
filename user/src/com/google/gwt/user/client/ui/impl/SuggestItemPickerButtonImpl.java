@@ -16,34 +16,50 @@
 
 package com.google.gwt.user.client.ui.impl;
 
-import com.google.gwt.user.client.ui.DefaultSuggestOracle;
-import com.google.gwt.user.client.ui.HasSuggestOracle;
 import com.google.gwt.user.client.ui.KeyboardListener;
 import com.google.gwt.user.client.ui.PopupListener;
 import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.SuggestOracle;
-import com.google.gwt.user.client.ui.SuggestOracleCallback;
-import com.google.gwt.user.client.ui.SuggestOracleRequest;
-import com.google.gwt.user.client.ui.SuggestOracleResponse;
+import com.google.gwt.user.client.ui.Suggest;
+import com.google.gwt.user.client.ui.Suggest.Callback;
+import com.google.gwt.user.client.ui.Suggest.HasOracle;
+import com.google.gwt.user.client.ui.Suggest.Oracle;
+import com.google.gwt.user.client.ui.Suggest.Request;
+import com.google.gwt.user.client.ui.Suggest.Response;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
 
 /**
- * A {@link ItemPickerButtonImpl} with a associated {@link SuggestOracle} to
- * populate the button's items.
+ * A {@link ItemPickerButtonImpl} with a associated {@link Oracle} to populate
+ * the button's items.
  */
 public class SuggestItemPickerButtonImpl extends ItemPickerButtonImpl implements
-    HasSuggestOracle {
+    HasOracle {
 
   private StringBuffer accum = new StringBuffer();
 
-  private final SuggestOracle oracle;
+  private final Oracle oracle;
 
-  private SuggestOracleCallback callBack = new SuggestOracleCallback() {
+  private Collection defaultSuggestions;
 
-    public void onSuggestionsRecieved(SuggestOracleRequest request,
-        SuggestOracleResponse response) {
+  private Callback callBack = new Callback() {
+
+    public void onSuggestionsReceived(Request request, Response response) {
       if (request.getQuery().trim().equals(accum.toString().trim())) {
-        getPopup().setItems(response.iterator());
-        SuggestItemPickerButtonImpl.super.showPopup();
+        Iterator suggestions = response.iterator();
+        if (suggestions.hasNext() == false) {
+          suggestions = defaultSuggestions.iterator();
+        }
+        getPopup().setItems(suggestions);
+        // Compiler bug requires us to inline the following call.
+        // SuggestItemPickerButtonImpl.super.showPopup();
+
+        // Start inline.
+        setDown(true);
+        getPopup().show();
+        // End inline.
+
       } else {
         getPopup().hide();
       }
@@ -51,7 +67,7 @@ public class SuggestItemPickerButtonImpl extends ItemPickerButtonImpl implements
   };
 
   {
-    // If the popup is closed for any reason, set the button to be depressed.
+    // If the popup is closed for any reason, clear the accum.
     getPopup().addPopupListener(new PopupListener() {
       public void onPopupClosed(PopupPanel sender, boolean autoClosed) {
         accum.setLength(0);
@@ -60,45 +76,64 @@ public class SuggestItemPickerButtonImpl extends ItemPickerButtonImpl implements
   }
 
   /**
-   * 
+   * Default Constructor for <code>SuggestDropDownButton</code>.
+   */
+  public SuggestItemPickerButtonImpl() {
+    this.oracle = new Suggest.DefaultOracle();
+  }
+
+  /**
    * Constructor for <code>SuggestDropDownButton</code>.
    * 
    * @param upText text for up image
    * @param oracle suggestion oracle
+   * @param defaultSuggestions to show when the oracle comes up empty
    */
-  public SuggestItemPickerButtonImpl(String upText, SuggestOracle oracle) {
+  public SuggestItemPickerButtonImpl(String upText, Oracle oracle,
+      Collection defaultSuggestions) {
     this.oracle = oracle;
     getUpFace().setText(upText);
+    setDefaultSuggestions(defaultSuggestions);
+  }
+
+  public SuggestItemPickerButtonImpl(Oracle oracle) {
+    this.oracle = oracle;
+  }
+
+  public Oracle getSuggestOracle() {
+    return oracle;
   }
 
   /**
+   * Sets the default items to show when there are no valid suggestions.
    * 
-   * Default Constructor for <code>SuggestDropDownButton</code>.
-   * 
+   * @param defaultSuggestions default suggestions
    * 
    */
-  public SuggestItemPickerButtonImpl() {
-    this.oracle = new DefaultSuggestOracle();
+  public void setDefaultSuggestions(Collection defaultSuggestions) {
+    this.defaultSuggestions = defaultSuggestions;
   }
 
-  public SuggestItemPickerButtonImpl(DefaultSuggestOracle oracle) {
-    this.oracle = oracle;
-  }
-
-  public SuggestOracle getOracle() {
-    return oracle;
+  /**
+   * Sets the default items to show when there are no valid suggestions.
+   * 
+   * @param defaultSuggestions default suggestions
+   * 
+   */
+  public void setDefaultSuggestions(String[] defaultSuggestions) {
+    this.defaultSuggestions = Arrays.asList(defaultSuggestions);
   }
 
   /**
    * Shows the popup.
    */
   public void showPopup() {
-    SuggestOracleRequest request = new SuggestOracleRequest(accum.toString());
+    Request request = new Request(accum.toString());
     oracle.requestSuggestions(request, callBack);
   }
 
-  void handleKeyPress(char keyCode) {
-    boolean navigate = getPopup().navigate(keyCode);
+  void delegateKeyPress(char keyCode) {
+    boolean navigate = getPopup().delegateKeyPress(keyCode);
     if (navigate) {
       return;
     }
@@ -111,4 +146,5 @@ public class SuggestItemPickerButtonImpl extends ItemPickerButtonImpl implements
     }
     showPopup();
   }
+
 }

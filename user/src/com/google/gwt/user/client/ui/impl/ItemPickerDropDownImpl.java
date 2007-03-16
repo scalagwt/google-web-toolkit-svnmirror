@@ -29,16 +29,20 @@ import com.google.gwt.user.client.ui.Widget;
 import java.util.Iterator;
 
 /**
- * Shared utility class for {@link com.google.gwt.user.client.ui.SuggestBox},
+ * Shared {@link ItemPicker} wrapper class for
+ * {@link com.google.gwt.user.client.ui.SuggestBox},
  * {@link com.google.gwt.user.client.ui.impl.ItemPickerButtonImpl}, and
- * {@link SpellCheck} which all use
- * {@link com.google.gwt.user.client.ui.ItemPicker} objects in styled drop
- * downs.
+ * {@link com.google.gwt.user.client.ui.richtext.RichTextEditor} spell checking
+ * which all use {@link com.google.gwt.user.client.ui.ItemPicker} objects in
+ * styled drop downs.
+ * <p>
+ * Unlike a composite, all listeners are delegated directly to the decorated
+ * {@link ItemPicker} because, from an outsider's point of view, the
+ * {@link ItemPickerDropDownImpl} should not exist.
  */
 public class ItemPickerDropDownImpl extends PopupPanel implements ItemPicker {
   private final ItemPicker picker;
   private final HasFocus owner;
-
   private boolean justChanged;
 
   public ItemPickerDropDownImpl(final HasFocus owner, ItemPicker picker) {
@@ -63,8 +67,25 @@ public class ItemPickerDropDownImpl extends PopupPanel implements ItemPicker {
     picker.addChangeListener(listener);
   }
 
-  public void click() {
-    picker.click();
+  public void confirmSelection() {
+    picker.confirmSelection();
+  }
+
+  public boolean delegateKeyPress(char keyCode) {
+    if (isAttached()) {
+      switch (keyCode) {
+        case KeyboardListener.KEY_ESCAPE:
+          hide();
+          return true;
+        case KeyboardListener.KEY_ENTER:
+          picker.confirmSelection();
+          return true;
+        default:
+          // Avoid shared post processing.
+          return picker.delegateKeyPress(keyCode);
+      }
+    }
+    return false;
   }
 
   public int getItemCount() {
@@ -87,23 +108,6 @@ public class ItemPickerDropDownImpl extends PopupPanel implements ItemPicker {
     return picker.getValue(index);
   }
 
-  public boolean navigate(char keyCode) {
-    if (isAttached()) {
-      switch (keyCode) {
-        case KeyboardListener.KEY_ESCAPE:
-          hide();
-          return true;
-        case KeyboardListener.KEY_ENTER:
-          picker.click();
-          return true;
-        default:
-          // Avoid shared post processing.
-          return picker.navigate(keyCode);
-      }
-    }
-    return false;
-  }
-
   public void removeChangeListener(ChangeListener listener) {
     picker.removeChangeListener(listener);
   }
@@ -112,12 +116,12 @@ public class ItemPickerDropDownImpl extends PopupPanel implements ItemPicker {
     picker.setItems(items);
   }
 
-  public void setSelectedIndex(int index) {
-    picker.setSelectedIndex(index);
+  public void setItems(Object[] items) {
+    picker.setItems(items);
   }
 
-  public void shiftSelection(int offset) {
-    picker.shiftSelection(offset);
+  public void setSelectedIndex(int index) {
+    picker.setSelectedIndex(index);
   }
 
   /**
@@ -152,7 +156,7 @@ public class ItemPickerDropDownImpl extends PopupPanel implements ItemPicker {
         - Window.getClientWidth());
     final int top = showBelow.getAbsoluteTop() + showBelow.getOffsetHeight();
     final int overshootTop = Math.max(0, (top + getOffsetHeight())
-        - Window.getClientHeight());
+        - (Window.getScrollTop() + Window.getClientHeight()));
     setPopupPosition(left - overshootLeft, top - overshootTop);
     super.show();
   }

@@ -29,16 +29,18 @@ import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * {@link ItemPickerButtonImpl} A button with a drop down list of pickable items.
+ * {@link ItemPickerButtonImpl} A button with a drop down list of pickable
+ * items.
  */
 public class ItemPickerButtonImpl extends ToggleButton implements
     SourcesChangeEvents {
+
   /**
    * Key press.
    */
   private class KeyPressListener extends KeyboardListenerAdapter {
     public void onKeyDown(Widget sender, char keyCode, int modifiers) {
-      handleKeyPress(keyCode);
+      delegateKeyPress(keyCode);
     }
   }
 
@@ -79,22 +81,29 @@ public class ItemPickerButtonImpl extends ToggleButton implements
    */
   public ItemPickerButtonImpl(ClippedImage upImage, ClippedImage downImage,
       ItemPicker picker) {
-    this(picker);
-    getUpFace().setImage(upImage);
-    getDownFace().setImage(downImage);
+    super(upImage, downImage);
+    setPicker(picker);
   }
 
   /**
    * 
-   * Constructor for <code>DropDownPushButton</code>.
+   * Constructor for <code>ItemPickerButtonImpl</code>.
    * 
    * @param picker item picker
    */
   public ItemPickerButtonImpl(ItemPicker picker) {
-    if (picker == null) {
-      throw new IllegalArgumentException(
-          "A Selectable popup button may not have a null popup");
-    }
+    setPicker(picker);
+  }
+
+  /**
+   * 
+   * Constructor for <code>ItemPickerButtonImpl</code>.
+   * 
+   * @param upText the text for the default (up) face of the button.
+   * @param picker item picker
+   */
+  public ItemPickerButtonImpl(String upText, ItemPicker picker) {
+    super(upText);
     setPicker(picker);
   }
 
@@ -123,18 +132,22 @@ public class ItemPickerButtonImpl extends ToggleButton implements
     popup.show();
   };
 
+  void delegateKeyPress(char keyCode) {
+    if (popup.isAttached() == false) {
+      showPopup();
+    }
+    popup.delegateKeyPress(keyCode);
+  }
+
   ItemPickerDropDownImpl getPopup() {
     return popup;
   }
 
-  void handleKeyPress(char keyCode) {
-    if (popup.isAttached() == false) {
-      showPopup();
-    }
-    popup.navigate(keyCode);
-  }
-
   private void setPicker(final ItemPicker picker) {
+    if (picker == null) {
+      throw new IllegalArgumentException(
+          "A Selectable popup button may not have a null popup");
+    }
     this.popup = new ItemPickerDropDownImpl(this, picker);
     popup.addPopupListener(new PopupListener() {
       public void onPopupClosed(PopupPanel sender, boolean autoClosed) {
