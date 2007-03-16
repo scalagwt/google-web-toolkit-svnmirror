@@ -35,10 +35,15 @@ import com.google.gwt.user.client.Event;
  * content is defined for a face, then the face will use the contents of another
  * face. For example, if <code>downHovering</code> does not have defined
  * contents, it will use the contents defined by the <code>down</code> face.
+ * </p>
+ * 
  * 
  * 
  * <p>
- * The supported faces are defined below: <table border=4>
+ * The supported faces are defined below:
+ * </p>
+ * <p>
+ * <table border="4">
  * <tr>
  * 
  * <td><b>CSS style name</b></td>
@@ -90,10 +95,7 @@ import com.google.gwt.user.client.Event;
  * <td>down</td>
  * </tr>
  * </table>
- * <p>
- * 
- * 
- * 
+ * </p>
  * 
  */
 public abstract class CustomButton extends ButtonBase implements
@@ -183,11 +185,9 @@ public abstract class CustomButton extends ButtonBase implements
 
     /**
      * Get the name of the face. This property is also used as a modifier on the
-     * <code>CustomButton</code> style.
-     * <p>
-     * For instance, if the <code>CustomButton</code> style is
-     * "gwt-PushButton" and the face name is "up", then the CSS class name will
-     * be "gwt-CustomButton-up".
+     * <code>CustomButton</code> style. <p/> For instance, if the
+     * <code>CustomButton</code> style is "gwt-PushButton" and the face name
+     * is "up", then the CSS class name will be "gwt-PushButton-up".
      * 
      * @return the face's name
      */
@@ -264,7 +264,7 @@ public abstract class CustomButton extends ButtonBase implements
   private String baseStyleName;
 
   /**
-   * The button's current face.
+   * The button's current face element.
    */
   private Element curFaceElement;
 
@@ -307,7 +307,7 @@ public abstract class CustomButton extends ButtonBase implements
    * 
    * Constructor for <code>CustomButton</code>.
    * 
-   * @param upImage image for the default(up) face of the button
+   * @param upImage image for the default (up) face of the button
    */
   public CustomButton(AbstractImage upImage) {
     this();
@@ -318,7 +318,7 @@ public abstract class CustomButton extends ButtonBase implements
    * 
    * Constructor for <code>CustomButton</code>.
    * 
-   * @param upImage image for the default(up) face of the button
+   * @param upImage image for the default (up) face of the button
    * @param downImage image for the down face of the button
    */
   public CustomButton(AbstractImage upImage, AbstractImage downImage) {
@@ -329,7 +329,7 @@ public abstract class CustomButton extends ButtonBase implements
   /**
    * Constructor for <code>CustomButton</code>.
    * 
-   * @param upImage image for the default(up) face of the button
+   * @param upImage image for the default (up) face of the button
    * @param downImage image for the down face of the button
    * @param listener clickListener
    */
@@ -510,11 +510,9 @@ public abstract class CustomButton extends ButtonBase implements
     int type = DOM.eventGetType(event);
     switch (type) {
       case Event.ONMOUSEOUT:
-      case Event.ONBLUR:
         setHovering(false);
         break;
       case Event.ONMOUSEOVER:
-      case Event.ONFOCUS:
         setHovering(true);
         break;
     }
@@ -800,7 +798,7 @@ public abstract class CustomButton extends ButtonBase implements
    * Toggle the disabled attribute.
    */
   private void toggleDisabled() {
-    // Add disabled.
+    // Toggle disabled.
     int newFaceID = getCurrentFace().getFaceID() ^ DISABLED_ATTRIBUTE;
 
     // Remove hovering.
@@ -814,7 +812,7 @@ public abstract class CustomButton extends ButtonBase implements
    * Toggle the hovering attribute.
    */
   private void toggleHover() {
-    // Add hovering.
+    // Toggle hovering.
     int newFaceID = getCurrentFace().getFaceID() ^ HOVERING_ATTRIBUTE;
 
     // Remove disabled.
