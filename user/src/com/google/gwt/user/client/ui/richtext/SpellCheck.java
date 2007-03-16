@@ -23,7 +23,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.impl.ItemPickerDropDownImpl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -33,6 +32,8 @@ import java.util.Map;
  * Spell Check for {@link RichTextArea}.
  */
 class SpellCheck {
+
+  private static final String MISSPELLED_WORD = "misspelledWord";
 
   /**
    * Provides the labels needed for spell check.
@@ -159,8 +160,8 @@ class SpellCheck {
    * 
    * @param misspellings supplied misspellings
    */
-  void startSpellCheck(Misspelling[] misspellings) {
-    if (misspellings.length == 0) {
+  void startSpellCheck(List misspellings) {
+    if (misspellings.size() == 0) {
       stateListener.onChange(State.NO_MISSPELLING);
       Timer t = new Timer() {
         public void run() {
@@ -193,16 +194,17 @@ class SpellCheck {
     return new ItemPickerDropDownImpl(target, noSuggestions);
   }
 
-  private void process(Misspelling[] entries) {
+  private void process(List entries) {
     List mispelledWords = new ArrayList();
     final Map wordsToSuggestions = new HashMap();
-    for (int i = 0; i < entries.length; i++) {
-      mispelledWords.add(entries[i].getWord());
-      wordsToSuggestions.put(entries[i].getWord(),
-          Arrays.asList(entries[i].getSuggestions()));
+    for (int i = 0; i < entries.size(); i++) {
+      Misspelling miss = (Misspelling) entries.get(i);
+      mispelledWords.add(miss.getWord());
+      wordsToSuggestions.put(miss.getWord(), miss.getSuggestions());
     }
-    HighlightCategory category = new HighlightCategory("misspelledWord");
+    HighlightCategory category = new HighlightCategory(MISSPELLED_WORD);
     Iterator i = target.addHighlights(mispelledWords, category);
+    // This code could be removed if we created a target.unhighlight(category);
     highlights = new ArrayList();
     while (i.hasNext()) {
       highlights.add(i.next());

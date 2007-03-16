@@ -32,119 +32,119 @@ public class RichTextEditor extends Composite {
   public interface ButtonCustomizer {
 
     /**
-     * Button for background color. *
+     * Customize button for background color. *
      * 
      * @param button the button for background color.
      */
     public void backgroundColor(CustomButton button);
 
     /**
-     * Button for block style.
+     * Customize button for block style.
      * 
      * @param button the button for block style.
      */
     public void blockStyle(CustomButton button);
 
     /**
-     * Button for bold.
+     * Customize button for bold.
      * 
      * @param button the button for bold.
      */
     public void bold(CustomButton button);
 
     /**
-     * Button for bulleted list.
+     * Customize button for bulleted list.
      * 
      * @param button the button for bulleted list.
      */
     public void bulletList(CustomButton button);
 
     /**
-     * Button for font color.
+     * Customize button for font color.
      * 
      * @param button the button for font color.
      */
     public void fontColor(CustomButton button);
 
     /**
-     * Button for font family. *
+     * Customize button for font family. *
      * 
      * @param button the button for font family.
      */
     public void fontFamily(CustomButton button);
 
     /**
-     * Button for font size.
+     * Customize button for font size.
      * 
-      * @param button the button for font size.
+     * @param button the button for font size.
      */
     public void fontSize(CustomButton button);
 
     /**
-     * Button for insert horizontal rule.
+     * Customize button for insert horizontal rule.
      * 
      * @param button the button for insert horizontal rule.
      */
     public void insertHRule(CustomButton button);
 
     /**
-     * Button for italics.
+     * Customize button for italics.
      * 
      * @param button the button for italics.
      */
     public void italics(CustomButton button);
 
     /**
-     * Button for justify center.
+     * Customize button for justify center.
      * 
      * @param button the button for justify center.
      */
     public void justifyCenter(CustomButton button);
 
     /**
-     * Button for justify left.
+     * Customize button for justify left.
      * 
      * @param button the button for justify left.
      */
     public void justifyLeft(CustomButton button);
 
     /**
-     * Button for justify right.
+     * Customize button for justify right.
      * 
      * @param button the button for justify right.
      */
     public void justifyRight(CustomButton button);
 
     /**
-     * Button for left indent.
+     * Customize button for left indent.
      * 
      * @param button the button for left indent.
      */
     public void leftIndent(CustomButton button);
 
     /**
-     * Button for link.
+     * Customize button for link.
      * 
      * @param button the button for link.
      */
     public void link(CustomButton button);
 
     /**
-     * Button for ordered list.
+     * Customize button for ordered list.
      * 
      * @param button the button for ordered list.
      */
     public void orderedList(CustomButton button);
 
     /**
-     * Button for right indent.
+     * Customize button for right indent.
      * 
      * @param button the button for right indent.
      */
     public void rightIndent(CustomButton button);
 
     /**
-     * Button for underline.
+     * Customize button for underline.
      * 
      * @param button the button for underline.
      */

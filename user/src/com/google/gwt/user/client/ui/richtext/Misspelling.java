@@ -3,6 +3,7 @@ package com.google.gwt.user.client.ui.richtext;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Represents a single misspelled word and the set of suggestions associated
@@ -10,7 +11,7 @@ import java.util.Arrays;
  */
 public class Misspelling implements IsSerializable {
   private String word;
-  private String[] suggestions;
+  private List suggestions;
 
   /**
    * 
@@ -20,6 +21,18 @@ public class Misspelling implements IsSerializable {
    * @param suggestions alternative suggestions.
    */
   public Misspelling(String word, String[] suggestions) {
+    this.word = word;
+    this.suggestions = Arrays.asList(suggestions);
+  }
+
+  /**
+   * 
+   * Constructor for <code>Misspelling</code>.
+   * 
+   * @param word the misspelled word
+   * @param suggestions alternative suggestions.
+   */
+  public Misspelling(String word, List suggestions) {
     this.word = word;
     this.suggestions = suggestions;
   }
@@ -36,7 +49,7 @@ public class Misspelling implements IsSerializable {
    * 
    * @return the suggestions
    */
-  public String[] getSuggestions() {
+  public List getSuggestions() {
     return suggestions;
   }
 
@@ -55,7 +68,7 @@ public class Misspelling implements IsSerializable {
    * @param suggestions
    */
   public void setSuggestions(String[] suggestions) {
-    this.suggestions = suggestions;
+    this.suggestions = Arrays.asList(suggestions);
   }
 
   /**
@@ -68,6 +81,6 @@ public class Misspelling implements IsSerializable {
   }
 
   public String toString() {
-    return getWord() + Arrays.asList(getSuggestions()).toString();
+    return getWord() + getSuggestions();
   }
 }

@@ -25,7 +25,7 @@ import java.util.EventObject;
  * Notice that the DOM events and elements used here are those inside the
  * iframe, and not the ones outside.
  */
-public class HighlightEvent extends EventObject {
+class HighlightEvent extends EventObject {
   /*
    * Implementation note: Most of this functionality should belong in a
    * superclass BrowserEvent that is for all DOM based events.
@@ -39,8 +39,8 @@ public class HighlightEvent extends EventObject {
    * Creates a new {@link HighlightEvent}.
    * 
    * @param highlight the {@link Highlight} that received the event
-   * @param domEvent the underlying {@link DOM} {@link Event} in the richTextArea
-   *          DOM
+   * @param domEvent the underlying {@link DOM} {@link Event} in the
+   *          richTextArea DOM
    */
   HighlightEvent(Highlight highlight, Event domEvent) {
     super(highlight);
@@ -77,8 +77,7 @@ public class HighlightEvent extends EventObject {
   }
 
   /**
-   * Cancels the event, so that no other handlers or listeners will processes
-   * it, and it will be preventDefault'ed.
+   * Has the event been cancelled?
    * 
    * @return whether the event has been cancelled
    */

@@ -23,7 +23,6 @@ import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.ClippedImage;
 import com.google.gwt.user.client.ui.ColorPicker;
 import com.google.gwt.user.client.ui.CustomButton;
-import com.google.gwt.user.client.ui.DefaultSuggestOracle;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
@@ -33,6 +32,7 @@ import com.google.gwt.user.client.ui.KeyboardListenerAdapter;
 import com.google.gwt.user.client.ui.MouseListenerAdapter;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PushButton;
+import com.google.gwt.user.client.ui.Suggest;
 import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.impl.ItemPickerButtonImpl;
@@ -57,7 +57,7 @@ class RichTextEditorImplStandard extends RichTextEditorImpl {
    * Default button provider.
    * 
    */
-  static class ButtonProviderImpl implements ButtonCustomizer {
+  static class ButtonCustomizerImpl implements ButtonCustomizer {
 
     /**
      * Images for the default button case.
@@ -414,8 +414,8 @@ class RichTextEditorImplStandard extends RichTextEditorImpl {
   /**
    * Hook up a push button.
    */
-  private abstract class HookupPressButton {
-    HookupPressButton(final PushButton button, String toolTip) {
+  private abstract class HookupPushButton {
+    HookupPushButton(final PushButton button, String toolTip) {
       buttons.add(button);
       button.setTitle(toolTip);
       button.addClickListener(new ClickListener() {
@@ -457,16 +457,15 @@ class RichTextEditorImplStandard extends RichTextEditorImpl {
         String fullHTML = beginHTML + labels.get(i) + endHTML;
         formattedLabels.add(fullHTML);
       }
-
-      DefaultSuggestOracle oracle = new DefaultSuggestOracle(masks);
-      oracle.setShowAllOnEmpty(true);
-      oracle.add(formattedLabels.iterator());
+      Suggest.DefaultOracle oracle = new Suggest.DefaultOracle(masks);
+      oracle.addAll(formattedLabels.iterator());
       SuggestItemPickerButtonImpl button = new SuggestItemPickerButtonImpl(
           oracle);
+
+      button.setDefaultSuggestions(formattedLabels);
       customizeButton(button);
       initButton(button, toolTip);
       final ItemPicker picker = button.getItemPicker();
-
       picker.addChangeListener(new ChangeListener() {
         public void onChange(Widget sender) {
           Object realValue = labelsToValues.get(picker.getSelectedValue());
@@ -677,7 +676,7 @@ class RichTextEditorImplStandard extends RichTextEditorImpl {
   }
 
   void useDefaultButtonProvider() {
-    buttonFaces = new ButtonProviderImpl();
+    buttonFaces = new ButtonCustomizerImpl();
   }
 
   void useDefaultTextProvider() {
@@ -815,7 +814,7 @@ class RichTextEditorImplStandard extends RichTextEditorImpl {
       }
 
       String getBeginHTML(int i) {
-        return "<div sfont-family = '" + values.get(i) + "'>";
+        return "<div style = 'font-family:" + values.get(i) + "'>";
       }
 
       String getEndHTML(int i) {
@@ -857,7 +856,7 @@ class RichTextEditorImplStandard extends RichTextEditorImpl {
       }
 
       String getBeginHTML(int index) {
-        return "<div style='font-size:'" + htmlFormat.get(index) + "%'>";
+        return "<div style='font-size:" + htmlFormat.get(index) + "%'>";
       }
 
       String getEndHTML(int i) {
@@ -922,7 +921,7 @@ class RichTextEditorImplStandard extends RichTextEditorImpl {
   private void addHRuleButton() {
     PushButton button = new PushButton();
     buttonFaces.insertHRule(button);
-    new HookupPressButton(button, labelProvider.insertHRuleIconText()) {
+    new HookupPushButton(button, labelProvider.insertHRuleIconText()) {
       void click() {
         richTextArea.insertHorizontalRule();
       }
@@ -933,7 +932,7 @@ class RichTextEditorImplStandard extends RichTextEditorImpl {
   private void addIndentButtons() {
     PushButton rightIndentButton = new PushButton();
     buttonFaces.rightIndent(rightIndentButton);
-    new HookupPressButton(rightIndentButton, labelProvider.indentIconText()) {
+    new HookupPushButton(rightIndentButton, labelProvider.indentIconText()) {
       void click() {
         richTextArea.rightIndent();
       }
@@ -941,7 +940,7 @@ class RichTextEditorImplStandard extends RichTextEditorImpl {
 
     PushButton leftIndentButton = new PushButton();
     buttonFaces.leftIndent(leftIndentButton);
-    new HookupPressButton(leftIndentButton, labelProvider.outdentIconText()) {
+    new HookupPushButton(leftIndentButton, labelProvider.outdentIconText()) {
       void click() {
         richTextArea.leftIndent();
       }
@@ -966,7 +965,7 @@ class RichTextEditorImplStandard extends RichTextEditorImpl {
   private void addLink() {
     PushButton button = new PushButton();
     buttonFaces.link(button);
-    new HookupPressButton(button, labelProvider.htmlLinkIconText()) {
+    new HookupPushButton(button, labelProvider.htmlLinkIconText()) {
       void click() {
         richTextArea.createLink(richTextArea.getSelectedHTML());
       }
@@ -976,7 +975,7 @@ class RichTextEditorImplStandard extends RichTextEditorImpl {
   private void addLists() {
     PushButton button = new PushButton();
     buttonFaces.bulletList(button);
-    new HookupPressButton(button, labelProvider.bulletedListIconText()) {
+    new HookupPushButton(button, labelProvider.bulletedListIconText()) {
       void click() {
         richTextArea.insertUnorderedList();
       }
@@ -984,7 +983,7 @@ class RichTextEditorImplStandard extends RichTextEditorImpl {
 
     PushButton orderedList = new PushButton();
     buttonFaces.orderedList(orderedList);
-    new HookupPressButton(orderedList, labelProvider.orderedListIconText()) {
+    new HookupPushButton(orderedList, labelProvider.orderedListIconText()) {
       void click() {
         richTextArea.insertOrderedList();
       }
