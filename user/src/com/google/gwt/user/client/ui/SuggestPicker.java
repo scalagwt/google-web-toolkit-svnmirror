@@ -16,17 +16,19 @@
 
 package com.google.gwt.user.client.ui;
 
+import com.google.gwt.user.client.DOM;
+
 import java.util.Iterator;
 
 /**
- * Selectable suggestions.
+ * Suggestion picker. Each "Item" represents a single string suggestion.
  */
 public class SuggestPicker extends AbstractItemPicker {
 
   /**
-   * Default style for the suggestion popup.
+   * Default style for the picker.
    */
-  private static final String STYLE_DEFAULT = "gwt-SuggestPicker";
+  private static final String STYLENAME_DEFAULT = "gwt-SuggestPicker";
 
   private int startInvisible = Integer.MAX_VALUE;
 
@@ -34,10 +36,10 @@ public class SuggestPicker extends AbstractItemPicker {
    * Constructor for <code>SuggestPopup</code>.
    */
   public SuggestPicker() {
-    setStyleName(STYLE_DEFAULT);
+    setStyleName(STYLENAME_DEFAULT);
   }
 
-  public boolean navigate(char keyCode) {
+  public boolean delegateKeyPress(char keyCode) {
     if (isAttached()) {
       switch (keyCode) {
         case KeyboardListener.KEY_DOWN:
@@ -51,40 +53,50 @@ public class SuggestPicker extends AbstractItemPicker {
     return false;
   }
 
+  public int getItemCount() {
+    return startInvisible;
+  }
+
   /**
-   * Sets the suggestions associated with this popup.
+   * Sets the suggestions associated with this picker.
    * 
-   * @param suggestions suggestions for this popup. The suggestions must be a
-   *          simple iterator of {@link String} objects.
+   * @param suggestions suggestions for this picker. The suggestions must be a
+   *          simple iterator of {@link String} objects that represent html
+   *          strings.
    */
-  public void setItems(Iterator suggestions) {
+  public final void setItems(Iterator suggestions) {
     int itemCount = 0;
 
     // Ensure all needed items exist and set each item's html to the given
     // suggestion.
     while (suggestions.hasNext()) {
       Item item = ensureItem(itemCount);
-      String suggestion = (String) suggestions.next();
-      item.setHTML(suggestion);
+      format(item.getElement(), suggestions.next());
       ++itemCount;
     }
 
+    if (itemCount == 0) {
+      throw new IllegalStateException(
+          "Must set at least one item in a SuggestPicker");
+    }
+
     // Render visible all needed cells.
-    int min = Math.min(itemCount, getItemCount());
+    int min = Math.min(itemCount, super.getItemCount());
     for (int i = startInvisible; i < min; i++) {
       setVisible(i, true);
     }
 
     // Render invisible all useless cells.
     startInvisible = itemCount;
-    for (int i = itemCount; i < getItemCount(); i++) {
+    for (int i = itemCount; i < super.getItemCount(); i++) {
       setVisible(i, false);
     }
+    System.err.println(DOM.toString(this.getElement()));
   }
 
-  public void shiftSelection(int shift) {
+  void shiftSelection(int shift) {
     int newSelect = getSelectedIndex() + shift;
-    if (newSelect >= getItemCount() || newSelect < 0
+    if (newSelect >= super.getItemCount() || newSelect < 0
         || newSelect >= startInvisible) {
       return;
     }
@@ -98,7 +110,7 @@ public class SuggestPicker extends AbstractItemPicker {
    * @return associated item
    */
   private Item ensureItem(int itemIndex) {
-    for (int i = getItemCount(); i <= itemIndex; i++) {
+    for (int i = super.getItemCount(); i <= itemIndex; i++) {
       Item item = new Item(i);
       getLayout().setWidget(i, 0, item);
     }

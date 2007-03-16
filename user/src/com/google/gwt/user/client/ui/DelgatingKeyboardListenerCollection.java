@@ -21,26 +21,33 @@ package com.google.gwt.user.client.ui;
  * to the composite's wrapped widget.
  * 
  */
-class CompositeKeyboardListenerCollection extends KeyboardListenerCollection
+class DelgatingKeyboardListenerCollection extends KeyboardListenerCollection
     implements KeyboardListener {
 
-  private Composite composite;
+  private Widget owner;
 
-  public CompositeKeyboardListenerCollection(Composite composite) {
-    this.composite = composite;
-    SourcesKeyboardEvents wrappedWidget = (SourcesKeyboardEvents) composite.getWidget();
-    wrappedWidget.addKeyboardListener(this);
+  /**
+   * 
+   * Constructor for {@DelgatingKeyboardListenerCollection}.
+   * 
+   * @param owner owner of listeners
+   * @param delegatedTo source of events
+   */
+  public DelgatingKeyboardListenerCollection(Widget owner,
+      SourcesKeyboardEvents delegatedTo) {
+    this.owner = owner;
+    delegatedTo.addKeyboardListener(this);
   }
 
   public void onKeyDown(Widget sender, char keyCode, int modifiers) {
-    fireKeyDown(composite, keyCode, modifiers);
+    fireKeyDown(owner, keyCode, modifiers);
   }
 
   public void onKeyPress(Widget sender, char keyCode, int modifiers) {
-    fireKeyPress(composite, keyCode, modifiers);
+    fireKeyPress(owner, keyCode, modifiers);
   }
 
   public void onKeyUp(Widget sender, char keyCode, int modifiers) {
-    fireKeyPress(composite, keyCode, modifiers);
+    fireKeyPress(owner, keyCode, modifiers);
   }
 }

@@ -17,22 +17,29 @@
 package com.google.gwt.user.client.ui;
 
 /**
- * {@link ClickListenerCollection} used to correctly hook up event listeners to
- * the composite's wrapped widget.
+ * {@link ClickListenerCollection} used to correctly hook up listeners which
+ * need to listen to events from another source.
  * 
  */
-class CompositeChangeListenerCollection extends ChangeListenerCollection
-    implements ChangeListener {
+class DelegatingClickListenerCollection extends ClickListenerCollection
+    implements ClickListener {
 
-  private Composite composite;
+  private Widget owner;
 
-  public CompositeChangeListenerCollection(Composite composite) {
-    this.composite = composite;
-    SourcesChangeEvents wrappedWidget = (SourcesChangeEvents) composite.getWidget();
-    wrappedWidget.addChangeListener(this);
+  /**
+   * 
+   * Constructor for {@DelegatingClickListenerCollection}.
+   * 
+   * @param owner owner of listeners
+   * @param delegatedTo source of events
+   */
+  public DelegatingClickListenerCollection(Widget owner,
+      SourcesClickEvents delegatedTo) {
+    this.owner = owner;
+    delegatedTo.addClickListener(this);
   }
 
-  public void onChange(Widget sender) {
-    super.fireChange(composite);
+  public void onClick(Widget sender) {
+    super.fireClick(owner);
   }
 }

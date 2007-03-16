@@ -19,21 +19,29 @@ package com.google.gwt.user.client.ui;
 import java.util.Iterator;
 
 /**
- * Represents a pickable list of items. Each {@link ItemPicker} should be
- * selectable via mouse and keyboard events.
+ * Represents a pickable list of items. Each {@link ItemPicker} should be able
+ * to response to mouse and keyboard events.
  * 
  */
 public interface ItemPicker extends SourcesChangeEvents {
   /**
-   * 
-   * Programmatic equivalent of the user clicking on the selected item in the
-   * popup. Note, this does not call the raw JavaScript <code>click</code>
-   * method.
+   * Confirms the current selection. Any relevant change listeners are fired.
    */
-  public void click();
+  public void confirmSelection();
 
   /**
-   * Gets the number of items in this selectable popup.
+   * Allows the {@link ItemPicker} to be controlled via keyboard input. This
+   * method should be used to hook up with a appropriate
+   * {@link KeyboardListener}.
+   * 
+   * @param keyCode key code
+   * @return <code>true</code> if the key code was consumed by the picker,
+   *         <code>false</code> otherwise
+   */
+  public boolean delegateKeyPress(char keyCode);
+
+  /**
+   * Gets the number of items.
    * 
    * @return number of items
    */
@@ -49,50 +57,50 @@ public interface ItemPicker extends SourcesChangeEvents {
   /**
    * Gets the value associated with the currently selected index.
    * 
+   * <p>
+   * The value should be convertible into a human readable {@link String} by
+   * calling the {@link String#toString()}.
+   * 
    * @return current selected value, or null if no value is selected
    */
   public Object getSelectedValue();
 
   /**
-   * Gets the value associated with the ith index.
+   * Gets the value associated with the given index.
+   * <p>
+   * The value should be convertible into a human readable {@link String} by
+   * calling the {@link String#toString()}.
    * 
    * @param index index
-   * @return the value associated with the ith index.
+   * @return the value associated with <code>index</code>.
    */
+  // Design note: Object is returned rather than String in order to allow the
+  // user to return type-safe enumerations.
   public Object getValue(int index);
 
   /**
-   * Navigate through the popup based upon a key code. This method should be
-   * used to hook up to an appropriate {@link KeyboardListener} in order to
-   * allow the item picker to be navigated through via the keyboard.
-   * 
-   * 
-   * @param keyCode key code for navigation
-   * @return <code>true</code> if the key code was used to navigate through
-   *         the popup, <code>false</code> otherwise
-   */
-  public boolean navigate(char keyCode);
-
-  /**
-   * Sets the items to be displayed.
+   * Sets the items to be displayed. The expected type of each item should be
+   * clearly documented in each class which implements this interface.Both
+   * <code>setItems</code> implementations should be functionally equivalent.
    * 
    * @param items items to be displayed
    */
   public void setItems(Iterator items);
 
   /**
-   * Sets the currently selected index
+   * Sets the items to be displayed. The expected type of each item should be
+   * clearly documented in each class which implements this interface. Both
+   * <code>setItems</code> implementations should be functionally equivalent.
    * 
-   * @param new selected index
+   * @param items items to be displayed
    */
-  public void setSelectedIndex(int index);
+  public void setItems(Object[] items);
 
   /**
-   * Shifts the current selection by the given amount, unless that would make
-   * the selected index invalid.
+   * Sets the currently selected index.
    * 
-   * @param shift the amount to shift the current selection by.
+   * @param index new selected index
    */
-  public void shiftSelection(int offset);
+  public void setSelectedIndex(int index);
 
 }

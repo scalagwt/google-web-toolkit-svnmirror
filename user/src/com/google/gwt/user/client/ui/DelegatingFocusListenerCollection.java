@@ -17,27 +17,33 @@
 package com.google.gwt.user.client.ui;
 
 /**
- * {@link FocusListenerCollection} used to correctly hook up event listeners to
- * the composite's wrapped widget.
+ * {@link FocusListenerCollection} used to correctly hook up listeners which
+ * need to listen to events from another source.
  * 
  */
-class CompositeFocusListenerCollection extends FocusListenerCollection
+class DelegatingFocusListenerCollection extends FocusListenerCollection
     implements FocusListener {
 
-  private Composite composite;
+  private Widget owner;
 
-  public CompositeFocusListenerCollection(Composite composite) {
-    this.composite = composite;
-    SourcesFocusEvents wrappedWidget = (SourcesFocusEvents) composite.getWidget();
-    wrappedWidget.addFocusListener(this);
+  /**
+   * 
+   * Constructor for {@DelegatingFocusListenerCollection}. *
+   * 
+   * @param owner owner of listeners
+   * @param delegatedTo source of events
+   */
+  public DelegatingFocusListenerCollection(Widget owner,
+      SourcesFocusEvents delegatedTo) {
+    this.owner = owner;
+    delegatedTo.addFocusListener(this);
   }
-  
- 
+
   public void onFocus(Widget sender) {
-    super.fireFocus(composite);
+    super.fireFocus(owner);
   }
 
   public void onLostFocus(Widget sender) {
-    super.fireLostFocus(composite);
+    super.fireLostFocus(owner);
   }
 }

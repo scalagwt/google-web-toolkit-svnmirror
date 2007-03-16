@@ -16,6 +16,10 @@
 
 package com.google.gwt.user.client.ui;
 
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Element;
+import com.google.gwt.user.client.ui.impl.UtilImpl;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -24,19 +28,22 @@ import java.util.List;
  * Helpful base implementation of the {@link ItemPicker} interface.
  * 
  */
-public abstract class AbstractItemPicker extends Composite implements
-    ItemPicker {
+abstract class AbstractItemPicker extends Composite implements ItemPicker {
+  /*
+   * Implementation note:AbstractItemPicker is package protected because we are
+   * hoping we might eventually be able to slip in a more efficient
+   * implementation of this class, so do not want to be bound by this
+   * implementation.
+   */
 
   /**
    * Selectable item.
    */
   class Item extends HTML {
-    /*
-     * Implementation note: Item is package protected in order to allow us to
-     * change its implementation in the future if a faster implementation
-     * becomes available.
-     */
+
     private int index;
+
+    Object value;
 
     /**
      * 
@@ -64,21 +71,8 @@ public abstract class AbstractItemPicker extends Composite implements
       return AbstractItemPicker.this;
     }
 
-    /**
-     * Gets the value of the item.
-     * 
-     * @return value of the item.
-     */
-    public Object getValue() {
-      if (values != null) {
-        return values.get(index);
-      } else {
-        return getText();
-      }
-    }
-
     public String toString() {
-      return "value: " + this.getValue() + " index: " + this.getIndex();
+      return "value: " + getValue(getIndex()) + " index: " + this.getIndex();
     }
   }
 
@@ -90,9 +84,8 @@ public abstract class AbstractItemPicker extends Composite implements
     public void onMouseDown(Widget sender, int x, int y) {
       // Unlike buttons, a item picker is selected as soon as the mouse down is
       // fired.
-
       Item item = (Item) sender;
-      item.getOwner().click();
+      item.getOwner().confirmSelection();
     }
 
     public void onMouseEnter(Widget sender) {
@@ -107,17 +100,14 @@ public abstract class AbstractItemPicker extends Composite implements
     }
   };
 
-  private static final String STYLE_SELECTED_ITEM = "selected";
-
-  private static final String STYLE_ITEM = "item";
+  private static final String STYLENAME_SELECTED_ITEM = "selected";
+  private static final String STYLENAME_ITEM = "item";
 
   private ChangeListenerCollection changeListeners = new ChangeListenerCollection();
   private ClickListenerCollection clickListeners = new ClickListenerCollection();
   private Item selectedItem;
   private final String selectedStyleName;
   private final String itemStyleName;
-
-  private List values;
   private List items = new ArrayList();
 
   {
@@ -126,18 +116,18 @@ public abstract class AbstractItemPicker extends Composite implements
 
   /**
    * Constructor for <code>ItemPicker</code>. Provides "item" as the default
-   * item style, and "selected" as the default selected item style.
+   * item style name, and "selected" as the default selected item style name.
    */
   public AbstractItemPicker() {
-    this(STYLE_ITEM, STYLE_SELECTED_ITEM);
+    this(STYLENAME_ITEM, STYLENAME_SELECTED_ITEM);
   }
 
   /**
    * 
    * Constructor for <code>ItemPicker</code>.
    * 
-   * @param itemStyleName CSS class name for default items
-   * @param selectedItemStyleName CSS class name for the currently selected item
+   * @param itemStyleName CSS style name for default items
+   * @param selectedItemStyleName CSS style name for the currently selected item
    */
   public AbstractItemPicker(String itemStyleName, String selectedItemStyleName) {
     this.selectedStyleName = selectedItemStyleName;
@@ -149,26 +139,21 @@ public abstract class AbstractItemPicker extends Composite implements
     getLayout().setCellSpacing(0);
   }
 
-  public void addChangeListener(ChangeListener listener) {
+  public final void addChangeListener(ChangeListener listener) {
     if (changeListeners == null) {
       changeListeners = new ChangeListenerCollection();
     }
     changeListeners.add(listener);
   }
 
-  public void addClickListener(ClickListener listener) {
-    if (clickListeners == null) {
-      clickListeners = new ClickListenerCollection();
-    }
-    clickListeners.add(listener);
-  }
-
-  public void click() {
+  public void confirmSelection() {
     if (selectedItem == null) {
       throw new RuntimeException("No element is selected");
     }
     changeListeners.fireChange(this);
   }
+
+  public abstract boolean delegateKeyPress(char keyCode);
 
   public int getItemCount() {
     return items.size();
@@ -182,47 +167,58 @@ public abstract class AbstractItemPicker extends Composite implements
   }
 
   public final Object getSelectedValue() {
-    if (getSelectedItem() == null) {
+    int index = getSelectedIndex();
+    if (index == -1) {
       return null;
     }
-    return getSelectedItem().getValue();
+    return getValue(index);
   }
 
-  public final Object getValue(int index) {
-    return getItem(index).getValue();
+  public Object getValue(int index) {
+    return getValue(getItem(index).getElement());
   }
 
-  public abstract boolean navigate(char keyCode);
-
-  public void removeChangeListener(ChangeListener listener) {
+  public final void removeChangeListener(ChangeListener listener) {
     this.changeListeners.remove(listener);
-  }
-
-  public void removeClickListener(ClickListener listener) {
-    if (clickListeners != null) {
-      clickListeners.remove(listener);
-    }
   }
 
   public abstract void setItems(Iterator items);
 
-  public void setSelectedIndex(int index) {
+  public final void setItems(Object[] items) {
+    setItems(UtilImpl.asIterator(items));
+  }
+
+  public final void setSelectedIndex(int index) {
     Item item = getItem(index);
     setSelection(item);
   }
 
-  public void shiftSelection(int offset) {
-    int newIndex = getSelectedIndex() + offset;
-    if (newIndex < 0 || newIndex >= getItemCount()) {
-      return;
-    } else {
-      Item item = getItem(newIndex);
-      setSelection(item);
-    }
+  /**
+   * Formats the displayed element using the information given by the user
+   * supplied item.
+   * 
+   * @param displayedElement the element used to the display the item
+   * @param item the user supplied item information
+   */
+  protected void format(Element displayedElement, Object item) {
+    DOM.setInnerHTML(displayedElement, (String) item);
   }
 
-  protected FlexTable getLayout() {
-    return (FlexTable) getWidget();
+  /**
+   * Gets the value from a given element. By default this method is used by
+   * {@link AbstractItemPicker#getValue(int)} to compute the value that should
+   * be returned to the user.
+   * 
+   * @param displayedElement displayed element
+   * @return value
+   */
+  protected Object getValue(Element displayedElement) {
+    return DOM.getInnerText(displayedElement);
+  }
+
+  void clearItems() {
+    items.clear();
+    getLayout().clear();
   }
 
   /**
@@ -233,6 +229,10 @@ public abstract class AbstractItemPicker extends Composite implements
    */
   Item getItem(int index) {
     return (Item) items.get(index);
+  }
+
+  FlexTable getLayout() {
+    return (FlexTable) getWidget();
   }
 
   /**
@@ -256,13 +256,32 @@ public abstract class AbstractItemPicker extends Composite implements
 
     // Remove old selected item.
     if (selectedItem != null) {
-      selectedItem.setStyleName(itemStyleName);
+      selectedItem.removeStyleName(selectedStyleName);
+      selectedItem.addStyleName(itemStyleName);
     }
 
     // Add new selected item.
     selectedItem = item;
     if (selectedItem != null) {
-      selectedItem.setStyleName(selectedStyleName);
+      selectedItem.removeStyleName(itemStyleName);
+      selectedItem.addStyleName(selectedStyleName);
     }
   }
+
+  /**
+   * Shifts the current selection by the given amount, unless that would make
+   * the selection invalid.
+   * 
+   * @param shift the amount to shift the current selection by.
+   */
+  void shiftSelection(int shift) {
+    int newIndex = getSelectedIndex() + shift;
+    if (newIndex < 0 || newIndex >= getItemCount()) {
+      return;
+    } else {
+      Item item = getItem(newIndex);
+      setSelection(item);
+    }
+  }
+
 }
