@@ -74,9 +74,9 @@ public class Window {
   }-*/;
 
   /**
-   * Use this method to explicitly disable the window's scrollbars.
-   * Applications that choose to resize their user-interfaces to fit within the
-   * window's client area will normally want to disable window scrolling.
+   * Use this method to explicitly disable the window's scrollbars. Applications
+   * that choose to resize their user-interfaces to fit within the window's
+   * client area will normally want to disable window scrolling.
    * 
    * @param enable <code>false</code> to disable window scrolling
    */
@@ -105,6 +105,36 @@ public class Window {
       return $wnd.innerWidth;
     return $doc.body.clientWidth;
   }-*/;
+
+  /**
+   * Gets the window's scroll left.
+   * 
+   * @return window's scroll left
+   */
+  public static native int getScrollLeft() /*-{
+    // Standard mode used documentElement.scrollLeft. Quirks mode uses 
+    // document.body.scrollLeft. So we take the max of the two.  
+    var scrollLeft = $doc.documentElement.scrollLeft;
+    if(scrollLeft == 0){
+      scrollLeft = $doc.body.scrollLeft
+    }
+    return scrollLeft;
+   }-*/;
+
+  /**
+   * Get the window's scroll top.
+   * 
+   * @return the window's scroll top
+   */
+  public static native int getScrollTop() /*-{
+    // Standard mode used documentElement.scrollTop. Quirks mode uses 
+    // document.body.scrollTop. So we take the max of the two.
+    var scrollTop = $doc.documentElement.scrollTop;
+    if(scrollTop == 0){
+      scrollTop = $doc.body.scrollTop
+    } 
+    return scrollTop;
+    }-*/;
 
   /**
    * Gets the browser window's current title.
@@ -147,7 +177,7 @@ public class Window {
   }
 
   /**
-   * Sets the size of the margins used within the window's client area.  It is
+   * Sets the size of the margins used within the window's client area. It is
    * sometimes necessary to do this because some browsers, such as Internet
    * Explorer, add margins by default, which can confound attempts to resize
    * panels to fit exactly within the window.
@@ -267,4 +297,5 @@ public class Window {
 
   private Window() {
   }
+
 }
