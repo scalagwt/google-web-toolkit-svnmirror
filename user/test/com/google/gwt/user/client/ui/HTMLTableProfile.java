@@ -3,6 +3,7 @@ package com.google.gwt.user.client.ui;
 
 import com.google.gwt.user.client.ui.HTMLTable.ColumnFormatter;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public abstract class HTMLTableProfile extends WidgetProfile {
@@ -27,7 +28,7 @@ public abstract class HTMLTableProfile extends WidgetProfile {
     for (int row = 0; row < rows; row++) {
       for (int column = 0; column < columns; column++) {
         HTMLTable.getCellFormatter().setStyleName(row, column,
-          row + "," + column);
+            row + "," + column);
       }
     }
     timing("setStyleName(" + rows + "," + columns + ")");
@@ -89,17 +90,28 @@ public abstract class HTMLTableProfile extends WidgetProfile {
   public void setWidgetTiming(int rows, int columns) {
     resetTimer();
     HTMLTable HTMLTable = createTable(rows, columns);
-    RootPanel.get().add(HTMLTable);
+    ArrayList l = new ArrayList();
     for (int row = 0; row < rows; row++) {
       for (int column = 0; column < columns; column++) {
-        Label label = new Label(column + "i");
+        l.add(new Label(column + "i"));
+      }
+    }
+    timing("Creating label widgets");
+    int count = 0;
+    resetTimer();
+
+    RootPanel.get().add(HTMLTable);
+
+    for (int row = 0; row < rows; row++) {
+      for (int column = 0; column < columns; column++) {
+        Label label = (Label) l.get(count++);
         HTMLTable.setWidget(row, column, label);
       }
     }
     timing("setWidgetTiming(" + rows + "," + columns + ")");
   }
-  
-  public void columnAddStyleName(int rows, int cols){
+
+  public void columnAddStyleName(int rows, int cols) {
     HTMLTable table = createTable(rows, cols);
     resetTimer();
     ColumnFormatter formatter = table.getColumnFormatter();
@@ -107,23 +119,20 @@ public abstract class HTMLTableProfile extends WidgetProfile {
       formatter.addStyleName(i, "fooStyle");
     }
     timing("column.addStyleName(" + rows + ", " + cols + ")");
-  
+
   }
 
   public void testTimings() throws Exception {
-    timing(10, 10);
-    timing(20, 10);
-    timing(20, 20);
-    timing(40, 20);
-    timing(40, 40);
-    timing(80, 40);
-    timing(80, 80);
-
-     throw new Exception("Finished Profile");
+    timing(20, 50);
+    /**
+     * timing(10, 10); timing(20, 10); timing(20, 20); timing(40, 20);
+     * timing(40, 40); timing(80, 40); timing(80, 80);
+     */
+    throw new Exception("Finished Profile");
   }
 
   public void timing(int rows, int columns) {
-    columnAddStyleName(rows, columns);
+    setHTMLTiming(rows, columns);
   }
 
 }
