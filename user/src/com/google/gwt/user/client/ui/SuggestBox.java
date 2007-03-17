@@ -33,8 +33,9 @@ import java.util.Iterator;
  * 
  * <p>
  * By default, the {@link SuggestBox} uses a {@link Suggest.DefaultOracle} as
- * its oracle and a {@link SuggestPicker} as it's {@link ItemPicker}. Below we
+ * its oracle and a {@link SuggestPicker} as its {@link ItemPicker}. Below we
  * show how a {@link Suggest.DefaultOracle} can be configured:
+ * </p>
  * 
  * <pre> 
  *   Suggest.DefaultOracle oracle = new Suggest.DefaultOracle();  
@@ -45,7 +46,7 @@ import java.util.Iterator;
  * </pre>
  * 
  * Using the example above, if the user types "C" into the text widget, the
- * oracle will configure the suggestions popup with the "Cat" and "Canary"
+ * oracle will configure the suggestions with the "Cat" and "Canary"
  * suggestions. Specifically, whenever the user types a key into the text
  * widget, the value is submitted to the <code>Suggest.DefaultOracle</code>.
  * <p>
@@ -53,9 +54,9 @@ import java.util.Iterator;
  * widget. When separators are defined, only the text between the nearest
  * separators is sent to the oracle rather than the entire text widget. So, to
  * continue the example above, if "," is a separator and the text widget
- * contains "dog, ca" then again the oracle will configure the suggestion popup
- * with "Cat" and "Canary".
- * 
+ * contains "dog, ca" then again the oracle will configure the suggestions with
+ * "Cat" and "Canary".
+ * </p>
  * 
  * <p>
  * A user may supply their own {@link ItemPicker} rather than relying on the
@@ -63,7 +64,7 @@ import java.util.Iterator;
  * to consume the results of the defined {@link Oracle} and respect the
  * {@link ItemPicker} contract that each value returned is convertible to a
  * human-readable {@link String}.
- * 
+ * </p>
  */
 public class SuggestBox extends Composite implements HasText, HasFocus,
     Suggest.HasOracle, SourcesClickEvents, SourcesFocusEvents,
@@ -87,9 +88,8 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
   private final Callback callBack = new Callback() {
 
     public void onSuggestionsReceived(Request request, Response response) {
-      showSuggestions(response.iterator());
+      showSuggestions(response.getSuggestions().iterator());
     }
-
   };
 
   /**
@@ -307,6 +307,7 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
    * Note: Until a KeyboardHandler is introduced that allows keyPress to detect
    * unicode characters over 16 bits, separators are restricted to 16 bit
    * values.
+   * </p>
    * 
    * @param separators separators for the text. The separators value is treated
    *          as a array of characters
@@ -340,7 +341,7 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
    * Show the given iterator of suggestions in an {@link ItemPicker}. The
    * {@link ItemPicker} must be able to parse the given iterator or a runtime
    * error will result. The default {@link SuggestPicker} only can parse an
-   * iterator of strings.
+   * iterator of objects with valid {@link String#toString()} methods.
    * 
    * @param suggestions suggestions to show
    */

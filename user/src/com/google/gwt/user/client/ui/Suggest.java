@@ -35,18 +35,19 @@ import java.util.List;
 public class Suggest {
 
   /**
-   * Callback for {@link Oracle}. Every {@link Request} should be associated
-   * with a callback that should be called after a {@link  Response} is
-   * generated.
+   * Callback for {@link com.google.gwt.user.client.ui.Suggest.Oracle}. Every
+   * {@link Request} should be associated with a callback that should be called
+   * after a {@link  Response} is generated.
    * 
    */
   public abstract interface Callback {
     /**
-     * Consume the suggestions created by a {@link Oracle} in response to a
+     * Consume the suggestions created by a
+     * {@link com.google.gwt.user.client.ui.Suggest.Oracle} in response to a
      * {@link Request}.
      * 
-     * @param request request
-     * @param response response
+     * @param request the request
+     * @param response the response
      * 
      */
     public abstract void onSuggestionsReceived(Request request,
@@ -54,38 +55,47 @@ public class Suggest {
   }
 
   /**
-   * The default {@link Oracle}. Returns potential suggestions based on
-   * breaking the query into separate words and looking for matches. Modifies
-   * the returned text to show which prefix matched the query term. The matching
-   * is case insensitive. All suggestions are sorted before being passed into a
-   * response.
+   * The default {@link com.google.gwt.user.client.ui.Suggest.Oracle}. Returns
+   * potential suggestions based on breaking the query into separate words and
+   * looking for matches. Modifies the returned text to show which prefix
+   * matched the query term. The matching is case insensitive. All suggestions
+   * are sorted before being passed into a response.
+   * 
    * 
    * <p>
-   * Example Table <table width = "100%" border = 1>
+   * Example Table
+   * </p>
+   * <p>
+   * <table width = "100%" border = "1">
+   * <tr>
    * <td><b> All Suggestions </b> </td>
    * <td><b>Query string</b> </td>
+   * </tr>
    * <td><b>Matching Suggestions</b></td>
+   * <tr>
+   * <td> John Smith, Joe Brown, Jane Doe, Jane Smith, Bob Jones</td>
+   * <td> Jo</td>
+   * <td> John Smith, Joe Brown, Bob Jones</td>
    * </tr>
    * <tr>
-   * <td> John Smith, Joe Brown, Jane Doe, Jane Smith</td>
-   * <td> Jo</td>
-   * <td> John Smith, Joe Brown</td>
-   * </tr>
-   * <td> John Smith, Joe Brown, Jane Doe, Jane Smith</td>
+   * <td> John Smith, Joe Brown, Jane Doe, Jane Smith, Bob Jones</td>
    * <td> Smith</td>
    * <td> John Smith, Jane Smith</td>
    * </tr>
+   * <tr>
    * <td> Georgia, New York, California</td>
    * <td> g</td>
    * <td> Georgia</td>
    * </tr>
+   * </table>
+   * </p>
    */
-  public static class DefaultOracle extends Oracle {
+  public static final class DefaultOracle extends Oracle {
     /*
-     * Implementation note: The SuggestionsController works by breaking
-     * suggestions down into their component words using whitespace, finding all
-     * suggestions that are potential matches, and then using substring matching
-     * to confirm the match.
+     * Implementation note: The DefaultOracle works by breaking suggestions down
+     * into their component words using whitespace, finding all suggestions that
+     * are potential matches, and then using substring matching to confirm the
+     * match.
      * 
      */
     /**
@@ -140,6 +150,8 @@ public class Suggest {
       }
     }
 
+    private static final String WORD_SPLITTER = " ";
+
     /**
      * Regular expression used to collapse all whitespace in a query string.
      */
@@ -161,7 +173,7 @@ public class Suggest {
     private HashMap toFormattedSuggestions = new HashMap();
 
     /**
-     * The set of masks used to prevent matching and replacing of the given
+     * The List of masks used to prevent matching and replacing of the given
      * substrings.
      */
     private String[] masks;
@@ -183,15 +195,20 @@ public class Suggest {
      *          <p>
      *          For example: If <code>&lt;b&gt;</code> and
      *          <code>&lt;/b&gt; </code> are passed in as masks, then the
-     *          string <code>&lt;b&gt;Dog&lt;/b&gt</code> would <strong>not</strong>
+     *          string <code>&lt;b&gt;Dog&lt;/b&gt;</code> would <strong>not</strong>
      *          match the query "b".
+     *          </p>
      */
 
-    public DefaultOracle(Collection masks) {
-      this.masks = new String[masks.size()];
-      Iterator maskIter = masks.iterator();
+    public DefaultOracle(Iterator masks) {
+      // Move to UtilImpl if we need to do this more than once.
+      List l = new ArrayList();
+      while (masks.hasNext()) {
+        l.add(masks.next());
+      }
+      this.masks = new String[l.size()];
       for (int i = 0; i < this.masks.length; i++) {
-        this.masks[i] = (String) maskIter.next();
+        this.masks[i] = (String) l.get(i);
       }
     }
 
@@ -200,8 +217,9 @@ public class Suggest {
      * masks that filter its input.
      * <p>
      * Example: If <code>&lt;b&gt;,&lt;/b&gt; </code> are passed in as masks,
-     * then the string <code>&lt;b&gt;Dog&lt;/b&gt</code> would <strong>not</strong>
+     * then the string <code>&lt;b&gt;Dog&lt;/b&gt;</code> would <strong>not</strong>
      * match the query "b".
+     * </p>
      * 
      * @param masks the HTML tags and other strings to ignore for the purpose of
      *          matching
@@ -218,7 +236,7 @@ public class Suggest {
     public void add(String suggestion) {
       String candidate = normalizeSuggestion(suggestion);
       toFormattedSuggestions.put(candidate, suggestion);
-      String[] words = candidate.split(" ");
+      String[] words = candidate.split(WORD_SPLITTER);
 
       for (int i = 0; i < words.length; i++) {
         String word = words[i];
@@ -252,6 +270,14 @@ public class Suggest {
       addAll(UtilImpl.asIterator(suggestions));
     }
 
+    public void requestSuggestions(Request request, Callback callback) {
+
+      final List suggestions = computeItemsFor(request.getQuery(),
+          request.getLimit());
+      Response response = new Response(suggestions);
+      callback.onSuggestionsReceived(request, response);
+    }
+
     /**
      * Compute the suggestions that are matches for a given query.
      * 
@@ -259,20 +285,12 @@ public class Suggest {
      * @param limit limit
      * @return matching suggestions
      */
-    public List computeItemsFor(String query, int limit) {
+    private List computeItemsFor(String query, int limit) {
       query = normalizeSearch(query);
       List candidates = createCandidatesFromSearch(query, limit);
 
       // Convert candidates to suggestions.
       return convertToFormattedSuggestions(query, candidates);
-    }
-
-    public void requestSuggestions(Request request, Callback callback) {
-
-      final List suggestions = computeItemsFor(request.getQuery(),
-          request.getLimit());
-      Response response = new Response(suggestions);
-      callback.onSuggestionsReceived(request, response);
     }
 
     /**
@@ -421,7 +439,7 @@ public class Suggest {
 
       // Remove all excess whitespace from the search string.
       while (true) {
-        String newSearch = search.replaceAll(NORMALIZE_TO_SPACE, " ");
+        String newSearch = search.replaceAll(NORMALIZE_TO_SPACE, WORD_SPLITTER);
         if (newSearch.equals(search)) {
           break;
         } else {
@@ -473,7 +491,7 @@ public class Suggest {
      * characters, setting a mask allows us to do so.
      * <p>
      * Example: If <code>&lt;b&gt;,&lt;/b&gt; </code> are passed in as masks,
-     * then the string <code>&lt;b&gt;Dog&lt;/b&gt</code> would <strong>not</strong>
+     * then the string <code>&lt;b&gt;Dog&lt;/b&gt;</code> would <strong>not</strong>
      * match the search string "b".
      * 
      * @param masks the HTML tags and other strings to ignore for the purpose of
@@ -485,27 +503,36 @@ public class Suggest {
   }
 
   /**
-   * An object that implements this interface has a {@link Oracle} that it uses
-   * to display suggestions. As an embedded {@link Oracle} may be final, no
-   * setter is required to conform to this interface.
+   * An object that implements this interface provides a
+   * {@link com.google.gwt.user.client.ui.Suggest.Oracle} that it uses to
+   * display suggestions. As the provided
+   * {@link com.google.gwt.user.client.ui.Suggest.Oracle} may be immutable or
+   * computed, no setter is required to conform to this interface.
    * 
    */
   public interface HasOracle {
     /**
-     * Gets the associated {@link Oracle}.
+     * Gets the provided {@link com.google.gwt.user.client.ui.Suggest.Oracle}.
      * 
      * @return the oracle
      */
     Oracle getSuggestOracle();
   }
+
   /**
    * 
-   * A {@link Oracle} can be used to create suggestions associated with a
-   * specific query string.
+   * A {@link com.google.gwt.user.client.ui.Suggest.Oracle} can be used to
+   * create suggestions associated with a specific query string.
    * 
    */
   public abstract static class Oracle {
     private int limit = 20;
+
+    /** 
+     * Constructor for {@Oracle}.
+     */
+    public Oracle() {
+    }
 
     /**
      * Generate a {@link Response} based on a specific {@link Request}.
@@ -515,24 +542,23 @@ public class Suggest {
      */
     public abstract void requestSuggestions(Request request, Callback callback);
   }
-
   /**
-   * A {@link Oracle} request.
+   * A {@link com.google.gwt.user.client.ui.Suggest.Oracle} request.
    */
   public static class Request implements IsSerializable {
     private int limit = 20;
     private String query;
 
     /**
-     * Constructor for {@Request}.
+     * Constructor for {@link Request}.
      */
     public Request() {
     }
 
     /**
-     * Constructor for {@Request}.
+     * Constructor for {@link Request}.
      * 
-     * @param query query string
+     * @param query the query string
      */
     public Request(String query) {
       setQuery(query);
@@ -540,9 +566,9 @@ public class Suggest {
 
     /**
      * 
-     * Constructor for {@Request}.
+     * Constructor for {@link Request}.
      * 
-     * @param query query string
+     * @param query the query string
      * @param limit limit on the number of suggestions that should be created
      *          for this query
      */
@@ -581,7 +607,7 @@ public class Suggest {
     /**
      * Sets the query string used for this request.
      * 
-     * @param query string
+     * @param query the query string
      */
     public void setQuery(String query) {
       this.query = query;
@@ -589,26 +615,54 @@ public class Suggest {
   }
 
   /**
-   * {@link Oracle} response.
+   * {@link com.google.gwt.user.client.ui.Suggest.Oracle} response. In order to
+   * send a {@link Response} object over RPC, responses must currently be of
+   * type {@link String}. Subclass the {@link Response} object in order to send
+   * other types over RPC.
    */
   public static class Response implements IsSerializable {
+
+    /**
+     * @gwt.typeArgs <java.lang.String>
+     */
     private Collection suggestions;
 
+    /**
+     * Constructor for {@link Response}.
+     */
     public Response() {
     }
 
+    /**
+     * 
+     * Constructor for {@link Response}.
+     * 
+     * @param suggestions each element of suggestions must have a human readable
+     *          toString() method. If the {@link Response} is being passed over
+     *          RPC, each element must be a {@link String} object.
+     */
     public Response(Collection suggestions) {
       setSuggestions(suggestions);
     }
 
+    /**
+     * Gets the collection of suggestions.
+     * 
+     * @return the collection of suggestions. Each element of suggestions must
+     *         have a human readable toString() method.
+     */
     public Collection getSuggestions() {
       return this.suggestions;
     }
 
-    public Iterator iterator() {
-      return this.suggestions.iterator();
-    }
-
+    /**
+     * 
+     * Sets the suggestions for this response.
+     * 
+     * @param suggestions each element of suggestions must have a human readable
+     *          toString() method. If the {@link Response} is being passed over
+     *          RPC, each element must be a {@link String} object.
+     */
     public void setSuggestions(Collection suggestions) {
       this.suggestions = suggestions;
     }
@@ -617,4 +671,11 @@ public class Suggest {
       return "Suggest.Response: " + getSuggestions();
     }
   }
+
+  /**
+   * This class in not instantiatable.
+   */
+  private Suggest() {
+  }
+
 }
