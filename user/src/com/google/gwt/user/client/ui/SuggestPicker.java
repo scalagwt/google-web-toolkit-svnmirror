@@ -16,12 +16,10 @@
 
 package com.google.gwt.user.client.ui;
 
-import com.google.gwt.user.client.DOM;
-
 import java.util.Iterator;
 
 /**
- * Suggestion picker. Each "Item" represents a single string suggestion.
+ * Suggestion picker. Each "Item" represents a suggestion.
  */
 public class SuggestPicker extends AbstractItemPicker {
 
@@ -60,9 +58,8 @@ public class SuggestPicker extends AbstractItemPicker {
   /**
    * Sets the suggestions associated with this picker.
    * 
-   * @param suggestions suggestions for this picker. The suggestions must be a
-   *          simple iterator of {@link String} objects that represent html
-   *          strings.
+   * @param suggestions suggestions for this picker. The suggestions must have
+   *          valid {@link String#toString()} methods.
    */
   public final void setItems(Iterator suggestions) {
     int itemCount = 0;
@@ -91,7 +88,6 @@ public class SuggestPicker extends AbstractItemPicker {
     for (int i = itemCount; i < super.getItemCount(); i++) {
       setVisible(i, false);
     }
-    System.err.println(DOM.toString(this.getElement()));
   }
 
   void shiftSelection(int shift) {
