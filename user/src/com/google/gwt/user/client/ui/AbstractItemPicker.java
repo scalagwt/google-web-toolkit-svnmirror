@@ -22,11 +22,9 @@ import com.google.gwt.user.client.ui.impl.UtilImpl;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 /**
  * Helpful base implementation of the {@link ItemPicker} interface.
- * 
  */
 abstract class AbstractItemPicker extends Composite implements ItemPicker {
   /*
@@ -41,9 +39,9 @@ abstract class AbstractItemPicker extends Composite implements ItemPicker {
    */
   class Item extends HTML {
 
-    private int index;
+    private Object value;
 
-    Object value;
+    private int index;
 
     /**
      * 
@@ -51,11 +49,15 @@ abstract class AbstractItemPicker extends Composite implements ItemPicker {
      * 
      * @param index index associated with item
      */
-    public Item(int index) {
+    Item(int index) {
       this.index = index;
       this.setStyleName(itemStyleName);
       this.addMouseListener(itemMouseListener);
       items.add(index, this);
+    }
+
+    public String toString() {
+      return "value: " + getValue(getIndex()) + " index: " + this.getIndex();
     }
 
     /**
@@ -63,16 +65,12 @@ abstract class AbstractItemPicker extends Composite implements ItemPicker {
      * 
      * @return the item's index
      */
-    public int getIndex() {
+    int getIndex() {
       return index;
     }
 
-    public AbstractItemPicker getOwner() {
+    AbstractItemPicker getOwner() {
       return AbstractItemPicker.this;
-    }
-
-    public String toString() {
-      return "value: " + getValue(getIndex()) + " index: " + this.getIndex();
     }
   }
 
@@ -108,7 +106,7 @@ abstract class AbstractItemPicker extends Composite implements ItemPicker {
   private Item selectedItem;
   private final String selectedStyleName;
   private final String itemStyleName;
-  private List items = new ArrayList();
+  private final ArrayList items;
 
   {
     initWidget(new FlexTable());
@@ -137,6 +135,7 @@ abstract class AbstractItemPicker extends Composite implements ItemPicker {
     // here.
     getLayout().setCellPadding(0);
     getLayout().setCellSpacing(0);
+    items = new ArrayList();
   }
 
   public final void addChangeListener(ChangeListener listener) {
@@ -160,10 +159,11 @@ abstract class AbstractItemPicker extends Composite implements ItemPicker {
   }
 
   public final int getSelectedIndex() {
-    if (getSelectedItem() == null) {
+    Item item = getSelectedItem();
+    if (item == null) {
       return -1;
     }
-    return getSelectedItem().getIndex();
+    return item.getIndex();
   }
 
   public final Object getSelectedValue() {
@@ -184,6 +184,12 @@ abstract class AbstractItemPicker extends Composite implements ItemPicker {
 
   public abstract void setItems(Iterator items);
 
+  /**
+   * Convenience method that delegates directly to
+   * {@link ItemPicker#setItems(Iterator)}.
+   * 
+   * @param items the items
+   */
   public final void setItems(Object[] items) {
     setItems(UtilImpl.asIterator(items));
   }
@@ -201,7 +207,7 @@ abstract class AbstractItemPicker extends Composite implements ItemPicker {
    * @param item the user supplied item information
    */
   protected void format(Element displayedElement, Object item) {
-    DOM.setInnerHTML(displayedElement, (String) item);
+    DOM.setInnerHTML(displayedElement, item.toString());
   }
 
   /**
@@ -210,7 +216,7 @@ abstract class AbstractItemPicker extends Composite implements ItemPicker {
    * be returned to the user.
    * 
    * @param displayedElement displayed element
-   * @return value
+   * @return the value associated with the given displayed element
    */
   protected Object getValue(Element displayedElement) {
     return DOM.getInnerText(displayedElement);

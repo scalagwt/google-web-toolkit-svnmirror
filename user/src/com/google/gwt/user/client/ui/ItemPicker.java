@@ -31,8 +31,7 @@ public interface ItemPicker extends SourcesChangeEvents {
 
   /**
    * Allows the {@link ItemPicker} to be controlled via keyboard input. This
-   * method should be used to hook up with a appropriate
-   * {@link KeyboardListener}.
+   * method should be hooked up to an appropriate {@link KeyboardListener}.
    * 
    * @param keyCode key code
    * @return <code>true</code> if the key code was consumed by the picker,
@@ -59,7 +58,8 @@ public interface ItemPicker extends SourcesChangeEvents {
    * 
    * <p>
    * The value should be convertible into a human readable {@link String} by
-   * calling the {@link String#toString()}.
+   * calling the {@link String#toString()} method.
+   * </p>
    * 
    * @return current selected value, or null if no value is selected
    */
@@ -70,6 +70,7 @@ public interface ItemPicker extends SourcesChangeEvents {
    * <p>
    * The value should be convertible into a human readable {@link String} by
    * calling the {@link String#toString()}.
+   * </p>
    * 
    * @param index index
    * @return the value associated with <code>index</code>.

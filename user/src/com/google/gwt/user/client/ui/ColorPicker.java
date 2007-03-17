@@ -32,14 +32,14 @@ public class ColorPicker extends AbstractItemPicker {
   private static final String STYLENAME_DEFAULT = "gwt-ColorPicker ";
 
   class ColorItem extends Item {
-    private String color;
+    private Object color;
 
-    ColorItem(int index, String color) {
+    ColorItem(int index, Object color) {
       super(index);
       this.color = color;
     }
 
-    String getColor() {
+    Object getColor() {
       return color;
     }
   }
@@ -87,8 +87,8 @@ public class ColorPicker extends AbstractItemPicker {
    * 
    * Constructor for {@link ColorPicker}.
    * 
-   * @param colors color iterator. Each color should be a {@link String}
-   *          representation of a CSS color
+   * @param colors color iterator. Each color's {@link String#toString()}
+   *          method should return a representation of a CSS color.
    * @param numColumns number of columns to be displayed
    */
   public ColorPicker(Iterator colors, int numColumns) {
@@ -101,8 +101,8 @@ public class ColorPicker extends AbstractItemPicker {
    * 
    * Constructor for {@link ColorPicker}.
    * 
-   * @param colors colors. Each color should be a {@link String} representation
-   *          of a CSS color
+   * @param colors colors. Each color's {@link String#toString()}
+   *          method should return a representation of a CSS color.
    * @param numColumns number of columns to be displayed
    */
   public ColorPicker(String[] colors, int numColumns) {
@@ -136,6 +136,11 @@ public class ColorPicker extends AbstractItemPicker {
     }
   }
 
+  /**
+   * Gets the number of columns to display per row of colors.
+   * 
+   * @return numColumns number of columns
+   */
   public int getColumnsPerRow() {
     return columnsPerRow;
   }
@@ -149,6 +154,11 @@ public class ColorPicker extends AbstractItemPicker {
     }
   }
 
+  /**
+   * Sets the number of columns to display per row of colors.
+   * 
+   * @param numColumns number of columns
+   */
   public void setColumnsPerRow(int numColumns) {
     if (numColumns <= 0) {
       throw new IllegalStateException("Cannot use " + numColumns
@@ -160,8 +170,8 @@ public class ColorPicker extends AbstractItemPicker {
   /**
    * Sets the items in the {@link ColorPicker}.
    * 
-   * @param colors iterator of colors. Each color should be the {@link String}
-   *          representation of a CSS color.
+   * @param colors iterator of colors. Each color's {@link String#toString()}
+   *          method should return a representation of a CSS color.
    */
   public final void setItems(Iterator colors) {
     clearItems();
@@ -177,7 +187,8 @@ public class ColorPicker extends AbstractItemPicker {
           // All items have been placed.
           return;
         }
-        ColorItem item = new ColorItem(i, (String) colors.next());
+
+        ColorItem item = new ColorItem(i, colors.next());
         format(item.getElement(), item.getColor());
         getLayout().setWidget(row, column, item);
         ++i;
@@ -187,7 +198,7 @@ public class ColorPicker extends AbstractItemPicker {
   }
 
   protected void format(Element e, Object item) {
-    DOM.setStyleAttribute(e, "background", (String) item);
+    DOM.setStyleAttribute(e, "background", item.toString());
   }
 
 }
