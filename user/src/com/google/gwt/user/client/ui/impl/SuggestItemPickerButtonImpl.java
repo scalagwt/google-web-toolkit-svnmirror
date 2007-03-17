@@ -47,7 +47,7 @@ public class SuggestItemPickerButtonImpl extends ItemPickerButtonImpl implements
 
     public void onSuggestionsReceived(Request request, Response response) {
       if (request.getQuery().trim().equals(accum.toString().trim())) {
-        Iterator suggestions = response.iterator();
+        Iterator suggestions = response.getSuggestions().iterator();
         if (suggestions.hasNext() == false) {
           suggestions = defaultSuggestions.iterator();
         }
@@ -96,6 +96,12 @@ public class SuggestItemPickerButtonImpl extends ItemPickerButtonImpl implements
     setDefaultSuggestions(defaultSuggestions);
   }
 
+  /**
+   * 
+   * Constructor for {@SuggestItemPickerButtonImpl}.
+   * 
+   * @param oracle the oracle
+   */
   public SuggestItemPickerButtonImpl(Oracle oracle) {
     this.oracle = oracle;
   }
