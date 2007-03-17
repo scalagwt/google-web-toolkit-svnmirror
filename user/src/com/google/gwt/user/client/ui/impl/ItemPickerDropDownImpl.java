@@ -18,7 +18,6 @@ package com.google.gwt.user.client.ui.impl;
 
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.ChangeListener;
-import com.google.gwt.user.client.ui.FocusListenerAdapter;
 import com.google.gwt.user.client.ui.HasFocus;
 import com.google.gwt.user.client.ui.ItemPicker;
 import com.google.gwt.user.client.ui.KeyboardListener;
@@ -50,11 +49,6 @@ public class ItemPickerDropDownImpl extends PopupPanel implements ItemPicker {
     setWidget((Widget) picker);
     this.picker = picker;
     this.owner = owner;
-    owner.addFocusListener(new FocusListenerAdapter() {
-      public void onLostFocus(Widget sender) {
-        hide();
-      }
-    });
 
     picker.addChangeListener(new ChangeListener() {
       public void onChange(Widget sender) {
@@ -149,15 +143,22 @@ public class ItemPickerDropDownImpl extends PopupPanel implements ItemPicker {
       return;
     }
     picker.setSelectedIndex(0);
-    // show must be called first, as otherwise getOffsetWidth is not correct.
+    // Show must be called first, as otherwise getOffsetWidth is not correct.
     super.show();
-    final int left = showBelow.getAbsoluteLeft();
-    int overshootLeft = Math.max(0, (left + getOffsetWidth())
-        - Window.getClientWidth());
-    final int top = showBelow.getAbsoluteTop() + showBelow.getOffsetHeight();
-    final int overshootTop = Math.max(0, (top + getOffsetHeight())
-        - (Window.getScrollTop() + Window.getClientHeight()));
-    setPopupPosition(left - overshootLeft, top - overshootTop);
+
+    // Calculate left.
+    int left = showBelow.getAbsoluteLeft();
+    int windowRight = Window.getClientWidth() + Window.getScrollLeft();
+    int overshootLeft = Math.max(0, (left + getOffsetWidth()) - windowRight);
+    left = left - overshootLeft;
+
+    // Calculate top.
+    int top = showBelow.getAbsoluteTop() + showBelow.getOffsetHeight();
+    int windowBottom = Window.getScrollTop() + Window.getClientHeight();
+    int overshootTop = Math.max(0, (top + getOffsetHeight()) - windowBottom);
+    top = top - overshootTop;
+    // set the popup position.
+    setPopupPosition(left, top);
     super.show();
   }
 }
