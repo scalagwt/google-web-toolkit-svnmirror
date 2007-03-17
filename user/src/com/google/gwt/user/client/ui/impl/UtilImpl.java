@@ -1,5 +1,5 @@
 /*
- * Copyright 2006 Google Inc.
+ * Copyright 2007 Google Inc.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,6 +19,9 @@ package com.google.gwt.user.client.ui.impl;
 import java.util.Arrays;
 import java.util.Iterator;
 
+/**
+ * Useful utility methods used for UI classes.
+ */
 public class UtilImpl {
 
   /**
@@ -28,11 +31,11 @@ public class UtilImpl {
    * @return iterator with array contents
    * 
    */
-
   public static Iterator asIterator(Object[] array) {
     // Implementation note: We are using a factory method to generate new
     // iterators in order to allow us to brutally optimized this process
     // later.
     return Arrays.asList(array).iterator();
   }
+
 }
