@@ -18,6 +18,7 @@ package com.google.gwt.user.client.ui.richtext;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ImageBundle;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.ChangeListener;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.ClippedImage;
@@ -31,8 +32,10 @@ import com.google.gwt.user.client.ui.ItemPicker;
 import com.google.gwt.user.client.ui.KeyboardListenerAdapter;
 import com.google.gwt.user.client.ui.MouseListenerAdapter;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.Suggest;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.impl.ItemPickerButtonImpl;
@@ -42,6 +45,7 @@ import com.google.gwt.user.client.ui.richtext.RichTextArea.FontSize;
 import com.google.gwt.user.client.ui.richtext.RichTextArea.Justification;
 import com.google.gwt.user.client.ui.richtext.RichTextEditor.ButtonCustomizer;
 import com.google.gwt.user.client.ui.richtext.RichTextEditor.LabelProvider;
+import com.google.gwt.user.client.ui.richtext.SpellCheck.Oracle;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -326,7 +330,6 @@ class RichTextEditorImplStandard extends RichTextEditorImpl {
 
       picker.addChangeListener(new ChangeListener() {
         public void onChange(Widget sender) {
-
           change(picker.getSelectedValue());
         }
       });
@@ -389,9 +392,8 @@ class RichTextEditorImplStandard extends RichTextEditorImpl {
         }
       });
 
-      buttons.add(button);
+      initButton(button, toolTip);
       listeningButtons.add(this);
-      button.setTitle(toolTip);
     }
 
     /**
@@ -411,13 +413,14 @@ class RichTextEditorImplStandard extends RichTextEditorImpl {
     abstract void updateButton();
   }
 
+  private int numButtonsPerRow = 1;
+
   /**
    * Hook up a push button.
    */
   private abstract class HookupPushButton {
     HookupPushButton(final PushButton button, String toolTip) {
-      buttons.add(button);
-      button.setTitle(toolTip);
+      initButton(button, toolTip);
       button.addClickListener(new ClickListener() {
         public void onClick(Widget sender) {
           click();
@@ -457,7 +460,7 @@ class RichTextEditorImplStandard extends RichTextEditorImpl {
         String fullHTML = beginHTML + labels.get(i) + endHTML;
         formattedLabels.add(fullHTML);
       }
-      Suggest.DefaultOracle oracle = new Suggest.DefaultOracle(masks);
+      Suggest.DefaultOracle oracle = new Suggest.DefaultOracle(masks.iterator());
       oracle.addAll(formattedLabels.iterator());
       SuggestItemPickerButtonImpl button = new SuggestItemPickerButtonImpl(
           oracle);
@@ -636,10 +639,8 @@ class RichTextEditorImplStandard extends RichTextEditorImpl {
     layout.setCellSpacing(0);
     layout.setStyleName("toolBar");
     root.add(layout);
-
-    createFormattingButtons();
-
     layout.setWidget(0, 0, buttons);
+    createFormattingButtons();
 
     spellCheckControl = new SpellCheckControl();
     spellCheckControl.setup();
@@ -664,7 +665,7 @@ class RichTextEditorImplStandard extends RichTextEditorImpl {
     this.labelProvider = labelProvider;
   }
 
-  void setSpellCheckModel(SpellCheckOracle spellCheckModel) {
+  void setSpellCheckModel(Oracle spellCheckModel) {
     spellCheckControl.getSpellCheck().setModel(spellCheckModel);
   }
 
@@ -967,7 +968,37 @@ class RichTextEditorImplStandard extends RichTextEditorImpl {
     buttonFaces.link(button);
     new HookupPushButton(button, labelProvider.htmlLinkIconText()) {
       void click() {
-        richTextArea.createLink(richTextArea.getSelectedHTML());
+        String selected = richTextArea.getSelectedHTML();
+        if (selected == null || selected.length() == 0) {
+          Window.alert(labelProvider.linkNeedSelection());
+          return;
+        }
+
+        // Most people do not add multiple links to their docs, so it should be
+        // cheaper to create then throw away then caching.
+        final PopupPanel p = new PopupPanel(true);
+        FlexTable table = new FlexTable();
+        p.setWidget(table);
+        table.setText(0, 0, labelProvider.linkEnterText());
+        final TextBox url = new TextBox();
+        url.addKeyboardListener(new KeyboardListenerAdapter() {
+
+          public void onKeyPress(Widget sender, char keyCode, int modifiers) {
+            if (keyCode == KEY_ENTER) {
+              richTextArea.createLink(url.getText());
+              p.hide();
+            }
+          }
+
+        });
+        url.setText("http://");
+        table.setWidget(0, 1, url);
+
+        p.setPopupPosition(richTextArea.getAbsoluteLeft(),
+            richTextArea.getAbsoluteTop());
+        p.setStyleName("gwt-RichTextEditor-LinkPopup");
+
+        p.show();
       }
     };
   }
@@ -1006,6 +1037,10 @@ class RichTextEditorImplStandard extends RichTextEditorImpl {
 
   private void initButton(CustomButton button, String tooltip) {
     button.setTitle(tooltip);
+    if (buttons.getWidgetCount() == numButtonsPerRow) {
+      buttons = new HorizontalPanel();
+      layout.setWidget(layout.getRowCount(), 0, buttons);
+    }
     buttons.add(button);
   }
 }

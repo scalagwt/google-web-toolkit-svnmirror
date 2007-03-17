@@ -20,6 +20,7 @@ import com.google.gwt.i18n.client.Constants;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.CustomButton;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.richtext.SpellCheck.Oracle;
 
 /**
  * A simple rich text editor.
@@ -218,6 +219,10 @@ public class RichTextEditor extends Composite {
 
     public String italicsIconText();
 
+    public String linkEnterText();
+
+    public String linkNeedSelection();
+
     public String noMisspellingsFoundStatus();
 
     public String noSuggestions();
@@ -348,7 +353,7 @@ public class RichTextEditor extends Composite {
    * 
    * @param spellCheckModel spell check model to set
    */
-  public void setSpellCheckModel(SpellCheckOracle spellCheckModel) {
+  public void setSpellCheckModel(Oracle spellCheckModel) {
     impl.setSpellCheckModel(spellCheckModel);
   }
 

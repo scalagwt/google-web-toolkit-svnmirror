@@ -17,12 +17,14 @@
 package com.google.gwt.user.client.ui.richtext;
 
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.rpc.IsSerializable;
 import com.google.gwt.user.client.ui.ChangeListener;
 import com.google.gwt.user.client.ui.SuggestPicker;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.impl.ItemPickerDropDownImpl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -31,15 +33,177 @@ import java.util.Map;
 /**
  * Spell Check for {@link RichTextArea}.
  */
-class SpellCheck {
+public class SpellCheck {
 
-  private static final String MISSPELLED_WORD = "misspelledWord";
+  public abstract class Callback {
 
+    /**
+     * CallBack used by {@link Oracle} once the {@link Response} has been
+     * created.
+     * 
+     * @param request spell check request
+     * @param response spell check response
+     */
+    public abstract void onSpellCheckResponseRecieved(Request request,
+        Response response);
+  }
+
+  /**
+   * Has a {@link Oracle}
+   */
+  public interface HasOracle {
+    public SpellCheck.Oracle getSpellCheckOracle();
+  }
+
+  /**
+   * Allows the spell check to communicate with a user's data source. Most
+   * implementations of {@link Oracle} should be a simple delegations to the
+   * user's server communication infrastructure, such as an RPC Service.
+   */
+  public abstract static class Oracle {
+
+    /**
+     * Requests a new spell check. The model is responsible for creating a spell
+     * check <code>Response</code> object and passing it into
+     * {@link Callback#onSpellCheckResponseRecieved(com.google.gwt.user.client.ui.richtext.SpellCheck.Request, com.google.gwt.user.client.ui.richtext.SpellCheck.Response)}
+     * 
+     * @param request spell check request
+     * @param callback spell check callback
+     */
+    public abstract void spellCheck(Request request, Callback callback);
+  }
+
+  /**
+   * Spell check request. The request fields represent a snapshot of the spell
+   * check state when the request was generated.
+   * 
+   */
+  public static class Request implements IsSerializable {
+    /**
+     * Locale used for spell checking engine.
+     */
+    private String locale;
+
+    /**
+     * Text to extract misspelled words from.
+     */
+    private String text;
+
+    /**
+     * Requests should only be created by {@link SpellCheck}.
+     */
+    Request() {
+    }
+
+    /**
+     * Gets the locale for spell checking.
+     * 
+     * @return spell check locale
+     */
+    public String getLocale() {
+      return locale;
+    }
+
+    /**
+     * Gets the text to extract misspelled words from.
+     * 
+     * @return returned text
+     */
+    public String getText() {
+      return text;
+    }
+
+    /**
+     * Sets the locale for spell checking. As there may be an arbitrary delay
+     * between the request for a spell check and its activation, we must cache
+     * the spell check driver's locale.
+     * 
+     * @param locale spell check locale
+     */
+    public void setLocale(String locale) {
+      this.locale = locale;
+    }
+
+    /**
+     * Sets the text to extract misspelled words from. As there may be an
+     * arbitrary delay between the request for a spell check and it's
+     * activation, we must cache the spellcheckable's text.
+     * 
+     * @param text the text
+     */
+    public void setText(String text) {
+      this.text = text;
+    }
+  }
+
+  /**
+   * Spell check response. Created by {@link Oracle}. Comprises all misspelled
+   * words represented in the corresponding {@link Request}.
+   */
+  public static class Response implements IsSerializable {
+    private List misspellings;
+
+    /**
+     * Gets the misspelled words.
+     * 
+     * @return list of misspellings
+     */
+    public List getMisspellings() {
+      return misspellings;
+    }
+
+    /**
+     * Sets the misspelled words.
+     * 
+     * @param misspellings misspellings
+     */
+    public void setMisspellings(List misspellings) {
+      this.misspellings = misspellings;
+    }
+
+    /**
+     * Sets the misspelled words.
+     * 
+     * @param misspellings mispellings
+     */
+    public void setMisspellings(Misspelling[] misspellings) {
+      this.misspellings = Arrays.asList(misspellings);
+    }
+
+    public String toString() {
+      return getMisspellings().toString();
+    }
+  }
   /**
    * Provides the labels needed for spell check.
    */
   interface LabelProvider {
     String noSuggestions();
+  }
+
+  /**
+   * Callback used by {@link Oracle} for spell checking.
+   */
+  class MyCallback extends Callback {
+    /**
+     * 
+     */
+    private final SpellCheck check;
+
+    MyCallback(SpellCheck check) {
+      this.check = check;
+    }
+
+    /**
+     * CallBack used by {@link Oracle} once the {@link Response} has been
+     * created.
+     * 
+     * @param request spell check request
+     * @param response spell check response
+     */
+    public void onSpellCheckResponseRecieved(Request request, Response response) {
+      this.check.startSpellCheck(response.getMisspellings());
+    }
   }
 
   /**
@@ -78,8 +242,10 @@ class SpellCheck {
     void onChange(State state);
   }
 
+  private static final String MISSPELLED_WORD = "misspelledWord";
+
   private static final int MILLISECONDS_DELAY = 500;
-  private SpellCheckOracle model;
+  private Oracle model;
   private List highlights;
   private String locale = "en";
   private StateListener stateListener;
@@ -125,10 +291,10 @@ class SpellCheck {
   void requestSpellCheck() {
     stateListener.onChange(State.CHECKING);
     clearHighlights();
-    SpellCheckRequest request = new SpellCheckRequest();
+    Request request = new Request();
     request.setText(target.getText());
     request.setLocale(locale);
-    final SpellCheckCallback callBack = new SpellCheckCallback(this);
+    final Callback callBack = new MyCallback(this);
 
     if (model == null) {
       throw new IllegalStateException(
@@ -151,7 +317,7 @@ class SpellCheck {
    * 
    * @param model the model
    */
-  void setModel(SpellCheckOracle model) {
+  void setModel(Oracle model) {
     this.model = model;
   }
 

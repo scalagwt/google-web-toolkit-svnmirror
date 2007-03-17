@@ -25,11 +25,9 @@ import com.google.gwt.user.client.ui.KeyboardListener;
 import com.google.gwt.user.client.ui.MouseListener;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.client.ui.richtext.RichTextArea.BlockFormat;
-import com.google.gwt.user.client.ui.richtext.RichTextArea.FontSize;
-import com.google.gwt.user.client.ui.richtext.RichTextArea.Justification;
 import com.google.gwt.user.client.ui.richtext.RichTextEditor.ButtonCustomizer;
 import com.google.gwt.user.client.ui.richtext.RichTextEditor.LabelProvider;
+import com.google.gwt.user.client.ui.richtext.SpellCheck.Oracle;
 
 import java.util.Iterator;
 import java.util.List;
@@ -397,7 +395,7 @@ class RichTextEditorImpl {
   void setLabels(LabelProvider provider) {
   }
 
-  void setSpellCheckModel(SpellCheckOracle spellCheckModel) {
+  void setSpellCheckModel(Oracle spellCheckModel) {
   }
 
   /**
