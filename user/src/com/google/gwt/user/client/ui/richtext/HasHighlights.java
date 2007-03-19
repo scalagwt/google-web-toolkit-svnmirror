@@ -18,7 +18,6 @@ package com.google.gwt.user.client.ui.richtext;
 import com.google.gwt.user.client.Element;
 
 import java.util.Iterator;
-import java.util.List;
 
 /**
  * Represents a widget which can have highlighted sections that react to user
@@ -36,7 +35,17 @@ public interface HasHighlights {
    * @param category the category to be used for the {@link Highlight}
    * @return the new {@link Highlight} objects as an {@link Iterator}
    */
-  Iterator addHighlights(List items, HighlightCategory category);
+  Iterator addHighlights(Iterator items, HighlightCategory category);
+
+  /**
+   * Adds highlights of a specific category. The highlights created are returned
+   * in the resulting {@link Iterator}.
+   * 
+   * @param items the items to be highlighted
+   * @param category the category to be used for the {@link Highlight}
+   * @return the new {@link Highlight} objects as an {@link Iterator}
+   */
+  Iterator addHighlights(String[] items, HighlightCategory category);
 
   /**
    * Creates a new, unattached highlight from the supplied item, giving it the
