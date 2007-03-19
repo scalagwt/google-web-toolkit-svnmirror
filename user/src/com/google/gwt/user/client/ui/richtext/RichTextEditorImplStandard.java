@@ -43,7 +43,7 @@ import com.google.gwt.user.client.ui.impl.SuggestItemPickerButtonImpl;
 import com.google.gwt.user.client.ui.richtext.RichTextArea.BlockFormat;
 import com.google.gwt.user.client.ui.richtext.RichTextArea.FontSize;
 import com.google.gwt.user.client.ui.richtext.RichTextArea.Justification;
-import com.google.gwt.user.client.ui.richtext.RichTextEditor.ButtonCustomizer;
+import com.google.gwt.user.client.ui.richtext.RichTextEditor.ButtonFaces;
 import com.google.gwt.user.client.ui.richtext.RichTextEditor.LabelProvider;
 import com.google.gwt.user.client.ui.richtext.SpellCheck.Oracle;
 
@@ -57,11 +57,12 @@ import java.util.List;
  * Standard Editor for rich text.
  */
 class RichTextEditorImplStandard extends RichTextEditorImpl {
+
   /**
    * Default button provider.
    * 
    */
-  static class ButtonCustomizerImpl implements ButtonCustomizer {
+  static class ButtonCustomizerImpl implements ButtonFaces {
 
     /**
      * Images for the default button case.
@@ -317,7 +318,6 @@ class RichTextEditorImplStandard extends RichTextEditorImpl {
       button.getDownFace().setImage(images.underlineDown());
     }
   }
-
   /**
    * Hook up a push button to be a drop down push button.
    * 
@@ -413,8 +413,6 @@ class RichTextEditorImplStandard extends RichTextEditorImpl {
     abstract void updateButton();
   }
 
-  private int numButtonsPerRow = 1;
-
   /**
    * Hook up a push button.
    */
@@ -507,7 +505,7 @@ class RichTextEditorImplStandard extends RichTextEditorImpl {
       setup();
     }
 
-    Iterator addHighlights(List words, HighlightCategory category) {
+    Iterator addHighlights(Iterator words, HighlightCategory category) {
       return richTextArea.addHighlights(words, category);
     }
 
@@ -566,37 +564,59 @@ class RichTextEditorImplStandard extends RichTextEditorImpl {
       });
       recheckSpelling.add(spellCheckDone);
       setSpellCheckWidget(spell);
-      spellCheck = new SpellCheck(richTextArea, labelProvider,
-          new SpellCheck.StateListener() {
-            public void onChange(SpellCheck.State state) {
-              if (state == SpellCheck.State.NO_MISSPELLING) {
-                setSpellCheckWidget(noMisspellingsFound);
-              } else if (state == SpellCheck.State.RECHECK) {
-                setSpellCheckWidget(recheckSpelling);
-              } else if (state == SpellCheck.State.SPELLCHECK) {
-                setSpellCheckWidget(spell);
-              } else if (state == SpellCheck.State.CHECKING) {
-                setSpellCheckWidget(checking);
-              } else {
-                throw new RuntimeException("Unknown state: " + state);
-              }
-            }
-          });
+
+      setupSpellCheck();
+    }
+
+    private void setupSpellCheck() {
+      SpellCheck.LabelProvider spellCheckLabels = new SpellCheck.LabelProvider() {
+        public String noSuggestions() {
+          return labelProvider.noSuggestions();
+        }
+      };
+
+      SpellCheck.StateListener listener = new SpellCheck.StateListener() {
+        public void onChange(SpellCheck.State state) {
+          if (state == SpellCheck.State.NO_MISSPELLING) {
+            setSpellCheckWidget(noMisspellingsFound);
+          } else if (state == SpellCheck.State.RECHECK) {
+            setSpellCheckWidget(recheckSpelling);
+          } else if (state == SpellCheck.State.SPELLCHECK) {
+            setSpellCheckWidget(spell);
+          } else if (state == SpellCheck.State.CHECKING) {
+            setSpellCheckWidget(checking);
+          } else {
+            throw new RuntimeException("Unknown state: " + state);
+          }
+        }
+      };
+      spellCheck = new SpellCheck(richTextArea, spellCheckLabels, listener);
     }
   }
 
+  private int numButtonsPerRow = 20;
+
   private SpellCheckControl spellCheckControl;
 
-  private ButtonCustomizer buttonFaces;
+  private ButtonFaces buttonFaces;
 
   private LabelProvider labelProvider;
 
   private HorizontalPanel buttons;
 
   private List listeningButtons = new ArrayList();
+
   // Using FlexTable for layout as HorizontalPanel had a weird alignment bug,
   // spelling would not align correctly.
   private FlexTable layout;
+
+  public Oracle getSpellCheckOracle() {
+    return this.spellCheckControl.spellCheck.getSpellCheckOracle();
+  }
+
+  public void setNumberOfButtonsPerRow(int numberOfButtons) {
+    this.numButtonsPerRow = numberOfButtons;
+  }
 
   void addListenersToRichText() {
     richTextArea.addKeyboardListener(new KeyboardListenerAdapter() {
@@ -617,7 +637,6 @@ class RichTextEditorImplStandard extends RichTextEditorImpl {
    * Adds the buttons to the toolbar.
    */
   void createFormattingButtons() {
-    buttons = new HorizontalPanel();
     addBold();
     addItalics();
     addUnderline();
@@ -639,7 +658,6 @@ class RichTextEditorImplStandard extends RichTextEditorImpl {
     layout.setCellSpacing(0);
     layout.setStyleName("toolBar");
     root.add(layout);
-    layout.setWidget(0, 0, buttons);
     createFormattingButtons();
 
     spellCheckControl = new SpellCheckControl();
@@ -657,7 +675,7 @@ class RichTextEditorImplStandard extends RichTextEditorImpl {
     return spellCheckControl.getSpellCheck();
   }
 
-  void setButtonProvider(ButtonCustomizer buttonProvider) {
+  void setButtonProvider(ButtonFaces buttonProvider) {
     this.buttonFaces = buttonProvider;
   }
 
@@ -666,7 +684,7 @@ class RichTextEditorImplStandard extends RichTextEditorImpl {
   }
 
   void setSpellCheckModel(Oracle spellCheckModel) {
-    spellCheckControl.getSpellCheck().setModel(spellCheckModel);
+    spellCheckControl.getSpellCheck().setOracle(spellCheckModel);
   }
 
   void updateImages() {
@@ -815,7 +833,7 @@ class RichTextEditorImplStandard extends RichTextEditorImpl {
       }
 
       String getBeginHTML(int i) {
-        return "<div style = 'font-family:" + values.get(i) + "'>";
+        return "<div style = 'font-family: " + values.get(i) + "'>";
       }
 
       String getEndHTML(int i) {
@@ -857,7 +875,7 @@ class RichTextEditorImplStandard extends RichTextEditorImpl {
       }
 
       String getBeginHTML(int index) {
-        return "<div style='font-size:" + htmlFormat.get(index) + "%'>";
+        return "<div style='font-size: " + htmlFormat.get(index) + "%'>";
       }
 
       String getEndHTML(int i) {
@@ -1037,8 +1055,9 @@ class RichTextEditorImplStandard extends RichTextEditorImpl {
 
   private void initButton(CustomButton button, String tooltip) {
     button.setTitle(tooltip);
-    if (buttons.getWidgetCount() == numButtonsPerRow) {
+    if (buttons == null || buttons.getWidgetCount() == numButtonsPerRow) {
       buttons = new HorizontalPanel();
+      buttons.setWidth("100%");
       layout.setWidget(layout.getRowCount(), 0, buttons);
     }
     buttons.add(button);
