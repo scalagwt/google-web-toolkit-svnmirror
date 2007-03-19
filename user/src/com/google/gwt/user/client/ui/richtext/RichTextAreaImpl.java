@@ -21,7 +21,6 @@ import com.google.gwt.user.client.Event;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 /**
  * Fall back implementation of rich-text editing for browsers that don't support
@@ -33,7 +32,7 @@ class RichTextAreaImpl {
   public void selectAll(Element element) {
   }
 
-  Iterator addHighlights(Element elem, RichTextArea rich, List words,
+  Iterator addHighlights(Element elem, RichTextArea rich, Iterator words,
       HighlightCategory category) {
     // return an empty Iterator so usage is consistent
     return new ArrayList().iterator();

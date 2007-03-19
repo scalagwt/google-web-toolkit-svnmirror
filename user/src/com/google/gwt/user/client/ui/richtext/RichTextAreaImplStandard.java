@@ -78,15 +78,15 @@ class RichTextAreaImplStandard extends RichTextAreaImpl {
     execCommand(element, "selectall", null);
   }
 
-  Iterator addHighlights(Element elem, RichTextArea rich, List words,
+  Iterator addHighlights(Element elem, RichTextArea rich, Iterator words,
       HighlightCategory category) {
     return addHighlights(rich, elem, words, category, null, getBody(elem));
   }
 
-  Iterator addHighlights(RichTextArea rich, Element elem, List words,
+  Iterator addHighlights(RichTextArea rich, Element elem, Iterator words,
       HighlightCategory category, Element nextSibling, Element toBeProcessed) {
     List out = new ArrayList();
-    if (words == null || words.size() == 0) {
+    if (words == null || words.hasNext() == false) {
       return out.iterator();
     }
     int nodeType = DOMUtil.getNodeType(toBeProcessed);
@@ -508,11 +508,11 @@ class RichTextAreaImplStandard extends RichTextAreaImpl {
     return elem.contentWindow.document.queryCommandState(cmd);
   }-*/;
 
-  private List spanify(RichTextArea rich, List words, String original,
+  private List spanify(RichTextArea rich, Iterator words, String original,
       HighlightCategory category) {
     List accum = new ArrayList();
     accum.add(original);
-    for (Iterator iter = words.iterator(); iter.hasNext();) {
+    for (Iterator iter = words; iter.hasNext();) {
       String word = (String) iter.next();
       accum = spanify(rich, word, category, accum);
     }

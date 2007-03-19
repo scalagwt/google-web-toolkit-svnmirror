@@ -30,10 +30,10 @@ import com.google.gwt.user.client.ui.MouseListenerCollection;
 import com.google.gwt.user.client.ui.SourcesChangeEvents;
 import com.google.gwt.user.client.ui.SourcesKeyboardEvents;
 import com.google.gwt.user.client.ui.SourcesMouseEvents;
+import com.google.gwt.user.client.ui.impl.UtilImpl;
 
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -112,6 +112,7 @@ public class RichTextArea extends FocusWidget implements HasHTML,
     }
   }
 
+  
   /**
    * Font size enumeration. Represents the numbers one through seven with one
    * being small, and seven being huge.
@@ -254,8 +255,12 @@ public class RichTextArea extends FocusWidget implements HasHTML,
     changeListeners.add(listener);
   }
 
-  public Iterator addHighlights(List items, HighlightCategory category) {
+  public Iterator addHighlights(Iterator items, HighlightCategory category) {
     return impl.addHighlights(getElement(), this, items, category);
+  }
+
+  public Iterator addHighlights(String[] items, HighlightCategory category) {
+    return addHighlights(UtilImpl.asIterator(items), category);
   }
 
   public void addKeyboardListener(KeyboardListener listener) {
