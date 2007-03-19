@@ -16,7 +16,7 @@
 package com.google.gwt.user.client.ui.richtext;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.i18n.client.Constants;
+
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.CustomButton;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -25,12 +25,12 @@ import com.google.gwt.user.client.ui.richtext.SpellCheck.Oracle;
 /**
  * A simple rich text editor.
  */
-public class RichTextEditor extends Composite {
+public class RichTextEditor extends Composite implements SpellCheck.HasOracle {
 
   /**
    * Provides buttons for use in the tool bar.
    */
-  public interface ButtonCustomizer {
+  public interface ButtonFaces {
 
     /**
      * Customize button for background color. *
@@ -153,96 +153,350 @@ public class RichTextEditor extends Composite {
   }
 
   /**
-   * Supplies text constants for the rich +text editor.
+   * Supplies text constants for the rich text editor.
    */
-  public interface LabelProvider extends Constants, SpellCheck.LabelProvider {
+  public interface LabelProvider extends com.google.gwt.i18n.client.Constants {
 
-    public String addressFormatStyle();
+    /**
+     * Translated "Address".
+     * 
+     * @return translated "Address"
+     * @gwt.key addressFormatStyle
+     */
+    String addressFormatStyle();
 
-    public String alignCenterIconText();
+    /**
+     * Translated "Align Center".
+     * 
+     * @return translated "Align Center"
+     * @gwt.key alignCenterIconText
+     */
+    String alignCenterIconText();
 
-    public String alignLeftIconText();
+    /**
+     * Translated "Align Left".
+     * 
+     * @return translated "Align Left"
+     * @gwt.key alignLeftIconText
+     */
+    String alignLeftIconText();
 
-    public String alignRightIconText();
+    /**
+     * Translated "Align Right".
+     * 
+     * @return translated "Align Right"
+     * @gwt.key alignRightIconText
+     */
+    String alignRightIconText();
 
-    public String blockStyleIconText();
+    /**
+     * Translated "Block Style".
+     * 
+     * @return translated "Block Style"
+     * @gwt.key blockStyleIconText
+     */
+    String blockStyleIconText();
 
-    public String boldIconText();
+    /**
+     * Translated "Bold".
+     * 
+     * @return translated "Bold"
+     * @gwt.key boldIconText
+     */
+    String boldIconText();
 
-    public String bulletedListIconText();
+    /**
+     * Translated "Bulleted List".
+     * 
+     * @return translated "Bulleted List"
+     * @gwt.key bulletedListIconText
+     */
+    String bulletedListIconText();
 
-    public String checkingStatus();
+    /**
+     * Translated "Checking...".
+     * 
+     * @return translated "Checking..."
+     * @gwt.key checkingStatus
+     */
+    String checkingStatus();
 
-    public String doneAction();
+    /**
+     * Translated "Done".
+     * 
+     * @return translated "Done"
+     * @gwt.key doneAction
+     */
+    String doneAction();
 
-    public String fontArial();
+    /**
+     * Translated "Arial".
+     * 
+     * @return translated "Arial"
+     * @gwt.key fontArial
+     */
+    String fontArial();
 
-    public String fontColorIconText();
+    /**
+     * Translated "Font Color".
+     * 
+     * @return translated "Font Color"
+     * @gwt.key fontColorIconText
+     */
+    String fontColorIconText();
 
-    public String fontCourierNew();
+    /**
+     * Translated "Courier New".
+     * 
+     * @return translated "Courier New"
+     * @gwt.key fontCourierNew
+     */
+    String fontCourierNew();
 
-    public String fontCursive();
+    /**
+     * Translated "Cursive".
+     * 
+     * @return translated "Cursive"
+     * @gwt.key fontCursive
+     */
+    String fontCursive();
 
-    public String fontIconText();
+    /**
+     * Translated "Font".
+     * 
+     * @return translated "Font"
+     * @gwt.key fontIconText
+     */
+    String fontIconText();
 
-    public String fontSizeHuge();
+    /**
+     * Translated "Huge".
+     * 
+     * @return translated "Huge"
+     * @gwt.key fontSizeHuge
+     */
+    String fontSizeHuge();
 
-    public String fontSizeIconText();
+    /**
+     * Translated "Font Size".
+     * 
+     * @return translated "Font Size"
+     * @gwt.key fontSizeIconText
+     */
+    String fontSizeIconText();
 
-    public String fontSizeLarge();
+    /**
+     * Translated "Large".
+     * 
+     * @return translated "Large"
+     * @gwt.key fontSizeLarge
+     */
+    String fontSizeLarge();
 
-    public String fontSizeNormal();
+    /**
+     * Translated "Normal".
+     * 
+     * @return translated "Normal"
+     * @gwt.key fontSizeNormal
+     */
+    String fontSizeNormal();
 
-    public String fontSizeSmall();
+    /**
+     * Translated "Small".
+     * 
+     * @return translated "Small"
+     * @gwt.key fontSizeSmall
+     */
+    String fontSizeSmall();
 
-    public String fontTimesNewRoman();
+    /**
+     * Translated "Times New Roman".
+     * 
+     * @return translated "Times New Roman"
+     * @gwt.key fontTimesNewRoman
+     */
+    String fontTimesNewRoman();
 
-    public String h1FormatStyle();
+    /**
+     * Translated "Headline 1".
+     * 
+     * @return translated "Headline 1"
+     * @gwt.key h1FormatStyle
+     */
+    String h1FormatStyle();
 
-    public String h2FormatStyle();
+    /**
+     * Translated "Headline 2".
+     * 
+     * @return translated "Headline 2"
+     * @gwt.key h2FormatStyle
+     */
+    String h2FormatStyle();
 
-    public String h3FormatStyle();
+    /**
+     * Translated "Headline 3".
+     * 
+     * @return translated "Headline 3"
+     * @gwt.key h3FormatStyle
+     */
+    String h3FormatStyle();
 
-    public String h4FormatStyle();
+    /**
+     * Translated "Headline 4".
+     * 
+     * @return translated "Headline 4"
+     * @gwt.key h4FormatStyle
+     */
+    String h4FormatStyle();
 
-    public String h5FormatStyle();
+    /**
+     * Translated "Headline 5".
+     * 
+     * @return translated "Headline 5"
+     * @gwt.key h5FormatStyle
+     */
+    String h5FormatStyle();
 
-    public String h6FormatStyle();
+    /**
+     * Translated "Headline 6".
+     * 
+     * @return translated "Headline 6"
+     * @gwt.key h6FormatStyle
+     */
+    String h6FormatStyle();
 
-    public String highlightColorIconText();
+    /**
+     * Translated "Highlight Color".
+     * 
+     * @return translated "Highlight Color"
+     * @gwt.key highlightColorIconText
+     */
+    String highlightColorIconText();
 
-    public String htmlLinkIconText();
+    /**
+     * Translated "HTML Link".
+     * 
+     * @return translated "HTML Link"
+     * @gwt.key htmlLinkIconText
+     */
+    String htmlLinkIconText();
 
-    public String indentIconText();
+    /**
+     * Translated "Indent".
+     * 
+     * @return translated "Indent"
+     * @gwt.key indentIconText
+     */
+    String indentIconText();
 
-    public String insertHRuleIconText();
+    /**
+     * Translated "Insert Horizontal Rule".
+     * 
+     * @return translated "Insert Horizontal Rule"
+     * @gwt.key insertHRuleIconText
+     */
+    String insertHRuleIconText();
 
-    public String italicsIconText();
+    /**
+     * Translated "Italic".
+     * 
+     * @return translated "Italic"
+     * @gwt.key italicsIconText
+     */
+    String italicsIconText();
 
-    public String linkEnterText();
+    /**
+     * Translated "Enter an URL".
+     * 
+     * @return translated "Enter an URL"
+     * @gwt.key linkEnterText
+     */
+    String linkEnterText();
 
-    public String linkNeedSelection();
+    /**
+     * Translated "First select the text that you want to make into a link".
+     * 
+     * @return translated "First select the text that you want to make into a
+     *         link"
+     * @gwt.key linkNeedSelection
+     */
+    String linkNeedSelection();
 
-    public String noMisspellingsFoundStatus();
+    /**
+     * Translated "No misspellings found".
+     * 
+     * @return translated "No misspellings found"
+     * @gwt.key noMisspellingsFoundStatus
+     */
+    String noMisspellingsFoundStatus();
 
-    public String noSuggestions();
+    /**
+     * Translated "No Suggestions".
+     * 
+     * @return translated "No Suggestions"
+     * @gwt.key noSuggestions
+     */
+    String noSuggestions();
 
-    public String orderedListIconText();
+    /**
+     * Translated "Ordered List".
+     * 
+     * @return translated "Ordered List"
+     * @gwt.key orderedListIconText
+     */
+    String orderedListIconText();
 
-    public String outdentIconText();
+    /**
+     * Translated "Outdent".
+     * 
+     * @return translated "Outdent"
+     * @gwt.key outdentIconText
+     */
+    String outdentIconText();
 
-    public String paragraphFormatStyle();
+    /**
+     * Translated "Paragraph".
+     * 
+     * @return translated "Paragraph"
+     * @gwt.key paragraphFormatStyle
+     */
+    String paragraphFormatStyle();
 
-    public String preFormatStyle();
+    /**
+     * Translated "Preformatted".
+     * 
+     * @return translated "Preformatted"
+     * @gwt.key preFormatStyle
+     */
+    String preFormatStyle();
 
-    public String reheckAction();
+    /**
+     * Translated "Recheck".
+     * 
+     * @return translated "Recheck"
+     * @gwt.key reheckAction
+     */
+    String reheckAction();
 
-    public String spellingAction();
+    /**
+     * Translated "Spelling".
+     * 
+     * @return translated "Spelling"
+     * @gwt.key spellingAction
+     */
+    String spellingAction();
 
-    public String underlineIconText();
+    /**
+     * Translated "Underline".
+     * 
+     * @return translated "Underline"
+     * @gwt.key underlineIconText
+     */
+    String underlineIconText();
   }
 
   private final VerticalPanel panel = new VerticalPanel();
+
   private final RichTextArea richTextArea;
   private final RichTextEditorImpl impl = (RichTextEditorImpl) GWT.create(RichTextEditorImpl.class);
 
@@ -259,8 +513,19 @@ public class RichTextEditor extends Composite {
    * 
    * @param buttonProvider custom button provider
    */
-  public RichTextEditor(ButtonCustomizer buttonProvider) {
+  public RichTextEditor(ButtonFaces buttonProvider) {
     this((String) null, buttonProvider);
+  }
+
+  /**
+   * 
+   * Constructor for {@link RichTextEditor}.
+   * 
+   * @param buttonProvider custom button provider
+   * @param numberOfButtonsPerRow number of buttons per row
+   */
+  public RichTextEditor(ButtonFaces buttonProvider, int numberOfButtonsPerRow) {
+    this((String) null, buttonProvider, numberOfButtonsPerRow);
   }
 
   /**
@@ -270,9 +535,21 @@ public class RichTextEditor extends Composite {
    * @param buttonProvider custom button provider
    * @param labelProvider custom label provider
    */
-  public RichTextEditor(ButtonCustomizer buttonProvider,
-      LabelProvider labelProvider) {
+  public RichTextEditor(ButtonFaces buttonProvider, LabelProvider labelProvider) {
     this((String) null, buttonProvider, labelProvider);
+  }
+
+  /**
+   * 
+   * Constructor for {@link RichTextEditor}.
+   * 
+   * @param buttonProvider custom button provider
+   * @param labelProvider custom label provider
+   * @param numberOfButtonsPerRow number of buttons per row
+   */
+  public RichTextEditor(ButtonFaces buttonProvider,
+      LabelProvider labelProvider, int numberOfButtonsPerRow) {
+    this((String) null, buttonProvider, labelProvider, numberOfButtonsPerRow);
   }
 
   /**
@@ -282,6 +559,16 @@ public class RichTextEditor extends Composite {
    */
   public RichTextEditor(LabelProvider labelProvider) {
     this((String) null, labelProvider);
+  }
+
+  /**
+   * Constructor for {@link RichTextEditor}.
+   * 
+   * @param labelProvider custom label provider *
+   * @param numberOfButtonsPerRow number of buttons per row
+   */
+  public RichTextEditor(LabelProvider labelProvider, int numberOfButtonsPerRow) {
+    this((String) null, labelProvider, numberOfButtonsPerRow);
   }
 
   /**
@@ -303,8 +590,25 @@ public class RichTextEditor extends Composite {
    * @param cssURL the css file to use for styling the edited highlighted item
    * @param buttonProvider custom button provider
    */
-  public RichTextEditor(String cssURL, ButtonCustomizer buttonProvider) {
+  public RichTextEditor(String cssURL, ButtonFaces buttonProvider) {
     richTextArea = new RichTextArea(cssURL);
+    impl.setButtonProvider(buttonProvider);
+    impl.useDefaultTextProvider();
+    setup();
+  }
+
+  /**
+   * 
+   * Constructor for {@link RichTextEditor}.
+   * 
+   * @param cssURL the css file to use for styling the edited highlighted item
+   * @param buttonProvider custom button provider *
+   * @param numberOfButtonsPerRow number of buttons per row
+   */
+  public RichTextEditor(String cssURL, ButtonFaces buttonProvider,
+      int numberOfButtonsPerRow) {
+    richTextArea = new RichTextArea(cssURL);
+    impl.setNumberOfButtonsPerRow(numberOfButtonsPerRow);
     impl.setButtonProvider(buttonProvider);
     impl.useDefaultTextProvider();
     setup();
@@ -318,11 +622,42 @@ public class RichTextEditor extends Composite {
    * @param buttonProvider custom button provider
    * @param labelProvider custom label provider
    */
-  public RichTextEditor(String cssURL, ButtonCustomizer buttonProvider,
+  public RichTextEditor(String cssURL, ButtonFaces buttonProvider,
       LabelProvider labelProvider) {
     richTextArea = new RichTextArea(cssURL);
     impl.setButtonProvider(buttonProvider);
     impl.setLabels(labelProvider);
+    setup();
+  }
+
+  /**
+   * 
+   * Constructor for {@link RichTextEditor}.
+   * 
+   * @param cssURL the css file to use for styling the edited highlighted item
+   * @param buttonProvider custom button provider
+   * @param labelProvider custom label provider *
+   * @param numberOfButtonsPerRow number of buttons per row
+   */
+  public RichTextEditor(String cssURL, ButtonFaces buttonProvider,
+      LabelProvider labelProvider, int numberOfButtonsPerRow) {
+    richTextArea = new RichTextArea(cssURL);
+    impl.setNumberOfButtonsPerRow(numberOfButtonsPerRow);
+    impl.setButtonProvider(buttonProvider);
+    impl.setLabels(labelProvider);
+    setup();
+  }
+
+  /**
+   * Constructor for {@link RichTextEditor}.
+   * 
+   * @param cssURL the css file to use for styling the edited highlighted item *
+   * @param numberOfButtonsPerRow number of buttons per row
+   */
+  public RichTextEditor(String cssURL, int numberOfButtonsPerRow) {
+    richTextArea = new RichTextArea(cssURL);
+    impl.useDefaultButtonProvider();
+    impl.useDefaultTextProvider();
     setup();
   }
 
@@ -340,6 +675,22 @@ public class RichTextEditor extends Composite {
   }
 
   /**
+   * Constructor for {@link RichTextEditor}.
+   * 
+   * @param cssURL the css file to use for styling the edited highlighted item
+   * @param labelProvider custom label provider *
+   * @param numberOfButtonsPerRow number of buttons per row
+   */
+  public RichTextEditor(String cssURL, LabelProvider labelProvider,
+      int numberOfButtonsPerRow) {
+    richTextArea = new RichTextArea(cssURL);
+    impl.setLabels(labelProvider);
+    impl.setNumberOfButtonsPerRow(numberOfButtonsPerRow);
+    impl.useDefaultButtonProvider();
+    setup();
+  }
+
+  /**
    * Get the rich text widget associated with this editor.
    * 
    * @return rich text widget
@@ -348,13 +699,17 @@ public class RichTextEditor extends Composite {
     return richTextArea;
   }
 
+  public Oracle getSpellCheckOracle() {
+    return impl.getSpellCheckOracle();
+  }
+
   /**
    * Sets the spell check model.
    * 
-   * @param spellCheckModel spell check model to set
+   * @param spellCheckOracle {@link Oracle} to use
    */
-  public void setSpellCheckModel(Oracle spellCheckModel) {
-    impl.setSpellCheckModel(spellCheckModel);
+  public void setSpellCheckOracle(Oracle spellCheckOracle) {
+    impl.setSpellCheckModel(spellCheckOracle);
   }
 
   protected void onAttach() {
