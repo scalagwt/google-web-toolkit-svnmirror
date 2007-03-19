@@ -25,6 +25,7 @@ import com.google.gwt.user.client.ui.impl.ItemPickerDropDownImpl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -35,10 +36,15 @@ import java.util.Map;
  */
 public class SpellCheck {
 
+  /**
+   * Spell check callback. Each {@link Oracle} should call
+   * {@link com.google.gwt.user.client.ui.richtext.SpellCheck.Callback#onSpellCheckResponseRecieved(com.google.gwt.user.client.ui.richtext.SpellCheck.Request, com.google.gwt.user.client.ui.richtext.SpellCheck.Response)}.
+   * 
+   */
   public abstract class Callback {
 
     /**
-     * CallBack used by {@link Oracle} once the {@link Response} has been
+     * Callback used by {@link Oracle} once the {@link Response} has been
      * created.
      * 
      * @param request spell check request
@@ -49,28 +55,36 @@ public class SpellCheck {
   }
 
   /**
-   * Has a {@link Oracle}
+   * Has a spell check oracle.
    */
   public interface HasOracle {
+    /**
+     * Get the associated spellcheck {@link Oracle}.
+     * 
+     * @return the oracle
+     */
     public SpellCheck.Oracle getSpellCheckOracle();
   }
 
   /**
-   * Allows the spell check to communicate with a user's data source. Most
-   * implementations of {@link Oracle} should be a simple delegations to the
-   * user's server communication infrastructure, such as an RPC Service.
+   * 
+   * A {@link Oracle} can be used to create {@link Response} objects from the
+   * supplied {@link Request} object. It is the oracle's responsibility to call
+   * {@link Callback#onSpellCheckResponseRecieved(com.google.gwt.user.client.ui.richtext.SpellCheck.Request, com.google.gwt.user.client.ui.richtext.SpellCheck.Response)}
+   * on the supplied {@link Callback} object.
+   * 
    */
   public abstract static class Oracle {
 
     /**
-     * Requests a new spell check. The model is responsible for creating a spell
-     * check <code>Response</code> object and passing it into
+     * Requests a new spell check. The responsible is responsible for creating a
+     * spell check <code>Response</code> and passing it into the method
      * {@link Callback#onSpellCheckResponseRecieved(com.google.gwt.user.client.ui.richtext.SpellCheck.Request, com.google.gwt.user.client.ui.richtext.SpellCheck.Response)}
      * 
      * @param request spell check request
      * @param callback spell check callback
      */
-    public abstract void spellCheck(Request request, Callback callback);
+    public abstract void requestSpellCheck(Request request, Callback callback);
   }
 
   /**
@@ -107,7 +121,7 @@ public class SpellCheck {
     /**
      * Gets the text to extract misspelled words from.
      * 
-     * @return returned text
+     * @return text
      */
     public String getText() {
       return text;
@@ -125,9 +139,7 @@ public class SpellCheck {
     }
 
     /**
-     * Sets the text to extract misspelled words from. As there may be an
-     * arbitrary delay between the request for a spell check and it's
-     * activation, we must cache the spellcheckable's text.
+     * Sets the text to extract misspelled words from.
      * 
      * @param text the text
      */
@@ -141,14 +153,15 @@ public class SpellCheck {
    * words represented in the corresponding {@link Request}.
    */
   public static class Response implements IsSerializable {
-    private List misspellings;
+
+    private Collection misspellings;
 
     /**
      * Gets the misspelled words.
      * 
-     * @return list of misspellings
+     * @return collection of misspellings
      */
-    public List getMisspellings() {
+    public Collection getMisspellings() {
       return misspellings;
     }
 
@@ -157,7 +170,7 @@ public class SpellCheck {
      * 
      * @param misspellings misspellings
      */
-    public void setMisspellings(List misspellings) {
+    public void setMisspellings(Collection misspellings) {
       this.misspellings = misspellings;
     }
 
@@ -185,14 +198,6 @@ public class SpellCheck {
    * Callback used by {@link Oracle} for spell checking.
    */
   class MyCallback extends Callback {
-    /**
-     * 
-     */
-    private final SpellCheck check;
-
-    MyCallback(SpellCheck check) {
-      this.check = check;
-    }
 
     /**
      * CallBack used by {@link Oracle} once the {@link Response} has been
@@ -202,7 +207,7 @@ public class SpellCheck {
      * @param response spell check response
      */
     public void onSpellCheckResponseRecieved(Request request, Response response) {
-      this.check.startSpellCheck(response.getMisspellings());
+      SpellCheck.this.startSpellCheck(response.getMisspellings());
     }
   }
 
@@ -244,8 +249,8 @@ public class SpellCheck {
 
   private static final String MISSPELLED_WORD = "misspelledWord";
 
-  private static final int MILLISECONDS_DELAY = 500;
-  private Oracle model;
+  private static final int MILLISECONDS_DELAY = 1000;
+  private Oracle oracle;
   private List highlights;
   private String locale = "en";
   private StateListener stateListener;
@@ -266,6 +271,11 @@ public class SpellCheck {
       StateListener stateListener) {
     this.stateListener = stateListener;
     this.target = target;
+    this.labels = labels;
+  }
+
+  public Oracle getSpellCheckOracle() {
+    return this.oracle;
   }
 
   /**
@@ -286,7 +296,7 @@ public class SpellCheck {
   }
 
   /**
-   * Request a new spell check from the spell check model.
+   * Request a new spell check from the spell check oracle.
    */
   void requestSpellCheck() {
     stateListener.onChange(State.CHECKING);
@@ -294,13 +304,13 @@ public class SpellCheck {
     Request request = new Request();
     request.setText(target.getText());
     request.setLocale(locale);
-    final Callback callBack = new MyCallback(this);
+    final Callback callBack = new MyCallback();
 
-    if (model == null) {
+    if (oracle == null) {
       throw new IllegalStateException(
           "Before Requesting a SpellCheck, you must provide a SpellCheckModel.");
     }
-    model.spellCheck(request, callBack);
+    oracle.requestSpellCheck(request, callBack);
   }
 
   /**
@@ -313,12 +323,12 @@ public class SpellCheck {
   }
 
   /**
-   * Sets the spell check model.
+   * Sets the spell check oracle.
    * 
-   * @param model the model
+   * @param oracle the oracle
    */
-  void setModel(Oracle model) {
-    this.model = model;
+  void setOracle(Oracle oracle) {
+    this.oracle = oracle;
   }
 
   /**
@@ -326,7 +336,7 @@ public class SpellCheck {
    * 
    * @param misspellings supplied misspellings
    */
-  void startSpellCheck(List misspellings) {
+  void startSpellCheck(Collection misspellings) {
     if (misspellings.size() == 0) {
       stateListener.onChange(State.NO_MISSPELLING);
       Timer t = new Timer() {
@@ -360,16 +370,18 @@ public class SpellCheck {
     return new ItemPickerDropDownImpl(target, noSuggestions);
   }
 
-  private void process(List entries) {
-    List mispelledWords = new ArrayList();
+  private void process(Collection misspelledWords) {
+
     final Map wordsToSuggestions = new HashMap();
-    for (int i = 0; i < entries.size(); i++) {
-      Misspelling miss = (Misspelling) entries.get(i);
-      mispelledWords.add(miss.getWord());
+
+    for (Iterator iter = misspelledWords.iterator(); iter.hasNext();) {
+      Misspelling miss = (Misspelling) iter.next();
       wordsToSuggestions.put(miss.getWord(), miss.getSuggestions());
     }
+
     HighlightCategory category = new HighlightCategory(MISSPELLED_WORD);
-    Iterator i = target.addHighlights(mispelledWords, category);
+    Iterator i = target.addHighlights(wordsToSuggestions.keySet().iterator(),
+        category);
     // This code could be removed if we created a target.unhighlight(category);
     highlights = new ArrayList();
     while (i.hasNext()) {
