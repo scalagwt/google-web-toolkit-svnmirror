@@ -620,7 +620,9 @@ public abstract class CustomButton extends ButtonBase implements
    * Common setup between constructors.
    */
   void finishSetup() {
-    setCurrentFace(getUpFace());
+    if (curFace == null) {
+      setCurrentFace(getUpFace());
+    }
   }
 
   /**
@@ -634,9 +636,9 @@ public abstract class CustomButton extends ButtonBase implements
      * Implementation note: Package protected so we can use it when testing the
      * button.
      */
-    if (curFace == null) {
-      finishSetup();
-    }
+
+    finishSetup();
+
     return curFace;
   }
 
