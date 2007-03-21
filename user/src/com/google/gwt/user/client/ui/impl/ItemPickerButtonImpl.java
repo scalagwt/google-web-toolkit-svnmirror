@@ -136,7 +136,7 @@ public class ItemPickerButtonImpl extends ToggleButton implements
     if (popup.isAttached() == false) {
       showPopup();
     }
-    popup.delegateKeyPress(keyCode);
+    popup.delegateKeyDown(keyCode);
   }
 
   ItemPickerDropDownImpl getPopup() {

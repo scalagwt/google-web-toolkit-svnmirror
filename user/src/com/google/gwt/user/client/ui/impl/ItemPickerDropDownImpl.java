@@ -65,18 +65,15 @@ public class ItemPickerDropDownImpl extends PopupPanel implements ItemPicker {
     picker.confirmSelection();
   }
 
-  public boolean delegateKeyPress(char keyCode) {
+  public boolean delegateKeyDown(char keyCode) {
     if (isAttached()) {
       switch (keyCode) {
         case KeyboardListener.KEY_ESCAPE:
           hide();
           return true;
-        case KeyboardListener.KEY_ENTER:
-          picker.confirmSelection();
-          return true;
         default:
           // Avoid shared post processing.
-          return picker.delegateKeyPress(keyCode);
+          return picker.delegateKeyDown(keyCode);
       }
     }
     return false;

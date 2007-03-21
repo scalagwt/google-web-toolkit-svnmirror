@@ -138,7 +138,7 @@ public class SuggestItemPickerButtonImpl extends ItemPickerButtonImpl implements
   }
 
   void delegateKeyPress(char keyCode) {
-    boolean navigate = getPopup().delegateKeyPress(keyCode);
+    boolean navigate = getPopup().delegateKeyDown(keyCode);
     if (navigate) {
       return;
     }
