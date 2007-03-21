@@ -191,6 +191,11 @@ public class SpellCheck {
    * Provides the labels needed for spell check.
    */
   interface LabelProvider {
+    /**
+     * String indicating no suggestions were found.
+     * 
+     * @return no suggestions string
+     */
     String noSuggestions();
   }
 
@@ -274,7 +279,7 @@ public class SpellCheck {
     this.labels = labels;
   }
 
-  public Oracle getSpellCheckOracle() {
+  Oracle getSpellCheckOracle() {
     return this.oracle;
   }
 
@@ -308,7 +313,7 @@ public class SpellCheck {
 
     if (oracle == null) {
       throw new IllegalStateException(
-          "Before Requesting a SpellCheck, you must provide a SpellCheckModel.");
+          "Before Requesting a SpellCheck, you must provide a SpellCheck.Oracle.");
     }
     oracle.requestSpellCheck(request, callBack);
   }
@@ -365,7 +370,7 @@ public class SpellCheck {
     SuggestPicker noSuggestions = new SuggestPicker();
     List noSuggestionsList = new ArrayList();
     noSuggestionsList.add(labels.noSuggestions());
-    noSuggestions.setItems(noSuggestionsList.iterator());
+    noSuggestions.setItems(noSuggestionsList);
     noSuggestions.setStyleName("gwt-RichTextEditor-NoSuggestions");
     return new ItemPickerDropDownImpl(target, noSuggestions);
   }
@@ -392,6 +397,7 @@ public class SpellCheck {
         HighlightClickHandler, HighlightKeyboardHandler {
 
       public void onKeyPress(HighlightKeyboardEvent e) {
+        // TODO add keyboard support for selecting text.
       }
 
       public void onKeyUp(HighlightKeyboardEvent e) {
@@ -400,11 +406,13 @@ public class SpellCheck {
 
     HighlightClickAndKeyboardHandler spellCheck = new HighlightClickAndKeyboardHandler() {
       Highlight selected;
-      final ItemPickerDropDownImpl noSuggestions = createNoSuggestionsPopup();
+      final ItemPickerDropDownImpl noSuggestionsDropDown = createNoSuggestionsPopup();
+      final ItemPickerDropDownImpl suggestionsDropDown = new ItemPickerDropDownImpl(
+          target, new SuggestPicker());
       {
-        noSuggestions.addChangeListener(new ChangeListener() {
+        suggestionsDropDown.addChangeListener(new ChangeListener() {
           public void onChange(Widget sender) {
-            selected.setText((String) noSuggestions.getSelectedValue());
+            selected.setText((String) suggestionsDropDown.getSelectedValue());
             selected.unhighlight();
           }
 
@@ -417,21 +425,18 @@ public class SpellCheck {
       }
 
       public void onKeyDown(HighlightKeyboardEvent e) {
-        if (e.getControlKey() || e.getKeyCode() == '1') {
-          System.err.println("got here");
-        }
       }
 
       private void select() {
         Object key = selected.getHighlighted();
         List suggestions = (List) wordsToSuggestions.get(key);
         if (suggestions.size() > 0) {
-          noSuggestions.hide();
-          noSuggestions.setItems(suggestions.iterator());
-          noSuggestions.showBelow(selected);
+          noSuggestionsDropDown.hide();
+          suggestionsDropDown.setItems(suggestions);
+          suggestionsDropDown.showBelow(selected);
         } else {
-          noSuggestions.hide();
-          noSuggestions.showBelow(selected);
+          noSuggestionsDropDown.hide();
+          noSuggestionsDropDown.showBelow(selected);
         }
       }
     };

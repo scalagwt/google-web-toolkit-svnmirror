@@ -28,7 +28,6 @@ import com.google.gwt.user.client.ui.Suggest.Response;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
 
 /**
  * A {@link ItemPickerButtonImpl} with a associated {@link Oracle} to populate
@@ -47,9 +46,9 @@ public class SuggestItemPickerButtonImpl extends ItemPickerButtonImpl implements
 
     public void onSuggestionsReceived(Request request, Response response) {
       if (request.getQuery().trim().equals(accum.toString().trim())) {
-        Iterator suggestions = response.getSuggestions().iterator();
-        if (suggestions.hasNext() == false) {
-          suggestions = defaultSuggestions.iterator();
+        Collection suggestions = response.getSuggestions();
+        if (suggestions.size() == 0) {
+          suggestions = defaultSuggestions;
         }
         getPopup().setItems(suggestions);
         // Compiler bug requires us to inline the following call.

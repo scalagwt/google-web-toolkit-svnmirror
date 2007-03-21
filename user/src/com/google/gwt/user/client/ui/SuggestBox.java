@@ -23,7 +23,7 @@ import com.google.gwt.user.client.ui.Suggest.Request;
 import com.google.gwt.user.client.ui.Suggest.Response;
 import com.google.gwt.user.client.ui.impl.ItemPickerDropDownImpl;
 
-import java.util.Iterator;
+import java.util.Collection;
 
 /**
  * Wrapper for a {@link TextBox} or {@link TextArea} with a built in
@@ -88,7 +88,7 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
   private final Callback callBack = new Callback() {
 
     public void onSuggestionsReceived(Request request, Response response) {
-      showSuggestions(response.getSuggestions().iterator());
+      showSuggestions(response.getSuggestions());
     }
   };
 
@@ -345,8 +345,8 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
    * 
    * @param suggestions suggestions to show
    */
-  protected void showSuggestions(Iterator suggestions) {
-    if (suggestions.hasNext()) {
+  protected void showSuggestions(Collection suggestions) {
+    if (suggestions.size() > 0) {
       popup.setItems(suggestions);
       popup.show();
     }

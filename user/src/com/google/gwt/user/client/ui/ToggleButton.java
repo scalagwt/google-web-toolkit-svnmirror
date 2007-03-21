@@ -122,6 +122,9 @@ public class ToggleButton extends CustomButton {
   }
 
   public void onBrowserEvent(Event event) {
+    if (isEnabled() == false) {
+      return;
+    }
     int type = DOM.eventGetType(event);
     switch (type) {
       case Event.ONCLICK:

@@ -21,6 +21,7 @@ import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.impl.UtilImpl;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -28,8 +29,6 @@ import java.util.List;
  * Color picker. Each "item" represents a CSS color.
  */
 public class ColorPicker extends AbstractItemPicker {
-
-  private static final String STYLENAME_DEFAULT = "gwt-ColorPicker ";
 
   class ColorItem extends Item {
     private Object color;
@@ -49,6 +48,8 @@ public class ColorPicker extends AbstractItemPicker {
    * selection of 60 web-safe CSS color styles.
    */
   public static final List DEFAULT_COLORS;
+
+  private static final String STYLENAME_DEFAULT = "gwt-ColorPicker ";
 
   static {
     String[] baseColors = {
@@ -87,8 +88,8 @@ public class ColorPicker extends AbstractItemPicker {
    * 
    * Constructor for {@link ColorPicker}.
    * 
-   * @param colors color iterator. Each color's {@link String#toString()}
-   *          method should return a representation of a CSS color.
+   * @param colors color iterator. Each color's {@link String#toString()} method
+   *          should return a representation of a CSS color.
    * @param numColumns number of columns to be displayed
    */
   public ColorPicker(Iterator colors, int numColumns) {
@@ -101,8 +102,8 @@ public class ColorPicker extends AbstractItemPicker {
    * 
    * Constructor for {@link ColorPicker}.
    * 
-   * @param colors colors. Each color's {@link String#toString()}
-   *          method should return a representation of a CSS color.
+   * @param colors colors. Each color's {@link String#toString()} method should
+   *          return a representation of a CSS color.
    * @param numColumns number of columns to be displayed
    */
   public ColorPicker(String[] colors, int numColumns) {
@@ -173,11 +174,26 @@ public class ColorPicker extends AbstractItemPicker {
    * @param colors iterator of colors. Each color's {@link String#toString()}
    *          method should return a representation of a CSS color.
    */
-  public final void setItems(Iterator colors) {
+  public final void setItems(Collection colors) {
+    setItems(colors.iterator());
+  }
+
+  protected void format(Element e, Object item) {
+    DOM.setStyleAttribute(e, "background", item.toString());
+  }
+
+  /**
+   * Sets the items in the {@link ColorPicker}.
+   * 
+   * @param colors iterator of colors. Each color's {@link String#toString()}
+   *          method should return a representation of a CSS color.
+   */
+  private final void setItems(Iterator colors) {
     clearItems();
     int row = 0;
     int i = 0;
     while (true) {
+
       for (int column = 0; column < getColumnsPerRow(); column++) {
         if (!colors.hasNext()) {
           if (i == 0) {
@@ -195,10 +211,6 @@ public class ColorPicker extends AbstractItemPicker {
       }
       ++row;
     }
-  }
-
-  protected void format(Element e, Object item) {
-    DOM.setStyleAttribute(e, "background", item.toString());
   }
 
 }

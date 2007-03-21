@@ -25,7 +25,7 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 
-import java.util.Iterator;
+import java.util.Collection;
 
 /**
  * Shared {@link ItemPicker} wrapper class for
@@ -106,11 +106,7 @@ public class ItemPickerDropDownImpl extends PopupPanel implements ItemPicker {
     picker.removeChangeListener(listener);
   }
 
-  public void setItems(Iterator items) {
-    picker.setItems(items);
-  }
-
-  public void setItems(Object[] items) {
+  public void setItems(Collection items) {
     picker.setItems(items);
   }
 

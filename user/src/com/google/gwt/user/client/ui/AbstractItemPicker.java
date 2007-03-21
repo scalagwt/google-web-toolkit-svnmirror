@@ -18,10 +18,9 @@ package com.google.gwt.user.client.ui;
 
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
-import com.google.gwt.user.client.ui.impl.UtilImpl;
 
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Collection;
 
 /**
  * Helpful base implementation of the {@link ItemPicker} interface.
@@ -182,17 +181,7 @@ abstract class AbstractItemPicker extends Composite implements ItemPicker {
     this.changeListeners.remove(listener);
   }
 
-  public abstract void setItems(Iterator items);
-
-  /**
-   * Convenience method that delegates directly to
-   * {@link ItemPicker#setItems(Iterator)}.
-   * 
-   * @param items the items
-   */
-  public final void setItems(Object[] items) {
-    setItems(UtilImpl.asIterator(items));
-  }
+  public abstract void setItems(Collection items);
 
   public final void setSelectedIndex(int index) {
     Item item = getItem(index);

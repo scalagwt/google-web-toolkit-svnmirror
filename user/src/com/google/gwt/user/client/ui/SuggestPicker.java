@@ -16,6 +16,7 @@
 
 package com.google.gwt.user.client.ui;
 
+import java.util.Collection;
 import java.util.Iterator;
 
 /**
@@ -61,7 +62,41 @@ public class SuggestPicker extends AbstractItemPicker {
    * @param suggestions suggestions for this picker. The suggestions must have
    *          valid {@link String#toString()} methods.
    */
-  public final void setItems(Iterator suggestions) {
+  public final void setItems(Collection suggestions) {
+    int itemCount = 0;
+    setItems(suggestions.iterator());
+  }
+
+  void shiftSelection(int shift) {
+    int newSelect = getSelectedIndex() + shift;
+    if (newSelect >= super.getItemCount() || newSelect < 0
+        || newSelect >= startInvisible) {
+      return;
+    }
+    setSelection(getItem(newSelect));
+  }
+
+  /**
+   * Ensures the existence of the given item and returns it.
+   * 
+   * @param itemIndex item index to ensure
+   * @return associated item
+   */
+  private Item ensureItem(int itemIndex) {
+    for (int i = super.getItemCount(); i <= itemIndex; i++) {
+      Item item = new Item(i);
+      getLayout().setWidget(i, 0, item);
+    }
+    return getItem(itemIndex);
+  }
+
+  /**
+   * Sets the suggestions associated with this picker.
+   * 
+   * @param suggestions suggestions for this picker. The suggestions must have
+   *          valid {@link String#toString()} methods.
+   */
+  private final void setItems(Iterator suggestions) {
     int itemCount = 0;
 
     // Ensure all needed items exist and set each item's html to the given
@@ -88,29 +123,6 @@ public class SuggestPicker extends AbstractItemPicker {
     for (int i = itemCount; i < super.getItemCount(); i++) {
       setVisible(i, false);
     }
-  }
-
-  void shiftSelection(int shift) {
-    int newSelect = getSelectedIndex() + shift;
-    if (newSelect >= super.getItemCount() || newSelect < 0
-        || newSelect >= startInvisible) {
-      return;
-    }
-    setSelection(getItem(newSelect));
-  }
-
-  /**
-   * Ensures the existence of the given item and returns it.
-   * 
-   * @param itemIndex item index to ensure
-   * @return associated item
-   */
-  private Item ensureItem(int itemIndex) {
-    for (int i = super.getItemCount(); i <= itemIndex; i++) {
-      Item item = new Item(i);
-      getLayout().setWidget(i, 0, item);
-    }
-    return getItem(itemIndex);
   }
 
   /**

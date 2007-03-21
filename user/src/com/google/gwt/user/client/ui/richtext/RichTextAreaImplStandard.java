@@ -51,6 +51,9 @@ class RichTextAreaImplStandard extends RichTextAreaImpl {
         getBody(elem));
     DOMUtil.setAttribute(highlightElement,
         RichTextAreaImplStandard.HIGHLIGHT_ID, id);
+
+    // Hack to show misspellings until CSS injection issue can be solved
+    DOM.setStyleAttribute(highlightElement, "background", "yellow");
     DOM.setInnerHTML(highlightElement, toBeHighlighted.toString());
     Highlight highlight = new Highlight(rich, toBeHighlighted, category,
         highlightElement);

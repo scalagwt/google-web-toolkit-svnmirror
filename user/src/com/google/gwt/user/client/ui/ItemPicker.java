@@ -16,7 +16,7 @@
 
 package com.google.gwt.user.client.ui;
 
-import java.util.Iterator;
+import java.util.Collection;
 
 /**
  * Represents a pickable list of items. Each {@link ItemPicker} should be able
@@ -86,16 +86,7 @@ public interface ItemPicker extends SourcesChangeEvents {
    * 
    * @param items items to be displayed
    */
-  public void setItems(Iterator items);
-
-  /**
-   * Sets the items to be displayed. The expected type of each item should be
-   * clearly documented in each class which implements this interface. Both
-   * <code>setItems</code> implementations should be functionally equivalent.
-   * 
-   * @param items items to be displayed
-   */
-  public void setItems(Object[] items);
+  public void setItems(Collection items);
 
   /**
    * Sets the currently selected index.
