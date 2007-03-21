@@ -35,16 +35,8 @@ public class ColorPickerTest extends ItemPickerTest {
     // Now we want only one color in the color picker.
     List single = new ArrayList();
     single.add("#000000");
-    picker.setItems(single.iterator());
+    picker.setItems(single);
     assertExpectedValues(picker, single);
-
-    // Should be able to use arrays
-    String[] stringColors = {"#000000"};
-    ColorPicker picker2 = new ColorPicker(stringColors, 1);
-    assertExpectedValues(picker2, single);
-    Object[] asArray = ColorPicker.DEFAULT_COLORS.toArray();
-    picker2.setItems(asArray);
-    assertExpectedValues(picker2, ColorPicker.DEFAULT_COLORS);
 
   }
 
@@ -54,7 +46,7 @@ public class ColorPickerTest extends ItemPickerTest {
     List noColors = new ArrayList();
     ColorPicker picker = new ColorPicker();
     try {
-      picker.setItems(noColors.iterator());
+      picker.setItems(noColors);
       fail("Should have thrown an IllegatStateException");
     } catch (IllegalStateException s) {
       // Expected

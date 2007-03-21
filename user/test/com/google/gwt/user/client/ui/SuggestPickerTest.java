@@ -17,6 +17,7 @@
 package com.google.gwt.user.client.ui;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class SuggestPickerTest extends ItemPickerTest {
@@ -25,11 +26,11 @@ public class SuggestPickerTest extends ItemPickerTest {
     String[] test1 = {"a", "b", "c"};
     String[] test2 = {"d"};
     String[] test3 = {"x", "y", "z", "q"};
-    picker.setItems(test1);
+    picker.setItems(Arrays.asList(test1));
     assertExpectedValues(picker, test1);
-    picker.setItems(test2);
+    picker.setItems(Arrays.asList(test2));
     assertExpectedValues(picker, test2);
-    picker.setItems(test3);
+    picker.setItems(Arrays.asList(test3));
     assertExpectedValues(picker, test3);
   }
 
@@ -39,7 +40,7 @@ public class SuggestPickerTest extends ItemPickerTest {
     List noSuggestions = new ArrayList();
     SuggestPicker picker = new SuggestPicker();
     try {
-      picker.setItems(noSuggestions.iterator());
+      picker.setItems(noSuggestions);
       fail("Should have thrown an IllegatStateException");
     } catch (IllegalStateException s) {
       // Expected
