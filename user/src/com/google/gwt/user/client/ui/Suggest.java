@@ -17,7 +17,6 @@
 package com.google.gwt.user.client.ui;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.google.gwt.user.client.ui.impl.UtilImpl;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -200,7 +199,7 @@ public class Suggest {
      *          </p>
      */
 
-    public DefaultOracle(Iterator masks) {
+    private DefaultOracle(Iterator masks) {
       // Move to UtilImpl if we need to do this more than once.
       List l = new ArrayList();
       while (masks.hasNext()) {
@@ -224,8 +223,8 @@ public class Suggest {
      * @param masks the HTML tags and other strings to ignore for the purpose of
      *          matching
      */
-    public DefaultOracle(String[] masks) {
-      setMasks(masks);
+    public DefaultOracle(Collection masks) {
+      this(masks.iterator());
     }
 
     /**
@@ -251,23 +250,15 @@ public class Suggest {
     }
 
     /**
-     * Adds all suggestions specified in the iterator.
+     * Adds all suggestions specified.
      * 
-     * @param iterator the iterator
+     * @param collection the iterator
      */
-    public void addAll(Iterator iterator) {
-      while (iterator.hasNext()) {
-        add((String) iterator.next());
+    public void addAll(Collection collection) {
+      Iterator suggestions = collection.iterator();
+      while (suggestions.hasNext()) {
+        add((String) suggestions.next());
       }
-    }
-
-    /**
-     * Adds all suggestions specified in the String[].
-     * 
-     * @param suggestions the array
-     */
-    public void addAll(String[] suggestions) {
-      addAll(UtilImpl.asIterator(suggestions));
     }
 
     public void requestSuggestions(Request request, Callback callback) {
@@ -528,7 +519,7 @@ public class Suggest {
   public abstract static class Oracle {
     private int limit = 20;
 
-    /** 
+    /**
      * Constructor for {@Oracle}.
      */
     public Oracle() {

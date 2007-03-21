@@ -357,7 +357,7 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
       private boolean pendingCancel;
 
       public void onKeyDown(Widget sender, char keyCode, int modifiers) {
-        pendingCancel = popup.delegateKeyPress(keyCode);
+        pendingCancel = popup.delegateKeyDown(keyCode);
       }
 
       public void onKeyPress(Widget sender, char keyCode, int modifiers) {

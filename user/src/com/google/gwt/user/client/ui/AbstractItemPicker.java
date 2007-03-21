@@ -151,7 +151,7 @@ abstract class AbstractItemPicker extends Composite implements ItemPicker {
     changeListeners.fireChange(this);
   }
 
-  public abstract boolean delegateKeyPress(char keyCode);
+  public abstract boolean delegateKeyDown(char keyCode);
 
   public int getItemCount() {
     return items.size();

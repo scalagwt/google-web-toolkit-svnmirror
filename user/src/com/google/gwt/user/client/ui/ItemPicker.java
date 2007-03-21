@@ -31,13 +31,14 @@ public interface ItemPicker extends SourcesChangeEvents {
 
   /**
    * Allows the {@link ItemPicker} to be controlled via keyboard input. This
-   * method should be hooked up to an appropriate {@link KeyboardListener}.
+   * method should be hooked up to an appropriate
+   * {@link KeyboardListener#onKeyDown(Widget, char, int)} method.
    * 
    * @param keyCode key code
    * @return <code>true</code> if the key code was consumed by the picker,
    *         <code>false</code> otherwise
    */
-  public boolean delegateKeyPress(char keyCode);
+  public boolean delegateKeyDown(char keyCode);
 
   /**
    * Gets the number of items.

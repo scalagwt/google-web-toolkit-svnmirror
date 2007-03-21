@@ -112,7 +112,7 @@ public class ColorPicker extends AbstractItemPicker {
     setItems(UtilImpl.asIterator(colors));
   }
 
-  public boolean delegateKeyPress(char keyCode) {
+  public boolean delegateKeyDown(char keyCode) {
     if (isAttached()) {
       switch (keyCode) {
         case KeyboardListener.KEY_DOWN:
@@ -126,6 +126,9 @@ public class ColorPicker extends AbstractItemPicker {
           break;
         case KeyboardListener.KEY_RIGHT:
           shiftSelection(1);
+          break;
+        case KeyboardListener.KEY_ENTER:
+          confirmSelection();
           break;
         default:
           // Avoid shared post processing.

@@ -38,7 +38,7 @@ public class SuggestPicker extends AbstractItemPicker {
     setStyleName(STYLENAME_DEFAULT);
   }
 
-  public boolean delegateKeyPress(char keyCode) {
+  public boolean delegateKeyDown(char keyCode) {
     if (isAttached()) {
       switch (keyCode) {
         case KeyboardListener.KEY_DOWN:
@@ -46,6 +46,9 @@ public class SuggestPicker extends AbstractItemPicker {
           return true;
         case KeyboardListener.KEY_UP:
           shiftSelection(-1);
+          return true;
+        case KeyboardListener.KEY_ENTER:
+          confirmSelection();
           return true;
       }
     }
@@ -63,7 +66,6 @@ public class SuggestPicker extends AbstractItemPicker {
    *          valid {@link String#toString()} methods.
    */
   public final void setItems(Collection suggestions) {
-    int itemCount = 0;
     setItems(suggestions.iterator());
   }
 
