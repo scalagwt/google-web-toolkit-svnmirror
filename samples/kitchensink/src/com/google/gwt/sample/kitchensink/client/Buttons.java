@@ -18,7 +18,10 @@ package com.google.gwt.sample.kitchensink.client;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.RadioButton;
+import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 /**
@@ -28,8 +31,8 @@ public class Buttons extends Sink {
 
   public static SinkInfo init() {
     return new SinkInfo("Buttons",
-      "GWT supports all the myriad types of buttons that exist in HTML.  "
-        + "Here are a few for your viewing pleasure.") {
+        "GWT supports all the myriad types of buttons that exist in HTML.  "
+            + "Here are a few for your viewing pleasure.") {
       public Sink createInstance() {
         return new Buttons();
       }
@@ -38,8 +41,13 @@ public class Buttons extends Sink {
 
   private Button disabledButton = new Button("Disabled Button");
   private CheckBox disabledCheck = new CheckBox("Disabled Check");
+  private PushButton styledPushButton = new PushButton("Styled Push Button");
+  private ToggleButton imageToggleButton = new ToggleButton(new Image(
+      "images/imageButton.gif"), new Image("images/imageButtonDown.gif"));
+  private ToggleButton disabledToggleButton = new ToggleButton("up");
   private Button normalButton = new Button("Normal Button");
   private CheckBox normalCheck = new CheckBox("Normal Check");
+
   private VerticalPanel panel = new VerticalPanel();
   private RadioButton radio0 = new RadioButton("group0", "Choice 0");
   private RadioButton radio1 = new RadioButton("group0", "Choice 1");
@@ -56,6 +64,12 @@ public class Buttons extends Sink {
 
     panel.add(hp = new HorizontalPanel());
     hp.setSpacing(8);
+    hp.add(imageToggleButton);
+    hp.add(styledPushButton);
+    hp.add(disabledToggleButton);
+
+    panel.add(hp = new HorizontalPanel());
+    hp.setSpacing(8);
     hp.add(normalCheck);
     hp.add(disabledCheck);
 
@@ -66,9 +80,15 @@ public class Buttons extends Sink {
     hp.add(radio2);
     hp.add(radio3);
 
+    // Disable some buttons.
+    radio2.setEnabled(false);
     disabledButton.setEnabled(false);
     disabledCheck.setEnabled(false);
-    radio2.setEnabled(false);
+
+    // Set disabled toggle button style.
+    disabledToggleButton.getDownFace().setHTML("<b>d</b>isabled <b>d</b>own");
+    disabledToggleButton.setDown(true);
+    disabledToggleButton.setEnabled(false);
 
     panel.setSpacing(8);
     initWidget(panel);

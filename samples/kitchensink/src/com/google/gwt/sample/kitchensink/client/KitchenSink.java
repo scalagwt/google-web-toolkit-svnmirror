@@ -20,8 +20,8 @@ import com.google.gwt.sample.kitchensink.client.Sink.SinkInfo;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.HistoryListener;
 import com.google.gwt.user.client.ui.DockPanel;
-import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
@@ -139,6 +139,7 @@ public class KitchenSink implements EntryPoint, HistoryListener {
     list.addSink(Trees.init());
     list.addSink(Frames.init());
     list.addSink(Tabs.init());
+    list.addSink(ItemPickers.init());
   }
 
   private void showInfo() {
