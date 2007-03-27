@@ -136,7 +136,7 @@ abstract class AbstractItemPicker extends Composite implements ItemPicker {
 
   public void commitSelection() {
     if (selectedItem == null) {
-      throw new RuntimeException("No element is selected");
+      throw new IllegalStateException("No element is selected");
     }
     changeListeners.fireChange(this);
   }
