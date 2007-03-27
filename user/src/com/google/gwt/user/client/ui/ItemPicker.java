@@ -20,14 +20,15 @@ import java.util.Collection;
 
 /**
  * Represents a pickable list of items. Each {@link ItemPicker} should be able
- * to response to mouse and keyboard events.
+ * to respond to mouse and keyboard events.
  * 
  */
 public interface ItemPicker extends SourcesChangeEvents {
+  
   /**
-   * Confirms the current selection. Any relevant change listeners are fired.
+   * Commits the current selection. Any relevant change listeners are fired.
    */
-  public void confirmSelection();
+  public void commitSelection();
 
   /**
    * Allows the {@link ItemPicker} to be controlled via keyboard input. This
@@ -82,8 +83,7 @@ public interface ItemPicker extends SourcesChangeEvents {
 
   /**
    * Sets the items to be displayed. The expected type of each item should be
-   * clearly documented in each class which implements this interface.Both
-   * <code>setItems</code> implementations should be functionally equivalent.
+   * clearly documented in each class which implements this interface.  
    * 
    * @param items items to be displayed
    */

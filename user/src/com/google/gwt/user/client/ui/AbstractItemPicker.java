@@ -37,9 +37,6 @@ abstract class AbstractItemPicker extends Composite implements ItemPicker {
    * Selectable item.
    */
   class Item extends HTML {
-
-    private Object value;
-
     private int index;
 
     /**
@@ -82,26 +79,19 @@ abstract class AbstractItemPicker extends Composite implements ItemPicker {
       // Unlike buttons, a item picker is selected as soon as the mouse down is
       // fired.
       Item item = (Item) sender;
-      item.getOwner().confirmSelection();
+      item.getOwner().commitSelection();
     }
 
     public void onMouseEnter(Widget sender) {
       Item item = (Item) sender;
       item.getOwner().setSelection(item);
     }
-  };
-  private static final ClickListener itemClickListener = new ClickListener() {
-    public void onClick(Widget sender) {
-      Item item = (Item) sender;
-      item.getOwner().clickListeners.fireClick(item);
-    }
-  };
+  }; 
 
   private static final String STYLENAME_SELECTED_ITEM = "selected";
   private static final String STYLENAME_ITEM = "item";
 
-  private ChangeListenerCollection changeListeners = new ChangeListenerCollection();
-  private ClickListenerCollection clickListeners = new ClickListenerCollection();
+  private ChangeListenerCollection changeListeners = new ChangeListenerCollection(); 
   private Item selectedItem;
   private final String selectedStyleName;
   private final String itemStyleName;
@@ -144,7 +134,7 @@ abstract class AbstractItemPicker extends Composite implements ItemPicker {
     changeListeners.add(listener);
   }
 
-  public void confirmSelection() {
+  public void commitSelection() {
     if (selectedItem == null) {
       throw new RuntimeException("No element is selected");
     }
@@ -233,7 +223,7 @@ abstract class AbstractItemPicker extends Composite implements ItemPicker {
   /**
    * Gets the currently selected item.
    * 
-   * @return selected item.
+   * @return selected item
    */
   Item getSelectedItem() {
     return selectedItem;
@@ -267,7 +257,7 @@ abstract class AbstractItemPicker extends Composite implements ItemPicker {
    * Shifts the current selection by the given amount, unless that would make
    * the selection invalid.
    * 
-   * @param shift the amount to shift the current selection by.
+   * @param shift the amount to shift the current selection by
    */
   void shiftSelection(int shift) {
     int newIndex = getSelectedIndex() + shift;

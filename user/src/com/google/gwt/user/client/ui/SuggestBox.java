@@ -371,7 +371,7 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
             // onKeyDown/onKeyUps's keyCode for ',' comes back '1/4', so unlike
             // navigation, we use key press events to determine when the user
             // wants to simulate clicking on the popup.
-            popup.confirmSelection();
+            popup.commitSelection();
 
             // The separator will be added after the popup is activated, so the
             // popup will have already added a new separator. Therefore, the

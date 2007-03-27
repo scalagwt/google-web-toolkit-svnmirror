@@ -48,7 +48,7 @@ public class SuggestPicker extends AbstractItemPicker {
           shiftSelection(-1);
           return true;
         case KeyboardListener.KEY_ENTER:
-          confirmSelection();
+          commitSelection();
           return true;
       }
     }

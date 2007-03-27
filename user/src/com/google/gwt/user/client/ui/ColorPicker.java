@@ -18,7 +18,6 @@ package com.google.gwt.user.client.ui;
 
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
-import com.google.gwt.user.client.ui.impl.UtilImpl;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -81,35 +80,22 @@ public class ColorPicker extends AbstractItemPicker {
    * @param numColumns number of columns to be displayed
    */
   public ColorPicker(int numColumns) {
-    this(DEFAULT_COLORS.iterator(), numColumns);
+    this(DEFAULT_COLORS, numColumns);
   }
 
   /**
    * 
-   * Constructor for {@link ColorPicker}.
+   * Constructor for {@link ColorPicker}. The passed in {@link Collection}
+   * should contain objects such that the {@link String#toString()} method
+   * returns a representation of a CSS color.
    * 
-   * @param colors color iterator. Each color's {@link String#toString()} method
-   *          should return a representation of a CSS color.
+   * @param colors color collection
    * @param numColumns number of columns to be displayed
    */
-  public ColorPicker(Iterator colors, int numColumns) {
+  public ColorPicker(Collection colors, int numColumns) {
     this.setColumnsPerRow(numColumns);
     setStyleName(STYLENAME_DEFAULT);
     setItems(colors);
-  }
-
-  /**
-   * 
-   * Constructor for {@link ColorPicker}.
-   * 
-   * @param colors colors. Each color's {@link String#toString()} method should
-   *          return a representation of a CSS color.
-   * @param numColumns number of columns to be displayed
-   */
-  public ColorPicker(String[] colors, int numColumns) {
-    this.setColumnsPerRow(numColumns);
-    setStyleName(STYLENAME_DEFAULT);
-    setItems(UtilImpl.asIterator(colors));
   }
 
   public boolean delegateKeyDown(char keyCode) {
@@ -128,7 +114,7 @@ public class ColorPicker extends AbstractItemPicker {
           shiftSelection(1);
           break;
         case KeyboardListener.KEY_ENTER:
-          confirmSelection();
+          commitSelection();
           break;
         default:
           // Avoid shared post processing.
@@ -172,10 +158,10 @@ public class ColorPicker extends AbstractItemPicker {
   }
 
   /**
-   * Sets the items in the {@link ColorPicker}.
-   * 
-   * @param colors iterator of colors. Each color's {@link String#toString()}
+   * Sets the items in the {@link ColorPicker}. Each color's {@link String#toString()}
    *          method should return a representation of a CSS color.
+   * 
+   * @param colors collection of colors.
    */
   public final void setItems(Collection colors) {
     setItems(colors.iterator());
@@ -187,9 +173,6 @@ public class ColorPicker extends AbstractItemPicker {
 
   /**
    * Sets the items in the {@link ColorPicker}.
-   * 
-   * @param colors iterator of colors. Each color's {@link String#toString()}
-   *          method should return a representation of a CSS color.
    */
   private final void setItems(Iterator colors) {
     clearItems();
