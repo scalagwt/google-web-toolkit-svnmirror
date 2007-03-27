@@ -20,7 +20,7 @@ import java.util.Collection;
 import java.util.Iterator;
 
 /**
- * Suggestion picker. Each "Item" represents a suggestion.
+ * Suggestion picker. Each "item" represents a suggestion.
  */
 public class SuggestPicker extends AbstractItemPicker {
 
@@ -32,7 +32,7 @@ public class SuggestPicker extends AbstractItemPicker {
   private int startInvisible = Integer.MAX_VALUE;
 
   /**
-   * Constructor for <code>SuggestPopup</code>.
+   * Constructor for <code>SuggestPicker</code>.
    */
   public SuggestPicker() {
     setStyleName(STYLENAME_DEFAULT);
@@ -56,14 +56,18 @@ public class SuggestPicker extends AbstractItemPicker {
   }
 
   public int getItemCount() {
-    return startInvisible;
+    if (startInvisible == Integer.MAX_VALUE) {
+      return 0;
+    } else {
+      return startInvisible;
+    }
   }
 
   /**
    * Sets the suggestions associated with this picker.
    * 
-   * @param suggestions suggestions for this picker. The suggestions must have
-   *          valid {@link String#toString()} methods.
+   * @param suggestions suggestions for this picker; the suggestions must have
+   *          valid {@link String#toString()} methods
    */
   public final void setItems(Collection suggestions) {
     setItems(suggestions.iterator());
@@ -95,8 +99,6 @@ public class SuggestPicker extends AbstractItemPicker {
   /**
    * Sets the suggestions associated with this picker.
    * 
-   * @param suggestions suggestions for this picker. The suggestions must have
-   *          valid {@link String#toString()} methods.
    */
   private final void setItems(Iterator suggestions) {
     int itemCount = 0;
