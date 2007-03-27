@@ -16,55 +16,56 @@
 
 package com.google.gwt.user.client.ui.impl;
 
-import com.google.gwt.user.client.ui.ChangeListener;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.ClippedImage;
+import com.google.gwt.user.client.ui.FocusListenerAdapter;
 import com.google.gwt.user.client.ui.ItemPicker;
+import com.google.gwt.user.client.ui.KeyboardListener;
 import com.google.gwt.user.client.ui.KeyboardListenerAdapter;
 import com.google.gwt.user.client.ui.PopupListener;
 import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.SourcesChangeEvents;
 import com.google.gwt.user.client.ui.SuggestPicker;
 import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * {@link ItemPickerButtonImpl} A button with a drop down list of pickable
- * items.
+ * {@link ItemPickerButtonImpl} A button with a drop down {@link ItemPicker}.
+ * Used by {@link com.google.gwt.user.client.ui.richtext.RichTextEditor}.
  */
-public class ItemPickerButtonImpl extends ToggleButton implements
-    SourcesChangeEvents {
-
-  /**
-   * Key press.
-   */
-  private class KeyPressListener extends KeyboardListenerAdapter {
-    public void onKeyDown(Widget sender, char keyCode, int modifiers) {
-      delegateKeyPress(keyCode);
-    }
-  }
+public class ItemPickerButtonImpl extends ToggleButton {
 
   private ItemPickerDropDownImpl popup;
 
   {
     // Adds a keyboard listener.
-    addKeyboardListener(new KeyPressListener());
+    addKeyboardListener(new KeyboardListenerAdapter() {
+      public void onKeyDown(Widget sender, char keyCode, int modifiers) {
+        handleKeyDown(keyCode);
+      }
+
+    });
 
     // Toggles menu based on button click.
     addClickListener(new ClickListener() {
       public void onClick(Widget sender) {
         if (isDown()) {
-          showPopup();
+          showItemPicker();
         } else {
           popup.hide();
         }
+      }
+    });
+
+    addFocusListener(new FocusListenerAdapter() {
+      public void onLostFocus(Widget sender) {
+        popup.hide();
       }
     });
   }
 
   /**
    * 
-   * Constructor for <code>DropDownButton</code>. Creates a
+   * Constructor for {@link ItemPickerButtonImpl}. Creates a
    * {@link SuggestPicker} for use with this button.
    */
   public ItemPickerButtonImpl() {
@@ -73,7 +74,7 @@ public class ItemPickerButtonImpl extends ToggleButton implements
 
   /**
    * 
-   * Constructor for <code>SelectablePopupButton</code>.
+   * Constructor for {@link ItemPickerButtonImpl}.
    * 
    * @param upImage up image for button
    * @param downImage down image for button
@@ -87,7 +88,7 @@ public class ItemPickerButtonImpl extends ToggleButton implements
 
   /**
    * 
-   * Constructor for <code>ItemPickerButtonImpl</code>.
+   * Constructor for {@link ItemPickerButtonImpl}.
    * 
    * @param picker item picker
    */
@@ -97,7 +98,7 @@ public class ItemPickerButtonImpl extends ToggleButton implements
 
   /**
    * 
-   * Constructor for <code>ItemPickerButtonImpl</code>.
+   * Constructor for {@link ItemPickerButtonImpl}.
    * 
    * @param upText the text for the default (up) face of the button.
    * @param picker item picker
@@ -107,46 +108,38 @@ public class ItemPickerButtonImpl extends ToggleButton implements
     setPicker(picker);
   }
 
-  public void addChangeListener(ChangeListener listener) {
-    popup.addChangeListener(listener);
-  }
-
   /**
    * Gets the current item picker.
    * 
    * @return item picker
    */
   public ItemPicker getItemPicker() {
-    return popup.getPicker();
-  }
-
-  public void removeChangeListener(ChangeListener listener) {
-    popup.removeChangeListener(listener);
+    return popup;
   }
 
   /**
    * Shows the popup.
    */
-  public void showPopup() {
+  protected void showItemPicker() {
     setDown(true);
     popup.show();
-  };
-
-  void delegateKeyPress(char keyCode) {
-    if (popup.isAttached() == false) {
-      showPopup();
-    }
-    popup.delegateKeyDown(keyCode);
   }
 
   ItemPickerDropDownImpl getPopup() {
     return popup;
+  };
+
+    void handleKeyDown(char keyCode) {
+    if (keyCode != KeyboardListener.KEY_TAB && popup.isAttached() == false) {
+      showItemPicker();
+    }
+    popup.delegateKeyDown(keyCode);
   }
 
   private void setPicker(final ItemPicker picker) {
     if (picker == null) {
       throw new IllegalArgumentException(
-          "A Selectable popup button may not have a null popup");
+          "An ItemPickerButtonImpl may not have a null popup");
     }
     this.popup = new ItemPickerDropDownImpl(this, picker);
     popup.addPopupListener(new PopupListener() {

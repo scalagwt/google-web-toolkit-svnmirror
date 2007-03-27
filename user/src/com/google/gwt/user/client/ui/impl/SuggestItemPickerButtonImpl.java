@@ -26,7 +26,6 @@ import com.google.gwt.user.client.ui.Suggest.Oracle;
 import com.google.gwt.user.client.ui.Suggest.Request;
 import com.google.gwt.user.client.ui.Suggest.Response;
 
-import java.util.Arrays;
 import java.util.Collection;
 
 /**
@@ -75,14 +74,14 @@ public class SuggestItemPickerButtonImpl extends ItemPickerButtonImpl implements
   }
 
   /**
-   * Default Constructor for <code>SuggestDropDownButton</code>.
+   * Default Constructor.
    */
   public SuggestItemPickerButtonImpl() {
     this.oracle = new Suggest.DefaultOracle();
   }
 
   /**
-   * Constructor for <code>SuggestDropDownButton</code>.
+   * Constructor for {@link SuggestItemPickerButtonImpl}.
    * 
    * @param upText text for up image
    * @param oracle suggestion oracle
@@ -105,6 +104,9 @@ public class SuggestItemPickerButtonImpl extends ItemPickerButtonImpl implements
     this.oracle = oracle;
   }
 
+  /**
+   * Gets the suggest oracle.
+   */
   public Oracle getSuggestOracle() {
     return oracle;
   }
@@ -120,28 +122,23 @@ public class SuggestItemPickerButtonImpl extends ItemPickerButtonImpl implements
   }
 
   /**
-   * Sets the default items to show when there are no valid suggestions.
-   * 
-   * @param defaultSuggestions default suggestions
-   * 
-   */
-  public void setDefaultSuggestions(String[] defaultSuggestions) {
-    this.defaultSuggestions = Arrays.asList(defaultSuggestions);
-  }
-
-  /**
    * Shows the popup.
    */
-  public void showPopup() {
+  protected void showItemPicker() {
     Request request = new Request(accum.toString());
     oracle.requestSuggestions(request, callBack);
   }
 
-  void delegateKeyPress(char keyCode) {
-    boolean navigate = getPopup().delegateKeyDown(keyCode);
-    if (navigate) {
+  /**
+   * Delegates key down.
+   */
+  void handleKeyDown(char keyCode) {
+    // Check to see if popup uses key down.
+    if (getPopup().delegateKeyDown(keyCode)) {
       return;
     }
+
+    // Adjust accum.
     if (Character.isLetterOrDigit(keyCode)) {
       accum.append(keyCode);
     } else if (keyCode == KeyboardListener.KEY_BACKSPACE) {
@@ -149,7 +146,9 @@ public class SuggestItemPickerButtonImpl extends ItemPickerButtonImpl implements
     } else {
       accum.setLength(0);
     }
-    showPopup();
+    if (keyCode != KeyboardListener.KEY_TAB) {
+      showItemPicker();
+    }
   }
 
 }

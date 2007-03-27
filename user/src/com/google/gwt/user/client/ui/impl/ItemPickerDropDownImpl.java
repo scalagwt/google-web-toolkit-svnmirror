@@ -28,7 +28,7 @@ import com.google.gwt.user.client.ui.Widget;
 import java.util.Collection;
 
 /**
- * Shared {@link ItemPicker} wrapper class for
+ * Shared {@link ItemPicker} decorator class for
  * {@link com.google.gwt.user.client.ui.SuggestBox},
  * {@link com.google.gwt.user.client.ui.impl.ItemPickerButtonImpl}, and
  * {@link com.google.gwt.user.client.ui.richtext.RichTextEditor} spell checking
@@ -42,7 +42,6 @@ import java.util.Collection;
 public class ItemPickerDropDownImpl extends PopupPanel implements ItemPicker {
   private final ItemPicker picker;
   private final HasFocus owner;
-  private boolean justChanged;
 
   public ItemPickerDropDownImpl(final HasFocus owner, ItemPicker picker) {
     super(true);
@@ -61,8 +60,8 @@ public class ItemPickerDropDownImpl extends PopupPanel implements ItemPicker {
     picker.addChangeListener(listener);
   }
 
-  public void confirmSelection() {
-    picker.confirmSelection();
+  public void commitSelection() {
+    picker.commitSelection();
   }
 
   public boolean delegateKeyDown(char keyCode) {
@@ -72,7 +71,6 @@ public class ItemPickerDropDownImpl extends PopupPanel implements ItemPicker {
           hide();
           return true;
         default:
-          // Avoid shared post processing.
           return picker.delegateKeyDown(keyCode);
       }
     }
@@ -81,10 +79,6 @@ public class ItemPickerDropDownImpl extends PopupPanel implements ItemPicker {
 
   public int getItemCount() {
     return picker.getItemCount();
-  }
-
-  public ItemPicker getPicker() {
-    return picker;
   }
 
   public int getSelectedIndex() {
@@ -127,16 +121,21 @@ public class ItemPickerDropDownImpl extends PopupPanel implements ItemPicker {
    * position may be adjusted.
    * 
    * @param showBelow the <code>UIObject</code> beneath which the popup should
-   *          be shown.
+   *          be shown
    */
   public void showBelow(UIObject showBelow) {
+    // A drop down with 0 items should never show itself.
     if (picker.getItemCount() == 0) {
-      // A drop down with 0 items should never show itself.
       hide();
       return;
     }
+
+    // Initialize the picker to the first element.
     picker.setSelectedIndex(0);
-    // Show must be called first, as otherwise getOffsetWidth is not correct.
+
+    // Show must be called first, as otherwise getOffsetWidth is not correct. As
+    // the adjustment is very fast, the user experience is not effected by this
+    // call.
     super.show();
 
     // Calculate left.
@@ -150,7 +149,8 @@ public class ItemPickerDropDownImpl extends PopupPanel implements ItemPicker {
     int windowBottom = Window.getScrollTop() + Window.getClientHeight();
     int overshootTop = Math.max(0, (top + getOffsetHeight()) - windowBottom);
     top = top - overshootTop;
-    // set the popup position.
+
+    // Set the popup position.
     setPopupPosition(left, top);
     super.show();
   }
