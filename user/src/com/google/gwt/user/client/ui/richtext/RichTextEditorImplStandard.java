@@ -45,7 +45,6 @@ import com.google.gwt.user.client.ui.richtext.RichTextArea.FontSize;
 import com.google.gwt.user.client.ui.richtext.RichTextArea.Justification;
 import com.google.gwt.user.client.ui.richtext.RichTextEditor.ButtonFaces;
 import com.google.gwt.user.client.ui.richtext.RichTextEditor.LabelProvider;
-import com.google.gwt.user.client.ui.richtext.SpellCheck.Oracle;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -69,6 +68,16 @@ class RichTextEditorImplStandard extends RichTextEditorImpl {
      * 
      */
     interface Images extends ImageBundle {
+
+      /**
+       * @gwt.resource com/google/gwt/user/client/ui/richtext/background-color-button-depressed-small.gif
+       */
+      public abstract ClippedImage backgroundColorDown();
+
+      /**
+       * @gwt.resource com/google/gwt/user/client/ui/richtext/background-color-button-small.gif
+       */
+      public abstract ClippedImage backgroundColorUp();
 
       /**
        * @gwt.resource com/google/gwt/user/client/ui/richtext/style-button-depressed-small.gif
@@ -234,8 +243,7 @@ class RichTextEditorImplStandard extends RichTextEditorImpl {
     private Images images = (Images) GWT.create(Images.class);
 
     public void backgroundColor(CustomButton button) {
-      button.getUpFace().setImage(images.colorUp());
-      button.getDownFace().setImage(images.colorDown());
+      button.getUpFace().setHTML("Background color");
     }
 
     public void blockStyle(CustomButton button) {
@@ -269,8 +277,7 @@ class RichTextEditorImplStandard extends RichTextEditorImpl {
     }
 
     public void insertHRule(CustomButton button) {
-      button.getUpFace().setImage(images.insertHRuleUp());
-      button.getDownFace().setImage(images.insertHRuleDown());
+      button.getUpFace().setText("Line");
     }
 
     public void italics(CustomButton button) {
@@ -458,8 +465,8 @@ class RichTextEditorImplStandard extends RichTextEditorImpl {
         String fullHTML = beginHTML + labels.get(i) + endHTML;
         formattedLabels.add(fullHTML);
       }
-      Suggest.DefaultOracle oracle = new Suggest.DefaultOracle(masks.iterator());
-      oracle.addAll(formattedLabels.iterator());
+      Suggest.DefaultOracle oracle = new Suggest.DefaultOracle(masks);
+      oracle.addAll(formattedLabels);
       SuggestItemPickerButtonImpl button = new SuggestItemPickerButtonImpl(
           oracle);
 
@@ -596,8 +603,6 @@ class RichTextEditorImplStandard extends RichTextEditorImpl {
 
   private int numButtonsPerRow = 20;
 
-  private SpellCheckControl spellCheckControl;
-
   private ButtonFaces buttonFaces;
 
   private LabelProvider labelProvider;
@@ -609,10 +614,6 @@ class RichTextEditorImplStandard extends RichTextEditorImpl {
   // Using FlexTable for layout as HorizontalPanel had a weird alignment bug,
   // spelling would not align correctly.
   private FlexTable layout;
-
-  public Oracle getSpellCheckOracle() {
-    return this.spellCheckControl.spellCheck.getSpellCheckOracle();
-  }
 
   public void setNumberOfButtonsPerRow(int numberOfButtons) {
     this.numButtonsPerRow = numberOfButtons;
@@ -660,9 +661,6 @@ class RichTextEditorImplStandard extends RichTextEditorImpl {
     root.add(layout);
     createFormattingButtons();
 
-    spellCheckControl = new SpellCheckControl();
-    spellCheckControl.setup();
-
     layout.getCellFormatter().setHorizontalAlignment(0, 1,
         HasHorizontalAlignment.ALIGN_RIGHT);
   }
@@ -671,20 +669,12 @@ class RichTextEditorImplStandard extends RichTextEditorImpl {
     return labelProvider;
   }
 
-  SpellCheck getSpellCheck() {
-    return spellCheckControl.getSpellCheck();
-  }
-
   void setButtonProvider(ButtonFaces buttonProvider) {
     this.buttonFaces = buttonProvider;
   }
 
   void setLabels(LabelProvider labelProvider) {
     this.labelProvider = labelProvider;
-  }
-
-  void setSpellCheckModel(Oracle spellCheckModel) {
-    spellCheckControl.getSpellCheck().setOracle(spellCheckModel);
   }
 
   void updateImages() {

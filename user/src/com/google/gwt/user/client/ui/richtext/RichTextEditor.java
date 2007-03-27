@@ -16,16 +16,14 @@
 package com.google.gwt.user.client.ui.richtext;
 
 import com.google.gwt.core.client.GWT;
-
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.CustomButton;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.richtext.SpellCheck.Oracle;
 
 /**
  * A simple rich text editor.
  */
-public class RichTextEditor extends Composite implements SpellCheck.HasOracle {
+public class RichTextEditor extends Composite {
 
   /**
    * Provides buttons for use in the tool bar.
@@ -697,19 +695,6 @@ public class RichTextEditor extends Composite implements SpellCheck.HasOracle {
    */
   public RichTextArea getRichTextArea() {
     return richTextArea;
-  }
-
-  public Oracle getSpellCheckOracle() {
-    return impl.getSpellCheckOracle();
-  }
-
-  /**
-   * Sets the spell check model.
-   * 
-   * @param spellCheckOracle {@link Oracle} to use
-   */
-  public void setSpellCheckOracle(Oracle spellCheckOracle) {
-    impl.setSpellCheckModel(spellCheckOracle);
   }
 
   protected void onAttach() {
