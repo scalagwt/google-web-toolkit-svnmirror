@@ -146,9 +146,12 @@ public abstract class CustomButton extends ButtonBase implements
      * 
      */
     public void setHTML(String html) {
-      face = DOM.createDiv();
+      if (face == null) {
+        face = DOM.createDiv();
+        UIObject.setStyleName(face, STYLENAME_HTML_FACE, true);
+      }
       DOM.setInnerHTML(face, html);
-      UIObject.setStyleName(face, STYLENAME_HTML_FACE, true);
+
     }
 
     /**
@@ -157,9 +160,7 @@ public abstract class CustomButton extends ButtonBase implements
      * @param image image to set as face contents
      */
     public final void setImage(AbstractImage image) {
-      // Cloning face in order to suppress extra click events.
       face = image.getElement();
-      DOM.sinkEvents(face, 0);
     }
 
     /**
@@ -168,9 +169,12 @@ public abstract class CustomButton extends ButtonBase implements
      * @param text text to set as face's contents
      */
     public final void setText(String text) {
-      face = DOM.createDiv();
+      if (face == null) {
+        face = DOM.createDiv();
+        UIObject.setStyleName(face, STYLENAME_HTML_FACE, true);
+      }
       DOM.setInnerText(face, text);
-      UIObject.setStyleName(face, STYLENAME_HTML_FACE, true);
+
     }
 
     public final String toString() {
