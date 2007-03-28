@@ -44,29 +44,13 @@
 
 	<!-- IE-specific implementation -->
 	<replace-with
-		class="com.google.gwt.user.client.ui.richtext.RichTextEditorImplStandard">
+		class="com.google.gwt.user.client.ui.impl.RichTextEditorImplStandard">
 		<when-type-is
-			class="com.google.gwt.user.client.ui.richtext.RichTextEditorImpl" />
-		<when-property-is name="user.agent" value="ie6" />
-	</replace-with>
-
-	<!-- Safari-specific implementation -->
-	<replace-with
-		class="com.google.gwt.user.client.ui.richtext.RichTextEditorImplSafari">
-		<when-type-is
-			class="com.google.gwt.user.client.ui.richtext.RichTextEditorImpl" />
-		<when-property-is name="user.agent" value="safari" />
-	</replace-with>
-
-	<!-- Mozilla-specific implementation -->
-	<replace-with
-		class="com.google.gwt.user.client.ui.richtext.RichTextEditorImplStandard">
-		<when-type-is
-			class="com.google.gwt.user.client.ui.richtext.RichTextEditorImpl" />
+			class="com.google.gwt.user.client.ui.impl.RichTextEditorImpl" />
 		<any>
 			<when-property-is name="user.agent" value="gecko1_8" />
 			<when-property-is name="user.agent" value="gecko" />
+			<when-property-is name="user.agent" value="ie6" />
 		</any>
 	</replace-with>
-
 </module>
