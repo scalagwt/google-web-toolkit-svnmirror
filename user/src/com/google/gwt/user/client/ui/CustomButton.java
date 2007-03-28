@@ -104,7 +104,7 @@ public abstract class CustomButton extends ButtonBase implements
    * Represents a button's face. Each face is associated with its own style
    * modifier and, optionally, its own contents html, text, or image.
    */
-  public abstract static class Face implements HasHTML, HasText {
+  public abstract class Face implements HasHTML, HasText {
     private static final String STYLENAME_HTML_FACE = "html-face";
     private final Face delegateTo;
     private Element face;
@@ -146,12 +146,10 @@ public abstract class CustomButton extends ButtonBase implements
      * 
      */
     public void setHTML(String html) {
-      if (face == null) {
-        face = DOM.createDiv();
-        UIObject.setStyleName(face, STYLENAME_HTML_FACE, true);
-      }
+      face = DOM.createDiv();
+      UIObject.setStyleName(face, STYLENAME_HTML_FACE, true);
       DOM.setInnerHTML(face, html);
-
+      updateButtonFace();
     }
 
     /**
@@ -161,6 +159,7 @@ public abstract class CustomButton extends ButtonBase implements
      */
     public final void setImage(AbstractImage image) {
       face = image.getElement();
+      updateButtonFace();
     }
 
     /**
@@ -169,12 +168,10 @@ public abstract class CustomButton extends ButtonBase implements
      * @param text text to set as face's contents
      */
     public final void setText(String text) {
-      if (face == null) {
-        face = DOM.createDiv();
-        UIObject.setStyleName(face, STYLENAME_HTML_FACE, true);
-      }
+      face = DOM.createDiv();
+      UIObject.setStyleName(face, STYLENAME_HTML_FACE, true);
       DOM.setInnerText(face, text);
-
+      updateButtonFace();
     }
 
     public final String toString() {
@@ -211,6 +208,12 @@ public abstract class CustomButton extends ButtonBase implements
         }
       } else {
         return face;
+      }
+    }
+
+    private void updateButtonFace() {
+      if (curFace != null && curFace.getFace() == this.getFace()) {
+        setCurrentFaceElement(face);
       }
     }
   }
@@ -664,14 +667,7 @@ public abstract class CustomButton extends ButtonBase implements
         super.removeStyleName(getCSSStyleName());
       }
       curFace = newFace;
-      Element newFaceElement = newFace.getFace();
-      if (curFaceElement != newFaceElement) {
-        if (curFaceElement != null) {
-          DOM.removeChild(getElement(), curFaceElement);
-        }
-        curFaceElement = newFaceElement;
-        DOM.appendChild(getElement(), curFaceElement);
-      }
+      setCurrentFaceElement(newFace.getFace());
       super.addStyleName(getCSSStyleName());
     }
   }
@@ -744,6 +740,16 @@ public abstract class CustomButton extends ButtonBase implements
   private void setCurrentFace(int faceID) {
     Face newFace = getFaceFromID(faceID);
     setCurrentFace(newFace);
+  }
+
+  private void setCurrentFaceElement(Element newFaceElement) {
+    if (curFaceElement != newFaceElement) {
+      if (curFaceElement != null) {
+        DOM.removeChild(getElement(), curFaceElement);
+      }
+      curFaceElement = newFaceElement;
+      DOM.appendChild(getElement(), curFaceElement);
+    }
   }
 
   /**
