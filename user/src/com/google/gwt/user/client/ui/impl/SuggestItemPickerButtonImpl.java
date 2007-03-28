@@ -133,10 +133,6 @@ public class SuggestItemPickerButtonImpl extends ItemPickerButtonImpl implements
    * Delegates key down.
    */
   void handleKeyDown(char keyCode) {
-    // Check to see if popup uses key down.
-    if (getPopup().delegateKeyDown(keyCode)) {
-      return;
-    }
 
     // Adjust accum.
     if (Character.isLetterOrDigit(keyCode)) {
