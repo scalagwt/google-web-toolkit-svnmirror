@@ -46,7 +46,7 @@ public class PushButton extends CustomButton {
    * @param upImage image for the default(up) face of the button
    */
   public PushButton(AbstractImage upImage) {
-    this();
+    super(upImage);
   }
 
   /**
@@ -125,12 +125,18 @@ public class PushButton extends CustomButton {
     }
     int type = DOM.eventGetType(event);
     switch (type) {
-
       case Event.ONMOUSEDOWN:
         waitingForMouseUp = true;
         setDown(true);
         break;
+      case Event.ONCLICK:
+        // Must synthesize click events because when we have two separate face
+        // elements for up/down, no click events are generated.
+        return;
       case Event.ONMOUSEUP:
+        if (waitingForMouseUp) {
+          fireClickListeners();
+        }
         waitingForMouseUp = false;
         setDown(false);
         break;
