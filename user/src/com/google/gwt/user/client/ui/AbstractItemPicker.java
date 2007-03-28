@@ -18,6 +18,7 @@ package com.google.gwt.user.client.ui;
 
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
+import com.google.gwt.user.client.Event;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,7 +37,7 @@ abstract class AbstractItemPicker extends Composite implements ItemPicker {
   /**
    * Selectable item.
    */
-  class Item extends HTML {
+  class Item extends Widget {
     private int index;
 
     /**
@@ -46,10 +47,22 @@ abstract class AbstractItemPicker extends Composite implements ItemPicker {
      * @param index index associated with item
      */
     Item(int index) {
+      setElement(DOM.createDiv());
+      sinkEvents(Event.ONMOUSEDOWN | Event.ONMOUSEOVER);
       this.index = index;
       this.setStyleName(itemStyleName);
-      this.addMouseListener(itemMouseListener);
       items.add(index, this);
+    }
+
+    public void onBrowserEvent(Event event) {
+      switch (DOM.eventGetType(event)) {
+        case Event.ONMOUSEOVER:
+          setSelection(this);
+          break;
+        case Event.ONMOUSEDOWN:
+          commitSelection();
+          break;
+      }
     }
 
     public String toString() {
@@ -70,36 +83,14 @@ abstract class AbstractItemPicker extends Composite implements ItemPicker {
     }
   }
 
-  /**
-   * Each item is given this mouse listener in order to allow the mouse to
-   * highlight each item in turn.
-   */
-  private static final MouseListener itemMouseListener = new MouseListenerAdapter() {
-    public void onMouseDown(Widget sender, int x, int y) {
-      // Unlike buttons, a item picker is selected as soon as the mouse down is
-      // fired.
-      Item item = (Item) sender;
-      item.getOwner().commitSelection();
-    }
-
-    public void onMouseEnter(Widget sender) {
-      Item item = (Item) sender;
-      item.getOwner().setSelection(item);
-    }
-  }; 
-
   private static final String STYLENAME_SELECTED_ITEM = "selected";
   private static final String STYLENAME_ITEM = "item";
 
-  private ChangeListenerCollection changeListeners = new ChangeListenerCollection(); 
+  private ChangeListenerCollection changeListeners = new ChangeListenerCollection();
   private Item selectedItem;
   private final String selectedStyleName;
   private final String itemStyleName;
   private final ArrayList items;
-
-  {
-    initWidget(new FlexTable());
-  }
 
   /**
    * Constructor for <code>ItemPicker</code>. Provides "item" as the default
@@ -117,6 +108,7 @@ abstract class AbstractItemPicker extends Composite implements ItemPicker {
    * @param selectedItemStyleName CSS style name for the currently selected item
    */
   public AbstractItemPicker(String itemStyleName, String selectedItemStyleName) {
+    initWidget(new FlexTable());
     this.selectedStyleName = selectedItemStyleName;
     this.itemStyleName = itemStyleName;
 
