@@ -30,8 +30,8 @@ import com.google.gwt.user.client.ui.MouseListenerCollection;
 import com.google.gwt.user.client.ui.SourcesChangeEvents;
 import com.google.gwt.user.client.ui.SourcesKeyboardEvents;
 import com.google.gwt.user.client.ui.SourcesMouseEvents;
-import com.google.gwt.user.client.ui.impl.UtilImpl;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -111,7 +111,6 @@ public class RichTextArea extends FocusWidget implements HasHTML,
       return tag;
     }
   }
-
   
   /**
    * Font size enumeration. Represents the numbers one through seven with one
@@ -260,7 +259,7 @@ public class RichTextArea extends FocusWidget implements HasHTML,
   }
 
   public Iterator addHighlights(String[] items, HighlightCategory category) {
-    return addHighlights(UtilImpl.asIterator(items), category);
+    return addHighlights(Arrays.asList(items).iterator(), category);
   }
 
   public void addKeyboardListener(KeyboardListener listener) {
