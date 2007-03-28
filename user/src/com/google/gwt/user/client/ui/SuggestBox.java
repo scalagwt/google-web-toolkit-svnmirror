@@ -82,11 +82,9 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
   private DelegatingChangeListenerCollection changeListeners;
   private DelegatingFocusListenerCollection focusListeners;
   private DelgatingKeyboardListenerCollection keyboardListeners;
-
   private String separatorPadding = " ";
 
   private final Callback callBack = new Callback() {
-
     public void onSuggestionsReceived(Request request, Response response) {
       showSuggestions(response.getSuggestions());
     }
@@ -121,7 +119,6 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
   }
 
   /**
-   * 
    * Constructor for <code>SuggestBox</code>.
    * 
    * @param oracle the oracle for this <code>SuggestBox</code>
@@ -136,8 +133,7 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
    * Constructor for <code>SuggestBox</code>.
    * 
    * @param oracle supplies suggestions based upon the current contents of the
-   *          text widget. Note, a single oracle may be used with multiple
-   *          suggest boxes.
+   *          text widget
    * @param picker picker to use for this SuggestBox
    */
   public SuggestBox(Oracle oracle, ItemPicker picker) {
@@ -149,8 +145,7 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
    * Constructor for <code>SuggestBox</code>.
    * 
    * @param oracle supplies suggestions based upon the current contents of the
-   *          text widget. Note, a single oracle may be used with multiple
-   *          suggest boxes.
+   *          text widget 
    * @param picker picker to use for this SuggestBox
    * @param box the text widget
    */
@@ -309,7 +304,7 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
    * values.
    * </p>
    * 
-   * @param separators separators for the text. The separators value is treated
+   * @param separators separators for the text; the separators value is treated
    *          as a array of characters
    */
 
