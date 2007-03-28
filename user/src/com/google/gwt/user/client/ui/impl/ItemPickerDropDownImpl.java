@@ -31,7 +31,7 @@ import java.util.Collection;
  * Shared {@link ItemPicker} decorator class for
  * {@link com.google.gwt.user.client.ui.SuggestBox},
  * {@link com.google.gwt.user.client.ui.impl.ItemPickerButtonImpl}, and
- * {@link com.google.gwt.user.client.ui.richtext.RichTextEditor} spell checking
+ * {@link com.google.gwt.user.client.ui.RichTextEditor} spell checking
  * which all use {@link com.google.gwt.user.client.ui.ItemPicker} objects in
  * styled drop downs.
  * <p>

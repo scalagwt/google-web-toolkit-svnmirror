@@ -30,7 +30,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 /**
  * {@link ItemPickerButtonImpl} A button with a drop down {@link ItemPicker}.
- * Used by {@link com.google.gwt.user.client.ui.richtext.RichTextEditor}.
+ * Used by {@link com.google.gwt.user.client.ui.RichTextEditor}.
  */
 public class ItemPickerButtonImpl extends ToggleButton {
 
@@ -40,6 +40,10 @@ public class ItemPickerButtonImpl extends ToggleButton {
     // Adds a keyboard listener.
     addKeyboardListener(new KeyboardListenerAdapter() {
       public void onKeyDown(Widget sender, char keyCode, int modifiers) {
+        if (keyCode != KeyboardListener.KEY_TAB && popup.isAttached() == false) {
+          showItemPicker();
+          return;
+        }
         handleKeyDown(keyCode);
       }
 
