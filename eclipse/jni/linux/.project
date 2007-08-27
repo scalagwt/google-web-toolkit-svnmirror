@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>jni-linux</name>
+	<comment></comment>
+	<projects>
+		<project>gwt-dev-linux</project>
+	</projects>
+	<buildSpec>
+		<buildCommand>
+			<name>org.eclipse.cdt.managedbuilder.core.genmakebuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>org.eclipse.cdt.core.cnature</nature>
+		<nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
+		<nature>org.eclipse.cdt.core.ccnature</nature>
+	</natures>
+	<linkedResources>
+		<link>
+			<name>linux</name>
+			<type>2</type>
+			<locationURI>GWT_ROOT/jni/linux</locationURI>
+		</link>
+		<link>
+			<name>jdk-include</name>
+			<type>2</type>
+			<locationURI>JAVA_HOME/include</locationURI>
+		</link>
+		<link>
+			<name>mozilla-sdk</name>
+			<type>2</type>
+			<locationURI>GWT_TOOLS/sdk/mozilla-1.7.12</locationURI>
+		</link>
+		<link>
+			<name>core</name>
+			<type>2</type>
+			<locationURI>GWT_ROOT/jni/core</locationURI>
+		</link>
+		<link>
+			<name>headers-gen</name>
+			<type>2</type>
+			<locationURI>GWT_ROOT/build/out/jni/linux</locationURI>
+		</link>
+	</linkedResources>
+</projectDescription>
