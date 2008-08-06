@@ -152,7 +152,7 @@ public class GWTShell extends ToolBase {
   }
 
   private class BrowserWidgetHostImpl implements BrowserWidgetHost {
-    private Map<ModuleSpaceHost, Integer> moduleTabs = new IdentityHashMap<ModuleSpaceHost, Integer>();
+    private Map<ModuleSpaceHost, ModulePanel> moduleTabs = new IdentityHashMap<ModuleSpaceHost, ModulePanel>();
 
     public BrowserWidgetHostImpl() {
     }
@@ -178,14 +178,16 @@ public class GWTShell extends ToolBase {
       }
 
       TreeLogger logger;
+      ModulePanel tab;
       if (!headlessMode) {
-        ModulePanel tab = new ModulePanel(maxLevel, moduleName, userAgent,
-            remoteSocket, tabs);
+        tab = new ModulePanel(maxLevel, moduleName, userAgent, remoteSocket,
+            tabs);
         logger = tab.getLogger();
 
         // Switch to a wait cursor.
         frame.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
       } else {
+        tab = null;
         logger = mainLogger;
       }
 
@@ -204,9 +206,8 @@ public class GWTShell extends ToolBase {
         ShellModuleSpaceHost host = doCreateShellModuleSpaceHost(logger,
             typeOracle, moduleDef, genDir, shellDir);
 
-        if (!headlessMode) {
-          final int tabIndex = tabs.getTabCount();
-          moduleTabs.put(host, tabIndex);
+        if (tab != null) {
+          moduleTabs.put(host, tab);
         }
         return host;
 
@@ -226,15 +227,9 @@ public class GWTShell extends ToolBase {
     }
 
     public void unloadModule(ModuleSpaceHost moduleSpaceHost) {
-      Integer tabIndex = moduleTabs.get(moduleSpaceHost);
-      if (tabIndex != null) {
-        tabs.setTitleAt(tabIndex, "Disconnected");
-        tabs.setIconAt(tabIndex, null); // TODO(jat): closed icon?
-        Component tabComponent = tabs.getComponentAt(tabIndex);
-        if (tabComponent instanceof SwingLoggerPanel) {
-          SwingLoggerPanel loggerWindow = (SwingLoggerPanel) tabComponent;
-          loggerWindow.disconnected();
-        }
+      ModulePanel tab = moduleTabs.remove(moduleSpaceHost);
+      if (tab != null) {
+        tab.disconnect();
       }
     }
 

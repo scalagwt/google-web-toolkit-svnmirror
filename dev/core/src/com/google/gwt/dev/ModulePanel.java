@@ -41,18 +41,22 @@ public class ModulePanel extends JPanel {
 
   private SwingLoggerPanel loggerPanel;
 
+  private final JTabbedPane tabs;
+
   public ModulePanel(Type maxLevel, String moduleName, String userAgent,
       String remoteSocket, final JTabbedPane tabs) {
     super(new BorderLayout());
+    this.tabs = tabs;
     JPanel topPanel = new JPanel();
     topPanel.add(new JLabel(moduleName));
     JButton compileButton = new JButton("Compile");
     topPanel.add(compileButton);
     add(topPanel, BorderLayout.NORTH);
-    final int tabIndex = tabs.getTabCount();
     loggerPanel = new SwingLoggerPanel(maxLevel, new CloseListener() {
       public void onClose() {
-        tabs.remove(tabIndex);
+        synchronized (tabs) {
+          tabs.remove(ModulePanel.this);
+        }
       }
     });
     add(loggerPanel);
@@ -71,10 +75,24 @@ public class ModulePanel extends JPanel {
     if (lastDot >= 0) {
       shortModuleName = shortModuleName.substring(lastDot + 1);
     }
-    tabs.addTab(shortModuleName, browserIcon, this, moduleName + " from "
-        + remoteSocket);
+    synchronized (tabs) {
+      tabs.addTab(shortModuleName, browserIcon, this, moduleName + " from "
+          + remoteSocket);
+    }
     logger.log(TreeLogger.INFO, "Request for module " + moduleName
         + " by user agent '" + userAgent + "' from " + remoteSocket);
+  }
+
+  public void disconnect() {
+    synchronized (tabs) {
+      int index = tabs.indexOfComponent(this);
+      if (index > -1) {
+        tabs.setTitleAt(index, "Disconnected");
+        // TODO(jat): closed icon?
+        tabs.setIconAt(index, null);
+      }
+    }
+    loggerPanel.disconnected();
   }
 
   public AbstractTreeLogger getLogger() {
