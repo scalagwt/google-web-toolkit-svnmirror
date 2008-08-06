@@ -53,6 +53,11 @@ function __gwt_jsWrapper(method, methodlookup, thisref) {
   }
 }
 
+function __gwt_throwException(exc) {
+  console.log("throwing exception ", exc);
+  throw exc;
+}
+
 function __gwt_eval(js) {
   try {
     return [0, eval(js)];

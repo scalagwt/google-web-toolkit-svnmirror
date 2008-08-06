@@ -51,6 +51,7 @@ ScriptableInstance::ScriptableInstance(NPP npp) : NPObjectWrapper<ScriptableInst
     statsID(NPN_GetStringIdentifier("stats")),
     savedID(NPN_GetStringIdentifier("saved")),
     jsWrapperID(NPN_GetStringIdentifier("__gwt_jsWrapper")),
+    jsExceptionID(NPN_GetStringIdentifier("__gwt_throwException")),
     jsTearOffID(NPN_GetStringIdentifier("__gwt_makeTearOff")),
     jsValueOfID(NPN_GetStringIdentifier("valueOf")),
     idx0(NPN_GetIntIdentifier(0)),
@@ -408,9 +409,6 @@ bool ScriptableInstance::invoke(HostChannel& channel, const Value& thisRef,
     return true;
   }
   Debug::log(Debug::Spam) << "  wrapped return is " << wrappedRetVal.toString() << Debug::flush;
-  if (methodName.find("toString") != string::npos) {
-    Debug::log(Debug::Error) << "returned from toString" << Debug::flush;
-  }
   NPVariantWrapper exceptFlag(*this);
   NPVariantWrapper retval(*this);
   NPObject* wrappedArray = wrappedRetVal.getAsObject();
@@ -461,8 +459,21 @@ bool ScriptableInstance::JavaObject_invoke(int objectId, NPObject* thisObj, int 
     return false;
   }
   NPVariantProxy::assignFrom(*this, *result, retMsg->getReturnValue());
-  // TODO: no way to set an actual exception object!
-  return !retMsg->isException();
+  if (retMsg->isException()) {
+    throwException(result);
+    return false;
+  }
+  return true;
+}
+
+void ScriptableInstance::throwException(NPVariant* exc) {
+  Debug::log(Debug::Debugging) << "throwException(" << exc << ")"
+      << Debug::flush;
+  NPVariantWrapper retVal(*this);
+  NPN_Invoke(getNPP(), window, jsExceptionID, exc, 1,
+      retVal.addressForReturn());
+  // ignore return value, since it throws an exception which results in
+  // a failure return code
 }
 
 bool ScriptableInstance::JavaObject_getProperty(int objectId, int dispId,

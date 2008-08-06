@@ -43,10 +43,12 @@ public:
     // our local objects will get freed anyway when the plugin dies
     localObjects.freeAll();
     localObjects.setDontFree(true);
-    if (window) {
-      NPN_ReleaseObject(window);
-      window = 0;
-    }
+    // TODO(jat): leaving this in causes SEGV upon plugin destruction in the
+    // NPN_ReleaseObject call.
+//    if (window) {
+//      NPN_ReleaseObject(window);
+//      window = 0;
+//    }
   }
   
   // NPObjectWrapper methods
@@ -90,6 +92,7 @@ private:
   const NPIdentifier savedID;
 
   const NPIdentifier jsWrapperID;
+  const NPIdentifier jsExceptionID;
   const NPIdentifier jsTearOffID;
   const NPIdentifier jsValueOfID;
   const NPIdentifier idx0;
@@ -98,7 +101,8 @@ private:
   NPObject* window;
   void dupString(const char* str, NPString& npString);
   void dumpObjectBytes(NPObject* obj);
-
+  void throwException(NPVariant* exc);
+  
   // SessionHandler methods
   bool invoke(HostChannel& channel, const Value& thisObj,
       const std::string& methodName, int numArgs, const Value* const args,

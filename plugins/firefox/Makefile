@@ -5,7 +5,7 @@ CXXFLAGS=$(CFLAGS)
 
 INSTDIR := extension/platform/$(shell ./getarch arch)/plugins
 
-HDRS= LocalObjectTable.h NPVariantWrapper.h Plugin.h mozincludes.h \
+HDRS= LocalObjectTable.h NPVariantWrapper.h Plugin.h ScriptableInstance.h mozincludes.h \
 	JavaObject.h ScriptableInstance.h
 
 COMMON= ../common/libcommon$(FLAG32BIT).a
@@ -71,13 +71,13 @@ depend:
 main.o: main.cpp ../common/Debug.h ../common/Platform.h \
   ../common/DebugLevel.h mozincludes.h npapi/npapi.h npapi/nphostapi.h \
   npapi/npapi.h npapi/npruntime.h npapi/npapi.h npapi/npruntime.h \
-  NPObjectWrapper.h Plugin.h ../common/HostChannel.h ../common/Message.h \
+  NPObjectWrapper.h Plugin.h ScriptableInstance.h ../common/HostChannel.h ../common/Message.h \
   ../common/ReturnMessage.h ../common/BrowserChannel.h ../common/Value.h \
   ../common/Debug.h ../common/SessionHandler.h \
   ../common/LoadModuleMessage.h ../common/HostChannel.h \
   LocalObjectTable.h ../common/SessionHandler.h \
   ../common/scoped_ptr/scoped_ptr.h ../common/AllowedConnections.h
-Plugin.o: Plugin.cpp Plugin.h ../common/Debug.h ../common/Platform.h \
+Plugin.o: Plugin.cpp Plugin.h ScriptableInstance.h ../common/Debug.h ../common/Platform.h \
   ../common/DebugLevel.h mozincludes.h npapi/npapi.h npapi/nphostapi.h \
   npapi/npapi.h npapi/npruntime.h npapi/npapi.h npapi/npruntime.h \
   NPObjectWrapper.h ../common/HostChannel.h ../common/Message.h \
@@ -88,7 +88,7 @@ Plugin.o: Plugin.cpp Plugin.h ../common/Debug.h ../common/Platform.h \
   ../common/ReturnMessage.h ../common/ServerMethods.h \
   ../common/scoped_ptr/scoped_ptr.h NPVariantWrapper.h \
   ../common/Platform.h ../common/Value.h JavaObject.h ../common/HashMap.h
-ScriptableInstance.o: ScriptableInstance.cpp Plugin.h ../common/Debug.h \
+ScriptableInstance.o: ScriptableInstance.cpp Plugin.h ScriptableInstance.h ../common/Debug.h \
   ../common/Platform.h \
   ../common/DebugLevel.h mozincludes.h npapi/npapi.h npapi/nphostapi.h \
   npapi/npapi.h npapi/npruntime.h npapi/npapi.h npapi/npruntime.h \
@@ -106,7 +106,7 @@ LocalObjectTable.o: LocalObjectTable.cpp mozincludes.h npapi/npapi.h \
   ../common/Debug.h ../common/Platform.h ../common/DebugLevel.h
 JavaObject.o: JavaObject.cpp JavaObject.h mozincludes.h npapi/npapi.h \
   npapi/nphostapi.h npapi/npapi.h npapi/npruntime.h npapi/npapi.h \
-  npapi/npruntime.h NPObjectWrapper.h Plugin.h ../common/Debug.h \
+  npapi/npruntime.h NPObjectWrapper.h Plugin.h ScriptableInstance.h ../common/Debug.h \
   ../common/Platform.h ../common/DebugLevel.h ../common/HostChannel.h \
   ../common/Message.h ../common/ReturnMessage.h ../common/AllowedConnections.h \
   ../common/BrowserChannel.h ../common/Value.h ../common/Debug.h \
