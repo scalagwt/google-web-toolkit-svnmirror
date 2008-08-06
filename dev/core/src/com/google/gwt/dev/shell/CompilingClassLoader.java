@@ -50,6 +50,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 
 /**
  * An isolated {@link ClassLoader} for running all user code. All user files are
@@ -454,6 +455,16 @@ public final class CompilingClassLoader extends ClassLoader implements
   private final Map<Integer, Object> weakJsoCache = new ReferenceMap(
       AbstractReferenceMap.HARD, AbstractReferenceMap.WEAK);
 
+  /**
+   * Used by {@link #findClass(String)} to prevent reentrant JSNI injection.
+   */
+  private boolean isInjectingClass = false;
+
+  /**
+   * Used by {@link #findClass(String)} to prevent reentrant JSNI injection.
+   */
+  private Stack<CompiledClass> toInject = new Stack<CompiledClass>();
+
   public CompilingClassLoader(TreeLogger logger,
       CompilationState compilationState, ShellJavaScriptHost javaScriptHost)
       throws UnableToCompleteException {
@@ -601,7 +612,26 @@ public final class CompilingClassLoader extends ClassLoader implements
     CompiledClass compiledClass = compilationState.getClassFileMap().get(
         canonicalizeClassName(className));
     if (compiledClass != null) {
-      injectJsniFor(compiledClass);
+      toInject.push(compiledClass);
+    }
+
+    /*
+     * Prevent reentrant problems where classes that need to be injected have
+     * circular dependencies on one another.
+     */
+    if (!isInjectingClass) {
+      try {
+        isInjectingClass = true;
+        /*
+         * Can't use an iterator here because calling injectJsniFor may cause
+         * additional entries to be added.
+         */
+        while (toInject.size() > 0) {
+          injectJsniFor(toInject.remove(0));
+        }
+      } finally {
+        isInjectingClass = false;
+      }
     }
 
     if (className.equals("com.google.gwt.core.client.GWT")) {
