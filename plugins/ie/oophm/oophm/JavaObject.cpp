@@ -111,6 +111,13 @@ STDMETHODIMP CJavaObject::InvokeEx(DISPID dispidMember, LCID lcid, WORD wFlags,
   Value thisRef = Value();
   thisRef.setJavaObject(objId);
 
+  if ((wFlags & DISPATCH_PROPERTYGET) && dispidMember == DISPID_VALUE &&
+    pdispparams->cArgs - pdispparams->cNamedArgs == 0) {
+      // This is an expression like ('' + obj)
+      wFlags = DISPATCH_METHOD;
+      dispidMember = DISPID_TOSTRING;
+  }
+
   if (wFlags & DISPATCH_METHOD) {
     Debug::log(Debug::Spam) << "Dispatching method " << dispidMember << " on " << objId << Debug::flush;
 
@@ -221,12 +228,44 @@ STDMETHODIMP CJavaObject::InvokeEx(DISPID dispidMember, LCID lcid, WORD wFlags,
       this->QueryInterface(IID_IDispatch, (void**)&pvarResult->pdispVal);
       pvarResult->vt = VT_DISPATCH;
 
+    } else if (dispidMember == DISPID_TOSTRING) {
+      // Asking for a tear-off of the .toString function
+      Debug::log(Debug::Spam) << "Making .toString tearoff" << Debug::flush;
+      HRESULT res;
+
+      // Get a reference to __gwt_makeTearOff
+      DISPID tearOffDispid;
+      LPOLESTR tearOffName = L"__gwt_makeTearOff";
+      res = sessionData->getWindow()->GetIDsOfNames(IID_NULL,
+        &tearOffName, 1, LOCALE_SYSTEM_DEFAULT, &tearOffDispid);
+      if (FAILED(res)) {
+        Debug::log(Debug::Error) << "Unable to find __gwt_makeTearOff" << Debug::flush;
+        return E_FAIL;
+      }
+
+      scoped_array<_variant_t> tearOffArgs(new _variant_t[3]);
+      // Parameters are backwards:
+      // __gwt_makeTearOff(proxy, dispId, argCount);
+      tearOffArgs[2] = this; // proxy
+      tearOffArgs[1] = 0; // dispId
+      tearOffArgs[0] = 0; // argCount
+      DISPPARAMS tearOffParams = {tearOffArgs.get(), NULL, 3, 0};
+
+      // Invoke __gwt_makeTearOff
+      res = sessionData->getWindow()->Invoke(tearOffDispid, IID_NULL, LOCALE_SYSTEM_DEFAULT,
+        DISPATCH_METHOD, &tearOffParams, pvarResult, NULL, 0);
+      if (FAILED(res)) {
+        Debug::log(Debug::Error) << "Unable to invoke __gwt_makeTearOff" << Debug::flush;
+        return E_FAIL;
+      }
+
     } else {
       Value ret = ServerMethods::getProperty(*channel,
         sessionData->getSessionHandler(), objId, dispidMember);
 
       if (ret.isUndefined()) {
         Debug::log(Debug::Error) << "Undefined get from Java object" << Debug::flush;
+        return E_FAIL;
       }
 
       _variant_t returnVariant;
