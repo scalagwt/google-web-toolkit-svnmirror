@@ -300,10 +300,14 @@ public final class Util {
    * Gets the contents of a file.
    * 
    * @param relativePath relative path within the install directory
-   * @return the contents of the file, or null if an error occurred
+   * @return the contents of the file, or <code>null</code> if an error
+   *         occurred
    */
   public static String getFileFromInstallPath(String relativePath) {
     String installPath = Utility.getInstallPath();
+    if (installPath == null) {
+      return null;
+    }
     File file = new File(installPath + '/' + relativePath);
     return readFileAsString(file);
   }

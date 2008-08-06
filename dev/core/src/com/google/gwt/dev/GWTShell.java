@@ -22,12 +22,10 @@ import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.dev.cfg.ModuleDef;
 import com.google.gwt.dev.cfg.ModuleDefLoader;
 import com.google.gwt.dev.jjs.JJSOptions;
-import com.google.gwt.dev.shell.BrowserWidget;
+import com.google.gwt.dev.shell.BrowserListener;
 import com.google.gwt.dev.shell.BrowserWidgetHost;
-import com.google.gwt.dev.shell.BrowserWidgetHostChecker;
-import com.google.gwt.dev.shell.LowLevel;
 import com.google.gwt.dev.shell.ModuleSpaceHost;
-import com.google.gwt.dev.shell.PlatformSpecific;
+import com.google.gwt.dev.shell.OophmSessionHandler;
 import com.google.gwt.dev.shell.ShellMainWindow;
 import com.google.gwt.dev.shell.ShellModuleSpaceHost;
 import com.google.gwt.dev.shell.tomcat.EmbeddedTomcatServer;
@@ -36,6 +34,8 @@ import com.google.gwt.dev.util.arg.ArgHandlerGenDir;
 import com.google.gwt.dev.util.arg.ArgHandlerLogLevel;
 import com.google.gwt.dev.util.arg.ArgHandlerScriptStyle;
 import com.google.gwt.dev.util.log.AbstractTreeLogger;
+import com.google.gwt.dev.util.log.PrintWriterTreeLogger;
+import com.google.gwt.dev.util.log.SwingLoggerPanel;
 import com.google.gwt.util.tools.ArgHandlerDisableAggressiveOptimization;
 import com.google.gwt.util.tools.ArgHandlerEnableAssertions;
 import com.google.gwt.util.tools.ArgHandlerExtra;
@@ -44,58 +44,27 @@ import com.google.gwt.util.tools.ArgHandlerOutDir;
 import com.google.gwt.util.tools.ArgHandlerString;
 import com.google.gwt.util.tools.ToolBase;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.graphics.Cursor;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.internal.Library;
-import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
-
+import java.awt.Component;
+import java.awt.Cursor;
 import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JTabbedPane;
 
 /**
  * The main executable class for the hosted mode shell.
  */
 public class GWTShell extends ToolBase {
-
-  /**
-   * Handles the -blacklist command line argument.
-   */
-  protected class ArgHandlerBlacklist extends ArgHandlerString {
-
-    @Override
-    public String[] getDefaultArgs() {
-      return new String[] {"-blacklist", ""};
-    }
-
-    @Override
-    public String getPurpose() {
-      return "Prevents the user browsing URLs that match the specified regexes (comma or space separated)";
-    }
-
-    @Override
-    public String getTag() {
-      return "-blacklist";
-    }
-
-    @Override
-    public String[] getTagArgs() {
-      return new String[] {"blacklist-string"};
-    }
-
-    @Override
-    public boolean setString(String blacklistStr) {
-      return BrowserWidgetHostChecker.blacklistRegexes(blacklistStr);
-    }
-  }
 
   /**
    * handles the -noserver command line flag.
@@ -182,38 +151,9 @@ public class GWTShell extends ToolBase {
     }
   }
 
-  /**
-   * Handles the -whitelist command line flag.
-   */
-  protected class ArgHandlerWhitelist extends ArgHandlerString {
-
-    @Override
-    public String[] getDefaultArgs() {
-      return new String[] {"-whitelist", ""};
-    }
-
-    @Override
-    public String getPurpose() {
-      return "Allows the user to browse URLs that match the specified regexes (comma or space separated)";
-    }
-
-    @Override
-    public String getTag() {
-      return "-whitelist";
-    }
-
-    @Override
-    public String[] getTagArgs() {
-      return new String[] {"whitelist-string"};
-    }
-
-    @Override
-    public boolean setString(String whitelistStr) {
-      return BrowserWidgetHostChecker.whitelistRegexes(whitelistStr);
-    }
-  }
-
   private class BrowserWidgetHostImpl implements BrowserWidgetHost {
+    private Map<ModuleSpaceHost, Integer> moduleTabs = new IdentityHashMap<ModuleSpaceHost, Integer>();
+
     public BrowserWidgetHostImpl() {
     }
 
@@ -229,34 +169,51 @@ public class GWTShell extends ToolBase {
       }
     }
 
-    public ModuleSpaceHost createModuleSpaceHost(BrowserWidget widget,
-        final String moduleName) throws UnableToCompleteException {
-      TreeLogger logger = getLogger();
+    public ModuleSpaceHost createModuleSpaceHost(TreeLogger mainLogger,
+        String moduleName, String userAgent, String remoteSocket)
+        throws UnableToCompleteException {
+      TreeLogger.Type maxLevel = TreeLogger.INFO;
+      if (mainLogger instanceof AbstractTreeLogger) {
+        maxLevel = ((AbstractTreeLogger) mainLogger).getMaxDetail();
+      }
 
-      // Switch to a wait cursor.
-      //
-      Shell widgetShell = widget.getShell();
+      TreeLogger logger;
+      if (!headlessMode) {
+        ModulePanel tab = new ModulePanel(maxLevel, moduleName, userAgent,
+            remoteSocket, tabs);
+        logger = tab.getLogger();
+
+        // Switch to a wait cursor.
+        frame.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+      } else {
+        logger = mainLogger;
+      }
+
       try {
-        Cursor waitCursor = display.getSystemCursor(SWT.CURSOR_WAIT);
-        widgetShell.setCursor(waitCursor);
-
         // Try to find an existing loaded version of the module def.
-        //
         ModuleDef moduleDef = loadModule(moduleName, logger);
         assert (moduleDef != null);
 
         // Create a sandbox for the module.
-        //
+        // TODO(jat): consider multiple instances of the same module open at
+        // once
         File shellDir = new File(outDir, GWT_SHELL_PATH + File.separator
             + moduleName);
 
         TypeOracle typeOracle = moduleDef.getTypeOracle(logger);
         ShellModuleSpaceHost host = doCreateShellModuleSpaceHost(logger,
             typeOracle, moduleDef, genDir, shellDir);
+
+        if (!headlessMode) {
+          final int tabIndex = tabs.getTabCount();
+          moduleTabs.put(host, tabIndex);
+        }
         return host;
+
       } finally {
-        Cursor normalCursor = display.getSystemCursor(SWT.CURSOR_ARROW);
-        widgetShell.setCursor(normalCursor);
+        if (!headlessMode) {
+          frame.setCursor(Cursor.getDefaultCursor());
+        }
       }
     }
 
@@ -268,9 +225,17 @@ public class GWTShell extends ToolBase {
       return GWTShell.this.normalizeURL(whatTheUserTyped);
     }
 
-    public BrowserWidget openNewBrowserWindow()
-        throws UnableToCompleteException {
-      return GWTShell.this.openNewBrowserWindow();
+    public void unloadModule(ModuleSpaceHost moduleSpaceHost) {
+      Integer tabIndex = moduleTabs.get(moduleSpaceHost);
+      if (tabIndex != null) {
+        tabs.setTitleAt(tabIndex, "Disconnected");
+        tabs.setIconAt(tabIndex, null); // TODO(jat): closed icon?
+        Component tabComponent = tabs.getComponentAt(tabIndex);
+        if (tabComponent instanceof SwingLoggerPanel) {
+          SwingLoggerPanel loggerWindow = (SwingLoggerPanel) tabComponent;
+          loggerWindow.disconnected();
+        }
+      }
     }
 
     /**
@@ -283,6 +248,7 @@ public class GWTShell extends ToolBase {
      */
     private ModuleDef loadModule(String moduleName, TreeLogger logger)
         throws UnableToCompleteException {
+      // TODO(jat): consider multithreading issues dealing with ModuleDefs
       boolean assumeFresh = !alreadySeenModules.contains(moduleName);
       ModuleDef moduleDef = ModuleDefLoader.loadFromClassPath(logger,
           moduleName, !assumeFresh);
@@ -295,12 +261,8 @@ public class GWTShell extends ToolBase {
   public static final String GWT_SHELL_PATH = ".gwt-tmp" + File.separator
       + "shell";
 
-  private static Image[] icons;
-
-  static {
-    // Correct menu on Mac OS X
-    Display.setAppName("GWT");
-  }
+  private static final String PACKAGE_PATH = GWTShell.class.getPackage().getName().replace(
+      '.', '/').concat("/shell/");
 
   public static String checkHost(String hostUnderConsideration,
       Set<String> hosts) {
@@ -315,7 +277,7 @@ public class GWTShell extends ToolBase {
   }
 
   public static String computeHostRegex(String url) {
-    // the enture URL up to the first slash not prefixed by a slash or colon.
+    // the entire URL up to the first slash not prefixed by a slash or colon.
     String raw = url.split("(?<![:/])/")[0];
     // escape the dots and put a begin line specifier on the result
     return "^" + raw.replaceAll("[.]", "[.]");
@@ -330,21 +292,6 @@ public class GWTShell extends ToolBase {
     return out.toString();
   }
 
-  /**
-   * Well-known place to get the GWT icons.
-   */
-  public static Image[] getIcons() {
-    // Make sure icon images are loaded.
-    //
-    if (icons == null) {
-      icons = new Image[] {
-          LowLevel.loadImage("icon16.png"), LowLevel.loadImage("icon24.png"),
-          LowLevel.loadImage("icon32.png"), LowLevel.loadImage("icon48.png"),
-          LowLevel.loadImage("icon128.png")};
-    }
-    return icons;
-  }
-
   public static void main(String[] args) {
     /*
      * NOTE: main always exits with a call to System.exit to terminate any
@@ -352,19 +299,29 @@ public class GWTShell extends ToolBase {
      * shutdown AWT related threads, since the contract for their termination is
      * still implementation-dependent.
      */
-    BootStrapPlatform.init();
+    BootStrapPlatform.go();
     GWTShell shellMain = new GWTShell();
     if (shellMain.processArgs(args)) {
       shellMain.run();
     }
-    System.exit(0);
   }
 
   /**
-   * Use the default display; constructing a new one would make instantiating
-   * multiple GWTShells fail with a mysterious exception.
+   * Loads an image from the classpath in this package.
    */
-  protected final Display display = Display.getDefault();
+  static ImageIcon loadImageIcon(String name) {
+    ClassLoader cl = GWTShell.class.getClassLoader();
+    URL url = cl.getResource(PACKAGE_PATH + name);
+    if (url != null) {
+      ImageIcon image = new ImageIcon(url);
+      return image;
+    } else {
+      // Bad image.
+      return new ImageIcon();
+    }
+  }
+
+  protected BrowserListener listener;
 
   protected File outDir;
 
@@ -378,7 +335,7 @@ public class GWTShell extends ToolBase {
 
   private BrowserWidgetHostImpl browserHost = new BrowserWidgetHostImpl();
 
-  private final List<Shell> browserShells = new ArrayList<Shell>();
+  private JFrame frame;
 
   private File genDir;
 
@@ -398,6 +355,12 @@ public class GWTShell extends ToolBase {
 
   private final List<String> startupUrls = new ArrayList<String>();
 
+  private JTabbedPane tabs;
+
+  private AbstractTreeLogger topLogger;
+
+  private WebServerPanel webServerLog;
+
   public GWTShell() {
     this(false, false);
   }
@@ -409,18 +372,15 @@ public class GWTShell extends ToolBase {
       registerHandler(new ArgHandlerNoServerFlag());
     }
 
-    registerHandler(new ArgHandlerWhitelist());
-    registerHandler(new ArgHandlerBlacklist());
-
     registerHandler(new ArgHandlerLogLevel() {
-      @Override
-      protected Type getDefaultLogLevel() {
-        return doGetDefaultLogLevel();
-      }
-
       @Override
       public void setLogLevel(Type level) {
         logLevel = level;
+      }
+
+      @Override
+      protected Type getDefaultLogLevel() {
+        return doGetDefaultLogLevel();
       }
     });
 
@@ -459,12 +419,6 @@ public class GWTShell extends ToolBase {
     startupUrls.add(url);
   }
 
-  public void closeAllBrowserWindows() {
-    while (!browserShells.isEmpty()) {
-      browserShells.get(0).dispose();
-    }
-  }
-
   public File getGenDir() {
     return genDir;
   }
@@ -482,15 +436,7 @@ public class GWTShell extends ToolBase {
   }
 
   public TreeLogger getTopLogger() {
-    return mainWnd.getLogger();
-  }
-
-  public boolean hasBrowserWindowsOpen() {
-    if (browserShells.isEmpty()) {
-      return false;
-    } else {
-      return true;
-    }
+    return topLogger;
   }
 
   /**
@@ -499,19 +445,38 @@ public class GWTShell extends ToolBase {
   public void launchStartupUrls(final TreeLogger logger) {
     if (startupUrls != null) {
       // Launch a browser window for each startup url.
-      //
       String startupURL = "";
       try {
         for (String prenormalized : startupUrls) {
           startupURL = normalizeURL(prenormalized);
           logger.log(TreeLogger.TRACE, "Starting URL: " + startupURL, null);
-          BrowserWidget bw = openNewBrowserWindow();
-          bw.go(startupURL);
+          launchURL(startupURL);
         }
       } catch (UnableToCompleteException e) {
         logger.log(TreeLogger.ERROR,
             "Unable to open new window for startup URL: " + startupURL, null);
       }
+    }
+  }
+
+  public void launchURL(String url) throws UnableToCompleteException {
+    /*
+     * TODO(jat): properly support launching arbitrary browsers; waiting on
+     * Freeland's work with BrowserScanner and the trunk merge to get it.
+     */
+    url += "?gwt.hosted=" + listener.getEndpointIdentifier();
+    TreeLogger branch = getTopLogger().branch(TreeLogger.INFO,
+        "Launching firefox with " + url, null);
+    try {
+      Process browser = Runtime.getRuntime().exec("firefox " + url + "&");
+      int exitCode = browser.waitFor();
+      if (exitCode != 0) {
+        branch.log(TreeLogger.ERROR, "Exit code " + exitCode, null);
+      }
+    } catch (IOException e) {
+      branch.log(TreeLogger.ERROR, "Error starting browser", e);
+    } catch (InterruptedException e) {
+      branch.log(TreeLogger.ERROR, "Error starting browser", e);
     }
   }
 
@@ -539,38 +504,6 @@ public class GWTShell extends ToolBase {
   }
 
   /**
-   * Called directly by ShellMainWindow and indirectly via BrowserWidgetHost.
-   */
-  public BrowserWidget openNewBrowserWindow() throws UnableToCompleteException {
-    boolean succeeded = false;
-    Shell s = createTrackedBrowserShell();
-    try {
-      BrowserWidget bw = PlatformSpecific.createBrowserWidget(getTopLogger(),
-          s, browserHost);
-
-      if (mainWnd != null) {
-        Rectangle r = mainWnd.getShell().getBounds();
-        int n = browserShells.size() + 1;
-        s.setBounds(r.x + n * 50, r.y + n * 50, 800, 600);
-      } else {
-        s.setSize(800, 600);
-      }
-
-      if (!isHeadless()) {
-        s.open();
-      }
-
-      bw.onFirstShown();
-      succeeded = true;
-      return bw;
-    } finally {
-      if (!succeeded) {
-        s.dispose();
-      }
-    }
-  }
-
-  /**
    * Sets up all the major aspects of running the shell graphically, including
    * creating the main window and optionally starting the embedded Tomcat
    * server.
@@ -578,7 +511,7 @@ public class GWTShell extends ToolBase {
   public void run() {
     try {
       // Set any platform specific system properties.
-      BootStrapPlatform.applyPlatformHacks();
+      BootStrapPlatform.go();
 
       if (!startUp()) {
         // Failed to initalize.
@@ -590,11 +523,6 @@ public class GWTShell extends ToolBase {
 
       // Tomcat's running now, so launch browsers for startup urls now.
       launchStartupUrls(getTopLogger());
-
-      pumpEventLoop();
-
-      shutDown();
-
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -685,8 +613,12 @@ public class GWTShell extends ToolBase {
   }
 
   protected void initializeLogger() {
-    final AbstractTreeLogger logger = mainWnd.getLogger();
-    logger.setMaxDetail(logLevel);
+    if (mainWnd != null) {
+      topLogger = mainWnd.getLogger();
+    } else {
+      topLogger = new PrintWriterTreeLogger(new PrintWriter(System.out));
+    }
+    topLogger.setMaxDetail(logLevel);
   }
 
   /**
@@ -696,37 +628,6 @@ public class GWTShell extends ToolBase {
    */
   protected boolean isHeadless() {
     return headlessMode;
-  }
-
-  protected boolean notDone() {
-    if (!mainWnd.isDisposed()) {
-      return true;
-    }
-    if (!browserShells.isEmpty()) {
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * 
-   */
-  protected void pumpEventLoop() {
-    TreeLogger logger = getTopLogger();
-
-    // Run the event loop. When there are no open shells, quit.
-    //
-    while (notDone()) {
-      try {
-        if (!display.readAndDispatch()) {
-          sleep();
-        }
-      } catch (Throwable e) {
-        String msg = e.getMessage();
-        msg = (msg != null ? msg : e.getClass().getName());
-        logger.log(TreeLogger.ERROR, msg, e);
-      }
-    }
   }
 
   protected void setHeadless(boolean headlessMode) {
@@ -746,10 +647,6 @@ public class GWTShell extends ToolBase {
     EmbeddedTomcatServer.stop();
   }
 
-  protected void sleep() {
-    display.sleep();
-  }
-
   protected boolean startUp() {
     if (started) {
       throw new IllegalStateException("Startup code has already been run");
@@ -757,16 +654,17 @@ public class GWTShell extends ToolBase {
 
     started = true;
 
-    loadRequiredNativeLibs();
-
     // Create the main app window.
     // When it is up and running, it will start the Tomcat server if desired.
-    //
-    openAppWindow();
+    if (!headlessMode) {
+      openAppWindow();
+    }
 
     // Initialize the logger.
-    //
     initializeLogger();
+
+    // Accept connections from OOPHM clients
+    startOophmListener();
 
     if (runTomcat) {
       // Start the HTTP server.
@@ -776,8 +674,8 @@ public class GWTShell extends ToolBase {
       final int serverPort = getPort();
 
       PerfLogger.start("GWTShell.startup (Tomcat launch)");
-      String whyFailed = EmbeddedTomcatServer.start(getTopLogger(), serverPort,
-          outDir);
+      String whyFailed = EmbeddedTomcatServer.start(headlessMode
+          ? getTopLogger() : webServerLog.getLogger(), serverPort, outDir);
       PerfLogger.end();
 
       if (whyFailed != null) {
@@ -792,58 +690,70 @@ public class GWTShell extends ToolBase {
     return true;
   }
 
-  private Shell createTrackedBrowserShell() {
-    final Shell shell = new Shell(display);
-    FillLayout fillLayout = new FillLayout();
-    fillLayout.marginWidth = 0;
-    fillLayout.marginHeight = 0;
-    shell.setLayout(fillLayout);
-    browserShells.add(shell);
-    shell.addDisposeListener(new DisposeListener() {
-      public void widgetDisposed(DisposeEvent e) {
-        if (e.widget == shell) {
-          browserShells.remove(shell);
-        }
-      }
-    });
-
-    shell.setImages(getIcons());
-
-    return shell;
-  }
-
-  private void loadRequiredNativeLibs() {
-    String libName = null;
-    try {
-      libName = "swt";
-      Library.loadLibrary(libName);
-    } catch (UnsatisfiedLinkError e) {
-      StringBuffer sb = new StringBuffer();
-      sb.append("Unable to load required native library '" + libName + "'");
-      sb.append("\n\tPlease specify the JVM startup argument ");
-      sb.append("\"-Djava.library.path\"");
-      throw new RuntimeException(sb.toString(), e);
-    }
+  @SuppressWarnings("unused")
+  // TODO(jat): implement and hook into UI, this is just copied from trunk
+  private void compile() {
+    // // first, compile
+    // Set<String> keySet = new HashSet<String>();
+    // for (Map.Entry<?, ModuleSpace> entry : loadedModules.entrySet()) {
+    // ModuleSpace module = entry.getValue();
+    // keySet.add(module.getModuleName());
+    // }
+    // String[] moduleNames = Util.toStringArray(keySet);
+    // if (moduleNames.length == 0) {
+    // // A latent problem with a module.
+    // //
+    // openWebModeButton.setEnabled(false);
+    // return;
+    // }
+    // try {
+    // Cursor waitCursor = getDisplay().getSystemCursor(SWT.CURSOR_WAIT);
+    // getShell().setCursor(waitCursor);
+    // getHost().compile(moduleNames);
+    // } catch (UnableToCompleteException e) {
+    // // Already logged by callee.
+    // //
+    // MessageBox msgBox = new MessageBox(getShell(), SWT.OK
+    // | SWT.ICON_ERROR);
+    // msgBox.setText("Compilation Failed");
+    // msgBox.setMessage("Compilation failed. Please see the log in the
+    // development shell for details.");
+    // msgBox.open();
+    // return;
+    // } finally {
+    // // Restore the cursor.
+    // //
+    // Cursor normalCursor = getDisplay().getSystemCursor(SWT.CURSOR_ARROW);
+    // getShell().setCursor(normalCursor);
+    // }
+    //
+    // String locationText = location.getText();
+    //
+    // launchExternalBrowser(logger, locationText);
   }
 
   private void openAppWindow() {
-    final Shell shell = new Shell(display);
-
-    FillLayout fillLayout = new FillLayout();
-    fillLayout.marginWidth = 0;
-    fillLayout.marginHeight = 0;
-    shell.setLayout(fillLayout);
-
-    shell.setImages(getIcons());
-
+    ImageIcon gwtIcon = loadImageIcon("icon24.png");
+    frame = new JFrame("GWT Hosted Mode");
+    tabs = new JTabbedPane();
     boolean checkForUpdates = doShouldCheckForUpdates();
-
-    mainWnd = new ShellMainWindow(this, shell, runTomcat ? getPort() : 0,
-        checkForUpdates);
-
-    shell.setSize(700, 600);
-    if (!isHeadless()) {
-      shell.open();
+    mainWnd = new ShellMainWindow(this, checkForUpdates, logLevel);
+    tabs.addTab("Hosted Mode", gwtIcon, mainWnd, "GWT Hosted-mode");
+    if (runTomcat) {
+      ImageIcon tomcatIcon = loadImageIcon("tomcat24.png");
+      webServerLog = new WebServerPanel(getPort(), logLevel);
+      tabs.addTab("Tomcat", tomcatIcon, webServerLog);
     }
+    frame.getContentPane().add(tabs);
+    frame.setSize(950, 700);
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    frame.setIconImage(loadImageIcon("icon16.png").getImage());
+    frame.setVisible(true);
+  }
+
+  private void startOophmListener() {
+    listener = new BrowserListener(getTopLogger(), 0, new OophmSessionHandler(
+        browserHost));
+    listener.start();
   }
 }

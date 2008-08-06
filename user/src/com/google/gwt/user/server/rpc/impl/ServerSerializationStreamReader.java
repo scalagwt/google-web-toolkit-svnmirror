@@ -146,8 +146,7 @@ public final class ServerSerializationStreamReader extends
   private enum VectorReader {
     BOOLEAN_VECTOR {
       @Override
-      protected Object readSingleValue(ServerSerializationStreamReader stream)
-          throws SerializationException {
+      protected Object readSingleValue(ServerSerializationStreamReader stream) {
         return stream.readBoolean();
       }
 
@@ -158,8 +157,7 @@ public final class ServerSerializationStreamReader extends
     },
     BYTE_VECTOR {
       @Override
-      protected Object readSingleValue(ServerSerializationStreamReader stream)
-          throws SerializationException {
+      protected Object readSingleValue(ServerSerializationStreamReader stream) {
         return stream.readByte();
       }
 
@@ -170,8 +168,7 @@ public final class ServerSerializationStreamReader extends
     },
     CHAR_VECTOR {
       @Override
-      protected Object readSingleValue(ServerSerializationStreamReader stream)
-          throws SerializationException {
+      protected Object readSingleValue(ServerSerializationStreamReader stream) {
         return stream.readChar();
       }
 
@@ -182,8 +179,7 @@ public final class ServerSerializationStreamReader extends
     },
     DOUBLE_VECTOR {
       @Override
-      protected Object readSingleValue(ServerSerializationStreamReader stream)
-          throws SerializationException {
+      protected Object readSingleValue(ServerSerializationStreamReader stream) {
         return stream.readDouble();
       }
 
@@ -194,8 +190,7 @@ public final class ServerSerializationStreamReader extends
     },
     FLOAT_VECTOR {
       @Override
-      protected Object readSingleValue(ServerSerializationStreamReader stream)
-          throws SerializationException {
+      protected Object readSingleValue(ServerSerializationStreamReader stream) {
         return stream.readFloat();
       }
 
@@ -206,8 +201,7 @@ public final class ServerSerializationStreamReader extends
     },
     INT_VECTOR {
       @Override
-      protected Object readSingleValue(ServerSerializationStreamReader stream)
-          throws SerializationException {
+      protected Object readSingleValue(ServerSerializationStreamReader stream) {
         return stream.readInt();
       }
 
@@ -218,8 +212,7 @@ public final class ServerSerializationStreamReader extends
     },
     LONG_VECTOR {
       @Override
-      protected Object readSingleValue(ServerSerializationStreamReader stream)
-          throws SerializationException {
+      protected Object readSingleValue(ServerSerializationStreamReader stream) {
         return stream.readLong();
       }
 
@@ -242,8 +235,7 @@ public final class ServerSerializationStreamReader extends
     },
     SHORT_VECTOR {
       @Override
-      protected Object readSingleValue(ServerSerializationStreamReader stream)
-          throws SerializationException {
+      protected Object readSingleValue(ServerSerializationStreamReader stream) {
         return stream.readShort();
       }
 
@@ -254,8 +246,7 @@ public final class ServerSerializationStreamReader extends
     },
     STRING_VECTOR {
       @Override
-      protected Object readSingleValue(ServerSerializationStreamReader stream)
-          throws SerializationException {
+      protected Object readSingleValue(ServerSerializationStreamReader stream) {
         return stream.readString();
       }
 
@@ -373,7 +364,7 @@ public final class ServerSerializationStreamReader extends
     stringTable = null;
 
     int idx = 0, nextIdx;
-    while (-1 != (nextIdx = encodedTokens.indexOf('\uffff', idx))) {
+    while (-1 != (nextIdx = encodedTokens.indexOf(RPC_SEPARATOR_CHAR, idx))) {
       String current = encodedTokens.substring(idx, nextIdx);
       tokenList.add(current);
       idx = nextIdx + 1;

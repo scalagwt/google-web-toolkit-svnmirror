@@ -15,11 +15,9 @@
  */
 package com.google.gwt.dev.util.log;
 
-import com.google.gwt.dev.shell.LowLevel;
+import com.google.gwt.core.ext.TreeLogger;
 
-import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
+import javax.swing.JFrame;
 
 /**
  * Useful for debugging, this class manages to standalone window
@@ -49,27 +47,23 @@ public class DetachedTreeLoggerWindow implements Runnable {
     return singleton;
   }
 
-  private final Shell shell;
+  private final JFrame frame;
   private final AbstractTreeLogger logger;
   private boolean isRunning = false;
 
   private DetachedTreeLoggerWindow(final String caption, final int width,
       final int height, final boolean autoScroll) {
-
-    shell = new Shell(Display.getCurrent());
-    shell.setText(caption);
-    FillLayout fillLayout = new FillLayout();
-    fillLayout.marginWidth = 0;
-    fillLayout.marginHeight = 0;
-    shell.setLayout(fillLayout);
-
-    final TreeLoggerWidget treeLoggerWidget = new TreeLoggerWidget(shell);
-    treeLoggerWidget.setAutoScroll(autoScroll);
+    frame = new JFrame(caption);
+    final SwingLoggerPanel treeLoggerWidget = new SwingLoggerPanel(TreeLogger.INFO);
     logger = treeLoggerWidget.getLogger();
+    treeLoggerWidget.setAutoScroll(autoScroll);
+    frame.getContentPane().add(treeLoggerWidget);
+    frame.setSize(950, 700);
 
-    shell.setImage(LowLevel.loadImage("gwt.ico"));
-    shell.setSize(width, height);
-    shell.open();
+//    frame.setImage(LowLevel.loadImage("gwt.ico"));
+    frame.setSize(width, height);
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    frame.setVisible(true);
   }
 
   public AbstractTreeLogger getLogger() {
@@ -84,13 +78,6 @@ public class DetachedTreeLoggerWindow implements Runnable {
     if (!maybeStart()) {
       throw new IllegalStateException(
           "DetachedTreeLogger window is already running.");
-    }
-
-    final Display display = shell.getDisplay();
-    while (!shell.isDisposed()) {
-      if (!display.readAndDispatch()) {
-        display.sleep();
-      }
     }
   }
 

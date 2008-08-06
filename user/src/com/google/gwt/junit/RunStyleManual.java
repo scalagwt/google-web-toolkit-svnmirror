@@ -31,11 +31,6 @@ class RunStyleManual extends RunStyleRemote {
   }
 
   @Override
-  public boolean isLocal() {
-    return false;
-  }
-
-  @Override
   public void launchModule(String moduleName) throws UnableToCompleteException {
     if (numClients == 1) {
       System.out.println("Please navigate your browser to this URL:");
@@ -44,13 +39,5 @@ class RunStyleManual extends RunStyleRemote {
           + " browsers to this URL:");
     }
     System.out.println(getMyUrl(moduleName));
-  }
-
-  @Override
-  public void maybeCompileModule(String moduleName)
-      throws UnableToCompleteException {
-    System.out.print("Compiling " + moduleName + "...");
-    super.maybeCompileModule(moduleName);
-    System.out.println(" success.");
   }
 }

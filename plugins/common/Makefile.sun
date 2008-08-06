@@ -1,0 +1,100 @@
+# Set to classpath value to get GWT classes from
+#GWTDEV=../build/staging/gwt-linux-0.0.0/gwt-dev-linux.jar
+GWTDEV=../eclipse/dev/linux/bin
+
+INC=-I..
+CFLAGS=-fast -g0 -Kpic $(INC) -Bdynamic -noex
+CXXFLAGS=$(CFLAGS)
+CXX=CC
+
+HDRS= HostChannel.h InvokeMessage.h LoadModuleMessage.h Message.h \
+      ReturnMessage.h Value.h BrowserChannel.h Debug.h DebugLevel.h \
+      SessionHandler.h ServerMethods.h Socket.h AllowedConnections.h
+
+OBJS=	HostChannel.o LoadModuleMessage.o InvokeMessage.o \
+	ReturnMessage.o ServerMethods.o Debug.o AllowedConnections.o \
+	Socket.o
+
+SRCS=	HostChannel.cpp LoadModuleMessage.cpp InvokeMessage.cpp \
+	ReturnMessage.cpp ServerMethods.cpp Debug.cpp AllowedConnections.cpp \
+	Socket.cpp
+
+OBJ32= $(patsubst %.cpp,obj32/%.o,$(SRCS))
+OBJ64= $(patsubst %.cpp,obj64/%.o,$(SRCS))
+
+all:: libcommon32.a libcommon64.a
+
+libcommon32.a: $(OBJ32) obj32.dir
+	ar -rv $@ $(OBJ32)
+
+libcommon64.a: $(OBJ64) obj64.dir
+	ar -rv $@ $(OBJ64)
+
+obj32.dir:
+	-mkdir obj32
+	touch obj32.dir
+
+obj64.dir:
+	-mkdir obj64
+	touch obj64.dir
+
+obj32/%.o: %.cpp obj32.dir
+	$(CXX) $(CXXFLAGS) -m32 -c $< -o $@
+
+obj64/%.o: %.cpp obj64.dir
+	$(CXX) $(CXXFLAGS) -m64 -c $< -o $@
+
+.PHONY: clean depend
+
+clean:
+	rm $(OBJ32) $(OBJ64) libcommon32.a libcommon64.a
+
+depend:
+	g++ -MM $(CFLAGS) $(SRCS) >>Makefile
+#	makedepend -- $(CFLAGS) -- $(SRCS)
+
+# DO NOT DELETE
+obj32/HostChannel.o obj64/HostChannel.o: Makefile.sun \
+  HostChannel.cpp HostChannel.h Platform.h Message.h \
+  ReturnMessage.h BrowserChannel.h Value.h SessionHandler.h \
+  InvokeMessage.h QuitMessage.h scoped_ptr/scoped_ptr.h
+obj32/LoadModuleMessage.o obj64/LoadModuleMessage.o: Makefile.sun \
+  LoadModuleMessage.cpp LoadModuleMessage.h Message.h \
+  BrowserChannel.h HostChannel.h Platform.h ReturnMessage.h Value.h \
+  SessionHandler.h scoped_ptr/scoped_ptr.h
+obj32/InvokeMessage.o obj64/InvokeMessage.o: Makefile.sun \
+  InvokeMessage.cpp InvokeMessage.h Message.h \
+  BrowserChannel.h Value.h HostChannel.h Platform.h ReturnMessage.h \
+  SessionHandler.h
+obj32/ReturnMessage.o obj64/ReturnMessage.o: Makefile.sun \
+  ReturnMessage.cpp ReturnMessage.h Message.h \
+  BrowserChannel.h Value.h HostChannel.h Platform.h SessionHandler.h
+obj32/ServerMethods.o obj64/ServerMethods.o: Makefile.sun \
+  ServerMethods.cpp ServerMethods.h Value.h \
+  BrowserChannel.h HostChannel.h Platform.h Message.h ReturnMessage.h \
+  SessionHandler.h InvokeMessage.h scoped_ptr/scoped_ptr.h
+obj32/HostChannel.o obj64/HostChannel.o: Makefile.sun \
+  HostChannel.cpp HostChannel.h Platform.h Message.h \
+  ReturnMessage.h BrowserChannel.h Value.h SessionHandler.h \
+  InvokeMessage.h QuitMessage.h scoped_ptr/scoped_ptr.h
+obj32/LoadModuleMessage.o obj64/LoadModuleMessage.o: Makefile.sun \
+  LoadModuleMessage.cpp LoadModuleMessage.h Message.h \
+  BrowserChannel.h HostChannel.h Platform.h ReturnMessage.h Value.h \
+  SessionHandler.h scoped_ptr/scoped_ptr.h
+obj32/InvokeMessage.o obj64/InvokeMessage.o: Makefile.sun \
+  InvokeMessage.cpp InvokeMessage.h Message.h \
+  BrowserChannel.h Value.h HostChannel.h Platform.h ReturnMessage.h \
+  SessionHandler.h
+obj32/ReturnMessage.o obj64/ReturnMessage.o: Makefile.sun \
+  ReturnMessage.cpp ReturnMessage.h Message.h \
+  BrowserChannel.h Value.h HostChannel.h Platform.h SessionHandler.h
+obj32/ServerMethods.o obj64/ServerMethods.o: Makefile.sun \
+  ServerMethods.cpp ServerMethods.h Value.h \
+  BrowserChannel.h HostChannel.h Platform.h Message.h ReturnMessage.h \
+  SessionHandler.h InvokeMessage.h scoped_ptr/scoped_ptr.h
+obj32/Debug.o obj64/Debug.o: Makefile.sun \
+  Debug.cpp Debug.h DebugLevel.h
+obj32/Socket.o obj64/Socket.o: Makefile.sun \
+  Socket.cpp Socket.h Debug.h DebugLevel.h
+obj32/AllowedConnections.o obj64/AllowedConnections.o: Makefile.sun \
+  AllowedConnections.cpp AllowedConnections.h Debug.h DebugLevel.h

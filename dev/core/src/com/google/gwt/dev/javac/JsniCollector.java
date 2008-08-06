@@ -101,6 +101,10 @@ public class JsniCollector {
       return paramNames;
     }
 
+    public JsProgram program() {
+      return program;
+    }
+
     public String source() {
       return source;
     }

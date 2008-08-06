@@ -371,10 +371,7 @@ public final class ServerSerializationStreamWriter extends
 
     for (int i = 0, n = input.length; i < n; ++i) {
       char c = input[i];
-      if (c < NUMBER_OF_JS_ESCAPED_CHARS && JS_CHARS_ESCAPED[c] != 0) {
-        charVector.add(JS_ESCAPE_CHAR);
-        charVector.add(JS_CHARS_ESCAPED[c]);
-      } else if (needsUnicodeEscape(c)) {
+      if (needsUnicodeEscape(c)) {
         charVector.add(JS_ESCAPE_CHAR);
         unicodeEscape(c, charVector);
       } else {
@@ -444,43 +441,57 @@ public final class ServerSerializationStreamWriter extends
    * </ol>
    */
   private static boolean needsUnicodeEscape(char ch) {
-    switch (Character.getType(ch)) {
-      // Conservative
-      case Character.COMBINING_SPACING_MARK:
-      case Character.ENCLOSING_MARK:
-      case Character.NON_SPACING_MARK:
-      case Character.UNASSIGNED:
-      case Character.PRIVATE_USE:
-      case Character.SPACE_SEPARATOR:
-      case Character.CONTROL:
-
-        // Minimal
-      case Character.LINE_SEPARATOR:
-      case Character.FORMAT:
-      case Character.PARAGRAPH_SEPARATOR:
-      case Character.SURROGATE:
+    switch (ch) {
+      case ' ':
+        // ASCII space gets caught in SPACE_SEPARATOR below, but does not need to be escaped
+        return false;
+      case RPC_SEPARATOR_CHAR:
+      case JS_QUOTE_CHAR:
+        // these must be quoted or they will break the protocol
         return true;
-
       default:
-        if (ch == NON_BREAKING_HYPHEN) {
-          // This can be expanded into a break followed by a hyphen
-          return true;
+        switch (Character.getType(ch)) {
+          // Conservative
+          case Character.COMBINING_SPACING_MARK:
+          case Character.ENCLOSING_MARK:
+          case Character.NON_SPACING_MARK:
+          case Character.UNASSIGNED:
+          case Character.PRIVATE_USE:
+          case Character.SPACE_SEPARATOR:
+          case Character.CONTROL:
+
+            // Minimal
+          case Character.LINE_SEPARATOR:
+          case Character.FORMAT:
+          case Character.PARAGRAPH_SEPARATOR:
+          case Character.SURROGATE:
+            return true;
+
+          default:
+            if (ch == NON_BREAKING_HYPHEN) {
+              // This can be expanded into a break followed by a hyphen
+              return true;
+            }
+          break;
         }
-        break;
+      break;
     }
 
     return false;
   }
 
   /**
-   * Writes either the two or four character escape sequence for a character.
-   * 
+   * Writes either the two or four character escape sequence for a character.  Some
+   * characters have special escapes, such as \n for U+000D.
    * 
    * @param ch character to unicode escape
    * @param charVector char vector to receive the unicode escaped representation
    */
   private static void unicodeEscape(char ch, CharVector charVector) {
-    if (ch < 256) {
+    if (ch < NUMBER_OF_JS_ESCAPED_CHARS && JS_CHARS_ESCAPED[ch] != 0) {
+      charVector.add(JS_ESCAPE_CHAR);
+      charVector.add(JS_CHARS_ESCAPED[ch]);
+    } else if (ch < 256) {
       charVector.add('x');
       charVector.add(NIBBLE_TO_HEX_CHAR[(ch >> 4) & 0x0F]);
       charVector.add(NIBBLE_TO_HEX_CHAR[ch & 0x0F]);

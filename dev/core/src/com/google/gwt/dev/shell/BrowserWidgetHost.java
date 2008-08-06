@@ -28,13 +28,12 @@ public interface BrowserWidgetHost {
 
   void compile(ModuleDef module) throws UnableToCompleteException;
 
-  // Factor this out if BrowserWidget becomes decoupled from hosted mode
-  ModuleSpaceHost createModuleSpaceHost(BrowserWidget widget, String moduleName)
-      throws UnableToCompleteException;
+  ModuleSpaceHost createModuleSpaceHost(TreeLogger logger, String moduleName, String userAgent,
+      String remoteEndpoint) throws UnableToCompleteException;
 
   TreeLogger getLogger();
 
   String normalizeURL(String whatTheUserTyped);
 
-  BrowserWidget openNewBrowserWindow() throws UnableToCompleteException;
+  void unloadModule(ModuleSpaceHost moduleSpaceHost);
 }

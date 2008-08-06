@@ -6,8 +6,7 @@
 	<property.ensure name="java.tools.path" location="${java.home}/../lib/tools.jar" unless="build.host.ismac" message="Cannot find ${java.home}/../lib/tools.jar; please use a JDK when building doc rather than a JRE." />
 
 	<property.ensure name="gwt.user.jar" location="${gwt.build.lib}/gwt-user.jar" />
-	<!-- Platform shouldn't matter here, just picking one -->
-	<property.ensure name="gwt.dev.jar" location="${gwt.build.lib}/gwt-dev-linux.jar" />
+	<property.ensure name="gwt.dev.jar" location="${gwt.build.lib}/gwt-dev.jar" />
 
 	<property name="USER_PKGS"
           value="com.google.gwt.core.client;com.google.gwt.core.ext;com.google.gwt.core.ext.linker;com.google.gwt.core.ext.typeinfo;com.google.gwt.dom.client;com.google.gwt.i18n.client;com.google.gwt.i18n.rebind.format;com.google.gwt.i18n.rebind.keygen;com.google.gwt.json.client;com.google.gwt.junit.client;com.google.gwt.benchmarks.client;com.google.gwt.user.client;com.google.gwt.user.client.rpc;com.google.gwt.user.client.ui;com.google.gwt.user.server.rpc;com.google.gwt.xml.client;com.google.gwt.http.client" />

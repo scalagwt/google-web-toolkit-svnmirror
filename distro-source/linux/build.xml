@@ -8,16 +8,10 @@
 		<mkdir dir="${gwt.build.dist}" />
 		<gwt.tgz.cat destfile="${project.dist}" compression="bzip2">
 			<!-- jars -->
-			<tarfileset file="${gwt.build.lib}/gwt-dev-${dist.platform}.jar" prefix="${project.distname}" />
+			<tarfileset file="${gwt.build.lib}/gwt-dev.jar" prefix="${project.distname}" />
 			<tarfileset file="${gwt.build.lib}/gwt-user.jar" prefix="${project.distname}" />
 			<tarfileset file="${gwt.build.lib}/gwt-servlet.jar" prefix="${project.distname}" />
 			<tarfileset file="${gwt.build.lib}/gwt-benchmark-viewer.jar" prefix="${project.distname}" />
-
-			<!-- jni libs-->
-			<tarfileset dir="${gwt.build.jni}/${dist.platform}" prefix="${project.distname}" />
-			<tarfileset dir="${gwt.tools.lib}/eclipse" prefix="${project.distname}">
-				<include name="libswt-*gtk-3235.so" />
-			</tarfileset>
 
 			<!-- raw files -->
 			<tarfileset dir="${project.build}" prefix="${project.distname}" mode="755">
@@ -50,12 +44,18 @@
 				<include name="samples/*/www/**" />
 				<exclude name="samples/*/www/.*/**" />
 			</tarfileset>
-			<tarfileset dir="${gwt.build.out}/samples-scripts/${dist.platform}" mode="755" prefix="${project.distname}/samples">
+			<tarfileset dir="${gwt.build.out}/samples-scripts" mode="755" prefix="${project.distname}/samples">
 				<include name="*/*-compile" />
 				<include name="*/*-shell" />
 			</tarfileset>
 
-			<includetar src="${gwt.tools.redist}/mozilla/mozilla-1.7.12.tar.gz" compression="gzip" prefix="${project.distname}" />
+			<!-- OOPHM plugins -->
+			<tarfileset dir="${gwt.build.out}" prefix="${project.distname}">
+				<include name="plugins" />
+				<include name="plugins/firefox" />
+				<include name="plugins/firefox/**" />
+			</tarfileset>
+
 		</gwt.tgz.cat>
 
 		<if>

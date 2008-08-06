@@ -10,16 +10,133 @@ if ($stats) {
   var moduleName = moduleFunc ? moduleFunc.moduleName : "unknown";
   $stats({moduleName:moduleName,subSystem:'startup',evtGroup:'moduleStartup',millis:(new Date()).getTime(),type:'moduleEvalStart'});
 }
+
+var __eval = window.eval;
+window.eval = function(s) {
+  return __eval(s);
+}
+
 </script></head>
 <body>
+<embed id="pluginEmbed" type="application/x-gwt-hosted-mode" width="10" height="10">
+</embed>
+<object id="pluginObject" CLASSID="CLSID:1D6156B6-002B-49E7-B5CA-C138FB843B4E">
+</object>
 <font face='arial' size='-1'>This html file is for hosted mode support.</font>
 <script><!--
+var $hosted = "localhost:9997";
+
+// wrapper to call JS methods, which we need both to be able to supply a
+// different this for method lookup and to get the exception back
+function __gwt_jsWrapper(method, methodlookup, thisref) {
+  try {
+    var args = Array.prototype.slice.call(arguments, 3);
+    // if (method.indexOf("::eval") >= 0) {
+    //  console.log("calling " + method + " on " + methodlookup + " (this=" + thisref + "), args are ", args);
+    //  console.log("method=" + methodlookup[method] ? methodlookup[method].toString() : methodlookup[method]);
+    // }
+    // console.log("calling " + method + " on " + methodlookup + " (this=" + thisref + "), args are ", args);
+    var ret = methodlookup[method].apply(thisref, args);
+    // console.log("successful; returned ", ret);
+    return [0, ret];
+  } catch (e) {
+    try {
+      // if (method.indexOf("::eval") >= 0) {
+      //  console.log("failed; exception", e);
+      // }
+      // console.log("methodlookup[method]=", methodlookup[method] ? methodlookup[method].toString() : methodlookup[method]);
+      // console.log("failed; exception ", e);
+    } catch (e2) {
+      // console.log("exception " + e2 + " logging original exception");
+    }
+    return [1, e];
+  }
+}
+
+function __gwt_eval(js) {
+  try {
+    return [0, eval(js)];
+  } catch (e) {
+    return [1, e];
+  }
+}
+
+/*
+ * This is used to create tear-offs of Java methods.  What this does is to
+ * create a Function object that invokes a specific dispatchId via the
+ * static-dispatch object.  We get the "this" value from the context in which
+ * the function is being executed.  Function-object identity is preserved by
+ * storing the created functions in a sparse array.
+ *
+ * function(p0, p1) {
+ *   return __static(dispId, this, p0, p1);
+ * }
+ */
+var $tearOffs = [];
+function __gwt_makeTearOff(proxy, dispId, argCount) {
+  var fn = $tearOffs[dispId];
+  if (fn) {
+    return fn;
+  }
+  
+  // IE6 doesn't won't eval() anonymous functions except as r-values
+  var js = "$tearOffs[" + dispId + "] = function(";
+  for (var i = 0; i < argCount; i++) {
+    js += "p" + i;
+    if (i < argCount - 1) {
+      js += ",";
+    }
+  }
+  js += ") {return __static(" + dispId+ ", this";
+  for (var i = 0; i < argCount; i++) {
+    js += ", p" + i;
+  }
+  js += ");};";
+  return eval(js);
+}
+
+function __gwt_appendScript(win, className) {
+  var script = win.document.createElement("script");
+  script.src = "http://" + $hosted + "/" + className;
+  win.document.body.appendChild(script);
+}
+
 function gwtOnLoad(errFn, modName, modBase){
   $moduleName = modName;
   $moduleBase = modBase;
-  if (!external.gwtOnLoad(window, modName)) {
-    if (errFn) {
-      errFn(modName);
+
+  /*
+   * NOTE: this presently sucks and is the only formulation I can find that will
+   * work across browsers.  On a Windows box where both plugins are registered,
+   * FF will instantiate the (non-working) IE plugin.  But plugins have problems
+   * that prevent making this easy.
+   *
+   * The IE plugin will throw an exception in FF if you try to resolve
+   * "pluginObject.connect" as a value.  Thus the try/catch below.
+   *
+   * The FF plugin will actually do illegal crashy things in IE if you try to
+   * resolve "pluginEmbed.connect" as a value.  Thus we have to try the IE
+   * plugin first.
+   *
+   * Both plugins need some work to make them truly safe.  I have no idea what
+   * will happen in Safari.
+   */
+  var plugins = [
+    document.getElementById('pluginObject'),
+    document.getElementById('pluginEmbed'),
+  ];
+  for (var i = 0; i < plugins.length; ++i) {
+    try {
+      var plugin = plugins[i];
+      if (!plugin.connect($hosted, $moduleName, window)) {
+        if (errFn) {
+          errFn(modName);
+        } else {
+          alert("failed to connect to hosted mode server at " + $hosted);
+        }
+      }
+      break;
+    } catch (e) {
     }
   }
 }
@@ -29,12 +146,22 @@ window.fireOnModuleLoadStart = function(className) {
 };
 
 window.onunload = function() {
-  external.gwtOnLoad(window, null);
 };
 
 window.__gwt_module_id = 0;
 
-var query = window.location.search.substr(1);
+var query = window.location.search;
 $stats && $stats({moduleName:$moduleName,subSystem:'startup',evtGroup:'moduleStartup',millis:(new Date()).getTime(),type:'moduleEvalEnd'});
-if (query && $wnd[query]) $wnd[query].onScriptLoad();
+var idx = query.indexOf("gwt.hosted=");
+if (idx >= 0) {
+  var amp = query.indexOf("&", idx);
+  if (amp >= 0) {
+    $hosted = query.substring(idx + 11, amp);
+  } else {
+    $hosted = query.substring(idx + 11);
+  }
+}
+idx = query.lastIndexOf("&");
+query = query.substring(idx + 1);
+if (query && $wnd[query]) setTimeout($wnd[query].onScriptLoad, 1);
 --></script></body></html>

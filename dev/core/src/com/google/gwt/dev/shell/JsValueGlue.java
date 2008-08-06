@@ -32,6 +32,53 @@ public final class JsValueGlue {
   public static final String JSO_IMPL_CLASS = "com.google.gwt.core.client.JavaScriptObject$";
 
   /**
+   * Create a JavaScriptObject instance referring to this JavaScript object.
+   * 
+   * @param classLoader the classLoader to create from
+   * @return the constructed JavaScriptObject
+   */
+  public static Object createJavaScriptObject(JsValue value, CompilingClassLoader classLoader) {
+    Throwable caught;
+    try {
+      // See if there's already a wrapper object (assures identity comparison).
+      Object jso = classLoader.getCachedJso(value.getJavaScriptObjectPointer());
+      if (jso != null) {
+        return jso;
+      }
+
+      // Instantiate the JSO class.
+      Class<?> jsoType = Class.forName(JSO_IMPL_CLASS, true, classLoader);
+      Constructor<?> ctor = jsoType.getDeclaredConstructor();
+      ctor.setAccessible(true);
+      jso = ctor.newInstance();
+
+      // Set the reference field to this JsValue using reflection.
+      Field referenceField = jsoType.getField(HOSTED_MODE_REFERENCE);
+      referenceField.set(jso, value);
+
+      classLoader.putCachedJso(value.getJavaScriptObjectPointer(), jso);
+      return jso;
+    } catch (InstantiationException e) {
+      caught = e;
+    } catch (IllegalAccessException e) {
+      caught = e;
+    } catch (SecurityException e) {
+      caught = e;
+    } catch (NoSuchMethodException e) {
+      caught = e;
+    } catch (IllegalArgumentException e) {
+      caught = e;
+    } catch (InvocationTargetException e) {
+      caught = e;
+    } catch (ClassNotFoundException e) {
+      caught = e;
+    } catch (NoSuchFieldException e) {
+      caught = e;
+    }
+    throw new RuntimeException("Error creating JavaScript object", caught);
+  }
+
+  /**
    * Return an object containing the value JavaScript object as a specified
    * type.
    * 
@@ -193,54 +240,6 @@ public final class JsValueGlue {
         value.setWrappedJavaObject(cl, obj);
       }
     }
-  }
-
-  /**
-   * Create a JavaScriptObject instance referring to this JavaScript object.
-   * 
-   * @param classLoader the classLoader to create from
-   * @return the constructed JavaScriptObject
-   */
-  private static Object createJavaScriptObject(JsValue value,
-      CompilingClassLoader classLoader) {
-    Throwable caught;
-    try {
-      // See if there's already a wrapper object (assures identity comparison).
-      Object jso = classLoader.getCachedJso(value.getJavaScriptObjectPointer());
-      if (jso != null) {
-        return jso;
-      }
-
-      // Instantiate the JSO class.
-      Class<?> jsoType = Class.forName(JSO_IMPL_CLASS, true, classLoader);
-      Constructor<?> ctor = jsoType.getDeclaredConstructor();
-      ctor.setAccessible(true);
-      jso = ctor.newInstance();
-
-      // Set the reference field to this JsValue using reflection.
-      Field referenceField = jsoType.getField(HOSTED_MODE_REFERENCE);
-      referenceField.set(jso, value);
-
-      classLoader.putCachedJso(value.getJavaScriptObjectPointer(), jso);
-      return jso;
-    } catch (InstantiationException e) {
-      caught = e;
-    } catch (IllegalAccessException e) {
-      caught = e;
-    } catch (SecurityException e) {
-      caught = e;
-    } catch (NoSuchMethodException e) {
-      caught = e;
-    } catch (IllegalArgumentException e) {
-      caught = e;
-    } catch (InvocationTargetException e) {
-      caught = e;
-    } catch (ClassNotFoundException e) {
-      caught = e;
-    } catch (NoSuchFieldException e) {
-      caught = e;
-    }
-    throw new RuntimeException("Error creating JavaScript object", caught);
   }
 
   private static int getIntRange(JsValue value, int low, int high,

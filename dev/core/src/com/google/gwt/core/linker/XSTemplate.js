@@ -65,14 +65,8 @@ function __MODULE_FUNC__() {
   // --------------- INTERNAL FUNCTIONS ---------------
 
   function isHostedMode() {
-    try {
-      return ($wnd.external && $wnd.external.gwtOnLoad &&
-          ($wnd.location.search.indexOf('gwt.hybrid') == -1));
-    } catch (e) {
-      // Defensive: some versions of IE7 reportedly can throw an exception
-      // evaluating "external.gwtOnLoad".
-      return false;
-    }
+    // TODO: can hosted mode work without an IFRAME?
+    return false;
   }
   
   // Called by onScriptLoad() and onload(). It causes

@@ -36,14 +36,12 @@ public class JsniConstructorTest extends GWTTestCase {
   /**
    * Ensure that exceptions propagate correctly.
    */
-  public void testExceptions() {
+  public void testExceptions() throws StaticObjectException {
     try {
       staticArg(false);
       fail("Should have thrown a checked exception");
     } catch (StaticObjectException e) {
       // Expected
-    } catch (Throwable t) {
-      fail("Expecting a StaticObjectException, got a " + t.getClass().getName());
     }
     
     try {
@@ -51,8 +49,6 @@ public class JsniConstructorTest extends GWTTestCase {
       fail("Should have thrown a runtime exception");
     } catch (RuntimeException e) {
       // Expected
-    } catch (Throwable t) {
-      fail("Expecting a RuntimeException, got a " + t.getClass().getName());
     }
   }
   

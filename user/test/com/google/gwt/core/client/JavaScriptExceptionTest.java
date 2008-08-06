@@ -53,22 +53,6 @@ public class JavaScriptExceptionTest extends GWTTestCase {
     @com.google.gwt.core.client.JavaScriptExceptionTest::throwJava(Ljava/lang/Throwable;)(t);
   }-*/;
 
-  /**
-   * This test doesn't work in hosted mode yet; we'd need a way to throw true
-   * native objects as exceptions. Windows/IE is the deal killer right now on
-   * really making this work since there's no way to raise an exception of a
-   * true JS value. We could use JS lambdas around Java calls to get around this
-   * restriction.
-   */
-  public native void disabledTestJsExceptionSandwich() /*-{
-    var e = { };
-    try {
-      @com.google.gwt.core.client.JavaScriptExceptionTest::throwSandwichJava(Ljava/lang/Object;)(e);
-    } catch (t) {
-      @junit.framework.Assert::assertSame(Ljava/lang/Object;Ljava/lang/Object;)(e, t);
-    }
-  }-*/;
-
   @Override
   public String getModuleName() {
     return "com.google.gwt.core.Core";
@@ -82,6 +66,15 @@ public class JavaScriptExceptionTest extends GWTTestCase {
       assertSame(e, t);
     }
   }
+
+  public native void testJsExceptionSandwich() /*-{
+    var e = { };
+    try {
+      @com.google.gwt.core.client.JavaScriptExceptionTest::throwSandwichJava(Ljava/lang/Object;)(e);
+    } catch (t) {
+      @junit.framework.Assert::assertSame(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)(t.toString(), e, t);
+    }
+  }-*/;
 
   public void testJso() {
     JavaScriptObject jso = makeJSO();

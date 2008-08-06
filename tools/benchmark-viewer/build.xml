@@ -32,8 +32,7 @@
 		<include name="**/*Test.class" />
 	</fileset>
 
-	<!-- Platform shouldn't matter here, just picking one -->
-	<property.ensure name="gwt.dev.jar" location="${gwt.build.lib}/gwt-dev-linux.jar" />
+	<property.ensure name="gwt.dev.jar" location="${gwt.build.lib}/gwt-dev.jar" />
 	<property.ensure name="gwt.user.jar" location="${gwt.build.lib}/gwt-user.jar" />
 
 	<target name="compile" description="Compile all class files">

@@ -41,6 +41,7 @@ import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 import junit.framework.TestResult;
 
+import java.awt.GraphicsEnvironment;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -199,8 +200,7 @@ public class JUnitShell extends GWTShell {
    */
   private static JUnitShell getUnitTestShell() {
     if (unitTestShell == null) {
-      BootStrapPlatform.init();
-      BootStrapPlatform.applyPlatformHacks();
+      BootStrapPlatform.go();
       unitTestShell = new JUnitShell();
       unitTestShell.lastLaunchFailed = true;
       String[] args = unitTestShell.synthesizeArgs();
@@ -242,6 +242,16 @@ public class JUnitShell extends GWTShell {
   private boolean lastLaunchFailed;
 
   /**
+   * We need to keep a hard reference to the last module that was launched until
+   * all client browsers have successfully transitioned to the current module.
+   * Failure to do so allows the last module to be GC'd, which transitively
+   * kills the {@link com.google.gwt.junit.server.JUnitHostImpl} servlet. If the
+   * servlet dies, the client browsers will be unable to transition.
+   */
+  @SuppressWarnings("unused")
+  private ModuleDef lastModule;
+
+  /**
    * Portal to interact with the servlet.
    */
   private JUnitMessageQueue messageQueue;
@@ -254,9 +264,9 @@ public class JUnitShell extends GWTShell {
   private int numClients = 1;
 
   /**
-   * What type of test we're running; Local hosted, local web, or remote web.
+   * Default to a manual, hosted-mode test.
    */
-  private RunStyle runStyle = new RunStyleLocalHosted(this);
+  private RunStyle runStyle = new RunStyleManual(this, 1);
 
   /**
    * The time the test actually began.
@@ -270,14 +280,10 @@ public class JUnitShell extends GWTShell {
   private long testBeginTimeout;
 
   /**
-   * We need to keep a hard reference to the last module that was launched until
-   * all client browsers have successfully transitioned to the current module.
-   * Failure to do so allows the last module to be GC'd, which transitively
-   * kills the {@link com.google.gwt.junit.server.JUnitHostImpl} servlet. If the
-   * servlet dies, the client browsers will be unable to transition.
+   * Indicates wheter or not the RunStyle in use should attempt to use hosted
+   * mode or regular web mode.
    */
-  @SuppressWarnings("unused")
-  private ModuleDef lastModule;
+  private boolean useHostedMode = true;
 
   /**
    * Enforce the singleton pattern. The call to {@link GWTShell}'s ctor forces
@@ -285,27 +291,6 @@ public class JUnitShell extends GWTShell {
    */
   private JUnitShell() {
     super(true, true);
-
-    registerHandler(new ArgHandlerFlag() {
-
-      @Override
-      public String getPurpose() {
-        return "Causes your test to run in web (compiled) mode (defaults to hosted mode)";
-      }
-
-      @Override
-      public String getTag() {
-        return "-web";
-      }
-
-      @Override
-      public boolean setFlag() {
-        runStyle = new RunStyleLocalWeb(JUnitShell.this);
-        numClients = 1;
-        return true;
-      }
-
-    });
 
     registerHandler(new ArgHandlerString() {
 
@@ -317,7 +302,7 @@ public class JUnitShell extends GWTShell {
 
       @Override
       public String getTag() {
-        return "-remoteweb";
+        return "-remote";
       }
 
       @Override
@@ -343,7 +328,7 @@ public class JUnitShell extends GWTShell {
 
       @Override
       public String getPurpose() {
-        return "Runs web mode via HTTP to a set of Selenium servers; "
+        return "Runs hosted mode via HTTP to a set of Selenium servers; "
             + "e.g. localhost:4444/*firefox,remotehost:4444/*iexplore";
       }
 
@@ -375,17 +360,12 @@ public class JUnitShell extends GWTShell {
 
       @Override
       public String getTag() {
-        return "-externalbrowser";
+        return "-external";
       }
 
       @Override
       public String[] getTagArgs() {
         return new String[] {"browserPaths"};
-      }
-
-      @Override
-      public boolean isUndocumented() {
-        return true;
       }
 
       @Override
@@ -406,7 +386,7 @@ public class JUnitShell extends GWTShell {
 
       @Override
       public String getPurpose() {
-        return "Causes the system to wait for a remote browser to connect";
+        return "Run tests in web mode after waiting for a remote browser to connect";
       }
 
       @Override
@@ -464,13 +444,37 @@ public class JUnitShell extends GWTShell {
       }
     });
 
+    registerHandler(new ArgHandlerFlag() {
+
+      @Override
+      public String getPurpose() {
+        return "Runs the test in web mode instead of hosted mode";
+      }
+
+      @Override
+      public String getTag() {
+        return "-web";
+      }
+
+      @Override
+      public boolean setFlag() {
+        useHostedMode = false;
+        return true;
+      }
+
+    });
+
     setRunTomcat(true);
-    setHeadless(true);
+    setHeadless(GraphicsEnvironment.isHeadless());
 
     // Legacy: -Dgwt.hybrid runs web mode
     if (System.getProperty(PROP_JUNIT_HYBRID_MODE) != null) {
-      runStyle = new RunStyleLocalWeb(this);
+      runStyle = new RunStyleManual(this, 1);
     }
+  }
+
+  public String getHostedUrlSuffix() {
+    return "?gwt.hosted=" + listener.getEndpointIdentifier();
   }
 
   @Override
@@ -515,12 +519,24 @@ public class JUnitShell extends GWTShell {
     }
   }
 
-  /**
-   * Overrides {@link GWTShell#notDone()} to wait for the currently-running test
-   * to complete.
-   */
-  @Override
-  protected boolean notDone() {
+  void compileForWebMode(String moduleName, String userAgentString)
+      throws UnableToCompleteException {
+    // Never fresh during JUnit.
+    ModuleDef module = ModuleDefLoader.loadFromClassPath(getTopLogger(),
+        moduleName, false);
+    if (userAgentString != null) {
+      Properties props = module.getProperties();
+      Property userAgent = props.find("user.agent");
+      if (userAgent != null) {
+        userAgent.setActiveValue(userAgentString);
+      }
+    }
+    BrowserWidgetHost browserHost = getBrowserHost();
+    assert (browserHost != null);
+    browserHost.compile(module);
+  }
+
+  private boolean notDone() {
     int activeClients = messageQueue.getNumClientsRetrievedCurrentTest();
     if (firstLaunch && runStyle instanceof RunStyleManual) {
       String[] newClients = messageQueue.getNewClients();
@@ -561,32 +577,6 @@ public class JUnitShell extends GWTShell {
     return !messageQueue.hasResult();
   }
 
-  @Override
-  protected void sleep() {
-    if (runStyle.isLocal()) {
-      super.sleep();
-    } else {
-      messageQueue.waitForResults(1000);
-    }
-  }
-
-  void compileForWebMode(String moduleName, String userAgentString)
-      throws UnableToCompleteException {
-    // Never fresh during JUnit.
-    ModuleDef module = ModuleDefLoader.loadFromClassPath(getTopLogger(),
-        moduleName, false);
-    if (userAgentString != null) {
-      Properties props = module.getProperties();
-      Property userAgent = props.find("user.agent");
-      if (userAgent != null) {
-        userAgent.setActiveValue(userAgentString);
-      }
-    }
-    BrowserWidgetHost browserHost = getBrowserHost();
-    assert (browserHost != null);
-    browserHost.compile(module);
-  }
-
   /**
    * Runs a particular test case.
    */
@@ -623,6 +613,7 @@ public class JUnitShell extends GWTShell {
       moduleNameProp.addKnownValue(moduleName);
       moduleNameProp.setActiveValue(moduleName);
       runStyle.maybeCompileModule(syntheticModuleName);
+      runStyle.setHostedMode(useHostedMode);
     }
 
     JUnitFatalLaunchException launchException = checkTestClassInCurrentModule(
@@ -651,7 +642,9 @@ public class JUnitShell extends GWTShell {
       // contacted; something probably went wrong (the module failed to load?)
       testBeginTime = System.currentTimeMillis();
       testBeginTimeout = testBeginTime + TEST_BEGIN_TIMEOUT_MILLIS;
-      pumpEventLoop();
+      while (notDone()) {
+        messageQueue.waitForResults(1000);
+      }
     } catch (TimeoutException e) {
       lastLaunchFailed = true;
       testResult.addError(testCase, e);
@@ -711,7 +704,7 @@ public class JUnitShell extends GWTShell {
       Pattern pattern = Pattern.compile("[^\\s\"]+|\"[^\"\\\\]*(\\\\.[^\"\\\\]*)*\"");
       Matcher matcher = pattern.matcher(args);
       Pattern quotedArgsPattern = Pattern.compile("^([\"'])(.*)([\"'])$");
-      
+
       while (matcher.find()) {
         // Strip leading and trailing quotes from the arg
         String arg = matcher.group();

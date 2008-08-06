@@ -1,6 +1,6 @@
            GOOGLE WEB TOOLKIT LICENSE INFORMATION
 
-March 3, 2008
+July 1, 2008
 
 The Google Web Toolkit software and sample code developed by Google is 
 licensed under the Apache License, v. 2.0. Other software included in this 
@@ -206,15 +206,6 @@ e.g. "gwt-dev-linux.jar".
   Source code availability:
     http://archive.eclipse.org/eclipse/downloads/drops/R-3.3.1-200709211145/download.php?dropFile=eclipse-JDT-SDK-3.3.1.zip
 
-* Eclipse Standard Widget Toolkit (SWT)
-  License: Eclipse Public License v. 1.0
-    http://www.eclipse.org/legal/epl-v10.html
-  Source code availability:
-    Linux: http://download.eclipse.org/eclipse/downloads/drops/R-3.2.1-200609210945/download.php?dropFile=swt-3.2.1-gtk-linux-x86.zip
-    Windows: http://download.eclipse.org/eclipse/downloads/drops/R-3.2.1-200609210945/download.php?dropFile=swt-3.2.1-win32-win32-x86.zip
-    Mac: http://download.eclipse.org/eclipse/downloads/drops/R-3.2.1-200609210945/download.php?dropFile=swt-3.2.1-carbon-macosx.zip
-    modifications are at org/eclipse/swt within gwt-dev.jar
-
 * JFreeChart
   License: GNU Lesser General Public License v. 2.1
     http://www.gnu.org/licenses/lgpl.html
@@ -226,15 +217,9 @@ e.g. "gwt-dev-linux.jar".
     http://www.mozilla.org/MPL/MPL-1.1.txt
   Source code availability: com/google/gwt/dev/js/rhino/ within gwt-dev.jar
 
-* Mozilla 1.7.12 (Linux only)
-  License: Mozilla Public License v. 1.1
-    http://www.mozilla.org/MPL/MPL-1.1.txt
-  Source code availability: 
-    http://developer.mozilla.org/en/docs/Download_Mozilla_Source_Code
-
-* WebKit 418.9 (Mac only)
+* SwingWorker 1.1
   License: GNU Lesser General Public License v. 2.1
     http://www.gnu.org/licenses/lgpl.html
   Source code availability: 
-    http://webkit.org/building/checkout.html
+    https://swingworker.dev.java.net/servlets/ProjectDocumentList
 

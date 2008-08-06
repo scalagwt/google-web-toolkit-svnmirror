@@ -47,6 +47,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -61,7 +62,8 @@ import java.util.Set;
  * since they really do not interact with the CompilingClassLoader
  * functionality.
  */
-public final class CompilingClassLoader extends ClassLoader {
+public final class CompilingClassLoader extends ClassLoader implements
+    DispatchIdOracle {
 
   /**
    * Oracle that can answer questions about
@@ -107,13 +109,6 @@ public final class CompilingClassLoader extends ClassLoader {
      * @return integer encoded as ((classId << 16) | memberId)
      */
     public synchronized int getDispId(String jsniMemberRef) {
-      /*
-       * Map JS toString() onto the Java toString() method.
-       */
-      if (jsniMemberRef.equals("toString")) {
-        jsniMemberRef = "@java.lang.Object::toString()";
-      }
-
       JsniRef parsed = JsniRef.parse(jsniMemberRef);
       if (parsed == null) {
         logger.log(TreeLogger.WARN, "Malformed JSNI reference '"
@@ -157,7 +152,10 @@ public final class CompilingClassLoader extends ClassLoader {
 
     /**
      * Returns the {@link java.lang.Class} instance for a given binary class
-     * name.
+     * name. It is important to avoid initializing the class because this would
+     * potentially cause initializers to be run in a different order than in web
+     * mode. Moreover, we may not have injected all of the JSNI code required to
+     * initialize the class.
      * 
      * @param binaryClassName the binary name of a class
      * @return {@link java.lang.Class} instance or null if the given binary
@@ -165,7 +163,7 @@ public final class CompilingClassLoader extends ClassLoader {
      */
     private Class<?> getClassFromBinaryName(String binaryClassName) {
       try {
-        return Class.forName(binaryClassName, true, CompilingClassLoader.this);
+        return Class.forName(binaryClassName, false, CompilingClassLoader.this);
       } catch (ClassNotFoundException e) {
         return null;
       }
@@ -596,6 +594,16 @@ public final class CompilingClassLoader extends ClassLoader {
       updateJavaScriptHost();
     }
 
+    /*
+     * We have to inject the JSNI code after defining the class, since dispId
+     * assignment is based around reflection on Class objects.
+     */
+    CompiledClass compiledClass = compilationState.getClassFileMap().get(
+        canonicalizeClassName(className));
+    if (compiledClass != null) {
+      injectJsniFor(compiledClass);
+    }
+
     if (className.equals("com.google.gwt.core.client.GWT")) {
       gwtClass = newClass;
       updateGwtClass();
@@ -613,6 +621,19 @@ public final class CompilingClassLoader extends ClassLoader {
     dispClassInfoOracle.clear();
   }
 
+  /**
+   * Convert a binary class name into a resource-like name.
+   */
+  private String canonicalizeClassName(String className) {
+    String lookupClassName = className.replace('.', '/');
+    // A JSO impl class ends with $, strip it
+    if (classRewriter != null && classRewriter.isJsoImpl(className)) {
+      lookupClassName = lookupClassName.substring(0,
+          lookupClassName.length() - 1);
+    }
+    return lookupClassName;
+  }
+
   private byte[] findClassBytes(String className) {
     if (JavaScriptHost.class.getName().equals(className)) {
       // No need to rewrite.
@@ -624,18 +645,10 @@ public final class CompilingClassLoader extends ClassLoader {
       return classRewriter.writeJsoIntf(className);
     }
 
-    // A JSO impl class needs the class bytes for the original class.
-    String lookupClassName = className.replace('.', '/');
-    if (classRewriter != null && classRewriter.isJsoImpl(className)) {
-      lookupClassName = lookupClassName.substring(0,
-          lookupClassName.length() - 1);
-    }
-
+    String lookupClassName = canonicalizeClassName(className);
     CompiledClass compiledClass = compilationState.getClassFileMap().get(
         lookupClassName);
     if (compiledClass != null) {
-      injectJsniFor(compiledClass);
-
       byte[] classBytes = compiledClass.getBytes();
       if (classRewriter != null) {
         byte[] newBytes = classRewriter.rewrite(className, classBytes);
@@ -658,15 +671,34 @@ public final class CompilingClassLoader extends ClassLoader {
   }
 
   private void injectJsniFor(CompiledClass compiledClass) {
-    for (JsniMethod jsniMethod : compiledClass.getJsniMethods()) {
-      String body = Jsni.getJavaScriptForHostedMode(logger, jsniMethod);
+    List<JsniMethod> jsniMethods = compiledClass.getJsniMethods();
+    if (jsniMethods.isEmpty()) {
+      return;
+    }
+    StringBuilder jsni = new StringBuilder();
+    final String sourceName = compiledClass.getSourceName();
+    for (JsniMethod jsniMethod : jsniMethods) {
+      String body = Jsni.getJavaScriptForHostedMode(logger, this, jsniMethod);
       if (body == null) {
         // The error has been logged; just ignore it for now.
         continue;
       }
-      shellJavaScriptHost.createNative(jsniMethod.location(),
-          jsniMethod.line(), jsniMethod.name(), jsniMethod.paramNames(), body);
+      jsni.append("// " + jsniMethod.location() + ":" + jsniMethod.line()
+          + "\n");
+      jsni.append("this[\"" + jsniMethod.name() + "\"] = function(");
+      final String[] paramNames = jsniMethod.paramNames();
+      for (int i = 0; i < paramNames.length; ++i) {
+        if (i > 0) {
+          jsni.append(", ");
+        }
+        jsni.append(paramNames[i]);
+      }
+      jsni.append(") ");
+      jsni.append(body);
+      jsni.append(";\n\n");
     }
+    logger.log(TreeLogger.TRACE, "Defining JSNI for " + sourceName);
+    shellJavaScriptHost.createNativeMethods(sourceName, jsni.toString());
   }
 
   /**
@@ -689,8 +721,6 @@ public final class CompilingClassLoader extends ClassLoader {
    * Tricky one, this. Reaches over into this modules's JavaScriptHost class and
    * sets its static 'host' field to our module space.
    * 
-   * @param moduleSpace the ModuleSpace instance to store using
-   *          JavaScriptHost.setHost().
    * @see JavaScriptHost
    */
   private void updateGwtClass() {

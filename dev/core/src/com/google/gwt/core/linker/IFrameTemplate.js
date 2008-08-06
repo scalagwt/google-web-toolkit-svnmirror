@@ -65,14 +65,8 @@ function __MODULE_FUNC__() {
   // --------------- INTERNAL FUNCTIONS ---------------
 
   function isHostedMode() {
-    try {
-      return ($wnd.external && $wnd.external.gwtOnLoad &&
-          ($wnd.location.search.indexOf('gwt.hybrid') == -1));
-    } catch (e) {
-      // Defensive: some versions of IE7 reportedly can throw an exception
-      // evaluating "external.gwtOnLoad".
-      return false;
-    }
+    return ($wnd.location.search.indexOf('gwt.hosted=') != -1) &&
+          ($wnd.location.search.indexOf('gwt.hybrid') == -1);
   }
 
   // Called by onScriptLoad(), onInjectionDone(), and onload(). It causes
@@ -354,7 +348,7 @@ function __MODULE_FUNC__() {
 
   var strongName;
   if (isHostedMode()) {
-    strongName = "hosted.html?__MODULE_FUNC__";
+    strongName = "hosted.html" + $wnd.location.search + "&__MODULE_FUNC__";
   } else {
     try {
 // __PERMUTATIONS_BEGIN__

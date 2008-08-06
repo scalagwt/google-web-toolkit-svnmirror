@@ -36,11 +36,6 @@ abstract class RunStyle {
   }
 
   /**
-   * Returns whether or not the local UI event loop needs to be pumped.
-   */
-  public abstract boolean isLocal();
-
-  /**
    * Requests initial launch of the browser. This should only be called once per
    * instance of RunStyle.
    * 
@@ -58,6 +53,12 @@ abstract class RunStyle {
    */
   public abstract void maybeCompileModule(String moduleName)
       throws UnableToCompleteException;
+
+  /**
+   * Set whether or not hosted-mode should be used instead of a web-mode
+   * compile.
+   */
+  public abstract void setHostedMode(boolean useHostedMode);
 
   /**
    * Tests whether the test was interrupted.

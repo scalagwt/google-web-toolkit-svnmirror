@@ -31,6 +31,8 @@ public abstract class AbstractSerializationStream {
    */
   public static final int SERIALIZATION_STREAM_VERSION_WITHOUT_SERIALIZATION_POLICY = 2;
 
+  protected static final char RPC_SEPARATOR_CHAR = '|';
+
   private int flags = 0;
 
   private int version = SERIALIZATION_STREAM_VERSION;

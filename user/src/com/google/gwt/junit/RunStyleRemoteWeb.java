@@ -135,7 +135,8 @@ class RunStyleRemoteWeb extends RunStyleRemote {
     try {
       RMISocketFactoryWithTimeouts.init();
     } catch (IOException e) {
-      throw new JUnitFatalLaunchException("Error initializing RMISocketFactory", e);
+      throw new JUnitFatalLaunchException(
+          "Error initializing RMISocketFactory", e);
     }
     int numClients = urls.length;
     BrowserManager[] browserManagers = new BrowserManager[numClients];
@@ -194,11 +195,6 @@ class RunStyleRemoteWeb extends RunStyleRemote {
       }
     }
     Runtime.getRuntime().addShutdownHook(new ShutdownCb());
-  }
-
-  @Override
-  public boolean isLocal() {
-    return false;
   }
 
   @Override

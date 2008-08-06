@@ -87,7 +87,7 @@ public final class ProjectCreator extends ToolBase {
       throws IOException {
 
     // Figure out the installation directory
-    String installPath = Utility.getInstallPath();
+    String installPath = Utility.getInstallPath(true);
 
     // Create a map of replacements.
     Map<String, String> replacements = new HashMap<String, String>();

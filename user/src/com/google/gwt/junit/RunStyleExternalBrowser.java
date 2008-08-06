@@ -19,10 +19,9 @@ import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
 
 /**
- * Runs in web mode via browsers managed as an external process. This feature is
- * experimental and is not officially supported.
+ * Runs in via browsers managed as an external process.
  */
-class RunStyleExternalBrowser extends RunStyle {
+class RunStyleExternalBrowser extends RunStyleManual {
 
   private static class ExternalBrowser {
     String browserPath;
@@ -52,7 +51,7 @@ class RunStyleExternalBrowser extends RunStyle {
    * @param browsers an array of path names pointing to browser executables.
    */
   public RunStyleExternalBrowser(JUnitShell shell, String browsers[]) {
-    super(shell);
+    super(shell, browsers.length);
     synchronized (this) {
       this.externalBrowsers = new ExternalBrowser[browsers.length];
       for (int i = 0; i < browsers.length; ++i) {
@@ -63,17 +62,11 @@ class RunStyleExternalBrowser extends RunStyle {
   }
 
   @Override
-  public boolean isLocal() {
-    return false;
-  }
-
-  @Override
   public synchronized void launchModule(String moduleName)
       throws UnableToCompleteException {
     String commandArray[] = new String[2];
     // construct the URL for the browser to hit
-    commandArray[1] = "http://" + "localhost" + ":" + shell.getPort() + "/"
-        + getUrlSuffix(moduleName);
+    commandArray[1] = getMyUrl(moduleName);
 
     Process child = null;
     for (ExternalBrowser browser : externalBrowsers) {
@@ -97,8 +90,8 @@ class RunStyleExternalBrowser extends RunStyle {
 
   @Override
   public boolean wasInterrupted() {
-    
-    // Make sure all browsers are still running 
+
+    // Make sure all browsers are still running
     for (ExternalBrowser browser : externalBrowsers) {
       try {
         browser.getProcess().exitValue();
@@ -129,11 +122,4 @@ class RunStyleExternalBrowser extends RunStyle {
       }
     }
   }
-
-  @Override
-  public void maybeCompileModule(String moduleName)
-      throws UnableToCompleteException {
-    shell.compileForWebMode(moduleName, null);
-  }
-
 }

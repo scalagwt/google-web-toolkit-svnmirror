@@ -90,14 +90,17 @@ public class GWTCompiler extends ToolBase {
    */
   private class ArgHandlerValidateOnlyFlag extends ArgHandlerFlag {
 
+    @Override
     public String getPurpose() {
       return "Validate all source code, but do not compile";
     }
 
+    @Override
     public String getTag() {
       return "-validateOnly";
     }
 
+    @Override
     public boolean setFlag() {
       jjsOptions.setValidateOnly(true);
       return true;
@@ -434,7 +437,7 @@ public class GWTCompiler extends ToolBase {
    */
   private boolean run() {
     // Set any platform specific system properties.
-    BootStrapPlatform.applyPlatformHacks();
+    BootStrapPlatform.go();
 
     if (useGuiLogger) {
       // Initialize a tree logger window.

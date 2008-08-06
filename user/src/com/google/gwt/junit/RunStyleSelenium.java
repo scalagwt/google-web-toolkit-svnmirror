@@ -155,9 +155,10 @@ public class RunStyleSelenium extends RunStyleRemote {
     // Startup all the selenia and point them at the module url.
     for (RCSelenium remote : remotes) {
       try {
-        shell.getTopLogger().log(TreeLogger.TRACE,
-            "Starting with domain: " + domain 
-            + " Opening URL: " + getMyUrl(moduleName)); 
+        shell.getTopLogger().log(
+            TreeLogger.TRACE,
+            "Starting with domain: " + domain + " Opening URL: "
+                + getMyUrl(moduleName));
         remote.createSelenium(domain);
         remote.getSelenium().start();
         remote.getSelenium().open(getMyUrl(moduleName));

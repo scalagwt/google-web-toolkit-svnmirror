@@ -11,7 +11,7 @@
 	<property name="gwt.apicheck.oldroot" 
 		location="../gwt-1.4"/>
 
-	<target name="dist" depends="dev, user, servlet, tools, jni, doc, samples" description="Run the distributions">
+	<target name="dist" depends="dev, user, servlet, tools, plugins, doc, samples" description="Run the distributions">
 		<gwt.ant dir="distro-source" />
 	</target>
 
@@ -31,8 +31,8 @@
 		<gwt.ant dir="servlet" />
 	</target>
 
-	<target name="jni" description="Run jni">
-		<gwt.ant dir="jni" />
+	<target name="plugins" description="Copy browser plugins">
+		<gwt.ant dir="plugins" />
 	</target>
 
 	<target name="doc" depends="buildtools, user" description="Build doc">

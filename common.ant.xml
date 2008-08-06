@@ -90,7 +90,7 @@
 	</condition>
 
 	<!-- JUnit support -->
-	<property name="gwt.dev.staging.jar" location="${gwt.build.staging}/gwt-${build.host.platform}-${gwt.version}/gwt-dev-${build.host.platform}.jar" />
+	<property name="gwt.dev.staging.jar" location="${gwt.build.staging}/gwt-${build.host.platform}-${gwt.version}/gwt-dev.jar" />
 	<property name="gwt.junit.port" value="8888" />
 	<property name="gwt.junit.testcase.includes" value="**/*Suite.class"/>
 
@@ -144,6 +144,7 @@
 		<attribute name="test.out" default="" />
 		<attribute name="test.reports" default="@{test.out}/reports" />
 		<attribute name="test.cases" default="" />
+		<attribute name="test.runstyle" default="" />
 		<element name="extraclasspaths" optional="true" />
 		<sequential>
 			<taskdef name="junit" classname="org.apache.tools.ant.taskdefs.optional.junit.JUnitTask">
@@ -161,7 +162,7 @@
 			<junit dir="@{test.out}" fork="yes" printsummary="yes" failureproperty="junit.failure" >
 				<jvmarg line="${junit.platform.args}" />
 				<jvmarg line="-Xmx512m" />
-				<sysproperty key="gwt.args" value="${junit.notheadless.arg} @{test.args}" />
+				<sysproperty key="gwt.args" value="${junit.notheadless.arg} @{test.args} @{test.runstyle}" />
 				<sysproperty key="java.awt.headless" value="${junit.headless}" />
 				<sysproperty key="gwt.devjar" value="${gwt.dev.staging.jar}" />
 				<classpath>

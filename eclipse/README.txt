@@ -103,7 +103,7 @@ Set the location to "settings/code-style/gwt-checkstyle-tests.xml".
 
 == Importing the GWT core projects ==
 
-1) Import the 'gwt-dev-<platform>' and 'gwt-user' projects
+1) Import the 'gwt-dev' and 'gwt-user' projects
 
   File->Import->General->Existing Projects into Workspace->Next
   Browse to the 'trunk/eclipse' folder and select it
@@ -112,19 +112,13 @@ Set the location to "settings/code-style/gwt-checkstyle-tests.xml".
   Inside this folder are a number of .projects files, only a few of
   which you will need to get started. You may import others later.
 
-  Select 'gwt-dev-<platform>' appropriate to your OS
+  Select 'gwt-dev'
   Select 'gwt-user'
   Select any of the GWT samples as you want.  The most useful ones are:
     - Hello: very simple project useful as a little playground
     - Showcase: complex UI application
     - DynaTable: uses RPC
   Then press the Finish button.
-  
-  Non-windows users: By default, gwt-user depends on gwt-dev-windows, which you
-  will not have imported.  You must update the gwt-user project configuration
-  to depend on gwt-dev-linux or gwt-dev-mac (whichever one you imported).  This
-  can be done by editing gwt-user's .classpath file directly, or through the IDE
-  under Project->Properties->Java Build Path->Projects.
 
 2) Dismiss the welcome tab if you are setting up an Eclipse workspace
   for the first time.

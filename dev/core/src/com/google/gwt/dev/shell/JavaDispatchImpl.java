@@ -25,34 +25,34 @@ import java.lang.reflect.Method;
  */
 public class JavaDispatchImpl implements JavaDispatch {
 
-  private final CompilingClassLoader classLoader;
+  private final DispatchIdOracle dispatchInfo;
 
   private final Object target;
 
   /**
    * This constructor initializes a dispatcher for handling static members.
    * 
-   * @param ccl class loader to use for dispatching member access
+   * @param dispatchInfo class loader to use for dispatching member access
    */
-  public JavaDispatchImpl(CompilingClassLoader ccl) {
-    classLoader = ccl;
+  public JavaDispatchImpl(DispatchIdOracle dispatchInfo) {
+    this.dispatchInfo = dispatchInfo;
     target = null;
   }
 
   /**
    * This constructor initializes a dispatcher around a particular instance.
    * 
-   * @param ccl class loader to use for dispatching member access
+   * @param dispatchInfo class loader to use for dispatching member access
    * @param target the instance object to use for dispatching member accesses
    * 
    * @throws NullPointerException if target is null
    */
-  public JavaDispatchImpl(CompilingClassLoader ccl, Object target) {
+  public JavaDispatchImpl(DispatchIdOracle dispatchInfo, Object target) {
     if (target == null) {
       throw new NullPointerException("target cannot be null");
     }
 
-    classLoader = ccl;
+    this.dispatchInfo = dispatchInfo;
     this.target = target;
   }
 
@@ -145,7 +145,7 @@ public class JavaDispatchImpl implements JavaDispatch {
    * @return the member
    */
   protected Member getMember(int dispId) {
-    DispatchClassInfo clsInfo = classLoader.getClassInfoByDispId(dispId);
+    DispatchClassInfo clsInfo = dispatchInfo.getClassInfoByDispId(dispId);
     return clsInfo.getMember(dispId);
   }
 }
