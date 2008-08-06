@@ -706,7 +706,7 @@ public final class CompilingClassLoader extends ClassLoader implements
       return;
     }
     StringBuilder jsni = new StringBuilder();
-    final String sourceName = compiledClass.getSourceName();
+    String sourceName = compiledClass.getSourceName();
     for (JsniMethod jsniMethod : jsniMethods) {
       String body = Jsni.getJavaScriptForHostedMode(logger, this, jsniMethod);
       if (body == null) {
@@ -716,7 +716,7 @@ public final class CompilingClassLoader extends ClassLoader implements
       jsni.append("// " + jsniMethod.location() + ":" + jsniMethod.line()
           + "\n");
       jsni.append("this[\"" + jsniMethod.name() + "\"] = function(");
-      final String[] paramNames = jsniMethod.paramNames();
+      String[] paramNames = jsniMethod.paramNames();
       for (int i = 0; i < paramNames.length; ++i) {
         if (i > 0) {
           jsni.append(", ");
