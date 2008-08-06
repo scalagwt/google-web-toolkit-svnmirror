@@ -15,6 +15,7 @@
  */
 package com.google.gwt.dev.shell;
 
+import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.dev.shell.JsValue.DispatchObject;
 
 import java.io.BufferedReader;
@@ -33,17 +34,20 @@ public class BrowserChannelServer extends BrowserChannel implements Runnable {
 
   private final ObjectsTable javaObjectsInBrowser = new ObjectsTable();
 
+  private TreeLogger logger;
+
   private String moduleName;
 
   private String userAgent;
 
-  public BrowserChannelServer(Socket socket, SessionHandler handler)
-      throws IOException {
+  public BrowserChannelServer(TreeLogger initialLogger, Socket socket,
+      SessionHandler handler) throws IOException {
     super(socket);
     this.handler = handler;
+    this.logger = initialLogger;
     Thread thread = new Thread(this);
     thread.setDaemon(true);
-    thread.setName("OOPHM server");
+    thread.setName("Hosted mode worker");
     thread.start();
   }
 
@@ -133,46 +137,30 @@ public class BrowserChannelServer extends BrowserChannel implements Runnable {
 
   public void run() {
     try {
-      boolean gotLoadModule = false;
+      MessageType type = Message.readMessageType(getStreamFromOtherSide());
+      assert type == MessageType.LoadModule;
+      LoadModuleMessage message = LoadModuleMessage.receive(this);
+      moduleName = message.getModuleName();
+      userAgent = message.getUserAgent();
+      Thread.currentThread().setName(
+          "Hosting " + moduleName + " for" + userAgent);
+      logger = handler.loadModule(logger, this, moduleName, userAgent);
       try {
-        MessageType type = Message.readMessageType(getStreamFromOtherSide());
-        assert type == MessageType.LoadModule;
-        gotLoadModule = true;
-        LoadModuleMessage message = LoadModuleMessage.receive(this);
-        moduleName = message.getModuleName();
-        userAgent = message.getUserAgent();
-        Thread.currentThread().setName(
-            "OOPHM server for " + moduleName + " from " + userAgent);
-        // TODO: handle exceptions
-        handler.loadModule(this, moduleName, userAgent);
-        try {
-          // send LoadModule response
-          ReturnMessage.send(this, false, new Value());
-          reactToMessages(handler);
-        } catch (IOException e) {
-          // TODO: Remove, just for debugging.
-          e.printStackTrace();
-        } catch (BrowserChannelException e) {
-          // check for HTTP
-          if (!gotLoadModule && !processHttpRequest()) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-          }
-        } finally {
-          handler.unloadModule(this, moduleName);
-        }
-      } catch (IOException e) {
-        // TODO: Remove, just for debugging.
-        e.printStackTrace();
-      } catch (BrowserChannelException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+        // send LoadModule response
+        ReturnMessage.send(this, false, new Value());
+        reactToMessages(handler);
+      } finally {
+        handler.unloadModule(this, moduleName);
       }
+    } catch (IOException e) {
+      logger.log(TreeLogger.TRACE, "Client connection lost", e);
+    } catch (BrowserChannelException e) {
+      logger.log(TreeLogger.WARN,
+          "Unrecognized command for client; closing connection", e);
     } finally {
       try {
         shutdown();
-      } catch (IOException e) {
-        // ignore errors during shutdown
+      } catch (IOException ignored) {
       }
       endSession();
     }

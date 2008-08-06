@@ -19,6 +19,7 @@ import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.dev.shell.BrowserChannel.SessionHandler.ReturnOrException;
 import com.google.gwt.dev.shell.BrowserChannel.SessionHandler.SpecialDispatchId;
 import com.google.gwt.dev.shell.BrowserChannel.Value.ValueType;
+import com.google.gwt.util.tools.Utility;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -154,8 +155,8 @@ public abstract class BrowserChannel {
     public abstract ReturnOrException invoke(BrowserChannel channel,
         Value thisObj, int dispId, Value[] args);
 
-    public abstract TreeLogger loadModule(BrowserChannel channel,
-        String moduleName, String userAgent);
+    public abstract TreeLogger loadModule(TreeLogger logger,
+        BrowserChannel channel, String moduleName, String userAgent);
 
     public abstract ReturnOrException setProperty(BrowserChannel channel,
         int refId, int dispId, Value newValue);
@@ -1173,24 +1174,9 @@ public abstract class BrowserChannel {
   }
 
   public void endSession() {
-    try {
-      streamFromOtherSide.close();
-    } catch (IOException e) {
-      // TODO: What to do here?
-    }
-
-    try {
-      streamToOtherSide.close();
-    } catch (IOException e) {
-      // TODO: What to do here?
-    }
-
-    try {
-      socket.close();
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
+    Utility.close(streamFromOtherSide);
+    Utility.close(streamToOtherSide);
+    Utility.close(socket);
   }
 
   public Set<Integer> getRefIdsForCleanup() {

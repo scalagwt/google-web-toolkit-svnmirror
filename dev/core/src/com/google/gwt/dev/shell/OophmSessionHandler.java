@@ -185,8 +185,8 @@ public class OophmSessionHandler extends SessionHandler {
   }
 
   @Override
-  public TreeLogger loadModule(BrowserChannel channel, String moduleName,
-      String userAgent) {
+  public TreeLogger loadModule(TreeLogger logger, BrowserChannel channel,
+      String moduleName, String userAgent) {
     logger.log(TreeLogger.INFO, "Hosted mode connection from "
         + channel.getRemoteEndpoint());
     try {
@@ -195,7 +195,7 @@ public class OophmSessionHandler extends SessionHandler {
       BrowserChannelServer serverChannel = (BrowserChannelServer) channel;
       ModuleSpaceHost msh = host.createModuleSpaceHost(logger, moduleName,
           userAgent, channel.getRemoteEndpoint());
-      logger = msh.getLogger();
+      this.logger = logger = msh.getLogger();
       ModuleSpace moduleSpace = new ModuleSpaceOOPHM(msh, moduleName,
           serverChannel);
       moduleMap.put(serverChannel, moduleSpace);

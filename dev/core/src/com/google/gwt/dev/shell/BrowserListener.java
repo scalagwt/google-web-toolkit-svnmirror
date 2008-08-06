@@ -49,12 +49,13 @@ public class BrowserListener {
           while (true) {
             try {
               Socket sock = listenSocket.accept();
-              logger.log(TreeLogger.INFO, "Connection received from "
-                  + sock.getInetAddress().getCanonicalHostName() + ":"
-                  + sock.getPort());
+              TreeLogger branch = logger.branch(TreeLogger.INFO,
+                  "Connection received from "
+                      + sock.getInetAddress().getCanonicalHostName() + ":"
+                      + sock.getPort());
               sock.setTcpNoDelay(true);
-              BrowserChannelServer server = new BrowserChannelServer(sock,
-                  handler);
+              BrowserChannelServer server = new BrowserChannelServer(branch,
+                  sock, handler);
               /*
                * This object is special-cased by the SessionHandler, used for
                * methods needed by the client like hasMethod/hasProperty/etc.
@@ -69,7 +70,7 @@ public class BrowserListener {
           }
         }
       };
-      listenThread.setName("OOPHM listener");
+      listenThread.setName("Hosted mode listener");
       listenThread.setDaemon(true);
     } catch (BindException e) {
       logger.log(TreeLogger.ERROR, "Unable to bind socket on port " + port
