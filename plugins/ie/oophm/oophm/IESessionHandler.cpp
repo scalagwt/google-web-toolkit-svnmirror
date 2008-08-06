@@ -193,7 +193,7 @@ bool IESessionHandler::invoke(HostChannel& channel, const Value& thisObj,
 
   // Free previously-collected Java ids on the server to enable re-use
   freeJavaObjects();
-  return exceptionFlag;
+  return exceptionFlag != 0;
 }
 
 bool IESessionHandler::invokeSpecial(HostChannel& channel, SpecialMethodId method, int numArgs,
@@ -398,7 +398,6 @@ void IESessionHandler::makeValueRef(_variant_t& retVal, const Value& value) {
       break;
 
     case Value::STRING:
-    case Value::JS_STRING_OBJECT:
       // The copy-constructor does not correctly handle embedded nulls
       retVal.bstrVal = UTF8ToBSTR(value.getString().length(), 
         value.getString().c_str()).Detach();

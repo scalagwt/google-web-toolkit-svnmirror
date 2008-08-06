@@ -6,5 +6,7 @@ Copies:
 /branches/oophm/ was created (r3415) as a straight copy from /trunk/@r3412
 
 Merges:
-/changes/jat/oophm-trunk-r3274 -r3275:3419 will be merged into this branch shortly
----> The final merge into trunk will start at revision [TBD]
+/changes/jat/oophm-trunk-r3274 -r3275:3419 was merged (r3424) into this branch; much manual hackery
+/changes/jat/oophm-trunk-r3274 -r3419:3424 was merged (r3425) into this branch
+---> The next merge from /changes/jat/oophm-trunk-r3274 will be -r3424:????; must hack around dev/core/
+---> The final merge into trunk will start at revision r3420

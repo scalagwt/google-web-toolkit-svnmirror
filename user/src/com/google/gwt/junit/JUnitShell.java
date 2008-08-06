@@ -439,7 +439,7 @@ public class JUnitShell extends GWTShell {
 
       @Override
       public boolean setFlag() {
-        setHeadless(false);
+        setHeadless(false || GraphicsEnvironment.isHeadless());
         return true;
       }
     });
@@ -465,7 +465,7 @@ public class JUnitShell extends GWTShell {
     });
 
     setRunTomcat(true);
-    setHeadless(GraphicsEnvironment.isHeadless());
+    setHeadless(true);
 
     // Legacy: -Dgwt.hybrid runs web mode
     if (System.getProperty(PROP_JUNIT_HYBRID_MODE) != null) {
@@ -612,8 +612,8 @@ public class JUnitShell extends GWTShell {
           "junit.moduleName");
       moduleNameProp.addKnownValue(moduleName);
       moduleNameProp.setActiveValue(moduleName);
-      runStyle.maybeCompileModule(syntheticModuleName);
       runStyle.setHostedMode(useHostedMode);
+      runStyle.maybeCompileModule(syntheticModuleName);
     }
 
     JUnitFatalLaunchException launchException = checkTestClassInCurrentModule(
