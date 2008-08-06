@@ -40,6 +40,7 @@
 		480DDCAC0E381E28000711F4 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 48A23BB60DD0E688004EF5CA /* main.m */; };
 		48108DDF0E2C15BD007FA76C /* AllowedConnections.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48108DDB0E2C15BD007FA76C /* AllowedConnections.cpp */; };
 		48108DE00E2C15BD007FA76C /* Socket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48108DDD0E2C15BD007FA76C /* Socket.cpp */; };
+		48338DDF0E4A2CA7008ACF0F /* oophm_bypass.plist in Resources */ = {isa = PBXBuildFile; fileRef = 48338DDB0E4A2C49008ACF0F /* oophm_bypass.plist */; };
 		48420D410DD51A3D001F3839 /* GTMNSString+HTML.m in Sources */ = {isa = PBXBuildFile; fileRef = 48420D3E0DD51A3D001F3839 /* GTMNSString+HTML.m */; };
 		48420D420DD51A3D001F3839 /* GTMStackTrace.c in Sources */ = {isa = PBXBuildFile; fileRef = 48420D3F0DD51A3D001F3839 /* GTMStackTrace.c */; };
 		4851A9D50DD1198300C577B2 /* JavaScriptCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 48FD98A00DC62FD800E011A2 /* JavaScriptCore.framework */; };
@@ -108,6 +109,7 @@
 		48108DDC0E2C15BD007FA76C /* AllowedConnections.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AllowedConnections.h; sourceTree = "<group>"; };
 		48108DDD0E2C15BD007FA76C /* Socket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Socket.cpp; sourceTree = "<group>"; };
 		48108DDE0E2C15BD007FA76C /* Socket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Socket.h; sourceTree = "<group>"; };
+		48338DDB0E4A2C49008ACF0F /* oophm_bypass.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = oophm_bypass.plist; sourceTree = "<group>"; };
 		48420D3C0DD51A23001F3839 /* GTMDefines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GTMDefines.h; path = GTM/GTMDefines.h; sourceTree = "<group>"; };
 		48420D3D0DD51A3D001F3839 /* GTMNSString+HTML.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "GTMNSString+HTML.h"; path = "GTM/Foundation/GTMNSString+HTML.h"; sourceTree = "<group>"; };
 		48420D3E0DD51A3D001F3839 /* GTMNSString+HTML.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "GTMNSString+HTML.m"; path = "GTM/Foundation/GTMNSString+HTML.m"; sourceTree = "<group>"; };
@@ -227,6 +229,7 @@
 		089C167CFE841241C02AAC07 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				48338DDB0E4A2C49008ACF0F /* oophm_bypass.plist */,
 				486DA8F40DD22BD50065980B /* crash.html */,
 				48C4D72D0DCA2B6900C34919 /* gwtlogo.icns */,
 				8D5B49B7048680CD000E48DA /* Info.plist */,
@@ -469,6 +472,7 @@
 				48C4D72E0DCA2B6900C34919 /* gwtlogo.icns in Resources */,
 				4856DF8F0DCF95B8000BF47C /* README.google in Resources */,
 				486DA8F50DD22BD50065980B /* crash.html in Resources */,
+				48338DDF0E4A2CA7008ACF0F /* oophm_bypass.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

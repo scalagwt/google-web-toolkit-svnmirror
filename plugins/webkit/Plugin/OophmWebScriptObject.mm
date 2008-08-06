@@ -93,15 +93,29 @@ private:
 
 - (BOOL)connectWithHost: (NSString*) host
          withModuleName: (NSString*) moduleName
-        withJsniContext: (WebScriptObject*) jsniContext {  
+        withJsniContext: (WebScriptObject*) jsniContext {
+  
+  // TODO remove this for production builds
+  Debug::log(Debug::Warning) << "ACLs are currently disabled" << Debug::flush;
+  return [self doConnectWithHost:host withModule:moduleName];
+
   NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+
+  // See if authentication has been bypassed
+  if ([defaults boolForKey:@"allowAll"]) {
+    return [self doConnectWithHost:host withModule:moduleName];
+  }
+  
+  // Otherwise, check for an explicit entry
   NSArray* allowedHosts = [defaults arrayForKey:@"allowedHosts"];
   if (allowedHosts != nil) {
-    if ([allowedHosts containsObject:host]) {
+    NSArray* hostParts = [host componentsSeparatedByString:@":"];
+    if ([allowedHosts containsObject:[hostParts objectAtIndex:0]]) {
       return [self doConnectWithHost:host withModule:moduleName];
     }
   }
-    
+  
+  // Otherwise, bring up an alert dialog
   NSAlert* alert = [NSAlert alertWithMessageText:@"Initiate hosted-mode session"
                                    defaultButton:@"Deny"
                                  alternateButton:nil
@@ -226,7 +240,8 @@ private:
   } else if (returnCode == NSAlertAlternateReturn ||
              [alert respondsToSelector:@selector(suppressionButton)] &&
              [[alert suppressionButton] state] == NSOnState) {
-    [self addAllowedHost:host];
+    NSArray* hostParts = [host componentsSeparatedByString:@":"];
+    [self addAllowedHost:[hostParts objectAtIndex:0]];
   }
 
   [self doConnectWithHost:host withModule:moduleName];
