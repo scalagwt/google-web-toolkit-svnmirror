@@ -163,8 +163,10 @@ public class RunStyleSelenium extends RunStyleRemote {
         remote.getSelenium().start();
         remote.getSelenium().open(getMyUrl(moduleName));
       } catch (Exception e) {
-        shell.getTopLogger().log(TreeLogger.ERROR,
-            "Error launching browser via Selenium-RC at " + remote.getHost(), e);
+        shell.getTopLogger().log(
+            TreeLogger.ERROR,
+            "Error launching browser " + remote.getBrowser()
+                + " via Selenium-RC at " + remote.getHost(), e);
       }
     }
   }
