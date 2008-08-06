@@ -31,11 +31,11 @@ public class Arrays {
 
   private static final class ArrayList<E> extends AbstractList<E> implements
       RandomAccess, Serializable {
-    private final E[] array;
+    private final E[] a;
 
     ArrayList(E[] array) {
       assert (array != null);
-      this.array = array;
+      this.a = array;
     }
 
     @Override
@@ -46,20 +46,20 @@ public class Arrays {
     @Override
     public E get(int index) {
       checkIndex(index, size());
-      return array[index];
+      return a[index];
     }
 
     @Override
     public E set(int index, E value) {
       checkIndex(index, size());
-      E was = array[index];
-      array[index] = value;
+      E was = a[index];
+      a[index] = value;
       return was;
     }
 
     @Override
     public int size() {
-      return array.length;
+      return a.length;
     }
 
     /*
@@ -67,7 +67,7 @@ public class Arrays {
      */
     @Override
     public Object[] toArray() {
-      return Array.clone(array);
+      return Array.clone(a);
     }
 
     /*
@@ -81,7 +81,7 @@ public class Arrays {
         out = Array.createFrom(out, size);
       }
       for (int i = 0; i < size; ++i) {
-        out[i] = (T) array[i];
+        out[i] = (T) a[i];
       }
       if (out.length > size) {
         out[size] = null;
