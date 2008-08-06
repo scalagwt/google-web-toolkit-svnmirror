@@ -21,11 +21,11 @@ package com.google.gwt.dev.shell;
 public class BrowserChannelException extends Exception {
   private static final long serialVersionUID = -8003262630951385484L;
 
-  public BrowserChannelException(String message, Throwable cause) {
-    super(message, cause);
-  }
-  
   public BrowserChannelException(String message) {
     super(message);
+  }
+  
+  public BrowserChannelException(String message, Throwable cause) {
+    super(message, cause);
   }
 }
