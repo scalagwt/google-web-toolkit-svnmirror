@@ -637,15 +637,15 @@ public class GWTShell extends ToolBase {
   /**
    * Derived classes can override to set a default port.
    */
-  protected ArgHandlerPortHosted getArgHandlerPortHosted() {
-    return new ArgHandlerPortHosted();
+  protected ArgHandlerPort getArgHandlerPort() {
+    return new ArgHandlerPort();
   }
 
   /**
    * Derived classes can override to set a default port.
    */
-  protected ArgHandlerPort getArgHandlerPort() {
-    return new ArgHandlerPort();
+  protected ArgHandlerPortHosted getArgHandlerPortHosted() {
+    return new ArgHandlerPortHosted();
   }
 
   protected BrowserWidgetHost getBrowserHost() {
