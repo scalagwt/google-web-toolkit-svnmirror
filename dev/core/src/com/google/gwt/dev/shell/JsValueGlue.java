@@ -37,7 +37,8 @@ public final class JsValueGlue {
    * @param classLoader the classLoader to create from
    * @return the constructed JavaScriptObject
    */
-  public static Object createJavaScriptObject(JsValue value, CompilingClassLoader classLoader) {
+  public static Object createJavaScriptObject(JsValue value,
+      CompilingClassLoader classLoader) {
     Throwable caught;
     try {
       // See if there's already a wrapper object (assures identity comparison).
@@ -94,13 +95,6 @@ public final class JsValueGlue {
       Class<T> type, String msgPrefix) {
 
     if (type.isPrimitive()) {
-      if (value.isUndefined()) {
-        throw new HostedModeException("Expected primitive type " + type
-            + "; actual value was undefined");
-      } else if (value.isNull()) {
-        throw new HostedModeException("Expected primitive type " + type
-            + "; actual value was null");
-      }
       if (type == Boolean.TYPE) {
         if (!value.isBoolean()) {
           throw new HostedModeException(msgPrefix + ": JS value of type "
@@ -176,9 +170,9 @@ public final class JsValueGlue {
     }
 
     // Just don't know what do to with this.
-    throw new IllegalArgumentException(msgPrefix + ": Cannot convert to type "
-        + TypeInfo.getSourceRepresentation(type) + " from "
-        + value.getTypeString());
+    throw new HostedModeException(msgPrefix + ": JS value of type "
+        + value.getTypeString() + ", expected "
+        + TypeInfo.getSourceRepresentation(type));
   }
 
   /**

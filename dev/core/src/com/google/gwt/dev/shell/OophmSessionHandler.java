@@ -229,9 +229,16 @@ public class OophmSessionHandler extends SessionHandler {
     JsValueOOPHM jsval = new JsValueOOPHM();
     serverChannel.convertToJsValue(moduleSpace.getIsolatedClassLoader(),
         localObjects, newValue, jsval);
-    dispObj.setField(dispId, jsval);
-    // TODO(jat): error handling
-    return new ReturnOrException(false, new Value());
+    boolean isException = false;
+    try {
+      dispObj.setField(dispId, jsval);
+    } catch (Throwable t) {
+      isException = true;
+      JsValueGlue.set(jsval, moduleSpace.getIsolatedClassLoader(),
+          t.getClass(), t);
+    }
+    Value retVal = serverChannel.convertFromJsValue(localObjects, jsval);
+    return new ReturnOrException(isException, retVal);
   }
 
   @Override
