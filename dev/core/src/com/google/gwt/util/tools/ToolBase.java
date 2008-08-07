@@ -16,6 +16,7 @@
 package com.google.gwt.util.tools;
 
 import com.google.gwt.dev.About;
+import com.google.gwt.dev.BootStrapPlatform;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -55,6 +56,11 @@ public abstract class ToolBase {
   // Use a list to preserve the declared order for help printing.
   //
   private final List<ArgHandler> orderedArgHandlers = new ArrayList<ArgHandler>();
+  
+  public ToolBase() {
+    // Set any platform specific system properties.
+    BootStrapPlatform.go();
+  }
 
   protected String getDescription() {
     return null;

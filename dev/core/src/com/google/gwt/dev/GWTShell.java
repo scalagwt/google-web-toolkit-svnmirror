@@ -503,16 +503,10 @@ public class GWTShell extends ToolBase {
    */
   public void run() {
     try {
-      // Set any platform specific system properties.
-      BootStrapPlatform.go();
-
       if (!startUp()) {
         // Failed to initalize.
         return;
       }
-
-      // Eager AWT initialization for OS X to ensure safe coexistence with SWT.
-      BootStrapPlatform.maybeInitializeAWT();
 
       // Tomcat's running now, so launch browsers for startup urls now.
       launchStartupUrls(getTopLogger());

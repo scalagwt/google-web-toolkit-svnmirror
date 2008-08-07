@@ -436,16 +436,10 @@ public class GWTCompiler extends ToolBase {
    *         completed without errors, <code>false</code> otherwise.
    */
   private boolean run() {
-    // Set any platform specific system properties.
-    BootStrapPlatform.go();
-
     if (useGuiLogger) {
       // Initialize a tree logger window.
       DetachedTreeLoggerWindow loggerWindow = DetachedTreeLoggerWindow.getInstance(
           "Build Output for " + moduleName, 800, 600, true);
-
-      // Eager AWT initialization for OS X to ensure safe coexistence with SWT.
-      BootStrapPlatform.maybeInitializeAWT();
 
       final AbstractTreeLogger logger = loggerWindow.getLogger();
       final boolean[] success = new boolean[1];

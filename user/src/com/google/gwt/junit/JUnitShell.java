@@ -439,7 +439,7 @@ public class JUnitShell extends GWTShell {
 
       @Override
       public boolean setFlag() {
-        setHeadless(false || GraphicsEnvironment.isHeadless());
+        setHeadless(GraphicsEnvironment.isHeadless());
         return true;
       }
     });
