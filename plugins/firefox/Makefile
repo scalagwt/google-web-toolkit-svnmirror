@@ -15,6 +15,8 @@ OBJS=	main.o Plugin.o LocalObjectTable.o JavaObject.o npn_bindings.o \
 SRCS=	main.cpp Plugin.cpp LocalObjectTable.cpp JavaObject.cpp \
 	npn_bindings.cc ScriptableInstance.cpp
 
+all:: oophm.xpi
+
 oophm.xpi: arch extension $(INSTDIR)/liboophm.so liboophm.so extension/install.rdf
 	-rm -f oophm.xpi
 	cd extension; zip -r -D -9 -o ../$@ * -x '*/.svn/*' -x 'META-INF/*'
@@ -34,6 +36,12 @@ $(INSTDIR):
 extension/META-INF/zigbert.sf: $(INSTDIR)/liboophm.so
 	signtool -d certdb -k 'GWT Plugin' -x .svn extension/
 
+extension/install.rdf: install-template.rdf version
+	sed s/GWT_OOPHM_VERSION/`cat version`/ install-template.rdf >$@
+
+version: computeversion $(HDRS) $(SRCS) $(COMMON)
+	./computeversion >$@
+
 arch: computearch
 	./computearch arch
 	@echo "Restart make"
@@ -50,20 +58,23 @@ $(COMMON): common
 
 $(OBJS): arch
 
-.PHONY: clean depend common install install-platform
+.PHONY: all realclean clean depend common install install-platform
 
-install: oophm.xpi
+install:: oophm.xpi
 	-cp --preserve=mode $< prebuilt
 
-install-platform: liboophm.so
+install-platform:: liboophm.so
 	-mkdir -p $(subst extension,prebuilt/extension,$(INSTDIR))
 	-cp --preserve=mode $< $(subst extension,prebuilt/extension,$(INSTDIR))
 
-clean:
-	-rm -f arch $(OBJS)
+realclean:: clean
+	-rm -f arch
+
+clean::
+	-rm -f $(OBJS)
 	-rm -f extension/platform/*/plugins/*.{so,dll}
 
-depend:
+depend::
 	g++ -MM $(CFLAGS) $(SRCS) >>Makefile
 #	makedepend -- $(CFLAGS) -- $(SRCS)
 

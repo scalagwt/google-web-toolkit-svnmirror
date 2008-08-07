@@ -46,7 +46,7 @@ public:
     HasMethod = SPECIAL_HAS_METHOD,
     HasProperty = SPECIAL_HAS_PROPERTY,
     GetProperty = SPECIAL_GET_PROPERTY,
-    SetProperty = SPECIAL_SET_PROPERTY,
+    SetProperty = SPECIAL_SET_PROPERTY
   };
 protected:
   virtual void freeValue(HostChannel& channel, int idCount, const int* ids) = 0;

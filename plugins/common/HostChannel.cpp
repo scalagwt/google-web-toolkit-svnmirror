@@ -73,6 +73,7 @@ bool HostChannel::disconnectFromHost() {
   sock.disconnect();
   return true;
 }
+
 bool HostChannel::readInt(int32_t& data) {
   int32_t d;
   if (!readBytes(&d, sizeof(d))) return false;
@@ -168,6 +169,7 @@ ReturnMessage* HostChannel::reactToMessages(SessionHandler* handler, bool expect
   char type;
   while (true) {
     flush();
+     Debug::log(Debug::Spam) << "Waiting for response, flushed output" << Debug::flush;
     if (!readByte(type)) {
       Debug::log(Debug::Error) << "Failed to receive message type" << Debug::flush;
       return 0;

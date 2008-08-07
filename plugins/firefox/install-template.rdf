@@ -4,11 +4,12 @@
 
   <Description about="urn:mozilla:install-manifest">
     <em:id>oophm@gwt.google.com</em:id>
-    <em:name>GWT OOPHM Plugin</em:name>
-    <em:version>0.1a</em:version>
+    <em:name>GWT Hosted Mode Plugin</em:name>
+    <em:version>GWT_OOPHM_VERSION</em:version>
     <em:type>2</em:type>
     <em:targetApplication>
       <Description>
+        <!-- Firefox 1.5-3.0 supported -->
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
         <em:minVersion>1.5</em:minVersion>
         <em:maxVersion>3.0.*</em:maxVersion>
@@ -16,7 +17,7 @@
     </em:targetApplication>
 
     <!-- Front End MetaData -->
-    <em:name>GWT OOPHM Plugin</em:name>
+    <em:name>GWT Hosted Mode Plugin</em:name>
     <em:description>A plugin to support hosted-mode development of GWT applications</em:description>
     <em:creator>Google, Inc.</em:creator>
     <em:homepageURL>http://code.google.com/webtoolkit/</em:homepageURL>
@@ -32,7 +33,7 @@
     # prefs dialog
 
     # replace default about dialog
-    <em:aboutURL>chrome://ajaxtool/content/about.xul</em:aboutURL>
+    <em:aboutURL>chrome://gwt-oophm/content/about.xul</em:aboutURL>
 
     # updates, see http://developer.mozilla.org/en/docs/Extension_Versioning%2C_Update_and_Compatibility#Update_RDF_Format
     <em:updateURL>https://xxx.google.com/.../update.rdf</em:updateURL>

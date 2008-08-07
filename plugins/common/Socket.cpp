@@ -95,6 +95,7 @@ bool Socket::connect(const char* host, int port) {
   connected = true;
   readBufPtr = readValid = readBuf;
   writeBufPtr = writeBuf;
+  Debug::log(Debug::Spam) << "  connected, fd=" << fd << Debug::flush;
   return true;
 }
 
@@ -115,7 +116,7 @@ bool Socket::disconnect() {
   
 bool Socket::emptyWriteBuf() {
   size_t len = writeBufPtr - writeBuf;
-  Debug::log(Debug::Spam) << "emptyWriteBuf: len=" << len << Debug::flush;
+  Debug::log(Debug::Spam) << "Socket::emptyWriteBuf: len=" << len << Debug::flush;
   ++numWrites;
   totWriteBytes += len;
   if (len > maxWriteBytes) {

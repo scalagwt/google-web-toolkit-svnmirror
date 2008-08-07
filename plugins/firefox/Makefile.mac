@@ -7,13 +7,14 @@ INSTDIR := extension/platform/$(shell ./getarch arch)/plugins/oophm.plugin/Conte
 RESDIR := extension/platform/$(shell ./getarch arch)/plugins/oophm.plugin/Contents/Resources
 
 HDRS= LocalObjectTable.h NPVariantWrapper.h Plugin.h mozincludes.h \
-	JavaObject.h
+	JavaObject.h ScriptableInstance.h
 
 COMMON= ../common/libcommon$(FLAG32BIT).a
-OBJS=	main.o Plugin.o LocalObjectTable.o JavaObject.o npn_bindings.o
+OBJS=	main.o Plugin.o LocalObjectTable.o JavaObject.o npn_bindings.o \
+	ScriptableInstance.o
 
 SRCS=	main.cpp Plugin.cpp LocalObjectTable.cpp JavaObject.cpp \
-	npn_bindings.cc
+	npn_bindings.cc ScriptableInstance.cpp
 
 oophm.xpi: arch extension $(INSTDIR)/liboophm $(RESDIR)/liboophm.rsrc \
   liboophm extension/install.rdf
@@ -34,6 +35,12 @@ $(INSTDIR):
 
 extension/META-INF/zigbert.sf: $(INSTDIR)/liboophm
 	signtool -d certdb -k 'GWT Plugin' -x .svn extension/
+
+extension/install.rdf: install-template.rdf version
+	sed s/GWT_OOPHM_VERSION/`cat version`/ install-template.rdf >$@
+
+version: computeversion $(HDRS) $(SRCS) $(COMMON)
+	./computeversion >$@
 
 arch: computearch
 	./computearch arch
@@ -57,7 +64,7 @@ $(COMMON): common
 
 $(OBJS): arch
 
-.PHONY: clean depend common install install-platform
+.PHONY: all realclean clean depend common install install-platform
 
 install: oophm.xpi
 	-cp $< prebuilt
@@ -68,8 +75,11 @@ install-platform: liboophm liboophm.rsrc
 	-cp liboophm $(subst extension,prebuilt/extension,$(INSTDIR))
 	-cp liboophm.rsrc $(subst extension,prebuilt/extension,$(RESDIR))
 
+realclean: clean
+	-rm -f arch
+
 clean:
-	-rm -f arch $(OBJS) liboophm liboophm.rsrc
+	-rm -f $(OBJS) liboophm liboophm.rsrc
 	-rm -rf extension
 
 depend:
@@ -80,7 +90,7 @@ depend:
 main.o: main.cpp ../common/Debug.h ../common/Platform.h \
   ../common/DebugLevel.h mozincludes.h npapi/npapi.h npapi/nphostapi.h \
   npapi/npapi.h npapi/npruntime.h npapi/npruntime.h NPObjectWrapper.h \
-  Plugin.h ../common/HostChannel.h ../common/Platform.h \
+  Plugin.h ScriptableInstance.h ../common/HostChannel.h ../common/Platform.h \
   ../common/Message.h ../common/ReturnMessage.h ../common/Message.h \
   ../common/BrowserChannel.h ../common/Value.h ../common/Debug.h \
   ../common/BrowserChannel.h ../common/Value.h ../common/SessionHandler.h \
@@ -88,7 +98,7 @@ main.o: main.cpp ../common/Debug.h ../common/Platform.h \
   ../common/BrowserChannel.h ../common/HostChannel.h \
   ../common/SessionHandler.h LocalObjectTable.h \
   ../common/scoped_ptr/scoped_ptr.h
-Plugin.o: Plugin.cpp Plugin.h ../common/Debug.h ../common/Platform.h \
+Plugin.o: Plugin.cpp Plugin.h ScriptableInstance.h ../common/Debug.h ../common/Platform.h \
   ../common/DebugLevel.h mozincludes.h npapi/npapi.h npapi/nphostapi.h \
   npapi/npapi.h npapi/npruntime.h npapi/npruntime.h NPObjectWrapper.h \
   ../common/HostChannel.h ../common/Platform.h ../common/Message.h \
@@ -107,7 +117,7 @@ LocalObjectTable.o: LocalObjectTable.cpp mozincludes.h npapi/npapi.h \
   ../common/Platform.h ../common/DebugLevel.h
 JavaObject.o: JavaObject.cpp JavaObject.h mozincludes.h npapi/npapi.h \
   npapi/nphostapi.h npapi/npapi.h npapi/npruntime.h npapi/npruntime.h \
-  NPObjectWrapper.h Plugin.h ../common/Debug.h ../common/Platform.h \
+  NPObjectWrapper.h Plugin.h ScriptableInstance.h ../common/Debug.h ../common/Platform.h \
   ../common/DebugLevel.h ../common/HostChannel.h ../common/Platform.h \
   ../common/Message.h ../common/ReturnMessage.h ../common/Message.h \
   ../common/BrowserChannel.h ../common/Value.h ../common/Debug.h \
