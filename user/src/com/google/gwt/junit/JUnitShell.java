@@ -500,6 +500,16 @@ public class JUnitShell extends GWTShell {
   }
 
   @Override
+  protected ArgHandlerPortHosted getArgHandlerPortHosted() {
+    return new ArgHandlerPortHosted() {
+      @Override
+      public String[] getDefaultArgs() {
+        return new String[] {"-port", "auto"};
+      }
+    };
+  }
+
+  @Override
   protected ArgHandlerPort getArgHandlerPort() {
     return new ArgHandlerPort() {
       @Override

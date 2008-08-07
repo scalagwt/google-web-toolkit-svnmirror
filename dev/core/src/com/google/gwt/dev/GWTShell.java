@@ -128,6 +128,48 @@ public class GWTShell extends ToolBase {
   }
 
   /**
+   * Handles the -portHosted command line flag.
+   */
+  protected class ArgHandlerPortHosted extends ArgHandlerString {
+
+    @Override
+    public String[] getDefaultArgs() {
+      return new String[] {"-portHosted", "9997"};
+    }
+
+    @Override
+    public String getPurpose() {
+      return "Listens on the specified port for hosted mode connections";
+    }
+
+    @Override
+    public String getTag() {
+      return "-portHosted";
+    }
+
+    @Override
+    public String[] getTagArgs() {
+      return new String[] {"port-number | \"auto\""};
+    }
+
+    @Override
+    public boolean setString(String value) {
+      if (value.equals("auto")) {
+        portHosted = 0;
+      } else {
+        try {
+          portHosted = Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+          String msg = "A port must be an integer or \"auto\"";
+          getTopLogger().log(TreeLogger.ERROR, msg, null);
+          return false;
+        }
+      }
+      return true;
+    }
+  }
+
+  /**
    * Handles the list of startup urls that can be passed on the command line.
    */
   protected class ArgHandlerStartupURLs extends ArgHandlerExtra {
@@ -342,6 +384,8 @@ public class GWTShell extends ToolBase {
 
   private int port;
 
+  private int portHosted;
+
   private boolean runTomcat = true;
 
   private boolean started;
@@ -360,6 +404,8 @@ public class GWTShell extends ToolBase {
 
   protected GWTShell(boolean forceServer, boolean noURLs) {
     registerHandler(getArgHandlerPort());
+
+    registerHandler(getArgHandlerPortHosted());
 
     if (!forceServer) {
       registerHandler(new ArgHandlerNoServerFlag());
@@ -591,6 +637,13 @@ public class GWTShell extends ToolBase {
   /**
    * Derived classes can override to set a default port.
    */
+  protected ArgHandlerPortHosted getArgHandlerPortHosted() {
+    return new ArgHandlerPortHosted();
+  }
+
+  /**
+   * Derived classes can override to set a default port.
+   */
   protected ArgHandlerPort getArgHandlerPort() {
     return new ArgHandlerPort();
   }
@@ -739,8 +792,8 @@ public class GWTShell extends ToolBase {
   }
 
   private void startOophmListener() {
-    listener = new BrowserListener(getTopLogger(), 0, new OophmSessionHandler(
-        browserHost));
+    listener = new BrowserListener(getTopLogger(), portHosted,
+        new OophmSessionHandler(browserHost));
     listener.start();
   }
 }
