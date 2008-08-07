@@ -35,7 +35,6 @@ import com.google.gwt.dev.util.arg.ArgHandlerLogLevel;
 import com.google.gwt.dev.util.arg.ArgHandlerScriptStyle;
 import com.google.gwt.dev.util.log.AbstractTreeLogger;
 import com.google.gwt.dev.util.log.PrintWriterTreeLogger;
-import com.google.gwt.dev.util.log.SwingLoggerPanel;
 import com.google.gwt.util.tools.ArgHandlerDisableAggressiveOptimization;
 import com.google.gwt.util.tools.ArgHandlerEnableAssertions;
 import com.google.gwt.util.tools.ArgHandlerExtra;
@@ -44,7 +43,6 @@ import com.google.gwt.util.tools.ArgHandlerOutDir;
 import com.google.gwt.util.tools.ArgHandlerString;
 import com.google.gwt.util.tools.ToolBase;
 
-import java.awt.Component;
 import java.awt.Cursor;
 import java.io.File;
 import java.io.IOException;
