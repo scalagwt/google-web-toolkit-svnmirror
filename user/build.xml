@@ -28,21 +28,21 @@
 	</target>
 
 	<!--
-		Compile test code for dev/core to pick up TypeOracleTestUtils and others.
+		Compile test code for dev to pick up TypeOracleTestUtils and others.
 	-->	
-	<target name="compile.dev.core.tests" description="Compiles test dependencies in dev/core">
+	<target name="compile.dev.tests" description="Compiles test dependencies in dev">
 		<gwt.ant dir="../dev" target="compile.tests" />
 	</target>
 
-	<target name="compile.tests" depends="compile.dev.core.tests" description="Compiles the test code for this project">
+	<target name="compile.tests" depends="compile.dev.tests" description="Compiles the test code for this project">
 		<mkdir dir="${javac.junit.out}" />
 		<gwt.javac srcdir="test" excludes="com/google/gwt/langtest/**" destdir="${javac.junit.out}">
 			<classpath>
 				<pathelement location="${javac.out}" />
-				<pathelement location="${gwt.build}/out/dev/core/bin-test" />
+				<pathelement location="${gwt.build}/out/dev/bin-test" />
 				<pathelement location="${gwt.tools.lib}/junit/junit-3.8.1.jar" />
 				<pathelement location="${gwt.tools.lib}/selenium/selenium-java-client-driver.jar" />
-				<pathelement location="${gwt.dev.staging.jar}" />
+				<pathelement location="${gwt.dev.jar}" />
 			</classpath>
 		</gwt.javac>
 	</target>
@@ -103,8 +103,6 @@
 	</target>
 
 	<target name="test" depends="compile, compile.tests" description="Run hosted-mode, web-mode, remoteweb, and selenium tests for this project.">
-		<property.ensure name="distro.built" location="${gwt.dev.staging.jar}" message="GWT must be built before performing any tests.  This can be fixed by running ant in the ${gwt.root} directory." />
-
 		<!--
 			Run hosted and web mode tests for the platform on which this build
 			is executing
