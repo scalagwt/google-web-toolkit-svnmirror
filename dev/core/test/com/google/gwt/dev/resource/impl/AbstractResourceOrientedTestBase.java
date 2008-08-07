@@ -32,26 +32,8 @@ import java.util.jar.JarFile;
 /**
  * Shared abstract class for tests that rely on well-known test data.
  * 
- * These tests rely on the external existence of the following files under
+ * These tests rely on the external existence of files under
  * <code>test/com/google/gwt/dev/javac/impl/testdata/</code>
- * 
- * <pre>
- * cpe1/com/google/gwt/user/User.gwt.xml
- * cpe1/com/google/gwt/user/client/Command.java
- * cpe1/com/google/gwt/user/client/Timer.java
- * cpe1/com/google/gwt/user/client/ui/Widget.java
- * cpe1/org/example/bar/client/BarClient1.txt
- * cpe1/org/example/bar/client/BarClient2.txt
- * cpe1/org/example/bar/client/etc/BarEtc.txt
- * cpe1/org/example/foo/client/FooClient.java
- * cpe1/org/example/foo/server/FooServer.java
- * 
- * cpe1/com/google/gwt/i18n/I18N.gwt.xml
- * cpe2/com/google/gwt/i18n/client/Messages.java
- * cpe2/com/google/gwt/i18n/rebind/LocalizableGenerator.java
- * cpe2/org/example/bar/client/BarClient2.txt
- * cpe2/org/example/bar/client/BarClient3.txt
- * </pre>
  * 
  * The same files should be present in jar files named cpe1.jar and cpe2.jar;
  * note that the contents of each will not have the <code>cpe1/</code> and
@@ -94,24 +76,24 @@ public abstract class AbstractResourceOrientedTestBase extends TestCase {
   private static class MOCK_CPE1 extends MockClassPathEntry {
     public MOCK_CPE1() {
       super("/cpe1/");
-      addResource("com/google/gwt/user/User.gwt.xml");
-      addResource("com/google/gwt/user/client/Command.java");
-      addResource("com/google/gwt/user/client/Timer.java");
-      addResource("com/google/gwt/user/client/ui/Widget.java");
+      addResource("com/google/gwt/user/_user.twit.xml");
+      addResource("com/google/gwt/user/client/_command.gava");
+      addResource("com/google/gwt/user/client/_timer.gava");
+      addResource("com/google/gwt/user/client/ui/_widget.gava");
       addResource("org/example/bar/client/BarClient1.txt");
       addResource("org/example/bar/client/BarClient2.txt");
       addResource("org/example/bar/client/etc/BarEtc.txt");
-      addResource("org/example/foo/client/FooClient.java");
-      addResource("org/example/foo/server/FooServer.java");
+      addResource("org/example/foo/client/_foo_client.gava");
+      addResource("org/example/foo/server/_foo_server.gava");
     }
   }
 
   private static class MOCK_CPE2 extends MockClassPathEntry {
     public MOCK_CPE2() {
       super("C:\\cpe2");
-      addResource("com/google/gwt/i18n/I18N.gwt.xml");
-      addResource("com/google/gwt/i18n/client/Messages.java");
-      addResource("com/google/gwt/i18n/rebind/LocalizableGenerator.java");
+      addResource("com/google/gwt/i18n/_i18n.twit.xml");
+      addResource("com/google/gwt/i18n/client/_messages.gava");
+      addResource("com/google/gwt/i18n/rebind/_localizable_generator.gava");
       addResource("org/example/bar/client/BarClient2.txt");
       addResource("org/example/bar/client/BarClient3.txt");
     }
