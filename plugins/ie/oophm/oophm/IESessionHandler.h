@@ -51,13 +51,16 @@ private:
   * interface is the only COM interface guaranteed to be stable for
   * any particular instance of an object.  It appears as though
   * Event objects exhibit the multiple-interface behavior.
+  *
+  * Furthermore, this map is not a CComPtr map because we don't
+  * to artificially add to the retain count of the Java objects.
   */
   std::map<int, IUnknown*> javaObjectsById;
   std::set<int> javaObjectsToFree;
 
   // Same as above
-  std::map<int, IUnknown*> jsObjectsById;
-  std::map<IUnknown*, int> jsIdsByObject;
+  std::map<int, CComPtr<IUnknown>> jsObjectsById;
+  std::map<CComPtr<IUnknown>, int> jsIdsByObject;
 
   /*
   * Send freed Java ids back to the server.

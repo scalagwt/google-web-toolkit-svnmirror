@@ -61,7 +61,7 @@ STDMETHODIMP Cplugin::connect(BSTR burl, BSTR bmoduleName, IDispatch* jsniContex
     return S_OK;
   }
 
-  sessionHandler = new IESessionHandler(channel, window);
+  sessionHandler.reset(new IESessionHandler(channel, window));
   std::string moduleName = BSTRToUTF8(bmoduleName);
   IOmNavigator* navigator;
   _bstr_t userAgent;
@@ -72,7 +72,7 @@ STDMETHODIMP Cplugin::connect(BSTR burl, BSTR bmoduleName, IDispatch* jsniContex
   LoadModuleMessage::send(*channel, 1,
     moduleName.c_str(), moduleName.length(),
     BSTRToUTF8(userAgent).c_str(),
-    sessionHandler);
+    sessionHandler.get());
 
   navigator->Release();
 

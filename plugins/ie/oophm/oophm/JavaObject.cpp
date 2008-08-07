@@ -180,19 +180,17 @@ STDMETHODIMP CJavaObject::InvokeEx(DISPID dispidMember, LCID lcid, WORD wFlags,
         return E_FAIL;
       }
 
-      // AddRef() here to simplify the loop below
-      pspCaller->AddRef();
+      CComPtr<IServiceProvider> currentCaller(pspCaller);
       EXCEPINFO excepInfo = {0, 0, L"OOPHM", L"Remote exception", 0, 0, 0, 0, 0};
-      ICanHandleException* goodForYou;
       HRESULT res;
 
       while (pspCaller != NULL) {
         // See if the caller supports ICanHandleException directly
-        res = pspCaller->QueryInterface(&goodForYou);
+        CComPtr<ICanHandleException> exceptionHandler;
+        res = currentCaller->QueryInterface(&exceptionHandler);
         if (SUCCEEDED(res)) {
           // The caller may or may not choose to handle the exception
-          res = goodForYou->CanHandleException(&excepInfo, &exceptionRef);
-          goodForYou->Release();
+          res = exceptionHandler->CanHandleException(&excepInfo, &exceptionRef);
           if (SUCCEEDED(res)) {
             Debug::log(Debug::Spam) << "Successfully propagated exception" << Debug::flush;
             break;
@@ -200,16 +198,14 @@ STDMETHODIMP CJavaObject::InvokeEx(DISPID dispidMember, LCID lcid, WORD wFlags,
         }
 
         // The caller cannot or will not handle the exception; try its caller
-        IServiceProvider* caller;
-        res = pspCaller->QueryService(SID_GetCaller, &caller);
-        pspCaller->Release();
+        CComPtr<IServiceProvider> superCaller;
+        res = currentCaller->QueryService(SID_GetCaller, &superCaller);
         if (!SUCCEEDED(res)) {
           Debug::log(Debug::Error) << "Unable to find exception handler" << Debug::flush;
           break;
         }
-        pspCaller = caller;
+        currentCaller = superCaller;
       }
-      pspCaller->Release();
 
       return S_OK;
 

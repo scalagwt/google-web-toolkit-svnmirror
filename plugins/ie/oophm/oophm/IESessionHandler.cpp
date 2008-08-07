@@ -25,39 +25,24 @@
 IESessionHandler::IESessionHandler(HostChannel* channel,
                                    IHTMLWindow2* window) : SessionData(channel, window, this), jsObjectId(1)
 {
-  window->AddRef();
   window->put_defaultStatus(L"GWT OOPHM Plugin active");
 }
 
 IESessionHandler::~IESessionHandler(void) {
   Debug::log(Debug::Debugging) << "Destroying session handler" << Debug::flush;
 
-  window->Release();
+  Debug::log(Debug::Spam) << jsObjectsById.size() << " active JS object referances" << Debug::flush;
 
-  {
-    // Release remaining JSObjects
-    Debug::log(Debug::Spam) << jsObjectsById.size() << " active JS object referances" << Debug::flush;
-    std::map<int, IUnknown*>::iterator it = jsObjectsById.begin();
-    while (it != jsObjectsById.end()) {
-      IUnknown* unk = it->second;
-      unk->Release();
-      it++;
-    }
-  }
-
-  {
-    // Put any remaining JavaObject references into zombie-mode in case
-    // of lingering references
-    Debug::log(Debug::Spam) << javaObjectsById.size() << " active Java object referances" << Debug::flush;
-    std::map<int, IUnknown*>::iterator it = javaObjectsById.begin();
-    while (it != javaObjectsById.end()) {
-      ((CJavaObject*)it->second)->shutdown();
-      it++;
-    }
+  // Put any remaining JavaObject references into zombie-mode in case
+  // of lingering references
+  Debug::log(Debug::Spam) << javaObjectsById.size() << " active Java object referances" << Debug::flush;
+  std::map<int, IUnknown*>::iterator it = javaObjectsById.begin();
+  while (it != javaObjectsById.end()) {
+    ((CJavaObject*)it->second)->shutdown();
+    it++;
   }
 
   channel->disconnectFromHost();
-  delete channel;
 }
 void IESessionHandler::freeJavaObject(unsigned int objId) {
   // Remove the now-defunt object from the lookup table
@@ -90,16 +75,13 @@ void IESessionHandler::freeJavaObjects() {
 void IESessionHandler::freeValue(HostChannel& channel, int idCount, const int* ids) {
   for (int i = 0; i < idCount; i++) {
     int jsId = ids[i];
-    std::map<int, IUnknown*>::iterator it = jsObjectsById.find(jsId);
+    std::map<int, CComPtr<IUnknown>>::iterator it = jsObjectsById.find(jsId);
     if (it == jsObjectsById.end()) {
       Debug::log(Debug::Error) << "Trying to free unknown js id " << jsId << Debug::flush;
       continue;
     }
-    IUnknown* unk = it->second;
+    jsIdsByObject.erase(it->second);
     jsObjectsById.erase(it);
-    jsIdsByObject.erase(unk);
-    UINT refCount = unk->Release();
-    Debug::log(Debug::Spam) << "Freed js id " << jsId << " now has refcount " << refCount << Debug::flush;
   }
   Debug::log(Debug::Debugging) << "Freed " << idCount << " JS objects" << Debug::flush;
 }
@@ -234,7 +216,7 @@ void IESessionHandler::makeException(_variant_t& in, const char* message) {
     in.SetString("Unable to get Error constructor");
   }
 
-  IDispatchEx* ex;
+  CComPtr<IDispatchEx> ex;
   res = errorConstructor.pdispVal->QueryInterface(&ex);
   if (res) {
     Debug::log(Debug::Error) << "Error constructor not IDispatchEx" << Debug::flush;
@@ -246,7 +228,6 @@ void IESessionHandler::makeException(_variant_t& in, const char* message) {
 
   res = ex->InvokeEx(DISPID_VALUE, LOCALE_SYSTEM_DEFAULT, DISPATCH_CONSTRUCT,
     &dispParams, in.GetAddress(), NULL, NULL);
-  ex->Release();
 
   if (res) {
     Debug::log(Debug::Error) << "Unable to invoke Error constructor" << Debug::flush;
@@ -262,8 +243,8 @@ void IESessionHandler::makeExceptionValue(Value& in, const char* message) {
 }
 
 void IESessionHandler::makeValue(Value& retVal, const _variant_t& value) {
-  IDispatch* dispObj;
-  IJavaObject* javaObject;
+  CComPtr<IDispatch> dispObj;
+  CComPtr<IJavaObject> javaObject;
 
   switch (value.vt) {
     case VT_EMPTY:
@@ -308,8 +289,7 @@ void IESessionHandler::makeValue(Value& retVal, const _variant_t& value) {
       } else if (!dispObj->QueryInterface(&javaObject)) {
         // It's one of our Java Object proxies
         // XXX This casting is a hack
-        retVal.setJavaObject(((CJavaObject*)javaObject)->getObjectId());
-        javaObject->Release();
+        retVal.setJavaObject(((CJavaObject*)javaObject.p)->getObjectId());
 
       } else {
         _variant_t stringValue;
@@ -331,15 +311,13 @@ void IESessionHandler::makeValue(Value& retVal, const _variant_t& value) {
 
           // We ask for the IUnknown interface since that's the only
           // COM interface guaranteed to have object-identity semantics
-          IUnknown* asUnknown;
+          CComPtr<IUnknown> asUnknown;
           dispObj->QueryInterface(&asUnknown);
 
           // See if we already know about this object
-          std::map<IUnknown*, int>::iterator it = jsIdsByObject.find(asUnknown);
+          std::map<CComPtr<IUnknown>, int>::iterator it = jsIdsByObject.find(asUnknown);
           if (it != jsIdsByObject.end()) {
             retVal.setJsObjectId(it->second);
-            // Release the locally-held instance of IUnknown
-            asUnknown->Release();
 
           } else {
             // Allocate a new id
@@ -347,7 +325,6 @@ void IESessionHandler::makeValue(Value& retVal, const _variant_t& value) {
             jsObjectsById[objId] = asUnknown;
             jsIdsByObject[asUnknown] = objId;
             retVal.setJsObjectId(objId);
-            // Don't release reference to IUnknown
           }
         }
       }
@@ -410,7 +387,7 @@ void IESessionHandler::makeValueRef(_variant_t& retVal, const Value& value) {
 
         std::map<int, IUnknown*>::iterator i = javaObjectsById.find(javaId);
         if (i == javaObjectsById.end()) {
-          IUnknown* target = NULL;
+          CComPtr<IUnknown> target;
 
           // Create a new instance of the Java object proxy type
           CJavaObject::CreateInstance(&target);
@@ -418,17 +395,17 @@ void IESessionHandler::makeValueRef(_variant_t& retVal, const Value& value) {
           // Because we used CreateInstance, we can cast it back to the concrete type
           // which allows us to pass pointers around, since we're guaranteed that
           // it is in the same process space
-          ((CJavaObject*)target)->initialize(javaId, this);
-          javaObjectsById[javaId] = target;
-
+          ((CJavaObject*)target.p)->initialize(javaId, this);
           target->QueryInterface(&retVal.pdispVal);
 
-          // Don't artificially extend the lifetime of the proxy object
-          target->Release();
+          // Don't artificially increase the lifetime of a Java object proxy by
+          // calling Detach; we want Release to be called.
+          javaObjectsById[javaId] = target;
 
-          // We may have released the proxy for this object but have not yet
-          // sent the freeJava messages to the server
+          // We may have previously released the proxy for the same object id,
+          // but have not yet sent a free message back to the server.
           javaObjectsToFree.erase(javaId);
+
         } else {
           i->second->QueryInterface(&retVal.pdispVal);
         }
@@ -440,7 +417,7 @@ void IESessionHandler::makeValueRef(_variant_t& retVal, const Value& value) {
       {
         int jsId = value.getJsObjectId();
 
-        std::map<int, IUnknown*>::iterator i = jsObjectsById.find(jsId);
+        std::map<int, CComPtr<IUnknown>>::iterator i = jsObjectsById.find(jsId);
         if (i == jsObjectsById.end()) {
           Debug::log(Debug::Error) << "Missing jsObject with id " << jsId << Debug::flush;
 

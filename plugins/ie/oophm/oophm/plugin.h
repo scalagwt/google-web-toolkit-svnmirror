@@ -205,21 +205,18 @@ END_MSG_MAP()
 
 	HRESULT FinalConstruct()
 	{
-    sessionHandler = NULL;
 		return S_OK;
 	}
 
 	void FinalRelease()
 	{
     Debug::log(Debug::Debugging) << "OOPHM plugin FinalRelease" << Debug::flush;
-    if (sessionHandler) {
-      delete sessionHandler;
-    }
 	}
+
 	STDMETHOD(connect)(BSTR url, BSTR moduleName, IDispatch* jsniContext, VARIANT_BOOL* ret);
 	STDMETHOD(testObject)(IDispatch** ret);
 private:
-  IESessionHandler* sessionHandler;
+  scoped_ptr<IESessionHandler> sessionHandler;
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(plugin), Cplugin)

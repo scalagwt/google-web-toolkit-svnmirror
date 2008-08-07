@@ -20,6 +20,7 @@
 #include "HostChannel.h"
 #include "Mshtml.h"
 #include "SessionHandler.h"
+#include "scoped_ptr/scoped_ptr.h"
 
 /*
 * Encapsules per-OOPHM-session data.
@@ -36,7 +37,7 @@ public:
   virtual void freeJavaObject(unsigned int objId)=0;
 
   HostChannel* getHostChannel() const {
-    return channel;
+    return channel.get();
   }
 
   SessionHandler* getSessionHandler() const {
@@ -63,14 +64,14 @@ protected:
   /*
   * The communication channel used for the OOPHM session.
   */
-  HostChannel* const channel;
+  scoped_ptr<HostChannel> const channel;
 
   /*
   * A reference to the SessionHandler being used in the OOPHM session.
   */
   SessionHandler* const sessionHandler;
 
-  IHTMLWindow2* const window;
+  CComPtr<IHTMLWindow2> const window;
 };
 typedef SessionData* SessionDataRef;
 
