@@ -36,6 +36,13 @@ STDMETHODIMP CExceptionCatcher::hasSeenException(BOOL* retVal) {
 
 STDMETHODIMP CExceptionCatcher::CanHandleException(EXCEPINFO* exInfo, VARIANT* value) {
   Debug::log(Debug::Debugging) << "Caught an exception from JS function" << Debug::flush;
+  if (hasCaughtException) {
+    Debug::log(Debug::Spam) << "Double-catching exception" << Debug::flush;
+    // We see this if a COM object that called a JavaObject doesn't recognize the
+    // throwing-exception return code; just keep the first exception that we've
+    // seen.
+    return S_OK;
+  }
   caughtException = value;
   hasCaughtException = true;
   return S_OK;

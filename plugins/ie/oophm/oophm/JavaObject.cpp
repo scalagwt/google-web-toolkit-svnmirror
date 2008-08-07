@@ -182,7 +182,7 @@ STDMETHODIMP CJavaObject::InvokeEx(DISPID dispidMember, LCID lcid, WORD wFlags,
 
       // AddRef() here to simplify the loop below
       pspCaller->AddRef();
-      EXCEPINFO excepInfo = {0, 0, L"OOPHM", L"Remote exception", 0, 0, 0, 0, 0x80020102L};
+      EXCEPINFO excepInfo = {0, 0, L"OOPHM", L"Remote exception", 0, 0, 0, 0, 0};
       ICanHandleException* goodForYou;
       HRESULT res;
 
@@ -211,8 +211,7 @@ STDMETHODIMP CJavaObject::InvokeEx(DISPID dispidMember, LCID lcid, WORD wFlags,
       }
       pspCaller->Release();
 
-      // This value is observed to make jscript throw the object we just threw
-      return 0x80020102L;
+      return S_OK;
 
     } else if (pvarResult) {
       // This will be NULL when the caller doesn't care about the return value
