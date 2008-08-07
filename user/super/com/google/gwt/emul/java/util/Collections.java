@@ -15,8 +15,6 @@
  */
 package java.util;
 
-import java.io.Serializable;
-
 /**
  * Utility methods that operate on collections. <a
  * href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/Collections.html">[Sun
