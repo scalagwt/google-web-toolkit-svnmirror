@@ -307,21 +307,11 @@ public class HostedTest extends GWTTestCase {
     }
   }
 
-  public native void testExceptionSandwichNative() /*-{
-    for (var i = 0; i < 4; i++) {
-      try {
-        this.@com.google.gwt.dev.jjs.test.HostedTest::throwError(ILjava/lang/String;)(i, "Hello World");
-        @junit.framework.Assert::fail(Ljava/lang/String;)("in testExceptionSandwichNative(), throwError() should have thrown");
-      } catch (e) {
-        if (i % 2 == 0) {
-          @junit.framework.Assert::assertEquals(Ljava/lang/Object;Ljava/lang/Object;)("Hello World", e.message);
-        } else {
-          @junit.framework.Assert::assertEquals(Ljava/lang/Object;Ljava/lang/Object;)("Hello World", e.@java.lang.Throwable::getMessage()());
-        }
-      }
-    }
-  }-*/;
-
+  public void testExceptionSandwichNative() {
+    String message = testExceptionSandwichNative0();
+    assertEquals("Hello World", message);
+  }
+  
   public void testFloat() {
     storeFloat(Float.MIN_VALUE);
     float f = getFloat();
@@ -858,6 +848,21 @@ public class HostedTest extends GWTTestCase {
 
   /*-{ try to mess with compiler }-*/
   private native void jsniL()/*-{}-*/;
+
+  private native String testExceptionSandwichNative0() /*-{
+    for (var i = 0; i < 4; i++) {
+      try {
+        this.@com.google.gwt.dev.jjs.test.HostedTest::throwError(ILjava/lang/String;)(i, "Hello World");
+        return "in testExceptionSandwichNative(), throwError() should have thrown";
+      } catch (e) {
+        if (i % 2 == 0) {
+          return e.message;
+        } else {
+          return e.@java.lang.Throwable::getMessage()();
+        }
+      }
+    }
+  }-*/;
 
   private native void throwError(int countdown, String s) throws Throwable /*-{
     if (countdown > 0) {

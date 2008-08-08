@@ -62,19 +62,16 @@ public class JavaScriptExceptionTest extends GWTTestCase {
     RuntimeException e = new RuntimeException();
     try {
       throwSandwichNative(e);
+      fail("Should not reach this line");
     } catch (Throwable t) {
       assertSame(e, t);
     }
   }
 
-  public native void testJsExceptionSandwich() /*-{
-    var e = { };
-    try {
-      @com.google.gwt.core.client.JavaScriptExceptionTest::throwSandwichJava(Ljava/lang/Object;)(e);
-    } catch (t) {
-      @junit.framework.Assert::assertSame(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)(t.toString(), e, t);
-    }
-  }-*/;
+  public void testJsExceptionSandwich() {
+    String message = testJsExceptionSandwich0();
+    assertTrue(message, message.equals("OK"));
+  }
 
   public void testJso() {
     JavaScriptObject jso = makeJSO();
@@ -134,4 +131,14 @@ public class JavaScriptExceptionTest extends GWTTestCase {
       assertTrue(e.getMessage().contains("foobarbaz"));
     }
   }
+
+  private native String testJsExceptionSandwich0() /*-{
+    var e = { };
+    try {
+      @com.google.gwt.core.client.JavaScriptExceptionTest::throwSandwichJava(Ljava/lang/Object;)(e);
+      return "Should not reach this line";
+    } catch (t) {
+      return e === t ? "OK" : "Not the same object: " + t;
+    }
+  }-*/;
 }
