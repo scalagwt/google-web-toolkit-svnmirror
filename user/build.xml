@@ -66,17 +66,16 @@
 	</target>
 
 	<macrodef name="run-test" description="Run a style of test">
-		<attribute name="test.mode" />
-		<attribute name="test.modeArgs" />
+		<attribute name="runstyle" />
 		<sequential>
-			<gwt.junit test.args="${test.args} -out www" test.runstyle="-@{test.mode} @{test.modeArgs}" test.out="${junit.out}/@{test.mode}/hosted" test.cases="default.tests">
+			<gwt.junit test.args="${test.args} -out www" test.runstyle="@{runstyle}" test.out="${junit.out}/@{test.mode}/hosted" test.cases="default.tests">
 				<extraclasspaths>
-					<pathelement location="${gwt.build}/out/dev/core/bin-test" />
+					<pathelement location="${gwt.build}/out/dev/bin-test" />
 				</extraclasspaths>
 			</gwt.junit>
-			<gwt.junit test.args="${test.args} -out www -web" test.runstyle="-@{test.mode} @{test.modeArgs}" test.out="${junit.out}/@{test.mode}/web" test.cases="default.tests">
+			<gwt.junit test.args="${test.args} -out www -web" test.runstyle="@{runstyle}" test.out="${junit.out}/@{test.mode}/web" test.cases="default.tests">
 				<extraclasspaths>
-					<pathelement location="${gwt.build}/out/dev/core/bin-test" />
+					<pathelement location="${gwt.build}/out/dev/bin-test" />
 				</extraclasspaths>
 			</gwt.junit>
 		</sequential>
@@ -84,22 +83,22 @@
 
 	<target name="remoteweb-test" description="Run a remoteweb test at the given host and path" if="gwt.remote.browsers">
 		<echo message="Performing remote browser testing at ${gwt.remote.browsers}" />
-		<run-test test.mode="remote" test.modeArgs="${gwt.remote.browsers}" />
+		<run-test runstyle="-remote ${gwt.remote.browsers}" />
 	</target>
 
 	<target name="selenium-test" description="Run a remote test using Selenium RC test at the given host and path" if="gwt.selenium.hosts">
 		<echo message="Performing remote browser testing using Selenium RC at ${gwt.selenium.hosts}" />
-		<run-test test.mode="selenium" test.modeArgs="${gwt.selenium.hosts}" />
+		<run-test runstyle="-selenium ${gwt.selenium.hosts}" />
 	</target>
 
 	<target name="manual-test" description="Run tests with a manually-invoked browser" if="gwt.manual.count">
 		<echo message="Performing manual browser testing expecting ${gwt.manual.count} hosts" />
-		<run-test test.mode="manual" test.modeArgs="${gwt.manual.count}" />
+		<run-test runstyle="-manual ${gwt.manual.count}" />
 	</target>
 
 	<target name="external-test" description="Run tests with an external command" if="gwt.external.commands">
 		<echo message="Performing external browser testing" />
-		<run-test test.mode="external" test.modeArgs="${gwt.external.commands}" />
+		<run-test runstyle="-external ${gwt.external.commands}" />
 	</target>
 
 	<target name="test" depends="compile, compile.tests" description="Run hosted-mode, web-mode, remoteweb, and selenium tests for this project.">
