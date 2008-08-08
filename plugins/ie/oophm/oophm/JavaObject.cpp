@@ -174,40 +174,19 @@ STDMETHODIMP CJavaObject::InvokeEx(DISPID dispidMember, LCID lcid, WORD wFlags,
       Debug::log(Debug::Spam) << "Sending exception back to JS" << Debug::flush;
       _variant_t exceptionRef;
       sessionData->makeValueRef(exceptionRef, v);
+      DISPID dispId;
+      LPOLESTR throwExceptionName = L"__gwt_throwException";
+      sessionData->getWindow()->GetIDsOfNames(IID_NULL, &throwExceptionName, 1,
+        LOCALE_SYSTEM_DEFAULT, &dispId);
 
-      if (!pspCaller) {
-        // We can't report the exception, so fail generically
-        return E_FAIL;
-      }
+      CComPtr<IDispatchEx> dispEx;
+      sessionData->getWindow()->QueryInterface(&dispEx);
 
-      CComPtr<IServiceProvider> currentCaller(pspCaller);
-      EXCEPINFO excepInfo = {0, 0, L"OOPHM", L"Remote exception", 0, 0, 0, 0, 0};
-      HRESULT res;
+      DISPPARAMS dispParams = {&exceptionRef, NULL, 1, 0};
+      _variant_t retVal;
+      return dispEx->InvokeEx(dispId, LOCALE_SYSTEM_DEFAULT, DISPATCH_METHOD,
+        &dispParams, &retVal, pexcepinfo, pspCaller);
 
-      while (pspCaller != NULL) {
-        // See if the caller supports ICanHandleException directly
-        CComPtr<ICanHandleException> exceptionHandler;
-        res = currentCaller->QueryInterface(&exceptionHandler);
-        if (SUCCEEDED(res)) {
-          // The caller may or may not choose to handle the exception
-          res = exceptionHandler->CanHandleException(&excepInfo, &exceptionRef);
-          if (SUCCEEDED(res)) {
-            Debug::log(Debug::Spam) << "Successfully propagated exception" << Debug::flush;
-            break;
-          }
-        }
-
-        // The caller cannot or will not handle the exception; try its caller
-        CComPtr<IServiceProvider> superCaller;
-        res = currentCaller->QueryService(SID_GetCaller, &superCaller);
-        if (!SUCCEEDED(res)) {
-          Debug::log(Debug::Error) << "Unable to find exception handler" << Debug::flush;
-          break;
-        }
-        currentCaller = superCaller;
-      }
-
-      return S_OK;
 
     } else if (pvarResult) {
       // This will be NULL when the caller doesn't care about the return value
