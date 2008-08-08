@@ -56,7 +56,10 @@ public class Element extends Node {
    *         does not have a specified or default value
    */
   public final native String getAttribute(String name) /*-{
-    return this.getAttribute(name);
+    var result = this.getAttribute(name);
+    // BUILD FIX HACK: must coerce to String for IE.
+    // ON MERGE: use a jgw fix from trunk instead of this!
+    return (result == null) ? null : String(result);
   }-*/;
 
   /**
