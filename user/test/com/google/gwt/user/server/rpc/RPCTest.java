@@ -41,53 +41,53 @@ public class RPCTest extends TestCase {
     void method1();
   }
 
-  private final String VALID_ENCODED_REQUEST = "3\uffff" + // version
-      "0\uffff" + // flags
-      "4\uffff" + // string table entry count
-      A.class.getName() + "\uffff" + // string table entry #0
-      "method2" + "\uffff" + // string table entry #1
-      "moduleBaseURL" + "\uffff" + // string table entry #2
-      "whitelistHashcode" + "\uffff" + // string table entry #4
-      "3\uffff" + // module base URL
-      "4\uffff" + // whitelist hashcode
-      "1\uffff" + // interface name
-      "2\uffff" + // method name
-      "0\uffff"; // param count
+  private final String VALID_ENCODED_REQUEST = "3|" + // version
+      "0|" + // flags
+      "4|" + // string table entry count
+      A.class.getName() + "|" + // string table entry #0
+      "method2" + "|" + // string table entry #1
+      "moduleBaseURL" + "|" + // string table entry #2
+      "whitelistHashcode" + "|" + // string table entry #4
+      "3|" + // module base URL
+      "4|" + // whitelist hashcode
+      "1|" + // interface name
+      "2|" + // method name
+      "0|"; // param count
 
-  private final String INVALID_METHOD_REQUEST = "3\uffff" + // version
-      "0\uffff" + // flags
-      "4\uffff" + // string table entry count
-      A.class.getName() + "\uffff" + // string table entry #0
-      "method3" + "\uffff" + // string table entry #1
-      "moduleBaseURL" + "\uffff" + // string table entry #2
-      "whitelistHashcode" + "\uffff" + // string table entry #4
-      "3\uffff" + // module base URL
-      "4\uffff" + // whitelist hashcode
-      "1\uffff" + // interface name
-      "2\uffff" + // method name
-      "0\uffff"; // param count
+  private final String INVALID_METHOD_REQUEST = "3|" + // version
+      "0|" + // flags
+      "4|" + // string table entry count
+      A.class.getName() + "|" + // string table entry #0
+      "method3" + "|" + // string table entry #1
+      "moduleBaseURL" + "|" + // string table entry #2
+      "whitelistHashcode" + "|" + // string table entry #4
+      "3|" + // module base URL
+      "4|" + // whitelist hashcode
+      "1|" + // interface name
+      "2|" + // method name
+      "0|"; // param count
 
-  private final String INVALID_INTERFACE_REQUEST = "3\uffff" + // version
-      "0\uffff" + // flags
-      "4\uffff" + // string table entry count
-      B.class.getName() + "\uffff" + // string table entry #0
-      "method1" + "\uffff" + // string table entry #1
-      "moduleBaseURL" + "\uffff" + // string table entry #2
-      "whitelistHashcode" + "\uffff" + // string table entry #4
-      "3\uffff" + // module base URL
-      "4\uffff" + // whitelist hashcode
-      "1\uffff" + // interface name
-      "2\uffff" + // method name
-      "0\uffff"; // param count
+  private final String INVALID_INTERFACE_REQUEST = "3|" + // version
+      "0|" + // flags
+      "4|" + // string table entry count
+      B.class.getName() + "|" + // string table entry #0
+      "method1" + "|" + // string table entry #1
+      "moduleBaseURL" + "|" + // string table entry #2
+      "whitelistHashcode" + "|" + // string table entry #4
+      "3|" + // module base URL
+      "4|" + // whitelist hashcode
+      "1|" + // interface name
+      "2|" + // method name
+      "0|"; // param count
 
-  private final String VALID_PRE_RPC_RESOURCE_ENCODED_REQUEST = "2\uffff" + // version
-      "0\uffff" + // flags
-      "2\uffff" + // string table entry count
-      A.class.getName() + "\uffff" + // string table entry #0
-      "method2" + "\uffff" + // string table entry #1
-      "1\uffff" + // interface name
-      "2\uffff" + // method name
-      "0\uffff"; // param count
+  private final String VALID_PRE_RPC_RESOURCE_ENCODED_REQUEST = "2|" + // version
+      "0|" + // flags
+      "2|" + // string table entry count
+      A.class.getName() + "|" + // string table entry #0
+      "method2" + "|" + // string table entry #1
+      "1|" + // interface name
+      "2|" + // method name
+      "0|"; // param count
 
   /**
    * Tests for method {@link RPC#decodeRequest(String)}

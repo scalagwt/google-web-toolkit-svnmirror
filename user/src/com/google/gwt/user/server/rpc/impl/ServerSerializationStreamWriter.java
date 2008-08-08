@@ -447,6 +447,7 @@ public final class ServerSerializationStreamWriter extends
         return false;
       case RPC_SEPARATOR_CHAR:
       case JS_QUOTE_CHAR:
+      case JS_ESCAPE_CHAR:
         // these must be quoted or they will break the protocol
         return true;
       default:
@@ -489,7 +490,6 @@ public final class ServerSerializationStreamWriter extends
    */
   private static void unicodeEscape(char ch, CharVector charVector) {
     if (ch < NUMBER_OF_JS_ESCAPED_CHARS && JS_CHARS_ESCAPED[ch] != 0) {
-      charVector.add(JS_ESCAPE_CHAR);
       charVector.add(JS_CHARS_ESCAPED[ch]);
     } else if (ch < 256) {
       charVector.add('x');
