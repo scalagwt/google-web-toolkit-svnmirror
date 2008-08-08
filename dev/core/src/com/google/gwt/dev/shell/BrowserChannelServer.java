@@ -111,6 +111,9 @@ public class BrowserChannelServer extends BrowserChannel implements Runnable {
             throw ModuleSpaceOOPHM.createJavaScriptException(ccl, target);
           }
         }
+        // JS throwing random primitive objects, which we'll wrap is JSException
+        throw ModuleSpaceOOPHM.createJavaScriptException(ccl,
+            returnValue.getValue().toString());
       }
     } catch (IOException e) {
       // TODO(jat): error handling?
