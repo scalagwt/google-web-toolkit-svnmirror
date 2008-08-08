@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 Google Inc.
+ * Copyright 2008 Google Inc.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -28,6 +28,8 @@ import java.lang.reflect.Method;
  * Tests for the {@link com.google.gwt.user.server.rpc.RPC RPC} class.
  */
 public class RPCTest extends TestCase {
+  
+  private static char RPC_SEPARATOR = '|';
 
   private static interface A extends RemoteService {
     void method1() throws SerializableException;
@@ -41,53 +43,53 @@ public class RPCTest extends TestCase {
     void method1();
   }
 
-  private final String VALID_ENCODED_REQUEST = "3|" + // version
-      "0|" + // flags
-      "4|" + // string table entry count
-      A.class.getName() + "|" + // string table entry #0
-      "method2" + "|" + // string table entry #1
-      "moduleBaseURL" + "|" + // string table entry #2
-      "whitelistHashcode" + "|" + // string table entry #4
-      "3|" + // module base URL
-      "4|" + // whitelist hashcode
-      "1|" + // interface name
-      "2|" + // method name
-      "0|"; // param count
+  private final String VALID_ENCODED_REQUEST = "3" + RPC_SEPARATOR + // version
+      "0" + RPC_SEPARATOR + // flags
+      "4" + RPC_SEPARATOR + // string table entry count
+      A.class.getName() + RPC_SEPARATOR + // string table entry #0
+      "method2" + RPC_SEPARATOR + // string table entry #1
+      "moduleBaseURL" + RPC_SEPARATOR + // string table entry #2
+      "whitelistHashcode" + RPC_SEPARATOR + // string table entry #4
+      "3" + RPC_SEPARATOR + // module base URL
+      "4" + RPC_SEPARATOR + // whitelist hashcode
+      "1" + RPC_SEPARATOR + // interface name
+      "2" + RPC_SEPARATOR + // method name
+      "0" + RPC_SEPARATOR; // param count
 
-  private final String INVALID_METHOD_REQUEST = "3|" + // version
-      "0|" + // flags
-      "4|" + // string table entry count
-      A.class.getName() + "|" + // string table entry #0
-      "method3" + "|" + // string table entry #1
-      "moduleBaseURL" + "|" + // string table entry #2
-      "whitelistHashcode" + "|" + // string table entry #4
-      "3|" + // module base URL
-      "4|" + // whitelist hashcode
-      "1|" + // interface name
-      "2|" + // method name
-      "0|"; // param count
+  private final String INVALID_METHOD_REQUEST = "3" + RPC_SEPARATOR + // version
+      "0" + RPC_SEPARATOR + // flags
+      "4" + RPC_SEPARATOR + // string table entry count
+      A.class.getName() + RPC_SEPARATOR + // string table entry #0
+      "method3" + RPC_SEPARATOR + // string table entry #1
+      "moduleBaseURL" + RPC_SEPARATOR + // string table entry #2
+      "whitelistHashcode" + RPC_SEPARATOR + // string table entry #4
+      "3" + RPC_SEPARATOR + // module base URL
+      "4" + RPC_SEPARATOR + // whitelist hashcode
+      "1" + RPC_SEPARATOR + // interface name
+      "2" + RPC_SEPARATOR + // method name
+      "0" + RPC_SEPARATOR; // param count
 
-  private final String INVALID_INTERFACE_REQUEST = "3|" + // version
-      "0|" + // flags
-      "4|" + // string table entry count
-      B.class.getName() + "|" + // string table entry #0
-      "method1" + "|" + // string table entry #1
-      "moduleBaseURL" + "|" + // string table entry #2
-      "whitelistHashcode" + "|" + // string table entry #4
-      "3|" + // module base URL
-      "4|" + // whitelist hashcode
-      "1|" + // interface name
-      "2|" + // method name
-      "0|"; // param count
+  private final String INVALID_INTERFACE_REQUEST = "3" + RPC_SEPARATOR + // version
+      "0" + RPC_SEPARATOR + // flags
+      "4" + RPC_SEPARATOR + // string table entry count
+      B.class.getName() + RPC_SEPARATOR + // string table entry #0
+      "method1" + RPC_SEPARATOR + // string table entry #1
+      "moduleBaseURL" + RPC_SEPARATOR + // string table entry #2
+      "whitelistHashcode" + RPC_SEPARATOR + // string table entry #4
+      "3" + RPC_SEPARATOR + // module base URL
+      "4" + RPC_SEPARATOR + // whitelist hashcode
+      "1" + RPC_SEPARATOR + // interface name
+      "2" + RPC_SEPARATOR + // method name
+      "0" + RPC_SEPARATOR; // param count
 
-  private final String VALID_PRE_RPC_RESOURCE_ENCODED_REQUEST = "2|" + // version
-      "0|" + // flags
-      "2|" + // string table entry count
-      A.class.getName() + "|" + // string table entry #0
-      "method2" + "|" + // string table entry #1
-      "1|" + // interface name
-      "2|" + // method name
-      "0|"; // param count
+  private final String VALID_PRE_RPC_RESOURCE_ENCODED_REQUEST = "2" + RPC_SEPARATOR + // version
+      "0" + RPC_SEPARATOR + // flags
+      "2" + RPC_SEPARATOR + // string table entry count
+      A.class.getName() + RPC_SEPARATOR + // string table entry #0
+      "method2" + RPC_SEPARATOR + // string table entry #1
+      "1" + RPC_SEPARATOR + // interface name
+      "2" + RPC_SEPARATOR + // method name
+      "0" + RPC_SEPARATOR; // param count
 
   /**
    * Tests for method {@link RPC#decodeRequest(String)}
