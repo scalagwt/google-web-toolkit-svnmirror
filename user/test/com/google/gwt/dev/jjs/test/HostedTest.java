@@ -701,8 +701,8 @@ public class HostedTest extends GWTTestCase {
       // should have thrown an exception in hosted mode,
       // so fail unless we are in web mode
       assertTrue(GWT.isScript());
-    } catch (IllegalArgumentException e) {
-      // expected exception
+    } catch (RuntimeException expected) {
+      assertTrue(expected.getClass().getName().endsWith("HostedModeException"));
     }
   }
 
