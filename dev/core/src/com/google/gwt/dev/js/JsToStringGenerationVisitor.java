@@ -143,9 +143,7 @@ public class JsToStringGenerationVisitor extends JsVisitor {
     for (Object element : x.getExpressions()) {
       JsExpression arg = (JsExpression) element;
       sep = _sepCommaOptSpace(sep);
-      _parenPushIfCommaExpr(arg);
-      accept(arg);
-      _parenPopIfCommaExpr(arg);
+      acceptInCommaContext(arg);
     }
     _rsquare();
     return false;
@@ -511,9 +509,7 @@ public class JsToStringGenerationVisitor extends JsVisitor {
     for (Object element : x.getArguments()) {
       JsExpression arg = (JsExpression) element;
       sep = _sepCommaOptSpace(sep);
-      _parenPushIfCommaExpr(arg);
-      accept(arg);
-      _parenPopIfCommaExpr(arg);
+      acceptInCommaContext(arg);
     }
     _rparen();
     return false;
@@ -561,9 +557,7 @@ public class JsToStringGenerationVisitor extends JsVisitor {
     for (Object element : x.getArguments()) {
       JsExpression arg = (JsExpression) element;
       sep = _sepCommaOptSpace(sep);
-      _parenPushIfCommaExpr(arg);
-      accept(arg);
-      _parenPopIfCommaExpr(arg);
+      acceptInCommaContext(arg);
     }
     _rparen();
 
@@ -610,9 +604,7 @@ public class JsToStringGenerationVisitor extends JsVisitor {
       }
       _colon();
       JsExpression valueExpr = propInit.getValueExpr();
-      _parenPushIfCommaExpr(valueExpr);
-      accept(valueExpr);
-      _parenPopIfCommaExpr(valueExpr);
+      acceptInCommaContext(valueExpr);
     }
     _rbrace();
     return false;
@@ -750,9 +742,7 @@ public class JsToStringGenerationVisitor extends JsVisitor {
       _spaceOpt();
       _assignment();
       _spaceOpt();
-      _parenPushIfCommaExpr(initExpr);
-      accept(initExpr);
-      _parenPopIfCommaExpr(initExpr);
+      acceptInCommaContext(initExpr);
     }
     return false;
   }
@@ -789,6 +779,12 @@ public class JsToStringGenerationVisitor extends JsVisitor {
 
   protected void _newlineOpt() {
     p.newlineOpt();
+  }
+
+  protected void acceptInCommaContext(JsExpression expr) {
+    _parenPushIfCommaExpr(expr);
+    accept(expr);
+    _parenPopIfCommaExpr(expr);
   }
 
   protected void printJsBlockOptionalTruncate(JsBlock x, boolean truncate) {
