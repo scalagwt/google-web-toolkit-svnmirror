@@ -97,6 +97,11 @@ class MethodDispatch implements DispatchMethod {
     }
   }
 
+  @Override
+  public String toString() {
+    return method.toString();
+  }
+
   /**
    * Send an exception back to the client. This will either wrap a Java
    * Throwable as a Java Object to be sent over the wire, or if the exception is

@@ -53,23 +53,6 @@ public abstract class JsValue {
   }
 
   /**
-   * For a thread-safety check to make sure only one thread ever accesses it.
-   */
-  private static Thread theOnlyThreadAllowed;
-
-  /**
-   * Ensures that the current thread is actually the UI thread.
-   */
-  @SuppressWarnings("unused")
-  private static synchronized void checkThread() {
-    if (theOnlyThreadAllowed == null) {
-      theOnlyThreadAllowed = Thread.currentThread();
-    } else if (theOnlyThreadAllowed != Thread.currentThread()) {
-      throw new RuntimeException("This object has permanent thread affinity.");
-    }
-  }
-
-  /**
    * Get the value of the object as a boolean. May attempt to convert the value
    * to a boolean if it is not a boolean.
    * 
@@ -128,6 +111,11 @@ public abstract class JsValue {
   public abstract String getTypeString();
 
   /**
+   * Returns a wrapped Java method.
+   */
+  public abstract DispatchMethod getWrappedJavaFunction();
+
+  /**
    * Unwrap a wrapped Java object.
    * 
    * @return the original Java object wrapped in this JS object
@@ -168,6 +156,11 @@ public abstract class JsValue {
    * Returns true if the JS value is undefined (void).
    */
   public abstract boolean isUndefined();
+
+  /**
+   * Returns true if the JS value contains a wrapped Java method.
+   */
+  public abstract boolean isWrappedJavaFunction();
 
   /**
    * Returns true if the JS value is a wrapped Java object.
@@ -280,11 +273,12 @@ public abstract class JsValue {
       return "Java object: " + wrappedObject.getClass().getName() + '@'
           + System.identityHashCode(wrappedObject);
     } else if (isJavaScriptObject()) {
-      return "JS object [" + getTypeString() + "]";
+      return getTypeString();
     } else if (isString()) {
       return "string: '" + getString() + "'";
-    } else {
-      return "*unknown type: " + getTypeString() + "*";
+    } else if (isWrappedJavaFunction()) {
+      return "Java method: " + getWrappedJavaFunction().toString();
     }
+    return getTypeString();
   }
 }

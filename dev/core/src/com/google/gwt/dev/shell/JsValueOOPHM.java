@@ -197,17 +197,30 @@ public class JsValueOOPHM extends JsValue {
 
   @Override
   public String getTypeString() {
-    if (value == null) {
-      return "null";
-    }
-    if (value instanceof JsObjectRef) {
-      // TODO(jat): get actual JS object type
+    if (isBoolean()) {
+      return "boolean";
+    } else if (isInt()) {
+      return "int";
+    } else if (isJavaScriptObject()) {
       JsObjectRef objRef = (JsObjectRef) value;
-      return "JsObject(" + objRef.getRefid() + ")";
+      return "JavaScript object(" + objRef.getRefid() + ")";
+    } else if (isNull()) {
+      return "null";
+    } else if (isNumber()) {
+      return "number";
+    } else if (isString()) {
+      return "string";
+    } else if (isUndefined()) {
+      return "undefined";
+    } else if (isWrappedJavaFunction()) {
+      return "Java Method";
+    } else if (isWrappedJavaObject()) {
+      return "Java Object " + value.getClass().getName();
     }
-    return value.getClass().toString();
+    return "unexpected value type";
   }
 
+  @Override
   public DispatchMethod getWrappedJavaFunction() {
     return (DispatchMethod) value;
   }
@@ -252,6 +265,7 @@ public class JsValueOOPHM extends JsValue {
     return value == undefValue;
   }
 
+  @Override
   public boolean isWrappedJavaFunction() {
     return value instanceof DispatchMethod;
   }
