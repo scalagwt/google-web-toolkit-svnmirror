@@ -315,7 +315,7 @@ void IESessionHandler::makeValue(Value& retVal, const _variant_t& value) {
           dispObj->QueryInterface(&asUnknown);
 
           // See if we already know about this object
-          std::map<CComPtr<IUnknown>, int>::iterator it = jsIdsByObject.find(asUnknown);
+          std::map<IUnknown*, int>::iterator it = jsIdsByObject.find(asUnknown);
           if (it != jsIdsByObject.end()) {
             retVal.setJsObjectId(it->second);
 

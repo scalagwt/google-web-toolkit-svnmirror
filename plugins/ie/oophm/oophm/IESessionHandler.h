@@ -58,9 +58,9 @@ private:
   std::map<int, IUnknown*> javaObjectsById;
   std::set<int> javaObjectsToFree;
 
-  // Same as above
+  // Same as above; only one map needs to increment reference count.
   std::map<int, CComPtr<IUnknown>> jsObjectsById;
-  std::map<CComPtr<IUnknown>, int> jsIdsByObject;
+  std::map<IUnknown*, int> jsIdsByObject;
 
   /*
   * Send freed Java ids back to the server.
