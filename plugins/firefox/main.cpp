@@ -177,11 +177,11 @@ extern "C" {
       return NPERR_INVALID_INSTANCE_ERROR;
     }
     Plugin* obj;
-    if (saved) {
-      obj = new Plugin(instance, reinterpret_cast<ScriptableInstance*>(saved));
-    } else {
+//    if (saved) {
+//      obj = new Plugin(instance, reinterpret_cast<ScriptableInstance*>(saved));
+//    } else {
       obj = new Plugin(instance);
-    }
+//    }
     instance->pdata = obj;
 
     // Make this a windowless plugin.

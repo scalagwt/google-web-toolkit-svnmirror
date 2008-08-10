@@ -114,6 +114,7 @@ STDMETHODIMP CJavaObject::InvokeEx(DISPID dispidMember, LCID lcid, WORD wFlags,
   if ((wFlags & DISPATCH_PROPERTYGET) && dispidMember == DISPID_VALUE &&
     pdispparams->cArgs - pdispparams->cNamedArgs == 0) {
       // This is an expression like ('' + obj)
+      // raw toString();
       wFlags = DISPATCH_METHOD;
       dispidMember = DISPID_TOSTRING;
   }
@@ -128,7 +129,6 @@ STDMETHODIMP CJavaObject::InvokeEx(DISPID dispidMember, LCID lcid, WORD wFlags,
     scoped_array<Value> args;
     Value javaDispatchId;
     int numArgs;
-    Value thisOverride;
 
     if (dispidMember == DISPID_VALUE) {
       numArgs = pdispparams->cArgs - pdispparams->cNamedArgs - 2;
@@ -140,19 +140,19 @@ STDMETHODIMP CJavaObject::InvokeEx(DISPID dispidMember, LCID lcid, WORD wFlags,
       args.reset(new Value[numArgs]);
       // The dispatch parameters are backwards
       sessionData->makeValue(javaDispatchId, pdispparams->rgvarg[pdispparams->cArgs - 1]);
-      sessionData->makeValue(thisOverride, pdispparams->rgvarg[pdispparams->cArgs - 2]);
+      sessionData->makeValue(thisRef, pdispparams->rgvarg[pdispparams->cArgs - 2]);
       for (int i = 0; i < numArgs; i++) {
         int index = pdispparams->cArgs - 3 - i;
         VARIANTARG element = pdispparams->rgvarg[index];
         sessionData->makeValue(args[i], element);
       }
     } else if (dispidMember == DISPID_TOSTRING) {
+      // raw toString();
       numArgs = 0;
       javaDispatchId.setInt(0);
-      thisOverride.setNull();
     }
 
-    if (!InvokeMessage::send(*channel, thisOverride.isNull() ? thisRef : thisOverride, javaDispatchId.getInt(), numArgs, args.get())) {
+    if (!InvokeMessage::send(*channel, thisRef, javaDispatchId.getInt(), numArgs, args.get())) {
       Debug::log(Debug::Error) << "Unable to send method invocation" << Debug::flush;
       return E_FAIL;
     }
@@ -168,32 +168,36 @@ STDMETHODIMP CJavaObject::InvokeEx(DISPID dispidMember, LCID lcid, WORD wFlags,
       // XXX better error handling
       return E_FAIL;
     }
-    Value v = m->getReturnValue();
 
-    if (m->isException()) {
-      Debug::log(Debug::Spam) << "Sending exception back to JS" << Debug::flush;
-      _variant_t exceptionRef;
-      sessionData->makeValueRef(exceptionRef, v);
-      DISPID dispId;
-      LPOLESTR throwExceptionName = L"__gwt_throwException";
-      sessionData->getWindow()->GetIDsOfNames(IID_NULL, &throwExceptionName, 1,
-        LOCALE_SYSTEM_DEFAULT, &dispId);
-
-      CComPtr<IDispatchEx> dispEx;
-      sessionData->getWindow()->QueryInterface(&dispEx);
-
-      DISPPARAMS dispParams = {&exceptionRef, NULL, 1, 0};
-      _variant_t retVal;
-      return dispEx->InvokeEx(dispId, LOCALE_SYSTEM_DEFAULT, DISPATCH_METHOD,
-        &dispParams, &retVal, pexcepinfo, pspCaller);
-
-
-    } else if (pvarResult) {
-      // This will be NULL when the caller doesn't care about the return value
-      _variant_t returnVariant;
-      sessionData->makeValueRef(returnVariant, v);
-      *pvarResult = returnVariant.Detach();
+    if (dispidMember == DISPID_TOSTRING) {
+      // raw toString();
+      if (pvarResult) {
+        // This will be NULL when the caller doesn't care about the return value
+        _variant_t returnVariant;
+        sessionData->makeValueRef(returnVariant, m->getReturnValue());
+        *pvarResult = returnVariant.Detach();
+      }
+      return m->isException() ? E_FAIL : S_OK;
     }
+
+    DISPID dispId;
+    LPOLESTR makeResultName = L"__gwt_makeResult";
+    if (!SUCCEEDED(sessionData->getWindow()->GetIDsOfNames(IID_NULL, &makeResultName, 1,
+      LOCALE_SYSTEM_DEFAULT, &dispId))) {
+        Debug::log(Debug::Error) << "Unable to get dispId for __gwt_makeResult" << Debug::flush;
+        return E_FAIL;
+    }
+
+    // Call __gwt_makeResult(isException, returnValue)
+    scoped_array<_variant_t> varArgs(new _variant_t[2]);
+    // Args go backwards.
+    varArgs[1] = (m->isException() ? 1 : 0);
+    sessionData->makeValueRef(varArgs[0], m->getReturnValue());
+    DISPPARAMS dispParams = {varArgs.get(), NULL, 2, 0};
+    CComPtr<IDispatchEx> dispEx;
+    sessionData->getWindow()->QueryInterface(&dispEx);
+    return dispEx->InvokeEx(dispId, LOCALE_SYSTEM_DEFAULT, DISPATCH_METHOD,
+      &dispParams, pvarResult, pexcepinfo, pspCaller);
 
   } else if (wFlags & DISPATCH_PROPERTYGET) {
     Debug::log(Debug::Spam) << "Getting property " << dispidMember << " on " << objId << Debug::flush;

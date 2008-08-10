@@ -105,6 +105,9 @@ private:
   std::map<JSObjectRef, int> jsIdsByObject;
   JSClassRef javaObjectWrapperClass;
   
+  /* A reference to __gwt_makeResult, which we use constantly */
+  JSObjectRef makeResultFunction;
+  
   /* The String() function */
   JSObjectRef stringConstructor;
    

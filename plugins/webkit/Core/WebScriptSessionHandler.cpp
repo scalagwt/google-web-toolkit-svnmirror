@@ -46,6 +46,17 @@ SessionData(channel, contextRef, this), jsObjectId(1), crashHandler(crashHandler
   JSValueProtect(contextRef, stringConstructor);
   JSStringRelease(stringString);
   
+  // Call out to the utility __gwt_makeResult function to create the return array
+  JSStringRef makeResultString = JSStringCreateWithUTF8CString("__gwt_makeResult");
+  JSValueRef makeResultValue = JSObjectGetProperty(contextRef, JSContextGetGlobalObject(contextRef), makeResultString, NULL);
+  JSStringRelease(makeResultString);
+  
+  if (!JSValueIsObject(contextRef, makeResultValue)) {
+    crashHandler->crash(__PRETTY_FUNCTION__, "Could not find __gwt_makeResult");
+  } else {
+    makeResultFunction = JSValueToObject(contextRef, makeResultValue, NULL);
+    JSValueProtect(contextRef, makeResultFunction);
+  }
   
   pthread_mutexattr_t mutexAttrs;
   pthread_mutexattr_init(&mutexAttrs);
@@ -74,6 +85,7 @@ WebScriptSessionHandler::~WebScriptSessionHandler() {
   JSClassRelease(javaObjectWrapperClass);
   
   JSValueUnprotect(contextRef, stringConstructor);
+  JSValueUnprotect(contextRef, makeResultFunction);
   
   JSGarbageCollect(contextRef);
   pthread_mutex_destroy(&javaObjectsLock);
@@ -247,7 +259,13 @@ JSValueRef WebScriptSessionHandler::javaFunctionCallbackImpl (int dispatchId,
                                                               size_t argumentCount,
                                                               const JSValueRef arguments[],
                                                               JSValueRef* exception){
+  /*
+   * NB: Because throwing exceptions in JavaScriptCore is trivial, we don't rely
+   * on any special return values to indicate that an exception is thrown, we'll simply
+   * throw the exception.
+   */
   Debug::log(Debug::Debugging) << "Java method " << dispatchId << " invoked" << Debug::flush;
+  
   /*
    * If a JS function is evaluated without an meaningful this object or the global
    * object is implicitly used as the this object, we'll assume that the
@@ -292,7 +310,8 @@ JSValueRef WebScriptSessionHandler::javaFunctionCallbackImpl (int dispatchId,
     toReturn = makeValueRef(v);
   }
   
-  return toReturn;
+  JSValueRef makeResultArguments[] = {JSValueMakeBoolean(contextRef, false), toReturn};
+  return JSObjectCallAsFunction(contextRef, makeResultFunction, NULL, 2, makeResultArguments, exception);
 }
 
 void WebScriptSessionHandler::javaObjectFinalizeImpl(int objId) {

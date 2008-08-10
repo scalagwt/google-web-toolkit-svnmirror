@@ -50,12 +50,12 @@ public class Jsni {
    * <tr>
    * <td><code>obj.@class::method(params)(args)</code></td>
    * 
-   * <td><code>obj(dispId, null, args)</code></td>
+   * <td><code>__gwt_makeJavaInvoke(paramCount)(obj, dispId, args)</code></td>
    * </tr>
    * <tr>
    * <td><code>@class::method(params)(args)</code></td>
    * 
-   * <td><code>__static(dispId, null, args)</code></td>
+   * <td><code>__gwt_makeJavaInvoke(paramCount)(null, dispId, args)</code></td>
    * </tr>
    * <tr>
    * <td><code>obj.@class::method(params)</code></td>
@@ -65,7 +65,7 @@ public class Jsni {
    * <tr>
    * <td><code>@class::method(params)</code></td>
    * 
-   * <td><code>__gwt_makeTearOff(__static, dispId, paramCount)</code></td>
+   * <td><code>__gwt_makeTearOff(null, dispId, paramCount)</code></td>
    * </tr>
    * <tr>
    * <td><code>obj.@class::field</code></td>
@@ -133,22 +133,29 @@ public class Jsni {
           paramCount = ((Constructor<?>) member).getParameterTypes().length;
         }
 
-        out.print("__gwt_makeTearOff(");
-        if (q != null) {
-          // We preserve the qualifier as an argument to ensure side-effects
-          accept(q);
-        } else {
-          out.print("__static");
-        }
-        out.print(", " + dispId + ", " + paramCount + ")");
+        // Use a clone instead of modifying the original JSNI
+        // __gwt_makeTearOff(obj, dispId, paramCount)
+        JsInvocation rewritten = new JsInvocation();
+        rewritten.setQualifier(new JsNameRef("__gwt_makeTearOff"));
 
+        List<JsExpression> arguments = rewritten.getArguments();
+        if (q == null) {
+          q = program.getNullLiteral();
+        }
+        arguments.add(q);
+        arguments.add(program.getNumberLiteral(dispId));
+        arguments.add(program.getNumberLiteral(paramCount));
+
+        accept(rewritten);
         return false;
       }
       return super.visit(x, ctx);
     }
 
     /**
-     * Handles immediate invocations of JSNI method references.
+     * Handles immediate invocations of JSNI method references. This has to be
+     * done through a wonky method "__gwt_makeJavaInvoke" to handle exceptions
+     * correctly on some browsers.
      */
     @Override
     public boolean visit(JsInvocation x, JsContext<JsExpression> ctx) {
@@ -179,19 +186,30 @@ public class Jsni {
               || member instanceof Constructor) {
 
             // Use a clone instead of modifying the original JSNI
-            JsInvocation rewritten = new JsInvocation();
-            if (ref.getQualifier() == null) {
-              rewritten.setQualifier(new JsNameRef("__static"));
-            } else {
-              rewritten.setQualifier(ref.getQualifier());
+            // __gwt_makeJavaInvoke(paramCount)(obj, dispId, args)
+            int paramCount = 0;
+            if (member instanceof Method) {
+              paramCount = ((Method) member).getParameterTypes().length;
+            } else if (member instanceof Constructor) {
+              paramCount = ((Constructor<?>) member).getParameterTypes().length;
             }
 
-            List<JsExpression> arguments = rewritten.getArguments();
-            arguments.add(new JsNameRef(String.valueOf(dispId)));
-            arguments.add(program.getNullLiteral());
+            JsInvocation inner = new JsInvocation();
+            inner.setQualifier(new JsNameRef("__gwt_makeJavaInvoke"));
+            inner.getArguments().add(program.getNumberLiteral(paramCount));
+
+            JsInvocation outer = new JsInvocation();
+            outer.setQualifier(inner);
+            JsExpression q = ref.getQualifier();
+            if (q == null) {
+              q = program.getNullLiteral();
+            }
+            List<JsExpression> arguments = outer.getArguments();
+            arguments.add(q);
+            arguments.add(program.getNumberLiteral(dispId));
             arguments.addAll(x.getArguments());
 
-            accept(rewritten);
+            accept(outer);
             return false;
           }
         }

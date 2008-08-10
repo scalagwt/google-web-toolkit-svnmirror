@@ -16,6 +16,7 @@
 package com.google.gwt.dev.shell;
 
 import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.dev.shell.JsValue.DispatchObject;
 
 import java.util.Set;
 
@@ -91,7 +92,7 @@ public class ModuleSpaceOOPHM extends ModuleSpace {
   }
 
   @Override
-  protected Object getStaticDispatcher() {
+  protected DispatchObject getStaticDispatcher() {
     return new JsValueOOPHM.DispatchObjectOOPHM(getIsolatedClassLoader());
   }
 }

@@ -89,7 +89,6 @@ public:
     return NPVARIANT_IS_NULL(variant);
   }
 
-
   int isObject() const {
     return isObject(variant);
   }
@@ -209,6 +208,19 @@ public:
     release(variant);
     OBJECT_TO_NPVARIANT(obj, variant);
     retain(variant);
+  }
+
+  // Convenience method for C++ code
+  NPVariantProxy& operator=(int intVal) {
+    assignFrom(variant, intVal);
+    return *this;
+  }
+
+  // Convenience method for C++ code
+  static void assignFrom(NPVariant& variant, int intVal) {
+    NPVariant newvar;
+    INT32_TO_NPVARIANT(intVal, newvar);
+    assignFrom(variant, newvar);
   }
 
   // Convenience method for C++ code

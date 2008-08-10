@@ -111,66 +111,58 @@ public class OophmSessionHandler extends SessionHandler {
    * Invoke a method on a server object in from client code.
    */
   @Override
-  public ReturnOrException invoke(BrowserChannel channel,
-      Value wrappedFunction, int methodDispatchId, Value[] args) {
+  public ReturnOrException invoke(BrowserChannel channel, Value thisVal,
+      int methodDispatchId, Value[] args) {
     BrowserChannelServer serverChannel = (BrowserChannelServer) channel;
     ObjectsTable localObjects = serverChannel.getJavaObjectsExposedInBrowser();
     ModuleSpace moduleSpace = moduleMap.get(serverChannel);
     assert moduleSpace != null;
     CompilingClassLoader cl = moduleSpace.getIsolatedClassLoader();
-    JsValueOOPHM jsThis;
 
     // Treat dispatch id 0 as toString()
     if (methodDispatchId == 0) {
       methodDispatchId = cl.getDispId("java.lang.Object::toString()");
     }
 
-    // XXX This is a hack to substitute the static method object as the
-    // this object when we don't have a viable this object. We see this mainly
-    // when static methods are used as tear-offs and then assigned as members
-    // of some other object.
-    if (!wrappedFunction.isJavaObject()) {
-      JsValueOOPHM.DispatchObjectOOPHM dispatch = (JsValueOOPHM.DispatchObjectOOPHM) moduleSpace.getStaticDispatcher();
-      jsThis = (JsValueOOPHM) dispatch.getField(methodDispatchId);
-    } else {
-      jsThis = new JsValueOOPHM();
-      serverChannel.convertToJsValue(cl, localObjects, wrappedFunction, jsThis);
-    }
-    TreeLogger.Type logLevel = TreeLogger.TRACE;
-    StringBuffer logMsg = new StringBuffer();
-    logMsg.append("Client invoke of ");
-    logMsg.append(methodDispatchId);
-    DispatchClassInfo classInfo = cl.getClassInfoByDispId(methodDispatchId);
-    if (classInfo != null) {
-      Member member = classInfo.getMember(methodDispatchId);
-      if (member != null) {
-        logMsg.append(" (");
-        logMsg.append(member.getName());
-        logMsg.append(")");
-        // TODO(jat): remove this; hack to keep history timer events out of
-        // TRACE
-        if ("decodeFragment".equals(member.getName())) {
-          logLevel = TreeLogger.SPAM;
+    JsValueOOPHM jsThis = new JsValueOOPHM();
+    serverChannel.convertToJsValue(cl, localObjects, thisVal, jsThis);
+
+    TreeLogger branch = TreeLogger.NULL;
+    if (logger.isLoggable(TreeLogger.DEBUG)) {
+      StringBuffer logMsg = new StringBuffer();
+      logMsg.append("Client invoke of ");
+      logMsg.append(methodDispatchId);
+      DispatchClassInfo classInfo = cl.getClassInfoByDispId(methodDispatchId);
+      if (classInfo != null) {
+        Member member = classInfo.getMember(methodDispatchId);
+        if (member != null) {
+          logMsg.append(" (");
+          logMsg.append(member.getName());
+          logMsg.append(")");
         }
       }
+      logMsg.append(" on ");
+      logMsg.append(jsThis.toString());
+      branch = logger.branch(TreeLogger.DEBUG, logMsg.toString(), null);
     }
-    logMsg.append(" on ");
-    logMsg.append(jsThis.toString());
-    TreeLogger branch = logger.branch(logLevel, logMsg.toString(), null);
     JsValueOOPHM[] jsArgs = new JsValueOOPHM[args.length];
     for (int i = 0; i < args.length; ++i) {
       jsArgs[i] = new JsValueOOPHM();
       serverChannel.convertToJsValue(cl, localObjects, args[i], jsArgs[i]);
-      branch.log(logLevel, " arg " + i + " = " + jsArgs[i].toString(), null);
+      branch.log(TreeLogger.DEBUG, " arg " + i + " = " + jsArgs[i].toString(),
+          null);
     }
     JsValueOOPHM jsRetVal = new JsValueOOPHM();
-    JsValueOOPHM jsMethod = new JsValueOOPHM(jsThis);
+    JsValueOOPHM jsMethod;
+    DispatchObject dispObj;
     if (jsThis.isWrappedJavaObject()) {
-      // If this is a wrapped object, get a wrapped function from the method
-      // name.
-      DispatchObject dispObj = jsThis.getJavaObjectWrapper();
-      jsMethod = (JsValueOOPHM) dispObj.getField(methodDispatchId);
+      // If this is a wrapped object, get get the method off it.
+      dispObj = jsThis.getJavaObjectWrapper();
+    } else {
+      // Look it up on the static dispatcher.
+      dispObj = moduleSpace.getStaticDispatcher();
     }
+    jsMethod = (JsValueOOPHM) dispObj.getField(methodDispatchId);
     DispatchMethod dispMethod = jsMethod.getWrappedJavaFunction();
     boolean exception;
     try {

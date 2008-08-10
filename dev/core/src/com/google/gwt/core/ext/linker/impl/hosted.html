@@ -28,82 +28,83 @@ var $hosted = "localhost:9997";
 
 // wrapper to call JS methods, which we need both to be able to supply a
 // different this for method lookup and to get the exception back
-function __gwt_jsWrapper(method, methodlookup, thisref) {
+function __gwt_jsInvoke(thisObj, methodName) {
   try {
-    var args = Array.prototype.slice.call(arguments, 3);
-    // if (method.indexOf("::eval") >= 0) {
-    //  console.log("calling " + method + " on " + methodlookup + " (this=" + thisref + "), args are ", args);
-    //  console.log("method=" + methodlookup[method] ? methodlookup[method].toString() : methodlookup[method]);
-    // }
-    // console.log("calling " + method + " on " + methodlookup + " (this=" + thisref + "), args are ", args);
-    var ret = methodlookup[method].apply(thisref, args);
-    // console.log("successful; returned ", ret);
-    return [0, ret];
+    var args = Array.prototype.slice.call(arguments, 2);
+    return [0, window[methodName].apply(thisObj, args)];
   } catch (e) {
-    try {
-      // if (method.indexOf("::eval") >= 0) {
-      //  console.log("failed; exception", e);
-      // }
-      // console.log("methodlookup[method]=", methodlookup[method] ? methodlookup[method].toString() : methodlookup[method]);
-      // console.log("failed; exception ", e);
-    } catch (e2) {
-      // console.log("exception " + e2 + " logging original exception");
-    }
     return [1, e];
   }
 }
 
-function __gwt_throwException(exc) {
-  // console.log("throwing exception ", exc);
-  throw exc;
+var __gwt_javaInvokes = [];
+function __gwt_makeJavaInvoke(argCount) {
+  return __gwt_javaInvokes[argCount] || __gwt_doMakeJavaInvoke(argCount);
 }
 
-function __gwt_eval(js) {
-  try {
-    return [0, eval(js)];
-  } catch (e) {
-    return [1, e];
+function __gwt_doMakeJavaInvoke(argCount) {
+  // IE6 won't eval() anonymous functions except as r-values
+  var argList = "";
+  for (var i = 0; i < argCount; i++) {
+    argList += ",p" + i;
   }
+  var argListNoComma = argList.substring(1);
+
+  return eval(
+    "__gwt_javaInvokes[" + argCount + "] =\n" +
+    "  function(thisObj, dispId" + argList + ") {\n" +
+    "    var result = __static(dispId, thisObj" + argList + ");\n" +
+    "    if (result[0]) {\n" +
+    "      throw result[1];\n" +
+    "    } else {\n" +
+    "      return result[1];\n" +
+    "    }\n" +
+    "  }\n"
+  ); 
 }
 
 /*
- * This is used to create tear-offs of Java methods.  What this does is to
- * create a Function object that invokes a specific dispatchId via the
- * static-dispatch object.  We get the "this" value from the context in which
- * the function is being executed.  Function-object identity is preserved by
- * storing the created functions in a sparse array.
- *
- * function(p0, p1) {
- *   return __static(dispId, this, p0, p1);
- * }
+ * This is used to create tear-offs of Java methods.  Each function corresponds
+ * to exactly one dispId, and also embeds the argument count.  We get the "this"
+ * value from the context in which the function is being executed.
+ * Function-object identity is preserved by caching in a sparse array.
  */
-var $tearOffs = [];
+var __gwt_tearOffs = [];
+var __gwt_tearOffGenerators = [];
 function __gwt_makeTearOff(proxy, dispId, argCount) {
-  var fn = $tearOffs[dispId];
-  if (fn) {
-    return fn;
-  }
-  
-  // IE6 doesn't won't eval() anonymous functions except as r-values
-  var js = "$tearOffs[" + dispId + "] = function(";
-  for (var i = 0; i < argCount; i++) {
-    js += "p" + i;
-    if (i < argCount - 1) {
-      js += ",";
-    }
-  }
-  js += ") {return __static(" + dispId+ ", this";
-  for (var i = 0; i < argCount; i++) {
-    js += ", p" + i;
-  }
-  js += ");};";
-  return eval(js);
+  return __gwt_tearOffs[dispId] || __gwt_doMakeTearOff(dispId, argCount);
 }
 
-function __gwt_appendScript(win, className) {
-  var script = win.document.createElement("script");
-  script.src = "http://" + $hosted + "/" + className;
-  win.document.body.appendChild(script);
+function __gwt_doMakeTearOff(dispId, argCount) {
+  return __gwt_tearOffs[dispId] = 
+      (__gwt_tearOffGenerators[argCount] || __gwt_doMakeTearOffGenerator(argCount))(dispId);
+}
+
+function __gwt_doMakeTearOffGenerator(argCount) {
+  // IE6 won't eval() anonymous functions except as r-values
+  var argList = "";
+  for (var i = 0; i < argCount; i++) {
+    argList += ",p" + i;
+  }
+  var argListNoComma = argList.substring(1);
+
+  return eval(
+    "__gwt_tearOffGenerators[" + argCount + "] =\n" +
+    "  function(dispId) {\n" +
+    "    return function(" + argListNoComma + ") {\n" +
+    "      var result = __static(dispId, this" + argList + ");\n" +
+    "      if (result[0]) {\n" +
+    "        throw result[1];\n" +
+    "      } else {\n" +
+    "        return result[1];\n" +
+    "      }\n" +
+    "    }\n" +
+    "  }\n"
+  ); 
+}
+
+function __gwt_makeResult(isException, result) {
+  return [isException, result];
 }
 
 function gwtOnLoad(errFn, modName, modBase){

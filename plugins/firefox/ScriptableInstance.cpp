@@ -50,8 +50,8 @@ ScriptableInstance::ScriptableInstance(NPP npp) : NPObjectWrapper<ScriptableInst
     connectedID(NPN_GetStringIdentifier("connected")),
     statsID(NPN_GetStringIdentifier("stats")),
     savedID(NPN_GetStringIdentifier("saved")),
-    jsWrapperID(NPN_GetStringIdentifier("__gwt_jsWrapper")),
-    jsExceptionID(NPN_GetStringIdentifier("__gwt_throwException")),
+    jsInvokeID(NPN_GetStringIdentifier("__gwt_jsInvoke")),
+    jsResultID(NPN_GetStringIdentifier("__gwt_makeResult")),
     jsTearOffID(NPN_GetStringIdentifier("__gwt_makeTearOff")),
     jsValueOfID(NPN_GetStringIdentifier("valueOf")),
     idx0(NPN_GetIntIdentifier(0)),
@@ -99,6 +99,17 @@ bool ScriptableInstance::tryGetStringPrimitive(NPObject* obj, NPVariant& result)
     NPVariantProxy::release(result);
   }
   return false;
+}
+
+bool ScriptableInstance::makeResult(bool isException, const Value& value, NPVariant* result) {
+  Debug::log(Debug::Debugging) << "makeResult(" << isException << ", " << value << ")"
+      << Debug::flush;
+  Value temp;
+  NPVariantArray varArgs(*this, 3);
+  varArgs[0] = isException ? 1 : 0;
+  varArgs[1] = value;
+  NPVariantWrapper retVal(*this);
+  return NPN_Invoke(getNPP(), window, jsResultID, varArgs.getArray(), varArgs.getSize(), result);
 }
 
 //=====================================================================================
@@ -379,27 +390,21 @@ bool ScriptableInstance::invoke(HostChannel& channel, const Value& thisRef,
     Value* returnValue) {
   Debug::log(Debug::Debugging) << "invokeJS(" << methodName << ", this=" 
       << thisRef.toString() << ", numArgs=" << numArgs << ")" << Debug::flush;
-  numArgs += 3; // account for args to wrapper function
-  NPVariantArray varArgs(*this, numArgs);
-  varArgs[0] = methodName;
-  varArgs[1] = window;
-  if (thisRef.isNull()) {
-    varArgs[2] = window;
-  } else {
-    varArgs[2] = thisRef;
-  }
-  for (int i = 3; i < numArgs; ++i) {
-    varArgs[i] = args[i - 3];
+  NPVariantArray varArgs(*this, numArgs + 2);
+  varArgs[0] = thisRef;
+  varArgs[1] = methodName;
+  for (int i = 0; i < numArgs; ++i) {
+    varArgs[i + 2] = args[i];
   }
   const NPVariant* argArray = varArgs.getArray();
   if (Debug::level(Debug::Spam)) {
-    for (int i = 0; i < numArgs; ++i) {
+    for (int i = 0; i < varArgs.getSize(); ++i) {
       Debug::log(Debug::Spam) << "  arg " << i << " is "
           << NPVariantProxy::toString(argArray[i]) << Debug::flush;
     }
   }
   NPVariantWrapper wrappedRetVal(*this);
-  if (!NPN_Invoke(getNPP(), window, jsWrapperID, argArray, numArgs,
+  if (!NPN_Invoke(getNPP(), window, jsInvokeID, argArray, varArgs.getSize(),
       wrappedRetVal.addressForReturn())) {
     Debug::log(Debug::Error) << "*** invokeJS(" << methodName << ", this="
         << thisRef.toString() << ", numArgs=" << numArgs << ") failed"
@@ -429,7 +434,7 @@ bool ScriptableInstance::invoke(HostChannel& channel, const Value& thisRef,
   return false;
 }
 
-bool ScriptableInstance::JavaObject_invoke(int objectId, NPObject* thisObj, int dispId,
+bool ScriptableInstance::JavaObject_invoke(int objectId, int dispId,
     const NPVariant* args, uint32_t numArgs, NPVariant* result) {
   Debug::log(Debug::Debugging) << "JavaObject_invoke(dispId= " << dispId << ", numArgs=" << numArgs << ")" << Debug::flush;
   if (Debug::level(Debug::Spam)) {
@@ -437,12 +442,15 @@ bool ScriptableInstance::JavaObject_invoke(int objectId, NPObject* thisObj, int 
       Debug::log(Debug::Spam) << "  " << i << " = " << args[i] << Debug::flush;
     }
   }
-  Value javaThis;
-  if (thisObj) {
-    javaThis.setJsObjectId(localObjects.add(thisObj));
-  } else {
-    javaThis.setJavaObject(objectId);
+
+  bool isRawToString = false;
+  if (dispId == -1) {
+    dispId = 0;
+    isRawToString = true;
   }
+
+  Value javaThis;
+  javaThis.setJavaObject(objectId);
   scoped_array<Value> vargs(new Value[numArgs]);
   for (unsigned i = 0; i < numArgs; ++i) {
     vargs[i] = NPVariantProxy::getAsValue(args[i], *this);
@@ -458,22 +466,13 @@ bool ScriptableInstance::JavaObject_invoke(int objectId, NPObject* thisObj, int 
     Debug::log(Debug::Error) << "JavaObject_invoke: failed to get return value" << Debug::flush;
     return false;
   }
-  NPVariantProxy::assignFrom(*this, *result, retMsg->getReturnValue());
-  if (retMsg->isException()) {
-    throwException(result);
-    return false;
+  if (isRawToString) {
+    // toString() needs the raw value
+    NPVariantProxy::assignFrom(*this, *result, retMsg->getReturnValue());
+    return !retMsg->isException();
   }
-  return true;
-}
-
-void ScriptableInstance::throwException(NPVariant* exc) {
-  Debug::log(Debug::Debugging) << "throwException(" << exc << ")"
-      << Debug::flush;
-  NPVariantWrapper retVal(*this);
-  NPN_Invoke(getNPP(), window, jsExceptionID, exc, 1,
-      retVal.addressForReturn());
-  // ignore return value, since it throws an exception which results in
-  // a failure return code
+  // Wrap the result
+  return makeResult(retMsg->isException(), retMsg->getReturnValue(), result);
 }
 
 bool ScriptableInstance::JavaObject_getProperty(int objectId, int dispId,

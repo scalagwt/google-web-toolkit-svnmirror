@@ -17,6 +17,7 @@ package com.google.gwt.dev.shell;
 
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
+import com.google.gwt.dev.shell.JsValue.DispatchObject;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -460,7 +461,7 @@ public abstract class ModuleSpace implements ShellJavaScriptHost {
   /**
    * Injects the magic needed to resolve JSNI references from module-space.
    */
-  protected abstract Object getStaticDispatcher();
+  protected abstract DispatchObject getStaticDispatcher();
 
   /**
    * Invokes a native JavaScript function.

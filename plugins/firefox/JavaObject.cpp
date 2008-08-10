@@ -134,17 +134,15 @@ bool JavaObject::invokeDefault(const NPVariant *args, uint32_t argCount, NPVaria
   Debug::log(Debug::Debugging) << ")" << Debug::flush;
   int dispId = NPVariantProxy::getAsInt(args[0]);
   int objId = objectId;
-  NPObject* thisObj = 0;
   if (!NPVariantProxy::isNull(args[1])) {
-    thisObj = NPVariantProxy::getAsObject(args[1]);
+    NPObject* thisObj = NPVariantProxy::getAsObject(args[1]);
     if (isInstance(thisObj)) {
       JavaObject* thisJavaObj = static_cast<JavaObject*>(thisObj);
       objId = thisJavaObj->objectId;
-      thisObj = 0;
     }
   }
   // JavaObject_invoke will retain the return value if needed.
-  return plugin->JavaObject_invoke(objId, thisObj, dispId, args + 2, argCount - 2, result);
+  return plugin->JavaObject_invoke(objId, dispId, args + 2, argCount - 2, result);
 }
 
 bool JavaObject::invoke(NPIdentifier name, const NPVariant *args,
@@ -159,8 +157,8 @@ bool JavaObject::invoke(NPIdentifier name, const NPVariant *args,
   Debug::log(Debug::Spam) << "JavaObject::invoke(" << objectId << ", method="
       << methodName << ")" << Debug::flush;
   if (name == plugin->toStringID) {
-    // map obj.toString to obj(0, null)
-    return plugin->JavaObject_invoke(objectId, 0, 0, args, argCount, result);
+    // -1 is magic and means a raw toString().
+    return plugin->JavaObject_invoke(objectId, -1, args, argCount, result);
   }
   // toString is the only method we support invoking directly on a Java wrapper
   return false;

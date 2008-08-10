@@ -91,8 +91,8 @@ private:
   const NPIdentifier statsID;
   const NPIdentifier savedID;
 
-  const NPIdentifier jsWrapperID;
-  const NPIdentifier jsExceptionID;
+  const NPIdentifier jsInvokeID;
+  const NPIdentifier jsResultID;
   const NPIdentifier jsTearOffID;
   const NPIdentifier jsValueOfID;
   const NPIdentifier idx0;
@@ -101,7 +101,7 @@ private:
   NPObject* window;
   void dupString(const char* str, NPString& npString);
   void dumpObjectBytes(NPObject* obj);
-  void throwException(NPVariant* exc);
+  bool makeResult(bool isException, const Value& value, NPVariant* result);
   
   // SessionHandler methods
   bool invoke(HostChannel& channel, const Value& thisObj,
@@ -118,7 +118,7 @@ private:
   Value clientMethod_setProperty(HostChannel& channel, int numArgs, const Value* const args);
   
   void JavaObject_invalidate(int objectId);
-  bool JavaObject_invoke(int objectId, NPObject* thisObj, int dispId, const NPVariant* args,
+  bool JavaObject_invoke(int objectId, int dispId, const NPVariant* args,
       uint32_t numArgs, NPVariant* result);
   bool JavaObject_getProperty(int objectId, int dispId, NPVariant* result);
   bool JavaObject_setProperty(int objectId, int dispId, const NPVariant* value);
