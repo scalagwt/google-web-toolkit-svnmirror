@@ -8,15 +8,19 @@ CXXFLAGS=$(CFLAGS)
 
 HDRS= HostChannel.h InvokeMessage.h LoadModuleMessage.h Message.h \
       ReturnMessage.h Value.h BrowserChannel.h Debug.h DebugLevel.h \
-      SessionHandler.h ServerMethods.h Socket.h AllowedConnections.h
+      SessionHandler.h ServerMethods.h Socket.h AllowedConnections.h \
+      LoadJsniMessage.h InvokeSpecialMessage.h FreeValueMessage.h
 
 OBJS=	HostChannel.o LoadModuleMessage.o InvokeMessage.o \
 	ReturnMessage.o ServerMethods.o Debug.o Socket.o \
-	AllowedConnections.o
+	AllowedConnections.o LoadJsniMessage.o \
+        InvokeSpecialMessage.o FreeValueMessage.o
 
 SRCS=	HostChannel.cpp LoadModuleMessage.cpp InvokeMessage.cpp \
 	ReturnMessage.cpp ServerMethods.cpp Debug.cpp Socket.cpp \
-	AllowedConnections.cpp
+	AllowedConnections.cpp LoadJsniMessage.cpp \
+        InvokeSpecialMessage.cpp FreeValueMessage.cpp
+ 
 
 OBJ32= $(patsubst %.cpp,obj32/%.o,$(SRCS))
 OBJ64= $(patsubst %.cpp,obj64/%.o,$(SRCS))
@@ -52,51 +56,41 @@ clean:
 	rm $(OBJ32) $(OBJ64) libcommon32.a libcommon64.a
 
 depend:
-	g++ -MM $(CFLAGS) $(SRCS) >>Makefile
+	g++ -MM $(CFLAGS) $(SRCS) >>Makefile.mac
 #	makedepend -- $(CFLAGS) -- $(SRCS)
-
-# DO NOT DELETE
-obj32/HostChannel.o obj64/HostChannel.o: Makefile \
-  HostChannel.cpp HostChannel.h Platform.h Message.h Debug.h DebugLevel.h \
-  ReturnMessage.h BrowserChannel.h Value.h SessionHandler.h \
-  InvokeMessage.h QuitMessage.h scoped_ptr/scoped_ptr.h Socket.h
-obj32/LoadModuleMessage.o obj64/LoadModuleMessage.o: Makefile \
-  LoadModuleMessage.cpp LoadModuleMessage.h Message.h Debug.h DebugLevel.h \
-  BrowserChannel.h HostChannel.h Platform.h ReturnMessage.h Value.h \
+HostChannel.o: HostChannel.cpp Debug.h Platform.h DebugLevel.h \
+  FreeValueMessage.h Message.h BrowserChannel.h HostChannel.h Socket.h \
+  AllowedConnections.h ReturnMessage.h Value.h SessionHandler.h \
+  LoadJsniMessage.h InvokeMessage.h InvokeSpecialMessage.h QuitMessage.h \
+  scoped_ptr/scoped_ptr.h
+LoadModuleMessage.o: LoadModuleMessage.cpp Debug.h Platform.h \
+  DebugLevel.h LoadModuleMessage.h Message.h BrowserChannel.h \
+  HostChannel.h Socket.h AllowedConnections.h ReturnMessage.h Value.h \
   SessionHandler.h scoped_ptr/scoped_ptr.h
-obj32/InvokeMessage.o obj64/InvokeMessage.o: Makefile \
-  InvokeMessage.cpp InvokeMessage.h Message.h Debug.h DebugLevel.h \
-  BrowserChannel.h Value.h HostChannel.h Platform.h ReturnMessage.h \
-  SessionHandler.h
-obj32/ReturnMessage.o obj64/ReturnMessage.o: Makefile \
-  ReturnMessage.cpp ReturnMessage.h Message.h Debug.h DebugLevel.h \
-  BrowserChannel.h Value.h HostChannel.h Platform.h SessionHandler.h
-obj32/ServerMethods.o obj64/ServerMethods.o: Makefile \
-  ServerMethods.cpp ServerMethods.h Value.h Debug.h DebugLevel.h \
-  BrowserChannel.h HostChannel.h Platform.h Message.h ReturnMessage.h \
-  SessionHandler.h InvokeMessage.h scoped_ptr/scoped_ptr.h
-obj32/HostChannel.o obj64/HostChannel.o: Makefile \
-  HostChannel.cpp HostChannel.h Platform.h Message.h Debug.h DebugLevel.h \
-  ReturnMessage.h BrowserChannel.h Value.h SessionHandler.h \
-  InvokeMessage.h QuitMessage.h scoped_ptr/scoped_ptr.h
-obj32/LoadModuleMessage.o obj64/LoadModuleMessage.o: Makefile \
-  LoadModuleMessage.cpp LoadModuleMessage.h Message.h Debug.h DebugLevel.h \
-  BrowserChannel.h HostChannel.h Platform.h ReturnMessage.h Value.h \
-  SessionHandler.h scoped_ptr/scoped_ptr.h
-obj32/InvokeMessage.o obj64/InvokeMessage.o: Makefile \
-  InvokeMessage.cpp InvokeMessage.h Message.h \
-  BrowserChannel.h Value.h HostChannel.h Platform.h ReturnMessage.h \
-  SessionHandler.h Debug.h DebugLevel.h
-obj32/ReturnMessage.o obj64/ReturnMessage.o: Makefile \
-  ReturnMessage.cpp ReturnMessage.h Message.h Debug.h DebugLevel.h \
-  BrowserChannel.h Value.h HostChannel.h Platform.h SessionHandler.h
-obj32/ServerMethods.o obj64/ServerMethods.o: Makefile \
-  ServerMethods.cpp ServerMethods.h Value.h Debug.h DebugLevel.h \
-  BrowserChannel.h HostChannel.h Platform.h Message.h ReturnMessage.h \
-  SessionHandler.h InvokeMessage.h scoped_ptr/scoped_ptr.h
-obj32/Debug.o obj64/Debug.o: Makefile \
-  Debug.cpp Debug.h DebugLevel.h
-obj32/Socket.o obj64/Socket.o: Makefile \
-  Socket.cpp Socket.h Debug.h DebugLevel.h
-obj32/AllowedConnections.o obj64/AllowedConnections.o: Makefile \
-  AllowedConnections.cpp AllowedConnections.h Debug.h DebugLevel.h
+InvokeMessage.o: InvokeMessage.cpp InvokeMessage.h Message.h \
+  BrowserChannel.h Value.h Debug.h Platform.h DebugLevel.h HostChannel.h \
+  Socket.h AllowedConnections.h ReturnMessage.h SessionHandler.h \
+  scoped_ptr/scoped_ptr.h
+ReturnMessage.o: ReturnMessage.cpp ReturnMessage.h Message.h \
+  BrowserChannel.h Value.h Debug.h Platform.h DebugLevel.h HostChannel.h \
+  Socket.h AllowedConnections.h SessionHandler.h
+ServerMethods.o: ServerMethods.cpp Debug.h Platform.h DebugLevel.h \
+  FreeValueMessage.h Message.h BrowserChannel.h HostChannel.h Socket.h \
+  AllowedConnections.h ReturnMessage.h Value.h SessionHandler.h \
+  InvokeMessage.h InvokeSpecialMessage.h ServerMethods.h \
+  scoped_ptr/scoped_ptr.h
+Debug.o: Debug.cpp Debug.h Platform.h DebugLevel.h
+Socket.o: Socket.cpp Platform.h Socket.h Debug.h DebugLevel.h
+AllowedConnections.o: AllowedConnections.cpp Debug.h Platform.h \
+  DebugLevel.h AllowedConnections.h
+LoadJsniMessage.o: LoadJsniMessage.cpp LoadJsniMessage.h Message.h \
+  BrowserChannel.h HostChannel.h Debug.h Platform.h DebugLevel.h Socket.h \
+  AllowedConnections.h ReturnMessage.h Value.h SessionHandler.h
+InvokeSpecialMessage.o: InvokeSpecialMessage.cpp InvokeSpecialMessage.h \
+  Message.h BrowserChannel.h SessionHandler.h Value.h Debug.h Platform.h \
+  DebugLevel.h HostChannel.h Socket.h AllowedConnections.h \
+  ReturnMessage.h scoped_ptr/scoped_ptr.h
+FreeValueMessage.o: FreeValueMessage.cpp FreeValueMessage.h Message.h \
+  BrowserChannel.h HostChannel.h Debug.h Platform.h DebugLevel.h Socket.h \
+  AllowedConnections.h ReturnMessage.h Value.h SessionHandler.h \
+  scoped_ptr/scoped_ptr.h
