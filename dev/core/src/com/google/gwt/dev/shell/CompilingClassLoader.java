@@ -50,6 +50,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 
 /**
  * An isolated {@link ClassLoader} for running all user code. All user files are
@@ -454,6 +455,16 @@ public final class CompilingClassLoader extends ClassLoader implements
   private final Map<Integer, Object> weakJsoCache = new ReferenceMap(
       AbstractReferenceMap.HARD, AbstractReferenceMap.WEAK);
 
+  /**
+   * Used by {@link #findClass(String)} to prevent reentrant JSNI injection.
+   */
+  private boolean isInjectingClass = false;
+
+  /**
+   * Used by {@link #findClass(String)} to prevent reentrant JSNI injection.
+   */
+  private Stack<CompiledClass> toInject = new Stack<CompiledClass>();
+
   public CompilingClassLoader(TreeLogger logger,
       CompilationState compilationState, ShellJavaScriptHost javaScriptHost)
       throws UnableToCompleteException {
@@ -542,28 +553,6 @@ public final class CompilingClassLoader extends ClassLoader implements
   }
 
   /**
-   * Inject the JSNI code associated with a class into the hosted-mode browser.
-   * This function should only be called on the instance of the
-   * CompilingClassLoader that created the class. Calling this method on a class
-   * that has no JSNI methods is a no-op.
-   */
-  public void injectJsniFor(Class<?> clazz) {
-    assert clazz.getClassLoader() == this : "Trying to inject JSNI for foreign Class";
-
-    Map<String, CompiledClass> classFileMap = compilationState.getClassFileMap();
-    String name = clazz.getName().replace('.', '/');
-
-    CompiledClass compiledClass = classFileMap.get(name);
-    if (compiledClass == null && clazz.getName().endsWith("$")) {
-      // Maybe a JSO implementation class
-      compiledClass = classFileMap.get(name.substring(0, name.length() - 1));
-    }
-    assert compiledClass != null : "No CompiledClass for " + clazz.getName();
-
-    injectJsniFor(compiledClass);
-  }
-
-  /**
    * Weakly caches a given JSO by unique id. A cached JSO can be looked up by
    * unique id until it is garbage collected.
    * 
@@ -604,11 +593,6 @@ public final class CompilingClassLoader extends ClassLoader implements
       return BRIDGE_CLASS_NAMES.get(className);
     }
 
-    // Rewritten classes refer to CCL in order to call injectJsniFor(Class)
-    if (CompilingClassLoader.class.getName().equals(className)) {
-      return getClass();
-    }
-
     // Get the bytes, compiling if necessary.
     byte[] classBytes = findClassBytes(className);
     if (classBytes == null) {
@@ -619,6 +603,35 @@ public final class CompilingClassLoader extends ClassLoader implements
     if (className.equals(JavaScriptHost.class.getName())) {
       javaScriptHostClass = newClass;
       updateJavaScriptHost();
+    }
+
+    /*
+     * We have to inject the JSNI code after defining the class, since dispId
+     * assignment is based around reflection on Class objects.
+     */
+    CompiledClass compiledClass = compilationState.getClassFileMap().get(
+        canonicalizeClassName(className));
+    if (compiledClass != null) {
+      toInject.push(compiledClass);
+    }
+
+    /*
+     * Prevent reentrant problems where classes that need to be injected have
+     * circular dependencies on one another.
+     */
+    if (!isInjectingClass) {
+      try {
+        isInjectingClass = true;
+        /*
+         * Can't use an iterator here because calling injectJsniFor may cause
+         * additional entries to be added.
+         */
+        while (toInject.size() > 0) {
+          injectJsniFor(toInject.remove(0));
+        }
+      } finally {
+        isInjectingClass = false;
+      }
     }
 
     if (className.equals("com.google.gwt.core.client.GWT")) {
