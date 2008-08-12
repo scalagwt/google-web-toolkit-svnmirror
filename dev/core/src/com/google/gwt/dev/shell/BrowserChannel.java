@@ -137,7 +137,7 @@ public abstract class BrowserChannel {
     /**
      * Enumeration of dispatch IDs on object 0 (the ServerMethods object).
      * 
-     * TODO: hasMethod/hasProperty no longer used!
+     * TODO: hasMethod/hasProperty no longer used, remove them!
      */
     public enum SpecialDispatchId {
       HasMethod, HasProperty, GetProperty, SetProperty,
@@ -145,12 +145,8 @@ public abstract class BrowserChannel {
 
     public abstract void freeValue(BrowserChannel channel, int[] ids);
 
-    public abstract Value getProperty(BrowserChannel channel, int refId,
-        int dispId);
-
-    public abstract int hasMethod(BrowserChannel channel, String method);
-
-    public abstract int hasProperty(BrowserChannel channel, String property);
+    public abstract ReturnOrException getProperty(BrowserChannel channel,
+        int refId, int dispId);
 
     public abstract ReturnOrException invoke(BrowserChannel channel,
         Value thisObj, int dispId, Value[] args);
@@ -1290,33 +1286,21 @@ public abstract class BrowserChannel {
   private void handleInvokeSpecial(SessionHandler handler) throws IOException,
       BrowserChannelException {
     final InvokeSpecialMessage ismsg = InvokeSpecialMessage.receive(this);
-    Value retVal = new Value();
     Value[] args = ismsg.getArgs();
     ReturnOrException retExc = null;
     switch (ismsg.getDispatchId()) {
       case GetProperty:
         assert args.length == 2;
-        retVal = handler.getProperty(this, args[0].getInt(), args[1].getInt());
+        retExc = handler.getProperty(this, args[0].getInt(), args[1].getInt());
         break;
       case SetProperty:
         assert args.length == 3;
         retExc = handler.setProperty(this, args[0].getInt(), args[1].getInt(),
             args[2]);
         break;
-      case HasMethod:
-        assert args.length == 1;
-        retVal.setInt(handler.hasMethod(this, args[0].getString()));
-        break;
-      case HasProperty:
-        assert args.length == 1;
-        retVal.setInt(handler.hasProperty(this, args[0].getString()));
-        break;
       default:
         throw new HostedModeException("Unexpected InvokeSpecial method "
             + ismsg.getDispatchId());
-    }
-    if (retExc == null) {
-      retExc = new ReturnOrException(false, retVal);
     }
     ReturnMessage.send(this, retExc);
   }

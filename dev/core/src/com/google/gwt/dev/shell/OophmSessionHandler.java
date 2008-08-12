@@ -21,9 +21,7 @@ import com.google.gwt.dev.shell.BrowserChannel.Value;
 import com.google.gwt.dev.shell.JsValue.DispatchMethod;
 import com.google.gwt.dev.shell.JsValue.DispatchObject;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
-import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -57,54 +55,33 @@ public class OophmSessionHandler extends SessionHandler {
   }
 
   @Override
-  public Value getProperty(BrowserChannel channel, int refId, int dispId) {
+  public ReturnOrException getProperty(BrowserChannel channel, int refId,
+      int dispId) {
     BrowserChannelServer serverChannel = (BrowserChannelServer) channel;
     ModuleSpace moduleSpace = moduleMap.get(serverChannel);
     assert moduleSpace != null;
     ObjectsTable localObjects = serverChannel.getJavaObjectsExposedInBrowser();
-    JsValueOOPHM obj = new JsValueOOPHM();
-    DispatchObject dispObj;
-    CompilingClassLoader ccl = moduleSpace.getIsolatedClassLoader();
-    obj.setWrappedJavaObject(ccl, localObjects.get(refId));
-    dispObj = obj.getJavaObjectWrapper();
-    TreeLogger branch = logger.branch(TreeLogger.SPAM,
-        "Client special invoke of getProperty(" + dispId + " ["
-            + ccl.getClassInfoByDispId(dispId).getMember(dispId) + "]) on "
-            + obj.toString(), null);
-    JsValueOOPHM jsval = (JsValueOOPHM) dispObj.getField(dispId);
-    Value retVal = serverChannel.convertFromJsValue(localObjects, jsval);
-    branch.log(TreeLogger.SPAM, "result is " + retVal, null);
-    return retVal;
-  }
-
-  @Override
-  public int hasMethod(BrowserChannel channel, String method) {
-    BrowserChannelServer serverChannel = (BrowserChannelServer) channel;
-    ModuleSpace moduleSpace = moduleMap.get(serverChannel);
-    assert moduleSpace != null;
-    DispatchIdOracle dispatchInfo = moduleSpace.getIsolatedClassLoader();
-    TreeLogger branch = logger.branch(TreeLogger.SPAM,
-        "Client special invoke of hasMethod(" + method + ")", null);
-    int dispId = dispatchInfo.getDispId(method);
-    Member member = dispatchInfo.getClassInfoByDispId(dispId).getMember(dispId);
-    if (!(member instanceof Method) && !(member instanceof Constructor)) {
-      dispId = -1;
+    try {
+      JsValueOOPHM obj = new JsValueOOPHM();
+      DispatchObject dispObj;
+      CompilingClassLoader ccl = moduleSpace.getIsolatedClassLoader();
+      obj.setWrappedJavaObject(ccl, localObjects.get(refId));
+      dispObj = obj.getJavaObjectWrapper();
+      TreeLogger branch = logger.branch(TreeLogger.SPAM,
+          "Client special invoke of getProperty(" + dispId + " ["
+              + ccl.getClassInfoByDispId(dispId).getMember(dispId) + "]) on "
+              + obj.toString(), null);
+      JsValueOOPHM jsval = (JsValueOOPHM) dispObj.getField(dispId);
+      Value retVal = serverChannel.convertFromJsValue(localObjects, jsval);
+      branch.log(TreeLogger.SPAM, "result is " + retVal, null);
+      return new ReturnOrException(false, retVal);
+    } catch (Throwable t) {
+      JsValueOOPHM jsval = new JsValueOOPHM();
+      JsValueGlue.set(jsval, moduleSpace.getIsolatedClassLoader(),
+          t.getClass(), t);
+      Value retVal = serverChannel.convertFromJsValue(localObjects, jsval);
+      return new ReturnOrException(true, retVal);
     }
-    branch.log(TreeLogger.SPAM, "  result is " + dispId, null);
-    return dispId;
-  }
-
-  @Override
-  public int hasProperty(BrowserChannel channel, String property) {
-    BrowserChannelServer serverChannel = (BrowserChannelServer) channel;
-    ModuleSpace moduleSpace = moduleMap.get(serverChannel);
-    assert moduleSpace != null;
-    DispatchIdOracle dispatchInfo = moduleSpace.getIsolatedClassLoader();
-    TreeLogger branch = logger.branch(TreeLogger.SPAM,
-        "Client special invoke of hasProperty(" + property + ")", null);
-    int dispId = dispatchInfo.getDispId(property);
-    branch.log(TreeLogger.SPAM, "  result is " + dispId, null);
-    return dispId;
   }
 
   /**
@@ -211,26 +188,26 @@ public class OophmSessionHandler extends SessionHandler {
     ModuleSpace moduleSpace = moduleMap.get(serverChannel);
     assert moduleSpace != null;
     ObjectsTable localObjects = serverChannel.getJavaObjectsExposedInBrowser();
-    JsValueOOPHM obj = new JsValueOOPHM();
-    DispatchObject dispObj;
-    obj.setWrappedJavaObject(moduleSpace.getIsolatedClassLoader(),
-        localObjects.get(refId));
-    dispObj = obj.getJavaObjectWrapper();
-    logger.log(TreeLogger.SPAM, "Client special invoke of setProperty(id="
-        + dispId + ", newValue=" + newValue + ") on " + obj.toString(), null);
-    JsValueOOPHM jsval = new JsValueOOPHM();
-    serverChannel.convertToJsValue(moduleSpace.getIsolatedClassLoader(),
-        localObjects, newValue, jsval);
-    boolean isException = false;
     try {
+      JsValueOOPHM obj = new JsValueOOPHM();
+      DispatchObject dispObj;
+      obj.setWrappedJavaObject(moduleSpace.getIsolatedClassLoader(),
+          localObjects.get(refId));
+      dispObj = obj.getJavaObjectWrapper();
+      logger.log(TreeLogger.SPAM, "Client special invoke of setProperty(id="
+          + dispId + ", newValue=" + newValue + ") on " + obj.toString(), null);
+      JsValueOOPHM jsval = new JsValueOOPHM();
+      serverChannel.convertToJsValue(moduleSpace.getIsolatedClassLoader(),
+          localObjects, newValue, jsval);
       dispObj.setField(dispId, jsval);
+      return new ReturnOrException(false, newValue);
     } catch (Throwable t) {
-      isException = true;
+      JsValueOOPHM jsval = new JsValueOOPHM();
       JsValueGlue.set(jsval, moduleSpace.getIsolatedClassLoader(),
           t.getClass(), t);
+      Value retVal = serverChannel.convertFromJsValue(localObjects, jsval);
+      return new ReturnOrException(true, retVal);
     }
-    Value retVal = serverChannel.convertFromJsValue(localObjects, jsval);
-    return new ReturnOrException(isException, retVal);
   }
 
   @Override
