@@ -11,11 +11,6 @@ if ($stats) {
   $stats({moduleName:moduleName,subSystem:'startup',evtGroup:'moduleStartup',millis:(new Date()).getTime(),type:'moduleEvalStart'});
 }
 
-var __eval = window.eval;
-window.eval = function(s) {
-  return __eval(s);
-}
-
 </script></head>
 <body>
 <embed id="pluginEmbed" type="application/x-gwt-hosted-mode" width="10" height="10">
