@@ -180,6 +180,7 @@ public class HostedModeClassRewriter {
     // v = new TraceClassVisitor(v, new PrintWriter(System.out));
 
     v = new RewriteRefsToJsoClasses(v, jsoIntfDescs, mapper);
+    v = new InjectJsniRewriter(v);
 
     if (jsoImplDescs.contains(desc)) {
       v = new WriteJsoImpl(v, jsoIntfDescs, mapper);

@@ -196,6 +196,24 @@ public class JsoTest extends GWTTestCase {
     }
   }
 
+  /**
+   * This class tests for a regression in the circular dependency between
+   * JavaScriptObject, RefersToSelf, JavaScriptObject$, RefersToSelf$, and the
+   * computation of dispatch ids.
+   */
+  static class RefersToSelf extends JavaScriptObject {
+    protected RefersToSelf() {
+    }
+
+    public static String getValue() {
+      return "Hello World";
+    }
+
+    public final native String getValue0() /*-{
+      return @com.google.gwt.dev.jjs.test.JsoTest.RefersToSelf::getValue()();
+    }-*/;
+  }
+
   private static native Bar makeBar() /*-{
     return {
       toString:function() {
@@ -241,6 +259,10 @@ public class JsoTest extends GWTTestCase {
       }
     };
   }
+
+  private static native RefersToSelf makeRefersToSelf() /*-{
+    return {};
+  }-*/;
 
   private static native JavaScriptObject returnMe(JavaScriptObject jso) /*-{
     return jso;
@@ -602,6 +624,10 @@ public class JsoTest extends GWTTestCase {
     @junit.framework.Assert::assertEquals(Ljava/lang/Object;Ljava/lang/Object;)("func Bar", o.@com.google.gwt.dev.jjs.test.JsoTest.Overloads::func(Lcom/google/gwt/dev/jjs/test/JsoTest$Bar;)(null));
     @junit.framework.Assert::assertEquals(Ljava/lang/Object;Ljava/lang/Object;)("sFunc Bar", @com.google.gwt.dev.jjs.test.JsoTest.Overloads::sFunc(Lcom/google/gwt/dev/jjs/test/JsoTest$Bar;)(null));
   }-*/;
+
+  public void testRefersToSelf() {
+    assertEquals("Hello World", makeRefersToSelf().getValue0());
+  }
 
   public void testStaticAccess() {
     Foo.field = 3;
