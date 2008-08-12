@@ -607,12 +607,16 @@ public final class CompilingClassLoader extends ClassLoader implements
 
     /*
      * We have to inject the JSNI code after defining the class, since dispId
-     * assignment is based around reflection on Class objects.
+     * assignment is based around reflection on Class objects. Don't inject JSNI
+     * when loading a JSO interface class; just wait until the implementation
+     * class is loaded.
      */
-    CompiledClass compiledClass = compilationState.getClassFileMap().get(
-        canonicalizeClassName(className));
-    if (compiledClass != null) {
-      toInject.push(compiledClass);
+    if (!classRewriter.isJsoIntf(className)) {
+      CompiledClass compiledClass = compilationState.getClassFileMap().get(
+          canonicalizeClassName(className));
+      if (compiledClass != null) {
+        toInject.push(compiledClass);
+      }
     }
 
     /*
