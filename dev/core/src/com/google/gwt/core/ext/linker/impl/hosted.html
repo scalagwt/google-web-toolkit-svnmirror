@@ -11,6 +11,14 @@ if ($stats) {
   $stats({moduleName:moduleName,subSystem:'startup',evtGroup:'moduleStartup',millis:(new Date()).getTime(),type:'moduleEvalStart'});
 }
 
+// install eval wrapper on FF to avoid EvalError problem
+if (navigator.userAgent.toLowerCase().indexOf("gecko") != -1) {
+  var __eval = window.eval;
+  window.eval = function(s) {
+    return __eval(s);
+  }
+}
+
 </script></head>
 <body>
 <embed id="pluginEmbed" type="application/x-gwt-hosted-mode" width="10" height="10">
