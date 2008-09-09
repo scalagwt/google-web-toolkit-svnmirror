@@ -1,0 +1,11 @@
+branch-info.txt for /branches/oophm/:
+Tracks interactions between this branch and other branches.
+See: http://code.google.com/p/google-web-toolkit/wiki/ManagingMerges
+
+Copies:
+/branches/oophm/ was created (r3635) as a straight copy from /trunk/@r3636
+
+Merges:
+http://google-web-toolkit.googlecode.com/svn/branches/oophm -r3420:3635 was merged into this branch (r3636)
+---> The final merge into trunk will start at revision r3636
+
