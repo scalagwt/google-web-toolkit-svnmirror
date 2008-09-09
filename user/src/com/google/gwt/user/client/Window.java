@@ -57,7 +57,6 @@ public class Window {
      * 
      * @return the string to the right of the URL's hash.
      */
-
     public static String getHash() {
       return impl.getHash();
     }
@@ -231,6 +230,7 @@ public class Window {
 
   private static ArrayList<WindowCloseListener> closingListeners;
   private static ArrayList<WindowResizeListener> resizeListeners;
+  private static ArrayList<WindowScrollListener> scrollListeners;
 
   /**
    * Adds a listener to receive window closing events.
@@ -238,7 +238,7 @@ public class Window {
    * @param listener the listener to be informed when the window is closing
    */
   public static void addWindowCloseListener(WindowCloseListener listener) {
-    maybeInitializeHandlers();
+    maybeInitializeCloseHandlers();
     if (closingListeners == null) {
       closingListeners = new ArrayList<WindowCloseListener>();
     }
@@ -251,11 +251,26 @@ public class Window {
    * @param listener the listener to be informed when the window is resized
    */
   public static void addWindowResizeListener(WindowResizeListener listener) {
-    maybeInitializeHandlers();
     if (resizeListeners == null) {
       resizeListeners = new ArrayList<WindowResizeListener>();
+      maybeInitializeCloseHandlers();
+      impl.initWindowResizeHandler();
     }
     resizeListeners.add(listener);
+  }
+
+  /**
+   * Adds a listener to receive window scroll events.
+   * 
+   * @param listener the listener to be informed when the window is scrolled
+   */
+  public static void addWindowScrollListener(WindowScrollListener listener) {
+    if (scrollListeners == null) {
+      scrollListeners = new ArrayList<WindowScrollListener>();
+      maybeInitializeCloseHandlers();
+      impl.initWindowScrollHandler();
+    }
+    scrollListeners.add(listener);
   }
 
   /**
@@ -340,7 +355,7 @@ public class Window {
   /**
    * Opens a new browser window. The "name" and "features" arguments are
    * specified <a href=
-   * 'http://www.mozilla.org/docs/dom/domref/dom_window_ref76.html'>here</a>.
+   * 'http://developer.mozilla.org/en/docs/DOM:window.open'>here</a>.
    * 
    * @param url the URL that the new window will display
    * @param name the name of the window (e.g. "_blank")
@@ -392,6 +407,27 @@ public class Window {
       resizeListeners.remove(listener);
     }
   }
+
+  /**
+   * Removes a window scroll listener.
+   * 
+   * @param listener the listener to be removed
+   */
+  public static void removeWindowScrollListener(WindowScrollListener listener) {
+    if (scrollListeners != null) {
+      scrollListeners.remove(listener);
+    }
+  }
+
+  /**
+   * Scroll the window to the specified position.
+   * 
+   * @param left the left scroll position
+   * @param top the top scroll position
+   */
+  public static native void scrollTo(int left, int top) /*-{
+    $wnd.scrollTo(left, top);
+  }-*/;
 
   /**
    * Sets the size of the margins used within the window's client area. It is
@@ -448,6 +484,15 @@ public class Window {
       fireResizedAndCatch(handler);
     } else {
       fireResizedImpl();
+    }
+  }
+
+  static void onScroll() {
+    UncaughtExceptionHandler handler = GWT.getUncaughtExceptionHandler();
+    if (handler != null) {
+      fireScrollAndCatch(handler);
+    } else {
+      fireScrollImpl();
     }
   }
 
@@ -508,25 +553,26 @@ public class Window {
     }
   }
 
-  private static native void init() /*-{
-    // Magic function defined by the selection script.
-    __gwt_initHandlers(
-      function() {
-        @com.google.gwt.user.client.Window::onResize()();
-      },
-      function() {
-        return @com.google.gwt.user.client.Window::onClosing()();
-      },
-      function() {
-        @com.google.gwt.user.client.Window::onClosed()();
-      }
-    );
-  }-*/;
+  private static void fireScrollAndCatch(UncaughtExceptionHandler handler) {
+    try {
+      fireScrollImpl();
+    } catch (Throwable e) {
+      handler.onUncaughtException(e);
+    }
+  }
 
-  private static void maybeInitializeHandlers() {
+  private static void fireScrollImpl() {
+    if (scrollListeners != null) {
+      for (WindowScrollListener listener : scrollListeners) {
+        listener.onWindowScrolled(getScrollLeft(), getScrollTop());
+      }
+    }
+  }
+
+  private static void maybeInitializeCloseHandlers() {
     if (GWT.isClient() && !handlersAreInitialized) {
-      init();
       handlersAreInitialized = true;
+      impl.initWindowCloseHandler();
     }
   }
 

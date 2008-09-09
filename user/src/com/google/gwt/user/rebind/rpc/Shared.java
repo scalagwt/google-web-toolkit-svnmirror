@@ -27,12 +27,12 @@ import com.google.gwt.core.ext.typeinfo.JType;
 import java.util.Locale;
 
 class Shared {
+
   /**
-   * Property used to control whether or not the RPC system will enforce the
-   * versioning scheme or not.
+   * Property used to control whether or not the RPC system will emit warnings
+   * when a type has final fields.
    */
-  static final String RPC_PROP_ENFORCE_TYPE_VERSIONING =
-      "gwt.enforceRPCTypeVersioning";
+  private static final String RPC_PROP_SUPPRESS_NON_STATIC_FINAL_FIELD_WARNINGS = "gwt.suppressNonStaticFinalFieldWarnings";
 
   /**
    * Capitalizes a name.
@@ -53,24 +53,13 @@ class Shared {
   }
 
   /**
-   * Returns <code>true</code> if the generated code should enforce type
-   * versioning.
+   * Returns <code>true</code> if warnings should not be emitted for final
+   * fields in serializable types.
    */
-  static boolean shouldEnforceTypeVersioning(TreeLogger logger,
+  static boolean shouldSuppressNonStaticFinalFieldWarnings(TreeLogger logger,
       PropertyOracle propertyOracle) {
-    try {
-      String propVal =
-          propertyOracle.getPropertyValue(logger,
-              RPC_PROP_ENFORCE_TYPE_VERSIONING);
-      if (propVal.equals("false")) {
-        return false;
-      }
-    } catch (BadPropertyValueException e) {
-      // Purposely ignored, because we want to enforce RPC versioning if
-      // the property is not defined.
-    }
-    // Assume type versioning unless the user explicitly turns it off.
-    return true;
+    return getBooleanProperty(logger, propertyOracle,
+        RPC_PROP_SUPPRESS_NON_STATIC_FINAL_FIELD_WARNINGS, false);
   }
 
   /**
@@ -123,7 +112,7 @@ class Shared {
     //
     className = className.replace('.', '_');
 
-    return new String[]{packageName, className};
+    return new String[] {packageName, className};
   }
 
   /**
@@ -137,8 +126,21 @@ class Shared {
    */
   static boolean typeNeedsCast(JType type) {
     return type.isPrimitive() == null
-      && !type.getQualifiedSourceName().equals("java.lang.String")
-      && !type.getQualifiedSourceName().equals("java.lang.Object");
+        && !type.getQualifiedSourceName().equals("java.lang.String")
+        && !type.getQualifiedSourceName().equals("java.lang.Object");
+  }
+
+  private static boolean getBooleanProperty(TreeLogger logger,
+      PropertyOracle propertyOracle, String propertyName, boolean defaultValue) {
+    try {
+      String propVal = propertyOracle.getPropertyValue(logger, propertyName);
+      if (propVal != null && propVal.length() > 0) {
+        return Boolean.valueOf(propVal);
+      }
+    } catch (BadPropertyValueException e) {
+      // Just return the default value.
+    }
+    return defaultValue;
   }
 
   /**

@@ -25,7 +25,6 @@
 			<classpath>
 				<pathelement location="${javac.out}" />
 				<pathelement location="${gwt.tools.lib}/junit/junit-3.8.1.jar" />
-				<pathelement location="${gwt.dev.staging.jar}" />
 				<pathelement location="${gwt.dev.jar}" />
 				<pathelement location="${gwt.user.jar}" />
 			</classpath>
@@ -55,7 +54,7 @@
 		<junit dir="${junit.out}" fork="yes" printsummary="yes" haltonfailure="true">
 			<classpath>
 				<pathelement location="test" />
-				<pathelement location="${gwt.build.out}/dev/core/bin"/>
+				<pathelement location="${gwt.dev.jar}"/>
 				<pathelement location="${gwt.build.out}/tools/api-checker/bin"/>
 				<pathelement location="${gwt.tools.lib}/eclipse/jdt-3.3.1.jar"/>
 				<pathelement location="${gwt.tools.lib}/junit/junit-3.8.1.jar" />

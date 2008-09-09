@@ -55,7 +55,7 @@
 			<classpath>
 				<pathelement location="${javac.out}" />
 				<pathelement location="${gwt.tools.lib}/junit/junit-3.8.1.jar" />
-				<pathelement location="${gwt.dev.staging.jar}" />
+				<pathelement location="${gwt.dev.jar}" />
 			</classpath>
 		</gwt.javac>
 	</target>
@@ -110,7 +110,7 @@
 	</target>
 
 	<target name="test" depends="compile, compile.tests" description="Run hosted-mode, web-mode and remoteweb tests for this project.">
-		<property.ensure name="distro.built" location="${gwt.dev.staging.jar}" message="GWT must be built before performing any tests.  This can be fixed by running ant in the ${gwt.root} directory." />
+		<property.ensure name="distro.built" location="${gwt.dev.jar}" message="GWT must be built before performing any tests.  This can be fixed by running ant in the ${gwt.root} directory." />
 
 		<!--
 			Run hosted and web mode tests for the platform on which this build

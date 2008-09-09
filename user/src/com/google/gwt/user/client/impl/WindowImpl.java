@@ -48,4 +48,61 @@ public class WindowImpl {
   public native int getScrollTop() /*-{
    return @com.google.gwt.user.client.impl.DocumentRootImpl::documentRoot.scrollTop;
   }-*/;
+
+  public native void initWindowCloseHandler() /*-{
+    var oldOnBeforeUnload = $wnd.onbeforeunload;
+    var oldOnUnload = $wnd.onunload;
+    
+    $wnd.onbeforeunload = function(evt) {
+      var ret, oldRet;
+      try {
+        ret = @com.google.gwt.user.client.Window::onClosing()();
+      } finally {
+        oldRet = oldOnBeforeUnload && oldOnBeforeUnload(evt);
+      }
+      // Avoid returning null as IE6 will coerce it into a string.
+      // Ensure that "" gets returned properly.
+      if (ret != null) {
+        return ret;
+      }
+      if (oldRet != null) {
+        return oldRet;
+      }
+      // returns undefined.
+    };
+    
+    $wnd.onunload = function(evt) {
+      try {
+        @com.google.gwt.user.client.Window::onClosed()();
+      } finally {
+        oldOnUnload && oldOnUnload(evt);
+        $wnd.onresize = null;
+        $wnd.onscroll = null;
+        $wnd.onbeforeunload = null;
+        $wnd.onunload = null;
+      }
+    };
+  }-*/;
+
+  public native void initWindowResizeHandler() /*-{
+    var oldOnResize = $wnd.onresize;
+    $wnd.onresize = function(evt) {
+      try {
+        @com.google.gwt.user.client.Window::onResize()();
+      } finally {
+        oldOnResize && oldOnResize(evt);
+      }
+    };
+  }-*/;
+
+  public native void initWindowScrollHandler() /*-{
+    var oldOnScroll = $wnd.onscroll;
+    $wnd.onscroll = function(evt) {
+      try {
+        @com.google.gwt.user.client.Window::onScroll()();
+      } finally {
+        oldOnScroll && oldOnScroll(evt);
+      }
+    };
+  }-*/;
 }

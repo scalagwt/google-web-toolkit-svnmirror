@@ -185,13 +185,7 @@ public class MenuBar extends Widget implements PopupListener, HasAnimation {
    * @return the {@link MenuItem} object
    */
   public MenuItem addItem(MenuItem item) {
-    addItemElement(item.getElement());
-    item.setParentMenu(this);
-    item.setSelectionStyle(false);
-    items.add(item);
-    allItems.add(item);
-    updateSubmenuIcon(item);
-    return item;
+    return insertItem(item, allItems.size());
   }
 
   /**
@@ -262,13 +256,7 @@ public class MenuBar extends Widget implements PopupListener, HasAnimation {
    * @return the {@link MenuItemSeparator} object
    */
   public MenuItemSeparator addSeparator(MenuItemSeparator separator) {
-    if (vertical) {
-      setItemColSpan(separator, 2);
-    }
-    addItemElement(separator.getElement());
-    separator.setParentMenu(this);
-    allItems.add(separator);
-    return separator;
+    return insertSeparator(separator, allItems.size());
   }
 
   /**
@@ -308,6 +296,98 @@ public class MenuBar extends Widget implements PopupListener, HasAnimation {
     return autoOpen;
   }
 
+  /**
+   * Get the index of a {@link MenuItem}.
+   * 
+   * @return the index of the item, or -1 if it is not contained by this MenuBar
+   */
+  public int getItemIndex(MenuItem item) {
+    return allItems.indexOf(item);
+  }
+
+  /**
+   * Get the index of a {@link MenuItemSerpator}.
+   * 
+   * @return the index of the separator, or -1 if it is not contained by this
+   *         MenuBar
+   */
+  public int getSeparatorIndex(MenuItemSeparator item) {
+    return allItems.indexOf(item);
+  }
+
+  /**
+   * Adds a menu item to the bar at a specific index.
+   * 
+   * @param item the item to be inserted
+   * @param beforeIndex the index where the item should be inserted
+   * @return the {@link MenuItem} object
+   * @throws IndexOutOfBoundsException if <code>beforeIndex</code> is out of
+   *           range
+   */
+  public MenuItem insertItem(MenuItem item, int beforeIndex)
+      throws IndexOutOfBoundsException {
+    // Check the bounds
+    if (beforeIndex < 0 || beforeIndex > allItems.size()) {
+      throw new IndexOutOfBoundsException();
+    }
+
+    // Add to the list of items
+    allItems.add(beforeIndex, item);
+    int itemsIndex = 0;
+    for (int i = 0; i < beforeIndex; i++) {
+      if (allItems.get(i) instanceof MenuItem) {
+        itemsIndex++;
+      }
+    }
+    items.add(itemsIndex, item);
+
+    // Setup the menu item
+    addItemElement(beforeIndex, item.getElement());
+    item.setParentMenu(this);
+    item.setSelectionStyle(false);
+    updateSubmenuIcon(item);
+    return item;
+  }
+
+  /**
+   * Adds a thin line to the {@link MenuBar} to separate sections of
+   * {@link MenuItem}s at the specified index.
+   * 
+   * @param beforeIndex the index where the seperator should be inserted
+   * @return the {@link MenuItemSeparator} object
+   * @throws IndexOutOfBoundsException if <code>beforeIndex</code> is out of
+   *           range
+   */
+  public MenuItemSeparator insertSeparator(int beforeIndex) {
+    return insertSeparator(new MenuItemSeparator(), beforeIndex); 
+  }
+
+  /**
+   * Adds a thin line to the {@link MenuBar} to separate sections of
+   * {@link MenuItem}s at the specified index.
+   * 
+   * @param separator the {@link MenuItemSeparator} to be inserted
+   * @param beforeIndex the index where the seperator should be inserted
+   * @return the {@link MenuItemSeparator} object
+   * @throws IndexOutOfBoundsException if <code>beforeIndex</code> is out of
+   *           range
+   */
+  public MenuItemSeparator insertSeparator(MenuItemSeparator separator,
+      int beforeIndex) throws IndexOutOfBoundsException {
+    // Check the bounds
+    if (beforeIndex < 0 || beforeIndex > allItems.size()) {
+      throw new IndexOutOfBoundsException();
+    }
+
+    if (vertical) {
+      setItemColSpan(separator, 2);
+    }
+    addItemElement(beforeIndex, separator.getElement());
+    separator.setParentMenu(this);
+    allItems.add(beforeIndex, separator);
+    return separator;
+  }
+
   public boolean isAnimationEnabled() {
     return isAnimationEnabled;
   }
@@ -329,14 +409,14 @@ public class MenuBar extends Widget implements PopupListener, HasAnimation {
 
       case Event.ONMOUSEOVER: {
         if (item != null) {
-          itemOver(item);
+          itemOver(item, true);
         }
         break;
       }
 
       case Event.ONMOUSEOUT: {
         if (item != null) {
-          itemOver(null);
+          itemOver(null, true);
         }
         break;
       }
@@ -515,110 +595,52 @@ public class MenuBar extends Widget implements PopupListener, HasAnimation {
    * if the item's command should be fired, <code>false</code> otherwise.
    */
   void doItemAction(final MenuItem item, boolean fireCommand) {
-    // If the given item is already showing its menu, we're done.
-    if ((shownChildMenu != null) && (item.getSubMenu() == shownChildMenu)) {
-      return;
-    }
-
-    // If another item is showing its menu, then hide it.
-    if (shownChildMenu != null) {
-      shownChildMenu.onHide();
-      popup.hide();
-    }
-
-    // If the item has no popup, optionally fire its command.
-    if ((item != null) && (item.getSubMenu() == null)) {
-      if (fireCommand) {
-        // Close this menu and all of its parents.
-        closeAllParents();
-
-        // Fire the item's command.
-        Command cmd = item.getCommand();
-        if (cmd != null) {
-          DeferredCommand.addCommand(cmd);
-        }
-      }
-      return;
-    }
-
     // Ensure that the item is selected.
     selectItem(item);
 
-    if (item == null) {
-      return;
-    }
-    
-    // Create a new popup for this item, and position it next to
-    // the item (below if this is a horizontal menu bar, to the
-    // right if it's a vertical bar).
-    popup = new DecoratedPopupPanel(true, false, "menuPopup") {
-      {
-        setWidget(item.getSubMenu());
-        item.getSubMenu().onShow();
-      }
-
-      @Override
-      public boolean onEventPreview(Event event) {
-        // Hook the popup panel's event preview. We use this to keep it from
-        // auto-hiding when the parent menu is clicked.
-        switch (DOM.eventGetType(event)) {
-          case Event.ONCLICK:
-            // If the event target is part of the parent menu, suppress the
-            // event altogether.
-            Element target = DOM.eventGetTarget(event);
-            Element parentMenuElement = item.getParentMenu().getElement();
-            if (DOM.isOrHasChild(parentMenuElement, target)) {
-              return false;
-            }
-            break;
-        }
-
-        return super.onEventPreview(event);
-      }
-    };
-    popup.setAnimationType(AnimationType.ONE_WAY_CORNER);
-    popup.setAnimationEnabled(isAnimationEnabled);
-    popup.setStyleName(STYLENAME_DEFAULT + "Popup");
-    String primaryStyleName = getStylePrimaryName();
-    if (!STYLENAME_DEFAULT.equals(primaryStyleName)) {
-      popup.addStyleName(primaryStyleName + "Popup");
-    }
-    popup.addPopupListener(this);
-
-    shownChildMenu = item.getSubMenu();
-    item.getSubMenu().parentMenu = this;
-
-    // Show the popup, ensuring that the menubar's event preview remains on top
-    // of the popup's.
-    popup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
-          
-      public void setPosition(int offsetWidth, int offsetHeight) {
+    if (item != null) {
+      // if the command should be fired and the item has one, fire it
+      if (fireCommand && item.getCommand() != null) {
+        // Close this menu and all of its parents.
+        closeAllParents();
+  
+        // Fire the item's command.
+        Command cmd = item.getCommand();
+        DeferredCommand.addCommand(cmd);
         
-        // depending on the bidi direction position a menu on the left or right
-        // of its base item
-        if (LocaleInfo.getCurrentLocale().isRTL()) {                                   
-          if (vertical) {
-            popup.setPopupPosition(MenuBar.this.getAbsoluteLeft() - offsetWidth + 1,
-                item.getAbsoluteTop());
-          } else {
-            popup.setPopupPosition(item.getAbsoluteLeft() + item.getOffsetWidth() - offsetWidth,
-                MenuBar.this.getAbsoluteTop() + MenuBar.this.getOffsetHeight() - 1);
-          }
-        } else {
-          if (vertical) {
-            popup.setPopupPosition(MenuBar.this.getAbsoluteLeft() + MenuBar.this.getOffsetWidth() - 1,
-                item.getAbsoluteTop());
-          } else {
-            popup.setPopupPosition(item.getAbsoluteLeft(), 
-                MenuBar.this.getAbsoluteTop() + MenuBar.this.getOffsetHeight() - 1);
-          }
+        // hide any open submenus of this item
+        if (shownChildMenu != null) {
+          shownChildMenu.onHide();
+          popup.hide();
+          shownChildMenu = null;
+          selectItem(null);
         }
+      } else if (item.getSubMenu() != null) {
+        if (shownChildMenu == null) {
+          // open this submenu
+          openPopup(item);
+        } else if (item.getSubMenu() != shownChildMenu) {
+          // close the other submenu and open this one
+          shownChildMenu.onHide();
+          popup.hide();
+          openPopup(item);
+        } else if (fireCommand && !autoOpen) {
+          // close this submenu
+          shownChildMenu.onHide();
+          popup.hide();
+          shownChildMenu = null;
+          selectItem(item);
+        }
+      } else if (autoOpen && shownChildMenu != null) {
+        // close submenu
+        shownChildMenu.onHide();
+        popup.hide();
+        shownChildMenu = null;
       }
-    });
-    shownChildMenu.focus();
+    }
   }
 
-  void itemOver(MenuItem item) {
+  void itemOver(MenuItem item, boolean focus) {
     if (item == null) {
       // Don't clear selection if the currently selected item's menu is showing.
       if ((selectedItem != null)
@@ -629,6 +651,9 @@ public class MenuBar extends Widget implements PopupListener, HasAnimation {
 
     // Style the item selected when the mouse enters.
     selectItem(item);
+    if (focus) {
+      focus();
+    }
 
     // If child menus are being shown, or this menu is itself
     // a child menu, automatically show an item's child menu
@@ -731,17 +756,18 @@ public class MenuBar extends Widget implements PopupListener, HasAnimation {
    * Physically add the td element of a {@link MenuItem} or
    * {@link MenuItemSeparator} to this {@link MenuBar}.
    * 
+   * @param beforeIndex the index where the seperator should be inserted
    * @param tdElem the td element to be added
    */
-  private void addItemElement(Element tdElem) {
-    Element tr;
+  private void addItemElement(int beforeIndex, Element tdElem) {
     if (vertical) {
-      tr = DOM.createTR();
-      DOM.appendChild(body, tr);
+      Element tr = DOM.createTR();
+      DOM.insertChild(body, tr, beforeIndex);
+      DOM.appendChild(tr, tdElem);
     } else {
-      tr = DOM.getChild(body, 0);
+      Element tr = DOM.getChild(body, 0);
+      DOM.insertChild(tr, tdElem, beforeIndex);
     }
-    DOM.appendChild(tr, tdElem);
   }
 
   /**
@@ -824,8 +850,13 @@ public class MenuBar extends Widget implements PopupListener, HasAnimation {
     if (vertical) {
       selectNextItem();
     } else {
-      if (selectedItem.getSubMenu() != null) {
-        doItemAction(selectedItem, false);
+      if (selectedItem.getSubMenu() != null 
+          && !selectedItem.getSubMenu().getItems().isEmpty()
+          && (shownChildMenu == null || shownChildMenu.getSelectedItem() == null)) {
+        if (shownChildMenu == null) {
+          doItemAction(selectedItem, false);
+        }
+        selectedItem.getSubMenu().focus();
       } else if (parentMenu != null) {
         if (parentMenu.vertical) {
           parentMenu.selectNextItem();
@@ -844,8 +875,13 @@ public class MenuBar extends Widget implements PopupListener, HasAnimation {
     if (!vertical) {
       selectNextItem();
     } else {
-      if ((shownChildMenu == null) && (selectedItem.getSubMenu() != null)) {
-        doItemAction(selectedItem, false);
+      if (selectedItem.getSubMenu() != null 
+          && !selectedItem.getSubMenu().getItems().isEmpty()
+          && (shownChildMenu == null || shownChildMenu.getSelectedItem() == null)) {
+        if (shownChildMenu == null) {
+          doItemAction(selectedItem, false);
+        }
+        selectedItem.getSubMenu().focus();
       } else if (parentMenu != null) {
         if (!parentMenu.vertical) {
           parentMenu.selectNextItem();
@@ -902,10 +938,81 @@ public class MenuBar extends Widget implements PopupListener, HasAnimation {
    * This method is called when a menu bar is shown.
    */
   private void onShow() {
-    // Select the first item when a menu is shown.
-    if (items.size() > 0) {
-      selectItem(items.get(0));
+    // clear the selection; a keyboard user can cursor down to the first item
+    selectItem(null);
+  }
+
+  private void openPopup(final MenuItem item) {
+    // Create a new popup for this item, and position it next to
+    // the item (below if this is a horizontal menu bar, to the
+    // right if it's a vertical bar).
+    popup = new DecoratedPopupPanel(true, false, "menuPopup") {
+      {
+        setWidget(item.getSubMenu());
+        item.getSubMenu().onShow();
+      }
+  
+      @Override
+      public boolean onEventPreview(Event event) {
+        // Hook the popup panel's event preview. We use this to keep it from
+        // auto-hiding when the parent menu is clicked.
+        switch (DOM.eventGetType(event)) {
+          case Event.ONMOUSEDOWN:
+            // If the event target is part of the parent menu, suppress the
+            // event altogether.
+            Element target = DOM.eventGetTarget(event);
+            Element parentMenuElement = item.getParentMenu().getElement();
+            if (DOM.isOrHasChild(parentMenuElement, target)) {
+              return false;
+            }
+            boolean cancel = super.onEventPreview(event);
+            if (cancel) {
+              selectItem(null);
+            }
+            return cancel;
+        }
+        return super.onEventPreview(event);
+      }
+    };
+    popup.setAnimationType(AnimationType.ONE_WAY_CORNER);
+    popup.setAnimationEnabled(isAnimationEnabled);
+    popup.setStyleName(STYLENAME_DEFAULT + "Popup");
+    String primaryStyleName = getStylePrimaryName();
+    if (!STYLENAME_DEFAULT.equals(primaryStyleName)) {
+      popup.addStyleName(primaryStyleName + "Popup");
     }
+    popup.addPopupListener(this);
+  
+    shownChildMenu = item.getSubMenu();
+    item.getSubMenu().parentMenu = this;
+  
+    // Show the popup, ensuring that the menubar's event preview remains on top
+    // of the popup's.
+    popup.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
+          
+      public void setPosition(int offsetWidth, int offsetHeight) {
+        
+        // depending on the bidi direction position a menu on the left or right
+        // of its base item
+        if (LocaleInfo.getCurrentLocale().isRTL()) {                                   
+          if (vertical) {
+            popup.setPopupPosition(MenuBar.this.getAbsoluteLeft() - offsetWidth + 1,
+                item.getAbsoluteTop());
+          } else {
+            popup.setPopupPosition(item.getAbsoluteLeft() + item.getOffsetWidth() - offsetWidth,
+                MenuBar.this.getAbsoluteTop() + MenuBar.this.getOffsetHeight() - 1);
+          }
+        } else {
+          if (vertical) {
+            popup.setPopupPosition(MenuBar.this.getAbsoluteLeft() + MenuBar.this.getOffsetWidth() - 1,
+                item.getAbsoluteTop());
+          } else {
+            popup.setPopupPosition(item.getAbsoluteLeft(), 
+                MenuBar.this.getAbsoluteTop() + MenuBar.this.getOffsetHeight() - 1);
+          }
+        }
+      }
+    });
   }
 
   /**

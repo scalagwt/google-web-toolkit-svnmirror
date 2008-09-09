@@ -75,6 +75,18 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
       }
 
       @Override
+      public void applyTo(ImagePrototypeElement img) {
+        DOM.setImgSrc(img.<Element>cast(), imageUrl);
+      }
+
+      @Override
+      public ImagePrototypeElement createElement() {
+        Element img = DOM.createImg();
+        applyTo(img.<ImagePrototypeElement>cast());
+        return img.cast();
+      }
+
+      @Override
       public Image createImage() {
         // NOTE: This class is only used internally and, therefore only needs
         // to support applyTo(Image).
@@ -503,14 +515,16 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
 
     switch (eventType) {
       case Event.ONKEYDOWN:
-      case Event.ONKEYUP:
-      case Event.ONKEYPRESS: {
-        if (keyboardListeners != null) {
-          keyboardListeners.fireKeyboardEvent(this, event);
-        }
+      case Event.ONKEYUP: {
         if (isArrowKey(DOM.eventGetKeyCode(event))) {
           DOM.eventCancelBubble(event, true);
           DOM.eventPreventDefault(event);
+        }
+      }
+      // Intentional fall through
+      case Event.ONKEYPRESS: {
+        if (keyboardListeners != null) {
+          keyboardListeners.fireKeyboardEvent(this, event);
         }
         break;
       }

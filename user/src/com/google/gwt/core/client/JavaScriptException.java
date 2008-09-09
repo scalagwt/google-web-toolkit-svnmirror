@@ -62,10 +62,18 @@ public final class JavaScriptException extends RuntimeException {
    */
   private static native String getProperties0(JavaScriptObject e) /*-{
     var result = "";
-    for (prop in e) {
-      if (prop != "name" && prop != "message") {
-        result += "\n " + prop + ": " + e[prop];
+    try {
+      for (prop in e) {
+        if (prop != "name" && prop != "message" && prop != "toString") {
+          try {
+            result += "\n " + prop + ": " + e[prop];
+          } catch (ignored) {
+            // Skip the property if it threw an exception.
+          }
+        }
       }
+    } catch (ignored) {
+      // If we can't do "in" on the exception, just return what we have.
     }
     return result;
   }-*/;
@@ -115,8 +123,7 @@ public final class JavaScriptException extends RuntimeException {
    */
   protected JavaScriptException(String message) {
     super(message);
-    this.name = null;
-    this.description = message;
+    this.message = this.description = message;
     this.e = null;
   }
 
@@ -125,7 +132,7 @@ public final class JavaScriptException extends RuntimeException {
    * <code>null</code>.
    */
   public String getDescription() {
-    if (description == null) {
+    if (message == null) {
       init();
     }
     return description;
@@ -151,7 +158,7 @@ public final class JavaScriptException extends RuntimeException {
    * <code>null</code>.
    */
   public String getName() {
-    if (name == null) {
+    if (message == null) {
       init();
     }
     return name;

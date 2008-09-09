@@ -1,5 +1,5 @@
 <!--                                                                        -->
-<!-- Copyright 2007 Google Inc.                                             -->
+<!-- Copyright 2008 Google Inc.                                             -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License"); you    -->
 <!-- may not use this file except in compliance with the License. You may   -->
 <!-- may obtain a copy of the License at                                    -->
@@ -20,30 +20,13 @@
 	<inherits name="com.google.gwt.http.HTTP"/>  
 	
 	<!-- 
-		Declare a property to determine whether or not RPC type versioning 
-		should be enforced. 
-	-->
-	<define-property name="gwt.enforceRPCTypeVersioning" values="true,false" />
-	
-	<!-- Default RPC versioning to be on. -->
-	<set-property name="gwt.enforceRPCTypeVersioning" value="true"/>
-	
-	<!-- 
 		Declare a property to determine whether warnings for final instance 
 		fields should be suppressed.
-		
-		NOTE: We no longer emit warnings for final fields.  This property has 
-		been deprecated, is currently being ignored, and will be removed in a 
-		future version of GWT.
 	-->
 	<define-property name="gwt.suppressNonStaticFinalFieldWarnings" values="true,false" />
 	
 	<!-- 
 	    Default warning for non-static, final fields enabled 
-
-		NOTE: We no longer emit a warning for final fields.  This property has 
-		been deprecated, is currently being ignored, and will be removed in a 
-		future version of GWT.
 	-->
 	<set-property name="gwt.suppressNonStaticFinalFieldWarnings" value="false" />
 

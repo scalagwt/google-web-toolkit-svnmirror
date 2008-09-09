@@ -24,6 +24,7 @@ import com.google.gwt.dev.jjs.test.CompilerTest;
 import com.google.gwt.dev.jjs.test.CoverageTest;
 import com.google.gwt.dev.jjs.test.EnhancedForLoopTest;
 import com.google.gwt.dev.jjs.test.EnumsTest;
+import com.google.gwt.dev.jjs.test.GenericCastTest;
 import com.google.gwt.dev.jjs.test.HostedTest;
 import com.google.gwt.dev.jjs.test.InnerClassTest;
 import com.google.gwt.dev.jjs.test.InnerOuterSuperTest;
@@ -38,6 +39,7 @@ import com.google.gwt.dev.jjs.test.MethodInterfaceTest;
 import com.google.gwt.dev.jjs.test.MiscellaneousTest;
 import com.google.gwt.dev.jjs.test.NativeLongTest;
 import com.google.gwt.dev.jjs.test.ObjectIdentityTest;
+import com.google.gwt.dev.jjs.test.UnstableGeneratorTest;
 import com.google.gwt.dev.jjs.test.VarargsTest;
 import com.google.gwt.junit.tools.GWTTestSuite;
 
@@ -61,6 +63,7 @@ public class CompilerSuite {
     suite.addTestSuite(CoverageTest.class);
     suite.addTestSuite(EnhancedForLoopTest.class);
     suite.addTestSuite(EnumsTest.class);
+    suite.addTestSuite(GenericCastTest.class);
     suite.addTestSuite(HostedTest.class);
     suite.addTestSuite(InnerClassTest.class);
     suite.addTestSuite(InnerOuterSuperTest.class);
@@ -75,6 +78,7 @@ public class CompilerSuite {
     suite.addTestSuite(MiscellaneousTest.class);
     suite.addTestSuite(NativeLongTest.class);
     suite.addTestSuite(ObjectIdentityTest.class);
+    suite.addTestSuite(UnstableGeneratorTest.class);
     suite.addTestSuite(VarargsTest.class);
     // $JUnit-END$
 

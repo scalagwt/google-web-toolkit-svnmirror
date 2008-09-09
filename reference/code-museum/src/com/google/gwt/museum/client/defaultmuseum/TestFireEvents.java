@@ -16,14 +16,18 @@
 package com.google.gwt.museum.client.defaultmuseum;
 
 import com.google.gwt.museum.client.common.AbstractIssue;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.WindowCloseListener;
+import com.google.gwt.user.client.WindowResizeListener;
+import com.google.gwt.user.client.WindowScrollListener;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -36,6 +40,10 @@ import java.util.Map;
  * Verify that events fire in all browsers.
  */
 public class TestFireEvents extends AbstractIssue {
+  private static final int WINDOW_EVENT_SCROLL = -1;
+  private static final int WINDOW_EVENT_RESIZE = -2;
+  private static final int WINDOW_EVENT_CLOSING = -3;
+
   /**
    * The main grid used for layout.
    */
@@ -195,6 +203,35 @@ public class TestFireEvents extends AbstractIssue {
     addDependentTest(Event.ONCONTEXTMENU, "contextMenu");
     loadable.setUrl("imageDoesNotExist.abc");
 
+    // Window Scroll Event
+    Label windowLabel = new Label("Window level events");
+    addTest(WINDOW_EVENT_SCROLL, "window.onscroll", windowLabel);
+    Window.addWindowScrollListener(new WindowScrollListener() {
+      public void onWindowScrolled(int scrollLeft, int scrollTop) {
+        passTest(WINDOW_EVENT_SCROLL);
+      }
+    });
+
+    // Window Resize Event
+    addDependentTest(WINDOW_EVENT_RESIZE, "window.onresize");
+    Window.addWindowResizeListener(new WindowResizeListener() {
+      public void onWindowResized(int width, int height) {
+        passTest(WINDOW_EVENT_RESIZE);
+      }
+    });
+
+    // Window Closing Event
+    addDependentTest(WINDOW_EVENT_CLOSING, "window.onbeforeunload");
+    Window.addWindowCloseListener(new WindowCloseListener() {
+      public void onWindowClosed() {
+      }
+
+      public String onWindowClosing() {
+        passTest(WINDOW_EVENT_CLOSING);
+        return "";
+      }
+    });
+
     // The following are not testable or not supported in all browsers
     // onlosecapture
 
@@ -267,7 +304,15 @@ public class TestFireEvents extends AbstractIssue {
    * @param event the event that was triggered
    */
   private void passTest(Event event) {
-    int eventType = DOM.eventGetType(event);
+    passTest(event.getTypeInt());
+  }
+
+  /**
+   * Mark the event as passed.
+   * 
+   * @param eventType the event type that was triggered
+   */
+  private void passTest(int eventType) {
     int rowIndex = eventMap.get(new Integer(eventType));
     if (layout.getCellCount(rowIndex) == 3) {
       layout.setHTML(rowIndex, 2, "pass");

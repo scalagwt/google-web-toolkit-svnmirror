@@ -189,6 +189,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.TreeSet;
 
 /**
  * This is the big kahuna where most of the nitty gritty of creating our AST
@@ -220,6 +222,10 @@ public class GenerateJavaAST {
 
     private static InternalCompilerException translateException(JNode node,
         Throwable e) {
+      if (e instanceof OutOfMemoryError) {
+        // Always rethrow OOMs (might have no memory to load ICE class anyway).
+        throw (OutOfMemoryError) e;
+      }
       InternalCompilerException ice;
       if (e instanceof InternalCompilerException) {
         ice = (InternalCompilerException) e;
@@ -453,29 +459,10 @@ public class GenerateJavaAST {
       // Check if we need to box the resulting expression.
       if (x != null) {
         if ((x.implicitConversion & TypeIds.BOXING) != 0) {
-          /*
-           * Beware! Passing in "primitiveTypeToBox" seems unnecessary, but it
-           * isn't. You cannot determine the true type to box directly by
-           * calling result.getType() in all cases because sometimes, such as
-           * when the expression is originally a int literal prefixed with a
-           * narrowing cast, the processExpression() calls returns JIntLiterals
-           * even when the actual type should be byte or short. So, unless you
-           * remember what the original expression type was, you'd incorrectly
-           * box a byte as an Integer.
-           */
-          JType primitiveTypeToBox = (JType) typeMap.get(x.resolvedType);
-
-          if (!(primitiveTypeToBox instanceof JPrimitiveType)) {
-            throw new InternalCompilerException(result,
-                "Attempt to box a non-primitive type: "
-                    + primitiveTypeToBox.getName(), null);
-          }
-
-          result = autoboxUtils.box(result,
-              ((JPrimitiveType) primitiveTypeToBox));
+          result = autoboxUtils.box(result, implicitConversionTargetType(x));
         } else if ((x.implicitConversion & TypeIds.UNBOXING) != 0) {
           // This code can actually leave an unbox operation in
-          // an lvalue position, for example ++x.intValue().
+          // an lvalue position, for example ++(x.intValue()).
           // Such trees are cleaned up in FixAssignmentToUnbox.
           JType typeToUnbox = (JType) typeMap.get(x.resolvedType);
           if (!(typeToUnbox instanceof JClassType)) {
@@ -1010,7 +997,6 @@ public class GenerateJavaAST {
     JExpression processExpression(FieldReference x) {
       SourceInfo info = makeSourceInfo(x);
       FieldBinding fieldBinding = x.binding;
-      JType type = (JType) typeMap.get(x.resolvedType);
       JField field;
       if (fieldBinding.declaringClass == null) {
         // probably array.length
@@ -1025,11 +1011,15 @@ public class GenerateJavaAST {
       JExpression fieldRef = new JFieldRef(program, info, instance, field,
           currentClass);
 
-      /*
-       * Note, this may result in an invalid AST due to an LHS cast operation.
-       * We fix this up in FixAssignmentToUnbox.
-       */
-      return maybeCast(type, fieldRef);
+      if (x.genericCast != null) {
+        JType castType = (JType) typeMap.get(x.genericCast);
+        /*
+         * Note, this may result in an invalid AST due to an LHS cast operation.
+         * We fix this up in FixAssignmentToUnbox.
+         */
+        return maybeCast(castType, fieldRef);
+      }
+      return fieldRef;
     }
 
     JExpression processExpression(InstanceOfExpression x) {
@@ -1041,7 +1031,6 @@ public class GenerateJavaAST {
 
     JExpression processExpression(MessageSend x) {
       SourceInfo info = makeSourceInfo(x);
-      JType type = (JType) typeMap.get(x.resolvedType);
       JMethod method = (JMethod) typeMap.get(x.binding);
 
       JExpression qualifier;
@@ -1077,7 +1066,11 @@ public class GenerateJavaAST {
       // The arguments come first...
       addCallArgs(x.arguments, call, x.binding);
 
-      return maybeCast(type, call);
+      if (x.valueCast != null) {
+        JType castType = (JType) typeMap.get(x.valueCast);
+        return maybeCast(castType, call);
+      }
+      return call;
     }
 
     @SuppressWarnings("unused")
@@ -1210,6 +1203,10 @@ public class GenerateJavaAST {
       JVariable variable = (JVariable) node;
 
       JExpression curRef = createVariableRef(info, variable, binding);
+      if (x.genericCast != null) {
+        JType castType = (JType) typeMap.get(x.genericCast);
+        curRef = maybeCast(castType, curRef);
+      }
 
       /*
        * Wackiness: JDT represents multiple field access as an array of fields,
@@ -1217,7 +1214,8 @@ public class GenerateJavaAST {
        * otherBindings takes the current expression as a qualifier.
        */
       if (x.otherBindings != null) {
-        for (FieldBinding fieldBinding : x.otherBindings) {
+        for (int i = 0; i < x.otherBindings.length; ++i) {
+          FieldBinding fieldBinding = x.otherBindings[i];
           JField field;
           if (fieldBinding.declaringClass == null) {
             // probably array.length
@@ -1230,6 +1228,10 @@ public class GenerateJavaAST {
             field = (JField) typeMap.get(fieldBinding);
           }
           curRef = new JFieldRef(program, info, curRef, field, currentClass);
+          if (x.otherGenericCasts != null && x.otherGenericCasts[i] != null) {
+            JType castType = (JType) typeMap.get(x.otherGenericCasts[i]);
+            curRef = maybeCast(castType, curRef);
+          }
         }
       }
 
@@ -1267,15 +1269,22 @@ public class GenerateJavaAST {
        * instance. CreateThisRef should compute a "this" access of the
        * appropriate type, unless the field is static.
        */
+      JExpression result = null;
       if (x.syntheticAccessors != null) {
         JField field = (JField) variable;
         if (!field.isStatic()) {
           JExpression instance = createThisRef(info, field.getEnclosingType());
-          return new JFieldRef(program, info, instance, field, currentClass);
+          result = new JFieldRef(program, info, instance, field, currentClass);
         }
       }
-
-      return createVariableRef(info, variable, binding);
+      if (result == null) {
+        result = createVariableRef(info, variable, binding);
+      }
+      if (x.genericCast != null) {
+        JType castType = (JType) typeMap.get(x.genericCast);
+        result = maybeCast(castType, result);
+      }
+      return result;
     }
 
     JExpression processExpression(SuperReference x) {
@@ -1612,6 +1621,11 @@ public class GenerateJavaAST {
       // May need to box or unbox the element assignment.
       if (x.elementVariableImplicitWidening != -1) {
         if ((x.elementVariableImplicitWidening & TypeIds.BOXING) != 0) {
+          /*
+           * Boxing is necessary. In this special case of autoboxing, the boxed
+           * expression cannot be a constant, so the box type must be exactly
+           * that associated with the expression.
+           */
           elementDecl.initializer = autoboxUtils.box(elementDecl.initializer,
               ((JPrimitiveType) elementDecl.initializer.getType()));
         } else if ((x.elementVariableImplicitWidening & TypeIds.UNBOXING) != 0) {
@@ -2178,6 +2192,43 @@ public class GenerateJavaAST {
       statements.add(new JReturnStatement(program, info, returnValue));
     }
 
+    /*
+     * Determine the destination type for an implicit conversion of the given
+     * expression. Beware that when autoboxing, the type of the expression is
+     * not necessarily the same as the type of the box to be created. The JDT
+     * figures out what the necessary conversion is, depending on the context
+     * the expression appears in, and stores it in <code>x.implicitConversion</code>,
+     * so extract it from there.
+     */
+    private JPrimitiveType implicitConversionTargetType(Expression x)
+        throws InternalCompilerException {
+      /*
+       * This algorithm for finding the target type is copied from
+       * org.eclipse.jdt.internal.compiler.codegen.CodeStream.generateReturnBytecode() .
+       */
+      switch ((x.implicitConversion & TypeIds.IMPLICIT_CONVERSION_MASK) >> 4) {
+        case TypeIds.T_boolean:
+          return program.getTypePrimitiveBoolean();
+        case TypeIds.T_byte:
+          return program.getTypePrimitiveByte();
+        case TypeIds.T_char:
+          return program.getTypePrimitiveChar();
+        case TypeIds.T_double:
+          return program.getTypePrimitiveDouble();
+        case TypeIds.T_float:
+          return program.getTypePrimitiveFloat();
+        case TypeIds.T_int:
+          return program.getTypePrimitiveInt();
+        case TypeIds.T_long:
+          return program.getTypePrimitiveLong();
+        case TypeIds.T_short:
+          return program.getTypePrimitiveShort();
+        default:
+          throw new InternalCompilerException(
+              "Could not determine the desired box type");
+      }
+    }
+
     private SourceInfo makeSourceInfo(Statement x) {
       int startLine = Util.getLineNumber(x.sourceStart,
           currentSeparatorPositions, 0, currentSeparatorPositions.length - 1);
@@ -2285,6 +2336,10 @@ public class GenerateJavaAST {
 
     private InternalCompilerException translateException(Object node,
         Throwable e) {
+      if (e instanceof OutOfMemoryError) {
+        // Always rethrow OOMs (might have no memory to load ICE class anyway).
+        throw (OutOfMemoryError) e;
+      }
       InternalCompilerException ice;
       if (e instanceof InternalCompilerException) {
         ice = (InternalCompilerException) e;
@@ -2522,7 +2577,7 @@ public class GenerateJavaAST {
           return null;
         } else {
           // look for a method
-          String almostMatches = null;
+          TreeSet<String> almostMatches = new TreeSet<String>();
           String methodName = parsed.memberName();
           String jsniSig = parsed.memberSignature();
           if (type == null) {
@@ -2530,31 +2585,44 @@ public class GenerateJavaAST {
               return program.getNullMethod();
             }
           } else {
-            for (int i = 0; i < type.methods.size(); ++i) {
-              JMethod method = type.methods.get(i);
-              if (method.getName().equals(methodName)) {
-                String sig = JProgram.getJsniSig(method);
-                if (sig.equals(jsniSig)) {
-                  return method;
-                } else if (almostMatches == null) {
-                  almostMatches = "'" + sig + "'";
-                } else {
-                  almostMatches += ", '" + sig + "'";
+            Queue<JReferenceType> workList = new LinkedList<JReferenceType>();
+            workList.add(type);
+            while (!workList.isEmpty()) {
+              JReferenceType cur = workList.poll();
+              for (int i = 0; i < cur.methods.size(); ++i) {
+                JMethod method = cur.methods.get(i);
+                if (method.getName().equals(methodName)) {
+                  String sig = JProgram.getJsniSig(method);
+                  if (sig.equals(jsniSig)) {
+                    return method;
+                  } else {
+                    almostMatches.add(sig);
+                  }
                 }
               }
+              if (cur.extnds != null) {
+                workList.add(cur.extnds);
+              }
+              workList.addAll(cur.implments);
             }
           }
 
-          if (almostMatches == null) {
+          if (almostMatches.isEmpty()) {
             reportJsniError(info, methodDecl,
                 "Unresolvable native reference to method '" + methodName
                     + "' in type '" + className + "'");
             return null;
           } else {
+            StringBuilder suggestList = new StringBuilder();
+            String comma = "";
+            for (String almost : almostMatches) {
+              suggestList.append(comma + "'" + almost + "'");
+              comma = ", ";
+            }
             reportJsniError(info, methodDecl,
                 "Unresolvable native reference to method '" + methodName
                     + "' in type '" + className + "' (did you mean "
-                    + almostMatches + "?)");
+                    + suggestList.toString() + "?)");
             return null;
           }
         }
@@ -2607,7 +2675,8 @@ public class GenerateJavaAST {
 
       private void processMethod(JsNameRef nameRef, SourceInfo info,
           JMethod method, JsContext<JsExpression> ctx) {
-        if (method.getEnclosingType() != null) {
+        JReferenceType enclosingType = method.getEnclosingType();
+        if (enclosingType != null) {
           if (method.isStatic() && nameRef.getQualifier() != null) {
             reportJsniError(info, methodDecl,
                 "Cannot make a qualified reference to the static method "
@@ -2616,6 +2685,16 @@ public class GenerateJavaAST {
             reportJsniError(info, methodDecl,
                 "Cannot make an unqualified reference to the instance method "
                     + method.getName());
+          } else if (!method.isStatic()
+              && program.isJavaScriptObject(enclosingType)) {
+            reportJsniError(
+                info,
+                methodDecl,
+                "Illegal reference to instance method '"
+                    + method.getName()
+                    + "' in type '"
+                    + enclosingType.getName()
+                    + "', which is an overlay type; only static references to overlay types are allowed from JSNI");
           }
         }
         if (ctx.isLvalue()) {
