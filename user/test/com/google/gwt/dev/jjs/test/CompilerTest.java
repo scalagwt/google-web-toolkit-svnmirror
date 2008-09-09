@@ -936,7 +936,8 @@ public class CompilerTest extends GWTTestCase {
     try {
       accessUninstantiableMethod(u);
       fail("Expected JavaScriptException");
-    } catch (JavaScriptException expected) {
+    } catch (NullPointerException expectedHostedMode) {
+    } catch (JavaScriptException expectedWebMode) {
     }
 
     try {

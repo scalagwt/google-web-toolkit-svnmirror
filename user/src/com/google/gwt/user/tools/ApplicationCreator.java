@@ -172,11 +172,11 @@ public final class ApplicationCreator extends ToolBase {
    * @throws IOException
    */
   static void createApplication(String fullClassName, File outDir,
-      String eclipse, boolean overwrite, boolean ignore)
-      throws IOException {
-    createApplication(fullClassName, outDir, eclipse, overwrite, ignore, null, null);
+      String eclipse, boolean overwrite, boolean ignore) throws IOException {
+    createApplication(fullClassName, outDir, eclipse, overwrite, ignore, null,
+        null);
   }
-  
+
   /**
    * @param fullClassName Name of the fully-qualified Java class to create as an
    *          Application.
@@ -195,34 +195,14 @@ public final class ApplicationCreator extends ToolBase {
       throws IOException {
 
     // Figure out the installation directory
-    String installPath = Utility.getInstallPath();
+    String installPath = Utility.getInstallPath(true);
     String gwtUserPath = installPath + '/' + "gwt-user.jar";
-    String gwtDevPath = installPath + '/' + Utility.getDevJarName();
+    String gwtDevPath = installPath + '/' + "gwt-dev.jar";
 
     // Validate the arguments for extra class path entries and modules.
     if (!CreatorUtilities.validatePathsAndModules(gwtUserPath, extraClassPaths,
         extraModules)) {
       return;
-    }
-    // Figure out what platform we're on
-    // 
-    boolean isWindows = gwtDevPath.substring(gwtDevPath.lastIndexOf('/') + 1).indexOf(
-        "windows") >= 0;
-    boolean isMacOsX = gwtDevPath.substring(gwtDevPath.lastIndexOf('/') + 1).indexOf(
-        "mac") >= 0;
-
-    // If the path from here to the install directory is relative, we need to
-    // set specific "base" directory tags; this is for sample generation during
-    // the build.
-    String basePathEnv;
-    if (!new File(installPath).isAbsolute()) {
-      if (isWindows) {
-        basePathEnv = "%~dp0\\";
-      } else {
-        basePathEnv = "$APPDIR/";
-      }
-    } else {
-      basePathEnv = "";
     }
 
     // Check out the class and package names.
@@ -256,19 +236,20 @@ public final class ApplicationCreator extends ToolBase {
     replacements.put("@className", className);
     replacements.put("@moduleName", moduleName);
     replacements.put("@clientPackage", clientPackageName);
-    replacements.put("@gwtUserPath", basePathEnv + gwtUserPath);
-    replacements.put("@gwtDevPath", basePathEnv + gwtDevPath);
+    replacements.put("@gwtUserPath", gwtUserPath);
+    replacements.put("@gwtDevPath", gwtDevPath);
     replacements.put("@shellClass", "com.google.gwt.dev.GWTShell");
     replacements.put("@compileClass", "com.google.gwt.dev.GWTCompiler");
     replacements.put("@startupUrl", startupUrl);
-    replacements.put("@vmargs", isMacOsX ? "-XstartOnFirstThread" : "");
+    replacements.put("@vmargs", "");
     replacements.put("@eclipseExtraLaunchPaths",
         CreatorUtilities.createEclipseExtraLaunchPaths(extraClassPaths));
     replacements.put("@extraModuleInherits",
         createExtraModuleInherits(extraModules));
     replacements.put("@extraClassPathsColon", CreatorUtilities.appendPaths(":",
         extraClassPaths));
-    replacements.put("@extraClassPathsSemicolon", CreatorUtilities.appendPaths(";", extraClassPaths));
+    replacements.put("@extraClassPathsSemicolon", CreatorUtilities.appendPaths(
+        ";", extraClassPaths));
 
     {
       // Create the module
@@ -327,32 +308,44 @@ public final class ApplicationCreator extends ToolBase {
     }
 
     // create startup files
-    String extension;
-    if (isWindows) {
-      extension = ".cmd";
+
+    // If the path from here to the install directory is relative, we need to
+    // set specific "base" directory tags; this is for sample generation during
+    // the build.
+    String[] basePathEnvs;
+    if (!new File(installPath).isAbsolute()) {
+      basePathEnvs = new String[] {"%~dp0\\", "$APPDIR/"};
     } else {
-      extension = "";
+      basePathEnvs = new String[] {"", ""};
     }
+    String extensions[] = {".cmd", ""};
 
-    File gwtshell = Utility.createNormalFile(outDir, className + "-shell"
-        + extension, overwrite, ignore);
-    if (gwtshell != null) {
-      String out = Utility.getFileFromClassPath(PACKAGE_PATH + "gwtshell"
-          + extension + "src");
-      Utility.writeTemplateFile(gwtshell, out, replacements);
-      if (extension.length() == 0) {
-        chmodExecutable(gwtshell);
+    for (int platform = 0; platform < 2; ++platform) {
+      String basePathEnv = basePathEnvs[platform];
+      String extension = extensions[platform];
+      replacements.put("@gwtUserPath", basePathEnv + gwtUserPath);
+      replacements.put("@gwtDevPath", basePathEnv + gwtDevPath);
+
+      File gwtshell = Utility.createNormalFile(outDir, className + "-shell"
+          + extension, overwrite, ignore);
+      if (gwtshell != null) {
+        String out = Utility.getFileFromClassPath(PACKAGE_PATH + "gwtshell"
+            + extension + "src");
+        Utility.writeTemplateFile(gwtshell, out, replacements);
+        if (extension.length() == 0) {
+          chmodExecutable(gwtshell);
+        }
       }
-    }
 
-    File gwtcompile = Utility.createNormalFile(outDir, className + "-compile"
-        + extension, overwrite, ignore);
-    if (gwtcompile != null) {
-      String out = Utility.getFileFromClassPath(PACKAGE_PATH + "gwtcompile"
-          + extension + "src");
-      Utility.writeTemplateFile(gwtcompile, out, replacements);
-      if (extension.length() == 0) {
-        chmodExecutable(gwtcompile);
+      File gwtcompile = Utility.createNormalFile(outDir, className + "-compile"
+          + extension, overwrite, ignore);
+      if (gwtcompile != null) {
+        String out = Utility.getFileFromClassPath(PACKAGE_PATH + "gwtcompile"
+            + extension + "src");
+        Utility.writeTemplateFile(gwtcompile, out, replacements);
+        if (extension.length() == 0) {
+          chmodExecutable(gwtcompile);
+        }
       }
     }
   }
@@ -368,7 +361,6 @@ public final class ApplicationCreator extends ToolBase {
     try {
       Runtime.getRuntime().exec("chmod u+x " + file.getAbsolutePath());
     } catch (Throwable e) {
-      System.err.println(("Warning: cannot exec chmod to set permission on generated file."));
     }
   }
 

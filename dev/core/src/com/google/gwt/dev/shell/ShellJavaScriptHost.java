@@ -30,14 +30,13 @@ import com.google.gwt.core.ext.UnableToCompleteException;
 public interface ShellJavaScriptHost {
 
   /**
-   * Defines a new native JavaScript function.
+   * Defines native JavaScript methods for a class.
    * 
-   * @param name the function's name, usually a JSNI signature
-   * @param paramNames parameter names
-   * @param js the script body
+   * @param sourceName source name of class
+   * @param string Javascript source, of the form of a function which defines the JSNI methods
+   *     on a given object.  For example, org.example.Foo is named jsni_org_example_Foo(obj). 
    */
-  void createNative(String file, int line, String name, String[] paramNames,
-      String js);
+  void createNativeMethods(String sourceName, String string);
 
   /**
    * Call this when a JavaScript exception is caught.

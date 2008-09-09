@@ -28,6 +28,8 @@ import java.lang.reflect.Method;
  * Tests for the {@link com.google.gwt.user.server.rpc.RPC RPC} class.
  */
 public class RPCTest extends TestCase {
+  
+  private static char RPC_SEPARATOR = '|';
 
   private static interface A extends RemoteService {
     void method1() throws SerializableException;
@@ -41,86 +43,53 @@ public class RPCTest extends TestCase {
     void method1();
   }
 
-  private static final String VALID_ENCODED_REQUEST = "4\uffff" + // version
-      "0\uffff" + // flags
-      "4\uffff" + // string table entry count
-      A.class.getName() + "\uffff" + // string table entry #0
-      "method2" + "\uffff" + // string table entry #1
-      "moduleBaseURL" + "\uffff" + // string table entry #2
-      "whitelistHashcode" + "\uffff" + // string table entry #4
-      "3\uffff" + // module base URL
-      "4\uffff" + // whitelist hashcode
-      "1\uffff" + // interface name
-      "2\uffff" + // method name
-      "0\uffff"; // param count
+  private final String VALID_ENCODED_REQUEST = "3" + RPC_SEPARATOR + // version
+      "0" + RPC_SEPARATOR + // flags
+      "4" + RPC_SEPARATOR + // string table entry count
+      A.class.getName() + RPC_SEPARATOR + // string table entry #0
+      "method2" + RPC_SEPARATOR + // string table entry #1
+      "moduleBaseURL" + RPC_SEPARATOR + // string table entry #2
+      "whitelistHashcode" + RPC_SEPARATOR + // string table entry #4
+      "3" + RPC_SEPARATOR + // module base URL
+      "4" + RPC_SEPARATOR + // whitelist hashcode
+      "1" + RPC_SEPARATOR + // interface name
+      "2" + RPC_SEPARATOR + // method name
+      "0" + RPC_SEPARATOR; // param count
 
-  private static final String INVALID_METHOD_REQUEST = "4\uffff" + // version
-      "0\uffff" + // flags
-      "4\uffff" + // string table entry count
-      A.class.getName() + "\uffff" + // string table entry #0
-      "method3" + "\uffff" + // string table entry #1
-      "moduleBaseURL" + "\uffff" + // string table entry #2
-      "whitelistHashcode" + "\uffff" + // string table entry #4
-      "3\uffff" + // module base URL
-      "4\uffff" + // whitelist hashcode
-      "1\uffff" + // interface name
-      "2\uffff" + // method name
-      "0\uffff"; // param count
+  private final String INVALID_METHOD_REQUEST = "3" + RPC_SEPARATOR + // version
+      "0" + RPC_SEPARATOR + // flags
+      "4" + RPC_SEPARATOR + // string table entry count
+      A.class.getName() + RPC_SEPARATOR + // string table entry #0
+      "method3" + RPC_SEPARATOR + // string table entry #1
+      "moduleBaseURL" + RPC_SEPARATOR + // string table entry #2
+      "whitelistHashcode" + RPC_SEPARATOR + // string table entry #4
+      "3" + RPC_SEPARATOR + // module base URL
+      "4" + RPC_SEPARATOR + // whitelist hashcode
+      "1" + RPC_SEPARATOR + // interface name
+      "2" + RPC_SEPARATOR + // method name
+      "0" + RPC_SEPARATOR; // param count
 
-  private static final String INVALID_INTERFACE_REQUEST = "4\uffff" + // version
-      "0\uffff" + // flags
-      "4\uffff" + // string table entry count
-      B.class.getName() + "\uffff" + // string table entry #0
-      "method1" + "\uffff" + // string table entry #1
-      "moduleBaseURL" + "\uffff" + // string table entry #2
-      "whitelistHashcode" + "\uffff" + // string table entry #4
-      "3\uffff" + // module base URL
-      "4\uffff" + // whitelist hashcode
-      "1\uffff" + // interface name
-      "2\uffff" + // method name
-      "0\uffff"; // param count
+  private final String INVALID_INTERFACE_REQUEST = "3" + RPC_SEPARATOR + // version
+      "0" + RPC_SEPARATOR + // flags
+      "4" + RPC_SEPARATOR + // string table entry count
+      B.class.getName() + RPC_SEPARATOR + // string table entry #0
+      "method1" + RPC_SEPARATOR + // string table entry #1
+      "moduleBaseURL" + RPC_SEPARATOR + // string table entry #2
+      "whitelistHashcode" + RPC_SEPARATOR + // string table entry #4
+      "3" + RPC_SEPARATOR + // module base URL
+      "4" + RPC_SEPARATOR + // whitelist hashcode
+      "1" + RPC_SEPARATOR + // interface name
+      "2" + RPC_SEPARATOR + // method name
+      "0" + RPC_SEPARATOR; // param count
 
-  private static final String VALID_V2_ENCODED_REQUEST = "2\uffff" + // version
-      "0\uffff" + // flags
-      "2\uffff" + // string table entry count
-      A.class.getName() + "\uffff" + // string table entry #0
-      "method2" + "\uffff" + // string table entry #1
-      "1\uffff" + // interface name
-      "2\uffff" + // method name
-      "0\uffff"; // param count
-
-  private static final String VALID_V3_ENCODED_REQUEST = "3\uffff" + // version
-      "0\uffff" + // flags
-      "4\uffff" + // string table entry count
-      A.class.getName() + "\uffff" + // string table entry #0
-      "method2" + "\uffff" + // string table entry #1
-      "moduleBaseURL" + "\uffff" + // string table entry #2
-      "whitelistHashcode" + "\uffff" + // string table entry #4
-      "3\uffff" + // module base URL
-      "4\uffff" + // whitelist hashcode
-      "1\uffff" + // interface name
-      "2\uffff" + // method name
-      "0\uffff"; // param count
-
-  /**
-   * Tests that seeing obsolete RPC formats throws an
-   * {@link IncompatibleRemoteServiceException}.
-   */
-  public void testDecodeObsoleteFormats() {
-    try {
-      RPC.decodeRequest(VALID_V2_ENCODED_REQUEST, A.class, null);
-      fail("Should have thrown an IncompatibleRemoteServiceException");
-    } catch (IncompatibleRemoteServiceException e) {
-      // Expected
-    }
-
-    try {
-      RPC.decodeRequest(VALID_V3_ENCODED_REQUEST, A.class, null);
-      fail("Should have thrown an IncompatibleRemoteServiceException");
-    } catch (IncompatibleRemoteServiceException e) {
-      // Expected
-    }
-  }
+  private final String VALID_PRE_RPC_RESOURCE_ENCODED_REQUEST = "2" + RPC_SEPARATOR + // version
+      "0" + RPC_SEPARATOR + // flags
+      "2" + RPC_SEPARATOR + // string table entry count
+      A.class.getName() + RPC_SEPARATOR + // string table entry #0
+      "method2" + RPC_SEPARATOR + // string table entry #1
+      "1" + RPC_SEPARATOR + // interface name
+      "2" + RPC_SEPARATOR + // method name
+      "0" + RPC_SEPARATOR; // param count
 
   /**
    * Tests for method {@link RPC#decodeRequest(String)}
@@ -214,6 +183,20 @@ public class RPCTest extends TestCase {
     } catch (IncompatibleRemoteServiceException e) {
       // should get here
     }
+  }
+
+  /**
+   * Tests that method
+   * {@link RPC#decodeRequest(String, Class, SerializationPolicyProvider)} can
+   * handle the decoding of requests from pre-RPC resource (whitelist) clients.
+   * 
+   * @throws SerializationException
+   */
+  public void testDecodeRequestPreRPCResourceFile() {
+    RPCRequest rpcRequest = RPC.decodeRequest(
+        VALID_PRE_RPC_RESOURCE_ENCODED_REQUEST, A.class, null);
+    SerializationPolicy serializationPolicy = rpcRequest.getSerializationPolicy();
+    assertEquals(RPC.getDefaultSerializationPolicy(), serializationPolicy);
   }
 
   /**

@@ -64,7 +64,7 @@ public final class Arrays {
     }
 
     private static native Object[] getArray0(List instance) /*-{
-      return instance.@java.util.Arrays$ArrayList::array;
+      return instance.@java.util.Arrays$ArrayList::a;
     }-*/;
   }
 }

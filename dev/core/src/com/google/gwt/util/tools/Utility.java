@@ -26,6 +26,7 @@ import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.io.Reader;
 import java.io.Writer;
+import java.net.Socket;
 import java.net.URI;
 import java.net.URL;
 import java.util.Iterator;
@@ -38,7 +39,6 @@ import java.util.Map.Entry;
  */
 public final class Utility {
 
-  private static String sDevJarName = null;
   private static String sInstallPath = null;
 
   /**
@@ -97,6 +97,19 @@ public final class Utility {
    * Helper that ignores exceptions during close, because what are you going to
    * do?
    */
+  public static void close(Socket socket) {
+    try {
+      if (socket != null) {
+        socket.close();
+      }
+    } catch (IOException e) {
+    }
+  }
+
+  /**
+   * Helper that ignores exceptions during close, because what are you going to
+   * do?
+   */
   public static void close(Writer writer) {
     try {
       if (writer != null) {
@@ -139,13 +152,6 @@ public final class Utility {
 
     System.out.println("Overwriting existing file " + file);
     return file;
-  }
-
-  public static String getDevJarName() {
-    if (sDevJarName == null) {
-      computeInstallationPath();
-    }
-    return sDevJarName;
   }
 
   /**
@@ -220,8 +226,12 @@ public final class Utility {
   }
 
   public static String getInstallPath() {
+    return getInstallPath(false);
+  }
+
+  public static String getInstallPath(boolean errorIfMissing) {
     if (sInstallPath == null) {
-      computeInstallationPath();
+      computeInstallationPath(errorIfMissing);
     }
     return sInstallPath;
   }
@@ -274,10 +284,22 @@ public final class Utility {
     close(fw);
   }
 
-  private static void computeInstallationPath() {
+  private static void computeInstallationPath(boolean errorIfMissing) {
     try {
-      String override = System.getProperty("gwt.devjar");
-      if (override == null) {
+      if (System.getProperty("gwt.devjar") != null) {
+        String override = System.getProperty("gwt.devjar");
+        override = override.replace('\\', '/');
+        int pos = override.lastIndexOf('/');
+        if (pos < 0) {
+          sInstallPath = "";
+        } else {
+          sInstallPath = override.substring(0, pos);
+        }
+      } else if (System.getProperty("gwt.installPath") != null) {
+        String override = System.getProperty("gwt.installPath");
+        override = override.replace('\\', '/');
+        sInstallPath = override;
+      } else {
         String partialPath = Utility.class.getName().replace('.', '/').concat(
             ".class");
         URL url = Utility.class.getClassLoader().getResource(partialPath);
@@ -285,14 +307,6 @@ public final class Utility {
           String path = url.toString();
           String jarPath = path.substring(path.indexOf("file:"),
               path.lastIndexOf('!'));
-          File devJarFile = new File(URI.create(jarPath));
-          if (!devJarFile.isFile()) {
-            throw new IOException("Could not find jar file; "
-                + devJarFile.getCanonicalPath()
-                + " does not appear to be a valid file");
-          }
-          sDevJarName = devJarFile.getName();
-
           String dirPath = jarPath.substring(0, jarPath.lastIndexOf('/') + 1);
           File installDirFile = new File(URI.create(dirPath));
           if (!installDirFile.isDirectory()) {
@@ -307,21 +321,12 @@ public final class Utility {
           throw new IOException(
               "Cannot determine installation directory; apparently not running from a jar");
         }
-      } else {
-        override = override.replace('\\', '/');
-        int pos = override.lastIndexOf('/');
-        if (pos < 0) {
-          sInstallPath = "";
-          sDevJarName = override;
-        } else {
-          sInstallPath = override.substring(0, pos);
-          sDevJarName = override.substring(pos + 1);
-        }
       }
     } catch (IOException e) {
-      throw new RuntimeException(
-          "Installation problem detected, please reinstall GWT", e);
+      if (errorIfMissing) {
+        throw new RuntimeException(
+            "Installation problem detected, please reinstall GWT", e);
+      }
     }
   }
-
 }

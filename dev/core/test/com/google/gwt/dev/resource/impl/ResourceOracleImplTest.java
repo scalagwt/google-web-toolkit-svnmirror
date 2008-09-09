@@ -264,14 +264,14 @@ public class ResourceOracleImplTest extends AbstractResourceOrientedTestBase {
     oracle.refresh(logger);
     ResourceOracleSnapshot s = new ResourceOracleSnapshot(oracle);
     s.assertCollectionsConsistent(9);
-    s.assertPathIncluded("com/google/gwt/user/client/Command.java", cpe1);
-    s.assertPathIncluded("com/google/gwt/i18n/client/Messages.java", cpe2);
+    s.assertPathIncluded("com/google/gwt/user/client/_command.gava", cpe1);
+    s.assertPathIncluded("com/google/gwt/i18n/client/_messages.gava", cpe2);
 
     {
       /*
        * Read a resource in cpe1.
        */
-      AbstractResource res = s.findResourceWithPath("com/google/gwt/user/client/Command.java");
+      AbstractResource res = s.findResourceWithPath("com/google/gwt/user/client/_command.gava");
       BufferedReader rdr = null;
       try {
         InputStream is = res.openContents();
@@ -288,7 +288,7 @@ public class ResourceOracleImplTest extends AbstractResourceOrientedTestBase {
       /*
        * Read a resource in cpe2.
        */
-      AbstractResource res = s.findResourceWithPath("com/google/gwt/i18n/client/Messages.java");
+      AbstractResource res = s.findResourceWithPath("com/google/gwt/i18n/client/_messages.gava");
       BufferedReader rdr = null;
       try {
         InputStream is = res.openContents();
@@ -322,15 +322,15 @@ public class ResourceOracleImplTest extends AbstractResourceOrientedTestBase {
        */
       ResourceOracleSnapshot s = refreshAndSnapshot(logger, oracle);
       s.assertCollectionsConsistent(9);
-      s.assertPathIncluded("com/google/gwt/user/client/Command.java");
-      s.assertPathIncluded("com/google/gwt/user/client/Timer.java");
-      s.assertPathIncluded("com/google/gwt/user/client/ui/Widget.java");
+      s.assertPathIncluded("com/google/gwt/user/client/_command.gava");
+      s.assertPathIncluded("com/google/gwt/user/client/_timer.gava");
+      s.assertPathIncluded("com/google/gwt/user/client/ui/_widget.gava");
       s.assertPathIncluded("org/example/bar/client/BarClient1.txt");
       s.assertPathIncluded("org/example/bar/client/BarClient2.txt");
       s.assertPathIncluded("org/example/bar/client/BarClient3.txt");
       s.assertPathIncluded("org/example/bar/client/etc/BarEtc.txt");
-      s.assertPathIncluded("org/example/foo/client/FooClient.java");
-      s.assertPathIncluded("com/google/gwt/i18n/client/Messages.java");
+      s.assertPathIncluded("org/example/foo/client/_foo_client.gava");
+      s.assertPathIncluded("com/google/gwt/i18n/client/_messages.gava");
     }
 
     {
@@ -338,8 +338,8 @@ public class ResourceOracleImplTest extends AbstractResourceOrientedTestBase {
        * Add duplicate resources later in the classpath, which won't be found.
        * Consequently, the collections' identities should not change.
        */
-      cpe3.addResource("com/google/gwt/user/client/Command.java");
-      cpe3.addResource("com/google/gwt/user/client/Timer.java");
+      cpe3.addResource("com/google/gwt/user/client/_command.gava");
+      cpe3.addResource("com/google/gwt/user/client/_timer.gava");
       cpe3.addResource("com/google/gwt/bar/client/etc/BarEtc.txt");
 
       ResourceOracleSnapshot before = new ResourceOracleSnapshot(oracle);
@@ -353,13 +353,13 @@ public class ResourceOracleImplTest extends AbstractResourceOrientedTestBase {
        * Add a unique resource later in the classpath, which will be found.
        * Consequently, the collections' identities should change.
        */
-      cpe3.addResource("com/google/gwt/i18n/client/Constants.java");
+      cpe3.addResource("com/google/gwt/i18n/client/_constants.gava");
 
       ResourceOracleSnapshot before = new ResourceOracleSnapshot(oracle);
       ResourceOracleSnapshot after = refreshAndSnapshot(logger, oracle);
       after.assertCollectionsConsistent(10);
       after.assertNotSameCollections(before);
-      after.assertPathIncluded("com/google/gwt/i18n/client/Constants.java");
+      after.assertPathIncluded("com/google/gwt/i18n/client/_constants.gava");
     }
   }
 
@@ -373,10 +373,10 @@ public class ResourceOracleImplTest extends AbstractResourceOrientedTestBase {
     /*
      * Intentionally add some duplicate resources.
      */
-    cpe0.addResource("com/google/gwt/user/client/Command.java");
-    cpe0.addResource("com/google/gwt/i18n/client/Constants.java");
-    cpe3.addResource("com/google/gwt/user/client/Command.java");
-    cpe3.addResource("com/google/gwt/i18n/client/Constants.java");
+    cpe0.addResource("com/google/gwt/user/client/_command.gava");
+    cpe0.addResource("com/google/gwt/i18n/client/_constants.gava");
+    cpe3.addResource("com/google/gwt/user/client/_command.gava");
+    cpe3.addResource("com/google/gwt/i18n/client/_constants.gava");
 
     {
       /*
@@ -385,16 +385,16 @@ public class ResourceOracleImplTest extends AbstractResourceOrientedTestBase {
        */
       ResourceOracleSnapshot s = refreshAndSnapshot(logger, oracle);
       s.assertCollectionsConsistent(10);
-      s.assertPathIncluded("com/google/gwt/user/client/Command.java");
-      s.assertPathIncluded("com/google/gwt/user/client/Timer.java");
-      s.assertPathIncluded("com/google/gwt/user/client/ui/Widget.java");
+      s.assertPathIncluded("com/google/gwt/user/client/_command.gava");
+      s.assertPathIncluded("com/google/gwt/user/client/_timer.gava");
+      s.assertPathIncluded("com/google/gwt/user/client/ui/_widget.gava");
       s.assertPathIncluded("org/example/bar/client/BarClient1.txt");
       s.assertPathIncluded("org/example/bar/client/BarClient2.txt");
       s.assertPathIncluded("org/example/bar/client/BarClient3.txt");
       s.assertPathIncluded("org/example/bar/client/etc/BarEtc.txt");
-      s.assertPathIncluded("org/example/foo/client/FooClient.java");
-      s.assertPathIncluded("com/google/gwt/i18n/client/Messages.java");
-      s.assertPathIncluded("com/google/gwt/i18n/client/Constants.java");
+      s.assertPathIncluded("org/example/foo/client/_foo_client.gava");
+      s.assertPathIncluded("com/google/gwt/i18n/client/_messages.gava");
+      s.assertPathIncluded("com/google/gwt/i18n/client/_constants.gava");
     }
 
     {
@@ -402,8 +402,8 @@ public class ResourceOracleImplTest extends AbstractResourceOrientedTestBase {
        * Remove a shadowed resource, which shouldn't have been found anyway.
        * Consequently, the collections' identities should not change.
        */
-      cpe3.removeResource("com/google/gwt/user/client/Command.java");
-      cpe3.removeResource("com/google/gwt/i18n/client/Constants.java");
+      cpe3.removeResource("com/google/gwt/user/client/_command.gava");
+      cpe3.removeResource("com/google/gwt/i18n/client/_constants.gava");
 
       ResourceOracleSnapshot before = new ResourceOracleSnapshot(oracle);
       ResourceOracleSnapshot after = refreshAndSnapshot(logger, oracle);
@@ -417,15 +417,15 @@ public class ResourceOracleImplTest extends AbstractResourceOrientedTestBase {
        * new one to ensure that lack of size change doesn't confuse anything.
        * Consequently, the collections' identities should change.
        */
-      cpe0.removeResource("com/google/gwt/i18n/client/Constants.java");
-      cpe3.addResource("com/google/gwt/user/client/Window.java");
+      cpe0.removeResource("com/google/gwt/i18n/client/_constants.gava");
+      cpe3.addResource("com/google/gwt/user/client/_window.gava");
 
       ResourceOracleSnapshot before = new ResourceOracleSnapshot(oracle);
       ResourceOracleSnapshot after = refreshAndSnapshot(logger, oracle);
       after.assertCollectionsConsistent(10);
       after.assertNotSameCollections(before);
-      after.assertPathIncluded("com/google/gwt/user/client/Window.java");
-      after.assertPathNotIncluded("com/google/gwt/i18n/client/Constants.java");
+      after.assertPathIncluded("com/google/gwt/user/client/_window.gava");
+      after.assertPathNotIncluded("com/google/gwt/i18n/client/_constants.gava");
     }
   }
 
@@ -442,13 +442,13 @@ public class ResourceOracleImplTest extends AbstractResourceOrientedTestBase {
        */
       oracle.refresh(logger);
       ResourceOracleSnapshot s = new ResourceOracleSnapshot(oracle);
-      s.assertPathIncluded("com/google/gwt/user/client/Command.java", cpe1);
-      s.assertPathIncluded("com/google/gwt/user/client/Timer.java", cpe1);
+      s.assertPathIncluded("com/google/gwt/user/client/_command.gava", cpe1);
+      s.assertPathIncluded("com/google/gwt/user/client/_timer.gava", cpe1);
     }
 
     // Add intentionally duplicate resources.
-    cpe0.addResource("com/google/gwt/user/client/Command.java");
-    cpe3.addResource("com/google/gwt/user/client/Timer.java");
+    cpe0.addResource("com/google/gwt/user/client/_command.gava");
+    cpe3.addResource("com/google/gwt/user/client/_timer.gava");
 
     {
       /*
@@ -456,8 +456,8 @@ public class ResourceOracleImplTest extends AbstractResourceOrientedTestBase {
        */
       oracle.refresh(logger);
       ResourceOracleSnapshot s = new ResourceOracleSnapshot(oracle);
-      s.assertPathIncluded("com/google/gwt/user/client/Command.java", cpe0);
-      s.assertPathIncluded("com/google/gwt/user/client/Timer.java", cpe1);
+      s.assertPathIncluded("com/google/gwt/user/client/_command.gava", cpe0);
+      s.assertPathIncluded("com/google/gwt/user/client/_timer.gava", cpe1);
     }
 
     {
@@ -468,7 +468,7 @@ public class ResourceOracleImplTest extends AbstractResourceOrientedTestBase {
       ResourceOracleSnapshot before = new ResourceOracleSnapshot(oracle);
       before.assertCollectionsConsistent(9);
 
-      cpe3.updateResource("com/google/gwt/user/client/Timer.java");
+      cpe3.updateResource("com/google/gwt/user/client/_timer.gava");
 
       ResourceOracleSnapshot after = refreshAndSnapshot(logger, oracle);
       after.assertSameCollections(before);
@@ -482,7 +482,7 @@ public class ResourceOracleImplTest extends AbstractResourceOrientedTestBase {
       ResourceOracleSnapshot before = new ResourceOracleSnapshot(oracle);
       before.assertCollectionsConsistent(9);
 
-      cpe0.updateResource("com/google/gwt/user/client/Command.java");
+      cpe0.updateResource("com/google/gwt/user/client/_command.gava");
 
       ResourceOracleSnapshot after = refreshAndSnapshot(logger, oracle);
       after.assertNotSameCollections(before);

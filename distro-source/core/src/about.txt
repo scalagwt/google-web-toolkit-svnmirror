@@ -17,5 +17,7 @@ This product includes software developed by:
  - The OpenQA Project (http://openqa.org/)
    - Selenium-RC (http://selenium-rc.openqa.org/)
  - The WebKit Open Source Project (http://www.webkit.org)
+ - JavaDesktop Community (https://javadesktop.dev.java.net/)
+   - SwingWorker 1.1 (https://swingworker.dev.java.net/) repackaged
 
 For source availability and license information see COPYING.

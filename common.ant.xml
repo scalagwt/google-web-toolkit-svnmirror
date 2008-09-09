@@ -85,32 +85,9 @@
   </condition>
   <fail unless="build.host.platform" message="Building on ${os.name} is not supported" />
 
-  <condition property="junit.platform.args" value="-XstartOnFirstThread" else="">
-    <isset property="build.host.ismac" />
-  </condition>
-
-  <!-- JUnit support -->
-  <property name="gwt.dev.staging.jar" location="${gwt.build.staging}/gwt-${build.host.platform}-${gwt.version}/gwt-dev-${build.host.platform}.jar" />
+  <property name="junit.platform.args" value ="" />
   <property name="gwt.junit.port" value="8888" />
   <property name="gwt.junit.testcase.includes" value="**/*Suite.class"/>
-
-  <!-- Headless mode keeps the hosted mode browser and log window
-       from popping up during a unit test run. This is usually desirable,
-       but the WebKit layout engine performs some optimizations in
-       headless mode that causes some GWT unit tests to break.  The 
-       solution for the time being is to turn off headless mode on
-       the mac.
-    -->
-  <condition property="junit.headless">
-    <not>
-         <isset property="build.host.ismac" />
-    </not>
-  </condition>
-  <condition property="junit.notheadless.arg" value="-notHeadless" else="">
-    <not>
-         <isset property="junit.headless" />
-    </not>
-  </condition>
 
   <!-- Pulls in tasks defined in ant-contrib, i.e. foreach -->
   <taskdef resource="net/sf/antcontrib/antlib.xml">
@@ -144,6 +121,7 @@
     <attribute name="test.out" default="" />
     <attribute name="test.reports" default="@{test.out}/reports" />
     <attribute name="test.cases" default="" />
+    <attribute name="test.runstyle" default="" />
     <element name="extraclasspaths" optional="true" />
     <sequential>
       <taskdef name="junit" classname="org.apache.tools.ant.taskdefs.optional.junit.JUnitTask">
@@ -161,16 +139,16 @@
       <junit dir="@{test.out}" fork="yes" printsummary="yes" failureproperty="junit.failure" >
         <jvmarg line="${junit.platform.args}" />
         <jvmarg line="-Xmx512m" />
-        <sysproperty key="gwt.args" value="${junit.notheadless.arg} @{test.args}" />
-        <sysproperty key="java.awt.headless" value="${junit.headless}" />
-        <sysproperty key="gwt.devjar" value="${gwt.dev.staging.jar}" />
+        <sysproperty key="gwt.args" value="@{test.args} @{test.runstyle}" />
+        <sysproperty key="java.awt.headless" value="true" />
+        <sysproperty key="gwt.devjar" value="${gwt.dev.jar}" />
         <classpath>
           <pathelement location="${gwt.root}/${project.tail}/src" />
           <pathelement location="${gwt.root}/${project.tail}/super" />
           <pathelement location="${gwt.root}/${project.tail}/test" />
           <pathelement location="${javac.junit.out}" />
           <pathelement location="${javac.out}" />
-          <pathelement location="${gwt.dev.staging.jar}" />
+          <pathelement location="${gwt.dev.jar}" />
           <pathelement location="${gwt.tools.lib}/junit/junit-3.8.1.jar" />
           <pathelement location="${gwt.tools.lib}/selenium/selenium-java-client-driver.jar" />
           <extraclasspaths />

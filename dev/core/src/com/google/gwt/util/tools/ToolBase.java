@@ -16,12 +16,10 @@
 package com.google.gwt.util.tools;
 
 import com.google.gwt.dev.About;
+import com.google.gwt.dev.BootStrapPlatform;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -51,24 +49,18 @@ import java.util.TreeMap;
  */
 public abstract class ToolBase {
 
-  static {
-    String installPath = Utility.getInstallPath();
-    try {
-      // try to make absolute
-      installPath = new File(installPath).getCanonicalPath();
-    } catch (IOException e) {
-      // ignore problems, failures will occur when the libs try to load
-    }
-    System.setProperty("swt.library.path", installPath + '/');
-  }
-
   // Use a tree map to sort the order.
   //
-  private final Map argHandlers = new TreeMap();
+  private final Map<String, ArgHandler> argHandlers = new TreeMap<String, ArgHandler>();
 
   // Use a list to preserve the declared order for help printing.
   //
-  private final List orderedArgHandlers = new ArrayList();
+  private final List<ArgHandler> orderedArgHandlers = new ArrayList<ArgHandler>();
+  
+  public ToolBase() {
+    // Set any platform specific system properties.
+    BootStrapPlatform.go();
+  }
 
   protected String getDescription() {
     return null;
@@ -79,8 +71,7 @@ public abstract class ToolBase {
 
     ArgHandler nullHandler = null;
     int widest = 0;
-    for (Iterator iter = orderedArgHandlers.iterator(); iter.hasNext();) {
-      ArgHandler handler = (ArgHandler) iter.next();
+    for (ArgHandler handler : orderedArgHandlers) {
       if (handler.isUndocumented()) {
         continue;
       }
@@ -109,8 +100,7 @@ public abstract class ToolBase {
 
     // Print the command-line template.
     //
-    for (Iterator iter = orderedArgHandlers.iterator(); iter.hasNext();) {
-      ArgHandler handler = (ArgHandler) iter.next();
+    for (ArgHandler handler : orderedArgHandlers) {
       if (handler.isUndocumented()) {
         continue;
       }
@@ -153,8 +143,7 @@ public abstract class ToolBase {
 
     // Print the details.
     //
-    for (Iterator iter = orderedArgHandlers.iterator(); iter.hasNext();) {
-      ArgHandler handler = (ArgHandler) iter.next();
+    for (ArgHandler handler : orderedArgHandlers) {
       if (handler.isUndocumented()) {
         continue;
       }
@@ -204,21 +193,21 @@ public abstract class ToolBase {
       }
     }
 
-    Set defs = new HashSet(argHandlers.values());
+    Set<ArgHandler> defs = new HashSet<ArgHandler>(argHandlers.values());
     int extraArgCount = 0;
 
-    Set receivedArg = new HashSet();
+    Set<ArgHandler> receivedArg = new HashSet<ArgHandler>();
 
     // Let the args drive the handlers.
     //
-    ArgHandler nullHandler = (ArgHandler) argHandlers.get("");
+    ArgHandler nullHandler = argHandlers.get("");
     for (int i = 0; i < args.length; i++) {
       String arg = args[i];
       ArgHandler handler;
       if (arg.startsWith("-")) {
         // Use the handler registered for this flag.
         //
-        handler = (ArgHandler) argHandlers.get(arg);
+        handler = argHandlers.get(arg);
       } else {
         // Use the handler that doesn't have a leading flag.
         //
@@ -251,8 +240,7 @@ public abstract class ToolBase {
 
     // See if any handler didn't get its required argument(s).
     //
-    for (Iterator iter = argHandlers.values().iterator(); iter.hasNext();) {
-      ArgHandler argHandler = (ArgHandler) iter.next();
+    for (ArgHandler argHandler : argHandlers.values()) {
       if (argHandler.isRequired() && !receivedArg.contains(argHandler)) {
         System.err.print("Missing required argument '");
         String tag = argHandler.getTag();
@@ -281,8 +269,7 @@ public abstract class ToolBase {
     // Set if there are any remaining unused handlers with default arguments.
     // Allow the default handlers to pretend there were other arguments.
     //
-    for (Iterator iter = defs.iterator(); iter.hasNext();) {
-      ArgHandler def = (ArgHandler) iter.next();
+    for (ArgHandler def : defs) {
       String[] defArgs = def.getDefaultArgs();
       if (defArgs != null) {
         if (def.handle(defArgs, 0) == -1) {

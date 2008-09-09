@@ -45,6 +45,10 @@ public class DispatchClassInfo {
     return clsId;
   }
 
+  public Class<?> getDispatchClass() {
+    return cls;
+  }
+
   public Member getMember(int id) {
     lazyInitTargetMembers();
     id &= 0xffff;

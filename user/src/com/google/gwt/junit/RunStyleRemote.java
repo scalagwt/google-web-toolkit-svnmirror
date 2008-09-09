@@ -21,31 +21,39 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 /**
- * Runs remotely in web mode. This feature is experimental and is not officially
- * supported.
+ * Runs tests in an external browser. This is the default and only case in
+ * OOPHM.
  */
 abstract class RunStyleRemote extends RunStyle {
+
+  private boolean useHostedMode;
 
   public RunStyleRemote(JUnitShell shell) {
     super(shell);
   }
 
-  @Override
-  public boolean isLocal() {
-    return false;
-  }
-
+  /**
+   * Compiles the named module if hosted-mode tests are not enabled.
+   */
   @Override
   public void maybeCompileModule(String moduleName)
       throws UnableToCompleteException {
-    shell.compileForWebMode(moduleName, null);
+    if (!useHostedMode) {
+      shell.compileForWebMode(moduleName, null);
+    }
+  }
+
+  @Override
+  public void setHostedMode(boolean useHostedMode) {
+    this.useHostedMode = useHostedMode;
   }
 
   protected String getMyUrl(String moduleName) {
     try {
       String localhost = InetAddress.getLocalHost().getHostAddress();
       return "http://" + localhost + ":" + shell.getPort() + "/"
-          + getUrlSuffix(moduleName);
+          + getUrlSuffix(moduleName)
+          + (useHostedMode ? shell.getHostedUrlSuffix() : "");
     } catch (UnknownHostException e) {
       throw new RuntimeException("Unable to determine my ip address", e);
     }

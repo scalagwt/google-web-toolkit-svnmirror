@@ -17,6 +17,7 @@ package com.google.gwt.dev.shell;
 
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
+import com.google.gwt.dev.shell.JsValue.DispatchObject;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -47,7 +48,16 @@ public abstract class ModuleSpace implements ShellJavaScriptHost {
     sThrownJavaExceptionObject.set(t);
   }
 
-  protected static RuntimeException createJavaScriptException(ClassLoader cl,
+  protected static TreeLogger getLogger() {
+    return threadLocalLogger.get();
+  }
+
+  /**
+   * Create a JavaScriptException object. This must be done reflectively, since
+   * this class will have been loaded from a ClassLoader other than the
+   * session's thread.
+   */
+  static RuntimeException createJavaScriptException(ClassLoader cl,
       Object exception) {
     Exception caught;
     try {
@@ -73,11 +83,44 @@ public abstract class ModuleSpace implements ShellJavaScriptHost {
     throw new RuntimeException("Error creating JavaScriptException", caught);
   }
 
-  protected static TreeLogger getLogger() {
-    return threadLocalLogger.get();
+  /**
+   * Get the JavaScriptObject wrapped by a JavaScriptException. We have to do
+   * this reflectively, since the JavaScriptException object is from an
+   * arbitrary classloader. If the object is not a JavaScriptException, or is
+   * not from the given ClassLoader, we'll return null.
+   */
+  static Object getJavaScriptExceptionException(ClassLoader cl,
+      Object javaScriptException) {
+    if (javaScriptException.getClass().getClassLoader() != cl) {
+      return null;
+    }
+
+    Exception caught;
+    try {
+      Class<?> javaScriptExceptionClass = Class.forName(
+          "com.google.gwt.core.client.JavaScriptException", true, cl);
+      
+      if (!javaScriptExceptionClass.isInstance(javaScriptException)) {
+        // Not a JavaScriptException
+        return null;
+      }
+      Method getException = javaScriptExceptionClass.getMethod("getException");
+      return getException.invoke(javaScriptException);
+    } catch (NoSuchMethodException e) {
+      caught = e;
+    } catch (ClassNotFoundException e) {
+      caught = e;
+    } catch (IllegalArgumentException e) {
+      caught = e;
+    } catch (IllegalAccessException e) {
+      caught = e;
+    } catch (InvocationTargetException e) {
+      caught = e;
+    }
+    throw new RuntimeException("Error getting exception value", caught);
   }
 
-  private final ModuleSpaceHost host;
+  protected final ModuleSpaceHost host;
 
   private final Object key;
 
@@ -249,8 +292,11 @@ public abstract class ModuleSpace implements ShellJavaScriptHost {
     if (!result.isUndefined()) {
       getLogger().log(
           TreeLogger.WARN,
-          "JSNI method '" + name + "' returned a value of type "
-              + result.getTypeString() + " but was declared void; it should not have returned a value at all",
+          "JSNI method '"
+              + name
+              + "' returned a value of type "
+              + result.getTypeString()
+              + " but was declared void; it should not have returned a value at all",
           null);
     }
   }
@@ -279,8 +325,8 @@ public abstract class ModuleSpace implements ShellJavaScriptHost {
     //
     try {
       Object staticDispatch = getStaticDispatcher();
-      createNative("initializeStaticDispatcher", 0, "__defineStatic",
-          new String[] {"__arg0"}, "window.__static = __arg0;");
+      createNativeMethods("initializeStaticDispatcher",
+          "function __defineStatic(__arg0) { window.__static = __arg0; }");
       invokeNativeVoid("__defineStatic", null, new Class[] {Object.class},
           new Object[] {staticDispatch});
     } catch (Throwable e) {
@@ -394,21 +440,7 @@ public abstract class ModuleSpace implements ShellJavaScriptHost {
     throw new UnableToCompleteException();
   }
 
-  protected String createNativeMethodInjector(String jsniSignature,
-      String[] paramNames, String js) {
-    String newScript = "window[\"" + jsniSignature + "\"] = function(";
-
-    for (int i = 0; i < paramNames.length; ++i) {
-      if (i > 0) {
-        newScript += ", ";
-      }
-
-      newScript += paramNames[i];
-    }
-
-    newScript += ") { " + js + " };\n";
-    return newScript;
-  }
+  protected abstract void cleanupJsValues();
 
   /**
    * Invokes a native JavaScript function.
@@ -429,7 +461,7 @@ public abstract class ModuleSpace implements ShellJavaScriptHost {
   /**
    * Injects the magic needed to resolve JSNI references from module-space.
    */
-  protected abstract Object getStaticDispatcher();
+  protected abstract DispatchObject getStaticDispatcher();
 
   /**
    * Invokes a native JavaScript function.
@@ -443,17 +475,13 @@ public abstract class ModuleSpace implements ShellJavaScriptHost {
   protected final JsValue invokeNative(String name, Object jthis,
       Class<?>[] types, Object[] args) throws Throwable {
     // Whenever a native method is invoked, release any enqueued cleanup objects
-    JsValue.mainThreadCleanup();
-    JsValue result = doInvoke(name, jthis, types, args);
-    // Is an exception active?
-    Throwable thrown = sCaughtJavaExceptionObject.get();
-    if (thrown == null) {
-      return result;
+    cleanupJsValues();
+    try {
+      return doInvoke(name, jthis, types, args);
+    } catch (Throwable thrown) {
+      scrubStackTrace(thrown);
+      throw thrown;
     }
-    sCaughtJavaExceptionObject.set(null);
-
-    scrubStackTrace(thrown);
-    throw thrown;
   }
 
   protected boolean isExceptionSame(@SuppressWarnings("unused")
@@ -480,7 +508,8 @@ public abstract class ModuleSpace implements ShellJavaScriptHost {
   }
 
   private String composeResultErrorMsgPrefix(String name, String typePhrase) {
-    return "Something other than " + typePhrase + " was returned from JSNI method '" + name + "'";
+    return "Something other than " + typePhrase
+        + " was returned from JSNI method '" + name + "'";
   }
 
   private boolean isUserFrame(StackTraceElement element) {

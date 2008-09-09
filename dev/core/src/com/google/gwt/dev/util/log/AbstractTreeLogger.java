@@ -165,6 +165,10 @@ public abstract class AbstractTreeLogger extends TreeLogger {
     return indexWithinMyParent;
   }
 
+  public final synchronized Type getMaxDetail() {
+    return logLevel;
+  }
+
   public final AbstractTreeLogger getParentLogger() {
     return parent;
   }

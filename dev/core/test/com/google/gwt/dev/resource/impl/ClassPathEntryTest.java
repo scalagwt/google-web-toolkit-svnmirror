@@ -84,9 +84,9 @@ public class ClassPathEntryTest extends AbstractResourceOrientedTestBase {
       Set<AbstractResource> r = cpe1.findApplicableResources(logger, pps);
 
       assertEquals(3, r.size());
-      assertPathIncluded(r, "com/google/gwt/user/client/Command.java");
-      assertPathIncluded(r, "com/google/gwt/user/client/Timer.java");
-      assertPathIncluded(r, "com/google/gwt/user/client/ui/Widget.java");
+      assertPathIncluded(r, "com/google/gwt/user/client/_command.gava");
+      assertPathIncluded(r, "com/google/gwt/user/client/_timer.gava");
+      assertPathIncluded(r, "com/google/gwt/user/client/ui/_widget.gava");
     }
 
     {
@@ -94,7 +94,7 @@ public class ClassPathEntryTest extends AbstractResourceOrientedTestBase {
       Set<AbstractResource> r = cpe2.findApplicableResources(logger, pps);
 
       assertEquals(1, r.size());
-      assertPathIncluded(r, "com/google/gwt/i18n/client/Messages.java");
+      assertPathIncluded(r, "com/google/gwt/i18n/client/_messages.gava");
     }
   }
 
@@ -109,15 +109,15 @@ public class ClassPathEntryTest extends AbstractResourceOrientedTestBase {
     Set<AbstractResource> r = cpe1.findApplicableResources(logger, pps);
 
     assertEquals(9, r.size());
-    assertPathIncluded(r, "com/google/gwt/user/User.gwt.xml");
-    assertPathIncluded(r, "com/google/gwt/user/client/Command.java");
-    assertPathIncluded(r, "com/google/gwt/user/client/Timer.java");
-    assertPathIncluded(r, "com/google/gwt/user/client/ui/Widget.java");
+    assertPathIncluded(r, "com/google/gwt/user/_user.twit.xml");
+    assertPathIncluded(r, "com/google/gwt/user/client/_command.gava");
+    assertPathIncluded(r, "com/google/gwt/user/client/_timer.gava");
+    assertPathIncluded(r, "com/google/gwt/user/client/ui/_widget.gava");
     assertPathIncluded(r, "org/example/bar/client/BarClient1.txt");
     assertPathIncluded(r, "org/example/bar/client/BarClient2.txt");
     assertPathIncluded(r, "org/example/bar/client/etc/BarEtc.txt");
-    assertPathIncluded(r, "org/example/foo/client/FooClient.java");
-    assertPathIncluded(r, "org/example/foo/server/FooServer.java");
+    assertPathIncluded(r, "org/example/foo/client/_foo_client.gava");
+    assertPathIncluded(r, "org/example/foo/server/_foo_server.gava");
   }
 
   // NOTE: if this test fails, ensure that the source root containing this very
@@ -130,10 +130,10 @@ public class ClassPathEntryTest extends AbstractResourceOrientedTestBase {
     Set<AbstractResource> r = cpe2.findApplicableResources(logger, pps);
 
     assertEquals(5, r.size());
-    assertPathIncluded(r, "com/google/gwt/i18n/I18N.gwt.xml");
-    assertPathIncluded(r, "com/google/gwt/i18n/client/Messages.java");
+    assertPathIncluded(r, "com/google/gwt/i18n/_i18n.twit.xml");
+    assertPathIncluded(r, "com/google/gwt/i18n/client/_messages.gava");
     assertPathIncluded(r,
-        "com/google/gwt/i18n/rebind/LocalizableGenerator.java");
+        "com/google/gwt/i18n/rebind/_localizable_generator.gava");
     assertPathIncluded(r, "org/example/bar/client/BarClient2.txt");
     assertPathIncluded(r, "org/example/bar/client/BarClient3.txt");
   }
@@ -151,19 +151,19 @@ public class ClassPathEntryTest extends AbstractResourceOrientedTestBase {
       Set<AbstractResource> r1 = cpe1.findApplicableResources(logger, pps);
 
       assertEquals(4, r1.size());
-      assertPathIncluded(r1, "com/google/gwt/user/User.gwt.xml");
-      assertPathIncluded(r1, "com/google/gwt/user/client/Command.java");
-      assertPathIncluded(r1, "com/google/gwt/user/client/Timer.java");
-      assertPathIncluded(r1, "com/google/gwt/user/client/ui/Widget.java");
+      assertPathIncluded(r1, "com/google/gwt/user/_user.twit.xml");
+      assertPathIncluded(r1, "com/google/gwt/user/client/_command.gava");
+      assertPathIncluded(r1, "com/google/gwt/user/client/_timer.gava");
+      assertPathIncluded(r1, "com/google/gwt/user/client/ui/_widget.gava");
 
       // Examine cpe2 in the absence of the filter.
       Set<AbstractResource> r2 = cpe2.findApplicableResources(logger, pps);
 
       assertEquals(3, r2.size());
-      assertPathIncluded(r2, "com/google/gwt/i18n/I18N.gwt.xml");
-      assertPathIncluded(r2, "com/google/gwt/i18n/client/Messages.java");
+      assertPathIncluded(r2, "com/google/gwt/i18n/_i18n.twit.xml");
+      assertPathIncluded(r2, "com/google/gwt/i18n/client/_messages.gava");
       assertPathIncluded(r2,
-          "com/google/gwt/i18n/rebind/LocalizableGenerator.java");
+          "com/google/gwt/i18n/rebind/_localizable_generator.gava");
     }
 
     {
@@ -182,19 +182,19 @@ public class ClassPathEntryTest extends AbstractResourceOrientedTestBase {
       Set<AbstractResource> r1 = cpe1.findApplicableResources(logger, pps);
 
       assertEquals(3, r1.size());
-      assertPathNotIncluded(r1, "com/google/gwt/user/User.gwt.xml");
-      assertPathIncluded(r1, "com/google/gwt/user/client/Command.java");
-      assertPathIncluded(r1, "com/google/gwt/user/client/Timer.java");
-      assertPathIncluded(r1, "com/google/gwt/user/client/ui/Widget.java");
+      assertPathNotIncluded(r1, "com/google/gwt/user/_user.twit.xml");
+      assertPathIncluded(r1, "com/google/gwt/user/client/_command.gava");
+      assertPathIncluded(r1, "com/google/gwt/user/client/_timer.gava");
+      assertPathIncluded(r1, "com/google/gwt/user/client/ui/_widget.gava");
 
       // Examine cpe2 in the presence of the filter.
       Set<AbstractResource> r2 = cpe2.findApplicableResources(logger, pps);
 
       assertEquals(2, r2.size());
-      assertPathNotIncluded(r1, "com/google/gwt/user/User.gwt.xml");
-      assertPathIncluded(r2, "com/google/gwt/i18n/client/Messages.java");
+      assertPathNotIncluded(r2, "com/google/gwt/i18n/_i18n.twit.xml");
+      assertPathIncluded(r2, "com/google/gwt/i18n/client/_messages.gava");
       assertPathIncluded(r2,
-          "com/google/gwt/i18n/rebind/LocalizableGenerator.java");
+          "com/google/gwt/i18n/rebind/_localizable_generator.gava");
     }
 
     {
@@ -242,9 +242,10 @@ public class ClassPathEntryTest extends AbstractResourceOrientedTestBase {
 
       assertEquals(3, r.size());
       // User.gwt.xml would be included but for the filter.
-      assertPathIncluded(r, "com/google/gwt/user/client/Command.java");
-      assertPathIncluded(r, "com/google/gwt/user/client/Timer.java");
-      assertPathIncluded(r, "com/google/gwt/user/client/ui/Widget.java");
+      assertPathNotIncluded(r, "com/google/gwt/user/_user.twit.xml");
+      assertPathIncluded(r, "com/google/gwt/user/client/_command.gava");
+      assertPathIncluded(r, "com/google/gwt/user/client/_timer.gava");
+      assertPathIncluded(r, "com/google/gwt/user/client/ui/_widget.gava");
     }
 
     {
@@ -253,9 +254,10 @@ public class ClassPathEntryTest extends AbstractResourceOrientedTestBase {
 
       assertEquals(2, r.size());
       // I18N.gwt.xml would be included but for the filter.
-      assertPathIncluded(r, "com/google/gwt/i18n/client/Messages.java");
+      assertPathNotIncluded(r, "com/google/gwt/i18n/_i18n.twit.xml");
+      assertPathIncluded(r, "com/google/gwt/i18n/client/_messages.gava");
       assertPathIncluded(r,
-          "com/google/gwt/i18n/rebind/LocalizableGenerator.java");
+          "com/google/gwt/i18n/rebind/_localizable_generator.gava");
     }
   }
 

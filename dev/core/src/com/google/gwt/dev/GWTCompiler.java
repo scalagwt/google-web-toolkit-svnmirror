@@ -89,14 +89,17 @@ public class GWTCompiler extends ToolBase {
    */
   private class ArgHandlerValidateOnlyFlag extends ArgHandlerFlag {
 
+    @Override
     public String getPurpose() {
       return "Validate all source code, but do not compile";
     }
 
+    @Override
     public String getTag() {
       return "-validateOnly";
     }
 
+    @Override
     public boolean setFlag() {
       jjsOptions.setValidateOnly(true);
       return true;
@@ -395,16 +398,10 @@ public class GWTCompiler extends ToolBase {
    *         completed without errors, <code>false</code> otherwise.
    */
   private boolean run() {
-    // Set any platform specific system properties.
-    BootStrapPlatform.applyPlatformHacks();
-
     if (useGuiLogger) {
       // Initialize a tree logger window.
       DetachedTreeLoggerWindow loggerWindow = DetachedTreeLoggerWindow.getInstance(
           "Build Output for " + moduleName, 800, 600, true);
-
-      // Eager AWT initialization for OS X to ensure safe coexistence with SWT.
-      BootStrapPlatform.maybeInitializeAWT();
 
       final AbstractTreeLogger logger = loggerWindow.getLogger();
       final boolean[] success = new boolean[1];

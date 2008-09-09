@@ -1,0 +1,5 @@
+<project name="plugins-common">
+	<property name="gwt.root" location="../.." />
+	<property name="project.tail" value="plugins/${plugin.root}" />
+	<import file="${gwt.root}/common.ant.xml" />
+</project>

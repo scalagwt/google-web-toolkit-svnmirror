@@ -21,6 +21,7 @@
 package com.google.gwt.dev.jjs.test;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.UnsafeNativeLong;
 import com.google.gwt.junit.client.GWTTestCase;
@@ -54,6 +55,24 @@ public class HostedTest extends GWTTestCase {
     }
   }
 
+  private static class SandwichException extends RuntimeException {
+    public SandwichException(String s) {
+      super(s);
+    }
+  }
+
+  private static class TestGenericList extends AbstractList<Object> {
+    @Override
+    public Object get(int index) {
+      return this;
+    }
+
+    @Override
+    public int size() {
+      return 42;
+    }
+  }
+
   private static class TestCovariantChild extends TestCovariantSuper {
     @Override
     public native String foo(String val) /*-{
@@ -82,18 +101,6 @@ public class HostedTest extends GWTTestCase {
     public native String foo() /*-{
       return "foo";
     }-*/;
-  }
-
-  private static class TestGenericList extends AbstractList<Object> {
-    @Override
-    public Object get(int index) {
-      return this;
-    }
-
-    @Override
-    public int size() {
-      return 42;
-    }
   }
 
   static String sFoo(String s) {
@@ -168,6 +175,11 @@ public class HostedTest extends GWTTestCase {
 
   private static native boolean jsniStaticFunctionsIdentical() /*-{
     return @com.google.gwt.dev.jjs.test.HostedTest::sFoo(Ljava/lang/String;) === @com.google.gwt.dev.jjs.test.HostedTest::sFoo(Ljava/lang/String;);
+  }-*/;
+
+  private static native String sFooApply(String s) /*-{
+    var func = @com.google.gwt.dev.jjs.test.HostedTest::sFoo(Ljava/lang/String;);
+    return func.apply(null, [s]);
   }-*/;
 
   private static native String sFooCall(String s) /*-{
@@ -278,6 +290,28 @@ public class HostedTest extends GWTTestCase {
     assertEquals("VAL3-foo", TestEnum.VAL3.foo());
   }
 
+  public void testExceptionSandwich() throws Throwable {
+    for (int i = 0; i < 4; i++) {
+      try {
+        throwError(i, "Hello World");
+        fail("in testExceptionSandwich(), throwError() should have thrown");
+      } catch (JavaScriptException e) {
+        // OK
+        assert i % 2 == 0;
+        assertEquals("Hello World", e.getDescription());
+      } catch (SandwichException e) {
+        // OK
+        assert i % 2 == 1;
+        assertEquals("Hello World", e.getMessage());
+      }
+    }
+  }
+
+  public void testExceptionSandwichNative() {
+    String message = testExceptionSandwichNative0();
+    assertEquals("Hello World", message);
+  }
+  
   public void testFloat() {
     storeFloat(Float.MIN_VALUE);
     float f = getFloat();
@@ -292,11 +326,13 @@ public class HostedTest extends GWTTestCase {
   }
 
   public void testFunctionCaching() {
+    assertEquals("barfoo", sFooApply("bar"));
     assertEquals("barfoo", sFooCall("bar"));
     assertEquals("barfoo", sFooDirect("bar"));
     assertEquals("barfoo", sFooInvoke("bar"));
     assertEquals("barfoo", sFooRoundTrip(getsFooFunc(), "bar"));
 
+    assertEquals("barfoo", fooApply("bar"));
     assertEquals("barfoo", fooCall("bar"));
     assertEquals("barfoo", fooDirect("bar"));
     assertEquals("barfoo", fooRoundTrip(getFooFunc(), "bar"));
@@ -596,6 +632,8 @@ public class HostedTest extends GWTTestCase {
     }
 
     assertEquals("FOO", callJSNIToString(new Foo()));
+    assertEquals("FOO", callJSNIToStringImplicit(new Foo()));
+    assertEquals("FOO", callJSNIToStringTearOff(new Foo()));
   }
 
   public void testLocalJsni() {
@@ -653,8 +691,8 @@ public class HostedTest extends GWTTestCase {
       // should have thrown an exception in hosted mode,
       // so fail unless we are in web mode
       assertTrue(GWT.isScript());
-    } catch (IllegalArgumentException e) {
-      // expected exception
+    } catch (RuntimeException expected) {
+      assertTrue(expected.getClass().getName().endsWith("HostedModeException"));
     }
   }
 
@@ -683,6 +721,15 @@ public class HostedTest extends GWTTestCase {
     return obj.toString();
   }-*/;
 
+  private native String callJSNIToStringImplicit(Object obj) /*-{
+    return "" + obj;
+  }-*/;
+
+  private native String callJSNIToStringTearOff(Object obj) /*-{
+    var toStringFunc = obj.toString;
+    return toStringFunc.call(obj);
+  }-*/;
+
   private native String enumName(TestEnum val) /*-{
     return val.@java.lang.Enum::name()();
   }-*/;
@@ -695,6 +742,11 @@ public class HostedTest extends GWTTestCase {
     return val.@java.lang.Enum::ordinal()();
   }-*/;
 
+  private native String fooApply(String s) /*-{
+    var f = this.@com.google.gwt.dev.jjs.test.HostedTest::foo(Ljava/lang/String;);
+    return f.apply(this, [s]);
+  }-*/;
+  
   private native String fooCall(String s) /*-{
     var f = this.@com.google.gwt.dev.jjs.test.HostedTest::foo(Ljava/lang/String;);
     return f.call(this, s);
@@ -796,6 +848,40 @@ public class HostedTest extends GWTTestCase {
 
   /*-{ try to mess with compiler }-*/
   private native void jsniL()/*-{}-*/;
+
+  private native String testExceptionSandwichNative0() /*-{
+    for (var i = 0; i < 4; i++) {
+      try {
+        this.@com.google.gwt.dev.jjs.test.HostedTest::throwError(ILjava/lang/String;)(i, "Hello World");
+        return "in testExceptionSandwichNative(), throwError() should have thrown";
+      } catch (e) {
+        if (i % 2 == 0) {
+          return e.message;
+        } else {
+          return e.@java.lang.Throwable::getMessage()();
+        }
+      }
+    }
+  }-*/;
+
+  private native void throwError(int countdown, String s) throws Throwable /*-{
+    if (countdown > 0) {
+      this.@com.google.gwt.dev.jjs.test.HostedTest::throwException(ILjava/lang/String;)(countdown - 1, s);
+      @junit.framework.Assert::fail(Ljava/lang/String;)("in throwError(), throwException() should have thrown");
+    } else {
+      throw new Error(s);
+    }
+  }-*/;
+
+  @SuppressWarnings("unused")
+  private void throwException(int countdown, String s) throws Throwable {
+    if (countdown > 0) {
+      throwError(countdown - 1, s);
+      fail("in throwException(), throwError() should have thrown");
+    } else {
+      throw new SandwichException(s);
+    }
+  }
 
   // test that JS can pass a series of arguments to a varargs function
   // TODO: not sure if we want to support this

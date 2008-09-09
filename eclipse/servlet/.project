@@ -16,9 +16,14 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>core</name>
+			<name>user</name>
 			<type>2</type>
 			<location>GWT_ROOT/user</location>
+		</link>
+		<link>
+			<name>dev</name>
+			<type>2</type>
+			<location>GWT_ROOT/dev/core</location>
 		</link>
 	</linkedResources>
 </projectDescription>

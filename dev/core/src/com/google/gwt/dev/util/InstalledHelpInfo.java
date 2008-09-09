@@ -31,14 +31,14 @@ public class InstalledHelpInfo extends HelpInfo {
   public InstalledHelpInfo(String htmlDocName) {
     try {
       String installPath = Utility.getInstallPath();
-      File file = new File(installPath, "doc");
-      file = new File(file, "helpInfo");
-      file = new File(file, htmlDocName);
-      if (file.isFile() && file.canRead()) {
-        url = file.toURI().toURL();
+      if (installPath != null) {
+        File file = new File(installPath, "doc");
+        file = new File(file, "helpInfo");
+        file = new File(file, htmlDocName);
+        if (file.isFile() && file.canRead()) {
+          url = file.toURI().toURL();
+        }
       }
-    } catch (RuntimeException e) {
-      // Installation problem; just don't provide help info
     } catch (MalformedURLException e) {
       // Unexpected; just don't provide help info
     }

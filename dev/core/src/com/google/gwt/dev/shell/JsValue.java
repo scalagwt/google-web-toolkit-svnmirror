@@ -15,8 +15,6 @@
  */
 package com.google.gwt.dev.shell;
 
-import java.util.Vector;
-
 /**
  * Represents a JavaScript value.
  * 
@@ -31,61 +29,27 @@ import java.util.Vector;
 public abstract class JsValue {
 
   /**
-   * Allows JsValue subclasses to clean themselves up.
+   * Provides interface for methods to be exposed on JavaScript side.
    */
-  protected interface JsCleanup {
-    void doCleanup();
+  public interface DispatchMethod {
+    boolean invoke(JsValue jsthis, JsValue[] jsargs, JsValue returnValue);
   }
 
   /**
-   * For a thread-safety check to make sure only one thread ever accesses it.
+   * Provides interface for objects to be exposed on JavaScript side.
    */
-  private static Thread theOnlyThreadAllowed;
+  public interface DispatchObject {
+    JsValue getField(int dispatchId);
 
-  /**
-   * A queue of JsCleanup objects ready to be released by the main thread.
-   */
-  private static Vector<JsCleanup> toBeReleased = new Vector<JsCleanup>();
+    JsValue getField(String name);
 
-  private static final Object toBeReleasedLock = new Object();
+    int getFieldId(String name);
 
-  /**
-   * The main thread should call this from time to time to release hosted-mode
-   * objects that Java is no longer referencing.
-   */
-  public static void mainThreadCleanup() {
-    checkThread();
-    Vector<JsCleanup> temp;
-    synchronized (toBeReleasedLock) {
-      temp = toBeReleased;
-      toBeReleased = new Vector<JsCleanup>();
-    }
-    for (JsCleanup cleanup : temp) {
-      cleanup.doCleanup();
-    }
-    temp.clear();
-  }
+    Object getTarget();
 
-  /**
-   * Ensures that the current thread is actually the UI thread.
-   */
-  private static synchronized void checkThread() {
-    if (theOnlyThreadAllowed == null) {
-      theOnlyThreadAllowed = Thread.currentThread();
-    } else if (theOnlyThreadAllowed != Thread.currentThread()) {
-      throw new RuntimeException("This object has permanent thread affinity.");
-    }
-  }
+    void setField(int dispatchId, JsValue value);
 
-  /**
-   * Moves this JS value to the queue of objects that are ready to be released.
-   */
-  private static void queueCleanup(JsCleanup cleanup) {
-    // Add to the queue to be released by the main thread later.
-    //
-    synchronized (toBeReleasedLock) {
-      toBeReleased.add(cleanup);
-    }
+    void setField(String name, JsValue value);
   }
 
   /**
@@ -103,6 +67,14 @@ public abstract class JsValue {
    * @return the value of the underlying object as an int
    */
   public abstract int getInt();
+
+  /**
+   * Get the wrapper object for a wrapped Java object. Only valid if
+   * isWrappedJavaObject() is true.
+   * 
+   * @return the Java object wrapper
+   */
+  public abstract DispatchObject getJavaObjectWrapper();
 
   /**
    * Returns a unique value corresponding to the underlying JavaScript object.
@@ -137,6 +109,11 @@ public abstract class JsValue {
    * is intended only for human consumption and may vary across platforms.
    */
   public abstract String getTypeString();
+
+  /**
+   * Returns a wrapped Java method.
+   */
+  public abstract DispatchMethod getWrappedJavaFunction();
 
   /**
    * Unwrap a wrapped Java object.
@@ -179,6 +156,11 @@ public abstract class JsValue {
    * Returns true if the JS value is undefined (void).
    */
   public abstract boolean isUndefined();
+
+  /**
+   * Returns true if the JS value contains a wrapped Java method.
+   */
+  public abstract boolean isWrappedJavaFunction();
 
   /**
    * Returns true if the JS value is a wrapped Java object.
@@ -283,30 +265,20 @@ public abstract class JsValue {
     } else if (isNumber()) {
       return "double: " + Double.toString(getNumber());
     } else if (isWrappedJavaObject()) {
-      return "Java object: " + getWrappedJavaObject().toString();
+      Object wrappedObject = getWrappedJavaObject();
+      if (wrappedObject == null) {
+        return "Java static dispatch";
+      }
+      // avoid calling toString on the wrapped object, as this can be expensive
+      return "Java object: " + wrappedObject.getClass().getName() + '@'
+          + System.identityHashCode(wrappedObject);
     } else if (isJavaScriptObject()) {
-      return "JS object [" + getTypeString() + "] : " + getString();
+      return getTypeString();
     } else if (isString()) {
       return "string: '" + getString() + "'";
-    } else {
-      return "*unknown type: " + getTypeString() + "*";
+    } else if (isWrappedJavaFunction()) {
+      return "Java method: " + getWrappedJavaFunction().toString();
     }
-  }
-
-  /**
-   * Create an object which frees the underlying JS resource.
-   * 
-   * @return a JsCleanup object which will free the underlying JS resource
-   */
-  protected abstract JsCleanup createCleanupObject();
-
-  /**
-   * When the Java object is garbage-collected, make sure the associated JS
-   * resource is freed. A helper object is used to avoid issues with
-   * resurrecting this object.
-   */
-  @Override
-  protected final void finalize() throws Throwable {
-    queueCleanup(createCleanupObject());
+    return getTypeString();
   }
 }

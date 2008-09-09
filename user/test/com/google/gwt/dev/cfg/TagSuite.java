@@ -31,7 +31,7 @@ public class TagSuite {
      * ClassLoader. Many of the tests test low-level RPC mechanisms and rely on
      * a ClassLoader to resolve classes and resources.
      */
-    BootStrapPlatform.applyPlatformHacks();
+    BootStrapPlatform.go();
   }
   
   public static Test suite() {

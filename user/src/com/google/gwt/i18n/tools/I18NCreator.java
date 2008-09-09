@@ -85,9 +85,7 @@ public final class I18NCreator extends ToolBase {
 
     @Override
     public String[] getTagArgs() {
-      return new String[] {
-        "interfaceName"
-      };
+      return new String[] {"interfaceName"};
     }
 
     @Override
@@ -131,29 +129,9 @@ public final class I18NCreator extends ToolBase {
       Class<? extends Localizable> interfaceToCreate) throws IOException {
 
     // Figure out the installation directory
-    String installPath = Utility.getInstallPath();
+    String installPath = Utility.getInstallPath(true);
     String gwtUserPath = installPath + '/' + "gwt-user.jar";
-    String gwtDevPath = installPath + '/' + Utility.getDevJarName();
-
-    // Figure out what platform we're on
-    // 
-    boolean isWindows = gwtDevPath.substring(gwtDevPath.lastIndexOf('/') + 1).indexOf(
-        "windows") >= 0;
-
-    // If the path from here to the install directory is relative, we need to
-    // set specific "base" directory tags; this is for sample creation during
-    // the
-    // build.
-    String basePathEnv;
-    if (!new File(installPath).isAbsolute()) {
-      if (isWindows) {
-        basePathEnv = "%~dp0\\";
-      } else {
-        basePathEnv = "$APPDIR/";
-      }
-    } else {
-      basePathEnv = "";
-    }
+    String gwtDevPath = installPath + '/' + "gwt-dev.jar";
 
     // Check out the class and package names.
     //
@@ -175,8 +153,8 @@ public final class I18NCreator extends ToolBase {
     Map<String, String> replacements = new HashMap<String, String>();
     replacements.put("@className", fullInterfaceName);
     replacements.put("@shortClassName", interfaceName);
-    replacements.put("@gwtUserPath", basePathEnv + gwtUserPath);
-    replacements.put("@gwtDevPath", basePathEnv + gwtDevPath);
+    replacements.put("@gwtUserPath", gwtUserPath);
+    replacements.put("@gwtDevPath", gwtDevPath);
     replacements.put("@compileClass", "com.google.gwt.dev.GWTCompiler");
     replacements.put("@i18nClass", "com.google.gwt.i18n.tools.I18NSync");
 
@@ -224,21 +202,47 @@ public final class I18NCreator extends ToolBase {
     }
 
     // create startup files
-    String extension;
-    if (isWindows) {
-      extension = ".cmd";
+
+    // If the path from here to the install directory is relative, we need to
+    // set specific "base" directory tags; this is for sample generation during
+    // the build.
+    String[] basePathEnvs;
+    if (!new File(installPath).isAbsolute()) {
+      basePathEnvs = new String[] {"%~dp0\\", "$APPDIR/"};
     } else {
-      extension = "";
+      basePathEnvs = new String[] {"", ""};
     }
-    File gwti18n = Utility.createNormalFile(outDir, interfaceName + "-i18n"
-        + extension, overwrite, ignore);
-    if (gwti18n != null) {
-      String out = Utility.getFileFromClassPath(PACKAGE_PATH + "gwti18n"
-          + extension + "src");
-      Utility.writeTemplateFile(gwti18n, out, replacements);
-      if (extension.length() == 0) {
-        Runtime.getRuntime().exec("chmod u+x " + gwti18n.getAbsolutePath());
+    String extensions[] = {".cmd", ""};
+
+    for (int platform = 0; platform < 2; ++platform) {
+      String basePathEnv = basePathEnvs[platform];
+      String extension = extensions[platform];
+      replacements.put("@gwtUserPath", basePathEnv + gwtUserPath);
+      replacements.put("@gwtDevPath", basePathEnv + gwtDevPath);
+      File gwti18n = Utility.createNormalFile(outDir, interfaceName + "-i18n"
+          + extension, overwrite, ignore);
+      if (gwti18n != null) {
+        String out = Utility.getFileFromClassPath(PACKAGE_PATH + "gwti18n"
+            + extension + "src");
+        Utility.writeTemplateFile(gwti18n, out, replacements);
+        if (extension.length() == 0) {
+          chmodExecutable(gwti18n);
+        }
       }
+    }
+  }
+
+  /**
+   * Try to make the given file executable. Implementation tries to exec chmod,
+   * which may fail if the platform doesn't support it. Prints a warning to
+   * stderr if the call fails.
+   * 
+   * @param file the file to make executable
+   */
+  private static void chmodExecutable(File file) {
+    try {
+      Runtime.getRuntime().exec("chmod u+x " + file.getAbsolutePath());
+    } catch (Throwable e) {
     }
   }
 

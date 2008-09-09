@@ -30,7 +30,7 @@ public final class ClientSerializationStreamWriter extends
   private static void append(StringBuffer sb, String token) {
     assert (token != null);
     sb.append(token);
-    sb.append('\uffff');
+    sb.append(RPC_SEPARATOR_CHAR);
   }
 
   @UnsafeNativeLong
