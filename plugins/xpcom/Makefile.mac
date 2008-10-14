@@ -71,9 +71,7 @@ install: oophm.xpi
 
 install-platform: liboophm.dylib
 	-mkdir -p $(subst extension,prebuilt/extension,$(INSTDIR))
-	-mkdir -p $(subst extension,prebuilt/extension,$(RESDIR))
 	-cp liboophm.dylib $(subst extension,prebuilt/extension,$(INSTDIR))
-	-cp liboophm.rsrc $(subst extension,prebuilt/extension,$(RESDIR))
 
 clean:
 	-rm -f arch $(OBJS) liboophm.dylib IOOPHM.h IOOPHM.xpt oophm.xpi
