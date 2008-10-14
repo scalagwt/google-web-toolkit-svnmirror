@@ -95,14 +95,20 @@ bool Socket::connect(const char* host, int port) {
   connected = true;
   readBufPtr = readValid = readBuf;
   writeBufPtr = writeBuf;
+#ifdef _WINDOWS
+  Debug::log(Debug::Spam) << "  connected" << Debug::flush;
+#else
   Debug::log(Debug::Spam) << "  connected, fd=" << fd << Debug::flush;
+#endif
   return true;
 }
 
-bool Socket::disconnect() {
+bool Socket::disconnect(bool doFlush) {
   if (connected) {
     Debug::log(Debug::Debugging) << "Disconnecting socket" << Debug::flush;
-    flush();
+    if (doFlush) {
+      flush();
+    }
     connected = false;
 #ifdef _WINDOWS
     closesocket(sock);
@@ -125,6 +131,11 @@ bool Socket::emptyWriteBuf() {
   for (char* ptr = writeBuf; len > 0; ) {
     ssize_t n = send(sock, ptr, len, 0);
     if (n <= 0) {
+      if (errno == EPIPE) {
+        Debug::log(Debug::Warning) << "Other end of socket disconnected" << Debug::flush;
+        disconnect(false);
+        return false;
+      }
       Debug::log(Debug::Error) << "Error " << errno << " writing " << len << " bytes to socket"
           << Debug::flush;
       return false;
@@ -138,10 +149,17 @@ bool Socket::emptyWriteBuf() {
   
 bool Socket::fillReadBuf() {
   readBufPtr = readBuf;
+  errno = 0;
   ssize_t n = recv(sock, readBuf, BUF_SIZE, 0);
   if (n <= 0) {
-      Debug::log(Debug::Error) << "Error " << errno << " reading " << BUF_SIZE << " bytes from socket"
-          << Debug::flush;
+    // EOF results in no error
+    if (!errno || errno == EPIPE) {
+      Debug::log(Debug::Warning) << "Other end of socket disconnected" << Debug::flush;
+      disconnect(false);
+      return false;
+    }
+    Debug::log(Debug::Error) << "Error " << errno << " reading " << BUF_SIZE << " bytes from socket"
+        << Debug::flush;
     return false;
   }
   ++numReads;

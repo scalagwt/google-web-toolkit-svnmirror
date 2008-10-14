@@ -748,7 +748,7 @@ public final class CompilingClassLoader extends ClassLoader implements
       jsni.append(body);
       jsni.append(";\n\n");
     }
-    logger.log(TreeLogger.TRACE, "Defining JSNI for " + sourceName);
+    logger.log(TreeLogger.DEBUG, "Defining JSNI for " + sourceName);
     shellJavaScriptHost.createNativeMethods(sourceName, jsni.toString());
   }
 

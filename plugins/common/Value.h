@@ -2,13 +2,13 @@
 #define _H_Value
 /*
  * Copyright 2008 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -16,7 +16,7 @@
  * the License.
  */
 
-#ifdef sun
+#ifndef _WINDOWS
 // TODO(jat): remove; for abort() which should probably go away
 #include <stdlib.h>
 #endif
@@ -44,7 +44,7 @@ public:
     JS_OBJECT = VALUE_TYPE_JS_OBJECT,
     UNDEFINED = VALUE_TYPE_UNDEFINED
   };
-  
+
 private:
   ValueType type;
   union {
@@ -53,17 +53,17 @@ private:
     unsigned short charValue;
     double doubleValue;
     float floatValue;
-    int intValue;
-    long long longValue;
+    int32_t intValue;
+    int64_t longValue;
     short shortValue;
     std::string* stringValue;
   } value;
-  
+
 public:
   Value() {
     type = UNDEFINED;
   }
-  
+
   Value(const Value& other) {
     copyValue(other);
   }
@@ -73,7 +73,7 @@ public:
     copyValue(other);
     return *this;
   }
-  
+
   ~Value() {
     clearOldValue();
   }
@@ -82,101 +82,101 @@ public:
     assertType(BOOLEAN);
     return value.boolValue;
   }
-  
+
   unsigned char getByte() const {
     assertType(BYTE);
     return value.byteValue;
   }
-  
+
   unsigned short getChar() const {
     assertType(CHAR);
     return value.charValue;
   }
-  
+
   double getDouble() const {
     assertType(DOUBLE);
     return value.doubleValue;
   }
-  
+
   float getFloat() const {
     assertType(FLOAT);
     return value.floatValue;
   }
-  
+
   int getInt() const {
     assertType(INT);
     return value.intValue;
   }
-  
+
   int getJavaObjectId() const {
     assertType(JAVA_OBJECT);
     return value.intValue;
   }
-  
+
   int getJsObjectId() const {
     assertType(JS_OBJECT);
     return value.intValue;
   }
-  
-  long long getLong() const {
+
+  int64_t getLong() const {
     assertType(LONG);
     return value.longValue;
   }
-  
+
   short getShort() const {
     assertType(SHORT);
     return value.shortValue;
   }
-  
+
   const std::string getString() const {
     assertType(STRING);
     return std::string(*value.stringValue);
   }
-  
+
   ValueType getType() const {
     return type;
   }
-  
+
   bool isBoolean() const {
     return type == BOOLEAN;
   }
-  
+
   bool isByte() const {
     return type == BYTE;
   }
-  
+
   bool isChar() const {
     return type == CHAR;
   }
-  
+
   bool isDouble() const {
     return type == DOUBLE;
   }
-  
+
   bool isFloat() const {
     return type == FLOAT;
   }
-  
+
   bool isInt() const {
     return type == INT;
   }
-  
+
   bool isJavaObject() const {
     return type == JAVA_OBJECT;
   }
-  
+
   bool isJsObject() const {
     return type == JS_OBJECT;
   }
-  
+
   bool isLong() const {
     return type == LONG;
   }
-  
+
   bool isNull() const {
     return type == NULL_TYPE;
   }
-  
+
   bool isNumber() const {
     switch (type) {
       case BYTE:
@@ -191,7 +191,7 @@ public:
         return false;
     }
   }
-  
+
   bool isPrimitive() const {
     switch (type) {
       case BOOLEAN:
@@ -207,11 +207,11 @@ public:
         return false;
     }
   }
-  
+
   bool isShort() const {
     return type == SHORT;
   }
-  
+
   bool isString() const {
     return type == STRING;
   }
@@ -219,72 +219,72 @@ public:
   bool isUndefined() const {
     return type == UNDEFINED;
   }
-  
+
   void setBoolean(bool val) {
     clearOldValue();
     type = BOOLEAN;
     value.boolValue = val;
   }
-  
+
   void setByte(unsigned char val) {
     clearOldValue();
     type = BYTE;
     value.byteValue = val;
   }
-  
+
   void setChar(unsigned short val) {
     clearOldValue();
     type = CHAR;
     value.charValue = val;
   }
-  
+
   void setDouble(double val) {
     clearOldValue();
     type = DOUBLE;
     value.doubleValue = val;
   }
-  
+
   void setFloat(float val) {
     clearOldValue();
     type = FLOAT;
     value.floatValue = val;
   }
-  
+
   void setInt(int val) {
     clearOldValue();
     type = INT;
     value.intValue = val;
   }
-  
+
   void setJavaObject(int objectId) {
     clearOldValue();
     type = JAVA_OBJECT;
     value.intValue = objectId;
   }
-  
+
   void setJsObjectId(int val) {
     clearOldValue();
     type = JS_OBJECT;
     value.intValue = val;
   }
-  
-  void setLong(long long val) {
+
+  void setLong(int64_t val) {
     clearOldValue();
     type = LONG;
     value.longValue = val;
   }
-  
+
   void setNull() {
     clearOldValue();
     type = NULL_TYPE;
   }
-  
+
   void setShort(short val) {
     clearOldValue();
     type = SHORT;
     value.shortValue = val;
   }
-  
+
   void setString(const char* chars, int len) {
     setString(std::string(chars, len));
   }
@@ -294,12 +294,12 @@ public:
     type = STRING;
     value.stringValue = new std::string(val);
   }
-  
+
   void setUndefined() {
     clearOldValue();
     type = UNDEFINED;
   }
-  
+
   std::string toString() const {
     char buf[30];
     switch (type) {
@@ -319,15 +319,21 @@ public:
         snprintf(buf, sizeof(buf), "short(%d)", getShort());
         return std::string(buf);
       case INT:
-        return std::string("int ");
+        snprintf(buf, sizeof(buf), "int(%d)", getInt());
+        return std::string(buf);
       case LONG:
-        return std::string("long ");
+        snprintf(buf, sizeof(buf), "long(%lld)",
+            static_cast<long long>(getLong()));
+        return std::string(buf);
       case FLOAT:
-        return std::string("float ");
+        snprintf(buf, sizeof(buf), "float(%f)", getFloat());
+        return std::string(buf);
       case DOUBLE:
-        return std::string("double ");
+        snprintf(buf, sizeof(buf), "double(%lf)", getDouble());
+        return std::string(buf);
       case STRING:
-        return std::string("string ");
+        snprintf(buf, sizeof(buf), "string(%.20s)", getString().c_str());
+        return std::string(buf);
       case JAVA_OBJECT:
         snprintf(buf, sizeof(buf), "JavaObj(%d)", getJavaObjectId());
         return std::string(buf);
@@ -340,16 +346,17 @@ public:
         return "Unknown type";
     }
   }
-  
+
 private:
   void assertType(ValueType reqType) const {
     if (type != reqType) {
       Debug::log(Debug::Error) << "Value::assertType - expecting type "
           << int(reqType) << ", was " << int(type) << Debug::flush;
+      // TODO(jat): is this portable?  Should we do something else here?
       abort();
     }
   }
-  
+
   void clearOldValue() {
     if (type == STRING) {
       delete value.stringValue;

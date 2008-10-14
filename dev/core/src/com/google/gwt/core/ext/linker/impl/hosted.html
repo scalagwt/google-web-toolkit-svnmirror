@@ -110,6 +110,30 @@ function __gwt_makeResult(isException, result) {
   return [isException, result];
 }
 
+function findPluginObject() {
+  try {
+    return document.getElementById('pluginObject');
+  } catch (e) {
+    return null;
+  }
+}
+
+function findPluginEmbed() {
+  try {
+    return document.getElementById('pluginEmbed')
+  } catch (e) {
+    return null;
+  }
+}
+
+function findPluginXPCOM() {
+  try {
+    return __gwt_HostedModePlugin;
+  } catch (e) {
+    return null;
+  }
+}
+
 function gwtOnLoad(errFn, modName, modBase){
   $moduleName = modName;
   $moduleBase = modBase;
@@ -130,23 +154,32 @@ function gwtOnLoad(errFn, modName, modBase){
    * Both plugins need some work to make them truly safe.  I have no idea what
    * will happen in Safari.
    */
-  var plugins = [
-    document.getElementById('pluginObject'),
-    document.getElementById('pluginEmbed'),
+  var pluginFinders = [
+    findPluginXPCOM,
+    findPluginObject,
+    findPluginEmbed,
   ];
-  for (var i = 0; i < plugins.length; ++i) {
+  var found = false;
+  for (var i = 0; i < pluginFinders.length; ++i) {
     try {
-      var plugin = plugins[i];
-      if (!plugin.connect($hosted, $moduleName, window)) {
-        if (errFn) {
-          errFn(modName);
+      var plugin = pluginFinders[i]();
+      if (plugin != null) {
+        if (plugin.connect($hosted, $moduleName, window)) {
+          found = true;
+          break;
         } else {
-          alert("failed to connect to hosted mode server at " + $hosted);
+          if (errFn) {
+            errFn(modName);
+          } else {
+            alert("failed to connect to hosted mode server at " + $hosted);
+          }
         }
       }
-      break;
     } catch (e) {
     }
+  }
+  if (!found) {
+    alert("No GWT plugin found");
   }
 }
 

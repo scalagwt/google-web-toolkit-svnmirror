@@ -18,9 +18,7 @@ package com.google.gwt.dev.shell;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.dev.shell.JsValue.DispatchObject;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.Socket;
 
 /**
@@ -107,11 +105,11 @@ public class BrowserChannelServer extends BrowserChannel implements Runnable {
           if (target instanceof Throwable) {
             throw (Throwable) (target);
           } else {
-            // JS throwing random Objects, which we'll wrap is JSException
+            // JS throwing random Java Objects, which we'll wrap is JSException
             throw ModuleSpaceOOPHM.createJavaScriptException(ccl, target);
           }
         }
-        // JS throwing random primitive objects, which we'll wrap is JSException
+        // JS throwing random primitives, which we'll wrap is JSException
         throw ModuleSpaceOOPHM.createJavaScriptException(ccl,
             returnValue.getValue().toString());
       }
@@ -156,9 +154,9 @@ public class BrowserChannelServer extends BrowserChannel implements Runnable {
         handler.unloadModule(this, moduleName);
       }
     } catch (IOException e) {
-      logger.log(TreeLogger.TRACE, "Client connection lost", e);
+      logger.log(TreeLogger.WARN, "Client connection lost", e);
     } catch (BrowserChannelException e) {
-      logger.log(TreeLogger.WARN,
+      logger.log(TreeLogger.ERROR,
           "Unrecognized command for client; closing connection", e);
     } finally {
       try {
@@ -264,23 +262,6 @@ public class BrowserChannelServer extends BrowserChannel implements Runnable {
         jsval.setWrappedJavaObject(ccl,
             localObjects.get(val.getJavaObject().getRefid()));
         break;
-    }
-  }
-
-  /**
-   * @return true if an http request was processed
-   */
-  private boolean processHttpRequest() {
-    try {
-      BufferedReader reader = new BufferedReader(new InputStreamReader(
-          getStreamFromOtherSide()));
-      String line = reader.readLine();
-      if (!line.substring(0, 3).equalsIgnoreCase("get ")) {
-        return false;
-      }
-      return true;
-    } catch (IOException ioe) {
-      return false;
     }
   }
 }

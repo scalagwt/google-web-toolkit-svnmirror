@@ -18,7 +18,8 @@
 
 // Defines the default debug level if not defined -- see Debug.h
 // Can also define GWT_DEBUGDISABLE to remove all traces of the debug code.
-#define GWT_DEBUGLEVEL Warning
+//#define GWT_DEBUGLEVEL Debugging
+#define GWT_DEBUGLEVEL Info
 //#define GWT_DEBUGDISABLE
 
 #endif

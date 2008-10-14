@@ -2,13 +2,13 @@
 #define __H_HostChannel
 /*
  * Copyright 2008 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <string>
 
+#include "ByteOrder.h"
 #include "Socket.h"
 #include "AllowedConnections.h"
 #include "Platform.h"
@@ -33,6 +34,7 @@
 class HostChannel {
   Socket sock;
   AllowedConnections whitelist;
+  static ByteOrder byteOrder;
 
 public:
   ~HostChannel() {
@@ -42,9 +44,9 @@ public:
     Debug::log(Debug::Debugging) << "HostChannel destroyed" << Debug::flush;
   }
 
-  bool connectToHost(char* host, unsigned port);
+  bool connectToHost(const char* host, unsigned port);
   bool disconnectFromHost();
-
+  
   bool isConnected() const {
     return sock.isConnected();
   }
@@ -72,22 +74,25 @@ public:
   }
 
   // TODO: don't pass out-params by reference as it makes the call site misleading
-  bool readInt(int32_t& data);  
+  bool readInt(int32_t& data);
   bool sendInt(const int32_t data);
- 
-  bool readShort(short& data);  
+
+  bool readShort(short& data);
   bool sendShort(const short data);
 
-  bool readLong(long long& data);  
-  bool sendLong(const long long data);
-  
-  bool readFloat(float& data);  
+  bool readLong(int64_t& data);
+  bool sendLong(const int64_t data);
+
+  bool readFloat(float& data);
   bool sendFloat(const float data);
-  
+
   bool readDouble(double& doubleRef);
   bool sendDouble(const double data);
-  
+
   bool readByte(char& data) {
+    if (!isConnected()) {
+      return false;
+    }
     int c = sock.readByte();
     if (c < 0) {
       return false;
@@ -97,33 +102,36 @@ public:
   }
 
   bool sendByte(const char data) {
+    if (!isConnected()) {
+      return false;
+    }
     return sock.writeByte(data);
   }
-  
+
   bool readStringLength(uint32_t& data);
   bool readStringBytes(char* data, const uint32_t len);
   bool readString(std::string& strRef);
-  bool HostChannel::sendString(const char* data, const uint32_t len) {
+  bool sendString(const char* data, const uint32_t len) {
     return sendInt(len) && sendBytes(data, len);
   }
 
-  bool HostChannel::sendString(const std::string& str) {
+  bool sendString(const std::string& str) {
     return sendString(str.c_str(), static_cast<uint32_t>(str.length()));
   }
 
   bool readValue(Value& valueRef);
   bool sendValue(const Value& value);
-  
+
   ReturnMessage* reactToMessages(SessionHandler* handler, bool expectReturn);
-  
+
   bool reactToMessages(SessionHandler* handler) {
     return !reactToMessages(handler, false);
   }
-  
+
   bool flush() {
     return sock.flush();
   }
-  
+
   ReturnMessage* reactToMessagesWhileWaitingForReturn(SessionHandler* handler) {
     return reactToMessages(handler, true);
   }

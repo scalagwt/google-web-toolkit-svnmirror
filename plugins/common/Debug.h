@@ -15,7 +15,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-#ifdef sun
+#ifndef _WINDOWS
 // TODO(jat): remove, for snprintf prototypes which should go away
 #include <stdio.h>
 #endif

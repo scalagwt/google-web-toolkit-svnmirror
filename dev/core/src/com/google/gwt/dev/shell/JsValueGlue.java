@@ -254,7 +254,8 @@ public final class JsValueGlue {
       intVal = (int) doubleVal;
       if (intVal != doubleVal) {
         ModuleSpace.getLogger().log(TreeLogger.WARN,
-            msgPrefix + ": Rounding double to int for " + typeName, null);
+            msgPrefix + ": Rounding double (" + doubleVal + ") to int for "
+            + typeName, null);
       }
     } else {
       throw new HostedModeException(msgPrefix + ": JS value of type "

@@ -1,12 +1,12 @@
 /*
  * Copyright 2008 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -35,6 +35,7 @@
 #include <time.h>
 
 #include "Platform.h"
+#include "ByteOrder.h"
 
 #include "FreeValueMessage.h"
 #include "HostChannel.h"
@@ -48,9 +49,11 @@
 
 using namespace std;
 
-bool HostChannel::connectToHost(char* host, unsigned port) {
-  Debug::log(Debug::Info) << "HostChannel::connectToHost(host=" << host << ",port=" << port
-      << ")" << Debug::flush;
+ByteOrder HostChannel::byteOrder;
+
+bool HostChannel::connectToHost(const char* host, unsigned port) {
+  Debug::log(Debug::Info) << "Initiating GWT hosted mode connection to host "
+      << host << ", port " << port << Debug::flush;
   if (!port) {
     port = 9997;
   }
@@ -63,7 +66,7 @@ bool HostChannel::connectToHost(char* host, unsigned port) {
 }
 
 bool HostChannel::disconnectFromHost() {
-  Debug::log(Debug::Info) << "Disconnecting channel" << Debug::flush;
+  Debug::log(Debug::Debugging) << "Disconnecting channel" << Debug::flush;
   if (!isConnected()) {
     Debug::log(Debug::Error) << "Disconnecting already disconnected channel" << Debug::flush;
     return false;
@@ -98,37 +101,50 @@ bool HostChannel::sendShort(const short data) {
   return sendBytes(&d, sizeof(d));
 }
 
-bool HostChannel::readLong(long long& data) {
+bool HostChannel::readLong(int64_t& data) {
   // network is big-endian
   int32_t d[2];
-  if (!readBytes(d, sizeof(d))) return false;
-  data = static_cast<long long>((static_cast<uint64_t>(ntohl(d[0])) << 32) | ntohl(d[1]));
+  if (!readInt(d[0])) return false;
+  if (!readInt(d[1])) return false;
+  data = (static_cast<int64_t>(d[0]) << 32) | ntohl(d[1]);
   return true;
 }
 
-bool HostChannel::sendLong(const long long data) {
-  int32_t d[2] = {htonl(static_cast<int32_t>(data >> 32)), htonl(static_cast<int32_t>(data & 0xFFFFFFFF))};
-  return sendBytes(d, sizeof(d));
+bool HostChannel::sendLong(const int64_t data) {
+  if (!sendInt(static_cast<int32_t>(data >> 32))) {
+    return false;
+  }
+  return sendInt(static_cast<int32_t>(data));
 }
 
-// TODO: byte order?
 bool HostChannel::readFloat(float& data) {
-  return readInt(reinterpret_cast<int&>(data));
+  char bytes[sizeof(data)];
+  if (!readBytes(bytes, sizeof(bytes))) {
+    return false;
+  }
+  data = byteOrder.floatFromBytes(bytes);
+  return true;
 }
 
-// TODO: byte order?
 bool HostChannel::sendFloat(const float data) {
-  return sendInt(*reinterpret_cast<const uint32_t*>(&data));
+  char bytes[sizeof(data)];
+  byteOrder.bytesFromFloat(data, bytes);
+  return sendBytes(bytes, sizeof(bytes));
 }
 
-// TODO: byte order?
 bool HostChannel::readDouble(double& data) {
-  return readLong(reinterpret_cast<long long&>(data));
+  char bytes[sizeof(data)];
+  if (!readBytes(bytes, sizeof(bytes))) {
+    return false;
+  }
+  data = byteOrder.doubleFromBytes(bytes);
+  return true;
 }
 
-// TODO: byte order?
 bool HostChannel::sendDouble(const double data) {
-  return sendLong(*reinterpret_cast<const long long*>(&data));
+  char bytes[sizeof(data)];
+  byteOrder.bytesFromDouble(data, bytes);
+  return sendBytes(bytes, sizeof(bytes));
 }
 
 bool HostChannel::readStringLength(uint32_t& data) {
@@ -146,22 +162,26 @@ bool HostChannel::readStringBytes(char* data, const uint32_t len) {
 bool HostChannel::readString(std::string& strRef) {
   uint32_t len;
   if (!readStringLength(len)) {
-    printf("readString: failed to read length\n");
+    Debug::log(Debug::Error) << "readString: failed to read length"
+        << Debug::flush;
     return false;
   }
   // Allocating variable-length arrays on the stack is a GCC feature,
-  // and is vulnerable to stack overflow attacks.
+  // and is vulnerable to stack overflow attacks, so we allocate on the heap.
   scoped_array<char> buf(new char[len]);
   if (!readStringBytes(buf.get(), len)) {
-    printf("readString: failed to read %d bytes\n", len);
+    Debug::log(Debug::Error) << "readString: failed to read " << len
+        << " bytes" << Debug::flush;
     return false;
   }
   strRef.assign(buf.get(), len);
   return true;
 }
 
-static inline double operator-(const struct timeval& end, const struct timeval& begin) {
-  double us = end.tv_sec * 1000000.0 + end.tv_usec - begin.tv_sec * 1000000.0 - begin.tv_usec;
+static inline double operator-(const struct timeval& end,
+    const struct timeval& begin) {
+  double us = end.tv_sec * 1000000.0 + end.tv_usec - begin.tv_sec * 1000000.0
+      - begin.tv_usec;
   return us;
 }
 
@@ -185,6 +205,7 @@ ReturnMessage* HostChannel::reactToMessages(SessionHandler* handler, bool expect
           Value returnValue;
           bool exception = handler->invoke(*this, imsg->getThis(), imsg->getMethodName(),
               imsg->getNumArgs(), imsg->getArgs(), &returnValue);
+          handler->sendFreeValues(*this);
           ReturnMessage::send(*this, exception, returnValue);
         }
         break;
@@ -199,6 +220,7 @@ ReturnMessage* HostChannel::reactToMessages(SessionHandler* handler, bool expect
           Value returnValue;
           bool exception = handler->invokeSpecial(*this, imsg->getDispatchId(),
               imsg->getNumArgs(), imsg->getArgs(), &returnValue);
+          handler->sendFreeValues(*this);
           ReturnMessage::send(*this, exception, returnValue);
         }
         break;
@@ -300,7 +322,7 @@ bool HostChannel::readValue(Value& valueRef) {
       return true;
     case Value::LONG:
       {
-        long long val;
+        int64_t val;
         if (!readLong(val)) return false;
         valueRef.setLong(val);
       }
@@ -339,6 +361,7 @@ bool HostChannel::sendValue(const Value& value) {
   switch (type) {
     case Value::NULL_TYPE:
     case Value::UNDEFINED:
+      // Null and Undefined only have the tag byte, no data
       return true;
     case Value::BOOLEAN:
       return sendByte(value.getBoolean() ? 1 : 0);

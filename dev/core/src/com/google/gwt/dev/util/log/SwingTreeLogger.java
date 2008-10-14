@@ -41,6 +41,10 @@ public final class SwingTreeLogger extends AbstractTreeLogger {
    */
   public static class LogEvent {
 
+    private static final Color DEBUG_COLOR = Color.decode("0x007777");
+    private static final Color SPAM_COLOR = Color.decode("0x005500");
+    private static final Color WARN_COLOR = Color.decode("0x888800");
+
     private static final Date firstLog = new Date();
     private static NumberFormat minHr = NumberFormat.getIntegerInstance();
     private static NumberFormat seconds = NumberFormat.getNumberInstance();
@@ -118,6 +122,7 @@ public final class SwingTreeLogger extends AbstractTreeLogger {
           sb.append("\">");
           sb.append(url.toString());
           sb.append("</a>");
+          sb.append("\n");
         }
       }
       return sb.toString();
@@ -132,7 +137,7 @@ public final class SwingTreeLogger extends AbstractTreeLogger {
         treeLabel.setForeground(Color.RED);
         image = imageError;
       } else if (type == TreeLogger.WARN) {
-        treeLabel.setForeground(Color.decode("0x888800"));
+        treeLabel.setForeground(WARN_COLOR);
         image = imageWarning;
       } else if (type == TreeLogger.INFO) {
         treeLabel.setForeground(Color.BLACK);
@@ -141,10 +146,10 @@ public final class SwingTreeLogger extends AbstractTreeLogger {
         treeLabel.setForeground(Color.DARK_GRAY);
         image = imageTrace;
       } else if (type == TreeLogger.DEBUG) {
-        treeLabel.setForeground(Color.decode("0x007777"));
+        treeLabel.setForeground(DEBUG_COLOR);
         image = imageDebug;
       } else if (type == TreeLogger.SPAM) {
-        treeLabel.setForeground(Color.decode("0x005500"));
+        treeLabel.setForeground(SPAM_COLOR);
         image = imageSpam;
       } else {
         // Messages without icons, ie ALL
@@ -214,7 +219,9 @@ public final class SwingTreeLogger extends AbstractTreeLogger {
   private static final ImageIcon imageTrace = tryLoadImage("log-item-trace.gif");
   private static final ImageIcon imageWarning = tryLoadImage("log-item-warning.gif");
 
-  private static ImageIcon tryLoadImage(String simpleName) {
+  // package protected to allow SwingLoggerPanel access
+  // TODO(jat): reorganize
+  static ImageIcon tryLoadImage(String simpleName) {
     URL url = SwingTreeLogger.class.getResource(simpleName);
     if (url != null) {
       try {
@@ -229,9 +236,10 @@ public final class SwingTreeLogger extends AbstractTreeLogger {
     }
   }
 
+  // package protected so SwingLoggerPanel can access
+  DefaultMutableTreeNode treeNode;
+
   private SwingLoggerPanel panel;
-  // Highest level of log message we or our children have seen
-  private DefaultMutableTreeNode treeNode;
 
   /**
    * Constructs the top-level TreeItemLogger.

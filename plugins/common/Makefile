@@ -9,7 +9,8 @@ CXXFLAGS=$(CFLAGS)
 HDRS= HostChannel.h InvokeMessage.h LoadModuleMessage.h Message.h \
       ReturnMessage.h Value.h BrowserChannel.h Debug.h DebugLevel.h \
       SessionHandler.h ServerMethods.h Socket.h AllowedConnections.h \
-      LoadJsniMessage.h InvokeSpecialMessage.h FreeValueMessage.h
+      LoadJsniMessage.h InvokeSpecialMessage.h FreeValueMessage.h \
+      ByteOrder.h
 
 OBJS=	HostChannel.o LoadModuleMessage.o InvokeMessage.o \
 	ReturnMessage.o ServerMethods.o Debug.o Socket.o \
@@ -24,7 +25,8 @@ SRCS=	HostChannel.cpp LoadModuleMessage.cpp InvokeMessage.cpp \
 OBJ32= $(patsubst %.cpp,obj32/%.o,$(SRCS))
 OBJ64= $(patsubst %.cpp,obj64/%.o,$(SRCS))
 
-all:: libcommon32.a libcommon64.a
+#all:: libcommon32.a libcommon64.a
+all:: libcommon32.a
 
 libcommon32.a: $(OBJ32) obj32.dir
 	ar -rv $@ $(OBJ32)

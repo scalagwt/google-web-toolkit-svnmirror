@@ -23,6 +23,7 @@ import java.net.BindException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 
 /**
@@ -53,7 +54,14 @@ public class BrowserListener {
                   "Connection received from "
                       + sock.getInetAddress().getCanonicalHostName() + ":"
                       + sock.getPort());
-              sock.setTcpNoDelay(true);
+              try {
+                sock.setTcpNoDelay(true);
+                sock.setKeepAlive(true);
+                sock.setReuseAddress(true);
+              } catch (SocketException e) {
+                // Ignore non-critical errors.
+              }
+
               BrowserChannelServer server = new BrowserChannelServer(branch,
                   sock, handler);
               /*

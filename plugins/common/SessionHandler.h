@@ -71,6 +71,11 @@ protected:
   virtual bool invokeSpecial(HostChannel& channel, SpecialMethodId method, int numArgs,
       const Value* const args, Value* returnValue) = 0;
 
+  /**
+   * Send any queued up free values back to the server.
+   */
+  virtual void sendFreeValues(HostChannel& channel) = 0;
+
   virtual ~SessionHandler() {}
 };
 

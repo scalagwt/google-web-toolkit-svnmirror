@@ -1,0 +1,86 @@
+XUL_SDK_PATH=../../../xulrunner-sdk
+GECKO_SDK_PATH=$(XUL_SDK_PATH)/sdk
+INC=-I. -I../common -I$(GECKO_SDK_PATH)/include -I$(XUL_SDK_PATH)/include/caps -I$(XUL_SDK_PATH)/include/dom -I$(XUL_SDK_PATH)/include/js -I$(XUL_SDK_PATH)/include/necko -I$(XUL_SDK_PATH)/include/string -I$(XUL_SDK_PATH)/include/widget -I$(XUL_SDK_PATH)/include/xpcom -I$(XUL_SDK_PATH)/include/xpconnect -I$(XUL_SDK_PATH)/include
+RUN_PATH_FLAG=-executable_path
+LD_FLAGS=-L$(GECKO_SDK_PATH)/lib -L$(XUL_SDK_PATH)/bin -Wl,$(RUN_PATH_FLAG),$(XUL_SDK_PATH)/bin -lxpcomglue_s -lxpcom -lnspr4 -lmozjs
+XPIDL_FLAGS=-I$(GECKO_SDK_PATH)/idl
+XPIDL=$(GECKO_SDK_PATH)/bin/xpidl
+FLAG32BIT=$(shell ./get32bitflag arch)
+CFLAGS=-g -O2 -fPIC -fshort-wchar $(INC)
+CXXFLAGS=$(CFLAGS)
+
+INSTDIR := extension/platform/$(shell ./getarch arch)/components
+#INSTDIR := extension/components
+
+COMMON= ../common/libcommon$(FLAG32BIT).a
+
+ALL: oophm-xpcom.xpi
+
+OBJS=	ExternalWrapper.o ModuleOOPHM.o FFSessionHandler.o JavaObject.o JSRunner.o XpcomDebug.o
+
+SRCS=	ExternalWrapper.cpp ModuleOOPHM.cpp FFSessionHandler.cpp JavaObject.cpp JSRunner.cpp XpcomDebug.cpp
+
+oophm-xpcom.xpi: arch extension $(INSTDIR)/liboophm.dylib \
+  extension/components/IOOPHM.xpt extension/install.rdf
+	-rm -f oophm-xpcom.xpi
+	cd extension; zip -r -D -9 -o ../$@ * -x '*/.svn/*' -x 'META-INF/*'
+
+extension: prebuilt/extension
+	-rm -rf extension
+	cp -r $< $@
+
+$(INSTDIR):
+	-mkdir -p $@
+
+arch: computearch
+	./computearch arch
+	@echo "Restart make"
+	@exit 1
+
+$(INSTDIR)/liboophm.dylib: liboophm.dylib
+	cp $< $@
+
+extension/components/IOOPHM.xpt: IOOPHM.xpt
+	-mkdir -p extension/components
+	cp $< $@
+
+extension/install.rdf: install-template.rdf version
+	sed s/GWT_OOPHM_VERSION/`cat version`/ install-template.rdf >$@
+
+version: computeversion $(HDRS) $(SRCS) $(COMMON)
+	./computeversion $@
+
+IOOPHM.h: IOOPHM.idl
+	$(XPIDL) -m header $(XPIDL_FLAGS) $<
+
+IOOPHM.xpt: IOOPHM.idl
+	$(XPIDL) -m typelib $(XPIDL_FLAGS) $<
+
+liboophm.dylib: $(OBJS) $(COMMON) $(INSTDIR)
+	g++ -m$(FLAG32BIT) -bundle -o $@ $(OBJS) $(COMMON) $(LD_FLAGS)
+
+$(COMMON): common
+	cd ../common; make -f Makefile.mac
+
+$(OBJS): arch IOOPHM.h
+
+.PHONY: clean depend common install install-platform
+
+install: oophm.xpi
+	-cp $< prebuilt
+
+install-platform: liboophm.dylib
+	-mkdir -p $(subst extension,prebuilt/extension,$(INSTDIR))
+	-mkdir -p $(subst extension,prebuilt/extension,$(RESDIR))
+	-cp liboophm.dylib $(subst extension,prebuilt/extension,$(INSTDIR))
+	-cp liboophm.rsrc $(subst extension,prebuilt/extension,$(RESDIR))
+
+clean:
+	-rm -f arch $(OBJS) liboophm.dylib IOOPHM.h IOOPHM.xpt oophm.xpi
+	-rm -rf extension
+
+depend:
+	g++ -MM $(CFLAGS) $(SRCS) >>Makefile
+#	makedepend -- $(CFLAGS) -- $(SRCS)
+
+# DO NOT DELETE

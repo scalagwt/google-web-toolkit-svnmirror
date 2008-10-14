@@ -93,7 +93,7 @@ public:
     // TODO(jat): LEAK LEAK LEAK
     // delete[] readBuf;
     // delete[] writeBuf;
-    Debug::log(Debug::Info) << "Socket: #r=" << numReads << ", bytes/read="
+    Debug::log(Debug::Debugging) << "Socket: #r=" << numReads << ", bytes/read="
         << (numReads ? totReadBytes / numReads : 0) << ", maxr=" << maxReadBytes << "; #w="
         << numWrites << ", bytes/write=" << (numWrites ? totWriteBytes / numWrites : 0) << ", maxw="
         << maxWriteBytes << Debug::flush;
@@ -118,9 +118,10 @@ public:
   /**
    * Disconnect this socket.
    * 
+   * @param doFlush true (the default value) if the socket should be flushed.
    * @return true if disconnect succeeds
    */
-  bool disconnect();
+  bool disconnect(bool doFlush = true);
   
   /**
    * Read a single byte from the socket.

@@ -487,7 +487,7 @@ public class GWTShell extends ToolBase {
       try {
         for (String prenormalized : startupUrls) {
           startupURL = normalizeURL(prenormalized);
-          logger.log(TreeLogger.TRACE, "Starting URL: " + startupURL, null);
+          logger.log(TreeLogger.INFO, "Starting URL: " + startupURL, null);
           launchURL(startupURL);
         }
       } catch (UnableToCompleteException e) {
@@ -502,7 +502,13 @@ public class GWTShell extends ToolBase {
      * TODO(jat): properly support launching arbitrary browsers; waiting on
      * Freeland's work with BrowserScanner and the trunk merge to get it.
      */
-    url += "?gwt.hosted=" + listener.getEndpointIdentifier();
+    String separator;
+    if (url.contains("?")) {
+      separator = "&";
+    } else {
+      separator = "?";
+    }
+    url += separator + "gwt.hosted=" + listener.getEndpointIdentifier();
     TreeLogger branch = getTopLogger().branch(TreeLogger.INFO,
         "Launching firefox with " + url, null);
     try {

@@ -28,9 +28,19 @@ typedef long ssize_t;
 
 #define snprintf sprintf_s
 #define SOCKETTYPE SOCKET
-#pragma warning(disable:4267) // Bogus conversion from size_t -> unsigned int warnings.
+// Bogus conversion from size_t -> unsigned int warnings.
+#pragma warning(disable:4267)
 #else
 #define SOCKETTYPE int
+#endif
+
+// Set the float byte-order if we know it -- see ByteOrder.h FloatByteOrder
+#if defined(i386) || defined(i586) || defined(i686) || defined(_x86)
+#define PLATFORM_FLOAT_ENDIANESS FLOAT_LITTLE_ENDIAN
+#endif
+
+#if defined(__sparc)
+#define PLATFORM_FLOAT_ENDIANESS FLOAT_BIG_ENDIAN
 #endif
 
 #endif

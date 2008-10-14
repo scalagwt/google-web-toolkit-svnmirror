@@ -156,8 +156,6 @@ public class OophmSessionHandler extends SessionHandler {
   @Override
   public TreeLogger loadModule(TreeLogger logger, BrowserChannel channel,
       String moduleName, String userAgent) {
-    logger.log(TreeLogger.INFO, "Hosted mode connection from "
-        + channel.getRemoteEndpoint());
     try {
       // Attach a new ModuleSpace to make it programmable.
       //

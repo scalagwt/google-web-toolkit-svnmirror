@@ -19,13 +19,18 @@ import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.TreeLogger.Type;
 import com.google.gwt.dev.util.log.AbstractTreeLogger;
 import com.google.gwt.dev.util.log.SwingLoggerPanel;
-import com.google.gwt.dev.util.log.SwingLoggerPanel.CloseListener;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
+import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
@@ -33,11 +38,41 @@ import javax.swing.JTabbedPane;
  */
 public class ModulePanel extends JPanel {
 
+  /**
+   * A tab component with a close button, derived from Swing
+   * TabComponentsDemoProject.
+   */
+  private class ClosedTabComponent extends JPanel {
+
+    public ClosedTabComponent() {
+      super(new FlowLayout(FlowLayout.LEFT, 0, 0));
+      setOpaque(false);
+      JLabel label = new JLabel("Disconnected");
+      add(label);
+      label.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
+      JButton button = new JButton(closeIcon);
+      button.setBorderPainted(false);
+      button.setPreferredSize(new Dimension(closeIcon.getIconWidth(),
+          closeIcon.getIconHeight()));
+      button.setToolTipText("Close this tab");
+      add(button);
+      button.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          synchronized (tabs) {
+            tabs.remove(ModulePanel.this);
+          }
+        }
+      });
+    }
+  }
+
   private static ImageIcon firefoxIcon = GWTShell.loadImageIcon("firefox24.png");
 
   private static ImageIcon ieIcon = GWTShell.loadImageIcon("ie24.png");
 
   private static ImageIcon safariIcon = GWTShell.loadImageIcon("safari24.png");
+
+  private static ImageIcon closeIcon = GWTShell.loadImageIcon("close.png");
 
   private SwingLoggerPanel loggerPanel;
 
@@ -49,16 +84,17 @@ public class ModulePanel extends JPanel {
     this.tabs = tabs;
     JPanel topPanel = new JPanel();
     topPanel.add(new JLabel(moduleName));
-    JButton compileButton = new JButton("Compile");
-    topPanel.add(compileButton);
-    add(topPanel, BorderLayout.NORTH);
-    loggerPanel = new SwingLoggerPanel(maxLevel, new CloseListener() {
-      public void onClose() {
-        synchronized (tabs) {
-          tabs.remove(ModulePanel.this);
-        }
+    JButton compileButton = new JButton("Compile (not yet implemented)");
+    compileButton.setEnabled(false);
+    compileButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        JOptionPane.showMessageDialog(null, "Compiling not implemented yet", 
+            "Alert: Not Implemented", JOptionPane.INFORMATION_MESSAGE);
       }
     });
+    topPanel.add(compileButton);
+    add(topPanel, BorderLayout.NORTH);
+    loggerPanel = new SwingLoggerPanel(maxLevel);
     add(loggerPanel);
     AbstractTreeLogger logger = loggerPanel.getLogger();
     ImageIcon browserIcon = null;
@@ -77,7 +113,7 @@ public class ModulePanel extends JPanel {
     }
     synchronized (tabs) {
       tabs.addTab(shortModuleName, browserIcon, this, moduleName + " from "
-          + remoteSocket);
+          + remoteSocket + " on " + userAgent);
     }
     logger.log(TreeLogger.INFO, "Request for module " + moduleName
         + " by user agent '" + userAgent + "' from " + remoteSocket);
@@ -87,9 +123,7 @@ public class ModulePanel extends JPanel {
     synchronized (tabs) {
       int index = tabs.indexOfComponent(this);
       if (index > -1) {
-        tabs.setTitleAt(index, "Disconnected");
-        // TODO(jat): closed icon?
-        tabs.setIconAt(index, null);
+        tabs.setTabComponentAt(index, new ClosedTabComponent());
       }
     }
     loggerPanel.disconnected();

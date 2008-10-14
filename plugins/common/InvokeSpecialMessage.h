@@ -2,13 +2,13 @@
 #define __INVOKESPECIALMESSAGE_H
 /*
  * Copyright 2008 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -29,13 +29,13 @@ class HostChannel;
  * to send an invoke message to the server.
  */
 class InvokeSpecialMessage : public Message {
-public:  
+public:
   static const char TYPE = MESSAGE_TYPE_INVOKESPECIAL;
 private:
   SessionHandler::SpecialMethodId dispatchId;
   int numArgs;
   const Value* args;
-  
+
 protected:
   /**
    * @param args array of arguments -- InvokeMessage takes ownership and will
@@ -44,16 +44,16 @@ protected:
   InvokeSpecialMessage(SessionHandler::SpecialMethodId dispatchId, int numArgs, const Value* args) : dispatchId(dispatchId),
       numArgs(numArgs), args(args) {}
 
-public:  
+public:
   ~InvokeSpecialMessage();
   virtual char getType() const;
-  
+
   SessionHandler::SpecialMethodId getDispatchId() const { return dispatchId; }
   int getNumArgs() const { return numArgs; }
   const Value* const getArgs() const { return args; }
-  
+
   static InvokeSpecialMessage* receive(HostChannel& channel);
-  static bool InvokeSpecialMessage::send(HostChannel& channel, int dispatchId, int numArgs,
+  static bool send(HostChannel& channel, int dispatchId, int numArgs,
       const Value* args);
 };
 #endif
