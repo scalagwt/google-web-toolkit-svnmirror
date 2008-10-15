@@ -19,12 +19,85 @@ package com.google.gwt.user.client.rpc;
  * Service used to test unicode escaping.
  */
 public interface UnicodeEscapingService extends RemoteService {
+  
+  /**
+   * Exception for escaping errors.
+   */
+  public static class InvalidCharacterException extends Exception {
+
+    private static String toHex(int val) {
+      String hex = Integer.toHexString(val);
+      return "00000".substring(hex.length()) + hex;
+    }
+
+    private int index;
+    private int expected;
+    private int actual;
+    private int rangeEnd;
+    private int rangeStart;
+
+    public InvalidCharacterException(int index, int rangeStart, int rangeEnd,
+        int expected, int actual) {
+      super(index < 0 ? "String length mismatch in range U+" + toHex(rangeStart)
+          + " - U+" + toHex(rangeEnd) + ": expected = " + expected
+          + ", actual = " + actual
+          : "At index " + index + " of range U+" + toHex(rangeStart) + " - U+"
+          + toHex(rangeEnd) + ", expected = U+" + toHex(expected)
+          + ", actual = U+" + toHex(actual));
+      this.index = index;
+      this.rangeStart = rangeStart;
+      this.rangeEnd = rangeEnd;
+      this.expected = expected;
+      this.actual = actual;
+    }
+
+    protected InvalidCharacterException() { }
+
+    public int getActual() {
+      return actual;
+    }
+
+    public int getExpected() {
+      return expected;
+    }
+
+    public int getIndex() {
+      return index;
+    }
+
+    public int getRangeEnd() {
+      return rangeEnd;
+    }
+
+    public int getRangeStart() {
+      return rangeStart;
+    }
+  }
+
   /**
    * Returns a string containing the characters from start to end.
    * 
-   * @param start start character value, inclusive
-   * @param end end character value, exclusive
+   * Used to verify server->client escaping.
+   * 
+   * @param start start character value, inclusive -- note if greater
+   *     than {@link Character#MIN_SUPPLEMENTARY_CODE_POINT} it will
+   *     be included as surrogate pairs in the returned string.
+   * @param end end character value, exclusive (see above comment)
    * @return a string containing the characters from start to end
    */
   String getStringContainingCharacterRange(int start, int end);
+
+  /**
+   * Verifies that the string contains the specified characters.
+   * 
+   * Used to verify client->server escaping.
+   *
+   * @param start start code point value included
+   * @param end first code point not included
+   * @param str string to verify
+   * @throws InvalidCharacterException if the string does not contain the specified characters
+   * @return true if the verification succeeded
+   */
+  boolean verifyStringContainingCharacterRange(int start, int end, String str)
+      throws InvalidCharacterException;
 }

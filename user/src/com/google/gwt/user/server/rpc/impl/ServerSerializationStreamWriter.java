@@ -372,7 +372,6 @@ public final class ServerSerializationStreamWriter extends
     for (int i = 0, n = input.length; i < n; ++i) {
       char c = input[i];
       if (needsUnicodeEscape(c)) {
-        charVector.add(JS_ESCAPE_CHAR);
         unicodeEscape(c, charVector);
       } else {
         charVector.add(c);
@@ -443,13 +442,16 @@ public final class ServerSerializationStreamWriter extends
   private static boolean needsUnicodeEscape(char ch) {
     switch (ch) {
       case ' ':
-        // ASCII space gets caught in SPACE_SEPARATOR below, but does not need to be escaped
+        // ASCII space gets caught in SPACE_SEPARATOR below, but does not
+        // need to be escaped
         return false;
-      case RPC_SEPARATOR_CHAR:
       case JS_QUOTE_CHAR:
       case JS_ESCAPE_CHAR:
         // these must be quoted or they will break the protocol
         return true;
+      case NON_BREAKING_HYPHEN:
+          // This can be expanded into a break followed by a hyphen
+          return true;
       default:
         switch (Character.getType(ch)) {
           // Conservative
@@ -469,26 +471,23 @@ public final class ServerSerializationStreamWriter extends
             return true;
 
           default:
-            if (ch == NON_BREAKING_HYPHEN) {
-              // This can be expanded into a break followed by a hyphen
-              return true;
-            }
-          break;
+            break;
         }
-      break;
+        break;
     }
-
     return false;
   }
 
   /**
-   * Writes either the two or four character escape sequence for a character.  Some
-   * characters have special escapes, such as \n for U+000D.
+   * Writes a safe escape sequence for a character.  Some characters have a
+   * short form, such as \n for U+000D, while others are represented as \\xNN
+   * or \\uNNNN.
    * 
    * @param ch character to unicode escape
    * @param charVector char vector to receive the unicode escaped representation
    */
   private static void unicodeEscape(char ch, CharVector charVector) {
+    charVector.add(JS_ESCAPE_CHAR);
     if (ch < NUMBER_OF_JS_ESCAPED_CHARS && JS_CHARS_ESCAPED[ch] != 0) {
       charVector.add(JS_CHARS_ESCAPED[ch]);
     } else if (ch < 256) {
