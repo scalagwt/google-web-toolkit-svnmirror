@@ -63,7 +63,6 @@ import com.google.gwt.event.logical.shared.HideHandler;
 import com.google.gwt.event.shared.AbstractEvent;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.event.shared.HasHandlerManager;
 import com.google.gwt.event.shared.AbstractEvent.Type;
 
 import java.util.EventListener;
@@ -79,13 +78,11 @@ abstract class L<ListenerType> implements EventHandler {
 
   public static class Change extends L<ChangeListener> implements ChangeHandler {
     @Deprecated
-    public static <EventSourceType extends HasHandlerManager & HasChangeHandlers> void add(
-        EventSourceType source, ChangeListener listener) {
+    public static void add(HasChangeHandlers source, ChangeListener listener) {
       source.addChangeHandler(new Change(listener));
     }
 
-    public static void remove(HasHandlerManager eventSource,
-        ChangeListener listener) {
+    public static void remove(Widget eventSource, ChangeListener listener) {
       baseRemove(eventSource, listener, ChangeEvent.TYPE);
     }
 
@@ -99,13 +96,11 @@ abstract class L<ListenerType> implements EventHandler {
   }
   public static class Click extends L<ClickListener> implements ClickHandler {
     @Deprecated
-    public static <EventSourceType extends HasHandlerManager & HasClickHandlers> void add(
-        EventSourceType source, ClickListener listener) {
+    public static void add(HasClickHandlers source, ClickListener listener) {
       source.addClickHandler(new Click(listener));
     }
 
-    public static void remove(HasHandlerManager eventSource,
-        ClickListener listener) {
+    public static void remove(Widget eventSource, ClickListener listener) {
       baseRemove(eventSource, listener, ClickEvent.TYPE);
     }
 
@@ -124,13 +119,12 @@ abstract class L<ListenerType> implements EventHandler {
   public static class Focus extends L<FocusListener> implements FocusHandler,
       BlurHandler {
 
-    public static <EventSourceType extends HasHandlerManager & HasAllFocusHandlers> void add(
+    public static <EventSourceType extends Widget & HasAllFocusHandlers> void add(
         EventSourceType source, FocusListener listener) {
       HasAllFocusHandlers.Adaptor.addHandlers(source, new Focus(listener));
     }
 
-    public static void remove(HasHandlerManager eventSource,
-        FocusListener listener) {
+    public static void remove(Widget eventSource, FocusListener listener) {
       baseRemove(eventSource, listener, LoadEvent.TYPE, ErrorEvent.TYPE);
     }
 
@@ -150,8 +144,7 @@ abstract class L<ListenerType> implements EventHandler {
   public abstract static class Hide extends L<EventListener> implements
       HideHandler {
 
-    public static void remove(HasHandlerManager eventSource,
-        EventListener listener) {
+    public static void remove(Widget eventSource, EventListener listener) {
       baseRemove(eventSource, listener, HideEvent.TYPE);
     }
 
@@ -163,8 +156,7 @@ abstract class L<ListenerType> implements EventHandler {
   public static class Load extends L<LoadListener> implements LoadHandler,
       ErrorHandler {
 
-    public static void remove(HasHandlerManager eventSource,
-        LoadListener listener) {
+    public static void remove(Widget eventSource, LoadListener listener) {
       baseRemove(eventSource, listener, LoadEvent.TYPE, ErrorEvent.TYPE);
     }
 
@@ -185,7 +177,7 @@ abstract class L<ListenerType> implements EventHandler {
       MouseDownHandler, MouseUpHandler, MouseOutHandler, MouseOverHandler,
       MouseMoveHandler {
 
-    public static <EventSourceType extends HasHandlerManager & HasMouseDownHandlers & HasMouseUpHandlers & HasMouseOutHandlers & HasMouseOverHandlers & HasMouseMoveHandlers> void add(
+    public static <EventSourceType extends Widget & HasMouseDownHandlers & HasMouseUpHandlers & HasMouseOutHandlers & HasMouseOverHandlers & HasMouseMoveHandlers> void add(
         EventSourceType source, MouseListener listener) {
       Mouse handlers = new Mouse(listener);
       source.addMouseDownHandler(handlers);
@@ -195,8 +187,7 @@ abstract class L<ListenerType> implements EventHandler {
       source.addMouseMoveHandler(handlers);
     }
 
-    public static void remove(HasHandlerManager eventSource,
-        MouseListener listener) {
+    public static void remove(Widget eventSource, MouseListener listener) {
       baseRemove(eventSource, listener, MouseDownEvent.TYPE, MouseUpEvent.TYPE,
           MouseOverEvent.TYPE, MouseOutEvent.TYPE);
     }
@@ -230,8 +221,7 @@ abstract class L<ListenerType> implements EventHandler {
 
   public static class MouseWheel extends L<MouseWheelListener> implements
       MouseWheelHandler {
-    public static void remove(HasHandlerManager eventSource,
-        MouseWheelListener listener) {
+    public static void remove(Widget eventSource, MouseWheelListener listener) {
       baseRemove(eventSource, listener, MouseWheelEvent.TYPE);
     }
 
@@ -247,8 +237,7 @@ abstract class L<ListenerType> implements EventHandler {
 
   public static class Scroll extends L<ScrollListener> implements ScrollHandler {
 
-    public static void remove(HasHandlerManager eventSource,
-        ScrollListener listener) {
+    public static void remove(Widget eventSource, ScrollListener listener) {
       baseRemove(eventSource, listener, ScrollEvent.TYPE, ErrorEvent.TYPE);
     }
 
@@ -267,13 +256,12 @@ abstract class L<ListenerType> implements EventHandler {
   static class Keyboard extends L<KeyboardListener> implements KeyDownHandler,
       KeyUpHandler, KeyPressHandler {
 
-    public static <EventSourceType extends HasHandlerManager & HasAllKeyHandlers> void add(
+    public static <EventSourceType extends Widget & HasAllKeyHandlers> void add(
         EventSourceType source, KeyboardListener listener) {
       HasAllKeyHandlers.Adaptor.addHandlers(source, new Keyboard(listener));
     }
 
-    public static void remove(HasHandlerManager eventSource,
-        KeyboardListener listener) {
+    public static void remove(Widget eventSource, KeyboardListener listener) {
       L.baseRemove(eventSource, listener, KeyDownEvent.TYPE, KeyUpEvent.TYPE,
           KeyPressEvent.TYPE);
     }
@@ -299,7 +287,7 @@ abstract class L<ListenerType> implements EventHandler {
     }
   }
 
-  static void baseRemove(HasHandlerManager eventSource, EventListener listener,
+  static void baseRemove(Widget eventSource, EventListener listener,
       Type... keys) {
     HandlerManager manager = eventSource.getHandlerManager();
     for (Type key : keys) {

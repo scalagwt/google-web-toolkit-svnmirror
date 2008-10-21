@@ -19,7 +19,20 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.HasAllMouseHandlers;
 import com.google.gwt.event.dom.client.HasClickHandlers;
+import com.google.gwt.event.dom.client.MouseDownEvent;
+import com.google.gwt.event.dom.client.MouseDownHandler;
+import com.google.gwt.event.dom.client.MouseMoveEvent;
+import com.google.gwt.event.dom.client.MouseMoveHandler;
+import com.google.gwt.event.dom.client.MouseOutEvent;
+import com.google.gwt.event.dom.client.MouseOutHandler;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseOverHandler;
+import com.google.gwt.event.dom.client.MouseUpEvent;
+import com.google.gwt.event.dom.client.MouseUpHandler;
+import com.google.gwt.event.dom.client.MouseWheelEvent;
+import com.google.gwt.event.dom.client.MouseWheelHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.BidiUtils;
 import com.google.gwt.i18n.client.HasDirection;
@@ -37,8 +50,9 @@ import com.google.gwt.i18n.client.HasDirection;
  * {@example com.google.gwt.examples.HTMLExample}
  * </p>
  */
-public class Label extends MousableWidget implements HasHorizontalAlignment,
-    HasText, HasWordWrap, HasDirection, HasClickHandlers, SourcesClickEvents {
+public class Label extends Widget implements HasHorizontalAlignment, HasText,
+    HasWordWrap, HasDirection, HasClickHandlers, SourcesClickEvents,
+    SourcesMouseEvents, HasAllMouseHandlers {
 
   /**
    * Creates a Label widget that wraps an existing &lt;div&gt; or &lt;span&gt;
@@ -115,6 +129,40 @@ public class Label extends MousableWidget implements HasHorizontalAlignment,
     L.Click.add(this, listener);
   }
 
+  public HandlerRegistration addMouseDownHandler(MouseDownHandler handler) {
+    return addDomHandler(MouseDownEvent.TYPE, handler);
+  }
+
+  @Deprecated
+  public void addMouseListener(MouseListener listener) {
+    L.Mouse.add(this, listener);
+  }
+
+  public HandlerRegistration addMouseMoveHandler(MouseMoveHandler handler) {
+    return addDomHandler(MouseMoveEvent.TYPE, handler);
+  }
+
+  public HandlerRegistration addMouseOutHandler(MouseOutHandler handler) {
+    return addDomHandler(MouseOutEvent.TYPE, handler);
+  }
+
+  public HandlerRegistration addMouseOverHandler(MouseOverHandler handler) {
+    return addDomHandler(MouseOverEvent.TYPE, handler);
+  }
+
+  public HandlerRegistration addMouseUpHandler(MouseUpHandler handler) {
+    return addDomHandler(MouseUpEvent.TYPE, handler);
+  }
+
+  public HandlerRegistration addMouseWheelHandler(MouseWheelHandler handler) {
+    return addDomHandler(MouseWheelEvent.TYPE, handler);
+  }
+
+  @Deprecated
+  public void addMouseWheelListener(MouseWheelListener listener) {
+    addMouseWheelHandler(new L.MouseWheel(listener));
+  }
+
   public Direction getDirection() {
     return BidiUtils.getDirectionOnElement(getElement());
   }
@@ -134,6 +182,16 @@ public class Label extends MousableWidget implements HasHorizontalAlignment,
   @Deprecated
   public void removeClickListener(ClickListener listener) {
     L.Click.remove(this, listener);
+  }
+
+  @Deprecated
+  public void removeMouseListener(MouseListener listener) {
+    L.Mouse.remove(this, listener);
+  }
+
+  @Deprecated
+  public void removeMouseWheelListener(MouseWheelListener listener) {
+    L.MouseWheel.remove(this, listener);
   }
 
   public void setDirection(Direction direction) {

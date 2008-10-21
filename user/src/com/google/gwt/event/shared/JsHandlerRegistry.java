@@ -24,7 +24,7 @@ import com.google.gwt.event.shared.AbstractEvent.Type;
  * don't have to make it public, should never be called outside of a GWT runtime
  * environment.
  * 
- * Th JsHandlerRegistry makes use of the fact that in the large majority of
+ * The JsHandlerRegistry makes use of the fact that in the large majority of
  * cases, only one or two handlers are added for each event type. Therefore,
  * rather than storing handlers in a list of lists, we store then in a single
  * flattened array with an escape clause to handle the rare case where we have
