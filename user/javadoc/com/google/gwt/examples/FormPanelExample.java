@@ -16,9 +16,10 @@
 package com.google.gwt.examples;
 
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormHandler;
 import com.google.gwt.user.client.ui.FormPanel;
@@ -28,7 +29,6 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 
 public class FormPanelExample implements EntryPoint {
 
@@ -66,8 +66,8 @@ public class FormPanelExample implements EntryPoint {
     panel.add(upload);
 
     // Add a 'submit' button.
-    panel.add(new Button("Submit", new ClickListener() {
-      public void onClick(Widget sender) {
+    panel.add(new Button("Submit", new ClickHandler() {
+      public void onClick(ClickEvent event) {
         form.submit();
       }
     }));
