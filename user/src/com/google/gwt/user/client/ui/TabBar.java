@@ -15,8 +15,7 @@
  */
 package com.google.gwt.user.client.ui;
 
-import com.google.gwt.event.dom.client.KeyCodeEvent;
-import com.google.gwt.event.dom.client.KeyEvent;
+import com.google.gwt.event.dom.client.HasKeyCodes;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 
@@ -26,24 +25,30 @@ import com.google.gwt.user.client.Event;
  * <p>
  * <img class='gallery' src='TabBar.png'/>
  * </p>
- * <h3>CSS Style Rules</h3> <ul class='css'> <li>.gwt-TabBar { the tab bar
- * itself }</li> <li>.gwt-TabBar .gwt-TabBarFirst { the left edge of the bar }</li>
+ * <h3>CSS Style Rules</h3> 
+ * <ul class='css'> 
+ * <li>.gwt-TabBar { the tab bar itself }</li> 
+ * <li>.gwt-TabBar .gwt-TabBarFirst { the left edge of the bar }</li>
  * <li>.gwt-TabBar .gwt-TabBarFirst-wrapper { table cell around the left edge }</li>
- * <li>.gwt-TabBar .gwt-TabBarRest { the right edge of the bar }</li> <li>
- * .gwt-TabBar .gwt-TabBarRest-wrapper { table cell around the right edge }</li>
- * <li>.gwt-TabBar .gwt-TabBarItem { unselected tabs }</li> <li>.gwt-TabBar
- * .gwt-TabBarItem-wrapper { table cell around tab }</li> <li>.gwt-TabBar
- * .gwt-TabBarItem-selected { additional style for selected tabs }</li> <li>
- * .gwt-TabBar .gwt-TabBarItem-wrapper-selected { table cell around selected tab
- * }</li> <li>.gwt-TabBar .gwt-TabBarItem-disabled { additional style for
- * disabled tabs }</li> <li>.gwt-TabBar .gwt-TabBarItem-wrapper-disabled { table
- * cell around disabled tab }</li> </ul>
+ * <li>.gwt-TabBar .gwt-TabBarRest { the right edge of the bar }</li> 
+ * <li>.gwt-TabBar .gwt-TabBarRest-wrapper { table cell around the right edge }</li>
+ * <li>.gwt-TabBar .gwt-TabBarItem { unselected tabs }</li> 
+ * <li>.gwt-TabBar .gwt-TabBarItem-wrapper { table cell around tab }</li> 
+ * <li>.gwt-TabBar .gwt-TabBarItem-selected { additional style for selected tabs }</li> 
+ * <li>.gwt-TabBar .gwt-TabBarItem-wrapper-selected { table cell around selected tab}</li> 
+ * 
+ * <li>.gwt-TabBar .gwt-TabBarItem-disabled { additional style for disabled tabs }</li> 
+ * <li>.gwt-TabBar .gwt-TabBarItem-wrapper-disabled { table cell around disabled tab }</li> 
+ * </ul>
+ *
  * <p>
  * <h3>Example</h3>
  * {@example com.google.gwt.examples.TabBarExample}
  * </p>
  */
 public class TabBar extends Composite implements SourcesTabEvents {
+  
+  
   /**
    * <code>ClickDelegatePanel</code> decorates any widget with the minimal
    * amount of machinery to receive clicks for delegation to the parent.
@@ -85,13 +90,14 @@ public class TabBar extends Composite implements SourcesTabEvents {
 
       // No need for call to super.
       switch (DOM.eventGetType(event)) {
-        case Event.ONCLICK:
-          TabBar.this.onClick(this);
+        case Event.ONCLICK: 
+          TabBar.this.selectTabByTabWidget(this);
           break;
 
         case Event.ONKEYDOWN:
-          TabBar.this.onKeyDown(this, ((char) DOM.eventGetKeyCode(event)),
-              KeyEvent.getKeyModifiers(event));
+          if (((char) DOM.eventGetKeyCode(event)) ==  HasKeyCodes.KEY_ENTER) {
+            TabBar.this.selectTabByTabWidget(this);
+          }
           break;
       }
     }
@@ -266,18 +272,6 @@ public class TabBar extends Composite implements SourcesTabEvents {
     assert (index >= 0) && (index < getTabCount()) : "Tab index out of bounds";
     ClickDelegatePanel delPanel = (ClickDelegatePanel) panel.getWidget(index + 1);
     return delPanel.isEnabled();
-  }
-
-  @Deprecated
-  public void onClick(Widget sender) {
-    selectTabByTabWidget(sender);
-  }
-
-  @Deprecated
-  public void onKeyDown(Widget sender, char keyCode, int modifiers) {
-    if (keyCode == KeyCodeEvent.KEY_ENTER) {
-      selectTabByTabWidget(sender);
-    }
   }
 
   /**
