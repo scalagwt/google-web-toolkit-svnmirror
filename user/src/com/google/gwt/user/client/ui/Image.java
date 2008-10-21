@@ -24,11 +24,24 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.DomEvent;
 import com.google.gwt.event.dom.client.ErrorEvent;
 import com.google.gwt.event.dom.client.ErrorHandler;
+import com.google.gwt.event.dom.client.HasAllMouseHandlers;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.dom.client.HasErrorHandlers;
 import com.google.gwt.event.dom.client.HasLoadHandlers;
 import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
+import com.google.gwt.event.dom.client.MouseDownEvent;
+import com.google.gwt.event.dom.client.MouseDownHandler;
+import com.google.gwt.event.dom.client.MouseMoveEvent;
+import com.google.gwt.event.dom.client.MouseMoveHandler;
+import com.google.gwt.event.dom.client.MouseOutEvent;
+import com.google.gwt.event.dom.client.MouseOutHandler;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseOverHandler;
+import com.google.gwt.event.dom.client.MouseUpEvent;
+import com.google.gwt.event.dom.client.MouseUpHandler;
+import com.google.gwt.event.dom.client.MouseWheelEvent;
+import com.google.gwt.event.dom.client.MouseWheelHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
@@ -70,8 +83,9 @@ import java.util.HashMap;
  * {@example com.google.gwt.examples.ImageExample}
  * </p>
  */
-public class Image extends MousableWidget implements SourcesLoadEvents,
-    HasLoadHandlers, HasErrorHandlers, SourcesClickEvents, HasClickHandlers {
+public class Image extends Widget implements SourcesLoadEvents,
+    HasLoadHandlers, HasErrorHandlers, SourcesClickEvents, HasClickHandlers,
+    HasAllMouseHandlers, SourcesMouseEvents {
 
   /**
    * Implementation of behaviors associated with the clipped state of an image.
@@ -419,6 +433,40 @@ public class Image extends MousableWidget implements SourcesLoadEvents,
     addLoadHandler(new L.Load(listener));
   }
 
+  public HandlerRegistration addMouseDownHandler(MouseDownHandler handler) {
+    return addDomHandler(MouseDownEvent.TYPE, handler);
+  }
+
+  @Deprecated
+  public void addMouseListener(MouseListener listener) {
+    L.Mouse.add(this, listener);
+  }
+
+  public HandlerRegistration addMouseMoveHandler(MouseMoveHandler handler) {
+    return addDomHandler(MouseMoveEvent.TYPE, handler);
+  }
+
+  public HandlerRegistration addMouseOutHandler(MouseOutHandler handler) {
+    return addDomHandler(MouseOutEvent.TYPE, handler);
+  }
+
+  public HandlerRegistration addMouseOverHandler(MouseOverHandler handler) {
+    return addDomHandler(MouseOverEvent.TYPE, handler);
+  }
+
+  public HandlerRegistration addMouseUpHandler(MouseUpHandler handler) {
+    return addDomHandler(MouseUpEvent.TYPE, handler);
+  }
+
+  public HandlerRegistration addMouseWheelHandler(MouseWheelHandler handler) {
+    return addDomHandler(MouseWheelEvent.TYPE, handler);
+  }
+
+  @Deprecated
+  public void addMouseWheelListener(MouseWheelListener listener) {
+    addMouseWheelHandler(new L.MouseWheel(listener));
+  }
+
   /**
    * Gets the height of the image. When the image is in the unclipped state, the
    * height of the image is not known until the image has been loaded (i.e. load
@@ -486,6 +534,16 @@ public class Image extends MousableWidget implements SourcesLoadEvents,
   @Deprecated
   public void removeLoadListener(LoadListener listener) {
     L.Load.remove(this, listener);
+  }
+
+  @Deprecated
+  public void removeMouseListener(MouseListener listener) {
+    L.Mouse.remove(this, listener);
+  }
+
+  @Deprecated
+  public void removeMouseWheelListener(MouseWheelListener listener) {
+    L.MouseWheel.remove(this, listener);
   }
 
   /**
