@@ -14,7 +14,7 @@
  * the License.
  */
 
-package com.google.gwt.event.dom.client;
+package com.google.gwt.core.client.impl;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -22,18 +22,18 @@ import com.google.gwt.core.client.JavaScriptObject;
 import java.util.HashMap;
 
 /**
- * A raw js string map implementation. public so we can avoid creating multiple
- * versions for our internal code, the API is completely unsafe with two
- * versions of get and put, so please don't use!
+ * A raw js map implementation. public so we can avoid creating multiple
+ * versions for our internal code, the API is completely unsafe with no fewer
+ * then three versions of put and get, so do not use!
  * 
  * @param <ValueType> value type
  */
-public class RawJsStringMapImpl<ValueType> {
+public class RawJsMapImpl<ValueType> {
 
   private static class KeyMap<ValueType> extends JavaScriptObject {
 
-    public static RawJsStringMapImpl.KeyMap create() {
-      return (RawJsStringMapImpl.KeyMap) JavaScriptObject.createObject();
+    public static RawJsMapImpl.KeyMap create() {
+      return (RawJsMapImpl.KeyMap) JavaScriptObject.createObject();
     }
 
     protected KeyMap() {
@@ -56,10 +56,10 @@ public class RawJsStringMapImpl<ValueType> {
     }-*/;
   }
 
-  private RawJsStringMapImpl.KeyMap<ValueType> map;
+  private RawJsMapImpl.KeyMap<ValueType> map;
   private HashMap<String, ValueType> javaMap;
 
-  public RawJsStringMapImpl() {
+  public RawJsMapImpl() {
     if (GWT.isScript()) {
       map = KeyMap.create();
     } else {

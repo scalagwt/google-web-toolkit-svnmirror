@@ -15,8 +15,8 @@
  */
 package com.google.gwt.user.client.ui;
 
+import com.google.gwt.core.client.impl.RawJsMapImpl;
 import com.google.gwt.dom.client.Document;
-import com.google.gwt.event.dom.client.RawJsStringMapImpl;
 import com.google.gwt.i18n.client.BidiUtils;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.client.LocaleInfo;
@@ -57,7 +57,7 @@ public class RootPanel extends AbsolutePanel {
     }
   }
 
-  private static RawJsStringMapImpl<RootPanel> rootPanels = new RawJsStringMapImpl<RootPanel>();
+  private static RawJsMapImpl<RootPanel> rootPanels = new RawJsMapImpl<RootPanel>();
   private static boolean hooked;
   private static WidgetCollection widgetsToDetach = new WidgetCollection(null);
 

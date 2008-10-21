@@ -15,6 +15,7 @@
  */
 package com.google.gwt.event.dom.client;
 
+import com.google.gwt.core.client.impl.RawJsMapImpl;
 import com.google.gwt.event.shared.AbstractEvent;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.HandlerManager;
@@ -49,8 +50,8 @@ public abstract class DomEvent extends AbstractEvent {
       this.cached = cached;
       // All clinit activity should take place here for DomEvent.
       if (registered == null) {
-        registered = new RawJsStringMapImpl();
-        reverseRegistered = new RawJsStringMapImpl();
+        registered = new RawJsMapImpl();
+        reverseRegistered = new RawJsMapImpl();
       }
       this.nativeEventTypeInt = nativeEventTypeInt;
       registered.put(nativeEventTypeString, this);
@@ -68,9 +69,9 @@ public abstract class DomEvent extends AbstractEvent {
     }
   }
 
-  private static RawJsStringMapImpl<Type> registered;
+  private static RawJsMapImpl<Type> registered;
 
-  private static RawJsStringMapImpl<Type> reverseRegistered;
+  private static RawJsMapImpl<Type> reverseRegistered;
 
   /**
    * Fires the given native event on the manager.
