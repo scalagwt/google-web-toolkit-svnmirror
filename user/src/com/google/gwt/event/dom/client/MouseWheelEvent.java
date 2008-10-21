@@ -15,6 +15,7 @@
  */
 package com.google.gwt.event.dom.client;
 
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 
 /**
@@ -23,18 +24,50 @@ import com.google.gwt.user.client.Event;
 public class MouseWheelEvent extends MouseEvent {
 
   /**
-    Event type for mouse wheel events. Represents the meta-data associated with this event.
-  */
-  public static final Type<MouseWheelEvent, MouseWheelHandler> TYPE = new Type<MouseWheelEvent,MouseWheelHandler>(
+   * Event type for mouse wheel events. Represents the meta-data associated with
+   * this event.
+   */
+  public static final Type<MouseWheelEvent, MouseWheelHandler> TYPE = new Type<MouseWheelEvent, MouseWheelHandler>(
       Event.ONMOUSEWHEEL, "mousewheel", new MouseWheelEvent()) {
-     @Override
-     public void fire(MouseWheelHandler handler, MouseWheelEvent event) {
-       handler.onMouseWheel(event);
-     }
-   };
+    @Override
+    public void fire(MouseWheelHandler handler, MouseWheelEvent event) {
+      handler.onMouseWheel(event);
+    }
+  };
 
-   
- @Override
+  /**
+   * @return the change in the mouse wheel position along the Y-axis; positive
+   *         if the mouse wheel is moving north (toward the top of the screen)
+   *         or negative if the mouse wheel is moving south (toward the bottom
+   *         of the screen)
+   */
+  public int getVelocityDeltaY() {
+    return DOM.eventGetMouseWheelVelocityY(getNativeEvent());
+  }
+
+  /**
+   * Convenience method that returns <code>true</code> if {@link #getDeltaY()}
+   * is a negative value.
+   * 
+   * @return <code>true</code> if the velocity includes a component directed
+   *         toword the top of the screen
+   */
+  public boolean isVelocityNorth() {
+    return getVelocityDeltaY() < 0;
+  }
+
+  /**
+   * Convenience method that returns <code>true</code> if {@link #getDeltaY()}
+   * is a positive value.
+   * 
+   * @return <code>true</code> if the velocity includes a component directed
+   *         toword the bottom of the screen
+   */
+  public boolean isVelocitySouth() {
+    return getVelocityDeltaY() > 0;
+  }
+
+  @Override
   protected Type getType() {
     return TYPE;
   }
