@@ -16,9 +16,6 @@
 
 package com.google.gwt.event.dom.client;
 
-import com.google.gwt.event.shared.HandlerAdaptor;
-import com.google.gwt.event.shared.HasHandlerManager;
-
 /**
  * This is a convenience interface that includes all focus handlers defined by
  * the core GWT system.
@@ -33,8 +30,7 @@ public interface HasAllFocusHandlers extends HasFocusHandlers, HasBlurHandlers {
    * Adaptor used to implement both {@link FocusHandler} and {@link BlurHandler}
    * .
    */
-  public abstract static class Adaptor extends HandlerAdaptor implements
-      FocusHandler, BlurHandler {
+  public abstract static class Adaptor implements FocusHandler, BlurHandler {
 
     /**
      * Convenience method to add both focus handlers at once to an event source.
@@ -44,8 +40,8 @@ public interface HasAllFocusHandlers extends HasFocusHandlers, HasBlurHandlers {
      * @param source the event source
      * @param handlers the focus handlers
      */
-    public static <EventSourceType extends HasHandlerManager & HasAllFocusHandlers, EventHandlerType extends BlurHandler & FocusHandler> void addHandlers(
-        EventSourceType source, EventHandlerType handlers) {
+    public static <EventHandlerType extends BlurHandler & FocusHandler> void addHandlers(
+       HasAllFocusHandlers source, EventHandlerType handlers) {
       source.addBlurHandler(handlers);
       source.addFocusHandler(handlers);
     }

@@ -16,8 +16,6 @@
 
 package com.google.gwt.event.dom.client;
 
-import com.google.gwt.event.shared.HandlerAdaptor;
-import com.google.gwt.event.shared.HasHandlerManager;
 
 /**
  * This is a convenience interface that includes all mouse handlers defined by
@@ -36,9 +34,9 @@ public interface HasAllMouseHandlers extends HasMouseDownHandlers,
    * Adaptor used to create and add all the Keyboard events at once.
    * 
    */
-  public abstract static class Adaptor extends HandlerAdaptor implements
-      HasMouseDownHandlers, HasMouseUpHandlers, HasMouseOutHandlers,
-      HasMouseOverHandlers, HasMouseMoveHandlers, HasMouseWheelHandlers {
+  public abstract static class Adaptor implements HasMouseDownHandlers,
+      HasMouseUpHandlers, HasMouseOutHandlers, HasMouseOverHandlers,
+      HasMouseMoveHandlers, HasMouseWheelHandlers {
 
     /**
      * Convenience method to add all key handlers at once.
@@ -48,8 +46,8 @@ public interface HasAllMouseHandlers extends HasMouseDownHandlers,
      * @param source event source
      * @param handlers handlers to add
      */
-    public static <EventSourceType extends HasHandlerManager & HasAllMouseHandlers, EventHandler extends MouseDownHandler & MouseUpHandler & MouseOutHandler & MouseOverHandler & MouseMoveHandler & MouseWheelHandler> void addHandlers(
-        EventSourceType source, EventHandler handlers) {
+    public static <EventHandler extends MouseDownHandler & MouseUpHandler & MouseOutHandler & MouseOverHandler & MouseMoveHandler & MouseWheelHandler> void addHandlers(
+        HasAllMouseHandlers source, EventHandler handlers) {
       source.addMouseDownHandler(handlers);
       source.addMouseUpHandler(handlers);
       source.addMouseOutHandler(handlers);

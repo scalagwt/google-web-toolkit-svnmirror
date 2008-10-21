@@ -16,9 +16,6 @@
 
 package com.google.gwt.event.dom.client;
 
-import com.google.gwt.event.shared.HandlerAdaptor;
-import com.google.gwt.event.shared.HasHandlerManager;
-
 /**
  * Convenience interface used to implement all key handlers at once. In the
  * unlikely event that more key handler subtypes are added to GWT, this
@@ -32,8 +29,8 @@ public interface HasAllKeyHandlers extends HasKeyUpHandlers,
   /**
    * Adaptor used to create and add all the Keyboard events at once.
    */
-  public abstract static class Adaptor extends HandlerAdaptor implements
-      KeyDownHandler, KeyUpHandler, KeyPressHandler {
+  public abstract static class Adaptor implements KeyDownHandler, KeyUpHandler,
+      KeyPressHandler {
 
     /**
      * Convenience method to add all key handlers at once.
@@ -43,8 +40,8 @@ public interface HasAllKeyHandlers extends HasKeyUpHandlers,
      * @param source event source
      * @param handlers handlers to add
      */
-    public static <EventSourceType extends HasHandlerManager & HasAllKeyHandlers, EventHandler extends KeyDownHandler & KeyUpHandler & KeyPressHandler> void addHandlers(
-        EventSourceType source, EventHandler handlers) {
+    public static <EventHandler extends KeyDownHandler & KeyUpHandler & KeyPressHandler> void addHandlers(
+        HasAllKeyHandlers source, EventHandler handlers) {
       source.addKeyDownHandler(handlers);
       source.addKeyPressHandler(handlers);
       source.addKeyUpHandler(handlers);
