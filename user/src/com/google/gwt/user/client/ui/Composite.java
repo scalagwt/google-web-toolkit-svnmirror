@@ -46,6 +46,13 @@ public abstract class Composite extends Widget {
   }
 
   @Override
+  public void sinkEvents(int eventsToSink) {
+    // Delegate to widget for sinking of events. Otherwise wrapping checkboxes
+    // etc. may fail.
+    widget.sinkEvents(eventsToSink);
+  }
+
+  @Override
   public void onBrowserEvent(Event event) {
     // Delegate events to the widget.
     widget.onBrowserEvent(event);

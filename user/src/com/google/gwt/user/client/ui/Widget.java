@@ -20,7 +20,6 @@ import com.google.gwt.event.shared.AbstractEvent;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.event.shared.HasHandlerManager;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
@@ -30,13 +29,12 @@ import com.google.gwt.user.client.EventListener;
  * support for receiving events from the browser and being added directly to
  * {@link com.google.gwt.user.client.ui.Panel panels}.
  */
-public class Widget extends UIObject implements EventListener,
-    HasHandlerManager {
-
+public class Widget extends UIObject implements EventListener {
+  private int sunkEvents;
   private boolean attached;
+
   private Object layoutData;
   private Widget parent;
-
   private HandlerManager handlerManager;
 
   /**
@@ -90,6 +88,15 @@ public class Widget extends UIObject implements EventListener,
     } else if (parent != null) {
       throw new IllegalStateException(
           "This widget's parent does not implement HasWidgets");
+    }
+  }
+
+  @Override
+  public void sinkEvents(int eventBitsToAdd) {
+    if (sunkEvents == -1) {
+      super.sinkEvents(eventBitsToAdd);
+    } else {
+      sunkEvents |= eventBitsToAdd;
     }
   }
 
@@ -193,6 +200,10 @@ public class Widget extends UIObject implements EventListener,
 
     attached = true;
     DOM.setEventListener(getElement(), this);
+    if (sunkEvents > 0) {
+      super.sinkEvents(sunkEvents);
+      sunkEvents = -1;
+    }
     doAttachChildren();
 
     // onLoad() gets called only *after* all of the children are attached and
