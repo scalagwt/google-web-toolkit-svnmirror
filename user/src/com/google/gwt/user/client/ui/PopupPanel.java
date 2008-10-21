@@ -18,7 +18,6 @@ package com.google.gwt.user.client.ui;
 import com.google.gwt.animation.client.Animation;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
-import com.google.gwt.event.dom.client.HasKeyCodes;
 import com.google.gwt.event.dom.client.KeyEvent;
 import com.google.gwt.event.logical.shared.HasHideHandlers;
 import com.google.gwt.event.logical.shared.HideEvent;
@@ -533,7 +532,7 @@ public class PopupPanel extends SimplePanel implements SourcesPopupEvents,
    * 
    * @param key the key code of the depressed key
    * @param modifiers keyboard modifiers, as specified in
-   *          {@link HasKeyCodes}.
+   *          {@link com.google.gwt.event.dom.client.HasKeyCodes}.
    * @return <code>false</code> to suppress the event
    */
   public boolean onKeyDownPreview(char key, int modifiers) {
@@ -546,7 +545,7 @@ public class PopupPanel extends SimplePanel implements SourcesPopupEvents,
    * 
    * @param key the unicode character pressed
    * @param modifiers keyboard modifiers, as specified in
-   *          {@link HasKeyCodes}.
+   *          {@link com.google.gwt.event.dom.client.HasKeyCodes}.
    * @return <code>false</code> to suppress the event
    */
   public boolean onKeyPressPreview(char key, int modifiers) {
@@ -559,7 +558,7 @@ public class PopupPanel extends SimplePanel implements SourcesPopupEvents,
    * 
    * @param key the key code of the released key
    * @param modifiers keyboard modifiers, as specified in
-   *          {@link HasKeyCodes}.
+   *          {@link com.google.gwt.event.dom.client.HasKeyCodes}.
    * @return <code>false</code> to suppress the event
    */
   public boolean onKeyUpPreview(char key, int modifiers) {
