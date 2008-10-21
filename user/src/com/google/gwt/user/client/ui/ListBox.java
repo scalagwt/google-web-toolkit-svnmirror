@@ -274,7 +274,7 @@ public class ListBox extends FocusWidget implements SourcesChangeEvents,
    * 
    * <p>
    * Note that setting the selection programmatically does <em>not</em> cause
-   * the {@link ChangeListener#onChange(Widget)} event to be fired.
+   * the {@link ChangeHandler#onChange(ChangeEvent)} event to be fired.
    * </p>
    * 
    * @param index the index of the item to be selected or unselected
@@ -327,7 +327,7 @@ public class ListBox extends FocusWidget implements SourcesChangeEvents,
    * 
    * <p>
    * Note that setting the selected index programmatically does <em>not</em>
-   * cause the {@link ChangeListener#onChange(Widget)} event to be fired.
+   * cause the {@link ChangeHandler#onChange(ChangeEvent)} event to be fired.
    * </p>
    * 
    * @param index the index of the item to be selected
