@@ -15,6 +15,10 @@
  */
 package com.google.gwt.user.client.ui;
 
+import com.google.gwt.event.dom.client.CellClickEvent;
+import com.google.gwt.event.dom.client.CellClickHandler;
+import com.google.gwt.event.dom.client.HasCellClickHandlers;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Event;
@@ -33,7 +37,8 @@ import java.util.NoSuchElementException;
  * <img class='gallery' src='Table.png'/>
  * </p>
  */
-public abstract class HTMLTable extends Panel implements SourcesTableEvents {
+public abstract class HTMLTable extends Panel implements SourcesTableEvents,
+    HasCellClickHandlers {
   /**
    * This class contains methods used to format a table's cells.
    */
@@ -217,8 +222,8 @@ public abstract class HTMLTable extends Panel implements SourcesTableEvents {
      * 
      * @param row the row of the cell whose visibility is to be set
      * @param column the column of the cell whose visibility is to be set
-     * @param visible <code>true</code> to show the cell, <code>false</code>
-     *          to hide it
+     * @param visible <code>true</code> to show the cell, <code>false</code> to
+     *          hide it
      */
     public void setVisible(int row, int column, boolean visible) {
       Element e = ensureElement(row, column);
@@ -426,12 +431,12 @@ public abstract class HTMLTable extends Panel implements SourcesTableEvents {
       }
       return DOM.getChild(columnGroup, col);
     }
-    
+
     /**
-     * Prepare the colgroup tag for the first time, guarenteeing that it
-     * exists and has at least one col tag in it.  This method corrects
-     * a Mozilla issue where the col tag will affect the wrong column if
-     * a col tag doesn't exist when the element is attached to the page.
+     * Prepare the colgroup tag for the first time, guarenteeing that it exists
+     * and has at least one col tag in it. This method corrects a Mozilla issue
+     * where the col tag will affect the wrong column if a col tag doesn't exist
+     * when the element is attached to the page.
      */
     private void prepareColumnGroup() {
       if (columnGroup == null) {
@@ -560,8 +565,8 @@ public abstract class HTMLTable extends Panel implements SourcesTableEvents {
      * Sets whether this row is visible.
      * 
      * @param row the row whose visibility is to be set
-     * @param visible <code>true</code> to show the row, <code>false</code>
-     *          to hide it
+     * @param visible <code>true</code> to show the row, <code>false</code> to
+     *          hide it
      */
     public void setVisible(int row, boolean visible) {
       Element e = ensureElement(row);
@@ -582,8 +587,8 @@ public abstract class HTMLTable extends Panel implements SourcesTableEvents {
     }
 
     protected native Element getRow(Element elem, int row)/*-{
-     return elem.rows[row];
-     }-*/;
+      return elem.rows[row];
+    }-*/;
 
     /**
      * Convenience methods to set an attribute on a row.
@@ -753,11 +758,6 @@ public abstract class HTMLTable extends Panel implements SourcesTableEvents {
    */
   private final Element tableElem;
 
-  /**
-   * Current table listener.
-   */
-  private TableListenerCollection tableListeners;
-
   private WidgetMapper widgetMap = new WidgetMapper();
 
   /**
@@ -770,17 +770,18 @@ public abstract class HTMLTable extends Panel implements SourcesTableEvents {
     setElement(tableElem);
   }
 
+  public HandlerRegistration addCellClickHandler(CellClickHandler handler) {
+    return addHandler(CellClickEvent.TYPE, handler);
+  }
+
   /**
    * Adds a listener to the current table.
    * 
    * @param listener listener to add
+   * @deprecated
    */
   public void addTableListener(TableListener listener) {
-    if (tableListeners == null) {
-      tableListeners = new TableListenerCollection();
-      sinkEvents(Event.ONCLICK);
-    }
-    tableListeners.add(listener);
+    L.Table.add(this, listener);
   }
 
   /**
@@ -950,7 +951,8 @@ public abstract class HTMLTable extends Panel implements SourcesTableEvents {
   public void onBrowserEvent(Event event) {
     switch (DOM.eventGetType(event)) {
       case Event.ONCLICK: {
-        if (tableListeners != null) {
+        if (getHandlers() != null
+            && getHandlers().isEventHandled(CellClickEvent.TYPE)) {
           // Find out which cell was actually clicked.
           Element td = getEventTargetCell(event);
           if (td == null) {
@@ -961,7 +963,7 @@ public abstract class HTMLTable extends Panel implements SourcesTableEvents {
           int row = DOM.getChildIndex(body, tr);
           int column = DOM.getChildIndex(tr, td);
           // Fire the event.
-          tableListeners.fireCellClicked(this, row, column);
+          fireEvent(new CellClickEvent(event, row, column));
         }
         break;
       }
@@ -1001,10 +1003,9 @@ public abstract class HTMLTable extends Panel implements SourcesTableEvents {
    * 
    * @param listener listener to remove
    */
+  @Deprecated
   public void removeTableListener(TableListener listener) {
-    if (tableListeners != null) {
-      tableListeners.remove(listener);
-    }
+    L.Table.remove(this, listener);
   }
 
   /**
@@ -1164,8 +1165,8 @@ public abstract class HTMLTable extends Panel implements SourcesTableEvents {
    * @return number of columns in the row
    */
   protected native int getDOMCellCount(Element tableBody, int row) /*-{
-   return tableBody.rows[row].cells.length;
-   }-*/;
+    return tableBody.rows[row].cells.length;
+  }-*/;
 
   /**
    * Directly ask the underlying DOM what the cell count on the given row is.
@@ -1187,8 +1188,8 @@ public abstract class HTMLTable extends Panel implements SourcesTableEvents {
   }
 
   protected native int getDOMRowCount(Element elem) /*-{
-   return elem.rows.length;
-   }-*/;
+    return elem.rows.length;
+  }-*/;
 
   /**
    * Determines the TD associated with the specified event.
@@ -1303,7 +1304,7 @@ public abstract class HTMLTable extends Panel implements SourcesTableEvents {
   @Override
   protected void onEnsureDebugId(String baseID) {
     super.onEnsureDebugId(baseID);
-    
+
     int rowCount = getRowCount();
     for (int row = 0; row < rowCount; row++) {
       int cellCount = getCellCount(row);

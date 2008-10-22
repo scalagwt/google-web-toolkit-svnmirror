@@ -38,18 +38,6 @@ public class Widget extends UIObject implements EventListener {
   private HandlerManager handlerManager;
 
   /**
-   * Returns this widget's {@link HandlerManager} used for event management.
-   * 
-   * @return the handler manager
-   */
-  public final HandlerManager getHandlerManager() {
-    if (handlerManager == null) {
-      handlerManager = createHandlerManager();
-    }
-    return handlerManager;
-  }
-
-  /**
    * Gets this widget's parent panel.
    * 
    * @return the widget's parent panel
@@ -126,18 +114,7 @@ public class Widget extends UIObject implements EventListener {
    */
   protected <HandlerType extends EventHandler> HandlerRegistration addHandler(
       AbstractEvent.Type<?, HandlerType> type, final HandlerType handler) {
-    return getHandlerManager().addHandler(type, handler);
-  }
-
-  /**
-   * Creates the {@link HandlerManager} used by this widget for event
-   * management.
-   * 
-   * @return the handler manager
-   * 
-   */
-  protected HandlerManager createHandlerManager() {
-    return new HandlerManager(this);
+    return ensureHandlers().addHandler(type, handler);
   }
 
   /**
@@ -159,6 +136,18 @@ public class Widget extends UIObject implements EventListener {
   }
 
   /**
+   * Returns this widget's {@link HandlerManager}, ensuring it exists.
+   * 
+   * @return the handler manager
+   */
+  protected final HandlerManager ensureHandlers() {
+    if (handlerManager == null) {
+      handlerManager = new HandlerManager(this);
+    }
+    return handlerManager;
+  }
+
+  /**
    * Fires an event.
    * 
    * @param event the event
@@ -170,13 +159,12 @@ public class Widget extends UIObject implements EventListener {
   }
 
   /**
-   * Is the event handled by one or more handlers?
+   * Returns this widget's {@link HandlerManager} used for event management.
    * 
-   * @param key event type key
-   * @return does this event type have a current handler
+   * @return the handler manager
    */
-  protected final boolean isEventHandled(AbstractEvent.Type key) {
-    return handlerManager == null ? false : handlerManager.isEventHandled(key);
+  protected final HandlerManager getHandlers() {
+    return handlerManager;
   }
 
   /**
@@ -272,10 +260,9 @@ public class Widget extends UIObject implements EventListener {
    */
   protected <HandlerType extends EventHandler> void removeHandler(
       AbstractEvent.Type<?, HandlerType> key, final HandlerType handler) {
-    if (handlerManager == null) {
-      handlerManager = new HandlerManager(this);
+    if (handlerManager != null) {
+      handlerManager.removeHandler(key, handler);
     }
-    handlerManager.removeHandler(key, handler);
   }
 
   /**

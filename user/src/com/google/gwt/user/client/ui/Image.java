@@ -205,7 +205,7 @@ public class Image extends Widget implements SourcesLoadEvents,
       DeferredCommand.addCommand(new Command() {
         public void execute() {
           DomEvent.unsafeFireNativeEvent(Event.ONLOAD,
-              image.getHandlerManager());
+              image.getHandlers());
         }
       });
     }

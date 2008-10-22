@@ -797,7 +797,7 @@ public abstract class CustomButton extends ButtonBase {
   }
 
   void fireClickListeners(Event nativeEvent) {
-    DomEvent.unsafeFireNativeEvent(Event.ONCLICK, getHandlerManager());
+    DomEvent.unsafeFireNativeEvent(Event.ONCLICK, getHandlers());
   }
 
   /**

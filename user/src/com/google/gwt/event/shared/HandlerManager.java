@@ -29,6 +29,27 @@ public class HandlerManager {
   private static final boolean useJs = GWT.isScript();
   private static int index = -EXPECTED_HANDLERS;
 
+  /**
+   * Is the given event live?
+   * 
+   * @param event the event
+   * @return is the event live
+   */
+  public static boolean isLive(AbstractEvent event) {
+    return event.isLive();
+  }
+
+  /**
+   * Revives the given event.
+   * 
+   * @param event the event
+   */
+  public static void revive(AbstractEvent event) {
+    if (event.isLive() == false) {
+      event.revive();
+    }
+  }
+
   static int createKeyIndex() {
     // Need to leave space for the size and the unflattened list if we end up
     // needing it.
@@ -38,9 +59,10 @@ public class HandlerManager {
 
   // Only one of JsHandlerRegistry and JavaHandlerRegistry are live at once.
   private final JsHandlerRegistry javaScriptRegistry;
+
   private final JavaHandlerRegistry javaRegistry;
 
-  // 
+  // source of the event.
   private final Object source;
 
   /**
@@ -97,6 +119,8 @@ public class HandlerManager {
    * @param event the event
    */
   public void fireEvent(AbstractEvent event) {
+    // If it not live we should clear the source and make it live.
+    revive(event);
     Object oldSource = event.getSource();
     event.setSource(source);
     if (useJs) {

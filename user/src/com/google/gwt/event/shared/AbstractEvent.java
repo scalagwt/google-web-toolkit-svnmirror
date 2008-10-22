@@ -94,8 +94,11 @@ public abstract class AbstractEvent {
    */
   public String toDebugString() {
     String name = this.getClass().getName();
-    name = name.substring(name.lastIndexOf("."));
-    return name + ": source = " + source;
+    name = name.substring(name.lastIndexOf(".") + 1);
+    String sourceName = source.getClass().getName();
+    sourceName = sourceName.substring(sourceName.lastIndexOf("." + 1));
+
+    return "event:" + name + ": source: " + sourceName;
   }
 
   /**
@@ -139,6 +142,7 @@ public abstract class AbstractEvent {
    */
   protected void revive() {
     dead = false;
+    source = null;
   }
 
   /**

@@ -19,6 +19,8 @@ package com.google.gwt.user.client.ui;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
+import com.google.gwt.event.dom.client.CellClickEvent;
+import com.google.gwt.event.dom.client.CellClickHandler;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -29,6 +31,7 @@ import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.dom.client.HasAllFocusHandlers;
 import com.google.gwt.event.dom.client.HasAllKeyHandlers;
+import com.google.gwt.event.dom.client.HasCellClickHandlers;
 import com.google.gwt.event.dom.client.HasChangeHandlers;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.dom.client.HasMouseDownHandlers;
@@ -58,8 +61,14 @@ import com.google.gwt.event.dom.client.MouseWheelEvent;
 import com.google.gwt.event.dom.client.MouseWheelHandler;
 import com.google.gwt.event.dom.client.ScrollEvent;
 import com.google.gwt.event.dom.client.ScrollHandler;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.logical.shared.HideEvent;
 import com.google.gwt.event.logical.shared.HideHandler;
+import com.google.gwt.event.logical.shared.OpenEvent;
+import com.google.gwt.event.logical.shared.OpenHandler;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.AbstractEvent;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.HandlerManager;
@@ -75,6 +84,27 @@ import java.util.EventListener;
  */
 @Deprecated
 abstract class L<ListenerType> implements EventHandler {
+
+  public static class Table extends L<TableListener> implements
+      CellClickHandler {
+    @Deprecated
+    public static void add(HasCellClickHandlers source, TableListener listener) {
+      source.addCellClickHandler(new Table(listener));
+    }
+
+    public static void remove(Widget eventSource, TableListener listener) {
+      baseRemove(eventSource, listener, CellClickEvent.TYPE);
+    }
+
+    protected Table(TableListener listener) {
+      super(listener);
+    }
+
+    public void onCellClick(CellClickEvent event) {
+      listener.onCellClicked((SourcesTableEvents) event.getSource(),
+          event.getRowIndex(), event.getCellIndex());
+    }
+  }
 
   public static class Change extends L<ChangeListener> implements ChangeHandler {
     @Deprecated
@@ -94,6 +124,7 @@ abstract class L<ListenerType> implements EventHandler {
       listener.onChange(source(event));
     }
   }
+
   public static class Click extends L<ClickListener> implements ClickHandler {
     @Deprecated
     public static void add(HasClickHandlers source, ClickListener listener) {
@@ -112,7 +143,6 @@ abstract class L<ListenerType> implements EventHandler {
       listener.onClick(source(event));
     }
   }
-
   /*
    * Handler wrapper for {@link FocusListener}.
    */
@@ -253,6 +283,38 @@ abstract class L<ListenerType> implements EventHandler {
     }
   }
 
+  public static class Tree extends L<TreeListener> implements
+      SelectionHandler<TreeItem>, CloseHandler<TreeItem>, OpenHandler<TreeItem> {
+    @Deprecated
+    public static void add(com.google.gwt.user.client.ui.Tree tree,
+        TreeListener listener) {
+      Tree t = new Tree(listener);
+      tree.addSelectionHandler(t);
+      tree.addCloseHandler(t);
+      tree.addOpenHandler(t);
+    }
+
+    public static void remove(Widget eventSource, TreeListener listener) {
+      baseRemove(eventSource, listener, SelectionEvent.TYPE);
+    }
+
+    protected Tree(TreeListener listener) {
+      super(listener);
+    }
+
+    public void onClose(CloseEvent<TreeItem> event) {
+      listener.onTreeItemStateChanged(event.getTarget());
+    }
+
+    public void onOpen(OpenEvent<TreeItem> event) {
+      listener.onTreeItemSelected(event.getTarget());
+    }
+
+    public void onSelection(SelectionEvent<TreeItem> event) {
+      listener.onTreeItemSelected(event.getOldValue());
+    }
+  }
+
   static class Keyboard extends L<KeyboardListener> implements KeyDownHandler,
       KeyUpHandler, KeyPressHandler {
 
@@ -289,13 +351,15 @@ abstract class L<ListenerType> implements EventHandler {
 
   static void baseRemove(Widget eventSource, EventListener listener,
       Type... keys) {
-    HandlerManager manager = eventSource.getHandlerManager();
-    for (Type key : keys) {
-      int handlerCount = manager.getHandlerCount(key);
-      for (int i = 0; i < handlerCount; i++) {
-        EventHandler handler = manager.getHandler(key, i);
-        if (handler instanceof L && ((L) handler).listener.equals(listener)) {
-          manager.removeHandler(key, handler);
+    HandlerManager manager = eventSource.getHandlers();
+    if (manager != null) {
+      for (Type key : keys) {
+        int handlerCount = manager.getHandlerCount(key);
+        for (int i = 0; i < handlerCount; i++) {
+          EventHandler handler = manager.getHandler(key, i);
+          if (handler instanceof L && ((L) handler).listener.equals(listener)) {
+            manager.removeHandler(key, handler);
+          }
         }
       }
     }
