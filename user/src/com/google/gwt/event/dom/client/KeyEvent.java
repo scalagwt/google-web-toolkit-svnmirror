@@ -93,6 +93,15 @@ public abstract class KeyEvent extends DomEvent {
   }
 
   /**
+   * Is the <code>meta</code> key down?
+   * 
+   * @return whether the meta key is down
+   */
+  public boolean isMetaKeyDown() {
+    return getNativeEvent().getMetaKey();
+  }
+
+  /**
    * Is the <code>shift</code> key down?
    * 
    * @return whether the shift key is down

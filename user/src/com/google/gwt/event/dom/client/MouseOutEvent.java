@@ -15,6 +15,7 @@
  */
 package com.google.gwt.event.dom.client;
 
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.Event;
 
 /**
@@ -23,18 +24,38 @@ import com.google.gwt.user.client.Event;
 public class MouseOutEvent extends MouseEvent {
 
   /**
-    Event type for mouse out events. Represents the meta-data associated with this event.
-  */
-  public static final Type<MouseOutEvent, MouseOutHandler> TYPE = new Type<MouseOutEvent,MouseOutHandler>(
+   * Event type for mouse out events. Represents the meta-data associated with
+   * this event.
+   */
+  public static final Type<MouseOutEvent, MouseOutHandler> TYPE = new Type<MouseOutEvent, MouseOutHandler>(
       Event.ONMOUSEOUT, "mouseout", new MouseOutEvent()) {
-     @Override
-     public void fire(MouseOutHandler handler, MouseOutEvent event) {
-       handler.onMouseOut(event);
-     }
-   };
+    @Override
+    public void fire(MouseOutHandler handler, MouseOutEvent event) {
+      handler.onMouseOut(event);
+    }
+  };
 
-   
- @Override
+  /**
+   * Gets the element from which the mouse pointer was moved.
+   * 
+   * @return the element from which the mouse pointer was moved
+   */
+  public Element getFromElement() {
+    // Use a deferred binding instead of DOMImpl's inefficient switch statement
+    return getNativeEvent().getFromElement();
+  }
+
+  /**
+   * Gets the element to which the mouse pointer was moved.
+   * 
+   * @return the element to which the mouse pointer was moved
+   */
+  public Element getToElement() {
+    // Use a deferred binding instead of DOMImpl's inefficient switch statement
+    return getNativeEvent().getToElement();
+  }
+
+  @Override
   protected Type getType() {
     return TYPE;
   }
