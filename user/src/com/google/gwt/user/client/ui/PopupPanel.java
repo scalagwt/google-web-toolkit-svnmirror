@@ -19,9 +19,9 @@ import com.google.gwt.animation.client.Animation;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.dom.client.KeyEvent;
-import com.google.gwt.event.logical.shared.HasHideHandlers;
-import com.google.gwt.event.logical.shared.HideEvent;
-import com.google.gwt.event.logical.shared.HideHandler;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.event.logical.shared.HasCloseHandlers;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.Command;
@@ -60,7 +60,7 @@ import com.google.gwt.user.client.ui.impl.PopupImpl;
  * the content }</li> </ul>
  */
 public class PopupPanel extends SimplePanel implements SourcesPopupEvents,
-    EventPreview, HasAnimation, HasHideHandlers {
+    EventPreview, HasAnimation, HasCloseHandlers<PopupPanel> {
 
   /**
    * A callback that is used to set the position of a {@link PopupPanel} right
@@ -324,14 +324,13 @@ public class PopupPanel extends SimplePanel implements SourcesPopupEvents,
     this.modal = modal;
   }
 
-  public HandlerRegistration addHideHandler(HideHandler handler) {
-    return addHandler(HideEvent.TYPE, handler);
+  public HandlerRegistration addCloseHandler(CloseHandler<PopupPanel> handler) {
+    return addHandler(CloseEvent.TYPE, handler);
   }
 
   public void addPopupListener(final PopupListener listener) {
-    addHideHandler(new HideHandler() {
-
-      public void onHide(HideEvent event) {
+    addCloseHandler(new CloseHandler() {
+      public void onClose(CloseEvent event) {
         listener.onPopupClosed(PopupPanel.this, autoHide);
       }
     });
@@ -431,7 +430,8 @@ public class PopupPanel extends SimplePanel implements SourcesPopupEvents,
 
     // Hide the popup
     resizeAnimation.setState(false);
-    fireEvent(new HideEvent());
+    CloseEvent event = new CloseEvent(this, autoClosed);
+    fireEvent(event);
   }
 
   public boolean isAnimationEnabled() {
@@ -567,7 +567,7 @@ public class PopupPanel extends SimplePanel implements SourcesPopupEvents,
 
   @Deprecated
   public void removePopupListener(PopupListener listener) {
-    L.Hide.remove(this, listener);
+    L.Close.remove(this, listener);
   }
 
   public void setAnimationEnabled(boolean enable) {

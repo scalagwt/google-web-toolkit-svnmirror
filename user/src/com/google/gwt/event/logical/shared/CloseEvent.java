@@ -33,20 +33,47 @@ public class CloseEvent<TargetType> extends AbstractEvent {
     }
   };
 
+  private boolean autoClosed = false;
+
   private TargetType target;
 
   /**
-   * Constructs a CloseEvent event.
+   * Constructs a {@link CloseEvent} event.
+   * 
+   * @param target the target being closed
    */
   public CloseEvent(TargetType target) {
     this.target = target;
   }
 
   /**
+   * Constructs a {@link CloseEvent} event.
+   * 
+   * @param target the target being closed
+   * @param autoClosed was the target auto closed
+   */
+  public CloseEvent(TargetType target, boolean autoClosed) {
+    this.target = target;
+    this.autoClosed = autoClosed;
+  }
+
+  /**
    * Gets the given target.
+   * 
+   * @return gets the target type
    */
   public TargetType getTarget() {
     return target;
+  }
+
+  /**
+   * Many widgets with close events have the option of closing them
+   * automatically. Auto closed should return true if that happened.
+   * 
+   * @return was the target automatically closed
+   */
+  public boolean isAutoClosed() {
+    return autoClosed;
   }
 
   @Override

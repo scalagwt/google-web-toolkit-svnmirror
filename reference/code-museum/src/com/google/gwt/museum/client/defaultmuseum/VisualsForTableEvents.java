@@ -32,7 +32,7 @@ import com.google.gwt.user.client.ui.Widget;
 /**
  * A simple tree used to quickly exercise tree behavior.
  */
-public class VisualsForGrid extends AbstractIssue {
+public class VisualsForTableEvents extends AbstractIssue {
   final Grid g = new Grid(5, 5);
 
   public void fillInGrid() {
@@ -92,12 +92,12 @@ public class VisualsForGrid extends AbstractIssue {
 
   @Override
   public String getInstructions() {
-    return "Open each node, make sure everything looks right";
+    return "Click on the cells";
   }
 
   @Override
   public String getSummary() {
-    return "simple tree, used for generic tree tests";
+    return "table events";
   }
 
   @Override

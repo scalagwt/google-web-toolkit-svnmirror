@@ -526,8 +526,8 @@ public class TreeItem extends UIObject implements HasHTML {
   /**
    * Selects or deselects this item.
    * 
-   * @param selected <code>true</code> to select the item, <code>false</code>
-   *          to deselect it
+   * @param selected <code>true</code> to select the item, <code>false</code> to
+   *          deselect it
    */
   public void setSelected(boolean selected) {
     if (this.selected == selected) {

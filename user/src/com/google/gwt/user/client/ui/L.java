@@ -63,8 +63,6 @@ import com.google.gwt.event.dom.client.ScrollEvent;
 import com.google.gwt.event.dom.client.ScrollHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
-import com.google.gwt.event.logical.shared.HideEvent;
-import com.google.gwt.event.logical.shared.HideHandler;
 import com.google.gwt.event.logical.shared.OpenEvent;
 import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
@@ -171,14 +169,14 @@ abstract class L<ListenerType> implements EventHandler {
     }
   }
 
-  public abstract static class Hide extends L<EventListener> implements
-      HideHandler {
+  public abstract static class Close extends L<EventListener> implements
+      CloseHandler {
 
     public static void remove(Widget eventSource, EventListener listener) {
-      baseRemove(eventSource, listener, HideEvent.TYPE);
+      baseRemove(eventSource, listener, CloseEvent.TYPE);
     }
 
-    protected Hide(EventListener listener) {
+    protected Close(EventListener listener) {
       super(listener);
     }
   }

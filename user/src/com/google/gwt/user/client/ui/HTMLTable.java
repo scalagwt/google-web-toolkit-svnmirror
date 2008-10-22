@@ -771,7 +771,7 @@ public abstract class HTMLTable extends Panel implements SourcesTableEvents,
   }
 
   public HandlerRegistration addCellClickHandler(CellClickHandler handler) {
-    return addHandler(CellClickEvent.TYPE, handler);
+    return addDomHandler(CellClickEvent.TYPE, handler);
   }
 
   /**
