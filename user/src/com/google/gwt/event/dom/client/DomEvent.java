@@ -43,10 +43,13 @@ public abstract class DomEvent extends AbstractEvent {
     /**
      * Constructor.
      * 
-     * @param nativeEventType the native event type
+     * @param nativeEventTypeInt the native event type
      */
-    public Type(int nativeEventTypeInt, String nativeEventTypeString,
-        DomEvent cached) {
+    public Type(int nativeEventTypeInt) {
+      this.nativeEventTypeInt = nativeEventTypeInt;
+    }
+
+    Type(int nativeEventTypeInt, String nativeEventTypeString, DomEvent cached) {
       this.cached = cached;
       // All clinit activity should take place here for DomEvent.
       if (registered == null) {
@@ -153,7 +156,6 @@ public abstract class DomEvent extends AbstractEvent {
    * @param nativeEvent the native event
    */
   public void setNativeEvent(Event nativeEvent) {
-    super.revive();
     this.nativeEvent = nativeEvent;
   }
 
