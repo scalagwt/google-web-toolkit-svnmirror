@@ -17,11 +17,21 @@ package com.google.gwt.user.client;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.event.logical.shared.ResizeEvent;
+import com.google.gwt.event.logical.shared.ResizeHandler;
+import com.google.gwt.event.shared.AbstractEvent;
+import com.google.gwt.event.shared.EventHandler;
+import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.event.shared.AbstractEvent.Type;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.impl.WindowImpl;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EventListener;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -90,8 +100,8 @@ public class Window {
 
     /**
      * Gets the URL's parameter of the specified name. Note that if multiple
-     * parameters have been specified with the same name, the last one will
-     * be returned.
+     * parameters have been specified with the same name, the last one will be
+     * returned.
      * 
      * @param name the name of the URL's parameter
      * @return the value of the URL's parameter
@@ -169,12 +179,13 @@ public class Window {
     }-*/;
 
     /**
-     * Builds the immutable map from String to List<String> that we'll return
-     * in getParameterMap(). Package-protected for testing.
-     * @return a map from the 
+     * Builds the immutable map from String to List<String> that we'll return in
+     * getParameterMap(). Package-protected for testing.
+     * 
+     * @return a map from the
      */
-    static Map<String,List<String>> buildListParamMap(String queryString) {
-      Map<String,List<String>> out = new HashMap<String, List<String>>();
+    static Map<String, List<String>> buildListParamMap(String queryString) {
+      Map<String, List<String>> out = new HashMap<String, List<String>>();
 
       if (queryString != null && queryString.length() > 1) {
         String qs = queryString.substring(1);
@@ -202,7 +213,7 @@ public class Window {
 
       return out;
     }
-    
+
     private static void ensureParameterMap() {
       if (paramMap == null) {
         paramMap = new HashMap<String, String>();
@@ -225,12 +236,112 @@ public class Window {
     }
   }
 
-  private static boolean handlersAreInitialized;
+  /**
+   * Root of legacy window listener support hierarchy.
+   * 
+   * @param <ListenerType> listener type
+   */
+  private static class ListenerDelagate<ListenerType> implements EventHandler {
+    static void baseRemove(EventListener listener, Type... keys) {
+      HandlerManager manager = Window.getHandlers();
+      if (manager != null) {
+        for (Type key : keys) {
+          int handlerCount = manager.getHandlerCount(key);
+          for (int i = 0; i < handlerCount; i++) {
+            EventHandler handler = manager.getHandler(key, i);
+            if (handler instanceof ListenerDelagate
+                && ((ListenerDelagate) handler).listener.equals(listener)) {
+              manager.removeHandler(key, handler);
+            }
+          }
+        }
+      }
+    }
+
+    protected final ListenerType listener;
+
+    public ListenerDelagate(ListenerType listener) {
+      this.listener = listener;
+    }
+  }
+
+  /**
+   * A delegate to a {@link WindowCloseListener}.
+   */
+  private static class WindowCloseListenerDelagate extends
+      ListenerDelagate<WindowCloseListener> implements WindowClosingHandler,
+      CloseHandler<Window> {
+    public WindowCloseListenerDelagate(WindowCloseListener listener) {
+      super(listener);
+    }
+
+    public void onClose(CloseEvent<Window> event) {
+      listener.onWindowClosed();
+    }
+
+    public void onWindowClosing(WindowClosingEvent event) {
+      String message = listener.onWindowClosing();
+      if (event.getMessage() == null) {
+        event.setMessage(message);
+      }
+    }
+  }
+
+  /**
+   * A delegate to a {@link WindowResizeListener}.
+   */
+  private static class WindowResizeListenerDelagate extends
+      ListenerDelagate<WindowResizeListener> implements ResizeHandler {
+    public WindowResizeListenerDelagate(WindowResizeListener listener) {
+      super(listener);
+    }
+
+    public void onResize(ResizeEvent event) {
+      listener.onWindowResized(event.getWidth(), event.getHeight());
+    }
+  }
+
+  /**
+   * A delegate to a {@link WindowScrollListener}.
+   */
+  private static class WindowScrollListenerDelagate extends
+      ListenerDelagate<WindowScrollListener> implements WindowScrollHandler {
+    public WindowScrollListenerDelagate(WindowScrollListener listener) {
+      super(listener);
+    }
+
+    public void onWindowScroll(WindowScrollEvent event) {
+      listener.onWindowScrolled(event.getScrollLeft(), event.getScrollTop());
+    }
+  }
+
+  private static boolean closeHandlersInitialized;
+  private static boolean scrollHandlersInitialized;
+  private static boolean resizeHandlersInitialized;
   private static final WindowImpl impl = GWT.create(WindowImpl.class);
 
-  private static ArrayList<WindowCloseListener> closingListeners;
-  private static ArrayList<WindowResizeListener> resizeListeners;
-  private static ArrayList<WindowScrollListener> scrollListeners;
+  private static HandlerManager handlerManager;
+
+  /**
+   * Adds a {@link CloseEvent} handler.
+   * 
+   * @param handler the handler
+   */
+  public static HandlerRegistration addCloseHandler(CloseHandler<Window> handler) {
+    maybeInitializeCloseHandlers();
+    return addHandler(CloseEvent.TYPE, handler);
+  }
+
+  /**
+   * Adds a {@link ResizeEvent} handler.
+   * 
+   * @param handler the handler
+   */
+  public static HandlerRegistration addResizeHandler(ResizeHandler handler) {
+    maybeInitializeCloseHandlers();
+    maybeInitializeResizeHandlers();
+    return addHandler(ResizeEvent.TYPE, handler);
+  }
 
   /**
    * Adds a listener to receive window closing events.
@@ -238,11 +349,21 @@ public class Window {
    * @param listener the listener to be informed when the window is closing
    */
   public static void addWindowCloseListener(WindowCloseListener listener) {
+    WindowCloseListenerDelagate delegate = new WindowCloseListenerDelagate(
+        listener);
+    addCloseHandler(delegate);
+    addWindowClosingHandler(delegate);
+  }
+
+  /**
+   * Adds a {@link WindowClosingEvent} handler.
+   * 
+   * @param handler the handler
+   */
+  public static HandlerRegistration addWindowClosingHandler(
+      WindowClosingHandler handler) {
     maybeInitializeCloseHandlers();
-    if (closingListeners == null) {
-      closingListeners = new ArrayList<WindowCloseListener>();
-    }
-    closingListeners.add(listener);
+    return addHandler(WindowClosingEvent.TYPE, handler);
   }
 
   /**
@@ -251,12 +372,19 @@ public class Window {
    * @param listener the listener to be informed when the window is resized
    */
   public static void addWindowResizeListener(WindowResizeListener listener) {
-    if (resizeListeners == null) {
-      resizeListeners = new ArrayList<WindowResizeListener>();
-      maybeInitializeCloseHandlers();
-      impl.initWindowResizeHandler();
-    }
-    resizeListeners.add(listener);
+    addResizeHandler(new WindowResizeListenerDelagate(listener));
+  }
+
+  /**
+   * Adds a {@link WindowScrollEvent} handler.
+   * 
+   * @param handler the handler
+   */
+  public static HandlerRegistration addWindowScrollHandler(
+      WindowScrollHandler handler) {
+    maybeInitializeCloseHandlers();
+    maybeInitializeScrollHandlers();
+    return addHandler(WindowScrollEvent.TYPE, handler);
   }
 
   /**
@@ -265,12 +393,7 @@ public class Window {
    * @param listener the listener to be informed when the window is scrolled
    */
   public static void addWindowScrollListener(WindowScrollListener listener) {
-    if (scrollListeners == null) {
-      scrollListeners = new ArrayList<WindowScrollListener>();
-      maybeInitializeCloseHandlers();
-      impl.initWindowScrollHandler();
-    }
-    scrollListeners.add(listener);
+    addWindowScrollHandler(new WindowScrollListenerDelagate(listener));
   }
 
   /**
@@ -392,9 +515,8 @@ public class Window {
    * @param listener the listener to be removed
    */
   public static void removeWindowCloseListener(WindowCloseListener listener) {
-    if (closingListeners != null) {
-      closingListeners.remove(listener);
-    }
+    ListenerDelagate.baseRemove(listener, WindowClosingEvent.TYPE,
+        CloseEvent.TYPE);
   }
 
   /**
@@ -403,9 +525,7 @@ public class Window {
    * @param listener the listener to be removed
    */
   public static void removeWindowResizeListener(WindowResizeListener listener) {
-    if (resizeListeners != null) {
-      resizeListeners.remove(listener);
-    }
+    ListenerDelagate.baseRemove(listener, ResizeEvent.TYPE);
   }
 
   /**
@@ -414,9 +534,7 @@ public class Window {
    * @param listener the listener to be removed
    */
   public static void removeWindowScrollListener(WindowScrollListener listener) {
-    if (scrollListeners != null) {
-      scrollListeners.remove(listener);
-    }
+    ListenerDelagate.baseRemove(listener, WindowScrollEvent.TYPE);
   }
 
   /**
@@ -496,6 +614,31 @@ public class Window {
     }
   }
 
+  /**
+   * Adds this handler to the Window.
+   * 
+   * @param <HandlerType> the type of handler to add
+   * @param type the event type
+   * @param handler the handler
+   * @return {@link HandlerRegistration} used to remove the handler
+   */
+  private static <HandlerType extends EventHandler> HandlerRegistration addHandler(
+      AbstractEvent.Type<?, HandlerType> type, final HandlerType handler) {
+    return ensureHandlers().addHandler(type, handler);
+  }
+
+  /**
+   * Returns the {@link HandlerManager}, ensuring it exists.
+   * 
+   * @return the handler manager
+   */
+  private static HandlerManager ensureHandlers() {
+    if (handlerManager == null) {
+      handlerManager = new HandlerManager(null);
+    }
+    return handlerManager;
+  }
+
   private static void fireClosedAndCatch(UncaughtExceptionHandler handler) {
     try {
       fireClosedImpl();
@@ -505,11 +648,7 @@ public class Window {
   }
 
   private static void fireClosedImpl() {
-    if (closingListeners != null) {
-      for (WindowCloseListener listener : closingListeners) {
-        listener.onWindowClosed();
-      }
-    }
+    fireEvent(new CloseEvent<Window>(null));
   }
 
   private static String fireClosingAndCatch(UncaughtExceptionHandler handler) {
@@ -522,19 +661,20 @@ public class Window {
   }
 
   private static String fireClosingImpl() {
-    String ret = null;
-    if (closingListeners != null) {
-      for (WindowCloseListener listener : closingListeners) {
-        // If any listener wants to suppress the window closing event, then do
-        // so.
-        String msg = listener.onWindowClosing();
-        if (ret == null) {
-          ret = msg;
-        }
-      }
-    }
+    WindowClosingEvent event = new WindowClosingEvent();
+    fireEvent(event);
+    return event.getMessage();
+  }
 
-    return ret;
+  /**
+   * Fires an event.
+   * 
+   * @param event the event
+   */
+  private static void fireEvent(AbstractEvent event) {
+    if (handlerManager != null) {
+      handlerManager.fireEvent(event);
+    }
   }
 
   private static void fireResizedAndCatch(UncaughtExceptionHandler handler) {
@@ -546,11 +686,7 @@ public class Window {
   }
 
   private static void fireResizedImpl() {
-    if (resizeListeners != null) {
-      for (WindowResizeListener listener : resizeListeners) {
-        listener.onWindowResized(getClientWidth(), getClientHeight());
-      }
-    }
+    fireEvent(new ResizeEvent(getClientWidth(), getClientHeight()));
   }
 
   private static void fireScrollAndCatch(UncaughtExceptionHandler handler) {
@@ -562,17 +698,36 @@ public class Window {
   }
 
   private static void fireScrollImpl() {
-    if (scrollListeners != null) {
-      for (WindowScrollListener listener : scrollListeners) {
-        listener.onWindowScrolled(getScrollLeft(), getScrollTop());
-      }
-    }
+    fireEvent(new WindowScrollEvent(getScrollLeft(), getScrollTop()));
+  }
+
+  /**
+   * Returns the {@link HandlerManager} used for event management.
+   * 
+   * @return the handler manager
+   */
+  private static HandlerManager getHandlers() {
+    return handlerManager;
   }
 
   private static void maybeInitializeCloseHandlers() {
-    if (GWT.isClient() && !handlersAreInitialized) {
-      handlersAreInitialized = true;
+    if (GWT.isClient() && !closeHandlersInitialized) {
+      closeHandlersInitialized = true;
       impl.initWindowCloseHandler();
+    }
+  }
+
+  private static void maybeInitializeResizeHandlers() {
+    if (GWT.isClient() && !resizeHandlersInitialized) {
+      resizeHandlersInitialized = true;
+      impl.initWindowResizeHandler();
+    }
+  }
+
+  private static void maybeInitializeScrollHandlers() {
+    if (GWT.isClient() && !scrollHandlersInitialized) {
+      scrollHandlersInitialized = true;
+      impl.initWindowScrollHandler();
     }
   }
 

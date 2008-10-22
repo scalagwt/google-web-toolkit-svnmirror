@@ -51,13 +51,16 @@ import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.event.dom.client.ScrollEvent;
 import com.google.gwt.event.dom.client.ScrollHandler;
+import com.google.gwt.event.logical.shared.ResizeEvent;
+import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.museum.client.common.AbstractIssue;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.WindowCloseListener;
-import com.google.gwt.user.client.WindowResizeListener;
-import com.google.gwt.user.client.WindowScrollListener;
+import com.google.gwt.user.client.WindowClosingEvent;
+import com.google.gwt.user.client.WindowClosingHandler;
+import com.google.gwt.user.client.WindowScrollEvent;
+import com.google.gwt.user.client.WindowScrollHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
@@ -331,24 +334,20 @@ public class TestFireEvents extends AbstractIssue {
       addDependentTest(WINDOW_EVENT_CLOSING, "window.onbeforeunload");
 
       // Add event handlers
-      // TODO(jlabanca): convert window listeners to handlers
-      Window.addWindowScrollListener(new WindowScrollListener() {
-        public void onWindowScrolled(int scrollLeft, int scrollTop) {
+      Window.addWindowScrollHandler(new WindowScrollHandler() {
+        public void onWindowScroll(WindowScrollEvent event) {
           passTest(WINDOW_EVENT_SCROLL);
         }
       });
-      Window.addWindowResizeListener(new WindowResizeListener() {
-        public void onWindowResized(int width, int height) {
+      Window.addResizeHandler(new ResizeHandler() {
+        public void onResize(ResizeEvent event) {
           passTest(WINDOW_EVENT_RESIZE);
         }
       });
-      Window.addWindowCloseListener(new WindowCloseListener() {
-        public void onWindowClosed() {
-        }
-
-        public String onWindowClosing() {
+      Window.addWindowClosingHandler(new WindowClosingHandler() {
+        public void onWindowClosing(WindowClosingEvent event) {
+          event.setMessage("Stay and verify that window.onbeforeunload() has passed");
           passTest(WINDOW_EVENT_CLOSING);
-          return "";
         }
       });
     }
