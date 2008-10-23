@@ -123,4 +123,12 @@ public class CompositeTest extends GWTTestCase {
 
     c.tb.setFocus(true);
   }
+
+  /**
+   * This test is here to prevent a "No tests found" warning in Junit.
+   * 
+   * TODO: Remove this when testBrowserEvents is enabled
+   */
+  public void testNothing() {
+  }
 }

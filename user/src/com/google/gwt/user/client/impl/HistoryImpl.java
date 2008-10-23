@@ -17,9 +17,12 @@ package com.google.gwt.user.client.impl;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
-import com.google.gwt.user.client.HistoryListener;
-
-import java.util.ArrayList;
+import com.google.gwt.event.shared.AbstractEvent;
+import com.google.gwt.event.shared.EventHandler;
+import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.HistoryChangeEvent;
+import com.google.gwt.user.client.HistoryChangeHandler;
 
 /**
  * Native implementation associated with
@@ -29,50 +32,78 @@ import java.util.ArrayList;
  */
 public abstract class HistoryImpl {
 
-  private static ArrayList<HistoryListener> historyListeners = new ArrayList<HistoryListener>();
+  private static HandlerManager handlerManager;
 
   /**
-   * Adds a listener to be informed of changes to the browser's history stack.
+   * Adds a {@link HistoryChangeEvent} handler to be informed of changes to the
+   * browser's history stack.
    * 
-   * @param listener the listener to be added
+   * @param handler the handler
    */
-  public static void addHistoryListener(HistoryListener listener) {
-    historyListeners.add(listener);
+  public static HandlerRegistration addHistoryChangeHandler(
+      HistoryChangeHandler handler) {
+    return addHandler(HistoryChangeEvent.TYPE, handler);
   }
 
   /**
-   * Fires the {@link HistoryListener#onHistoryChanged(String)} event to all
-   * listeners with the given token.
+   * Fires the {@link HistoryChangeEvent} to all handlers with the given token.
    */
   public static void fireHistoryChangedImpl(String historyToken) {
-    // TODO: replace this copy when a more general solution to event handlers
-    // wanting to remove themselves from the listener list is implemented.
+    fireEvent(new HistoryChangeEvent(historyToken));
+  }
 
-    // This is necessary to avoid a CurrentModificationException in hosted
-    // mode, as the listeners may try to remove themselves from the list while
-    // it is being iterated, such as in HistoryTest.
-    HistoryListener[] listenersToInvoke = historyListeners.toArray(new HistoryListener[historyListeners.size()]);
-    for (HistoryListener listener : listenersToInvoke) {
-      listener.onHistoryChanged(historyToken);
-    }
+  /**
+   * Returns the {@link HandlerManager} used for event management.
+   * 
+   * @return the handler manager
+   */
+  public static HandlerManager getHandlers() {
+    return handlerManager;
   }
 
   public static native String getToken() /*-{
     return $wnd.__gwt_historyToken || "";
   }-*/;
 
-  /**
-   * Removes a history listener.
-   * 
-   * @param listener the listener to be removed
-   */
-  public static void removeHistoryListener(HistoryListener listener) {
-    historyListeners.remove(listener);
-  }
-
   protected static native void setToken(String token) /*-{
     $wnd.__gwt_historyToken = token;
   }-*/;
+
+  /**
+   * Adds this handler to the History.
+   * 
+   * @param <HandlerType> the type of handler to add
+   * @param type the event type
+   * @param handler the handler
+   * @return {@link HandlerRegistration} used to remove the handler
+   */
+  private static <HandlerType extends EventHandler> HandlerRegistration addHandler(
+      AbstractEvent.Type<?, HandlerType> type, final HandlerType handler) {
+    return ensureHandlers().addHandler(type, handler);
+  }
+
+  /**
+   * Returns the {@link HandlerManager}, ensuring it exists.
+   * 
+   * @return the handler manager
+   */
+  private static HandlerManager ensureHandlers() {
+    if (handlerManager == null) {
+      handlerManager = new HandlerManager(null);
+    }
+    return handlerManager;
+  }
+
+  /**
+   * Fires an event.
+   * 
+   * @param event the event
+   */
+  private static void fireEvent(AbstractEvent event) {
+    if (handlerManager != null) {
+      handlerManager.fireEvent(event);
+    }
+  }
 
   private static void fireHistoryChanged(String historyToken) {
     UncaughtExceptionHandler handler = GWT.getUncaughtExceptionHandler();

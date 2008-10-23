@@ -16,6 +16,7 @@
 package com.google.gwt.user.client;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.impl.HistoryImpl;
 
 /**
@@ -72,12 +73,23 @@ public class History {
   }
 
   /**
+   * Adds a {@link HistoryChangeEvent} handler to be informed of changes to the
+   * browser's history stack.
+   * 
+   * @param handler the handler
+   */
+  public static HandlerRegistration addHistoryChangeHandler(
+      HistoryChangeHandler handler) {
+    return impl.addHistoryChangeHandler(handler);
+  }
+
+  /**
    * Adds a listener to be informed of changes to the browser's history stack.
    * 
    * @param listener the listener to be added
    */
   public static void addHistoryListener(HistoryListener listener) {
-    HistoryImpl.addHistoryListener(listener);
+    L.HistoryChange.add(listener);
   }
 
   /**
@@ -172,6 +184,6 @@ public class History {
    * @param listener the listener to be removed
    */
   public static void removeHistoryListener(HistoryListener listener) {
-    HistoryImpl.removeHistoryListener(listener);
+    L.HistoryChange.remove(impl.getHandlers(), listener);
   }
 }

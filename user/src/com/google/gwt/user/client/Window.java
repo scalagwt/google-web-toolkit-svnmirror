@@ -25,13 +25,11 @@ import com.google.gwt.event.shared.AbstractEvent;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.event.shared.AbstractEvent.Type;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.impl.WindowImpl;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.EventListener;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -236,89 +234,6 @@ public class Window {
     }
   }
 
-  /**
-   * Root of legacy window listener support hierarchy.
-   * 
-   * @param <ListenerType> listener type
-   */
-  @Deprecated
-  private static class ListenerDelagate<ListenerType> implements EventHandler {
-    static void baseRemove(EventListener listener, Type... keys) {
-      HandlerManager manager = Window.getHandlers();
-      if (manager != null) {
-        for (Type key : keys) {
-          int handlerCount = manager.getHandlerCount(key);
-          for (int i = 0; i < handlerCount; i++) {
-            EventHandler handler = manager.getHandler(key, i);
-            if (handler instanceof ListenerDelagate
-                && ((ListenerDelagate) handler).listener.equals(listener)) {
-              manager.removeHandler(key, handler);
-            }
-          }
-        }
-      }
-    }
-
-    protected final ListenerType listener;
-
-    public ListenerDelagate(ListenerType listener) {
-      this.listener = listener;
-    }
-  }
-
-  /**
-   * A delegate to a {@link WindowCloseListener}.
-   */
-  @Deprecated
-  private static class WindowCloseListenerDelagate extends
-      ListenerDelagate<WindowCloseListener> implements WindowClosingHandler,
-      CloseHandler<Window> {
-    public WindowCloseListenerDelagate(WindowCloseListener listener) {
-      super(listener);
-    }
-
-    public void onClose(CloseEvent<Window> event) {
-      listener.onWindowClosed();
-    }
-
-    public void onWindowClosing(WindowClosingEvent event) {
-      String message = listener.onWindowClosing();
-      if (event.getMessage() == null) {
-        event.setMessage(message);
-      }
-    }
-  }
-
-  /**
-   * A delegate to a {@link WindowResizeListener}.
-   */
-  @Deprecated
-  private static class WindowResizeListenerDelagate extends
-      ListenerDelagate<WindowResizeListener> implements ResizeHandler {
-    public WindowResizeListenerDelagate(WindowResizeListener listener) {
-      super(listener);
-    }
-
-    public void onResize(ResizeEvent event) {
-      listener.onWindowResized(event.getWidth(), event.getHeight());
-    }
-  }
-
-  /**
-   * A delegate to a {@link WindowScrollListener}.
-   */
-  @Deprecated
-  private static class WindowScrollListenerDelagate extends
-      ListenerDelagate<WindowScrollListener> implements WindowScrollHandler {
-    public WindowScrollListenerDelagate(WindowScrollListener listener) {
-      super(listener);
-    }
-
-    public void onWindowScroll(WindowScrollEvent event) {
-      listener.onWindowScrolled(event.getScrollLeft(), event.getScrollTop());
-    }
-  }
-
   private static boolean closeHandlersInitialized;
   private static boolean scrollHandlersInitialized;
   private static boolean resizeHandlersInitialized;
@@ -354,10 +269,7 @@ public class Window {
    */
   @Deprecated
   public static void addWindowCloseListener(WindowCloseListener listener) {
-    WindowCloseListenerDelagate delegate = new WindowCloseListenerDelagate(
-        listener);
-    addCloseHandler(delegate);
-    addWindowClosingHandler(delegate);
+    L.WindowClose.add(listener);
   }
 
   /**
@@ -378,7 +290,7 @@ public class Window {
    */
   @Deprecated
   public static void addWindowResizeListener(WindowResizeListener listener) {
-    addResizeHandler(new WindowResizeListenerDelagate(listener));
+    L.WindowResize.add(listener);
   }
 
   /**
@@ -400,7 +312,7 @@ public class Window {
    */
   @Deprecated
   public static void addWindowScrollListener(WindowScrollListener listener) {
-    addWindowScrollHandler(new WindowScrollListenerDelagate(listener));
+    L.WindowScroll.add(listener);
   }
 
   /**
@@ -523,8 +435,7 @@ public class Window {
    */
   @Deprecated
   public static void removeWindowCloseListener(WindowCloseListener listener) {
-    ListenerDelagate.baseRemove(listener, WindowClosingEvent.TYPE,
-        CloseEvent.TYPE);
+    L.WindowClose.remove(getHandlers(), listener);
   }
 
   /**
@@ -534,7 +445,7 @@ public class Window {
    */
   @Deprecated
   public static void removeWindowResizeListener(WindowResizeListener listener) {
-    ListenerDelagate.baseRemove(listener, ResizeEvent.TYPE);
+    L.WindowResize.remove(getHandlers(), listener);
   }
 
   /**
@@ -544,7 +455,7 @@ public class Window {
    */
   @Deprecated
   public static void removeWindowScrollListener(WindowScrollListener listener) {
-    ListenerDelagate.baseRemove(listener, WindowScrollEvent.TYPE);
+    L.WindowScroll.remove(getHandlers(), listener);
   }
 
   /**
