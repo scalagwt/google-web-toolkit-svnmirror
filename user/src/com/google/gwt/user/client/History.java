@@ -29,8 +29,8 @@ import com.google.gwt.user.client.impl.HistoryImpl;
  * <p>
  * In order to receive notification of user-directed changes to the current
  * history item, implement the
- * {@link com.google.gwt.user.client.HistoryListener} interface and attach it
- * via {@link #addHistoryListener}.
+ * {@link com.google.gwt.user.client.HistoryChangeHandler} interface and attach
+ * it via {@link #addHistoryListener}.
  * </p>
  * 
  * <p>
@@ -41,7 +41,8 @@ import com.google.gwt.user.client.impl.HistoryImpl;
  * <p>
  * <h3>URL Encoding</h3>
  * Any valid characters may be used in the history token and will survive
- * round-trips through {@link #newItem(String)} to {@link #getToken()}/{@link HistoryListener#onHistoryChanged(String)},
+ * round-trips through {@link #newItem(String)} to {@link #getToken()}/
+ * {@link HistoryChangeHandler#onHistoryChanged(HistoryChangeEvent)},
  * but most will be encoded in the user-visible URL. The following US-ASCII
  * characters are not encoded on any currently supported browser (but may be in
  * the future due to future browser changes):
@@ -80,7 +81,7 @@ public class History {
    */
   public static HandlerRegistration addHistoryChangeHandler(
       HistoryChangeHandler handler) {
-    return impl.addHistoryChangeHandler(handler);
+    return HistoryImpl.addHistoryChangeHandler(handler);
   }
 
   /**
@@ -88,6 +89,7 @@ public class History {
    * 
    * @param listener the listener to be added
    */
+  @Deprecated
   public static void addHistoryListener(HistoryListener listener) {
     L.HistoryChange.add(listener);
   }
@@ -102,10 +104,11 @@ public class History {
   }-*/;
 
   /**
-   * Fire {@link HistoryListener#onHistoryChanged(String)} events with the
-   * current history state. This is most often called at the end of an
-   * application's {@link com.google.gwt.core.client.EntryPoint#onModuleLoad()}
-   * to inform history listeners of the initial application state.
+   * Fire {@link HistoryChangeHandler#onHistoryChanged(HistoryChangeEvent)}
+   * events with the current history state. This is most often called at the end
+   * of an application's
+   * {@link com.google.gwt.core.client.EntryPoint#onModuleLoad()} to inform
+   * history listeners of the initial application state.
    */
   public static void fireCurrentHistoryState() {
     HistoryImpl.fireHistoryChangedImpl(getToken());
@@ -121,10 +124,10 @@ public class History {
 
   /**
    * Gets the current history token. The listener will not receive a
-   * {@link HistoryListener#onHistoryChanged(String)} event for the initial
-   * token; requiring that an application request the token explicitly on
-   * startup gives it an opportunity to run different initialization code in the
-   * presence or absence of an initial token.
+   * {@link HistoryChangeHandler#onHistoryChanged(HistoryChangeEvent)} event for
+   * the initial token; requiring that an application request the token
+   * explicitly on startup gives it an opportunity to run different
+   * initialization code in the presence or absence of an initial token.
    * 
    * @return the initial token, or the empty string if none is present.
    */
@@ -136,7 +139,8 @@ public class History {
    * Adds a new browser history entry. In hosted mode, the 'back' and 'forward'
    * actions are accessible via the standard Alt-Left and Alt-Right keystrokes.
    * Calling this method will cause
-   * {@link HistoryListener#onHistoryChanged(String)} to be called as well.
+   * {@link HistoryChangeHandler#onHistoryChanged(HistoryChangeEvent)} to be
+   * called as well.
    * 
    * @param historyToken the token to associate with the new history item
    */
@@ -148,13 +152,13 @@ public class History {
    * Adds a new browser history entry. In hosted mode, the 'back' and 'forward'
    * actions are accessible via the standard Alt-Left and Alt-Right keystrokes.
    * Calling this method will cause
-   * {@link HistoryListener#onHistoryChanged(String)} to be called as well if
-   * and only if issueEvent is true.
+   * {@link HistoryChangeHandler#onHistoryChanged(HistoryChangeEvent)} to be
+   * called as well if and only if issueEvent is true.
    * 
    * @param historyToken the token to associate with the new history item
    * @param issueEvent true if a
-   *          {@link HistoryListener#onHistoryChanged(String)} event should be
-   *          issued
+   *          {@link HistoryChangeHandler#onHistoryChanged(HistoryChangeEvent)}
+   *          event should be issued
    */
   public static void newItem(String historyToken, boolean issueEvent) {
     if (impl != null) {
@@ -183,7 +187,8 @@ public class History {
    * 
    * @param listener the listener to be removed
    */
+  @Deprecated
   public static void removeHistoryListener(HistoryListener listener) {
-    L.HistoryChange.remove(impl.getHandlers(), listener);
+    L.HistoryChange.remove(HistoryImpl.getHandlers(), listener);
   }
 }
