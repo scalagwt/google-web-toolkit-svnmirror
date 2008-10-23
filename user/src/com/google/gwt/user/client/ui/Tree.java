@@ -33,11 +33,11 @@ import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.logical.shared.HasCloseHandlers;
 import com.google.gwt.event.logical.shared.HasOpenHandlers;
-import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
+import com.google.gwt.event.logical.shared.HasSelectionHandlers;
 import com.google.gwt.event.logical.shared.OpenEvent;
 import com.google.gwt.event.logical.shared.OpenHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.DOM;
@@ -68,8 +68,8 @@ import java.util.Map;
  */
 public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
     HasFocus, HasAnimation, HasAllKeyHandlers, HasAllFocusHandlers,
-    HasValue<TreeItem>, HasValueChangeHandlers<TreeItem>,
-    HasOpenHandlers<TreeItem>, HasCloseHandlers<TreeItem> {
+    HasSelectionHandlers<TreeItem>, HasOpenHandlers<TreeItem>,
+    HasCloseHandlers<TreeItem> {
 
   /**
    * Provides images to support the the deprecated case where a url prefix is
@@ -342,14 +342,14 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
     return addHandler(OpenEvent.TYPE, handler);
   }
 
+  public HandlerRegistration addSelectionHandler(
+      SelectionHandler<TreeItem> handler) {
+    return addHandler(SelectionEvent.TYPE, handler);
+  }
+
   @Deprecated
   public void addTreeListener(TreeListener listener) {
     L.Tree.add(this, listener);
-  }
-
-  public HandlerRegistration addValueChangeHandler(
-      ValueChangeHandler<TreeItem> handler) {
-    return addHandler(ValueChangeEvent.TYPE, handler);
   }
 
   /**
@@ -642,10 +642,6 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
 
   public void setTabIndex(int index) {
     FocusPanel.impl.setTabIndex(focusable, index);
-  }
-
-  public void setValue(TreeItem item) {
-    setSelectedItem(item);
   }
 
   /**
@@ -1123,7 +1119,6 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
     if (curSelection != null) {
       curSelection.setSelected(false);
     }
-    TreeItem oldSelection = curSelection;
     curSelection = item;
 
     if (moveFocus && curSelection != null) {
@@ -1132,7 +1127,7 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
       // Select the item and fire the selection event.
       curSelection.setSelected(true);
       if (fireEvents) {
-        fireEvent(new ValueChangeEvent(oldSelection, curSelection));
+        fireEvent(new SelectionEvent(curSelection));
       }
     }
   }

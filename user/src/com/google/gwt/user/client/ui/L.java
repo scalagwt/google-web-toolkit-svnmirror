@@ -69,8 +69,9 @@ import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.logical.shared.OpenEvent;
 import com.google.gwt.event.logical.shared.OpenHandler;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.AbstractEvent;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.HandlerManager;
@@ -135,7 +136,7 @@ abstract class L<ListenerType> implements EventHandler {
 
     public void onSelection(SelectionEvent<Integer> event) {
       listener.onTabSelected((SourcesTabEvents) event.getSource(),
-          event.getNewValue().intValue());
+          event.getSelectedItem().intValue());
     }
   }
 
@@ -317,13 +318,12 @@ abstract class L<ListenerType> implements EventHandler {
   }
 
   public static class Tree extends L<TreeListener> implements
-      ValueChangeHandler<TreeItem>, CloseHandler<TreeItem>,
-      OpenHandler<TreeItem> {
+      SelectionHandler<TreeItem>, CloseHandler<TreeItem>, OpenHandler<TreeItem> {
     @Deprecated
     public static void add(com.google.gwt.user.client.ui.Tree tree,
         TreeListener listener) {
       Tree t = new Tree(listener);
-      tree.addValueChangeHandler(t);
+      tree.addSelectionHandler(t);
       tree.addCloseHandler(t);
       tree.addOpenHandler(t);
     }
@@ -344,8 +344,8 @@ abstract class L<ListenerType> implements EventHandler {
       listener.onTreeItemSelected(event.getTarget());
     }
 
-    public void onValueChange(ValueChangeEvent<TreeItem> event) {
-      listener.onTreeItemSelected(event.getOldValue());
+    public void onSelection(SelectionEvent<TreeItem> event) {
+      listener.onTreeItemSelected(event.getSelectedItem());
     }
   }
 

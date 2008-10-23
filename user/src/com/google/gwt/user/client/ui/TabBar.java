@@ -337,7 +337,7 @@ public class TabBar extends Composite implements SourcesTabEvents,
     selectedTab = panel.getWidget(index + 1);
     setSelectionStyle(selectedTab, true);
 
-    fireEvent(new SelectionEvent<Integer>(oldIndex, index));
+    fireEvent(new SelectionEvent<Integer>(index));
     return true;
   }
 

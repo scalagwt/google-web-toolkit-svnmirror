@@ -227,7 +227,7 @@ public class Showcase implements EntryPoint {
     // Add a handler that sets the content widget when a menu item is selected
     app.addSelectionHandler(new SelectionHandler<TreeItem>() {
       public void onSelection(SelectionEvent<TreeItem> event) {
-        TreeItem item = event.getNewValue();
+        TreeItem item = event.getSelectedItem();
         ContentWidget content = itemWidgets.get(item);
         if (content != null && !content.equals(app.getContent())) {
           History.newItem(getContentWidgetToken(content));
