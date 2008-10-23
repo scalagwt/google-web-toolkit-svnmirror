@@ -719,9 +719,9 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
 
   void fireStateChanged(TreeItem item, boolean open) {
     if (open) {
-      fireEvent(new OpenEvent(item));
+      fireEvent(new OpenEvent<TreeItem>(item));
     } else {
-      fireEvent(new CloseEvent(item));
+      fireEvent(new CloseEvent<TreeItem>(item));
     }
   }
 
@@ -1132,7 +1132,7 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
       // Select the item and fire the selection event.
       curSelection.setSelected(true);
       if (fireEvents) {
-        fireEvent(new SelectionEvent(oldSelection, curSelection));
+        fireEvent(new SelectionEvent<TreeItem>(oldSelection, curSelection));
       }
     }
   }
