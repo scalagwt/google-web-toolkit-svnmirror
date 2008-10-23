@@ -23,18 +23,18 @@ import com.google.gwt.user.client.Event;
 public class KeyDownEvent extends KeyCodeEvent {
 
   /**
-    Event type for key down events. Represents the meta-data associated with this event.
-  */
-  public static final Type<KeyDownEvent, KeyDownHandler> TYPE = new Type<KeyDownEvent,KeyDownHandler>(
+   * Type for key down events. Represents the meta-data associated with this
+   * event.
+   */
+  public static final Type<KeyDownEvent, KeyDownHandler> TYPE = new Type<KeyDownEvent, KeyDownHandler>(
       Event.ONKEYDOWN, "keydown", new KeyDownEvent()) {
-     @Override
-     public void fire(KeyDownHandler handler, KeyDownEvent event) {
-       handler.onKeyDown(event);
-     }
-   };
+    @Override
+    public void fire(KeyDownHandler handler, KeyDownEvent event) {
+      handler.onKeyDown(event);
+    }
+  };
 
-   
- @Override
+  @Override
   protected Type getType() {
     return TYPE;
   }

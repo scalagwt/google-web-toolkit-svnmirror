@@ -95,10 +95,11 @@ public abstract class AbstractEvent {
   public String toDebugString() {
     String name = this.getClass().getName();
     name = name.substring(name.lastIndexOf(".") + 1);
-    String sourceName = source.getClass().getName();
-    sourceName = sourceName.substring(sourceName.lastIndexOf("." + 1));
-
-    return "event:" + name + ": source: " + sourceName;
+    String sourceName = getSource().toString();
+    if (sourceName.length() > 20) {
+      sourceName = sourceName.substring(0, 16) + "...";
+    }
+    return "event:" + name + ": sourceName: " + source;
   }
 
   /**

@@ -15,6 +15,29 @@
  */
 package com.google.gwt.user.client.ui;
 
+import com.google.gwt.event.dom.client.AllFocusHandlers;
+import com.google.gwt.event.dom.client.AllKeyHandlers;
+import com.google.gwt.event.dom.client.BlurEvent;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.FocusEvent;
+import com.google.gwt.event.dom.client.HasAllKeyHandlers;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
+import com.google.gwt.event.dom.client.KeyPressEvent;
+import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.event.logical.shared.HasSelectionHandlers;
+import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
@@ -23,28 +46,7 @@ import com.google.gwt.user.client.ui.SuggestOracle.Callback;
 import com.google.gwt.user.client.ui.SuggestOracle.Request;
 import com.google.gwt.user.client.ui.SuggestOracle.Response;
 import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
-import com.google.gwt.event.dom.client.BlurEvent;
-import com.google.gwt.event.dom.client.BlurHandler;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.FocusEvent;
-import com.google.gwt.event.dom.client.FocusHandler;
-import com.google.gwt.event.dom.client.HasAllFocusHandlers;
-import com.google.gwt.event.dom.client.HasAllKeyHandlers;
-import com.google.gwt.event.dom.client.HasChangeHandlers;
-import com.google.gwt.event.dom.client.HasClickHandlers;
-import com.google.gwt.event.dom.client.KeyDownEvent;
-import com.google.gwt.event.dom.client.KeyDownHandler;
-import com.google.gwt.event.dom.client.KeyPressEvent;
-import com.google.gwt.event.dom.client.KeyPressHandler;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.i18n.client.LocaleInfo;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -124,10 +126,11 @@ import java.util.List;
  * @see MultiWordSuggestOracle
  * @see TextBoxBase
  */
-public final class SuggestBox extends Composite implements HasText, HasFocus,
+public class SuggestBox extends Composite implements HasText, HasFocus,
     HasAnimation, SourcesClickEvents, SourcesFocusEvents, SourcesChangeEvents,
-    SourcesKeyboardEvents, FiresSuggestionEvents, HasAllFocusHandlers,
-    HasChangeHandlers, HasAllKeyHandlers, HasClickHandlers {
+    SourcesKeyboardEvents, FiresSuggestionEvents, HasAllKeyHandlers,
+    HasValue<String>, HasValueChangeHandlers<String>,
+    HasSelectionHandlers<Suggestion> {
 
   /**
    * The SuggestionMenu class is used for the display and selection of
@@ -164,6 +167,8 @@ public final class SuggestBox extends Composite implements HasText, HasFocus,
 
     /**
      * Returns the index of the menu item that is currently selected.
+     * 
+     * @return returns the selected item
      */
     public int getSelectedItemIndex() {
       // The index of the currently selected item can only be
@@ -179,6 +184,8 @@ public final class SuggestBox extends Composite implements HasText, HasFocus,
      * Selects the item at the specified index in the menu. Selecting the item
      * does not perform the item's associated action; it only changes the style
      * of the item and updates the value of SuggestionMenu.selectedItem.
+     * 
+     * @param index index
      */
     public void selectItem(int index) {
       List<MenuItem> items = getItems();
@@ -195,7 +202,7 @@ public final class SuggestBox extends Composite implements HasText, HasFocus,
    * and each item stores a reference to its Suggestion object.
    */
   private static class SuggestionMenuItem extends MenuItem {
- 
+
     private static final String STYLENAME_DEFAULT = "item";
 
     private Suggestion suggestion;
@@ -407,18 +414,19 @@ public final class SuggestBox extends Composite implements HasText, HasFocus,
   private static final String STYLENAME_DEFAULT = "gwt-SuggestBox";
 
   private int limit = 20;
+
   private SuggestOracle oracle;
   private String currentText;
   private final SuggestionMenu suggestionMenu;
   private final SuggestionPopup suggestionPopup;
   private final TextBoxBase box;
-  private ArrayList<SuggestionHandler> suggestionHandlers = null;
-
   private final Callback callBack = new Callback() {
     public void onSuggestionsReady(Request request, Response response) {
       showSuggestions(response.getSuggestions());
     }
   };
+
+  private String value;
 
   /**
    * Constructor for {@link SuggestBox}. Creates a
@@ -457,33 +465,28 @@ public final class SuggestBox extends Composite implements HasText, HasFocus,
     suggestionPopup = new SuggestionPopup();
     suggestionPopup.setAnimationType(AnimationType.ONE_WAY_CORNER);
 
-    addKeyboardSupport();
+    addEventsToTextBox();
+
     setOracle(oracle);
     setStyleName(STYLENAME_DEFAULT);
   }
 
-  public HandlerRegistration addBlurHandler(BlurHandler handler) {
-    return addDomHandler(BlurEvent.TYPE, handler);
-  }
-
-  public HandlerRegistration addChangeHandler(ChangeHandler handler) {
-    return addDomHandler(ChangeEvent.TYPE, handler);
-  }
-
   /**
+   * 
    * Adds a listener to receive change events on the SuggestBox's text box. The
    * source Widget for these events will be the SuggestBox.
    * 
    * @param listener the listener interface to add
-   * @deprecated
+   * @deprecated use getTextBox().addChangeHandler instead
    */
   @Deprecated
-  public void addChangeListener(ChangeListener listener) {
-    L.Change.add(this, listener);
-  }
+  public void addChangeListener(final ChangeListener listener) {
+    box.addChangeHandler(new ChangeHandler() {
 
-  public HandlerRegistration addClickHandler(ClickHandler handler) {
-    return addHandler(ClickEvent.TYPE, handler);
+      public void onChange(ChangeEvent event) {
+        listener.onChange(SuggestBox.this);
+      }
+    });
   }
 
   /**
@@ -491,32 +494,58 @@ public final class SuggestBox extends Composite implements HasText, HasFocus,
    * source Widget for these events will be the SuggestBox.
    * 
    * @param listener the listener interface to add
-   * @deprecated
+   * @deprecated use getTextBox().addClickHandler instead
    */
   @Deprecated
-  public void addClickListener(ClickListener listener) {
-    L.Click.add(this, listener);
+  public void addClickListener(final ClickListener listener) {
+    box.addClickHandler(new ClickHandler() {
+
+      public void onClick(ClickEvent event) {
+        listener.onClick(SuggestBox.this);
+      }
+    });
   }
 
-  public void addEventHandler(SuggestionHandler handler) {
-    if (suggestionHandlers == null) {
-      suggestionHandlers = new ArrayList<SuggestionHandler>();
-    }
-    suggestionHandlers.add(handler);
+  /**
+   * Adds an event to this handler.
+   * 
+   * @deprecated use addSelectionHandler instead.
+   */
+  public void addEventHandler(final SuggestionHandler handler) {
+    addSelectionHandler(new SelectionHandler<Suggestion>() {
+
+      public void onSelection(SelectionEvent<Suggestion> event) {
+        handler.onSuggestionSelected(new SuggestionEvent(SuggestBox.this,
+            event.getSelectedItem()));
+      }
+    });
   }
 
-  public HandlerRegistration addFocusHandler(FocusHandler handler) {
-    return addDomHandler(FocusEvent.TYPE, handler);
-  }
-
+  /**
+   * Adds a listener to receive focus events on the SuggestBox's text box. The
+   * source Widget for these events will be the SuggestBox.
+   * 
+   * @param listener the listener interface to add
+   * @deprecated use getTextBox().addFocusHandler/addBlurHandler() instead
+   */
   @Deprecated
-  public void addFocusListener(FocusListener listener) {
-    HasAllFocusHandlers.Adaptor.addHandlers(this, new L.Focus(listener));
+  public void addFocusListener(final FocusListener listener) {
+    AllFocusHandlers adaptor = new AllFocusHandlers() {
+
+      public void onBlur(BlurEvent event) {
+        listener.onLostFocus(SuggestBox.this);
+      }
+
+      public void onFocus(FocusEvent event) {
+        listener.onFocus(SuggestBox.this);
+      }
+    };
+    adaptor.addFocusHandlersTo(box);
   }
 
   @Deprecated
   public void addKeyboardListener(KeyboardListener listener) {
-    HasAllKeyHandlers.Adaptor.addHandlers(this, new L.Keyboard(listener));
+    AllKeyHandlers.addHandlers(this, new L.Keyboard(listener));
   }
 
   public HandlerRegistration addKeyDownHandler(KeyDownHandler handler) {
@@ -529,6 +558,16 @@ public final class SuggestBox extends Composite implements HasText, HasFocus,
 
   public HandlerRegistration addKeyUpHandler(KeyUpHandler handler) {
     return addDomHandler(KeyUpEvent.TYPE, handler);
+  }
+
+  public HandlerRegistration addSelectionHandler(
+      SelectionHandler<Suggestion> handler) {
+    return addHandler(SelectionEvent.TYPE, handler);
+  }
+
+  public HandlerRegistration addValueChangeHandler(
+      ValueChangeHandler<String> handler) {
+    return addHandler(ValueChangeEvent.TYPE, handler);
   }
 
   /**
@@ -559,6 +598,19 @@ public final class SuggestBox extends Composite implements HasText, HasFocus,
     return box.getText();
   }
 
+  /**
+   * Get the text box associated with this suggest box.
+   * 
+   * @return this suggest box's text box
+   */
+  public TextBoxBase getTextBox() {
+    return box;
+  }
+
+  public String getValue() {
+    return value;
+  }
+
   public boolean isAnimationEnabled() {
     return suggestionPopup.isAnimationEnabled();
   }
@@ -573,11 +625,9 @@ public final class SuggestBox extends Composite implements HasText, HasFocus,
     L.Click.remove(this, listener);
   }
 
+  @Deprecated
   public void removeEventHandler(SuggestionHandler handler) {
-    if (suggestionHandlers == null) {
-      return;
-    }
-    suggestionHandlers.remove(handler);
+    L.baseRemove(this, handler, SelectionEvent.TYPE);
   }
 
   @Deprecated
@@ -628,6 +678,16 @@ public final class SuggestBox extends Composite implements HasText, HasFocus,
 
   public void setText(String text) {
     box.setText(text);
+    setValue(text);
+  }
+
+  public void setValue(String newValue) {
+    if (value == newValue || (value != null && value.equals(newValue))) {
+      return;
+    }
+    String oldValue = value;
+    this.value = newValue;
+    fireEvent(new ValueChangeEvent(oldValue, newValue));
   }
 
   /**
@@ -646,8 +706,13 @@ public final class SuggestBox extends Composite implements HasText, HasFocus,
     suggestionMenu.setMenuItemDebugIds(baseID);
   }
 
-  private void addKeyboardSupport() {
-    HasAllKeyHandlers.Adaptor adaptor = new HasAllKeyHandlers.Adaptor() {
+  private void addEventsToTextBox() {
+    class TextBoxEvents extends AllKeyHandlers implements ChangeHandler {
+
+      public void onChange(ChangeEvent event) {
+        setValue(getText());
+      }
+
       public void onKeyDown(KeyDownEvent event) {
         // Make sure that the menu is actually showing. These keystrokes
         // are only relevant when choosing a suggestion.
@@ -665,14 +730,17 @@ public final class SuggestBox extends Composite implements HasText, HasFocus,
               break;
           }
         }
+        fireEvent(event);
       }
 
       public void onKeyPress(KeyPressEvent event) {
+        fireEvent(event);
       }
 
       public void onKeyUp(KeyUpEvent event) {
         // After every user key input, refresh the popup's suggestions.
         refreshSuggestions();
+        fireEvent(event);
       }
 
       private void refreshSuggestions() {
@@ -693,24 +761,21 @@ public final class SuggestBox extends Composite implements HasText, HasFocus,
           showSuggestions(text);
         }
       }
-    };
-    box.addKeyDownHandler(adaptor);
-    box.addKeyUpHandler(adaptor);
+    }
+
+    TextBoxEvents events = new TextBoxEvents();
+    events.addKeyHandlersTo(box);
+    box.addChangeHandler(events);
   }
 
   private void fireSuggestionEvent(Suggestion selectedSuggestion) {
-    if (suggestionHandlers != null) {
-      SuggestionEvent event = new SuggestionEvent(this, selectedSuggestion);
-      for (SuggestionHandler handler : suggestionHandlers) {
-        handler.onSuggestionSelected(event);
-      }
-    }
+    fireEvent(new SelectionEvent(selectedSuggestion));
   }
 
   private void setNewSelection(SuggestionMenuItem menuItem) {
     Suggestion curSuggestion = menuItem.getSuggestion();
     currentText = curSuggestion.getReplacementString();
-    box.setText(currentText);
+    setText(currentText);
     suggestionPopup.hide();
     fireSuggestionEvent(curSuggestion);
   }

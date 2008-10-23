@@ -56,7 +56,7 @@ public class ResizeEvent extends AbstractEvent {
   public int getHeight() {
     return height;
   }
-  
+
   /**
    * Returns the new width.
    * 

@@ -26,31 +26,4 @@ package com.google.gwt.event.dom.client;
 public interface HasAllKeyHandlers extends HasKeyUpHandlers,
     HasKeyDownHandlers, HasKeyPressHandlers {
 
-  /**
-   * Adaptor used to create and add all the Keyboard events at once.
-   */
-  public abstract static class Adaptor implements KeyDownHandler, KeyUpHandler,
-      KeyPressHandler {
-
-    /**
-     * Convenience method to add all key handlers at once.
-     * 
-     * @param <EventSourceType> event source type
-     * @param <EventHandler> event handler type
-     * @param source event source
-     * @param handlers handlers to add
-     */
-    public static <EventHandler extends KeyDownHandler & KeyUpHandler & KeyPressHandler> void addHandlers(
-        HasAllKeyHandlers source, EventHandler handlers) {
-      source.addKeyDownHandler(handlers);
-      source.addKeyPressHandler(handlers);
-      source.addKeyUpHandler(handlers);
-    }
-
-    /**
-     * Constructor.
-     */
-    public Adaptor() {
-    }
-  }
 }

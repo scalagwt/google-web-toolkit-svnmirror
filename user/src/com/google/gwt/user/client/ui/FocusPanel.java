@@ -15,6 +15,8 @@
  */
 package com.google.gwt.user.client.ui;
 
+import com.google.gwt.event.dom.client.AllFocusHandlers;
+import com.google.gwt.event.dom.client.AllKeyHandlers;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -85,12 +87,12 @@ public class FocusPanel extends SimplePanel implements HasFocus,
 
   @Deprecated
   public void addFocusListener(FocusListener listener) {
-    HasAllFocusHandlers.Adaptor.addHandlers(this, new L.Focus(listener));
+    AllFocusHandlers.addHandlers(this, new L.Focus(listener));
   }
 
   @Deprecated
   public void addKeyboardListener(KeyboardListener listener) {
-    HasAllKeyHandlers.Adaptor.addHandlers(this, new L.Keyboard(listener));
+    AllKeyHandlers.addHandlers(this, new L.Keyboard(listener));
   }
 
   public HandlerRegistration addKeyDownHandler(KeyDownHandler handler) {

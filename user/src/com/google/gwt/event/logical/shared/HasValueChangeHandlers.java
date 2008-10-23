@@ -13,21 +13,24 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.google.gwt.event.logical.shared;
 
 import com.google.gwt.event.shared.HandlerRegistration;
 
 /**
  * A widget that implements this interface is a public source of
- * {@link FormSubmitEvent} events.
- *
+ * {@link ValueChangeEvent} events.
  * 
+ * @param <ValueType> The type of value
  */
-public interface HasFormSubmitHandlers {
+public interface HasValueChangeHandlers<ValueType> {
   /**
-   * Adds a {@link HasFormSubmitEvent} handler.
+   * Adds a {@link ValueChangeEvent} handler.
    * 
    * @param handler the handler
+   * @return the handler registration
    */
-  HandlerRegistration addFormSubmitHandler(FormSubmitHandler handler);
+  HandlerRegistration addValueChangeHandler(
+      ValueChangeHandler<ValueType> handler);
 }

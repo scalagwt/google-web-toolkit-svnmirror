@@ -20,8 +20,8 @@ import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.logical.shared.OpenEvent;
 import com.google.gwt.event.logical.shared.OpenHandler;
-import com.google.gwt.event.logical.shared.SelectionEvent;
-import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.museum.client.common.AbstractIssue;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Tree;
@@ -38,9 +38,9 @@ public class VisualsForTreeEvents extends AbstractIssue {
   public Widget createIssue() {
     VerticalPanel p = new VerticalPanel();
     Tree t = VisualsForTree.createTree();
-    t.addSelectionHandler(new SelectionHandler<TreeItem>() {
+    t.addValueChangeHandler(new ValueChangeHandler<TreeItem>() {
 
-      public void onSelection(SelectionEvent<TreeItem> event) {
+      public void onValueChange(ValueChangeEvent<TreeItem> event) {
         Window.setTitle("select " + prettyPrint(event.getOldValue()) + "->"
             + prettyPrint(event.getNewValue()));
       }

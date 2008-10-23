@@ -31,10 +31,10 @@ import com.google.gwt.user.client.EventListener;
  */
 public class Widget extends UIObject implements EventListener {
   /**
-   * A bit-map of the events that should be sunk when the widget is attached
-   * to the DOM.  We delay the sinking of events to improve startup performance.
+   * A bit-map of the events that should be sunk when the widget is attached to
+   * the DOM. We delay the sinking of events to improve startup performance.
    */
-  private int eventsToSink;
+  int eventsToSink;
   private boolean attached;
 
   private Object layoutData;
@@ -85,7 +85,7 @@ public class Widget extends UIObject implements EventListener {
 
   @Override
   public void sinkEvents(int eventBitsToAdd) {
-    if (eventsToSink == -1) {
+    if (isOrWasAttached()) {
       super.sinkEvents(eventBitsToAdd);
     } else {
       eventsToSink |= eventBitsToAdd;
@@ -191,11 +191,15 @@ public class Widget extends UIObject implements EventListener {
     }
 
     attached = true;
+
+    // Event hookup code
     DOM.setEventListener(getElement(), this);
-    if (eventsToSink > 0) {
-      super.sinkEvents(eventsToSink);
-    }
+
+    int bitsToAdd = eventsToSink;
     eventsToSink = -1;
+    if (bitsToAdd > 0) {
+      sinkEvents(bitsToAdd);
+    }
     doAttachChildren();
 
     // onLoad() gets called only *after* all of the children are attached and
@@ -277,6 +281,15 @@ public class Widget extends UIObject implements EventListener {
    */
   Object getLayoutData() {
     return layoutData;
+  }
+
+  /**
+   * Has this widget ever been attached?
+   * 
+   * @return has this widget been attached
+   */
+  final boolean isOrWasAttached() {
+    return eventsToSink == -1;
   }
 
   @Override

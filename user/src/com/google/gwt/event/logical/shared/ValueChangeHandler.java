@@ -13,19 +13,21 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.google.gwt.event.logical.shared;
 
 import com.google.gwt.event.shared.EventHandler;
 
 /**
- * Handler interface for {@link FormSubmitCompleteEvent} events. 
+ * Handler for {@link ValueChangeEvent} events.
+ * 
+ * @param <ValueType> type of the selected value
  */
-public interface FormSubmitCompleteHandler extends EventHandler {
-
+public interface ValueChangeHandler<ValueType> extends EventHandler {
   /**
-   * Called when {@link FormSubmitCompleteEvent} is fired.
+   * Fired once a value has been changed.
    * 
-   * @param event the {@link FormSubmitCompleteEvent} that was fired
+   * @param event the event
    */
-  void onFormSubmitComplete(FormSubmitCompleteEvent event);
+  void onValueChange(ValueChangeEvent<ValueType> event);
 }

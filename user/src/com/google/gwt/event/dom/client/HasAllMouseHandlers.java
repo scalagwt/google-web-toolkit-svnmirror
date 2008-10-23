@@ -30,38 +30,4 @@ public interface HasAllMouseHandlers extends HasMouseDownHandlers,
     HasMouseUpHandlers, HasMouseOutHandlers, HasMouseOverHandlers,
     HasMouseMoveHandlers, HasMouseWheelHandlers {
 
-  /**
-   * Adaptor used to create and add all the Keyboard events at once.
-   * 
-   */
-  public abstract static class Adaptor implements HasMouseDownHandlers,
-      HasMouseUpHandlers, HasMouseOutHandlers, HasMouseOverHandlers,
-      HasMouseMoveHandlers, HasMouseWheelHandlers {
-
-    /**
-     * Convenience method to add all key handlers at once.
-     * 
-     * @param <EventSourceType> event source type
-     * @param <EventHandler> event handler type
-     * @param source event source
-     * @param handlers handlers to add
-     */
-    public static <EventHandler extends MouseDownHandler & MouseUpHandler & MouseOutHandler & MouseOverHandler & MouseMoveHandler & MouseWheelHandler> void addHandlers(
-        HasAllMouseHandlers source, EventHandler handlers) {
-      source.addMouseDownHandler(handlers);
-      source.addMouseUpHandler(handlers);
-      source.addMouseOutHandler(handlers);
-      source.addMouseOverHandler(handlers);
-      source.addMouseMoveHandler(handlers);
-      source.addMouseWheelHandler(handlers);
-    }
-
-    /**
-     * Creates an adaptor to implement all the {@link HasAllKeyHandlers} handler
-     * types.
-     */
-    public Adaptor() {
-    }
-  }
-
 }

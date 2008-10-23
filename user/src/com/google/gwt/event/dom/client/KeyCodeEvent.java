@@ -93,4 +93,9 @@ public abstract class KeyCodeEvent extends KeyEvent implements HasKeyCodes {
     return getKeyCode() == KEY_UP;
   }
 
+  @Override
+  public String toDebugString() {
+    return super.toDebugString() + "[" + getKeyCode() + "]";
+  }
+
 }

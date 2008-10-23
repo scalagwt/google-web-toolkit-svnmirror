@@ -44,6 +44,11 @@ public class KeyPressEvent extends KeyEvent {
   }
 
   @Override
+  public String toDebugString() {
+    return super.toDebugString() + "[" + getCharCode() + "]";
+  }
+
+  @Override
   protected Type getType() {
     return TYPE;
   }

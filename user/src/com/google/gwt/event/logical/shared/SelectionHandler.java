@@ -13,21 +13,20 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.google.gwt.event.logical.shared;
 
 import com.google.gwt.event.shared.EventHandler;
 
 /**
- * Handler for {@link SelectionEvent} events.
- * 
- * @param <Value> type of the selected value
+ * Handler interface for {@link SelectionEvent} events. 
+   * @param <SelectedItem> the type being selected
  */
-public interface SelectionHandler<Value> extends EventHandler {
+public interface SelectionHandler<SelectedItem> extends EventHandler {
+
   /**
-   * Fired once a value has been selected.
+   * Called when {@link SelectionEvent} is fired.
    * 
-   * @param event the event
+   * @param event the {@link SelectionEvent} that was fired
    */
-  void onSelection(SelectionEvent<Value> event);
+  void onSelection(SelectionEvent<SelectedItem> event);
 }

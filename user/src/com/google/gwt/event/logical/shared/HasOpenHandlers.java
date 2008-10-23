@@ -19,8 +19,9 @@ import com.google.gwt.event.shared.HandlerRegistration;
 
 /**
  * A widget that implements this interface is a public source of
- * {@link OpenEvent} events. 
-   * @param <TargetType> the type of the object being opened
+ * {@link OpenEvent} events.
+ * 
+ * @param <TargetType> the type of the object being opened
  */
 public interface HasOpenHandlers<TargetType> {
   /**

@@ -13,23 +13,21 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.google.gwt.event.logical.shared;
 
 import com.google.gwt.event.shared.HandlerRegistration;
 
 /**
  * A widget that implements this interface is a public source of
- * {@link SelectionEvent} events.
- * 
- * @param <ValueType> The type of value being selected
+ * {@link SelectionEvent} events. 
+   * @param <SelectedItem> the type being selected
  */
-public interface HasSelectionHandlers<ValueType> {
+public interface HasSelectionHandlers<SelectedItem> {
   /**
    * Adds a {@link SelectionEvent} handler.
    * 
    * @param handler the handler
-   * @return the handler registration
+   * @return the registration for the event
    */
-  HandlerRegistration addSelectionHandler(SelectionHandler<ValueType> handler);
+  HandlerRegistration addSelectionHandler(SelectionHandler<SelectedItem> handler);
 }

@@ -13,68 +13,49 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.google.gwt.event.logical.shared;
 
 import com.google.gwt.event.shared.AbstractEvent;
 
 /**
- * Fired after an event source has selected a new value.
+ * Represents a selection event.
  * 
- * @param <Value> the type of value the widget has selected
+ * @param <SelectedItemType> the type being selected
  */
-public class SelectionEvent<Value> extends AbstractEvent {
+public class SelectionEvent<SelectedItemType> extends AbstractEvent {
 
   /**
-   * The event type.
+   * Event type.
    */
   public static final Type<SelectionEvent, SelectionHandler> TYPE = new Type<SelectionEvent, SelectionHandler>() {
-
     @Override
     protected void fire(SelectionHandler handler, SelectionEvent event) {
       handler.onSelection(event);
     }
   };
-
-  private Value oldValue;
-  private Value newValue;
+  private SelectedItemType item;
 
   /**
-   * Constructor.
+   * Constructs a SelectionEvent event.
    * 
-   * @param oldValue the old value
-   * @param newValue the new value
+   * @param item the selected item
    */
-
-  public SelectionEvent(Value oldValue, Value newValue) {
-    this.oldValue = oldValue;
-    this.newValue = newValue;
+  public SelectionEvent(SelectedItemType item) {
+    this.item = item;
   }
 
   /**
-   * Returns the new value.
+   * Gets the selected item.
    * 
-   * @return the new value
+   * @return the selected item
    */
-  public Value getNewValue() {
-    assertLive();
-    return newValue;
-  }
-
-  /**
-   * Returns the old value.
-   * 
-   * @return the old value
-   */
-  public Value getOldValue() {
-    assertLive();
-    return oldValue;
+  public SelectedItemType getSelectedItem() {
+    return item;
   }
 
   @Override
   public String toDebugString() {
-    assertLive();
-    return super.toDebugString() + " old = " + oldValue + " new =" + newValue;
+    return "selected: " + item;
   }
 
   @Override
