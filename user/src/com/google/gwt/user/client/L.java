@@ -54,7 +54,7 @@ abstract class L<ListenerType> implements EventHandler {
   }
 
   public static class WindowClose extends L<WindowCloseListener> implements
-      WindowClosingHandler, CloseHandler<Window> {
+      Window.ClosingHandler, CloseHandler<Window> {
     @Deprecated
     public static void add(WindowCloseListener listener) {
       WindowClose handler = new WindowClose(listener);
@@ -64,7 +64,7 @@ abstract class L<ListenerType> implements EventHandler {
 
     public static void remove(HandlerManager manager,
         WindowCloseListener listener) {
-      baseRemove(manager, listener, WindowClosingEvent.TYPE, CloseEvent.TYPE);
+      baseRemove(manager, listener, Window.ClosingEvent.TYPE, CloseEvent.TYPE);
     }
 
     protected WindowClose(WindowCloseListener listener) {
@@ -75,7 +75,7 @@ abstract class L<ListenerType> implements EventHandler {
       listener.onWindowClosed();
     }
 
-    public void onWindowClosing(WindowClosingEvent event) {
+    public void onWindowClosing(Window.ClosingEvent event) {
       String message = listener.onWindowClosing();
       if (event.getMessage() == null) {
         event.setMessage(message);
@@ -105,7 +105,7 @@ abstract class L<ListenerType> implements EventHandler {
   }
 
   public static class WindowScroll extends L<WindowScrollListener> implements
-      WindowScrollHandler {
+      Window.ScrollHandler {
     @Deprecated
     public static void add(WindowScrollListener listener) {
       Window.addWindowScrollHandler(new WindowScroll(listener));
@@ -113,14 +113,14 @@ abstract class L<ListenerType> implements EventHandler {
 
     public static void remove(HandlerManager manager,
         WindowScrollListener listener) {
-      baseRemove(manager, listener, WindowScrollEvent.TYPE);
+      baseRemove(manager, listener, Window.ScrollEvent.TYPE);
     }
 
     protected WindowScroll(WindowScrollListener listener) {
       super(listener);
     }
 
-    public void onWindowScroll(WindowScrollEvent event) {
+    public void onWindowScroll(Window.ScrollEvent event) {
       listener.onWindowScrolled(event.getScrollLeft(), event.getScrollTop());
     }
   }
