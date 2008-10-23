@@ -61,6 +61,8 @@ import com.google.gwt.event.dom.client.MouseWheelEvent;
 import com.google.gwt.event.dom.client.MouseWheelHandler;
 import com.google.gwt.event.dom.client.ScrollEvent;
 import com.google.gwt.event.dom.client.ScrollHandler;
+import com.google.gwt.event.logical.shared.BeforeSelectionEvent;
+import com.google.gwt.event.logical.shared.BeforeSelectionHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.logical.shared.OpenEvent;
@@ -101,6 +103,37 @@ abstract class L<ListenerType> implements EventHandler {
     public void onCellClick(CellClickEvent event) {
       listener.onCellClicked((SourcesTableEvents) event.getSource(),
           event.getRowIndex(), event.getCellIndex());
+    }
+  }
+
+  public static class Tab extends L<TabListener> implements
+      SelectionHandler<Integer>, BeforeSelectionHandler<Integer> {
+    @Deprecated
+    public static void add(TabBar source, TabListener listener) {
+      Tab t = new Tab(listener);
+      source.addBeforeSelectionHandler(t);
+      source.addSelectionHandler(t);
+    }
+
+    public static void remove(Widget eventSource, TabListener listener) {
+      baseRemove(eventSource, listener, SelectionEvent.TYPE,
+          BeforeSelectionEvent.TYPE);
+    }
+
+    protected Tab(TabListener listener) {
+      super(listener);
+    }
+
+    public void onBeforeSelection(BeforeSelectionEvent<Integer> event) {
+      if (!listener.onBeforeTabSelected((SourcesTabEvents) event.getSource(),
+          event.getNewValue().intValue())) {
+        event.cancel();
+      }
+    }
+
+    public void onSelection(SelectionEvent<Integer> event) {
+      listener.onTabSelected((SourcesTabEvents) event.getSource(),
+          event.getNewValue().intValue());
     }
   }
 
