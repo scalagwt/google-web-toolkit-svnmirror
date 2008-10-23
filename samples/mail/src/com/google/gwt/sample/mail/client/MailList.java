@@ -15,19 +15,20 @@
  */
 package com.google.gwt.sample.mail.client;
 
+import com.google.gwt.event.dom.client.CellClickEvent;
+import com.google.gwt.event.dom.client.CellClickHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.SourcesTableEvents;
-import com.google.gwt.user.client.ui.TableListener;
 
 /**
  * A composite that displays a list of emails that can be selected.
  */
-public class MailList extends Composite implements TableListener, ClickHandler {
+public class MailList extends Composite implements CellClickHandler,
+    ClickHandler {
 
   private static final int VISIBLE_EMAIL_COUNT = 10;
 
@@ -47,7 +48,7 @@ public class MailList extends Composite implements TableListener, ClickHandler {
     table.setWidth("100%");
 
     // Hook up events.
-    table.addTableListener(this);
+    table.addCellClickHandler(this);
     newerButton.addClickHandler(this);
     olderButton.addClickHandler(this);
 
@@ -69,8 +70,9 @@ public class MailList extends Composite implements TableListener, ClickHandler {
     update();
   }
 
-  public void onCellClicked(SourcesTableEvents sender, int row, int cell) {
+  public void onCellClick(CellClickEvent event) {
     // Select the row that was clicked (-1 to account for header row).
+    int row = event.getRowIndex();
     if (row > 0) {
       selectRow(row - 1);
     }

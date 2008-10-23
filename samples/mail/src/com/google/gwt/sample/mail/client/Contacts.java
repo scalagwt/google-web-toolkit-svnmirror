@@ -113,7 +113,7 @@ public class Contacts extends Composite {
         + "</a>");
     panel.add(link);
 
-    // Add a click listener that displays a ContactPopup when it is clicked.
+    // Add a click handler that displays a ContactPopup when it is clicked.
     link.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         ContactPopup popup = new ContactPopup(contact);

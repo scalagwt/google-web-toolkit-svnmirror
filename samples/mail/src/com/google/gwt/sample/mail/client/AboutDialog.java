@@ -44,7 +44,7 @@ public class AboutDialog extends DialogBox {
     text.setStyleName("mail-AboutText");
     outer.add(text);
 
-    // Create the 'OK' button, along with a listener that hides the dialog
+    // Create the 'OK' button, along with a handler that hides the dialog
     // when the button is clicked.
     outer.add(new Button("Close", new ClickHandler() {
       public void onClick(ClickEvent event) {
