@@ -241,6 +241,7 @@ public class Window {
    * 
    * @param <ListenerType> listener type
    */
+  @Deprecated
   private static class ListenerDelagate<ListenerType> implements EventHandler {
     static void baseRemove(EventListener listener, Type... keys) {
       HandlerManager manager = Window.getHandlers();
@@ -268,6 +269,7 @@ public class Window {
   /**
    * A delegate to a {@link WindowCloseListener}.
    */
+  @Deprecated
   private static class WindowCloseListenerDelagate extends
       ListenerDelagate<WindowCloseListener> implements WindowClosingHandler,
       CloseHandler<Window> {
@@ -290,6 +292,7 @@ public class Window {
   /**
    * A delegate to a {@link WindowResizeListener}.
    */
+  @Deprecated
   private static class WindowResizeListenerDelagate extends
       ListenerDelagate<WindowResizeListener> implements ResizeHandler {
     public WindowResizeListenerDelagate(WindowResizeListener listener) {
@@ -304,6 +307,7 @@ public class Window {
   /**
    * A delegate to a {@link WindowScrollListener}.
    */
+  @Deprecated
   private static class WindowScrollListenerDelagate extends
       ListenerDelagate<WindowScrollListener> implements WindowScrollHandler {
     public WindowScrollListenerDelagate(WindowScrollListener listener) {
@@ -348,6 +352,7 @@ public class Window {
    * 
    * @param listener the listener to be informed when the window is closing
    */
+  @Deprecated
   public static void addWindowCloseListener(WindowCloseListener listener) {
     WindowCloseListenerDelagate delegate = new WindowCloseListenerDelagate(
         listener);
@@ -371,6 +376,7 @@ public class Window {
    * 
    * @param listener the listener to be informed when the window is resized
    */
+  @Deprecated
   public static void addWindowResizeListener(WindowResizeListener listener) {
     addResizeHandler(new WindowResizeListenerDelagate(listener));
   }
@@ -392,6 +398,7 @@ public class Window {
    * 
    * @param listener the listener to be informed when the window is scrolled
    */
+  @Deprecated
   public static void addWindowScrollListener(WindowScrollListener listener) {
     addWindowScrollHandler(new WindowScrollListenerDelagate(listener));
   }
@@ -514,6 +521,7 @@ public class Window {
    * 
    * @param listener the listener to be removed
    */
+  @Deprecated
   public static void removeWindowCloseListener(WindowCloseListener listener) {
     ListenerDelagate.baseRemove(listener, WindowClosingEvent.TYPE,
         CloseEvent.TYPE);
@@ -524,6 +532,7 @@ public class Window {
    * 
    * @param listener the listener to be removed
    */
+  @Deprecated
   public static void removeWindowResizeListener(WindowResizeListener listener) {
     ListenerDelagate.baseRemove(listener, ResizeEvent.TYPE);
   }
@@ -533,6 +542,7 @@ public class Window {
    * 
    * @param listener the listener to be removed
    */
+  @Deprecated
   public static void removeWindowScrollListener(WindowScrollListener listener) {
     ListenerDelagate.baseRemove(listener, WindowScrollEvent.TYPE);
   }
