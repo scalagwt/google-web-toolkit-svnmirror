@@ -16,6 +16,8 @@
 package com.google.gwt.user.client.ui;
 
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.junit.client.GWTTestCase;
 import com.google.gwt.user.client.DOM;
@@ -24,7 +26,24 @@ import com.google.gwt.user.client.DOM;
  * Tests for {@link Anchor}.
  */
 public class AnchorTest extends GWTTestCase {
+  private final class TestClickHandler implements ClickHandler {
+    private int clicks = 0;
+    private Object lastSender;
 
+    public void onClick(ClickEvent event) {
+      clicks++;
+      lastSender = event.getSource();
+    }
+
+    public int getClicks() {
+      return clicks;
+    }
+
+    public Object getLastSender() {
+      return lastSender;
+    }
+  }
+  
   private static final String TEST_URL0 = "http://www.google.com/";
   private static final String TEST_URL1 = "http://code.google.com/";
 
@@ -58,6 +77,7 @@ public class AnchorTest extends GWTTestCase {
     assertEquals(42, anchor.getTabIndex());
   }
   
+  @Deprecated
   private final class TestClickListener implements ClickListener {
     private int clicks = 0;
     private Widget lastSender;
@@ -136,10 +156,16 @@ public class AnchorTest extends GWTTestCase {
     TestClickListener testListener = new TestClickListener();
     anchor.addClickListener(testListener);
 
+    TestClickHandler handler = new TestClickHandler();
+    anchor.addClickHandler(handler);
+
     assertEquals(0, testListener.getClicks());
+    assertEquals(0, handler.getClicks());
     triggerEvent(anchor.getElement(), "click", false, "MouseEvents");
     assertEquals(1, testListener.getClicks());
+    assertEquals(1, handler.getClicks());
     assertEquals(anchor, testListener.getLastSender());
+    assertEquals(anchor, handler.getLastSender());
   }
 
   public void testLink() {
