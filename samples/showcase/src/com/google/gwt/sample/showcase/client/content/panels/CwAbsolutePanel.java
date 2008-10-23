@@ -229,14 +229,13 @@ public class CwAbsolutePanel extends ContentWidget {
     });
 
     // Move the item as the user changes the value in the left and top boxes
-
-    KeyUpHandler repositionListener = new KeyUpHandler() {
+    KeyUpHandler repositionHandler = new KeyUpHandler() {
       public void onKeyUp(KeyUpEvent event) {
         repositionItem();
       }
     };
-    topPosBox.addKeyUpHandler(repositionListener);
-    leftPosBox.addKeyUpHandler(repositionListener);
+    topPosBox.addKeyUpHandler(repositionHandler);
+    leftPosBox.addKeyUpHandler(repositionHandler);
 
     // Return the options bar
     return optionsBar;

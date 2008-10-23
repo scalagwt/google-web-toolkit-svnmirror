@@ -147,7 +147,7 @@ public class CwCookies extends ContentWidget {
     mainLayout.setWidget(2, 1, cookieValueBox);
     mainLayout.setWidget(2, 2, setCookieButton);
 
-    // Add a listener to set the cookie value
+    // Add a handler to set the cookie value
     setCookieButton.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         String name = cookieNameBox.getText();
@@ -166,14 +166,14 @@ public class CwCookies extends ContentWidget {
       }
     });
 
-    // Add a listener to select an existing cookie
+    // Add a handler to select an existing cookie
     existingCookiesBox.addChangeHandler(new ChangeHandler() {
       public void onChange(ChangeEvent event) {
         updateExstingCookie();
       }
     });
 
-    // Add a listener to delete an existing cookie
+    // Add a handler to delete an existing cookie
     deleteCookieButton.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         int selectedIndex = existingCookiesBox.getSelectedIndex();

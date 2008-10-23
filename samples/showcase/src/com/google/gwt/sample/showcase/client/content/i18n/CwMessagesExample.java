@@ -38,7 +38,7 @@ import com.google.gwt.user.client.ui.FlexTable.FlexCellFormatter;
 /**
  * Example file.
  */
-@ShowcaseRaw( {"ErrorMessages.java", "ErrorMessages.properties"})
+@ShowcaseRaw({"ErrorMessages.java", "ErrorMessages.properties"})
 public class CwMessagesExample extends ContentWidget {
   /**
    * The constants used in this Content Widget.
@@ -203,7 +203,7 @@ public class CwMessagesExample extends ContentWidget {
     layout.setWidget(5, 1, formattedMessage);
     formatter.setVerticalAlignment(5, 0, HasVerticalAlignment.ALIGN_TOP);
 
-    // Add listeners to all of the argument boxes
+    // Add handlers to all of the argument boxes
     KeyUpHandler keyUpHandler = new KeyUpHandler() {
       public void onKeyUp(KeyUpEvent event) {
         updateMessage();

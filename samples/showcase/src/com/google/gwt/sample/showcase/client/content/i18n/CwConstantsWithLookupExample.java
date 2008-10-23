@@ -39,7 +39,7 @@ import java.util.MissingResourceException;
 /**
  * Example file.
  */
-@ShowcaseRaw( {"ColorConstants.java", "ColorConstants.properties"})
+@ShowcaseRaw({"ColorConstants.java", "ColorConstants.properties"})
 public class CwConstantsWithLookupExample extends ContentWidget {
   /**
    * The constants used in this Content Widget.
@@ -174,7 +174,7 @@ public class CwConstantsWithLookupExample extends ContentWidget {
     layout.setHTML(2, 0, constants.cwConstantsWithLookupExampleResults());
     layout.setWidget(2, 1, colorResultsBox);
 
-    // Add a listener to update the color as the user types a lookup value
+    // Add a handler to update the color as the user types a lookup value
     colorBox.addKeyUpHandler(new KeyUpHandler() {
       public void onKeyUp(KeyUpEvent event) {
         updateColor();

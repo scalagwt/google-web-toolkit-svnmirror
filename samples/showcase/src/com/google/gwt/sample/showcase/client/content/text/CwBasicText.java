@@ -131,10 +131,10 @@ public class CwBasicText extends ContentWidget {
 
   /**
    * Create a TextBox example that includes the text box and an optional
-   * listener that updates a Label with the currently selected text.
+   * handler that updates a Label with the currently selected text.
    * 
    * @param textBox the text box to listen to
-   * @param addSelection add listeners to update label
+   * @param addSelection add handlers to update label
    * @return the Label that will be updated
    */
   @ShowcaseSource
@@ -145,19 +145,19 @@ public class CwBasicText extends ContentWidget {
     hPanel.setSpacing(4);
     hPanel.add(textBox);
 
-    // Add listeners
+    // Add handlers
     if (addSelection) {
       // Create the new label
       final Label label = new Label(constants.cwBasicTextSelected() + ": 0, 0");
 
-      // Add a KeyboardListener
+      // Add a KeyUpHandler
       textBox.addKeyUpHandler(new KeyUpHandler() {
         public void onKeyUp(KeyUpEvent event) {
           updateSelectionLabel(textBox, label);
         }
       });
 
-      // Add a ClickListener
+      // Add a ClickHandler
       textBox.addClickHandler(new ClickHandler() {
         public void onClick(ClickEvent event) {
           updateSelectionLabel(textBox, label);

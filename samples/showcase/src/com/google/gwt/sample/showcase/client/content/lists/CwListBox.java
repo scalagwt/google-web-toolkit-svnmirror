@@ -116,7 +116,7 @@ public class CwListBox extends ContentWidget {
     multiBoxPanel.add(multiBox);
     hPanel.add(multiBoxPanel);
 
-    // Add a listener to handle drop box events
+    // Add a handler to handle drop box events
     dropBox.addChangeHandler(new ChangeHandler() {
       public void onChange(ChangeEvent event) {
         showCategory(multiBox, dropBox.getSelectedIndex());
