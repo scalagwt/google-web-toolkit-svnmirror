@@ -694,7 +694,9 @@ public class Window {
   }
 
   private static void fireClosedImpl() {
-    fireEvent(new CloseEvent<Window>(null));
+    if (closeHandlersInitialized) {
+      fireEvent(new CloseEvent<Window>(null));
+    }
   }
 
   private static String fireClosingAndCatch(UncaughtExceptionHandler handler) {
@@ -707,9 +709,12 @@ public class Window {
   }
 
   private static String fireClosingImpl() {
-    Window.ClosingEvent event = new Window.ClosingEvent();
-    fireEvent(event);
-    return event.getMessage();
+    if (closeHandlersInitialized) {
+      Window.ClosingEvent event = new Window.ClosingEvent();
+      fireEvent(event);
+      return event.getMessage();
+    }
+    return null;
   }
 
   /**
@@ -732,7 +737,9 @@ public class Window {
   }
 
   private static void fireResizedImpl() {
-    fireEvent(new ResizeEvent(getClientWidth(), getClientHeight()));
+    if (resizeHandlersInitialized) {
+      fireEvent(new ResizeEvent(getClientWidth(), getClientHeight()));
+    }
   }
 
   private static void fireScrollAndCatch(UncaughtExceptionHandler handler) {
@@ -744,7 +751,9 @@ public class Window {
   }
 
   private static void fireScrollImpl() {
-    fireEvent(new Window.ScrollEvent(getScrollLeft(), getScrollTop()));
+    if (scrollHandlersInitialized) {
+      fireEvent(new Window.ScrollEvent(getScrollLeft(), getScrollTop()));
+    }
   }
 
   /**
