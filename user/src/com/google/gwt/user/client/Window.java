@@ -25,7 +25,6 @@ import com.google.gwt.event.shared.AbstractEvent;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.event.shared.AbstractEvent.Type;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.impl.WindowImpl;
 
@@ -283,7 +282,6 @@ public class Window {
     }
   }
 
-  
   /**
    * Handler for {@link Window.ClosingEvent} events.
    */
