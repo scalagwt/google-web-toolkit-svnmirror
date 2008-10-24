@@ -76,7 +76,7 @@ class HistoryImplSafari extends HistoryImplStandard {
 
     @com.google.gwt.user.client.impl.HistoryImpl::setToken(Ljava/lang/String;)(token);
 
-    @com.google.gwt.user.client.impl.HistoryImpl::fireHistoryChangedImpl(Ljava/lang/String;)($wnd.__gwt_historyToken);
+    @com.google.gwt.user.client.impl.HistoryImpl::fireHistoryChangedImpl(Ljava/lang/String;Ljava/lang/String;)('', $wnd.__gwt_historyToken);
   }-*/;
 
   private native void newNativeUpdate(String historyToken) /*-{
