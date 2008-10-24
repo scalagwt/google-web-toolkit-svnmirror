@@ -21,9 +21,9 @@ import com.google.gwt.event.shared.AbstractEvent;
 /**
  * Fired before an event source has selected a new value.
  * 
- * @param <Value> the type of value the widget has selected
+ * @param <ItemType> the type being selected
  */
-public class BeforeSelectionEvent<Value> extends AbstractEvent {
+public class BeforeSelectionEvent<ItemType> extends AbstractEvent {
 
   /**
    * The event type.
@@ -36,20 +36,17 @@ public class BeforeSelectionEvent<Value> extends AbstractEvent {
     }
   };
 
-  private Value oldValue;
-  private Value newValue;
+  private ItemType item;
   private boolean canceled = false;
 
   /**
-   * Constructor.
+   * Construct a new {@link BeforeSelectionEvent}.
    * 
-   * @param oldValue the old value
-   * @param newValue the new value
+   * @param item the item being selected
    */
 
-  public BeforeSelectionEvent(Value oldValue, Value newValue) {
-    this.oldValue = oldValue;
-    this.newValue = newValue;
+  public BeforeSelectionEvent(ItemType item) {
+    this.item = item;
   }
 
   /**
@@ -61,23 +58,12 @@ public class BeforeSelectionEvent<Value> extends AbstractEvent {
   }
 
   /**
-   * Returns the new value.
+   * Gets the item that is being selected.
    * 
-   * @return the new value
+   * @return the item being selected
    */
-  public Value getNewValue() {
-    assertLive();
-    return newValue;
-  }
-
-  /**
-   * Returns the old value.
-   * 
-   * @return the old value
-   */
-  public Value getOldValue() {
-    assertLive();
-    return oldValue;
+  public ItemType getItem() {
+    return item;
   }
 
   /**
@@ -92,8 +78,7 @@ public class BeforeSelectionEvent<Value> extends AbstractEvent {
 
   @Override
   public String toDebugString() {
-    assertLive();
-    return super.toDebugString() + " old = " + oldValue + " new =" + newValue;
+    return "selecting: " + item;
   }
 
   @Override

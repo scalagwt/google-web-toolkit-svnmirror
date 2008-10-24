@@ -319,9 +319,8 @@ public class TabBar extends Composite implements SourcesTabEvents,
   public boolean selectTab(int index) {
     checkTabIndex(index);
 
-    int oldIndex = getSelectedTab();
     BeforeSelectionEvent<Integer> beforeEvent = new BeforeSelectionEvent<Integer>(
-        oldIndex, index);
+        index);
     fireEvent(beforeEvent);
     if (beforeEvent.isCancelled()) {
       return false;

@@ -189,7 +189,6 @@ public class TabPanel extends Composite implements TabListener,
 
   private UnmodifiableTabBar tabBar = new UnmodifiableTabBar();
   private TabbedDeckPanel deck = new TabbedDeckPanel(tabBar);
-  private int oldIndex = -1;
 
   /**
    * Creates an empty tab panel.
@@ -355,8 +354,7 @@ public class TabPanel extends Composite implements TabListener,
   }
 
   public void onBeforeSelection(BeforeSelectionEvent<Integer> event) {
-    oldIndex = event.getOldValue().intValue();
-    if (!onBeforeTabSelected(tabBar, event.getNewValue().intValue())) {
+    if (!onBeforeTabSelected(tabBar, event.getItem().intValue())) {
       event.cancel();
     }
   }
@@ -364,7 +362,7 @@ public class TabPanel extends Composite implements TabListener,
   @Deprecated
   public boolean onBeforeTabSelected(SourcesTabEvents sender, int tabIndex) {
     BeforeSelectionEvent<Integer> event = new BeforeSelectionEvent<Integer>(
-        oldIndex, tabIndex);
+        tabIndex);
     fireEvent(event);
     return !event.isCancelled();
   }

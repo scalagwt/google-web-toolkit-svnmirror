@@ -135,7 +135,7 @@ abstract class L<ListenerType> implements EventHandler {
 
     public void onBeforeSelection(BeforeSelectionEvent<Integer> event) {
       if (!listener.onBeforeTabSelected((SourcesTabEvents) event.getSource(),
-          event.getNewValue().intValue())) {
+          event.getItem().intValue())) {
         event.cancel();
       }
     }
