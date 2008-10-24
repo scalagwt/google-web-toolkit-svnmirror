@@ -41,7 +41,7 @@ public class MouseWheelEvent extends MouseEvent {
    *         or negative if the mouse wheel is moving south (toward the bottom
    *         of the screen)
    */
-  public int getVelocityDeltaY() {
+  public int getVelocityY() {
     return DOM.eventGetMouseWheelVelocityY(getNativeEvent());
   }
 
@@ -53,7 +53,7 @@ public class MouseWheelEvent extends MouseEvent {
    *         toword the top of the screen
    */
   public boolean isVelocityNorth() {
-    return getVelocityDeltaY() < 0;
+    return getVelocityY() < 0;
   }
 
   /**
@@ -64,7 +64,7 @@ public class MouseWheelEvent extends MouseEvent {
    *         toword the bottom of the screen
    */
   public boolean isVelocitySouth() {
-    return getVelocityDeltaY() > 0;
+    return getVelocityY() > 0;
   }
 
   @Override
