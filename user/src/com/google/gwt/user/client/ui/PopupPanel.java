@@ -328,12 +328,9 @@ public class PopupPanel extends SimplePanel implements SourcesPopupEvents,
     return addHandler(CloseEvent.TYPE, handler);
   }
 
+  @Deprecated
   public void addPopupListener(final PopupListener listener) {
-    addCloseHandler(new CloseHandler() {
-      public void onClose(CloseEvent event) {
-        listener.onPopupClosed(PopupPanel.this, autoHide);
-      }
-    });
+    addCloseHandler(new L.Popup(listener));
   }
 
   /**
@@ -419,8 +416,7 @@ public class PopupPanel extends SimplePanel implements SourcesPopupEvents,
    * Hides the popup. This has no effect if it is not currently visible.
    * 
    * @param autoClosed the value that will be passed to
-   *          {@link PopupListener#onPopupClosed(PopupPanel, boolean)} when the
-   *          popup is closed
+   *          {@link CloseHandler#onClose(CloseEvent)} when the popup is closed
    */
   public void hide(boolean autoClosed) {
     if (!showing) {
@@ -430,7 +426,7 @@ public class PopupPanel extends SimplePanel implements SourcesPopupEvents,
 
     // Hide the popup
     resizeAnimation.setState(false);
-    CloseEvent event = new CloseEvent(this, autoClosed);
+    CloseEvent<PopupPanel> event = new CloseEvent<PopupPanel>(this, autoClosed);
     fireEvent(event);
   }
 
@@ -567,7 +563,7 @@ public class PopupPanel extends SimplePanel implements SourcesPopupEvents,
 
   @Deprecated
   public void removePopupListener(PopupListener listener) {
-    L.Close.remove(this, listener);
+    L.Popup.remove(this, listener);
   }
 
   public void setAnimationEnabled(boolean enable) {

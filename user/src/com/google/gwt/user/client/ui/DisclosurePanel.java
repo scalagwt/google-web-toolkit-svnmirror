@@ -17,12 +17,18 @@ package com.google.gwt.user.client.ui;
 
 import com.google.gwt.animation.client.Animation;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.event.logical.shared.HasCloseHandlers;
+import com.google.gwt.event.logical.shared.HasOpenHandlers;
+import com.google.gwt.event.logical.shared.OpenEvent;
+import com.google.gwt.event.logical.shared.OpenHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Event;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 
 /**
@@ -48,9 +54,10 @@ import java.util.Iterator;
  * </p>
  */
 public final class DisclosurePanel extends Composite implements
-    FiresDisclosureEvents, HasWidgets, HasAnimation {
+    FiresDisclosureEvents, HasWidgets, HasAnimation,
+    HasOpenHandlers<DisclosurePanel>, HasCloseHandlers<DisclosurePanel> {
   /**
-   * The duration of the animation. 
+   * The duration of the animation.
    */
   private static final int ANIMATION_DURATION = 350;
 
@@ -156,7 +163,7 @@ public final class DisclosurePanel extends Composite implements
    * The default header widget used within a {@link DisclosurePanel}.
    */
   private class DefaultHeader extends Widget implements HasText,
-      DisclosureHandler {
+      OpenHandler<DisclosurePanel>, CloseHandler<DisclosurePanel> {
 
     /**
      * imageTD holds the image for the icon, not null. labelTD holds the text
@@ -196,7 +203,8 @@ public final class DisclosurePanel extends Composite implements
 
       setText(text);
 
-      addEventHandler(this);
+      addOpenHandler(this);
+      addCloseHandler(this);
       setStyle();
     }
 
@@ -204,11 +212,11 @@ public final class DisclosurePanel extends Composite implements
       return DOM.getInnerText(labelTD);
     }
 
-    public final void onClose(DisclosureEvent event) {
+    public final void onClose(CloseEvent<DisclosurePanel> event) {
       setStyle();
     }
 
-    public final void onOpen(DisclosureEvent event) {
+    public final void onOpen(OpenEvent<DisclosurePanel> event) {
       setStyle();
     }
 
@@ -273,12 +281,6 @@ public final class DisclosurePanel extends Composite implements
   private boolean isAnimationEnabled = false;
 
   private boolean isOpen = false;
-
-  /**
-   * null until #{@link #addEventHandler(DisclosureHandler)} is called (lazily
-   * initialized).
-   */
-  private ArrayList<DisclosureHandler> handlers;
 
   /**
    * Creates an empty DisclosurePanel that is initially closed.
@@ -354,17 +356,24 @@ public final class DisclosurePanel extends Composite implements
     }
   }
 
+  public HandlerRegistration addCloseHandler(
+      CloseHandler<DisclosurePanel> handler) {
+    return addHandler(CloseEvent.TYPE, handler);
+  }
+
   /**
    * Attaches an event handler to the panel to receive {@link DisclosureEvent}
    * notification.
    * 
    * @param handler the handler to be added (should not be null)
    */
-  public void addEventHandler(DisclosureHandler handler) {
-    if (handlers == null) {
-      handlers = new ArrayList<DisclosureHandler>();
-    }
-    handlers.add(handler);
+  @Deprecated
+  public void addEventHandler(final DisclosureHandler handler) {
+    L.Disclosure.add(this, handler);
+  }
+
+  public HandlerRegistration addOpenHandler(OpenHandler<DisclosurePanel> handler) {
+    return addHandler(OpenEvent.TYPE, handler);
   }
 
   public void clear() {
@@ -432,11 +441,9 @@ public final class DisclosurePanel extends Composite implements
    * 
    * @param handler the handler to be removed
    */
+  @Deprecated
   public void removeEventHandler(DisclosureHandler handler) {
-    if (handlers == null) {
-      return;
-    }
-    handlers.remove(handler);
+    L.Disclosure.remove(this, handler);
   }
 
   public void setAnimationEnabled(boolean enable) {
@@ -479,8 +486,8 @@ public final class DisclosurePanel extends Composite implements
   /**
    * Changes the visible state of this <code>DisclosurePanel</code>.
    * 
-   * @param isOpen <code>true</code> to open the panel, <code>false</code>
-   *          to close
+   * @param isOpen <code>true</code> to open the panel, <code>false</code> to
+   *          close
    */
   public void setOpen(boolean isOpen) {
     if (this.isOpen != isOpen) {
@@ -505,17 +512,10 @@ public final class DisclosurePanel extends Composite implements
   }
 
   private void fireEvent() {
-    if (handlers == null) {
-      return;
-    }
-
-    DisclosureEvent event = new DisclosureEvent(this);
-    for (DisclosureHandler handler : handlers) {
-      if (isOpen) {
-        handler.onOpen(event);
-      } else {
-        handler.onClose(event);
-      }
+    if (isOpen) {
+      fireEvent(new OpenEvent<DisclosurePanel>(this));
+    } else {
+      fireEvent(new CloseEvent<DisclosurePanel>(this));
     }
   }
 

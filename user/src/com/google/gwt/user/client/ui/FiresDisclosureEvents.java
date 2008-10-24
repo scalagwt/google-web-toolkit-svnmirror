@@ -19,6 +19,7 @@ package com.google.gwt.user.client.ui;
  * A widget that implements this interface fires the events defined by
  * the {@link DisclosureHandler} interface.
  */
+@Deprecated
 public interface FiresDisclosureEvents {
   
   /**
@@ -26,6 +27,7 @@ public interface FiresDisclosureEvents {
    * 
    * @param handler the handler to add
    */
+  @Deprecated
   void addEventHandler(DisclosureHandler handler);
   
   /**
@@ -33,5 +35,6 @@ public interface FiresDisclosureEvents {
    * 
    * @param handler the handler to remove.
    */
+  @Deprecated
   void removeEventHandler(DisclosureHandler handler);
 }

@@ -109,6 +109,32 @@ abstract class L<ListenerType> implements EventHandler {
     }
   }
 
+  public static class Disclosure extends L<DisclosureHandler> implements
+      CloseHandler<DisclosurePanel>, OpenHandler<DisclosurePanel> {
+
+    public static void add(DisclosurePanel source, DisclosureHandler listener) {
+      Disclosure handlers = new Disclosure(listener);
+      source.addOpenHandler(handlers);
+      source.addCloseHandler(handlers);
+    }
+
+    public static void remove(Widget eventSource, DisclosureHandler listener) {
+      baseRemove(eventSource, listener, CloseEvent.TYPE, OpenEvent.TYPE);
+    }
+
+    protected Disclosure(DisclosureHandler listener) {
+      super(listener);
+    }
+
+    public void onClose(CloseEvent<DisclosurePanel> event) {
+      listener.onClose(new DisclosureEvent((DisclosurePanel) event.getSource()));
+    }
+
+    public void onOpen(OpenEvent<DisclosurePanel> event) {
+      listener.onOpen(new DisclosureEvent((DisclosurePanel) event.getSource()));
+    }
+  }
+
   public static class Tab extends L<TabListener> implements
       SelectionHandler<Integer>, BeforeSelectionHandler<Integer> {
     @Deprecated
@@ -211,15 +237,20 @@ abstract class L<ListenerType> implements EventHandler {
     }
   }
 
-  public abstract static class Close extends L<EventListener> implements
-      CloseHandler {
+  public static class Popup extends L<PopupListener> implements
+      CloseHandler<PopupPanel> {
 
-    public static void remove(Widget eventSource, EventListener listener) {
+    public static void remove(Widget eventSource, PopupListener listener) {
       baseRemove(eventSource, listener, CloseEvent.TYPE);
     }
 
-    protected Close(EventListener listener) {
+    protected Popup(PopupListener listener) {
       super(listener);
+    }
+
+    public void onClose(CloseEvent<PopupPanel> event) {
+      listener.onPopupClosed((PopupPanel) event.getSource(),
+          event.isAutoClosed());
     }
   }
 
