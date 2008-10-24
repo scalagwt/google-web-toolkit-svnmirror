@@ -82,7 +82,7 @@ public class VisualsForSuggestBoxEvents extends AbstractIssue {
       @Override
       public String toString() {
         return suggestBoxName;
-      };
+      }
     };
 
     class MyHandler extends AllKeyHandlers implements ChangeListener,

@@ -79,9 +79,8 @@ public class VisualsForPopupEvents extends AbstractIssue {
       }
     }));
 
-    p.addCloseHandler(new CloseHandler() {
-
-      public void onClose(CloseEvent event) {
+    p.addCloseHandler(new CloseHandler<PopupPanel>() {
+      public void onClose(CloseEvent<PopupPanel> event) {
         Window.setTitle("closing popup '" + p.getTitle() + "'. autohide:"
             + event.isAutoClosed());
       }

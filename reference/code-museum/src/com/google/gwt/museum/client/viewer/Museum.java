@@ -22,6 +22,8 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.museum.client.common.AbstractIssue;
 import com.google.gwt.museum.client.common.Utility;
 import com.google.gwt.user.client.DeferredCommand;
@@ -40,9 +42,8 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.SuggestOracle;
-import com.google.gwt.user.client.ui.SuggestionEvent;
-import com.google.gwt.user.client.ui.SuggestionHandler;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -191,14 +192,13 @@ public class Museum implements EntryPoint {
     };
 
     SuggestBox box = new SuggestBox(oracle);
-    box.addEventHandler(new SuggestionHandler() {
-      public void onSuggestionSelected(SuggestionEvent event) {
-        AbstractIssue issue = ((IssueSuggestion) event.getSelectedSuggestion()).getIssue();
+    box.addSelectionHandler(new SelectionHandler<Suggestion>() {
+      public void onSelection(SelectionEvent<Suggestion> event) {
+        AbstractIssue issue = ((IssueSuggestion) event.getSelectedItem()).getIssue();
         int index = issues.indexOf(issue);
         issueList.setSelectedIndex(index);
         refreshIssue();
       }
-
     });
     box.setAnimationEnabled(false);
     return box;
