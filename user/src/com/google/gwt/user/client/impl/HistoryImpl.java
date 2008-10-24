@@ -17,12 +17,12 @@ package com.google.gwt.user.client.impl;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.AbstractEvent;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.HistoryChangeEvent;
-import com.google.gwt.user.client.HistoryChangeHandler;
 
 /**
  * Native implementation associated with
@@ -35,21 +35,21 @@ public abstract class HistoryImpl {
   private static HandlerManager handlerManager;
 
   /**
-   * Adds a {@link HistoryChangeEvent} handler to be informed of changes to the
+   * Adds a {@link ValueChangeEvent} handler to be informed of changes to the
    * browser's history stack.
    * 
    * @param handler the handler
    */
-  public static HandlerRegistration addHistoryChangeHandler(
-      HistoryChangeHandler handler) {
-    return addHandler(HistoryChangeEvent.TYPE, handler);
+  public static HandlerRegistration addValueChangeHandler(
+      ValueChangeHandler<String> handler) {
+    return addHandler(ValueChangeEvent.TYPE, handler);
   }
 
   /**
-   * Fires the {@link HistoryChangeEvent} to all handlers with the given token.
+   * Fires the {@link ValueChangeEvent} to all handlers with the given tokens.
    */
-  public static void fireHistoryChangedImpl(String historyToken) {
-    fireEvent(new HistoryChangeEvent(historyToken));
+  public static void fireHistoryChangedImpl(String oldToken, String newToken) {
+    fireEvent(new ValueChangeEvent<String>(oldToken, newToken));
   }
 
   /**
@@ -105,19 +105,19 @@ public abstract class HistoryImpl {
     }
   }
 
-  private static void fireHistoryChanged(String historyToken) {
+  private static void fireHistoryChanged(String oldToken, String newToken) {
     UncaughtExceptionHandler handler = GWT.getUncaughtExceptionHandler();
     if (handler != null) {
-      fireHistoryChangedAndCatch(historyToken, handler);
+      fireHistoryChangedAndCatch(oldToken, newToken, handler);
     } else {
-      fireHistoryChangedImpl(historyToken);
+      fireHistoryChangedImpl(oldToken, newToken);
     }
   }
 
-  private static void fireHistoryChangedAndCatch(String historyToken,
-      UncaughtExceptionHandler handler) {
+  private static void fireHistoryChangedAndCatch(String oldToken,
+      String newToken, UncaughtExceptionHandler handler) {
     try {
-      fireHistoryChangedImpl(historyToken);
+      fireHistoryChangedImpl(oldToken, newToken);
     } catch (Throwable e) {
       handler.onUncaughtException(e);
     }
@@ -126,22 +126,24 @@ public abstract class HistoryImpl {
   public abstract boolean init();
 
   public final void newItem(String historyToken, boolean issueEvent) {
+    String oldToken = getToken();
     historyToken = (historyToken == null) ? "" : historyToken;
     if (!historyToken.equals(getToken())) {
       setToken(historyToken);
       nativeUpdate(historyToken);
       if (issueEvent) {
-        fireHistoryChangedImpl(historyToken);
+        fireHistoryChangedImpl(oldToken, historyToken);
       }
     }
   }
 
   public final void newItemOnEvent(String historyToken) {
+    String oldToken = getToken();
     historyToken = (historyToken == null) ? "" : historyToken;
     if (!historyToken.equals(getToken())) {
       setToken(historyToken);
       nativeUpdateOnEvent(historyToken);
-      fireHistoryChanged(historyToken);
+      fireHistoryChanged(oldToken, historyToken);
     }
   }
 

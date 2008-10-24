@@ -16,6 +16,7 @@
 package com.google.gwt.user.client;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.impl.HistoryImpl;
 
@@ -29,8 +30,8 @@ import com.google.gwt.user.client.impl.HistoryImpl;
  * <p>
  * In order to receive notification of user-directed changes to the current
  * history item, implement the
- * {@link com.google.gwt.user.client.HistoryChangeHandler} interface and attach
- * it via {@link #addHistoryListener}.
+ * {@link ValueChangeHandler} interface and attach
+ * it via {@link #addValueChangeHandler(ValueChangeHandler)}.
  * </p>
  * 
  * <p>
@@ -42,7 +43,7 @@ import com.google.gwt.user.client.impl.HistoryImpl;
  * <h3>URL Encoding</h3>
  * Any valid characters may be used in the history token and will survive
  * round-trips through {@link #newItem(String)} to {@link #getToken()}/
- * {@link HistoryChangeHandler#onHistoryChanged(HistoryChangeEvent)},
+ * {@link ValueChangeHandler#onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)},
  * but most will be encoded in the user-visible URL. The following US-ASCII
  * characters are not encoded on any currently supported browser (but may be in
  * the future due to future browser changes):
@@ -74,17 +75,6 @@ public class History {
   }
 
   /**
-   * Adds a {@link HistoryChangeEvent} handler to be informed of changes to the
-   * browser's history stack.
-   * 
-   * @param handler the handler
-   */
-  public static HandlerRegistration addHistoryChangeHandler(
-      HistoryChangeHandler handler) {
-    return HistoryImpl.addHistoryChangeHandler(handler);
-  }
-
-  /**
    * Adds a listener to be informed of changes to the browser's history stack.
    * 
    * @param listener the listener to be added
@@ -92,6 +82,17 @@ public class History {
   @Deprecated
   public static void addHistoryListener(HistoryListener listener) {
     L.HistoryChange.add(listener);
+  }
+
+  /**
+   * Adds a {@link com.google.gwt.event.logical.shared.ValueChangeEvent} handler
+   * to be informed of changes to the browser's history stack.
+   * 
+   * @param handler the handler
+   */
+  public static HandlerRegistration addValueChangeHandler(
+      ValueChangeHandler<String> handler) {
+    return HistoryImpl.addValueChangeHandler(handler);
   }
 
   /**
@@ -104,14 +105,16 @@ public class History {
   }-*/;
 
   /**
-   * Fire {@link HistoryChangeHandler#onHistoryChanged(HistoryChangeEvent)}
+   * Fire
+   * {@link ValueChangeHandler#onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)}
    * events with the current history state. This is most often called at the end
    * of an application's
    * {@link com.google.gwt.core.client.EntryPoint#onModuleLoad()} to inform
-   * history listeners of the initial application state.
+   * history handlers of the initial application state.
    */
   public static void fireCurrentHistoryState() {
-    HistoryImpl.fireHistoryChangedImpl(getToken());
+    String token = getToken();
+    HistoryImpl.fireHistoryChangedImpl(null, token);
   }
 
   /**
@@ -123,10 +126,10 @@ public class History {
   }-*/;
 
   /**
-   * Gets the current history token. The listener will not receive a
-   * {@link HistoryChangeHandler#onHistoryChanged(HistoryChangeEvent)} event for
-   * the initial token; requiring that an application request the token
-   * explicitly on startup gives it an opportunity to run different
+   * Gets the current history token. The handler will not receive a
+   * {@link ValueChangeHandler#onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)}
+   * event for the initial token; requiring that an application request the
+   * token explicitly on startup gives it an opportunity to run different
    * initialization code in the presence or absence of an initial token.
    * 
    * @return the initial token, or the empty string if none is present.
@@ -139,8 +142,8 @@ public class History {
    * Adds a new browser history entry. In hosted mode, the 'back' and 'forward'
    * actions are accessible via the standard Alt-Left and Alt-Right keystrokes.
    * Calling this method will cause
-   * {@link HistoryChangeHandler#onHistoryChanged(HistoryChangeEvent)} to be
-   * called as well.
+   * {@link ValueChangeHandler#onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)}
+   * to be called as well.
    * 
    * @param historyToken the token to associate with the new history item
    */
@@ -152,12 +155,12 @@ public class History {
    * Adds a new browser history entry. In hosted mode, the 'back' and 'forward'
    * actions are accessible via the standard Alt-Left and Alt-Right keystrokes.
    * Calling this method will cause
-   * {@link HistoryChangeHandler#onHistoryChanged(HistoryChangeEvent)} to be
-   * called as well if and only if issueEvent is true.
+   * {@link ValueChangeHandler#onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)}
+   * to be called as well if and only if issueEvent is true.
    * 
    * @param historyToken the token to associate with the new history item
    * @param issueEvent true if a
-   *          {@link HistoryChangeHandler#onHistoryChanged(HistoryChangeEvent)}
+   *          {@link ValueChangeHandler#onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)}
    *          event should be issued
    */
   public static void newItem(String historyToken, boolean issueEvent) {
@@ -167,7 +170,7 @@ public class History {
   }
 
   /**
-   * Call all history listeners with the specified token. Note that this does
+   * Call all history handlers with the specified token. Note that this does
    * not change the history system's idea of the current state and is only kept
    * for backward compatibility. To fire history events for the initial state of
    * the application, instead call {@link #fireCurrentHistoryState()} from the
@@ -179,7 +182,8 @@ public class History {
    */
   @Deprecated
   public static void onHistoryChanged(String historyToken) {
-    HistoryImpl.fireHistoryChangedImpl(historyToken);
+    String oldToken = getToken();
+    HistoryImpl.fireHistoryChangedImpl(oldToken, historyToken);
   }
 
   /**

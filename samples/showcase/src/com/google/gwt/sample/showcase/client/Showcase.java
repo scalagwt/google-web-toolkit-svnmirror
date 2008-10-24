@@ -27,6 +27,8 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.sample.showcase.client.content.i18n.CwConstantsExample;
 import com.google.gwt.sample.showcase.client.content.i18n.CwConstantsWithLookupExample;
@@ -65,8 +67,6 @@ import com.google.gwt.sample.showcase.client.content.widgets.CwHyperlink;
 import com.google.gwt.sample.showcase.client.content.widgets.CwRadioButton;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.HistoryChangeEvent;
-import com.google.gwt.user.client.HistoryChangeHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.HTML;
@@ -207,9 +207,9 @@ public class Showcase implements EntryPoint {
     setupMainMenu(constants);
 
     // Setup a history handler to reselect the associate menu item
-    final HistoryChangeHandler historyHandler = new HistoryChangeHandler() {
-      public void onHistoryChanged(HistoryChangeEvent event) {
-        TreeItem item = itemTokens.get(event.getHistoryToken());
+    final ValueChangeHandler<String> historyHandler = new ValueChangeHandler<String>() {
+      public void onValueChange(ValueChangeEvent<String> event) {
+        TreeItem item = itemTokens.get(event.getNewValue());
         if (item == null) {
           item = app.getMainMenu().getItem(0).getChild(0);
         }
@@ -222,7 +222,7 @@ public class Showcase implements EntryPoint {
         displayContentWidget(itemWidgets.get(item));
       }
     };
-    History.addHistoryChangeHandler(historyHandler);
+    History.addValueChangeHandler(historyHandler);
 
     // Add a handler that sets the content widget when a menu item is selected
     app.addSelectionHandler(new SelectionHandler<TreeItem>() {
@@ -236,9 +236,8 @@ public class Showcase implements EntryPoint {
     });
 
     // Show the initial example
-    String initToken = History.getToken();
-    if (initToken.length() > 0) {
-      historyHandler.onHistoryChanged(new HistoryChangeEvent(initToken));
+    if (History.getToken().length() > 0) {
+      History.fireCurrentHistoryState();
     } else {
       // Use the first token available
       TreeItem firstItem = app.getMainMenu().getItem(0).getChild(0);

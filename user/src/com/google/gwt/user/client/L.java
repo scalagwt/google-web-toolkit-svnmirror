@@ -20,6 +20,8 @@ import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.AbstractEvent.Type;
@@ -34,22 +36,22 @@ import java.util.EventListener;
 @Deprecated
 abstract class L<ListenerType> implements EventHandler {
   public static class HistoryChange extends L<HistoryListener> implements
-      HistoryChangeHandler {
+      ValueChangeHandler<String> {
     @Deprecated
     public static void add(HistoryListener listener) {
-      History.addHistoryChangeHandler(new HistoryChange(listener));
+      History.addValueChangeHandler(new HistoryChange(listener));
     }
 
     public static void remove(HandlerManager manager, HistoryListener listener) {
-      baseRemove(manager, listener, HistoryChangeEvent.TYPE);
+      baseRemove(manager, listener, ValueChangeEvent.TYPE);
     }
 
     protected HistoryChange(HistoryListener listener) {
       super(listener);
     }
 
-    public void onHistoryChanged(HistoryChangeEvent event) {
-      listener.onHistoryChanged(event.getHistoryToken());
+    public void onValueChange(ValueChangeEvent<String> event) {
+      listener.onHistoryChanged(event.getNewValue());
     }
   }
 
