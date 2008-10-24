@@ -133,7 +133,7 @@ public class CwBasicText extends ContentWidget {
    * Create a TextBox example that includes the text box and an optional
    * handler that updates a Label with the currently selected text.
    * 
-   * @param textBox the text box to listen to
+   * @param textBox the text box to handle
    * @param addSelection add handlers to update label
    * @return the Label that will be updated
    */
