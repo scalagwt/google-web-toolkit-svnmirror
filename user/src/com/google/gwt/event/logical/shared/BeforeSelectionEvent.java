@@ -72,7 +72,7 @@ public class BeforeSelectionEvent<ItemType> extends AbstractEvent {
    * 
    * @return true if the event has been canceled.
    */
-  public boolean isCancelled() {
+  public boolean isCanceled() {
     return canceled;
   }
 

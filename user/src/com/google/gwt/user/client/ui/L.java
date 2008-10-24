@@ -135,6 +135,38 @@ abstract class L<ListenerType> implements EventHandler {
     }
   }
 
+  public static class Form extends L<FormHandler> implements
+      FormPanel.SubmitHandler, FormPanel.SubmitCompleteHandler {
+
+    public static void add(FormPanel source, FormHandler listener) {
+      Form handlers = new Form(listener);
+      source.addSubmitHandler(handlers);
+      source.addSubmitCompleteHandler(handlers);
+    }
+
+    public static void remove(Widget eventSource, FormHandler listener) {
+      baseRemove(eventSource, listener, FormPanel.SubmitEvent.TYPE,
+          FormPanel.SubmitCompleteEvent.TYPE);
+    }
+
+    protected Form(FormHandler listener) {
+      super(listener);
+    }
+
+    public void onSubmit(FormPanel.SubmitEvent event) {
+      FormSubmitEvent fse = new FormSubmitEvent((FormPanel) event.getSource());
+      listener.onSubmit(fse);
+      if (fse.isSetCancelledCalled()) {
+        event.setCanceled(fse.isCancelled());
+      }
+    }
+
+    public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
+      listener.onSubmitComplete(new FormSubmitCompleteEvent(
+          (FormPanel) event.getSource(), event.getResults()));
+    }
+  }
+
   public static class Tab extends L<TabListener> implements
       SelectionHandler<Integer>, BeforeSelectionHandler<Integer> {
     @Deprecated

@@ -322,7 +322,7 @@ public class TabBar extends Composite implements SourcesTabEvents,
     BeforeSelectionEvent<Integer> beforeEvent = new BeforeSelectionEvent<Integer>(
         index);
     fireEvent(beforeEvent);
-    if (beforeEvent.isCancelled()) {
+    if (beforeEvent.isCanceled()) {
       return false;
     }
 

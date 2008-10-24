@@ -364,7 +364,7 @@ public class TabPanel extends Composite implements TabListener,
     BeforeSelectionEvent<Integer> event = new BeforeSelectionEvent<Integer>(
         tabIndex);
     fireEvent(event);
-    return !event.isCancelled();
+    return !event.isCanceled();
   }
 
   public void onSelection(SelectionEvent<Integer> event) {
