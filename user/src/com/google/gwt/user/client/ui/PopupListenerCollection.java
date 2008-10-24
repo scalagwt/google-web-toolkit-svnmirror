@@ -32,6 +32,7 @@ public class PopupListenerCollection extends ArrayList<PopupListener> {
    * @param autoClosed <code>true</code> if the popup was automatically
    *          closed; <code>false</code> if it was closed programmatically.
    */
+  @Deprecated
   public void firePopupClosed(PopupPanel sender, boolean autoClosed) {
     for (PopupListener listener : this) {
       listener.onPopupClosed(sender, autoClosed);

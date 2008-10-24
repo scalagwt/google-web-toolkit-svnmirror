@@ -19,6 +19,7 @@ package com.google.gwt.user.client.ui;
  * A widget that implements this interface sources the events defined by the
  * {@link com.google.gwt.user.client.ui.TableListener} interface.
  */
+@Deprecated
 public interface SourcesTableEvents {
 
   /**
@@ -26,6 +27,7 @@ public interface SourcesTableEvents {
    * 
    * @param listener the listener interface to add
    */
+  @Deprecated
   void addTableListener(TableListener listener);
 
   /**
@@ -33,5 +35,6 @@ public interface SourcesTableEvents {
    * 
    * @param listener the listener interface to remove
    */
+  @Deprecated
   void removeTableListener(TableListener listener);
 }

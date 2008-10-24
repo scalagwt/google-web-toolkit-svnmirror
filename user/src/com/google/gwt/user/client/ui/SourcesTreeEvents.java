@@ -19,6 +19,7 @@ package com.google.gwt.user.client.ui;
  * A widget that implements this interface sources the events defined by the
  * {@link com.google.gwt.user.client.ui.TreeListener} interface.
  */
+@Deprecated
 public interface SourcesTreeEvents {
 
   /**
@@ -26,6 +27,7 @@ public interface SourcesTreeEvents {
    * 
    * @param listener the listener interface to add
    */
+  @Deprecated
   void addTreeListener(TreeListener listener);
 
   /**
@@ -33,5 +35,6 @@ public interface SourcesTreeEvents {
    * 
    * @param listener the listener interface to remove
    */
+  @Deprecated
   void removeTreeListener(TreeListener listener);
 }

@@ -19,6 +19,7 @@ package com.google.gwt.user.client.ui;
  * A widget that implements this interface fires the events defined by the
  * {@link SuggestionHandler} interface.
  */
+@Deprecated
 public interface FiresSuggestionEvents {
 
   /**
@@ -26,6 +27,7 @@ public interface FiresSuggestionEvents {
    * 
    * @param handler the handler to add
    */
+  @Deprecated
   void addEventHandler(SuggestionHandler handler);
 
   /**
@@ -33,5 +35,6 @@ public interface FiresSuggestionEvents {
    * 
    * @param handler the handler to remove.
    */
+  @Deprecated
   void removeEventHandler(SuggestionHandler handler);
 }
