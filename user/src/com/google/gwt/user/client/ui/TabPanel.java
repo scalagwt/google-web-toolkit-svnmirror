@@ -15,6 +15,14 @@
  */
 package com.google.gwt.user.client.ui;
 
+import com.google.gwt.event.logical.shared.BeforeSelectionEvent;
+import com.google.gwt.event.logical.shared.BeforeSelectionHandler;
+import com.google.gwt.event.logical.shared.HasBeforeSelectionHandlers;
+import com.google.gwt.event.logical.shared.HasSelectionHandlers;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
+
 import java.util.Iterator;
 
 /**
@@ -47,7 +55,9 @@ import java.util.Iterator;
  * </p>
  */
 public class TabPanel extends Composite implements TabListener,
-    SourcesTabEvents, HasWidgets, HasAnimation, IndexedPanel {
+    SourcesTabEvents, HasWidgets, HasAnimation, IndexedPanel,
+    HasBeforeSelectionHandlers<Integer>, HasSelectionHandlers<Integer>,
+    BeforeSelectionHandler<Integer>, SelectionHandler<Integer> {
   /**
    * This extension of DeckPanel overrides the public mutator methods to prevent
    * external callers from adding to the state of the DeckPanel.
@@ -179,7 +189,7 @@ public class TabPanel extends Composite implements TabListener,
 
   private UnmodifiableTabBar tabBar = new UnmodifiableTabBar();
   private TabbedDeckPanel deck = new TabbedDeckPanel(tabBar);
-  private TabListenerCollection tabListeners;
+  private int oldIndex = -1;
 
   /**
    * Creates an empty tab panel.
@@ -192,7 +202,8 @@ public class TabPanel extends Composite implements TabListener,
     panel.setCellHeight(deck, "100%");
     tabBar.setWidth("100%");
 
-    tabBar.addTabListener(this);
+    tabBar.addBeforeSelectionHandler(this);
+    tabBar.addSelectionHandler(this);
     initWidget(panel);
     setStyleName("gwt-TabPanel");
     deck.setStyleName("gwt-TabPanelBottom");
@@ -239,11 +250,19 @@ public class TabPanel extends Composite implements TabListener,
     insert(w, tabWidget, getWidgetCount());
   }
 
+  public HandlerRegistration addBeforeSelectionHandler(
+      BeforeSelectionHandler<Integer> handler) {
+    return addHandler(BeforeSelectionEvent.TYPE, handler);
+  }
+
+  public HandlerRegistration addSelectionHandler(
+      SelectionHandler<Integer> handler) {
+    return addHandler(SelectionEvent.TYPE, handler);
+  }
+
+  @Deprecated
   public void addTabListener(TabListener listener) {
-    if (tabListeners == null) {
-      tabListeners = new TabListenerCollection();
-    }
-    tabListeners.add(listener);
+    L.Tab.add(this, listener);
   }
 
   public void clear() {
@@ -335,18 +354,29 @@ public class TabPanel extends Composite implements TabListener,
     return deck.iterator();
   }
 
-  public boolean onBeforeTabSelected(SourcesTabEvents sender, int tabIndex) {
-    if (tabListeners != null) {
-      return tabListeners.fireBeforeTabSelected(this, tabIndex);
+  public void onBeforeSelection(BeforeSelectionEvent<Integer> event) {
+    oldIndex = event.getOldValue().intValue();
+    if (!onBeforeTabSelected(tabBar, event.getNewValue().intValue())) {
+      event.cancel();
     }
-    return true;
   }
 
+  @Deprecated
+  public boolean onBeforeTabSelected(SourcesTabEvents sender, int tabIndex) {
+    BeforeSelectionEvent<Integer> event = new BeforeSelectionEvent<Integer>(
+        oldIndex, tabIndex);
+    fireEvent(event);
+    return !event.isCancelled();
+  }
+
+  public void onSelection(SelectionEvent<Integer> event) {
+    onTabSelected(tabBar, event.getSelectedItem().intValue());
+  }
+
+  @Deprecated
   public void onTabSelected(SourcesTabEvents sender, int tabIndex) {
     deck.showWidget(tabIndex);
-    if (tabListeners != null) {
-      tabListeners.fireTabSelected(this, tabIndex);
-    }
+    fireEvent(new SelectionEvent<Integer>(tabIndex));
   }
 
   public boolean remove(int index) {
@@ -364,10 +394,9 @@ public class TabPanel extends Composite implements TabListener,
     return deck.remove(widget);
   }
 
+  @Deprecated
   public void removeTabListener(TabListener listener) {
-    if (tabListeners != null) {
-      tabListeners.remove(listener);
-    }
+    L.Tab.remove(this, listener);
   }
 
   /**

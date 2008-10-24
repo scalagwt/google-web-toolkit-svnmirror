@@ -118,6 +118,12 @@ abstract class L<ListenerType> implements EventHandler {
       source.addSelectionHandler(t);
     }
 
+    public static void add(TabPanel source, TabListener listener) {
+      Tab t = new Tab(listener);
+      source.addBeforeSelectionHandler(t);
+      source.addSelectionHandler(t);
+    }
+
     public static void remove(Widget eventSource, TabListener listener) {
       baseRemove(eventSource, listener, SelectionEvent.TYPE,
           BeforeSelectionEvent.TYPE);

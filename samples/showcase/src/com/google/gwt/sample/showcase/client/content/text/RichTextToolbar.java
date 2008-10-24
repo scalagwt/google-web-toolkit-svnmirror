@@ -164,10 +164,10 @@ public class RichTextToolbar extends Composite {
   }
 
   /**
-   * We use an inner EventListener class to avoid exposing event methods on the
+   * We use an inner EventHandler class to avoid exposing event methods on the
    * RichTextToolbar itself.
    */
-  private class EventListener implements ClickHandler, ChangeHandler,
+  private class EventHandler implements ClickHandler, ChangeHandler,
       KeyUpHandler {
 
     public void onChange(ChangeEvent event) {
@@ -260,7 +260,7 @@ public class RichTextToolbar extends Composite {
 
   private Images images = (Images) GWT.create(Images.class);
   private Strings strings = (Strings) GWT.create(Strings.class);
-  private EventListener listener = new EventListener();
+  private EventHandler handler = new EventHandler();
 
   private RichTextArea richText;
   private RichTextArea.BasicFormatter basic;
@@ -355,16 +355,16 @@ public class RichTextToolbar extends Composite {
       bottomPanel.add(fonts = createFontList());
       bottomPanel.add(fontSizes = createFontSizes());
 
-      // We only use these listeners for updating status, so don't hook them up
+      // We only use these handlers for updating status, so don't hook them up
       // unless at least basic editing is supported.
-      richText.addKeyUpHandler(listener);
-      richText.addClickHandler(listener);
+      richText.addKeyUpHandler(handler);
+      richText.addClickHandler(handler);
     }
   }
 
   private ListBox createColorList(String caption) {
     ListBox lb = new ListBox();
-    lb.addChangeHandler(listener);
+    lb.addChangeHandler(handler);
     lb.setVisibleItemCount(1);
 
     lb.addItem(caption);
@@ -379,7 +379,7 @@ public class RichTextToolbar extends Composite {
 
   private ListBox createFontList() {
     ListBox lb = new ListBox();
-    lb.addChangeHandler(listener);
+    lb.addChangeHandler(handler);
     lb.setVisibleItemCount(1);
 
     lb.addItem(strings.font(), "");
@@ -395,7 +395,7 @@ public class RichTextToolbar extends Composite {
 
   private ListBox createFontSizes() {
     ListBox lb = new ListBox();
-    lb.addChangeHandler(listener);
+    lb.addChangeHandler(handler);
     lb.setVisibleItemCount(1);
 
     lb.addItem(strings.size());
@@ -411,14 +411,14 @@ public class RichTextToolbar extends Composite {
 
   private PushButton createPushButton(AbstractImagePrototype img, String tip) {
     PushButton pb = new PushButton(img.createImage());
-    pb.addClickHandler(listener);
+    pb.addClickHandler(handler);
     pb.setTitle(tip);
     return pb;
   }
 
   private ToggleButton createToggleButton(AbstractImagePrototype img, String tip) {
     ToggleButton tb = new ToggleButton(img.createImage());
-    tb.addClickHandler(listener);
+    tb.addClickHandler(handler);
     tb.setTitle(tip);
     return tb;
   }

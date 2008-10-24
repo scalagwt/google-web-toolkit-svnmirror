@@ -57,10 +57,6 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.museum.client.common.AbstractIssue;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.WindowClosingEvent;
-import com.google.gwt.user.client.WindowClosingHandler;
-import com.google.gwt.user.client.WindowScrollEvent;
-import com.google.gwt.user.client.WindowScrollHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
@@ -334,8 +330,8 @@ public class TestFireEvents extends AbstractIssue {
       addDependentTest(WINDOW_EVENT_CLOSING, "window.onbeforeunload");
 
       // Add event handlers
-      Window.addWindowScrollHandler(new WindowScrollHandler() {
-        public void onWindowScroll(WindowScrollEvent event) {
+      Window.addWindowScrollHandler(new Window.ScrollHandler() {
+        public void onWindowScroll(Window.ScrollEvent event) {
           passTest(WINDOW_EVENT_SCROLL);
         }
       });
@@ -344,8 +340,8 @@ public class TestFireEvents extends AbstractIssue {
           passTest(WINDOW_EVENT_RESIZE);
         }
       });
-      Window.addWindowClosingHandler(new WindowClosingHandler() {
-        public void onWindowClosing(WindowClosingEvent event) {
+      Window.addWindowClosingHandler(new Window.ClosingHandler() {
+        public void onWindowClosing(Window.ClosingEvent event) {
           event.setMessage("Stay and verify that window.onbeforeunload() has passed");
           passTest(WINDOW_EVENT_CLOSING);
         }

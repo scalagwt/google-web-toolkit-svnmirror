@@ -19,6 +19,7 @@ package com.google.gwt.user.client.ui;
  * A widget that implements this interface sources the events defined by the
  * {@link com.google.gwt.user.client.ui.TabListener} interface.
  */
+@Deprecated
 public interface SourcesTabEvents {
 
   /**
@@ -26,6 +27,7 @@ public interface SourcesTabEvents {
    * 
    * @param listener the listener interface to add
    */
+  @Deprecated
   void addTabListener(TabListener listener);
 
   /**
@@ -33,5 +35,6 @@ public interface SourcesTabEvents {
    * 
    * @param listener the listener interface to remove
    */
+  @Deprecated
   void removeTabListener(TabListener listener);
 }
