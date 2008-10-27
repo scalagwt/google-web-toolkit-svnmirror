@@ -128,13 +128,13 @@ public abstract class HandlerTestBase extends GWTTestCase {
 
   void assertFired(EventHandler... handler) {
     for (int i = 0; i < handler.length; i++) {
-      assertTrue(handler[i] + " was not fired", active.contains(handler[i]));
+      assertTrue(handler[i] + " should have fired", active.contains(handler[i]));
     }
   }
 
   void assertNotFired(EventHandler... handler) {
     for (int i = 0; i < handler.length; i++) {
-      assertFalse(handler[i] + " was fired and should have been",
+      assertFalse(handler[i] + " should not have fired",
           active.contains(handler[i]));
     }
   }

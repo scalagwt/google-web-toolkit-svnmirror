@@ -25,7 +25,7 @@ import com.google.gwt.event.shared.AbstractEvent.Type;
 public class HandlerRegistration {
 
   private HandlerManager manager;
-  private EventHandler handler;
+  EventHandler handler;
   private Type type;
 
   /**
@@ -47,5 +47,9 @@ public class HandlerRegistration {
    */
   public void removeHandler() {
     manager.removeHandler(type, handler);
+  }
+
+   EventHandler getHandler() {
+     return handler;
   }
 }

@@ -18,6 +18,9 @@ package com.google.gwt.event.shared;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.AbstractEvent.Type;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Manager responsible for adding handlers to event sources and firing those
  * handlers on passed in events.
@@ -65,6 +68,12 @@ public class HandlerManager {
   // source of the event.
   private final Object source;
 
+  private int firingDepth = 0;
+
+  private List<Object> removalQueue;
+
+  private ArrayList<Object> addQueue;
+
   /**
    * Creates a handler manager with the given source.
    * 
@@ -92,10 +101,10 @@ public class HandlerManager {
    */
   public <HandlerType extends EventHandler> HandlerRegistration addHandler(
       AbstractEvent.Type<?, HandlerType> type, final HandlerType handler) {
-    if (useJs) {
-      javaScriptRegistry.addHandler(type, handler);
+    if (firingDepth > 0) {
+      enqueueAdd(type, handler);
     } else {
-      javaRegistry.addHandler(type, handler);
+      doAdd(type, handler);
     }
     return new HandlerRegistration(this, type, handler);
   }
@@ -123,10 +132,18 @@ public class HandlerManager {
     revive(event);
     Object oldSource = event.getSource();
     event.setSource(source);
-    if (useJs) {
-      javaScriptRegistry.fireEvent(event);
-    } else {
-      javaRegistry.fireEvent(event);
+    try {
+      firingDepth++;
+      if (useJs) {
+        javaScriptRegistry.fireEvent(event);
+      } else {
+        javaRegistry.fireEvent(event);
+      }
+    } finally {
+      firingDepth--;
+      if (firingDepth == 0) {
+        handleQueuedAddsAndRemoves();
+      }
     }
     if (oldSource == null) {
       // This was my event, so I should kill it now that I'm done.
@@ -160,7 +177,7 @@ public class HandlerManager {
    * @param type the event type
    * @return the number of registered handlers
    */
-  public int getHandlerCount(Type type) {
+  public int getHandlerCount(Type<?,?> type) {
     if (useJs) {
       return javaScriptRegistry.getHandlerCount(type);
     } else {
@@ -174,7 +191,7 @@ public class HandlerManager {
    * @param type the event type
    * @return are handlers listening on the given event type
    */
-  public boolean isEventHandled(Type type) {
+  public boolean isEventHandled(Type<?,?> type) {
     return getHandlerCount(type) > 0;
   }
 
@@ -190,10 +207,65 @@ public class HandlerManager {
    */
   public <HandlerType extends EventHandler> void removeHandler(
       AbstractEvent.Type<?, HandlerType> type, final HandlerType handler) {
+    if (firingDepth > 0) {
+      enqueueRemove(type, handler);
+    } else {
+      doRemove(type, handler);
+    }
+  }
+
+  private <H extends EventHandler> void doAdd(AbstractEvent.Type<?, H> type,
+      final H handler) {
+    if (useJs) {
+      javaScriptRegistry.addHandler(type, handler);
+    } else {
+      javaRegistry.addHandler(type, handler);
+    }
+  }
+
+  private <H extends EventHandler> void doRemove(AbstractEvent.Type<?, H> type,
+      final H handler) {
     if (useJs) {
       javaScriptRegistry.removeHandler(type, handler);
     } else {
       javaRegistry.removeHandler(type, handler);
+    }
+  }
+  
+  private <H extends EventHandler> void enqueueAdd(
+      AbstractEvent.Type<?, H> type, final H handler) {
+    if (addQueue == null) {
+      addQueue = new ArrayList<Object>();
+      addQueue.add(type);
+      addQueue.add(handler);
+    }
+  }
+  
+  private <H extends EventHandler> void enqueueRemove(
+      AbstractEvent.Type<?, H> type, final H handler) {
+    if (removalQueue == null) {
+      removalQueue = new ArrayList<Object>();
+      removalQueue.add(type);
+      removalQueue.add(handler);
+    }
+  }
+  
+  @SuppressWarnings("unchecked")
+  private void handleQueuedAddsAndRemoves() {
+    // Do Adds first in case someone does a quick add/remove
+    if (addQueue != null) {
+      for (int i = 0; i < addQueue.size(); i += 2) {
+        doAdd((AbstractEvent.Type) addQueue.get(i),
+            (EventHandler) addQueue.get(i + 1));
+      }
+      addQueue = null;
+    }
+    if (removalQueue != null) {
+      for (int i = 0; i < removalQueue.size(); i += 2) {
+        doRemove((AbstractEvent.Type) removalQueue.get(i),
+            (EventHandler) removalQueue.get(i + 1));
+      }
+      removalQueue = null;
     }
   }
 }

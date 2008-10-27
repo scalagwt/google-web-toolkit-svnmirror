@@ -84,6 +84,85 @@ public class HandlerManagerTest extends HandlerTestBase {
     assertNotFired(mouse1, mouse2, mouse3);
     assertFired(click1, click2, adaptor1);
   }
+  
+  public void testConcurrentAdd() {
+    final HandlerManager manager = new HandlerManager("bogus source");
+    final MouseDownHandler two = new MouseDownHandler() {
+      public void onMouseDown(MouseDownEvent event) {
+        add(this);
+      }
+    };
+    MouseDownHandler one = new MouseDownHandler() {
+      public void onMouseDown(MouseDownEvent event) {
+        manager.addHandler(MouseDownEvent.TYPE, two);
+        add(this);
+      }
+    };
+    manager.addHandler(MouseDownEvent.TYPE, one);
+    manager.addHandler(MouseDownEvent.TYPE, mouse1);
+    manager.addHandler(MouseDownEvent.TYPE, mouse2);
+    manager.addHandler(MouseDownEvent.TYPE, mouse3);
+    manager.fireEvent(new MouseDownEvent());
+    assertFired(one, mouse1, mouse2, mouse3);
+    assertNotFired(two);
+    
+    reset();
+    manager.fireEvent(new MouseDownEvent());
+    assertFired(one, two, mouse1, mouse2, mouse3);
+  }
+
+  class ShyHandler implements MouseDownHandler {
+    HandlerRegistration r;
+    public void onMouseDown(MouseDownEvent event) {
+      add(this);
+      r.removeHandler();
+    }
+  }
+  
+  public void testConcurrentRemove() {
+    final HandlerManager manager = new HandlerManager("bogus source");
+
+    ShyHandler h = new ShyHandler();
+
+    manager.addHandler(MouseDownEvent.TYPE, mouse1);
+    h.r = manager.addHandler(MouseDownEvent.TYPE, h);
+    manager.addHandler(MouseDownEvent.TYPE, mouse2);
+    manager.addHandler(MouseDownEvent.TYPE, mouse3);
+    
+    manager.fireEvent(new MouseDownEvent());
+    assertFired(h, mouse1, mouse2, mouse3);
+    reset();
+    manager.fireEvent(new MouseDownEvent());
+    assertFired(mouse1, mouse2, mouse3);
+    assertNotFired(h);
+  }
+  
+  public void testConcurrentAddAndRemoveByNastyUsersTryingToHurtUs() {
+    final HandlerManager manager = new HandlerManager("bogus source");
+    final MouseDownHandler two = new MouseDownHandler() {
+      public void onMouseDown(MouseDownEvent event) {
+        add(this);
+      }
+    };
+    MouseDownHandler one = new MouseDownHandler() {
+      public void onMouseDown(MouseDownEvent event) {
+        manager.addHandler(MouseDownEvent.TYPE, two).removeHandler();
+        add(this);
+      }
+    };
+    manager.addHandler(MouseDownEvent.TYPE, one);
+    manager.addHandler(MouseDownEvent.TYPE, mouse1);
+    manager.addHandler(MouseDownEvent.TYPE, mouse2);
+    manager.addHandler(MouseDownEvent.TYPE, mouse3);
+    manager.fireEvent(new MouseDownEvent());
+    assertFired(one, mouse1, mouse2, mouse3);
+    assertNotFired(two);
+    
+    reset();
+    manager.fireEvent(new MouseDownEvent());
+    assertFired(one, mouse1, mouse2, mouse3);
+    assertNotFired(two);
+  }
 
   public void testMultiFiring() {
 
