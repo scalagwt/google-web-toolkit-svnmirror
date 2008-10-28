@@ -20,14 +20,14 @@ import com.google.gwt.event.shared.EventHandler;
 /**
  * Handler interface for {@link OpenEvent} events.
  * 
- * @param <TargetType> the type of the object being opened
+ * @param <T> the type being opened
  */
-public interface OpenHandler<TargetType> extends EventHandler {
+public interface OpenHandler<T> extends EventHandler {
 
   /**
    * Called when {@link OpenEvent} is fired.
    * 
    * @param event the {@link OpenEvent} that was fired
    */
-  void onOpen(OpenEvent<TargetType> event);
+  void onOpen(OpenEvent<T> event);
 }

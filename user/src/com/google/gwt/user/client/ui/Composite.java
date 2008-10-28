@@ -105,7 +105,6 @@ public abstract class Composite extends Widget {
       sinkEvents(bitsToAdd);
     }
      
-    
     // Call onLoad() directly, because we're not calling super.onAttach().
     onLoad();
   }

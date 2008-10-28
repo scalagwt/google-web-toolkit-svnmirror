@@ -16,10 +16,15 @@
 
 package com.google.gwt.event.dom.client;
 
+import com.google.gwt.event.shared.EventHandler;
+
 /**
  * Key up and key down are both events based upon a given key code.
+ * 
+ * @param <H> handler type
  */
-public abstract class KeyCodeEvent extends KeyEvent implements HasKeyCodes {
+public abstract class KeyCodeEvent<H extends EventHandler> extends KeyEvent<H>
+    implements HasKeyCodes {
   /**
    * Does the key code represent an arrow key?
    * 
@@ -53,7 +58,7 @@ public abstract class KeyCodeEvent extends KeyEvent implements HasKeyCodes {
    * @return is the key code alpha numeric.
    */
   public boolean isAlphaNumeric() {
-    int keycode = getKeyCode();
+    final int keycode = getKeyCode();
     return (48 <= keycode && keycode <= 57) || (65 <= keycode && keycode <= 90);
   }
 

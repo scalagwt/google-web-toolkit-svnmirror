@@ -19,6 +19,9 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.event.logical.shared.HasCloseHandlers;
+import com.google.gwt.event.logical.shared.HasHandlers;
+import com.google.gwt.event.logical.shared.HasResizeHandlers;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.shared.AbstractEvent;
@@ -39,6 +42,73 @@ import java.util.Map;
  * events.
  */
 public class Window {
+
+  /**
+   * Fired just before the browser window closes or navigates to a different
+   * site.
+   */
+  public static class ClosingEvent extends AbstractEvent<Window.ClosingHandler> {
+    /**
+     * The event type.
+     */
+    private static final Type<ClosingHandler> TYPE = new Type<ClosingHandler>();
+
+    static Type<ClosingHandler> getType() {
+      return TYPE;
+    }
+
+    /**
+     * The message to display to the user in an attempt to keep them on the
+     * page.
+     */
+    private String message = null;
+
+    /**
+     * Get the message that will be presented to the user in a confirmation
+     * dialog that asks the user whether or not she wishes to navigate away from
+     * the page.
+     * 
+     * @return the message to display to the user, or null
+     */
+    public String getMessage() {
+      return message;
+    }
+
+    /**
+     * Set the message to a <code>non-null</code> value to present a
+     * confirmation dialog that asks the user whether or not she wishes to
+     * navigate away from the page. If multiple handlers set the message, the
+     * last message will be displayed; all others will be ignored.
+     * 
+     * @param message the message to display to the user, or null
+     */
+    public void setMessage(String message) {
+      this.message = message;
+    }
+
+    @Override
+    protected void dispatch(ClosingHandler handler) {
+      handler.onWindowClosing(this);
+    }
+
+    @Override
+    protected Type<ClosingHandler> getAssociatedType() {
+      return TYPE;
+    }
+  }
+
+  /**
+   * Handler for {@link Window.ClosingEvent} events.
+   */
+  public interface ClosingHandler extends EventHandler {
+    /**
+     * Fired just before the browser window closes or navigates to a different
+     * site. No user-interface may be displayed during shutdown.
+     * 
+     * @param event the event
+     */
+    void onWindowClosing(Window.ClosingEvent event);
+  }
 
   /**
    * This class provides access to the browser's location's object. The location
@@ -233,81 +303,19 @@ public class Window {
     private Location() {
     }
   }
-  
-  /**
-   * Fired just before the browser window closes or navigates to a different site.
-   */
-  public static class ClosingEvent extends AbstractEvent {
-    /**
-     * The event type.
-     */
-    public static final Type<Window.ClosingEvent, Window.ClosingHandler> TYPE = new Type<Window.ClosingEvent, Window.ClosingHandler>() {
-      @Override
-      protected void fire(Window.ClosingHandler handler, Window.ClosingEvent event) {
-        handler.onWindowClosing(event);
-      }
-    };
-
-    /**
-     * The message to display to the user in an attempt to keep them on the page.
-     */
-    private String message = null;
-
-    /**
-     * Get the message that will be presented to the user in a confirmation dialog
-     * that asks the user whether or not she wishes to navigate away from the
-     * page.
-     * 
-     * @return the message to display to the user, or null
-     */
-    public String getMessage() {
-      return message;
-    }
-
-    /**
-     * Set the message to a <code>non-null</code> value to present a confirmation
-     * dialog that asks the user whether or not she wishes to navigate away from
-     * the page. If multiple handlers set the message, the last message will be
-     * displayed; all others will be ignored.
-     * 
-     * @param message the message to display to the user, or null
-     */
-    public void setMessage(String message) {
-      this.message = message;
-    }
-
-    @Override
-    protected Type getType() {
-      return TYPE;
-    }
-  }
-
-  /**
-   * Handler for {@link Window.ClosingEvent} events.
-   */
-  public interface ClosingHandler extends EventHandler {
-    /**
-     * Fired just before the browser window closes or navigates to a different
-     * site. No user-interface may be displayed during shutdown.
-     * 
-     * @param event the event
-     */
-    void onWindowClosing(Window.ClosingEvent event);
-  }
 
   /**
    * Fired when the browser window is scrolled.
    */
-  public static class ScrollEvent extends AbstractEvent {
+  public static class ScrollEvent extends AbstractEvent<Window.ScrollHandler> {
     /**
      * The event type.
      */
-    public static final Type<Window.ScrollEvent, Window.ScrollHandler> TYPE = new Type<Window.ScrollEvent, Window.ScrollHandler>() {
-      @Override
-      protected void fire(Window.ScrollHandler handler, Window.ScrollEvent event) {
-        handler.onWindowScroll(event);
-      }
-    };
+    static final Type<Window.ScrollHandler> TYPE = new Type<Window.ScrollHandler>();
+
+    static Type<Window.ScrollHandler> getType() {
+      return TYPE;
+    }
 
     private int scrollLeft;
     private int scrollTop;
@@ -318,7 +326,7 @@ public class Window {
      * @param scrollLeft the left scroll position
      * @param scrollTop the top scroll position
      */
-    public ScrollEvent(int scrollLeft, int scrollTop) {
+    private ScrollEvent(int scrollLeft, int scrollTop) {
       this.scrollLeft = scrollLeft;
       this.scrollTop = scrollTop;
     }
@@ -342,11 +350,16 @@ public class Window {
     }
 
     @Override
-    protected Type getType() {
+    protected void dispatch(ScrollHandler handler) {
+      handler.onWindowScroll(this);
+    }
+
+    @Override
+    protected Type<ScrollHandler> getAssociatedType() {
       return TYPE;
     }
   }
-  
+
   /**
    * Handler for {@link Window.ScrollEvent} events.
    */
@@ -358,33 +371,55 @@ public class Window {
      */
     void onWindowScroll(Window.ScrollEvent event);
   }
-  
+
+  private static class WindowHandlers extends HandlerManager implements
+      HasCloseHandlers<Window>, HasResizeHandlers, HasHandlers {
+
+    public WindowHandlers() {
+      super(null);
+    }
+
+    public HandlerRegistration addCloseHandler(CloseHandler<Window> handler) {
+      return addHandler(CloseEvent.getType(), handler);
+    }
+
+    public HandlerRegistration addResizeHandler(ResizeHandler handler) {
+      return addHandler(ResizeEvent.getType(), handler);
+    }
+
+    public HandlerManager getHandlers() {
+      return this;
+    }
+  }
+
   private static boolean closeHandlersInitialized;
   private static boolean scrollHandlersInitialized;
   private static boolean resizeHandlersInitialized;
   private static final WindowImpl impl = GWT.create(WindowImpl.class);
 
-  private static HandlerManager handlerManager;
+  private static WindowHandlers handlers;
 
   /**
    * Adds a {@link CloseEvent} handler.
    * 
    * @param handler the handler
+   * @return returns the handler registration
    */
   public static HandlerRegistration addCloseHandler(CloseHandler<Window> handler) {
     maybeInitializeCloseHandlers();
-    return addHandler(CloseEvent.TYPE, handler);
+    return addHandler(CloseEvent.getType(), handler);
   }
 
   /**
    * Adds a {@link ResizeEvent} handler.
    * 
    * @param handler the handler
+   * @return returns the handler registration
    */
   public static HandlerRegistration addResizeHandler(ResizeHandler handler) {
     maybeInitializeCloseHandlers();
     maybeInitializeResizeHandlers();
-    return addHandler(ResizeEvent.TYPE, handler);
+    return addHandler(ResizeEvent.getType(), handler);
   }
 
   /**
@@ -401,11 +436,12 @@ public class Window {
    * Adds a {@link Window.ClosingEvent} handler.
    * 
    * @param handler the handler
+   * @return returns the handler registration
    */
   public static HandlerRegistration addWindowClosingHandler(
       ClosingHandler handler) {
     maybeInitializeCloseHandlers();
-    return addHandler(Window.ClosingEvent.TYPE, handler);
+    return addHandler(Window.ClosingEvent.getType(), handler);
   }
 
   /**
@@ -422,12 +458,13 @@ public class Window {
    * Adds a {@link Window.ScrollEvent} handler.
    * 
    * @param handler the handler
+   * @return returns the handler registration
    */
   public static HandlerRegistration addWindowScrollHandler(
       Window.ScrollHandler handler) {
     maybeInitializeCloseHandlers();
     maybeInitializeScrollHandlers();
-    return addHandler(Window.ScrollEvent.TYPE, handler);
+    return addHandler(Window.ScrollEvent.getType(), handler);
   }
 
   /**
@@ -560,7 +597,7 @@ public class Window {
    */
   @Deprecated
   public static void removeWindowCloseListener(WindowCloseListener listener) {
-    L.WindowClose.remove(getHandlers(), listener);
+    L.WindowClose.remove(handlers, listener);
   }
 
   /**
@@ -570,7 +607,7 @@ public class Window {
    */
   @Deprecated
   public static void removeWindowResizeListener(WindowResizeListener listener) {
-    L.WindowResize.remove(getHandlers(), listener);
+    L.WindowResize.remove(handlers, listener);
   }
 
   /**
@@ -580,7 +617,7 @@ public class Window {
    */
   @Deprecated
   public static void removeWindowScrollListener(WindowScrollListener listener) {
-    L.WindowScroll.remove(getHandlers(), listener);
+    L.WindowScroll.remove(handlers, listener);
   }
 
   /**
@@ -669,20 +706,8 @@ public class Window {
    * @return {@link HandlerRegistration} used to remove the handler
    */
   private static <HandlerType extends EventHandler> HandlerRegistration addHandler(
-      AbstractEvent.Type<?, HandlerType> type, final HandlerType handler) {
-    return ensureHandlers().addHandler(type, handler);
-  }
-
-  /**
-   * Returns the {@link HandlerManager}, ensuring it exists.
-   * 
-   * @return the handler manager
-   */
-  private static HandlerManager ensureHandlers() {
-    if (handlerManager == null) {
-      handlerManager = new HandlerManager(null);
-    }
-    return handlerManager;
+      AbstractEvent.Type<HandlerType> type, final HandlerType handler) {
+    return getHandlers().addHandler(type, handler);
   }
 
   private static void fireClosedAndCatch(UncaughtExceptionHandler handler) {
@@ -695,7 +720,7 @@ public class Window {
 
   private static void fireClosedImpl() {
     if (closeHandlersInitialized) {
-      fireEvent(new CloseEvent<Window>(null));
+      CloseEvent.fire(getHandlers(), null);
     }
   }
 
@@ -722,9 +747,9 @@ public class Window {
    * 
    * @param event the event
    */
-  private static void fireEvent(AbstractEvent event) {
-    if (handlerManager != null) {
-      handlerManager.fireEvent(event);
+  private static void fireEvent(AbstractEvent<?> event) {
+    if (handlers != null) {
+      handlers.fireEvent(event);
     }
   }
 
@@ -738,7 +763,7 @@ public class Window {
 
   private static void fireResizedImpl() {
     if (resizeHandlersInitialized) {
-      fireEvent(new ResizeEvent(getClientWidth(), getClientHeight()));
+      ResizeEvent.fire(getHandlers(), getClientWidth(), getClientHeight());
     }
   }
 
@@ -756,13 +781,11 @@ public class Window {
     }
   }
 
-  /**
-   * Returns the {@link HandlerManager} used for event management.
-   * 
-   * @return the handler manager
-   */
-  private static HandlerManager getHandlers() {
-    return handlerManager;
+  private static WindowHandlers getHandlers() {
+    if (handlers == null) {
+      handlers = new WindowHandlers();
+    }
+    return handlers;
   }
 
   private static void maybeInitializeCloseHandlers() {

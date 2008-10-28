@@ -23,9 +23,10 @@ import com.google.gwt.user.client.Window;
 /**
  * Abstract class representing mouse events.
  * 
- * @param <T> event handler type
+ * @param <H> handler type
+ * 
  */
-public abstract class MouseEvent<T extends EventHandler> extends DomEvent {
+public abstract class MouseEvent<H extends EventHandler> extends DomEvent<H> {
 
   /**
    * The native Dom button codes.

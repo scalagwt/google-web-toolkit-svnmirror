@@ -20,22 +20,40 @@ import com.google.gwt.user.client.Event;
 /**
  * Represents a native mouse up event.
  */
-public class MouseUpEvent extends MouseEvent {
+public class MouseUpEvent extends MouseEvent<MouseUpHandler> {
 
   /**
-    Event type for mouse up events. Represents the meta-data associated with this event.
-  */
-  public static final Type<MouseUpEvent, MouseUpHandler> TYPE = new Type<MouseUpEvent,MouseUpHandler>(
-      Event.ONMOUSEUP, "mouseup", new MouseUpEvent()) {
-     @Override
-     public void fire(MouseUpHandler handler, MouseUpEvent event) {
-       handler.onMouseUp(event);
-     }
-   };
+   * Event type for mouse up events. Represents the meta-data associated with
+   * this event.
+   */
+  private static Type<MouseUpHandler> TYPE = new Type<MouseUpHandler>(
+      Event.ONMOUSEUP, "mouseup", new MouseUpEvent());
 
-   
- @Override
-  protected Type getType() {
+  /**
+   * Ensures the existence of the handler TYPE, so the system knows to start
+   * firing events and then returns it.
+   * 
+   * @return the handler TYPE
+   */
+  public static Type<MouseUpHandler> getType() {
+    return TYPE;
+  }
+
+  /**
+   * Protected constructor, use
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)}
+   * to fire click events.
+   */
+  protected MouseUpEvent() {
+  }
+
+  @Override
+  protected void dispatch(MouseUpHandler handler) {
+    handler.onMouseUp(this);
+  }
+
+  @Override
+  protected final Type<MouseUpHandler> getAssociatedType() {
     return TYPE;
   }
 

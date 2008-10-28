@@ -13,22 +13,21 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.google.gwt.event.logical.shared;
 
-import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.event.shared.HandlerManager;
 
 /**
- * A widget that implements this interface is a public source of
- * {@link ValueChangeEvent} events.
- * 
- * @param <I> the value about to be changed
+ * An object that implements this interface has a collection of handlers stored
+ * in a {@link HandlerManager}.
  */
-public interface HasValueChangeHandlers<I> {
+
+public interface HasHandlers {
   /**
-   * Adds a {@link ValueChangeEvent} handler.
+   * Gets this object's handlers.
    * 
-   * @param handler the handler
-   * @return the registration for the event
+   * @return the handlers
    */
-  HandlerRegistration addValueChangeHandler(ValueChangeHandler<I> handler);
+  HandlerManager getHandlers();
 }

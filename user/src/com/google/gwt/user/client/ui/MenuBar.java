@@ -296,7 +296,7 @@ public class MenuBar extends Widget implements PopupListener, HasAnimation {
   }
 
   /**
-   * Get the index of a {@link MenuItemSerpator}.
+   * Get the index of a {@link MenuItemSeparator}.
    * 
    * @return the index of the separator, or -1 if it is not contained by this
    *         MenuBar

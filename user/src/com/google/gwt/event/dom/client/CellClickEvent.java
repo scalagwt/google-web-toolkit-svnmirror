@@ -15,52 +15,79 @@
  */
 package com.google.gwt.event.dom.client;
 
+import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Event;
 
 /**
  * Represents a native cell click event.
  */
-public class CellClickEvent extends ClickEvent {
+public final class CellClickEvent extends DomEvent<CellClickHandler> {
 
   /**
    * Event type for cell click events. Represents the meta-data associated with
    * this event.
    */
-  public static final Type<CellClickEvent, CellClickHandler> TYPE = new Type<CellClickEvent, CellClickHandler>(
-      Event.ONCLICK) {
-    @Override
-    public void fire(CellClickHandler handler, CellClickEvent event) {
-      handler.onCellClick(event);
-    }
-  };
-
-  private int rowIndex;
-  private int cellIndex;
+  private static Type<CellClickHandler> HOOK;
 
   /**
-   * Constructor.
+   * Fires the cell click event.
    * 
+   * @param handlers to fire the click event to
    * @param nativeEvent native event
    * @param rowIndex row index
    * @param cellIndex cell index
    */
-  public CellClickEvent(Event nativeEvent, int rowIndex, int cellIndex) {
-    setNativeEvent(nativeEvent);
-    this.rowIndex = rowIndex;
-    this.cellIndex = cellIndex;
+  public static void fire(HandlerManager handlers, Event nativeEvent,
+      int rowIndex, int cellIndex) {
+    final CellClickEvent event = new CellClickEvent();
+    event.setNativeEvent(nativeEvent);
+    event.rowIndex = rowIndex;
+    event.cellIndex = cellIndex;
+    handlers.fireEvent(event);
   }
 
+  /**
+   * Ensures the existence of the handler hook, then returns it.
+   * 
+   * @return the handler hook
+   */
+  public static Type<CellClickHandler> getType() {
+    if (HOOK == null) {
+      HOOK = new Type<CellClickHandler>(Event.ONCLICK);
+    }
+    return HOOK;
+  }
+
+  private int rowIndex;
+
+  private int cellIndex;
+
+  /**
+   * Gets the cell index.
+   * 
+   * @return the cell index
+   */
   public int getCellIndex() {
     return cellIndex;
   }
 
+  /**
+   * Gets the row index.
+   * 
+   * @return the row index
+   */
   public int getRowIndex() {
     return rowIndex;
   }
 
   @Override
-  protected Type getType() {
-    return TYPE;
+  protected void dispatch(CellClickHandler handler) {
+    handler.onCellClick(this);
+  }
+
+  @Override
+  protected Type<CellClickHandler> getAssociatedType() {
+    return HOOK;
   }
 
 }

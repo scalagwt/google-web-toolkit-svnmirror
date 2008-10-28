@@ -92,7 +92,7 @@ public class History {
    */
   public static HandlerRegistration addValueChangeHandler(
       ValueChangeHandler<String> handler) {
-    return HistoryImpl.addValueChangeHandler(handler);
+    return impl.addValueChangeHandler(handler);
   }
 
   /**
@@ -114,7 +114,7 @@ public class History {
    */
   public static void fireCurrentHistoryState() {
     String token = getToken();
-    HistoryImpl.fireHistoryChangedImpl(null, token);
+    impl.fireHistoryChangedImpl(null, token);
   }
 
   /**
@@ -183,7 +183,7 @@ public class History {
   @Deprecated
   public static void onHistoryChanged(String historyToken) {
     String oldToken = getToken();
-    HistoryImpl.fireHistoryChangedImpl(oldToken, historyToken);
+    impl.fireHistoryChangedImpl(oldToken, historyToken);
   }
 
   /**
@@ -193,6 +193,6 @@ public class History {
    */
   @Deprecated
   public static void removeHistoryListener(HistoryListener listener) {
-    L.HistoryChange.remove(HistoryImpl.getHandlers(), listener);
+    L.HistoryChange.remove(impl.getHandlers(), listener);
   }
 }

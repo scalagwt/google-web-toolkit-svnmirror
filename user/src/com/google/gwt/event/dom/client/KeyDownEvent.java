@@ -20,22 +20,40 @@ import com.google.gwt.user.client.Event;
 /**
  * Represents a native key down event.
  */
-public class KeyDownEvent extends KeyCodeEvent {
+public class KeyDownEvent extends KeyCodeEvent<KeyDownHandler> {
 
   /**
-   * Type for key down events. Represents the meta-data associated with this
-   * event.
+   * Event type for key down events. Represents the meta-data associated with
+   * this event.
    */
-  public static final Type<KeyDownEvent, KeyDownHandler> TYPE = new Type<KeyDownEvent, KeyDownHandler>(
-      Event.ONKEYDOWN, "keydown", new KeyDownEvent()) {
-    @Override
-    public void fire(KeyDownHandler handler, KeyDownEvent event) {
-      handler.onKeyDown(event);
-    }
-  };
+  private static Type<KeyDownHandler> TYPE = new Type<KeyDownHandler>(
+      Event.ONKEYDOWN, "keydown", new KeyDownEvent());
+
+  /**
+   * Ensures the existence of the handler TYPE, so the system knows to start
+   * firing events and then returns it.
+   * 
+   * @return the handler TYPE
+   */
+  public static Type<KeyDownHandler> getType() {
+    return TYPE;
+  }
+
+  /**
+   * Protected constructor, use
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)}
+   * to fire click events.
+   */
+  protected KeyDownEvent() {
+  }
 
   @Override
-  protected Type getType() {
+  protected void dispatch(KeyDownHandler handler) {
+    handler.onKeyDown(this);
+  }
+
+  @Override
+  protected final Type<KeyDownHandler> getAssociatedType() {
     return TYPE;
   }
 

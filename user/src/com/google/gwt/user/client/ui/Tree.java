@@ -273,15 +273,15 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
   }
 
   public HandlerRegistration addBlurHandler(BlurHandler handler) {
-    return addDomHandler(BlurEvent.TYPE, handler);
+    return addDomHandler(BlurEvent.getType(), handler);
   }
 
   public HandlerRegistration addCloseHandler(CloseHandler<TreeItem> handler) {
-    return addHandler(CloseEvent.TYPE, handler);
+    return addHandler(CloseEvent.getType(), handler);
   }
 
   public HandlerRegistration addFocusHandler(FocusHandler handler) {
-    return addDomHandler(FocusEvent.TYPE, handler);
+    return addDomHandler(FocusEvent.getType(), handler);
   }
 
   @Deprecated
@@ -327,24 +327,24 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
   }
 
   public HandlerRegistration addKeyDownHandler(KeyDownHandler handler) {
-    return addDomHandler(KeyDownEvent.TYPE, handler);
+    return addDomHandler(KeyDownEvent.getType(), handler);
   }
 
   public HandlerRegistration addKeyPressHandler(KeyPressHandler handler) {
-    return addDomHandler(KeyPressEvent.TYPE, handler);
+    return addDomHandler(KeyPressEvent.getType(), handler);
   }
 
   public HandlerRegistration addKeyUpHandler(KeyUpHandler handler) {
-    return addDomHandler(KeyUpEvent.TYPE, handler);
+    return addDomHandler(KeyUpEvent.getType(), handler);
   }
 
-  public HandlerRegistration addOpenHandler(OpenHandler<TreeItem> handler) {
-    return addHandler(OpenEvent.TYPE, handler);
+  public final HandlerRegistration addOpenHandler(OpenHandler<TreeItem> handler) {
+    return addHandler(OpenEvent.getType(), handler);
   }
 
   public HandlerRegistration addSelectionHandler(
       SelectionHandler<TreeItem> handler) {
-    return addHandler(SelectionEvent.TYPE, handler);
+    return addHandler(SelectionEvent.getType(), handler);
   }
 
   @Deprecated
@@ -715,9 +715,9 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
 
   void fireStateChanged(TreeItem item, boolean open) {
     if (open) {
-      fireEvent(new OpenEvent(item));
+      OpenEvent.fire(this, item);
     } else {
-      fireEvent(new CloseEvent(item));
+      CloseEvent.fire(this, item);
     }
   }
 
@@ -1127,7 +1127,7 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
       // Select the item and fire the selection event.
       curSelection.setSelected(true);
       if (fireEvents) {
-        fireEvent(new SelectionEvent(curSelection));
+        SelectionEvent.fire(this, curSelection);
       }
     }
   }

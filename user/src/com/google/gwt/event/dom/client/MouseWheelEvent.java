@@ -15,60 +15,45 @@
  */
 package com.google.gwt.event.dom.client;
 
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 
 /**
  * Represents a native mouse wheel event.
  */
-public class MouseWheelEvent extends MouseEvent {
+public class MouseWheelEvent extends MouseEvent<MouseWheelHandler> {
 
   /**
    * Event type for mouse wheel events. Represents the meta-data associated with
    * this event.
    */
-  public static final Type<MouseWheelEvent, MouseWheelHandler> TYPE = new Type<MouseWheelEvent, MouseWheelHandler>(
-      Event.ONMOUSEWHEEL, "mousewheel", new MouseWheelEvent()) {
-    @Override
-    public void fire(MouseWheelHandler handler, MouseWheelEvent event) {
-      handler.onMouseWheel(event);
-    }
-  };
+  private static Type<MouseWheelHandler> TYPE = new Type<MouseWheelHandler>(
+      Event.ONMOUSEWHEEL, "mousewheel", new MouseWheelEvent());
 
   /**
-   * @return the change in the mouse wheel position along the Y-axis; positive
-   *         if the mouse wheel is moving north (toward the top of the screen)
-   *         or negative if the mouse wheel is moving south (toward the bottom
-   *         of the screen)
+   * Ensures the existence of the handler TYPE, so the system knows to start
+   * firing events and then returns it.
+   * 
+   * @return the handler TYPE
    */
-  public int getVelocityY() {
-    return DOM.eventGetMouseWheelVelocityY(getNativeEvent());
+  public static Type<MouseWheelHandler> getType() {
+    return TYPE;
   }
 
   /**
-   * Convenience method that returns <code>true</code> if {@link #getDeltaY()}
-   * is a negative value.
-   * 
-   * @return <code>true</code> if the velocity includes a component directed
-   *         toword the top of the screen
+   * Protected constructor, use
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)}
+   * to fire click events.
    */
-  public boolean isVelocityNorth() {
-    return getVelocityY() < 0;
-  }
-
-  /**
-   * Convenience method that returns <code>true</code> if {@link #getDeltaY()}
-   * is a positive value.
-   * 
-   * @return <code>true</code> if the velocity includes a component directed
-   *         toword the bottom of the screen
-   */
-  public boolean isVelocitySouth() {
-    return getVelocityY() > 0;
+  protected MouseWheelEvent() {
   }
 
   @Override
-  protected Type getType() {
+  protected void dispatch(MouseWheelHandler handler) {
+    handler.onMouseWheel(this);
+  }
+
+  @Override
+  protected final Type<MouseWheelHandler> getAssociatedType() {
     return TYPE;
   }
 

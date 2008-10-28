@@ -13,76 +13,115 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.google.gwt.event.logical.shared;
 
 import com.google.gwt.event.shared.AbstractEvent;
+import com.google.gwt.event.shared.HandlerManager;
 
 /**
- * Fired before an event source has selected a new value.
+ * Represents a before selection event.
  * 
- * @param <ItemType> the type being selected
+ * @param <I> the type about to be selected
  */
-public class BeforeSelectionEvent<ItemType> extends AbstractEvent {
+public class BeforeSelectionEvent<I> extends
+    AbstractEvent<BeforeSelectionHandler<I>> {
 
   /**
-   * The event type.
+   * Handler type.
    */
-  public static final Type<BeforeSelectionEvent, BeforeSelectionHandler> TYPE = new Type<BeforeSelectionEvent, BeforeSelectionHandler>() {
-    @Override
-    protected void fire(BeforeSelectionHandler handler,
-        BeforeSelectionEvent event) {
-      handler.onBeforeSelection(event);
-    }
-  };
-
-  private ItemType item;
-  private boolean canceled = false;
+  private static Type<BeforeSelectionHandler<?>> TYPE;
 
   /**
-   * Construct a new {@link BeforeSelectionEvent}.
+   * Fires a before selection event on all registered handlers in the handler
+   * manager.
    * 
-   * @param item the item being selected
+   * @param <I> the item type
+   * @param <S> The event source.
+   * @param source the source of the handlers. Must have before selection
+   *          handlers and a handler manager.
+   * @param item the item
+   * @return the event so that the caller can check if it was canceled
    */
-
-  public BeforeSelectionEvent(ItemType item) {
-    this.item = item;
+  public static <I, S extends HasBeforeSelectionHandlers<I> & HasHandlers> BeforeSelectionEvent<I> fire(
+      S source, I item) {
+    if (TYPE != null) {
+      HandlerManager handlers = source.getHandlers();
+      if (handlers != null) {
+        BeforeSelectionEvent<I> event = new BeforeSelectionEvent<I>();
+        event.setItem(item);
+        handlers.fireEvent(event);
+        return event;
+      }
+    }
+    return null;
   }
 
   /**
-   * Cancel the selection. Firing this will prevent a subsequent
-   * {@link SelectionEvent} from being fired.
+   * Gets the abstract type associated with this event.
+   * 
+   * @return returns the handler type
+   */
+  public static Type<BeforeSelectionHandler<?>> getType() {
+    if (TYPE == null) {
+      TYPE = new Type<BeforeSelectionHandler<?>>();
+    }
+    return TYPE;
+  }
+
+  private I item;
+
+  private boolean canceled;
+
+  /**
+   * Constructor. Should only be used by subclasses, almost always for testing.
+   */
+  protected BeforeSelectionEvent() {
+  }
+
+  /**
+   * Cancel the selection event.
    */
   public void cancel() {
-    this.canceled = true;
+    canceled = true;
   }
 
   /**
-   * Gets the item that is being selected.
+   * Gets the item.
    * 
-   * @return the item being selected
+   * @return the item
    */
-  public ItemType getItem() {
+  public I getItem() {
     return item;
   }
 
   /**
-   * Check to see if this event has been canceled. If canceled, the subsequent
-   * {@link SelectionEvent} will not fire.
+   * Has the selection event already been canceled?
    * 
-   * @return true if the event has been canceled.
+   * @return is canceled
    */
   public boolean isCanceled() {
     return canceled;
   }
 
   @Override
-  public String toDebugString() {
-    return "selecting: " + item;
+  protected void dispatch(BeforeSelectionHandler<I> handler) {
+    handler.onBeforeSelection(this);
   }
 
+  // Because of type erasure, our static type is
+  // wild carded, yet the "real" type should use our I param.
+  @SuppressWarnings("unchecked")
   @Override
-  protected Type getType() {
-    return TYPE;
+  protected Type<BeforeSelectionHandler<I>> getAssociatedType() {
+    return (Type) TYPE;
+  }
+
+  /**
+   * Sets the item.
+   * 
+   * @param item the item
+   */
+  protected final void setItem(I item) {
+    this.item = item;
   }
 }

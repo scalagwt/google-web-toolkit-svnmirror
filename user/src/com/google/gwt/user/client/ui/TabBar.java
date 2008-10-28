@@ -148,12 +148,12 @@ public class TabBar extends Composite implements SourcesTabEvents,
 
   public HandlerRegistration addBeforeSelectionHandler(
       BeforeSelectionHandler<Integer> handler) {
-    return addHandler(BeforeSelectionEvent.TYPE, handler);
+    return addHandler(BeforeSelectionEvent.getType(), handler);
   }
 
   public HandlerRegistration addSelectionHandler(
       SelectionHandler<Integer> handler) {
-    return addHandler(SelectionEvent.TYPE, handler);
+    return addHandler(SelectionEvent.getType(), handler);
   }
 
   /**
@@ -318,11 +318,10 @@ public class TabBar extends Composite implements SourcesTabEvents,
    */
   public boolean selectTab(int index) {
     checkTabIndex(index);
+    BeforeSelectionEvent<?> event = BeforeSelectionEvent.fire(this,
+    index);
 
-    BeforeSelectionEvent<Integer> beforeEvent = new BeforeSelectionEvent<Integer>(
-        index);
-    fireEvent(beforeEvent);
-    if (beforeEvent.isCanceled()) {
+    if (event != null && event.isCanceled()) {
       return false;
     }
 
@@ -335,8 +334,7 @@ public class TabBar extends Composite implements SourcesTabEvents,
 
     selectedTab = panel.getWidget(index + 1);
     setSelectionStyle(selectedTab, true);
-
-    fireEvent(new SelectionEvent<Integer>(index));
+    SelectionEvent.fire(this, index);
     return true;
   }
 

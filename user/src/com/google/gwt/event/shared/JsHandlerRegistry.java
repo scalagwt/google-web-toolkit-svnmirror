@@ -42,7 +42,8 @@ class JsHandlerRegistry extends JavaScriptObject {
   protected JsHandlerRegistry() {
   }
 
-  public final void addHandler(AbstractEvent.Type eventKey, EventHandler handler) {
+  public final <H extends EventHandler> void addHandler(
+      AbstractEvent.Type<H> eventKey, H handler) {
     // The base is the equivalent to a c pointer into the flattened handler data
     // structure.
     int base = eventKey.hashCode();
@@ -57,7 +58,7 @@ class JsHandlerRegistry extends JavaScriptObject {
     setCount(base, count + 1);
   }
 
-  public final void clearHandlers(Type<?, ?> type) {
+  public final <T> void clearHandlers(Type<T> type) {
     int base = type.hashCode();
     // Clearing handlers is relatively unusual, so the cost of unflattening the
     // handler list is justified by the smaller code.
@@ -68,35 +69,42 @@ class JsHandlerRegistry extends JavaScriptObject {
     setCount(base, 0);
   }
 
-  public final void fireEvent(AbstractEvent event) {
-    Type type = event.getType();
+  // Adding the extra field to js getHandler() broke the inlining so using the
+  // unsafe cast instead.
+  @SuppressWarnings("unchecked")
+  public final <H extends EventHandler> void fireEvent(AbstractEvent<H> event) {
+    Type<H> type = event.getAssociatedType();
     int base = type.hashCode();
     int count = getCount(base);
     boolean isFlattened = isFlattened(base);
 
     for (int i = 0; i < count; i++) {
       // Gets the given handler to fire.
-      EventHandler handler = getHandler(base, i, isFlattened);
+      H handler = (H) getHandler(base, i, isFlattened);
 
       // Fires the handler.
-      type.fire(handler, event);
+      event.dispatch(handler);
     }
   }
 
-  public final EventHandler getHandler(AbstractEvent.Type eventKey, int index) {
-    int base = eventKey.hashCode();
+  // Adding the extra field to js getHandler() broke the inlining so using the
+  // unsafe cast instead.
+  @SuppressWarnings("unchecked")
+  public final <H extends EventHandler> H getHandler(
+      AbstractEvent.Type<H> type, int index) {
+    int base = type.hashCode();
     int count = getCount(base);
     if (index >= count) {
       throw new IndexOutOfBoundsException("index: " + index);
     }
-    return getHandler(base, index, isFlattened(base));
+    return (H) getHandler(base, index, isFlattened(base));
   }
 
-  public final int getHandlerCount(AbstractEvent.Type eventKey) {
+  public final int getHandlerCount(AbstractEvent.Type<?> eventKey) {
     return getCount(eventKey.hashCode());
   }
 
-  public final void removeHandler(AbstractEvent.Type eventKey,
+  public final <H> void removeHandler(AbstractEvent.Type<H> eventKey,
       EventHandler handler) {
     int base = eventKey.hashCode();
 

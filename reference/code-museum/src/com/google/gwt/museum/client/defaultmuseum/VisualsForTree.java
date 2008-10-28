@@ -36,6 +36,7 @@ public class VisualsForTree extends AbstractIssue {
     TreeItem bba = new TreeItem("b.b.a");
     TreeItem bc = new TreeItem("b.c");
     TreeItem c = new TreeItem("c");
+
     t.setSelectedItem(b);
     t.addItem(a);
     t.addItem(b);

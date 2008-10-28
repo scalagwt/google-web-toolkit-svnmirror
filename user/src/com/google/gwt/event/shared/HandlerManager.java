@@ -38,7 +38,7 @@ public class HandlerManager {
    * @param event the event
    * @return is the event live
    */
-  public static boolean isLive(AbstractEvent event) {
+  public static boolean isLive(AbstractEvent<?> event) {
     return event.isLive();
   }
 
@@ -47,7 +47,7 @@ public class HandlerManager {
    * 
    * @param event the event
    */
-  public static void revive(AbstractEvent event) {
+  public static void revive(AbstractEvent<?> event) {
     if (event.isLive() == false) {
       event.revive();
     }
@@ -100,7 +100,7 @@ public class HandlerManager {
    *         handler later
    */
   public <HandlerType extends EventHandler> HandlerRegistration addHandler(
-      AbstractEvent.Type<?, HandlerType> type, final HandlerType handler) {
+      AbstractEvent.Type<HandlerType> type, final HandlerType handler) {
     if (firingDepth > 0) {
       enqueueAdd(type, handler);
     } else {
@@ -114,7 +114,7 @@ public class HandlerManager {
    * 
    * @param type the type
    */
-  public void clearHandlers(Type<?, ?> type) {
+  public void clearHandlers(Type<?> type) {
     if (useJs) {
       javaScriptRegistry.clearHandlers(type);
     } else {
@@ -127,7 +127,7 @@ public class HandlerManager {
    * 
    * @param event the event
    */
-  public void fireEvent(AbstractEvent event) {
+  public void fireEvent(AbstractEvent<?> event) {
     // If it not live we should clear the source and make it live.
     revive(event);
     Object oldSource = event.getSource();
@@ -163,11 +163,11 @@ public class HandlerManager {
    * @return the given handler
    */
   public <HandlerType extends EventHandler> HandlerType getHandler(
-      AbstractEvent.Type<?, HandlerType> type, int index) {
+      AbstractEvent.Type<HandlerType> type, int index) {
     if (useJs) {
-      return (HandlerType) javaScriptRegistry.getHandler(type, index);
+      return  javaScriptRegistry.getHandler(type, index);
     } else {
-      return (HandlerType) javaRegistry.getHandler(type, index);
+      return javaRegistry.getHandler(type, index);
     }
   }
 
@@ -177,7 +177,7 @@ public class HandlerManager {
    * @param type the event type
    * @return the number of registered handlers
    */
-  public int getHandlerCount(Type<?,?> type) {
+  public int getHandlerCount(Type<?> type) {
     if (useJs) {
       return javaScriptRegistry.getHandlerCount(type);
     } else {
@@ -191,7 +191,7 @@ public class HandlerManager {
    * @param type the event type
    * @return are handlers listening on the given event type
    */
-  public boolean isEventHandled(Type<?,?> type) {
+  public boolean isEventHandled(Type<?> type) {
     return getHandlerCount(type) > 0;
   }
 
@@ -206,7 +206,7 @@ public class HandlerManager {
    * @param handler the handler
    */
   public <HandlerType extends EventHandler> void removeHandler(
-      AbstractEvent.Type<?, HandlerType> type, final HandlerType handler) {
+      AbstractEvent.Type<HandlerType> type, final HandlerType handler) {
     if (firingDepth > 0) {
       enqueueRemove(type, handler);
     } else {
@@ -214,7 +214,7 @@ public class HandlerManager {
     }
   }
 
-  private <H extends EventHandler> void doAdd(AbstractEvent.Type<?, H> type,
+  private <H extends EventHandler> void doAdd(AbstractEvent.Type<H> type,
       final H handler) {
     if (useJs) {
       javaScriptRegistry.addHandler(type, handler);
@@ -223,7 +223,7 @@ public class HandlerManager {
     }
   }
 
-  private <H extends EventHandler> void doRemove(AbstractEvent.Type<?, H> type,
+  private <H extends EventHandler> void doRemove(AbstractEvent.Type<H> type,
       final H handler) {
     if (useJs) {
       javaScriptRegistry.removeHandler(type, handler);
@@ -231,25 +231,25 @@ public class HandlerManager {
       javaRegistry.removeHandler(type, handler);
     }
   }
-  
-  private <H extends EventHandler> void enqueueAdd(
-      AbstractEvent.Type<?, H> type, final H handler) {
+
+  private <H extends EventHandler> void enqueueAdd(AbstractEvent.Type<H> type,
+      final H handler) {
     if (addQueue == null) {
       addQueue = new ArrayList<Object>();
       addQueue.add(type);
       addQueue.add(handler);
     }
   }
-  
+
   private <H extends EventHandler> void enqueueRemove(
-      AbstractEvent.Type<?, H> type, final H handler) {
+      AbstractEvent.Type<H> type, final H handler) {
     if (removalQueue == null) {
       removalQueue = new ArrayList<Object>();
       removalQueue.add(type);
       removalQueue.add(handler);
     }
   }
-  
+
   @SuppressWarnings("unchecked")
   private void handleQueuedAddsAndRemoves() {
     // Do Adds first in case someone does a quick add/remove

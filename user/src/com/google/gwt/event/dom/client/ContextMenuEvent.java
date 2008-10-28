@@ -20,22 +20,41 @@ import com.google.gwt.user.client.Event;
 /**
  * Represents a native context menu event.
  */
-public class ContextMenuEvent extends DomEvent {
+public class ContextMenuEvent extends DomEvent<ContextMenuHandler> {
 
   /**
    * Event type for context menu events. Represents the meta-data associated
    * with this event.
    */
-  public static final Type<ContextMenuEvent, ContextMenuHandler> TYPE = new Type<ContextMenuEvent, ContextMenuHandler>(
-      Event.ONCONTEXTMENU, "contextmenu", new ContextMenuEvent()) {
-    @Override
-    protected void fire(ContextMenuHandler handler, ContextMenuEvent event) {
-      handler.onContextMenu(event);
-    }
-  };
+  private static Type<ContextMenuHandler> TYPE = new Type<ContextMenuHandler>(
+      Event.ONCONTEXTMENU, "contextmenu", new ContextMenuEvent());
 
-  @Override
-  protected Type getType() {
+  /**
+   * Ensures the existence of the handler TYPE, so the system knows to start
+   * firing events and then returns it.
+   * 
+   * @return the handler TYPE
+   */
+  public static Type<ContextMenuHandler> getType() {
     return TYPE;
   }
+
+  /**
+   * Protected constructor, use
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)}
+   * to fire click events.
+   */
+  protected ContextMenuEvent() {
+  }
+
+  @Override
+  protected void dispatch(ContextMenuHandler handler) {
+    handler.onContextMenu(this);
+  }
+
+  @Override
+  protected final Type<ContextMenuHandler> getAssociatedType() {
+    return TYPE;
+  }
+
 }

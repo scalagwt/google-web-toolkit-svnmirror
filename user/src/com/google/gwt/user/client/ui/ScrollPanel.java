@@ -48,7 +48,7 @@ public class ScrollPanel extends SimplePanel implements SourcesScrollEvents,
   }
 
   public HandlerRegistration addScrollHandler(ScrollHandler handler) {
-    return addDomHandler(ScrollEvent.TYPE, handler);
+    return addDomHandler(ScrollEvent.getType(), handler);
   }
 
   @Deprecated

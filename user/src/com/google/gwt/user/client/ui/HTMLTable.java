@@ -771,7 +771,7 @@ public abstract class HTMLTable extends Panel implements SourcesTableEvents,
   }
 
   public HandlerRegistration addCellClickHandler(CellClickHandler handler) {
-    return addDomHandler(CellClickEvent.TYPE, handler);
+    return addDomHandler(CellClickEvent.getType(), handler);
   }
 
   /**
@@ -952,7 +952,7 @@ public abstract class HTMLTable extends Panel implements SourcesTableEvents,
     switch (DOM.eventGetType(event)) {
       case Event.ONCLICK: {
         if (getHandlers() != null
-            && getHandlers().isEventHandled(CellClickEvent.TYPE)) {
+            && getHandlers().isEventHandled(CellClickEvent.getType())) {
           // Find out which cell was actually clicked.
           Element td = getEventTargetCell(event);
           if (td == null) {
@@ -963,7 +963,7 @@ public abstract class HTMLTable extends Panel implements SourcesTableEvents,
           int row = DOM.getChildIndex(body, tr);
           int column = DOM.getChildIndex(tr, td);
           // Fire the event.
-          fireEvent(new CellClickEvent(event, row, column));
+          CellClickEvent.fire(getHandlers(), event, row, column);
         }
         break;
       }

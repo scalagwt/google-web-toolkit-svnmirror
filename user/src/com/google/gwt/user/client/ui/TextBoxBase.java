@@ -86,7 +86,7 @@ public class TextBoxBase extends FocusWidget implements SourcesChangeEvents,
   }
 
   public HandlerRegistration addChangeHandler(ChangeHandler handler) {
-    return addDomHandler(ChangeEvent.TYPE, handler);
+    return addDomHandler(ChangeEvent.getType(), handler);
   }
   @Deprecated
   public void addChangeListener(ChangeListener listener) {

@@ -18,15 +18,16 @@ package com.google.gwt.event.logical.shared;
 import com.google.gwt.event.shared.EventHandler;
 
 /**
- * Handler interface for {@link SelectionEvent} events. 
-   * @param <SelectedItem> the type being selected
+ * Handler interface for {@link SelectionEvent} events.
+ * 
+ * @param <I> the type being selected
  */
-public interface SelectionHandler<SelectedItem> extends EventHandler {
+public interface SelectionHandler<I> extends EventHandler {
 
   /**
    * Called when {@link SelectionEvent} is fired.
    * 
    * @param event the {@link SelectionEvent} that was fired
    */
-  void onSelection(SelectionEvent<SelectedItem> event);
+  void onSelection(SelectionEvent<I> event);
 }

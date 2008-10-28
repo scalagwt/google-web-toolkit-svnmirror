@@ -83,11 +83,11 @@ public abstract class FocusWidget extends Widget implements SourcesClickEvents,
   }
 
   public HandlerRegistration addBlurHandler(BlurHandler handler) {
-    return addDomHandler(BlurEvent.TYPE, handler);
+    return addDomHandler(BlurEvent.getType(), handler);
   }
 
   public HandlerRegistration addClickHandler(ClickHandler handler) {
-    return addDomHandler(ClickEvent.TYPE, handler);
+    return addDomHandler(ClickEvent.getType(), handler);
   }
 
   @Deprecated
@@ -96,7 +96,7 @@ public abstract class FocusWidget extends Widget implements SourcesClickEvents,
   }
 
   public HandlerRegistration addFocusHandler(FocusHandler handler) {
-    return addDomHandler(FocusEvent.TYPE, handler);
+    return addDomHandler(FocusEvent.getType(), handler);
   }
 
   @Deprecated
@@ -110,19 +110,19 @@ public abstract class FocusWidget extends Widget implements SourcesClickEvents,
   }
 
   public HandlerRegistration addKeyDownHandler(KeyDownHandler handler) {
-    return addDomHandler(KeyDownEvent.TYPE, handler);
+    return addDomHandler(KeyDownEvent.getType(), handler);
   }
 
   public HandlerRegistration addKeyPressHandler(KeyPressHandler handler) {
-    return addDomHandler(KeyPressEvent.TYPE, handler);
+    return addDomHandler(KeyPressEvent.getType(), handler);
   }
 
   public HandlerRegistration addKeyUpHandler(KeyUpHandler handler) {
-    return addDomHandler(KeyUpEvent.TYPE, handler);
+    return addDomHandler(KeyUpEvent.getType(), handler);
   }
 
   public HandlerRegistration addMouseDownHandler(MouseDownHandler handler) {
-    return addDomHandler(MouseDownEvent.TYPE, handler);
+    return addDomHandler(MouseDownEvent.getType(), handler);
   }
 
   @Deprecated
@@ -131,23 +131,23 @@ public abstract class FocusWidget extends Widget implements SourcesClickEvents,
   }
 
   public HandlerRegistration addMouseMoveHandler(MouseMoveHandler handler) {
-    return addDomHandler(MouseMoveEvent.TYPE, handler);
+    return addDomHandler(MouseMoveEvent.getType(), handler);
   }
 
   public HandlerRegistration addMouseOutHandler(MouseOutHandler handler) {
-    return addDomHandler(MouseOutEvent.TYPE, handler);
+    return addDomHandler(MouseOutEvent.getType(), handler);
   }
 
   public HandlerRegistration addMouseOverHandler(MouseOverHandler handler) {
-    return addDomHandler(MouseOverEvent.TYPE, handler);
+    return addDomHandler(MouseOverEvent.getType(), handler);
   }
 
   public HandlerRegistration addMouseUpHandler(MouseUpHandler handler) {
-    return addDomHandler(MouseUpEvent.TYPE, handler);
+    return addDomHandler(MouseUpEvent.getType(), handler);
   }
 
   public HandlerRegistration addMouseWheelHandler(MouseWheelHandler handler) {
-    return addDomHandler(MouseWheelEvent.TYPE, handler);
+    return addDomHandler(MouseWheelEvent.getType(), handler);
   }
 
   @Deprecated

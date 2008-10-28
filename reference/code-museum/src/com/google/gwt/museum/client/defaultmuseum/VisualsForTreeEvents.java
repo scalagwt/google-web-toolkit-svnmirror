@@ -38,12 +38,13 @@ public class VisualsForTreeEvents extends AbstractIssue {
   public Widget createIssue() {
     VerticalPanel p = new VerticalPanel();
     Tree t = VisualsForTree.createTree();
+
     t.addSelectionHandler(new SelectionHandler<TreeItem>() {
       public void onSelection(SelectionEvent<TreeItem> event) {
         Window.setTitle("select " + prettyPrint(event.getSelectedItem()));
       }
     });
-    
+
     t.addCloseHandler(new CloseHandler<TreeItem>() {
 
       public void onClose(CloseEvent<TreeItem> event) {

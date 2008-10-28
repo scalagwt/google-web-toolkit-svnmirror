@@ -16,68 +16,126 @@
 package com.google.gwt.event.logical.shared;
 
 import com.google.gwt.event.shared.AbstractEvent;
+import com.google.gwt.event.shared.HandlerManager;
 
 /**
  * Represents a close event.
  * 
- * @param <TargetType> the target closed
+ * @param <T> the type being closed
  */
-public class CloseEvent<TargetType> extends AbstractEvent {
+public class CloseEvent<T> extends AbstractEvent<CloseHandler<T>> {
+
   /**
-   * Event type for Close.
+   * Handler type.
    */
-  public static final Type<CloseEvent, CloseHandler> TYPE = new Type<CloseEvent, CloseHandler>() {
-    @Override
-    protected void fire(CloseHandler handler, CloseEvent event) {
-      handler.onClose(event);
+  private static Type<CloseHandler<?>> TYPE;
+
+  /**
+   * Fires a close event on all registered handlers in the handler manager.
+   * 
+   * @param <T> the target type
+   * @param <S> The event source.
+   * @param source the source of the handlers. Must have close handlers and a
+   *          handler manager.
+   * @param target the target
+   * @param autoClosed was the target closed automatically
+   */
+  public static <T, S extends HasCloseHandlers<T> & HasHandlers> void fire(
+      S source, T target, boolean autoClosed) {
+    if (TYPE != null) {
+      HandlerManager handlers = source.getHandlers();
+      if (handlers != null) {
+        CloseEvent<T> event = new CloseEvent<T>();
+        event.autoClosed = autoClosed;
+        event.setTarget(target);
+        handlers.fireEvent(event);
+      }
     }
-  };
-
-  private boolean autoClosed = false;
-
-  private TargetType target;
-
-  /**
-   * Constructs a {@link CloseEvent} event.
-   * 
-   * @param target the target being closed
-   */
-  public CloseEvent(TargetType target) {
-    this.target = target;
   }
 
   /**
-   * Constructs a {@link CloseEvent} event.
+   * Fires a close event on all registered handlers in the handler manager.
    * 
-   * @param target the target being closed
-   * @param autoClosed was the target auto closed
+   * @param <T> the target type
+   * @param <S> The event source.
+   * @param source the source of the handlers. Must have close handlers and a
+   *          handler manager.
+   * @param target the target
    */
-  public CloseEvent(TargetType target, boolean autoClosed) {
-    this.target = target;
-    this.autoClosed = autoClosed;
+  public static <T, S extends HasCloseHandlers<T> & HasHandlers> void fire(
+      S source, T target) {
+    fire(source, target, false);
   }
 
   /**
-   * Gets the given target.
+   * Gets the abstract type associated with this event.
    * 
-   * @return gets the target type
+   * @return returns the handler type
    */
-  public TargetType getTarget() {
+  public static Type<CloseHandler<?>> getType() {
+    if (TYPE == null) {
+      TYPE = new Type<CloseHandler<?>>();
+    }
+    return TYPE;
+  }
+
+  private T target;
+
+  private boolean autoClosed;
+
+  /**
+   * Constructor. Should only be used by subclasses, almost always for testing.
+   */
+  protected CloseEvent() {
+  }
+
+  /**
+   * Gets the target.
+   * 
+   * @return the target
+   */
+  public T getTarget() {
     return target;
   }
 
   /**
-   * Many widgets with close events have the option of closing them
-   * automatically. Auto closed should return true if that happened.
+   * Was the target automatically closed?
    * 
-   * @return was the target automatically closed
+   * @return auto closed
    */
   public boolean isAutoClosed() {
     return autoClosed;
   }
 
+  // @param autoClosed was the close event triggered automatically
   @Override
-  protected Type getType() {
-    return TYPE;
+  protected void dispatch(CloseHandler<T> handler) {
+    handler.onClose(this);
+  }
+
+  // Because of type erasure, our static type is
+  // wild carded, yet the "real" type should use our I param.
+  @SuppressWarnings("unchecked")
+  @Override
+  protected final Type<CloseHandler<T>> getAssociatedType() {
+    return (Type) TYPE;
+  }
+
+  /**
+   * Was the target automatically closed? 
+   * 
+   * @param autoClosed autoClosed
+   */
+  protected final void setAutoClosed(boolean autoClosed) {
+    this.autoClosed = autoClosed;
+  }
+
+  /**
+   * Sets the target.
+   * 
+   * @param target the target
+   */
+  protected final void setTarget(T target) {
+    this.target = target;
   }
 }

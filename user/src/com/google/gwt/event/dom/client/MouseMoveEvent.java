@@ -20,22 +20,40 @@ import com.google.gwt.user.client.Event;
 /**
  * Represents a native mouse move event.
  */
-public class MouseMoveEvent extends MouseEvent {
+public class MouseMoveEvent extends MouseEvent<MouseMoveHandler> {
 
   /**
-    Event type for mouse move events. Represents the meta-data associated with this event.
-  */
-  public static final Type<MouseMoveEvent, MouseMoveHandler> TYPE = new Type<MouseMoveEvent,MouseMoveHandler>(
-      Event.ONMOUSEMOVE, "mousemove", new MouseMoveEvent()) {
-     @Override
-     public void fire(MouseMoveHandler handler, MouseMoveEvent event) {
-       handler.onMouseMove(event);
-     }
-   };
+   * Event type for mouse move events. Represents the meta-data associated with
+   * this event.
+   */
+  private static Type<MouseMoveHandler> TYPE = new Type<MouseMoveHandler>(
+      Event.ONMOUSEMOVE, "mousemove", new MouseMoveEvent());
 
-   
- @Override
-  protected Type getType() {
+  /**
+   * Ensures the existence of the handler TYPE, so the system knows to start
+   * firing events and then returns it.
+   * 
+   * @return the handler TYPE
+   */
+  public static Type<MouseMoveHandler> getType() {
+    return TYPE;
+  }
+
+  /**
+   * Protected constructor, use
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)}
+   * to fire click events.
+   */
+  protected MouseMoveEvent() {
+  }
+
+  @Override
+  protected void dispatch(MouseMoveHandler handler) {
+    handler.onMouseMove(this);
+  }
+
+  @Override
+  protected final Type<MouseMoveHandler> getAssociatedType() {
     return TYPE;
   }
 

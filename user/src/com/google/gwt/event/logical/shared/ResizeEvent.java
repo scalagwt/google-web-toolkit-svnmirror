@@ -17,25 +17,58 @@
 package com.google.gwt.event.logical.shared;
 
 import com.google.gwt.event.shared.AbstractEvent;
+import com.google.gwt.event.shared.HandlerManager;
 
 /**
- * Fired when the widget is resized.
+ * Fired when the event source is resized.
  */
-public class ResizeEvent extends AbstractEvent {
+public class ResizeEvent extends AbstractEvent<ResizeHandler> {
 
   /**
    * The event type.
    */
-  public static final Type<ResizeEvent, ResizeHandler> TYPE = new Type<ResizeEvent, ResizeHandler>() {
+  private static Type<ResizeHandler> TYPE;
 
-    @Override
-    protected void fire(ResizeHandler handler, ResizeEvent event) {
-      handler.onResize(event);
+  /**
+   * Fires a resize event on all registered handlers in the handler source.
+   * 
+   * @param <S> The handler source
+   * @param source the source of the handlers. Must have resize handlers and a
+   *          handler manager.
+   * @param width the new width
+   * @param height the new height
+   */
+  public static <S extends HasResizeHandlers & HasHandlers> void fire(S source,
+      int width, int height) {
+    if (TYPE != null) {
+      HandlerManager handlers = source.getHandlers();
+      if (handlers != null) {
+        ResizeEvent event = new ResizeEvent(width, height);
+        handlers.fireEvent(event);
+      }
     }
-  };
+  }
+
+  /**
+   * Ensures the existence of the handler hook and then returns it.
+   * 
+   * @return returns a handler hook
+   */
+  public static Type<ResizeHandler> getType() {
+    if (TYPE == null) {
+      TYPE = new Type<ResizeHandler>();
+    }
+    return TYPE;
+  }
 
   private int width;
   private int height;
+
+  /**
+   * Constructor.
+   */
+  protected ResizeEvent() {
+  }
 
   /**
    * Construct a new {@link ResizeEvent}.
@@ -43,7 +76,7 @@ public class ResizeEvent extends AbstractEvent {
    * @param width the new width
    * @param height the new height
    */
-  public ResizeEvent(int width, int height) {
+  protected ResizeEvent(int width, int height) {
     this.width = width;
     this.height = height;
   }
@@ -73,7 +106,12 @@ public class ResizeEvent extends AbstractEvent {
   }
 
   @Override
-  protected Type getType() {
+  protected void dispatch(ResizeHandler handler) {
+    handler.onResize(this);
+  }
+
+  @Override
+  protected Type<ResizeHandler> getAssociatedType() {
     return TYPE;
   }
 }

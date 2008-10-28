@@ -26,17 +26,19 @@ public class HandlerRegistration {
 
   private HandlerManager manager;
   EventHandler handler;
-  private Type type;
+  private Type<?> type;
 
   /**
    * Creates a new handler registration.
+   * 
+   * @param <H> Handler type
    * 
    * @param manager the handler manager
    * @param type the event type
    * @param handler the handler
    */
-  protected HandlerRegistration(HandlerManager manager, Type type,
-      EventHandler handler) {
+  protected <H extends EventHandler> HandlerRegistration(
+      HandlerManager manager, Type<H> type, H handler) {
     this.manager = manager;
     this.handler = handler;
     this.type = type;
@@ -44,12 +46,19 @@ public class HandlerRegistration {
 
   /**
    * Removes the given handler from its manager.
+   * 
+   * @param <H> handler type
    */
-  public void removeHandler() {
-    manager.removeHandler(type, handler);
+  // This is safe because when the elements were passed in they conformed to
+  // Type<H>,H.
+  @SuppressWarnings("unchecked")
+  public <H extends EventHandler> void removeHandler() {
+    Type<H> myType = (Type<H>) type;
+    H myHandler = (H) handler;
+    manager.removeHandler(myType, myHandler);
   }
 
-   EventHandler getHandler() {
-     return handler;
+  EventHandler getHandler() {
+    return handler;
   }
 }

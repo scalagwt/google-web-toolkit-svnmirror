@@ -40,9 +40,6 @@ import java.util.Iterator;
  * <li>.gwt-DisclosurePanel { the panel's primary style }</li>
  * <li>.gwt-DisclosurePanel-open { dependent style set when panel is open }</li>
  * <li>.gwt-DisclosurePanel-closed { dependent style set when panel is closed }</li>
- * <li>.header { the header section }</li>
- * <li>.content { the content section }</li>
- * </ul>
  * 
  * <p>
  * <img class='gallery' src='DisclosurePanel.png'/>
@@ -358,7 +355,7 @@ public final class DisclosurePanel extends Composite implements
 
   public HandlerRegistration addCloseHandler(
       CloseHandler<DisclosurePanel> handler) {
-    return addHandler(CloseEvent.TYPE, handler);
+    return addHandler(CloseEvent.getType(), handler);
   }
 
   /**
@@ -373,7 +370,7 @@ public final class DisclosurePanel extends Composite implements
   }
 
   public HandlerRegistration addOpenHandler(OpenHandler<DisclosurePanel> handler) {
-    return addHandler(OpenEvent.TYPE, handler);
+    return addHandler(OpenEvent.getType(), handler);
   }
 
   public void clear() {
@@ -513,9 +510,9 @@ public final class DisclosurePanel extends Composite implements
 
   private void fireEvent() {
     if (isOpen) {
-      fireEvent(new OpenEvent<DisclosurePanel>(this));
+      OpenEvent.fire(this, this);
     } else {
-      fireEvent(new CloseEvent<DisclosurePanel>(this));
+      CloseEvent.fire(this, this);
     }
   }
 

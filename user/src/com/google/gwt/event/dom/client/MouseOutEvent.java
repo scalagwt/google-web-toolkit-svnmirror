@@ -21,19 +21,32 @@ import com.google.gwt.user.client.Event;
 /**
  * Represents a native mouse out event.
  */
-public class MouseOutEvent extends MouseEvent {
+public class MouseOutEvent extends MouseEvent<MouseOutHandler> {
 
   /**
    * Event type for mouse out events. Represents the meta-data associated with
    * this event.
    */
-  public static final Type<MouseOutEvent, MouseOutHandler> TYPE = new Type<MouseOutEvent, MouseOutHandler>(
-      Event.ONMOUSEOUT, "mouseout", new MouseOutEvent()) {
-    @Override
-    public void fire(MouseOutHandler handler, MouseOutEvent event) {
-      handler.onMouseOut(event);
-    }
-  };
+  private static Type<MouseOutHandler> TYPE = new Type<MouseOutHandler>(
+      Event.ONMOUSEOUT, "mouseout", new MouseOutEvent());
+
+  /**
+   * Ensures the existence of the handler TYPE, so the system knows to start
+   * firing events and then returns it.
+   * 
+   * @return the handler TYPE
+   */
+  public static Type<MouseOutHandler> getType() {
+    return TYPE;
+  }
+
+  /**
+   * Protected constructor, use
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)}
+   * to fire click events.
+   */
+  protected MouseOutEvent() {
+  }
 
   /**
    * Gets the element from which the mouse pointer was moved.
@@ -56,7 +69,12 @@ public class MouseOutEvent extends MouseEvent {
   }
 
   @Override
-  protected Type getType() {
+  protected void dispatch(MouseOutHandler handler) {
+    handler.onMouseOut(this);
+  }
+
+  @Override
+  protected final Type<MouseOutHandler> getAssociatedType() {
     return TYPE;
   }
 

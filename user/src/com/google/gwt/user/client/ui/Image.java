@@ -412,7 +412,7 @@ public class Image extends Widget implements SourcesLoadEvents,
   }
 
   public HandlerRegistration addClickHandler(ClickHandler handler) {
-    return addHandler(ClickEvent.TYPE, handler);
+    return addHandler(ClickEvent.getType(), handler);
   }
 
   @Deprecated
@@ -421,11 +421,11 @@ public class Image extends Widget implements SourcesLoadEvents,
   }
 
   public HandlerRegistration addErrorHandler(ErrorHandler handler) {
-    return super.addHandler(ErrorEvent.TYPE, handler);
+    return super.addHandler(ErrorEvent.getType(), handler);
   }
 
   public HandlerRegistration addLoadHandler(LoadHandler handler) {
-    return super.addHandler(LoadEvent.TYPE, handler);
+    return super.addHandler(LoadEvent.getType(), handler);
   }
 
   @Deprecated
@@ -434,7 +434,7 @@ public class Image extends Widget implements SourcesLoadEvents,
   }
 
   public HandlerRegistration addMouseDownHandler(MouseDownHandler handler) {
-    return addDomHandler(MouseDownEvent.TYPE, handler);
+    return addDomHandler(MouseDownEvent.getType(), handler);
   }
 
   @Deprecated
@@ -443,23 +443,23 @@ public class Image extends Widget implements SourcesLoadEvents,
   }
 
   public HandlerRegistration addMouseMoveHandler(MouseMoveHandler handler) {
-    return addDomHandler(MouseMoveEvent.TYPE, handler);
+    return addDomHandler(MouseMoveEvent.getType(), handler);
   }
 
   public HandlerRegistration addMouseOutHandler(MouseOutHandler handler) {
-    return addDomHandler(MouseOutEvent.TYPE, handler);
+    return addDomHandler(MouseOutEvent.getType(), handler);
   }
 
   public HandlerRegistration addMouseOverHandler(MouseOverHandler handler) {
-    return addDomHandler(MouseOverEvent.TYPE, handler);
+    return addDomHandler(MouseOverEvent.getType(), handler);
   }
 
   public HandlerRegistration addMouseUpHandler(MouseUpHandler handler) {
-    return addDomHandler(MouseUpEvent.TYPE, handler);
+    return addDomHandler(MouseUpEvent.getType(), handler);
   }
 
   public HandlerRegistration addMouseWheelHandler(MouseWheelHandler handler) {
-    return addDomHandler(MouseWheelEvent.TYPE, handler);
+    return addDomHandler(MouseWheelEvent.getType(), handler);
   }
 
   @Deprecated

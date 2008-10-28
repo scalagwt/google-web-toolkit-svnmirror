@@ -20,14 +20,14 @@ import com.google.gwt.event.shared.EventHandler;
 /**
  * Handler interface for {@link CloseEvent} events.
  * 
- * @param <TargetType> the target closed
+ * @param <T> the type being closed
  */
-public interface CloseHandler<TargetType> extends EventHandler {
+public interface CloseHandler<T> extends EventHandler {
 
   /**
-   * Called when CloseEvent is fired.
+   * Called when {@link CloseEvent} is fired.
    * 
    * @param event the {@link CloseEvent} that was fired
    */
-  void onClose(CloseEvent<TargetType> event);
+  void onClose(CloseEvent<T> event);
 }

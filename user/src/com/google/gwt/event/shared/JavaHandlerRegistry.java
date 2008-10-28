@@ -24,39 +24,39 @@ import java.util.HashMap;
 /**
  * The default Handler manager's handler registry.
  */
-class JavaHandlerRegistry extends
-    HashMap<AbstractEvent.Type, ArrayList<EventHandler>> {
+class JavaHandlerRegistry extends HashMap<AbstractEvent.Type<?>, ArrayList<?>> {
 
-  public void addHandler(AbstractEvent.Type eventKey, EventHandler handler) {
-    ArrayList<EventHandler> l = super.get(eventKey);
+  public <H extends EventHandler> void addHandler(Type<H> type, H handler) {
+    ArrayList<H> l = get(type);
     if (l == null) {
-      l = new ArrayList<EventHandler>();
-      super.put(eventKey, l);
+      l = new ArrayList<H>();
+      super.put(type, l);
     }
     l.add(handler);
   }
 
-  public void clearHandlers(Type<?, ?> type) {
+  public void clearHandlers(Type<?> type) {
     super.remove(type);
   }
 
-  public void fireEvent(AbstractEvent event) {
-    Type type = event.getType();
+  public <H extends EventHandler> void fireEvent(AbstractEvent<H> event) {
+    Type<H> type = event.getAssociatedType();
     int count = getHandlerCount(type);
     for (int i = 0; i < count; i++) {
-      EventHandler handler = getHandler(type, i);
-      type.fire(handler, event);
+      H handler = getHandler(type, i);
+      event.dispatch(handler);
     }
   }
 
-  public EventHandler getHandler(AbstractEvent.Type eventKey, int index) {
+  public <H extends EventHandler> H getHandler(AbstractEvent.Type<H> eventKey,
+      int index) {
     assert (index < getHandlerCount(eventKey));
-    ArrayList<EventHandler> l = super.get(eventKey);
-    return l.get(index);
+    ArrayList<H> l = get(eventKey);
+    return  l.get(index);
   }
 
-  public int getHandlerCount(AbstractEvent.Type eventKey) {
-    ArrayList<EventHandler> l = super.get(eventKey);
+  public int getHandlerCount(AbstractEvent.Type<?> eventKey) {
+    ArrayList<?> l = super.get(eventKey);
     if (l == null) {
       return 0;
     } else {
@@ -64,10 +64,16 @@ class JavaHandlerRegistry extends
     }
   }
 
-  public void removeHandler(AbstractEvent.Type eventKey, EventHandler handler) {
-    ArrayList<EventHandler> l = super.get(eventKey);
+  public <H> void removeHandler(AbstractEvent.Type<H> eventKey, H handler) {
+    ArrayList<H> l = get(eventKey);
     if (l != null) {
       l.remove(handler);
     }
+  }
+
+  @SuppressWarnings("unchecked")
+  private <H> ArrayList<H> get(AbstractEvent.Type<H> type) {
+    // This cast is safe because we control the puts.
+    return (ArrayList<H>) super.get(type);
   }
 }

@@ -20,22 +20,40 @@ import com.google.gwt.user.client.Event;
 /**
  * Represents a native change event.
  */
-public class ChangeEvent extends DomEvent {
+public class ChangeEvent extends DomEvent<ChangeHandler> {
 
   /**
    * Event type for change events. Represents the meta-data associated with this
    * event.
    */
-  public static final Type<ChangeEvent, ChangeHandler> TYPE = new Type<ChangeEvent, ChangeHandler>(
-      Event.ONCHANGE, "change", new ChangeEvent()) {
-    @Override
-    public void fire(ChangeHandler handler, ChangeEvent event) {
-      handler.onChange(event);
-    }
-  };
+  private static Type<ChangeHandler> TYPE = new Type<ChangeHandler>(
+      Event.ONCHANGE, "change", new ChangeEvent());
+
+  /**
+   * Ensures the existence of the handler TYPE, so the system knows to start
+   * firing events and then returns it.
+   * 
+   * @return the handler TYPE
+   */
+  public static Type<ChangeHandler> getType() {
+    return TYPE;
+  }
+
+  /**
+   * Protected constructor, use
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)}
+   * to fire click events.
+   */
+  protected ChangeEvent() {
+  }
 
   @Override
-  protected Type getType() {
+  protected void dispatch(ChangeHandler handler) {
+    handler.onChange(this);
+  }
+
+  @Override
+  protected final Type<ChangeHandler> getAssociatedType() {
     return TYPE;
   }
 

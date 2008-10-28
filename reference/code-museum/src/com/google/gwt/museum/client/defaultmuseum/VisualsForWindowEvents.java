@@ -40,7 +40,8 @@ import java.util.ArrayList;
 public class VisualsForWindowEvents extends AbstractIssue implements
     CloseHandler<Window>, Window.ClosingHandler, Window.ScrollHandler,
     ResizeHandler {
-
+  static int numResizes = 0;
+  
   private ArrayList<HandlerRegistration> registrations = new ArrayList<HandlerRegistration>();
   private FlowPanel messages = new FlowPanel();
 
@@ -67,8 +68,6 @@ public class VisualsForWindowEvents extends AbstractIssue implements
 
     Button clearButton = new Button("Clear events");
     clearButton.addClickHandler(new ClickHandler() {
-
-      @Override
       public void onClick(ClickEvent event) {
         messages.clear();
       }
@@ -106,21 +105,18 @@ public class VisualsForWindowEvents extends AbstractIssue implements
     return false;
   }
 
-  @Override
   public void onClose(CloseEvent<Window> event) {
     Window.alert("Closing the window.");
   }
 
-  @Override
   public void onResize(ResizeEvent event) {
-    addMessage("Got a window resize!");
+    Window.setTitle("Got resize " + numResizes++);
   }
 
   public void onWindowClosing(ClosingEvent event) {
     event.setMessage("Are you sure you want to navigate away?");
   }
 
-  @Override
   public void onWindowScroll(ScrollEvent event) {
     addMessage("Got a window scroll!");
   }

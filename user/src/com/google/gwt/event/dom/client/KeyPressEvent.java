@@ -20,19 +20,32 @@ import com.google.gwt.user.client.Event;
 /**
  * Represents a native key press event.
  */
-public class KeyPressEvent extends KeyEvent {
+public class KeyPressEvent extends KeyEvent<KeyPressHandler> {
 
   /**
    * Event type for key press events. Represents the meta-data associated with
    * this event.
    */
-  public static final Type<KeyPressEvent, KeyPressHandler> TYPE = new Type<KeyPressEvent, KeyPressHandler>(
-      Event.ONKEYPRESS, "keypress", new KeyPressEvent()) {
-    @Override
-    public void fire(KeyPressHandler handler, KeyPressEvent event) {
-      handler.onKeyPress(event);
-    }
-  };
+  private static Type<KeyPressHandler> TYPE = new Type<KeyPressHandler>(
+      Event.ONKEYPRESS, "keypress", new KeyPressEvent());
+
+  /**
+   * Ensures the existence of the handler TYPE, so the system knows to start
+   * firing events and then returns it.
+   * 
+   * @return the handler TYPE
+   */
+  public static Type<KeyPressHandler> getType() {
+    return TYPE;
+  }
+
+  /**
+   * Protected constructor, use
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)}
+   * to fire click events.
+   */
+  protected KeyPressEvent() {
+  }
 
   /**
    * Gets the char code for this event.
@@ -49,12 +62,17 @@ public class KeyPressEvent extends KeyEvent {
   }
 
   @Override
-  protected Type getType() {
+  protected void dispatch(KeyPressHandler handler) {
+    handler.onKeyPress(this);
+  }
+
+  @Override
+  protected final Type<KeyPressHandler> getAssociatedType() {
     return TYPE;
   }
 
   private native char getCharCode(Event e)/*-{
-    return e.charCode || e.keyCode;
-  }-*/;
+      return e.charCode || e.keyCode;
+    }-*/;
 
 }

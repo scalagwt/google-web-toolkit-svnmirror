@@ -26,6 +26,7 @@ public interface HasResizeHandlers {
    * Adds a {@link ResizeEvent} handler.
    * 
    * @param handler the handler
+   * @return the handler registration
    */
   HandlerRegistration addResizeHandler(ResizeHandler handler);
 }

@@ -17,6 +17,8 @@
 package com.google.gwt.museum.client.defaultmuseum;
 
 import com.google.gwt.event.dom.client.AllKeyHandlers;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyUpEvent;
@@ -25,12 +27,16 @@ import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.AbstractEvent;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.museum.client.common.AbstractIssue;
 import com.google.gwt.user.client.ui.ChangeListener;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FocusListener;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SuggestBox;
+import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
@@ -41,16 +47,44 @@ import java.util.List;
 /**
  * A simple test for suggest box events.
  */
+@SuppressWarnings("deprecation")
 public class VisualsForSuggestBoxEvents extends AbstractIssue {
-  static int xPos = 0;
+
+  private abstract class CheckBoxEvent extends CheckBox implements
+      ChangeHandler {
+    String name;
+    HandlerRegistration reg;
+
+    public CheckBoxEvent(String name, Panel p) {
+      this.name = name;
+      this.setChecked(true);
+      this.setText(name);
+      p.add(this);
+    }
+
+    public void onChange(ChangeEvent event) {
+      if (this.isChecked()) {
+        report("add " + name);
+        addHandler();
+      } else {
+        report("remove " + name);
+        removeHandler();
+      }
+    }
+
+    abstract void addHandler();
+
+    abstract void removeHandler();
+  }
+
   VerticalPanel report = new VerticalPanel();
 
   @Override
   public Widget createIssue() {
     VerticalPanel p = new VerticalPanel();
 
-    p.add(createSuggestBox("suggest 1"));
-    p.add(createSuggestBox("suggest 2"));
+    p.add(createSuggestBox("suggest 1", p));
+    p.add(createSuggestBox("suggest 2", p));
     p.add(report);
     report("reporting");
     return p;
@@ -71,20 +105,17 @@ public class VisualsForSuggestBoxEvents extends AbstractIssue {
     return false;
   }
 
-  SuggestBox createSuggestBox(final String suggestBoxName) {
+  SuggestBox createSuggestBox(final String suggestBoxName, Panel p) {
 
     List<String> femaleNames = Arrays.asList(new String[] {
         "Jamie", "Jill", "Jackie", "Susan", "Helen", "Emily", "Karen",
         "Abigail", "Kaitlyn", "Laura", "Joanna", "Tasha"});
     MultiWordSuggestOracle oracle = new MultiWordSuggestOracle();
     oracle.addAll(femaleNames);
-    SuggestBox b = new SuggestBox(oracle) {
-      @Override
-      public String toString() {
-        return suggestBoxName;
-      }
-    };
 
+    final SuggestBox b = new SuggestBox(oracle);
+    b.setTitle(suggestBoxName);
+    p.add(b);
     class MyHandler extends AllKeyHandlers implements ChangeListener,
         FocusListener, ValueChangeHandler<String>, SelectionHandler<Suggestion> {
 
@@ -120,8 +151,19 @@ public class VisualsForSuggestBoxEvents extends AbstractIssue {
         report(event);
       }
     }
-    MyHandler handler = new MyHandler();
-    b.addKeyDownHandler(handler);
+    final MyHandler handler = new MyHandler();
+    new CheckBoxEvent("KeyDown", p) {
+
+      @Override
+      void addHandler() {
+        reg = b.addKeyDownHandler(handler);
+      }
+
+      @Override
+      void removeHandler() {
+        reg.removeHandler();
+      }
+    };
     b.addKeyUpHandler(handler);
     b.addKeyPressHandler(handler);
     b.addChangeListener(handler);
@@ -131,13 +173,13 @@ public class VisualsForSuggestBoxEvents extends AbstractIssue {
     return b;
   }
 
-  private void report(AbstractEvent event) {
-    report(event.toDebugString());
+  private void report(AbstractEvent<?> event) {
+    String title = ((UIObject) event.getSource()).getTitle();
+    report(title + " fired " + event.toDebugString());
   }
 
   // will be replaced by logging
   private void report(String s) {
-    System.err.println("fobar");
     report.insert(new Label(s), 0);
     if (report.getWidgetCount() == 10) {
       report.remove(9);

@@ -16,6 +16,7 @@
 package com.google.gwt.user.client.ui;
 
 import com.google.gwt.event.dom.client.DomEvent;
+import com.google.gwt.event.logical.shared.HasHandlers;
 import com.google.gwt.event.shared.AbstractEvent;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.HandlerManager;
@@ -29,7 +30,7 @@ import com.google.gwt.user.client.EventListener;
  * support for receiving events from the browser and being added directly to
  * {@link com.google.gwt.user.client.ui.Panel panels}.
  */
-public class Widget extends UIObject implements EventListener {
+public class Widget extends UIObject implements EventListener, HasHandlers {
   /**
    * A bit-map of the events that should be sunk when the widget is attached to
    * the DOM. We delay the sinking of events to improve startup performance.
@@ -40,6 +41,15 @@ public class Widget extends UIObject implements EventListener {
   private Object layoutData;
   private Widget parent;
   private HandlerManager handlerManager;
+
+  /**
+   * Returns this widget's {@link HandlerManager} used for event management.
+   * 
+   * @return the handler manager
+   */
+  public final HandlerManager getHandlers() {
+    return handlerManager;
+  }
 
   /**
    * Gets this widget's parent panel.
@@ -97,13 +107,13 @@ public class Widget extends UIObject implements EventListener {
    * native event. If you do not want to sink the native event, use the generic
    * addHandler method instead.
    * 
-   * @param <HandlerType> the type of handler to add
+   * @param <H> the type of handler to add
    * @param type the event key
    * @param handler the handler
    * @return {@link HandlerRegistration} used to remove the handler
    */
-  protected <HandlerType extends EventHandler> HandlerRegistration addDomHandler(
-      DomEvent.Type<?, HandlerType> type, final HandlerType handler) {
+  protected <H extends EventHandler> HandlerRegistration addDomHandler(
+      DomEvent.Type<H> type, final H handler) {
     sinkEvents(type.getNativeEventTypeInt());
     return addHandler(type, handler);
   }
@@ -111,14 +121,17 @@ public class Widget extends UIObject implements EventListener {
   /**
    * Adds this handler to the widget.
    * 
-   * @param <HandlerType> the type of handler to add
+   * @param <H> the type of handler to add
    * @param type the event type
    * @param handler the handler
    * @return {@link HandlerRegistration} used to remove the handler
    */
-  protected <HandlerType extends EventHandler> HandlerRegistration addHandler(
-      AbstractEvent.Type<?, HandlerType> type, final HandlerType handler) {
-    return ensureHandlers().addHandler(type, handler);
+  protected <H extends EventHandler> HandlerRegistration addHandler(
+      AbstractEvent.Type<H> type, final H handler) {
+    if (handlerManager == null) {
+      handlerManager = new HandlerManager(this);
+    }
+    return handlerManager.addHandler(type, handler);
   }
 
   /**
@@ -140,35 +153,15 @@ public class Widget extends UIObject implements EventListener {
   }
 
   /**
-   * Returns this widget's {@link HandlerManager}, ensuring it exists.
-   * 
-   * @return the handler manager
-   */
-  protected final HandlerManager ensureHandlers() {
-    if (handlerManager == null) {
-      handlerManager = new HandlerManager(this);
-    }
-    return handlerManager;
-  }
-
-  /**
-   * Fires an event.
+   * Fires an event. Usually used when passing an event from one source to
+   * another.
    * 
    * @param event the event
    */
-  protected void fireEvent(AbstractEvent event) {
+  protected void fireEvent(AbstractEvent<?> event) {
     if (handlerManager != null) {
       handlerManager.fireEvent(event);
     }
-  }
-
-  /**
-   * Returns this widget's {@link HandlerManager} used for event management.
-   * 
-   * @return the handler manager
-   */
-  protected final HandlerManager getHandlers() {
-    return handlerManager;
   }
 
   /**
@@ -261,13 +254,13 @@ public class Widget extends UIObject implements EventListener {
    * instead. This method is provided primary to support the deprecated
    * listeners api.
    * 
-   * @param <HandlerType> handler type
+   * @param <H> handler type
    * 
    * @param key the event key
    * @param handler the handler
    */
-  protected <HandlerType extends EventHandler> void removeHandler(
-      AbstractEvent.Type<?, HandlerType> key, final HandlerType handler) {
+  protected <H extends EventHandler> void removeHandler(
+      AbstractEvent.Type<H> key, final H handler) {
     if (handlerManager != null) {
       handlerManager.removeHandler(key, handler);
     }

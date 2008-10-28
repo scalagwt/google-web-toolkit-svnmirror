@@ -20,22 +20,40 @@ import com.google.gwt.user.client.Event;
 /**
  * Represents a native scroll event.
  */
-public class ScrollEvent extends DomEvent {
+public class ScrollEvent extends DomEvent<ScrollHandler> {
 
   /**
-    Event type for scroll events. Represents the meta-data associated with this event.
-  */
-  public static final Type<ScrollEvent, ScrollHandler> TYPE = new Type<ScrollEvent,ScrollHandler>(
-      Event.ONSCROLL, "scroll", new ScrollEvent()) {
-     @Override
-     public void fire(ScrollHandler handler, ScrollEvent event) {
-       handler.onScroll(event);
-     }
-   };
+   * Event type for scroll events. Represents the meta-data associated with this
+   * event.
+   */
+  private static Type<ScrollHandler> TYPE = new Type<ScrollHandler>(
+      Event.ONSCROLL, "scroll", new ScrollEvent());
 
-   
- @Override
-  protected Type getType() {
+  /**
+   * Ensures the existence of the handler TYPE, so the system knows to start
+   * firing events and then returns it.
+   * 
+   * @return the handler TYPE
+   */
+  public static Type<ScrollHandler> getType() {
+    return TYPE;
+  }
+
+  /**
+   * Protected constructor, use
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)}
+   * to fire click events.
+   */
+  protected ScrollEvent() {
+  }
+
+  @Override
+  protected void dispatch(ScrollHandler handler) {
+    handler.onScroll(this);
+  }
+
+  @Override
+  protected final Type<ScrollHandler> getAssociatedType() {
     return TYPE;
   }
 

@@ -62,19 +62,88 @@ import com.google.gwt.user.client.ui.impl.FormPanelImplHost;
 public class FormPanel extends SimplePanel implements FiresFormEvents,
     FormPanelImplHost {
   /**
-   * Fired when the form is submitted.
+   * Fired when a form has been submitted successfully.
    */
-  public static class SubmitEvent extends AbstractEvent {
+  public static class SubmitCompleteEvent extends
+      AbstractEvent<SubmitCompleteHandler> {
     /**
      * The event type.
      */
-    public static final Type<FormPanel.SubmitEvent, FormPanel.SubmitHandler> TYPE = new Type<FormPanel.SubmitEvent, FormPanel.SubmitHandler>() {
-      @Override
-      protected void fire(FormPanel.SubmitHandler handler,
-          FormPanel.SubmitEvent event) {
-        handler.onSubmit(event);
+    private static Type<SubmitCompleteHandler> TYPE;
+
+    /**
+     * Handler hook.
+     * 
+     * @return the handler hook
+     */
+    static Type<SubmitCompleteHandler> getType() {
+      if (TYPE == null) {
+        TYPE = new Type<SubmitCompleteHandler>();
       }
-    };
+      return TYPE;
+    }
+
+    private String resultHtml;
+
+    protected SubmitCompleteEvent(String resultsHtml) {
+      this.resultHtml = resultsHtml;
+    }
+
+    /**
+     * Gets the result text of the form submission.
+     * 
+     * @return the result html, or <code>null</code> if there was an error
+     *         reading it
+     * @tip The result html can be <code>null</code> as a result of submitting a
+     *      form to a different domain.
+     */
+    public String getResults() {
+      return resultHtml;
+    }
+
+    @Override
+    protected void dispatch(SubmitCompleteHandler handler) {
+      handler.onSubmitComplete(this);
+    }
+
+    @Override
+    protected Type<SubmitCompleteHandler> getAssociatedType() {
+      return TYPE;
+    }
+  }
+
+  /**
+   * Handler for {@link FormPanel.SubmitCompleteEvent} events.
+   */
+  public interface SubmitCompleteHandler extends EventHandler {
+    /**
+     * Fired when a form has been submitted successfully.
+     * 
+     * @param event the event
+     */
+    void onSubmitComplete(FormPanel.SubmitCompleteEvent event);
+  }
+
+  /**
+   * Fired when the form is submitted.
+   */
+  public static class SubmitEvent extends AbstractEvent<SubmitHandler> {
+    /**
+     * The event type.
+     */
+    private static Type<SubmitHandler> TYPE = new Type<SubmitHandler>();
+
+    /**
+     * Handler hook.
+     * 
+     * @return the handler hook
+     */
+    static Type<SubmitHandler> getType() {
+      if (TYPE == null) {
+        TYPE = new Type<SubmitHandler>();
+      }
+      return TYPE;
+    }
 
     private boolean canceled = false;
 
@@ -96,7 +165,12 @@ public class FormPanel extends SimplePanel implements FiresFormEvents,
     }
 
     @Override
-    protected Type getType() {
+    protected void dispatch(FormPanel.SubmitHandler handler) {
+      handler.onSubmit(this);
+    }
+
+    @Override
+    protected Type<FormPanel.SubmitHandler> getAssociatedType() {
       return TYPE;
     }
 
@@ -126,57 +200,6 @@ public class FormPanel extends SimplePanel implements FiresFormEvents,
      * @param event the event
      */
     void onSubmit(FormPanel.SubmitEvent event);
-  }
-
-  /**
-   * Fired when a form has been submitted successfully.
-   */
-  public static class SubmitCompleteEvent extends AbstractEvent {
-    /**
-     * The event type.
-     */
-    public static final Type<FormPanel.SubmitCompleteEvent, FormPanel.SubmitCompleteHandler> TYPE = new Type<FormPanel.SubmitCompleteEvent, FormPanel.SubmitCompleteHandler>() {
-      @Override
-      protected void fire(FormPanel.SubmitCompleteHandler handler,
-          FormPanel.SubmitCompleteEvent event) {
-        handler.onSubmitComplete(event);
-      }
-    };
-
-    private String resultHtml;
-
-    public SubmitCompleteEvent(String resultsHtml) {
-      this.resultHtml = resultsHtml;
-    }
-
-    /**
-     * Gets the result text of the form submission.
-     * 
-     * @return the result html, or <code>null</code> if there was an error
-     *         reading it
-     * @tip The result html can be <code>null</code> as a result of submitting a
-     *      form to a different domain.
-     */
-    public String getResults() {
-      return resultHtml;
-    }
-
-    @Override
-    protected Type getType() {
-      return TYPE;
-    }
-  }
-
-  /**
-   * Handler for {@link FormPanel.SubmitCompleteEvent} events.
-   */
-  public interface SubmitCompleteHandler extends EventHandler {
-    /**
-     * Fired when a form has been submitted successfully.
-     * 
-     * @param event the event
-     */
-    void onSubmitComplete(FormPanel.SubmitCompleteEvent event);
   }
 
   /**
@@ -382,8 +405,8 @@ public class FormPanel extends SimplePanel implements FiresFormEvents,
    * @param handler the handler
    */
   public HandlerRegistration addSubmitCompleteHandler(
-      FormPanel.SubmitCompleteHandler handler) {
-    return addHandler(FormPanel.SubmitCompleteEvent.TYPE, handler);
+      SubmitCompleteHandler handler) {
+    return addHandler(SubmitCompleteEvent.getType(), handler);
   }
 
   /**
@@ -391,8 +414,8 @@ public class FormPanel extends SimplePanel implements FiresFormEvents,
    * 
    * @param handler the handler
    */
-  public HandlerRegistration addSubmitHandler(FormPanel.SubmitHandler handler) {
-    return addHandler(FormPanel.SubmitEvent.TYPE, handler);
+  public HandlerRegistration addSubmitHandler(SubmitHandler handler) {
+    return addHandler(SubmitEvent.getType(), handler);
   }
 
   /**

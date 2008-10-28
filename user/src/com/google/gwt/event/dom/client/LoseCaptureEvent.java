@@ -20,22 +20,40 @@ import com.google.gwt.user.client.Event;
 /**
  * Represents a native lose capture event.
  */
-public class LoseCaptureEvent extends DomEvent {
+public class LoseCaptureEvent extends DomEvent<LoseCaptureHandler> {
 
   /**
-    Event type for lose capture events. Represents the meta-data associated with this event.
-  */
-  public static final Type<LoseCaptureEvent, LoseCaptureHandler> TYPE = new Type<LoseCaptureEvent,LoseCaptureHandler>(
-      Event.ONLOSECAPTURE, "losecapture", new LoseCaptureEvent()) {
-     @Override
-     public void fire(LoseCaptureHandler handler, LoseCaptureEvent event) {
-       handler.onLoseCapture(event);
-     }
-   };
+   * Event type for lose capture events. Represents the meta-data associated
+   * with this event.
+   */
+  private static Type<LoseCaptureHandler> TYPE = new Type<LoseCaptureHandler>(
+      Event.ONLOSECAPTURE, "losecapture", new LoseCaptureEvent());
 
-   
- @Override
-  protected Type getType() {
+  /**
+   * Ensures the existence of the handler TYPE, so the system knows to start
+   * firing events and then returns it.
+   * 
+   * @return the handler TYPE
+   */
+  public static Type<LoseCaptureHandler> getType() {
+    return TYPE;
+  }
+
+  /**
+   * Protected constructor, use
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)}
+   * to fire click events.
+   */
+  protected LoseCaptureEvent() {
+  }
+
+  @Override
+  protected void dispatch(LoseCaptureHandler handler) {
+    handler.onLoseCapture(this);
+  }
+
+  @Override
+  protected final Type<LoseCaptureHandler> getAssociatedType() {
     return TYPE;
   }
 

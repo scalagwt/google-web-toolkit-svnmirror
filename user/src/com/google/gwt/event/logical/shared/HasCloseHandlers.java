@@ -21,13 +21,14 @@ import com.google.gwt.event.shared.HandlerRegistration;
  * A widget that implements this interface is a public source of
  * {@link CloseEvent} events.
  * 
- * @param <TargetType> the target closed
+ * @param <T> the type being closed
  */
-public interface HasCloseHandlers<TargetType> {
+public interface HasCloseHandlers<T> {
   /**
-   * Adds a {@link HasCloseEvent} handler.
+   * Adds a {@link CloseEvent} handler.
    * 
    * @param handler the handler
+   * @return the registration for the event
    */
-  HandlerRegistration addCloseHandler(CloseHandler<TargetType> handler);
+  HandlerRegistration addCloseHandler(CloseHandler<T> handler);
 }

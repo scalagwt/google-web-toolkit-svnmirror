@@ -20,22 +20,40 @@ import com.google.gwt.user.client.Event;
 /**
  * Represents a native error event.
  */
-public class ErrorEvent extends DomEvent {
+public class ErrorEvent extends DomEvent<ErrorHandler> {
 
   /**
-    Event type for error events. Represents the meta-data associated with this event.
-  */
-  public static final Type<ErrorEvent, ErrorHandler> TYPE = new Type<ErrorEvent,ErrorHandler>(
-      Event.ONERROR, "error", new ErrorEvent()) {
-     @Override
-     public void fire(ErrorHandler handler, ErrorEvent event) {
-       handler.onError(event);
-     }
-   };
+   * Event type for error events. Represents the meta-data associated with this
+   * event.
+   */
+  private static Type<ErrorHandler> TYPE = new Type<ErrorHandler>(
+      Event.ONERROR, "error", new ErrorEvent());
 
-   
- @Override
-  protected Type getType() {
+  /**
+   * Ensures the existence of the handler TYPE, so the system knows to start
+   * firing events and then returns it.
+   * 
+   * @return the handler TYPE
+   */
+  public static Type<ErrorHandler> getType() {
+    return TYPE;
+  }
+
+  /**
+   * Protected constructor, use
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)}
+   * to fire click events.
+   */
+  protected ErrorEvent() {
+  }
+
+  @Override
+  protected void dispatch(ErrorHandler handler) {
+    handler.onError(this);
+  }
+
+  @Override
+  protected final Type<ErrorHandler> getAssociatedType() {
     return TYPE;
   }
 

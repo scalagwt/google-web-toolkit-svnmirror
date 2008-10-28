@@ -20,22 +20,40 @@ import com.google.gwt.user.client.Event;
 /**
  * Represents a native mouse down event.
  */
-public class MouseDownEvent extends MouseEvent {
+public class MouseDownEvent extends MouseEvent<MouseDownHandler> {
 
   /**
-    Event type for mouse down events. Represents the meta-data associated with this event.
-  */
-  public static final Type<MouseDownEvent, MouseDownHandler> TYPE = new Type<MouseDownEvent,MouseDownHandler>(
-      Event.ONMOUSEDOWN, "mousedown", new MouseDownEvent()) {
-     @Override
-     public void fire(MouseDownHandler handler, MouseDownEvent event) {
-       handler.onMouseDown(event);
-     }
-   };
+   * Event type for mouse down events. Represents the meta-data associated with
+   * this event.
+   */
+  private static Type<MouseDownHandler> TYPE = new Type<MouseDownHandler>(
+      Event.ONMOUSEDOWN, "mousedown", new MouseDownEvent());
 
-   
- @Override
-  protected Type getType() {
+  /**
+   * Ensures the existence of the handler TYPE, so the system knows to start
+   * firing events and then returns it.
+   * 
+   * @return the handler TYPE
+   */
+  public static Type<MouseDownHandler> getType() {
+    return TYPE;
+  }
+
+  /**
+   * Protected constructor, use
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)}
+   * to fire click events.
+   */
+  protected MouseDownEvent() {
+  }
+
+  @Override
+  protected void dispatch(MouseDownHandler handler) {
+    handler.onMouseDown(this);
+  }
+
+  @Override
+  protected final Type<MouseDownHandler> getAssociatedType() {
     return TYPE;
   }
 

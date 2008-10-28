@@ -325,7 +325,7 @@ public class PopupPanel extends SimplePanel implements SourcesPopupEvents,
   }
 
   public HandlerRegistration addCloseHandler(CloseHandler<PopupPanel> handler) {
-    return addHandler(CloseEvent.TYPE, handler);
+    return addHandler(CloseEvent.getType(), handler);
   }
 
   @Deprecated
@@ -426,8 +426,7 @@ public class PopupPanel extends SimplePanel implements SourcesPopupEvents,
 
     // Hide the popup
     resizeAnimation.setState(false);
-    CloseEvent<PopupPanel> event = new CloseEvent<PopupPanel>(this, autoClosed);
-    fireEvent(event);
+    CloseEvent.fire(this, this, autoClosed);
   }
 
   public boolean isAnimationEnabled() {

@@ -13,21 +13,21 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.google.gwt.event.logical.shared;
 
 import com.google.gwt.event.shared.EventHandler;
 
 /**
- * Handler for {@link ValueChangeEvent} events.
+ * Handler interface for {@link ValueChangeEvent} events.
  * 
- * @param <ValueType> type of the selected value
+ * @param <I> the value about to be changed
  */
-public interface ValueChangeHandler<ValueType> extends EventHandler {
+public interface ValueChangeHandler<I> extends EventHandler {
+
   /**
-   * Fired once a value has been changed.
+   * Called when {@link ValueChangeEvent} is fired.
    * 
-   * @param event the event
+   * @param event the {@link ValueChangeEvent} that was fired
    */
-  void onValueChange(ValueChangeEvent<ValueType> event);
+  void onValueChange(ValueChangeEvent<I> event);
 }

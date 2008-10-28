@@ -20,22 +20,40 @@ import com.google.gwt.user.client.Event;
 /**
  * Represents a native focus event.
  */
-public class FocusEvent extends DomEvent {
+public class FocusEvent extends DomEvent<FocusHandler> {
 
   /**
-    Event type for focus events. Represents the meta-data associated with this event.
-  */
-  public static final Type<FocusEvent, FocusHandler> TYPE = new Type<FocusEvent,FocusHandler>(
-      Event.ONFOCUS, "focus", new FocusEvent()) {
-     @Override
-     public void fire(FocusHandler handler, FocusEvent event) {
-       handler.onFocus(event);
-     }
-   };
+   * Event type for focus events. Represents the meta-data associated with this
+   * event.
+   */
+  private static Type<FocusHandler> TYPE = new Type<FocusHandler>(
+      Event.ONFOCUS, "focus", new FocusEvent());
 
-   
- @Override
-  protected Type getType() {
+  /**
+   * Ensures the existence of the handler TYPE, so the system knows to start
+   * firing events and then returns it.
+   * 
+   * @return the handler TYPE
+   */
+  public static Type<FocusHandler> getType() {
+    return TYPE;
+  }
+
+  /**
+   * Protected constructor, use
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)}
+   * to fire click events.
+   */
+  protected FocusEvent() {
+  }
+
+  @Override
+  protected void dispatch(FocusHandler handler) {
+    handler.onFocus(this);
+  }
+
+  @Override
+  protected final Type<FocusHandler> getAssociatedType() {
     return TYPE;
   }
 

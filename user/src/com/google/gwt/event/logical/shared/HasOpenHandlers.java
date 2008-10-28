@@ -21,13 +21,14 @@ import com.google.gwt.event.shared.HandlerRegistration;
  * A widget that implements this interface is a public source of
  * {@link OpenEvent} events.
  * 
- * @param <TargetType> the type of the object being opened
+ * @param <T> the type being opened
  */
-public interface HasOpenHandlers<TargetType> {
+public interface HasOpenHandlers<T> {
   /**
-   * Adds a {@link HasOpenEvent} handler.
+   * Adds a {@link OpenEvent} handler.
    * 
    * @param handler the handler
+   * @return the registration for the event
    */
-  HandlerRegistration addOpenHandler(OpenHandler<TargetType> handler);
+  HandlerRegistration addOpenHandler(OpenHandler<T> handler);
 }

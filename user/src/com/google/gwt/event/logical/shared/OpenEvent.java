@@ -16,45 +16,89 @@
 package com.google.gwt.event.logical.shared;
 
 import com.google.gwt.event.shared.AbstractEvent;
+import com.google.gwt.event.shared.HandlerManager;
 
 /**
  * Represents a open event.
  * 
- * @param <TargetType> the type of the object being opened
+ * @param <T> the type being opened
  */
-public class OpenEvent<TargetType> extends AbstractEvent {
+public class OpenEvent<T> extends AbstractEvent<OpenHandler<T>> {
 
   /**
-   * Event type.
+   * Handler type.
    */
-  public static final Type<OpenEvent, OpenHandler> TYPE = new Type<OpenEvent, OpenHandler>() {
-    @Override
-    protected void fire(OpenHandler handler, OpenEvent event) {
-      handler.onOpen(event);
-    }
-  };
-  private TargetType target;
+  private static Type<OpenHandler<?>> TYPE;
 
   /**
-   * Constructs a OpenEvent event.
+   * Fires a open event on all registered handlers in the handler manager.
    * 
-   * @param target the opened target
+   * @param <T> the target type
+   * @param <S> The event source.
+   * @param source the source of the handlers. Must have open handlers and a
+   *          handler manager.
+   * @param target the target
    */
-  public OpenEvent(TargetType target) {
-    this.target = target;
+  public static <T, S extends HasOpenHandlers<T> & HasHandlers> void fire(
+      S source, T target) {
+    if (TYPE != null) {
+      HandlerManager handlers = source.getHandlers();
+      if (handlers != null) {
+        OpenEvent<T> event = new OpenEvent<T>();
+        event.setTarget(target);
+        handlers.fireEvent(event);
+      }
+    }
   }
 
   /**
-   * Gets the target being opened
+   * Gets the abstract type associated with this event.
    * 
-   * @return the opened target
+   * @return returns the handler type
    */
-  public TargetType getTarget() {
+  public static Type<OpenHandler<?>> getType() {
+    if (TYPE == null) {
+      TYPE = new Type<OpenHandler<?>>();
+    }
+    return TYPE;
+  }
+
+  private T target;
+
+  /**
+   * Constructor. Should only be used by subclasses, almost always for testing.
+   */
+  protected OpenEvent() {
+  }
+
+  /**
+   * Gets the target.
+   * 
+   * @return the target
+   */
+  public T getTarget() {
     return target;
   }
 
   @Override
-  protected Type getType() {
-    return TYPE;
+  protected void dispatch(OpenHandler<T> handler) {
+    handler.onOpen(this);
+  }
+
+  // Because of type erasure, our static type is
+  // wild carded, yet the "real" type should use our I param.
+  @SuppressWarnings("unchecked")
+  @Override
+  protected final Type<OpenHandler<T>> getAssociatedType() {
+    return (Type) TYPE;
+  }
+
+  /**
+   * Sets the target.
+   * 
+   * @param target the target
+   */
+  protected final void setTarget(T target) {
+    this.target = target;
   }
 }

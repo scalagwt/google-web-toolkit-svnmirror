@@ -15,7 +15,7 @@
  */
 package com.google.gwt.event.dom.client;
 
-import com.google.gwt.core.client.impl.RawJsMapImpl;
+import com.google.gwt.core.client.impl.RawJsMapImpl; 
 import com.google.gwt.event.shared.AbstractEvent;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.HandlerManager;
@@ -27,18 +27,19 @@ import com.google.gwt.user.client.Event;
  * underlying native browser event object as well as a subclass of
  * AbstractEvent.Key that understands GWT event bits used by sinkEvents().
  * 
+ * @param <H> handler type
+ * 
  */
-public abstract class DomEvent extends AbstractEvent {
+public abstract class DomEvent<H extends EventHandler> extends AbstractEvent<H> {
   /**
    * Type class used by dom event subclasses.
    * 
-   * @param <EventType> event type
    * @param <HandlerType> handler type
    */
-  public abstract static class Type<EventType extends DomEvent, HandlerType extends EventHandler>
-      extends AbstractEvent.Type<EventType, HandlerType> {
-    private int nativeEventTypeInt;
-    DomEvent cached;
+  public static class Type<HandlerType extends EventHandler> extends
+      AbstractEvent.Type<HandlerType> {
+    private final int nativeEventTypeInt;
+    DomEvent<HandlerType> cached;
 
     /**
      * Constructor.
@@ -49,12 +50,13 @@ public abstract class DomEvent extends AbstractEvent {
       this.nativeEventTypeInt = nativeEventTypeInt;
     }
 
-    Type(int nativeEventTypeInt, String nativeEventTypeString, DomEvent cached) {
+    Type(int nativeEventTypeInt, String nativeEventTypeString,
+        DomEvent<HandlerType> cached) {
       this.cached = cached;
       // All clinit activity should take place here for DomEvent.
       if (registered == null) {
-        registered = new RawJsMapImpl();
-        reverseRegistered = new RawJsMapImpl();
+        registered = new RawJsMapImpl<Type<?>>();
+        reverseRegistered = new RawJsMapImpl<Type<?>>();
       }
       this.nativeEventTypeInt = nativeEventTypeInt;
       registered.put(nativeEventTypeString, this);
@@ -72,9 +74,9 @@ public abstract class DomEvent extends AbstractEvent {
     }
   }
 
-  private static RawJsMapImpl<Type> registered;
+  private static RawJsMapImpl<Type<?>> registered;
 
-  private static RawJsMapImpl<Type> reverseRegistered;
+  private static RawJsMapImpl<Type<?>> reverseRegistered;
 
   /**
    * Fires the given native event on the manager.
@@ -84,7 +86,7 @@ public abstract class DomEvent extends AbstractEvent {
    */
   public static void fireNativeEvent(Event nativeEvent, HandlerManager manager) {
     if (registered != null) {
-      DomEvent.Type typeKey = registered.get(nativeEvent.getType());
+      final DomEvent.Type<?> typeKey = registered.get(nativeEvent.getType());
       if (typeKey != null) {
         fire(nativeEvent, manager, typeKey);
       }
@@ -103,19 +105,22 @@ public abstract class DomEvent extends AbstractEvent {
    * 
    * @param eventType the GWT event type representing the type of the native
    *          event.
-   * @param manager the event manager
+   * @param handlers the handler manager containing the handlers
    */
-  public static void unsafeFireNativeEvent(int eventType, HandlerManager manager) {
+  public static void unsafeFireNativeEvent(int eventType, HandlerManager handlers) {
     if (registered != null) {
-      DomEvent.Type typeKey = reverseRegistered.get(eventType + "");
+      final DomEvent.Type<?> typeKey = reverseRegistered.get(eventType + "");
       if (typeKey != null) {
-        fire(null, manager, typeKey);
+        fire(null, handlers, typeKey);
       }
     }
   }
 
   private static void fire(Event nativeEvent, HandlerManager manager,
-      DomEvent.Type typeKey) {
+      DomEvent.Type<?> typeKey) {
+    if (manager == null) {
+      return;
+    }
     // Store and restore native event just in case we are in recursive
     // loop.
     Event currentNative = null;
@@ -168,5 +173,5 @@ public abstract class DomEvent extends AbstractEvent {
   }
 
   @Override
-  protected abstract DomEvent.Type getType();
+  protected abstract DomEvent.Type<H> getAssociatedType();
 }

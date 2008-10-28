@@ -16,7 +16,6 @@
 
 package com.google.gwt.event.dom.client;
 
-
 /**
  * This is a convenience interface that includes all mouse handlers defined by
  * the core GWT system.

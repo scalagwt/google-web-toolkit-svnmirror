@@ -31,10 +31,10 @@ import java.util.EventListener;
 /**
  * Root of legacy listener support hierarchy.
  * 
- * @param <ListenerType> listener type
+ * @param <T> listener type
  */
 @Deprecated
-abstract class L<ListenerType> implements EventHandler {
+abstract class L<T> implements EventHandler {
   public static class HistoryChange extends L<HistoryListener> implements
       ValueChangeHandler<String> {
     @Deprecated
@@ -43,7 +43,7 @@ abstract class L<ListenerType> implements EventHandler {
     }
 
     public static void remove(HandlerManager manager, HistoryListener listener) {
-      baseRemove(manager, listener, ValueChangeEvent.TYPE);
+      baseRemove(manager, listener, ValueChangeEvent.getType());
     }
 
     protected HistoryChange(HistoryListener listener) {
@@ -66,7 +66,8 @@ abstract class L<ListenerType> implements EventHandler {
 
     public static void remove(HandlerManager manager,
         WindowCloseListener listener) {
-      baseRemove(manager, listener, Window.ClosingEvent.TYPE, CloseEvent.TYPE);
+      baseRemove(manager, listener, Window.ClosingEvent.getType(),
+          CloseEvent.getType());
     }
 
     protected WindowClose(WindowCloseListener listener) {
@@ -94,7 +95,7 @@ abstract class L<ListenerType> implements EventHandler {
 
     public static void remove(HandlerManager manager,
         WindowResizeListener listener) {
-      baseRemove(manager, listener, ResizeEvent.TYPE);
+      baseRemove(manager, listener, ResizeEvent.getType());
     }
 
     protected WindowResize(WindowResizeListener listener) {
@@ -115,7 +116,7 @@ abstract class L<ListenerType> implements EventHandler {
 
     public static void remove(HandlerManager manager,
         WindowScrollListener listener) {
-      baseRemove(manager, listener, Window.ScrollEvent.TYPE);
+      baseRemove(manager, listener, Window.ScrollEvent.getType());
     }
 
     protected WindowScroll(WindowScrollListener listener) {
@@ -127,8 +128,11 @@ abstract class L<ListenerType> implements EventHandler {
     }
   }
 
-  static void baseRemove(HandlerManager manager, EventListener listener,
-      Type... keys) {
+  // This is an internal helper method with the current formulation, we have
+  // lost the info needed to make it safe by this point.
+  @SuppressWarnings("unchecked")
+  private static void baseRemove(HandlerManager manager,
+      EventListener listener, Type... keys) {
     if (manager != null) {
       for (Type key : keys) {
         int handlerCount = manager.getHandlerCount(key);
@@ -145,9 +149,9 @@ abstract class L<ListenerType> implements EventHandler {
   /**
    * Listener being wrapped.
    */
-  protected final ListenerType listener;
+  protected final T listener;
 
-  protected L(ListenerType listener) {
+  protected L(T listener) {
     this.listener = listener;
   }
 }

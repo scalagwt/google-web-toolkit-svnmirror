@@ -549,25 +549,25 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
   }
 
   public HandlerRegistration addKeyDownHandler(KeyDownHandler handler) {
-    return addDomHandler(KeyDownEvent.TYPE, handler);
+    return addDomHandler(KeyDownEvent.getType(), handler);
   }
 
   public HandlerRegistration addKeyPressHandler(KeyPressHandler handler) {
-    return addDomHandler(KeyPressEvent.TYPE, handler);
+    return addDomHandler(KeyPressEvent.getType(), handler);
   }
 
   public HandlerRegistration addKeyUpHandler(KeyUpHandler handler) {
-    return addDomHandler(KeyUpEvent.TYPE, handler);
+    return addDomHandler(KeyUpEvent.getType(), handler);
   }
 
   public HandlerRegistration addSelectionHandler(
       SelectionHandler<Suggestion> handler) {
-    return addHandler(SelectionEvent.TYPE, handler);
+    return addHandler(SelectionEvent.getType(), handler);
   }
 
   public HandlerRegistration addValueChangeHandler(
       ValueChangeHandler<String> handler) {
-    return addHandler(ValueChangeEvent.TYPE, handler);
+    return addHandler(ValueChangeEvent.getType(), handler);
   }
 
   /**
@@ -617,17 +617,17 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
 
   @Deprecated
   public void removeChangeListener(ChangeListener listener) {
-    L.Change.remove(this, listener);
+    L.Change.remove(box, listener);
   }
 
   @Deprecated
   public void removeClickListener(ClickListener listener) {
-    L.Click.remove(this, listener);
+    L.Click.remove(box, listener);
   }
 
   @Deprecated
   public void removeEventHandler(SuggestionHandler handler) {
-    L.baseRemove(this, handler, SelectionEvent.TYPE);
+    L.baseRemove(this, handler, SelectionEvent.getType());
   }
 
   @Deprecated
@@ -687,7 +687,7 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
     }
     String oldValue = value;
     this.value = newValue;
-    fireEvent(new ValueChangeEvent(oldValue, newValue));
+    ValueChangeEvent.fire(this, oldValue, newValue);
   }
 
   /**
@@ -769,7 +769,7 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
   }
 
   private void fireSuggestionEvent(Suggestion selectedSuggestion) {
-    fireEvent(new SelectionEvent(selectedSuggestion));
+    SelectionEvent.fire(this, selectedSuggestion);
   }
 
   private void setNewSelection(SuggestionMenuItem menuItem) {

@@ -42,12 +42,9 @@ import java.util.Iterator;
  * {@link com.google.gwt.user.client.ui.HasWidgets}.
  * </p>
  * 
- * <h3>CSS Style Rules</h3>
- * <ul class='css'>
- * <li>.gwt-TabPanel { the tab panel itself }</li>
- * <li>.gwt-TabPanelBottom { the bottom section of the tab panel (the deck
- * containing the widget) }</li>
- * </ul>
+ * <h3>CSS Style Rules</h3> <ul class='css'> <li>.gwt-TabPanel { the tab panel
+ * itself }</li> <li>.gwt-TabPanelBottom { the bottom section of the tab panel
+ * (the deck containing the widget) }</li> </ul>
  * 
  * <p>
  * <h3>Example</h3>
@@ -251,12 +248,12 @@ public class TabPanel extends Composite implements TabListener,
 
   public HandlerRegistration addBeforeSelectionHandler(
       BeforeSelectionHandler<Integer> handler) {
-    return addHandler(BeforeSelectionEvent.TYPE, handler);
+    return addHandler(BeforeSelectionEvent.getType(), handler);
   }
 
   public HandlerRegistration addSelectionHandler(
       SelectionHandler<Integer> handler) {
-    return addHandler(SelectionEvent.TYPE, handler);
+    return addHandler(SelectionEvent.getType(), handler);
   }
 
   @Deprecated
@@ -361,10 +358,8 @@ public class TabPanel extends Composite implements TabListener,
 
   @Deprecated
   public boolean onBeforeTabSelected(SourcesTabEvents sender, int tabIndex) {
-    BeforeSelectionEvent<Integer> event = new BeforeSelectionEvent<Integer>(
-        tabIndex);
-    fireEvent(event);
-    return !event.isCanceled();
+    BeforeSelectionEvent<Integer> event = BeforeSelectionEvent.fire(this, tabIndex);
+    return event == null || !event.isCanceled();
   }
 
   public void onSelection(SelectionEvent<Integer> event) {
@@ -374,7 +369,7 @@ public class TabPanel extends Composite implements TabListener,
   @Deprecated
   public void onTabSelected(SourcesTabEvents sender, int tabIndex) {
     deck.showWidget(tabIndex);
-    fireEvent(new SelectionEvent<Integer>(tabIndex));
+    SelectionEvent.fire(this, tabIndex);
   }
 
   public boolean remove(int index) {

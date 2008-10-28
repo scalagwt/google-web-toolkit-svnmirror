@@ -20,21 +20,21 @@ package com.google.gwt.event.shared;
  * longer be accessed once the {@link HandlerManager} which originally fired the
  * event finishes with it.
  * 
+ * @param <H> handler type
+ * 
  */
-public abstract class AbstractEvent {
+public abstract class AbstractEvent<H extends EventHandler> {
+
   /**
    * Type class used to register events with the {@link HandlerManager}.
    * <p>
-   * Type is parameterized by the event and handler type in order to make the
-   * addHandler method type safe and to avoid type-casts when implementing
-   * {@link AbstractEvent.Type#fire(EventHandler, AbstractEvent)}.
+   * Type is parameterized by the handler type in order to make the addHandler
+   * method type safe.
    * </p>
    * 
-   * @param <EventType> event type
-   * @param <HandlerType> handler type
+   * @param <H> handler type
    */
-  public abstract static class Type<EventType extends AbstractEvent, HandlerType extends EventHandler> {
-
+  public static class Type<H> {
     private int index;
 
     /**
@@ -54,14 +54,6 @@ public abstract class AbstractEvent {
     public String toString() {
       return "Event type";
     }
-
-    /**
-     * Fires the given handler on the supplied event.
-     * 
-     * @param handler the handler to fire
-     * @param event the event
-     */
-    protected abstract void fire(HandlerType handler, EventType event);
   }
 
   private boolean dead;
@@ -119,11 +111,20 @@ public abstract class AbstractEvent {
   }
 
   /**
-   * Returns the type used to register this event.
+   * Should only be called by {@link HandlerManager}. In other words, do not use
+   * or call.
+   * 
+   * @param handler handler
+   */
+  protected abstract void dispatch(H handler);
+
+  /**
+   * Returns the type used to register this event. Used by handler manager to
+   * dispatch events to the correct handlers.
    * 
    * @return the type
    */
-  protected abstract Type getType();
+  protected abstract Type<H> getAssociatedType();
 
   /**
    * Is the event current live?

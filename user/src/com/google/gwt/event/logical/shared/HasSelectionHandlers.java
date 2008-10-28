@@ -19,15 +19,16 @@ import com.google.gwt.event.shared.HandlerRegistration;
 
 /**
  * A widget that implements this interface is a public source of
- * {@link SelectionEvent} events. 
-   * @param <SelectedItem> the type being selected
+ * {@link SelectionEvent} events.
+ * 
+ * @param <I> the type being selected
  */
-public interface HasSelectionHandlers<SelectedItem> {
+public interface HasSelectionHandlers<I> {
   /**
    * Adds a {@link SelectionEvent} handler.
    * 
    * @param handler the handler
    * @return the registration for the event
    */
-  HandlerRegistration addSelectionHandler(SelectionHandler<SelectedItem> handler);
+  HandlerRegistration addSelectionHandler(SelectionHandler<I> handler);
 }

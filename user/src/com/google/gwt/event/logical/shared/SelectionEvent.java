@@ -16,32 +16,59 @@
 package com.google.gwt.event.logical.shared;
 
 import com.google.gwt.event.shared.AbstractEvent;
+import com.google.gwt.event.shared.HandlerManager;
 
 /**
  * Represents a selection event.
  * 
- * @param <SelectedItemType> the type being selected
+ * @param <I> the type being selected
  */
-public class SelectionEvent<SelectedItemType> extends AbstractEvent {
+public class SelectionEvent<I> extends AbstractEvent<SelectionHandler<I>> {
 
   /**
-   * Event type.
+   * Handler type.
    */
-  public static final Type<SelectionEvent, SelectionHandler> TYPE = new Type<SelectionEvent, SelectionHandler>() {
-    @Override
-    protected void fire(SelectionHandler handler, SelectionEvent event) {
-      handler.onSelection(event);
-    }
-  };
-  private SelectedItemType item;
+  private static Type<SelectionHandler<?>> TYPE;
 
   /**
-   * Constructs a SelectionEvent event.
+   * Fires a selection event on all registered handlers in the handler manager.
    * 
-   * @param item the selected item
+   * @param <I> the selected item type
+   * @param <S> The event source.
+   * @param source the source of the handlers. Must have selection handlers and
+   *          a handler manager.
+   * @param selectedItem the selected item
    */
-  public SelectionEvent(SelectedItemType item) {
-    this.item = item;
+  public static <I, S extends HasSelectionHandlers<I> & HasHandlers> void fire(
+      S source, I selectedItem) {
+    if (TYPE != null) {
+      HandlerManager handlers = source.getHandlers();
+      if (handlers != null) {
+        SelectionEvent<I> event = new SelectionEvent<I>();
+        event.setSelectedItem(selectedItem);
+        handlers.fireEvent(event);
+      }
+    }
+  }
+
+  /**
+   * Gets the abstract type associated with this event.
+   * 
+   * @return returns the handler type
+   */
+  public static Type<SelectionHandler<?>> getType() {
+    if (TYPE == null) {
+      TYPE = new Type<SelectionHandler<?>>();
+    }
+    return TYPE;
+  }
+
+  private I selectedItem;
+
+  /**
+   * Constructor. Should only be used by subclasses, almost always for testing.
+   */
+  protected SelectionEvent() {
   }
 
   /**
@@ -49,17 +76,29 @@ public class SelectionEvent<SelectedItemType> extends AbstractEvent {
    * 
    * @return the selected item
    */
-  public SelectedItemType getSelectedItem() {
-    return item;
+  public I getSelectedItem() {
+    return selectedItem;
   }
 
   @Override
-  public String toDebugString() {
-    return "selected: " + item;
+  protected void dispatch(SelectionHandler<I> handler) {
+    handler.onSelection(this);
   }
 
+  // Because of type erasure, our static type is
+  // wild carded, yet the "real" type should use our I param.
+  @SuppressWarnings("unchecked")
   @Override
-  protected Type getType() {
-    return TYPE;
+  protected Type<SelectionHandler<I>> getAssociatedType() {
+    return (Type) TYPE;
+  }
+
+  /**
+   * Sets the selected item.
+   * 
+   * @param selectedItem the selected item
+   */
+  protected final void setSelectedItem(I selectedItem) {
+    this.selectedItem = selectedItem;
   }
 }

@@ -39,13 +39,13 @@ public class EventsTest extends TestCase {
 
   public void testKeyEvents() {
     final Flag flag = new Flag();
-    HandlerRegistration downRegistration = manager.addHandler(KeyDownEvent.TYPE,
-        new KeyDownHandler() {
+    HandlerRegistration downRegistration = manager.addHandler(
+        KeyDownEvent.getType(), new KeyDownHandler() {
           public void onKeyDown(KeyDownEvent event) {
             flag.flag = true;
           }
         });
-    HandlerRegistration upRegistration = manager.addHandler(KeyUpEvent.TYPE,
+    HandlerRegistration upRegistration = manager.addHandler(KeyUpEvent.getType(),
         new KeyUpHandler() {
           public void onKeyUp(KeyUpEvent event) {
             flag.flag = true;
@@ -53,7 +53,7 @@ public class EventsTest extends TestCase {
         });
 
     HandlerRegistration pressRegistration = manager.addHandler(
-        KeyPressEvent.TYPE, new KeyPressHandler() {
+        KeyPressEvent.getType(), new KeyPressHandler() {
           public void onKeyPress(KeyPressEvent event) {
             flag.flag = true;
           }
@@ -68,54 +68,54 @@ public class EventsTest extends TestCase {
 
     final Flag flag = new Flag();
     HandlerRegistration downRegistration = manager.addHandler(
-        MouseDownEvent.TYPE, new MouseDownHandler() {
+        MouseDownEvent.getType(), new MouseDownHandler() {
           public void onMouseDown(MouseDownEvent event) {
             flag.flag = true;
           }
         });
-    HandlerRegistration upRegistration = manager.addHandler(MouseUpEvent.TYPE,
-        new MouseUpHandler() {
+    HandlerRegistration upRegistration = manager.addHandler(
+        MouseUpEvent.getType(), new MouseUpHandler() {
           public void onMouseUp(MouseUpEvent event) {
             flag.flag = true;
           }
         });
 
-    HandlerRegistration clickRegistration = manager.addHandler(ClickEvent.TYPE,
-        new ClickHandler() {
+    HandlerRegistration clickRegistration = manager.addHandler(
+        ClickEvent.getType(), new ClickHandler() {
           public void onClick(ClickEvent event) {
             flag.flag = true;
           }
         });
 
     HandlerRegistration dblclickRegistration = manager.addHandler(
-        DoubleClickEvent.TYPE, new DoubleClickHandler() {
+        DoubleClickEvent.getType(), new DoubleClickHandler() {
           public void onDoubleClick(DoubleClickEvent event) {
             flag.flag = true;
           }
         });
 
-    HandlerRegistration outRegistration = manager.addHandler(MouseOutEvent.TYPE,
-        new MouseOutHandler() {
+    HandlerRegistration outRegistration = manager.addHandler(
+        MouseOutEvent.getType(), new MouseOutHandler() {
           public void onMouseOut(MouseOutEvent event) {
             flag.flag = true;
           }
         });
     HandlerRegistration overRegistration = manager.addHandler(
-        MouseOverEvent.TYPE, new MouseOverHandler() {
+        MouseOverEvent.getType(), new MouseOverHandler() {
           public void onMouseOver(MouseOverEvent event) {
             flag.flag = true;
           }
         });
 
     HandlerRegistration moveRegistration = manager.addHandler(
-        MouseMoveEvent.TYPE, new MouseMoveHandler() {
+        MouseMoveEvent.getType(), new MouseMoveHandler() {
           public void onMouseMove(MouseMoveEvent event) {
             flag.flag = true;
           }
         });
 
     HandlerRegistration wheelRegistration = manager.addHandler(
-        MouseWheelEvent.TYPE, new MouseWheelHandler() {
+        MouseWheelEvent.getType(), new MouseWheelHandler() {
           public void onMouseWheel(MouseWheelEvent event) {
             flag.flag = true;
           }
@@ -126,8 +126,7 @@ public class EventsTest extends TestCase {
     checkFire(new MouseOutEvent(), outRegistration, flag, "onMouseOut");
     checkFire(new MouseOverEvent(), overRegistration, flag, "onMouseOver");
     checkFire(new MouseMoveEvent(), moveRegistration, flag, "onMouseMove");
-    checkFire(new MouseWheelEvent(), wheelRegistration, flag,
-        "onMouseWheel");
+    checkFire(new MouseWheelEvent(), wheelRegistration, flag, "onMouseWheel");
     checkFire(new ClickEvent(), clickRegistration, flag, "onClick");
     checkFire(new DoubleClickEvent(), dblclickRegistration, flag,
         "onDoubleClick");

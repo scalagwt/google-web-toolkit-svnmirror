@@ -121,7 +121,7 @@ public class Label extends Widget implements HasHorizontalAlignment, HasText,
   }
 
   public HandlerRegistration addClickHandler(ClickHandler handler) {
-    return addDomHandler(ClickEvent.TYPE, handler);
+    return addDomHandler(ClickEvent.getType(), handler);
   }
 
   @Deprecated
@@ -130,7 +130,7 @@ public class Label extends Widget implements HasHorizontalAlignment, HasText,
   }
 
   public HandlerRegistration addMouseDownHandler(MouseDownHandler handler) {
-    return addDomHandler(MouseDownEvent.TYPE, handler);
+    return addDomHandler(MouseDownEvent.getType(), handler);
   }
 
   @Deprecated
@@ -139,23 +139,23 @@ public class Label extends Widget implements HasHorizontalAlignment, HasText,
   }
 
   public HandlerRegistration addMouseMoveHandler(MouseMoveHandler handler) {
-    return addDomHandler(MouseMoveEvent.TYPE, handler);
+    return addDomHandler(MouseMoveEvent.getType(), handler);
   }
 
   public HandlerRegistration addMouseOutHandler(MouseOutHandler handler) {
-    return addDomHandler(MouseOutEvent.TYPE, handler);
+    return addDomHandler(MouseOutEvent.getType(), handler);
   }
 
   public HandlerRegistration addMouseOverHandler(MouseOverHandler handler) {
-    return addDomHandler(MouseOverEvent.TYPE, handler);
+    return addDomHandler(MouseOverEvent.getType(), handler);
   }
 
   public HandlerRegistration addMouseUpHandler(MouseUpHandler handler) {
-    return addDomHandler(MouseUpEvent.TYPE, handler);
+    return addDomHandler(MouseUpEvent.getType(), handler);
   }
 
   public HandlerRegistration addMouseWheelHandler(MouseWheelHandler handler) {
-    return addDomHandler(MouseWheelEvent.TYPE, handler);
+    return addDomHandler(MouseWheelEvent.getType(), handler);
   }
 
   @Deprecated

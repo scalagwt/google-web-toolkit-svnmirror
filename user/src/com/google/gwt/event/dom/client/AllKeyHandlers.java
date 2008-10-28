@@ -19,7 +19,6 @@ package com.google.gwt.event.dom.client;
 /**
  * Adaptor used to create and add all the Key handlers at once.
  * 
- * 
  * <br/> WARNING, PLEASE READ: As this class is intended for developers who wish
  * to create all key events in GWT, new key handlers will be added to it.
  * Therefore, updates to GWT could cause breaking API changes.

@@ -21,19 +21,32 @@ import com.google.gwt.user.client.Event;
 /**
  * Represents a native mouse over event.
  */
-public class MouseOverEvent extends MouseEvent {
+public class MouseOverEvent extends MouseEvent<MouseOverHandler> {
 
   /**
    * Event type for mouse over events. Represents the meta-data associated with
    * this event.
    */
-  public static final Type<MouseOverEvent, MouseOverHandler> TYPE = new Type<MouseOverEvent, MouseOverHandler>(
-      Event.ONMOUSEOVER, "mouseover", new MouseOverEvent()) {
-    @Override
-    public void fire(MouseOverHandler handler, MouseOverEvent event) {
-      handler.onMouseOver(event);
-    }
-  };
+  private static Type<MouseOverHandler> TYPE = new Type<MouseOverHandler>(
+      Event.ONMOUSEOVER, "mouseover", new MouseOverEvent());
+
+  /**
+   * Ensures the existence of the handler TYPE, so the system knows to start
+   * firing events and then returns it.
+   * 
+   * @return the handler TYPE
+   */
+  public static Type<MouseOverHandler> getType() {
+    return TYPE;
+  }
+
+  /**
+   * Protected constructor, use
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)}
+   * to fire click events.
+   */
+  protected MouseOverEvent() {
+  }
 
   /**
    * Gets the element from which the mouse pointer was moved.
@@ -56,7 +69,12 @@ public class MouseOverEvent extends MouseEvent {
   }
 
   @Override
-  protected Type getType() {
+  protected void dispatch(MouseOverHandler handler) {
+    handler.onMouseOver(this);
+  }
+
+  @Override
+  protected final Type<MouseOverHandler> getAssociatedType() {
     return TYPE;
   }
 
