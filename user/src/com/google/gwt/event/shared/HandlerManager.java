@@ -198,7 +198,7 @@ public class HandlerManager {
   /**
    * Removes the given handler from the specified event type. Normally,
    * applications should call {@link HandlerRegistration#removeHandler()}
-   * instead. This method is provided primary to support deprecated APIS.
+   * instead.
    * 
    * @param <HandlerType> handler type
    * 
