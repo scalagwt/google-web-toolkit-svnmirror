@@ -15,13 +15,15 @@
  */
 package com.google.gwt.user.client.ui;
 
+import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
+
 /**
- * An object that implements this interface contains a value of type T, which
- * can be set and retrieved using these methods.
+ * An object that implements this interface should be a user input widget, where
+ * the user and programmer can both set and get the object's value.
  * 
  * @param <T> the type of value.
  */
-public interface HasValue<T> {
+public interface HasValue<T> extends HasValueChangeHandlers<T> {
 
   /**
    * Gets this object's value.
@@ -33,7 +35,7 @@ public interface HasValue<T> {
   /**
    * Sets this object's value.
    * 
-   * @param text the object's new value
+   * @param value the object's new value
    */
-  void setValue(T text);
+  void setValue(T value);
 }

@@ -15,6 +15,11 @@
  */
 package com.google.gwt.user.client.ui;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 
@@ -36,7 +41,7 @@ import com.google.gwt.user.client.Element;
  * {@example com.google.gwt.examples.CheckBoxExample}
  * </p>
  */
-public class CheckBox extends ButtonBase implements HasName {
+public class CheckBox extends ButtonBase implements HasName, HasValue<Boolean> {
   private Element inputElem, labelElem;
 
   /**
@@ -92,6 +97,19 @@ public class CheckBox extends ButtonBase implements HasName {
     setTabIndex(0);
   }
 
+  public HandlerRegistration addValueChangeHandler(
+      ValueChangeHandler<Boolean> handler) {
+    if (!ValueChangeEvent.isHandled(this)) {
+      this.addClickHandler(new ClickHandler() {
+        public void onClick(ClickEvent event) {
+          boolean isChecked = isChecked();
+          ValueChangeEvent.fire(CheckBox.this, !isChecked, isChecked);
+        }
+      });
+    }
+    return addHandler(ValueChangeEvent.getType(), handler);
+  }
+
   @Override
   public String getHTML() {
     return DOM.getInnerHTML(labelElem);
@@ -109,6 +127,10 @@ public class CheckBox extends ButtonBase implements HasName {
   @Override
   public String getText() {
     return DOM.getInnerText(labelElem);
+  }
+
+  public Boolean getValue() {
+    return isChecked();
   }
 
   /**
@@ -137,8 +159,12 @@ public class CheckBox extends ButtonBase implements HasName {
    * @param checked <code>true</code> to check the check box
    */
   public void setChecked(boolean checked) {
+    boolean fire = ValueChangeEvent.isHandled(this) && checked != isChecked();
     DOM.setElementPropertyBoolean(inputElem, "checked", checked);
     DOM.setElementPropertyBoolean(inputElem, "defaultChecked", checked);
+    if (fire) {
+      ValueChangeEvent.fire(this, !checked, checked);
+    }
   }
 
   @Override
@@ -186,6 +212,19 @@ public class CheckBox extends ButtonBase implements HasName {
   @Override
   public void setText(String text) {
     DOM.setInnerText(labelElem, text);
+  }
+
+  /**
+   * Sets this object's value.
+   * 
+   * @param value the object's new value
+   */
+  public void setValue(boolean value) {
+    setChecked(value);
+  }
+
+  public void setValue(Boolean value) {
+    setChecked(value);
   }
 
   // Unlike other widgets the CheckBox sinks on its input element, not its

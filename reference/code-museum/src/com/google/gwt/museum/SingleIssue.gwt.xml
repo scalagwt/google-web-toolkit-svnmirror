@@ -6,7 +6,7 @@
 
 	<!-- Specify the app entry point class.                   -->
 	<entry-point
-		class='com.google.gwt.museum.client.defaultmuseum.VisualsForEventsFiring' />
+		class='com.google.gwt.museum.client.defaultmuseum.VisualsForSuggestBoxEvents' />
 	<source path="client/common" />
 	<source path="client/defaultmuseum" />
 	<source path="client/viewer" />

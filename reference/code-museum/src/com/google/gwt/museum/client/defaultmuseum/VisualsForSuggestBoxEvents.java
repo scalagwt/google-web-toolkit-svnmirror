@@ -17,8 +17,6 @@
 package com.google.gwt.museum.client.defaultmuseum;
 
 import com.google.gwt.event.dom.client.AllKeyHandlers;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyUpEvent;
@@ -36,6 +34,8 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SuggestBox;
+import com.google.gwt.user.client.ui.SuggestionEvent;
+import com.google.gwt.user.client.ui.SuggestionHandler;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -51,19 +51,20 @@ import java.util.List;
 public class VisualsForSuggestBoxEvents extends AbstractIssue {
 
   private abstract class CheckBoxEvent extends CheckBox implements
-      ChangeHandler {
+      ValueChangeHandler<Boolean> {
     String name;
     HandlerRegistration reg;
 
     public CheckBoxEvent(String name, Panel p) {
       this.name = name;
-      this.setChecked(true);
       this.setText(name);
       p.add(this);
+      this.addValueChangeHandler(this);
+      this.setChecked(true);
     }
 
-    public void onChange(ChangeEvent event) {
-      if (this.isChecked()) {
+    public void onValueChange(ValueChangeEvent<Boolean> event) {
+      if (event.getNewValue().booleanValue()) {
         report("add " + name);
         addHandler();
       } else {
@@ -117,7 +118,8 @@ public class VisualsForSuggestBoxEvents extends AbstractIssue {
     b.setTitle(suggestBoxName);
     p.add(b);
     class MyHandler extends AllKeyHandlers implements ChangeListener,
-        FocusListener, ValueChangeHandler<String>, SelectionHandler<Suggestion> {
+        FocusListener, ValueChangeHandler<String>,
+        SelectionHandler<Suggestion>, SuggestionHandler {
 
       public void onChange(Widget sender) {
         report("change: " + sender.getClass());
@@ -147,6 +149,10 @@ public class VisualsForSuggestBoxEvents extends AbstractIssue {
         report(event);
       }
 
+      public void onSuggestionSelected(SuggestionEvent event) {
+        report("suggestion:" + event.getSelectedSuggestion());
+      }
+
       public void onValueChange(ValueChangeEvent<String> event) {
         report(event);
       }
@@ -164,9 +170,34 @@ public class VisualsForSuggestBoxEvents extends AbstractIssue {
         reg.removeHandler();
       }
     };
+
+    new CheckBoxEvent("ChangeListener", p) {
+
+      @Override
+      void addHandler() {
+        b.addChangeListener(handler);
+      }
+
+      @Override
+      void removeHandler() {
+        b.removeChangeListener(handler);
+      }
+    };
+    new CheckBoxEvent("Suggestion listener", p) {
+
+      @Override
+      void addHandler() {
+        b.addEventHandler(handler);
+      }
+
+      @Override
+      void removeHandler() {
+        b.removeEventHandler(handler);
+      }
+    };
+
     b.addKeyUpHandler(handler);
     b.addKeyPressHandler(handler);
-    b.addChangeListener(handler);
     b.addFocusListener(handler);
     b.addSelectionHandler(handler);
     b.addValueChangeHandler(handler);

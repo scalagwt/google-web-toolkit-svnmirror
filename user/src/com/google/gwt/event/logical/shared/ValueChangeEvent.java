@@ -31,6 +31,29 @@ public class ValueChangeEvent<I> extends AbstractEvent<ValueChangeHandler<I>> {
   private static Type<ValueChangeHandler<?>> TYPE;
 
   /**
+   * Fires a boolean value change event on all registered handlers in the
+   * handler manager.
+   * 
+   * @param <S> The event source.
+   * @param source the source of the handlers. Must have value change handlers
+   *          and a handler manager.
+   * @param oldValue the old value
+   * @param newValue the new value
+   */
+  public static <S extends HasValueChangeHandlers<Boolean> & HasHandlers> void fire(
+      S source, boolean oldValue, boolean newValue) {
+    if (TYPE != null) {
+      HandlerManager handlers = source.getHandlers();
+      if (handlers != null && oldValue != newValue) {
+        ValueChangeEvent<Boolean> event = new ValueChangeEvent<Boolean>();
+        event.setOldValue(Boolean.valueOf(oldValue));
+        event.setNewValue(Boolean.valueOf(newValue));
+        handlers.fireEvent(event);
+      }
+    }
+  }
+
+  /**
    * Fires a value change event on all registered handlers in the handler
    * manager.
    * 
@@ -64,6 +87,16 @@ public class ValueChangeEvent<I> extends AbstractEvent<ValueChangeHandler<I>> {
       TYPE = new Type<ValueChangeHandler<?>>();
     }
     return TYPE;
+  }
+
+  /**
+   * Does the given source have a handler for this type?
+   * 
+   * @param source the source
+   * @return does the source have a handler for this type
+   */
+  public static boolean isHandled(HasHandlers source) {
+    return isHandled(getType(), source);
   }
 
   private I oldValue;

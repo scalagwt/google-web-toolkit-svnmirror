@@ -234,6 +234,7 @@ abstract class L<T> implements EventHandler {
       listener.onLoad(source(event));
     }
   }
+
   public static class Mouse extends L<MouseListener> implements
       MouseDownHandler, MouseUpHandler, MouseOutHandler, MouseOverHandler,
       MouseMoveHandler {
@@ -280,7 +281,6 @@ abstract class L<T> implements EventHandler {
       listener.onMouseUp(source(event), event.getClientX(), event.getClientY());
     }
   }
-
   public static class MouseWheel extends L<MouseWheelListener> implements
       MouseWheelHandler {
     public static void remove(Widget eventSource, MouseWheelListener listener) {
@@ -330,6 +330,27 @@ abstract class L<T> implements EventHandler {
       Element elem = source.getElement();
       listener.onScroll(source(event), elem.getScrollLeft(),
           elem.getScrollTop());
+    }
+  }
+
+  public static class Suggestion extends L<SuggestionHandler> implements
+      SelectionHandler<SuggestOracle.Suggestion> {
+    @Deprecated
+    public static void add(SuggestBox source, SuggestionHandler listener) {
+      source.addSelectionHandler(new Suggestion(listener));
+    }
+
+    public static void remove(Widget eventSource, SuggestionHandler listener) {
+      baseRemove(eventSource, listener, SelectionEvent.getType());
+    }
+
+    protected Suggestion(SuggestionHandler listener) {
+      super(listener);
+    }
+
+    public void onSelection(SelectionEvent<SuggestOracle.Suggestion> event) {
+      listener.onSuggestionSelected(new SuggestionEvent(
+          (SuggestBox) event.getSource(), event.getSelectedItem()));
     }
   }
 
@@ -481,11 +502,21 @@ abstract class L<T> implements EventHandler {
    */
   protected final T listener;
 
+  private Widget source;
+
   protected L(T listener) {
     this.listener = listener;
   }
 
+  public void setSource(Widget source) {
+    this.source = source;
+  }
+
   Widget source(AbstractEvent<?> event) {
-    return (Widget) event.getSource();
+    if (source == null) {
+      return (Widget) event.getSource();
+    } else {
+      return source;
+    }
   }
 }
