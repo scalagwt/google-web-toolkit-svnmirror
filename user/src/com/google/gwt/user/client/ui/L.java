@@ -21,8 +21,6 @@ import com.google.gwt.event.dom.client.AllFocusHandlers;
 import com.google.gwt.event.dom.client.AllKeyHandlers;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
-import com.google.gwt.event.dom.client.CellClickEvent;
-import com.google.gwt.event.dom.client.CellClickHandler;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -33,7 +31,6 @@ import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.dom.client.HasAllFocusHandlers;
 import com.google.gwt.event.dom.client.HasAllKeyHandlers;
-import com.google.gwt.event.dom.client.HasCellClickHandlers;
 import com.google.gwt.event.dom.client.HasChangeHandlers;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.dom.client.HasMouseDownHandlers;
@@ -392,23 +389,24 @@ abstract class L<T> implements EventHandler {
   }
 
   public static class Table extends L<TableListener> implements
-      CellClickHandler {
+      ClickHandler {
     @Deprecated
-    public static void add(HasCellClickHandlers source, TableListener listener) {
-      source.addCellClickHandler(new Table(listener));
+    public static void add(HasClickHandlers source, TableListener listener) {
+      source.addClickHandler(new Table(listener));
     }
 
     public static void remove(Widget eventSource, TableListener listener) {
-      baseRemove(eventSource, listener, CellClickEvent.getType());
+      baseRemove(eventSource, listener, ClickEvent.getType());
     }
 
     protected Table(TableListener listener) {
       super(listener);
     }
 
-    public void onCellClick(CellClickEvent event) {
-      listener.onCellClicked((SourcesTableEvents) event.getSource(),
-          event.getRowIndex(), event.getCellIndex());
+    public void onClick(ClickEvent event) {
+      HTMLTable table = (HTMLTable) event.getSource();
+      HTMLTable.Cell cell = table.getCellForEvent(event);
+      listener.onCellClicked(table, cell.getRowIndex(), cell.getCellIndex());
     }
   }
 

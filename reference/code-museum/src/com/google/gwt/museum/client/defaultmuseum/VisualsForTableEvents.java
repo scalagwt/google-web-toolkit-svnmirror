@@ -16,8 +16,6 @@
 
 package com.google.gwt.museum.client.defaultmuseum;
 
-import com.google.gwt.event.dom.client.CellClickEvent;
-import com.google.gwt.event.dom.client.CellClickHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.FocusEvent;
@@ -28,6 +26,7 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.HTMLTable.Cell;
 
 /**
  * A simple tree used to quickly exercise tree behavior.
@@ -80,10 +79,11 @@ public class VisualsForTableEvents extends AbstractIssue {
     VerticalPanel p = new VerticalPanel();
     fillInGrid();
     p.add(g);
-    g.addCellClickHandler(new CellClickHandler() {
-      public void onCellClick(CellClickEvent event) {
-        g.setText(0, event.getCellIndex(), "clicked on " + event.getCellIndex()
-            + "," + event.getRowIndex());
+    g.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        Cell cell = g.getCellForEvent(event);
+        g.setText(0, cell.getCellIndex(), "clicked on " 
+            + cell.getCellIndex() + "," + cell.getRowIndex());
       }
 
     });
