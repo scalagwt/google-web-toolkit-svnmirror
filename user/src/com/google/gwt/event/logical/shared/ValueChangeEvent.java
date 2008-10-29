@@ -32,7 +32,8 @@ public class ValueChangeEvent<I> extends AbstractEvent<ValueChangeHandler<I>> {
 
   /**
    * Fires a boolean value change event on all registered handlers in the
-   * handler manager.
+   * handler manager. Will not fire if the old and new values are the same
+   * object.
    * 
    * @param <S> The event source.
    * @param source the source of the handlers. Must have value change handlers
@@ -43,19 +44,14 @@ public class ValueChangeEvent<I> extends AbstractEvent<ValueChangeHandler<I>> {
   public static <S extends HasValueChangeHandlers<Boolean> & HasHandlers> void fire(
       S source, boolean oldValue, boolean newValue) {
     if (TYPE != null) {
-      HandlerManager handlers = source.getHandlers();
-      if (handlers != null && oldValue != newValue) {
-        ValueChangeEvent<Boolean> event = new ValueChangeEvent<Boolean>();
-        event.setOldValue(Boolean.valueOf(oldValue));
-        event.setNewValue(Boolean.valueOf(newValue));
-        handlers.fireEvent(event);
-      }
+      fire(source, Boolean.valueOf(oldValue), Boolean.valueOf(newValue));
     }
   }
 
   /**
    * Fires a value change event on all registered handlers in the handler
-   * manager.
+   * manager. Will not fire if the old and new values are the same object as
+   * that is against the value change constract.
    * 
    * @param <I> the old value type
    * @param <S> The event source.
@@ -68,7 +64,8 @@ public class ValueChangeEvent<I> extends AbstractEvent<ValueChangeHandler<I>> {
       S source, I oldValue, I newValue) {
     if (TYPE != null) {
       HandlerManager handlers = source.getHandlers();
-      if (handlers != null) {
+      if (handlers != null && oldValue != newValue
+          && handlers.isEventHandled(TYPE)) {
         ValueChangeEvent<I> event = new ValueChangeEvent<I>();
         event.setOldValue(oldValue);
         event.setNewValue(newValue);
@@ -87,16 +84,6 @@ public class ValueChangeEvent<I> extends AbstractEvent<ValueChangeHandler<I>> {
       TYPE = new Type<ValueChangeHandler<?>>();
     }
     return TYPE;
-  }
-
-  /**
-   * Does the given source have a handler for this type?
-   * 
-   * @param source the source
-   * @return does the source have a handler for this type
-   */
-  public static boolean isHandled(HasHandlers source) {
-    return isHandled(getType(), source);
   }
 
   private I oldValue;

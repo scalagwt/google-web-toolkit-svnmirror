@@ -71,6 +71,16 @@ public class Widget extends UIObject implements EventListener, HasHandlers {
     return attached;
   }
 
+  /**
+   * Is the given event handled by this widget?
+   * 
+   * @param type the event type
+   * @return is it handled?
+   */
+  public boolean isEventHandled(AbstractEvent.Type<?> type) {
+    return handlerManager != null && handlerManager.isEventHandled(type);
+  }
+
   public void onBrowserEvent(Event nativeEvent) {
     if (handlerManager != null) {
       DomEvent.fireNativeEvent(nativeEvent, handlerManager);

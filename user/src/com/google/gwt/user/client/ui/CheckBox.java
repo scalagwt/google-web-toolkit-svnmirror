@@ -99,7 +99,8 @@ public class CheckBox extends ButtonBase implements HasName, HasValue<Boolean> {
 
   public HandlerRegistration addValueChangeHandler(
       ValueChangeHandler<Boolean> handler) {
-    if (!ValueChangeEvent.isHandled(this)) {
+    // Is this the first value change event? If so, add hooking ability
+    if (!isEventHandled(ValueChangeEvent.getType())) {
       this.addClickHandler(new ClickHandler() {
         public void onClick(ClickEvent event) {
           boolean isChecked = isChecked();
@@ -159,12 +160,10 @@ public class CheckBox extends ButtonBase implements HasName, HasValue<Boolean> {
    * @param checked <code>true</code> to check the check box
    */
   public void setChecked(boolean checked) {
-    boolean fire = ValueChangeEvent.isHandled(this) && checked != isChecked();
+    boolean wasChecked = this.isChecked();
     DOM.setElementPropertyBoolean(inputElem, "checked", checked);
     DOM.setElementPropertyBoolean(inputElem, "defaultChecked", checked);
-    if (fire) {
-      ValueChangeEvent.fire(this, !checked, checked);
-    }
+    ValueChangeEvent.fire(this, wasChecked, checked);
   }
 
   @Override

@@ -15,7 +15,6 @@
  */
 package com.google.gwt.event.shared;
 
-import com.google.gwt.event.logical.shared.HasHandlers;
 
 /**
  * Root of all gwt events. All gwt events are considered dead and should no
@@ -56,17 +55,6 @@ public abstract class AbstractEvent<H extends EventHandler> {
     public String toString() {
       return "Event type";
     }
-  }
-
-  /**
-   * Helper method to compute isHandled for event types.
-   * 
-   * @param type the type being asked about
-   * @param source the source of the handlers
-   */
-  protected static boolean isHandled(Type<?> type, HasHandlers source) {
-    return type != null && source.getHandlers() != null
-        && source.getHandlers().isEventHandled(type);
   }
 
   private boolean dead;
