@@ -29,8 +29,7 @@ import com.google.gwt.user.client.impl.HistoryImpl;
  * 
  * <p>
  * In order to receive notification of user-directed changes to the current
- * history item, implement the
- * {@link ValueChangeHandler} interface and attach
+ * history item, implement the {@link ValueChangeHandler} interface and attach
  * it via {@link #addValueChangeHandler(ValueChangeHandler)}.
  * </p>
  * 
@@ -43,8 +42,8 @@ import com.google.gwt.user.client.impl.HistoryImpl;
  * <h3>URL Encoding</h3>
  * Any valid characters may be used in the history token and will survive
  * round-trips through {@link #newItem(String)} to {@link #getToken()}/
- * {@link ValueChangeHandler#onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)},
- * but most will be encoded in the user-visible URL. The following US-ASCII
+ * {@link ValueChangeHandler#onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)}
+ * , but most will be encoded in the user-visible URL. The following US-ASCII
  * characters are not encoded on any currently supported browser (but may be in
  * the future due to future browser changes):
  * <ul>
@@ -114,7 +113,7 @@ public class History {
    */
   public static void fireCurrentHistoryState() {
     String token = getToken();
-    impl.fireHistoryChangedImpl(null, token);
+    impl.fireHistoryChangedImpl(token);
   }
 
   /**
@@ -170,10 +169,10 @@ public class History {
   }
 
   /**
-   * Call all history handlers with the specified token. Note that this does
-   * not change the history system's idea of the current state and is only kept
-   * for backward compatibility. To fire history events for the initial state of
-   * the application, instead call {@link #fireCurrentHistoryState()} from the
+   * Call all history handlers with the specified token. Note that this does not
+   * change the history system's idea of the current state and is only kept for
+   * backward compatibility. To fire history events for the initial state of the
+   * application, instead call {@link #fireCurrentHistoryState()} from the
    * application {@link com.google.gwt.core.client.EntryPoint#onModuleLoad()}
    * method.
    * 
@@ -182,8 +181,7 @@ public class History {
    */
   @Deprecated
   public static void onHistoryChanged(String historyToken) {
-    String oldToken = getToken();
-    impl.fireHistoryChangedImpl(oldToken, historyToken);
+    impl.fireHistoryChangedImpl(historyToken);
   }
 
   /**

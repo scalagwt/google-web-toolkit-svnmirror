@@ -78,6 +78,7 @@ public class DisclosurePanelTest extends GWTTestCase {
   /**
    * Test to ensure that event handler dispatch function appropriately.
    */
+  @SuppressWarnings("deprecation")
   public void testEventHandlers() {
 
     final boolean[] aDidFire = new boolean[2];
@@ -128,8 +129,10 @@ public class DisclosurePanelTest extends GWTTestCase {
     panel.setOpen(true);
     panel.setOpen(false);
     // We expect a to have fired both events, and b to have fired none.
-    assertTrue(aDidFire[OPEN] && aDidFire[CLOSE] && !bDidFire[OPEN]
-        && !bDidFire[CLOSE]);
+    assertTrue(aDidFire[OPEN]);
+    assertTrue(aDidFire[CLOSE]);
+    assertTrue(!bDidFire[OPEN]);
+    assertTrue(!bDidFire[CLOSE]);
   }
 
   private DisclosurePanel createTestPanel() {

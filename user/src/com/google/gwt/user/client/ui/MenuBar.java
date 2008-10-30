@@ -17,6 +17,10 @@ package com.google.gwt.user.client.ui;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.KeyCodeEvent;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.event.logical.shared.HasCloseHandlers;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DOM;
@@ -71,9 +75,10 @@ import java.util.List;
  * {@example com.google.gwt.examples.MenuBarExample}
  * </p>
  */
-public class MenuBar extends Widget implements PopupListener, HasAnimation {
-  private static final String STYLENAME_DEFAULT = "gwt-MenuBar";
-
+//Nothing we can do about MenuBar implementing PopupListener until next release.
+@SuppressWarnings("deprecation")
+public class MenuBar extends Widget implements PopupListener, HasAnimation,
+    HasCloseHandlers<MenuBar> {
   /**
    * An {@link ImageBundle} that provides images for {@link MenuBar}.
    */
@@ -105,6 +110,8 @@ public class MenuBar extends Widget implements PopupListener, HasAnimation {
     @Resource("menuBarSubMenuIcon_rtl.gif")
     AbstractImagePrototype menuBarSubMenuIcon();
   }
+
+  private static final String STYLENAME_DEFAULT = "gwt-MenuBar";
 
   /**
    * List of all {@link MenuItem}s and {@link MenuItemSeparator}s.
@@ -166,6 +173,10 @@ public class MenuBar extends Widget implements PopupListener, HasAnimation {
    */
   public MenuBar(MenuBarImages images) {
     this(false, images);
+  }
+
+  public HandlerRegistration addCloseHandler(CloseHandler<MenuBar> handler) {
+   return  super.addHandler(CloseEvent.getType(), handler);
   }
 
   /**
@@ -460,6 +471,12 @@ public class MenuBar extends Widget implements PopupListener, HasAnimation {
     } // end switch (DOM.eventGetType(event))
   }
 
+  /**
+   * Closes the menu bar.
+   * 
+   * @deprecated use {@link #addCloseHandler(CloseHandler)} instead.
+   */
+  @Deprecated
   public void onPopupClosed(PopupPanel sender, boolean autoClosed) {
     // If the menu popup was auto-closed, close all of its parents as well.
     if (autoClosed) {
@@ -923,6 +940,7 @@ public class MenuBar extends Widget implements PopupListener, HasAnimation {
       popup.hide();
       focus();
     }
+    CloseEvent.fire(this,this);
   }
 
   /*
@@ -933,6 +951,7 @@ public class MenuBar extends Widget implements PopupListener, HasAnimation {
     selectItem(null);
   }
 
+  @SuppressWarnings("deprecation")
   private void openPopup(final MenuItem item) {
     // Create a new popup for this item, and position it next to
     // the item (below if this is a horizontal menu bar, to the
@@ -1093,7 +1112,7 @@ public class MenuBar extends Widget implements PopupListener, HasAnimation {
     if (shownChildMenu != null) {
       doItemAction(itemToBeSelected, false);
     }
-  }
+  } 
 
   /**
    * Set the colspan of a {@link MenuItem} or {@link MenuItemSeparator}.

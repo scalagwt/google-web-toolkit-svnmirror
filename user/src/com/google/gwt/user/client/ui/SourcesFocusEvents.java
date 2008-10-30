@@ -18,14 +18,16 @@ package com.google.gwt.user.client.ui;
 /**
  * A widget that implements this interface sources the events defined by the
  * {@link com.google.gwt.user.client.ui.FocusListener} interface.
+ * 
  */
-@Deprecated
 public interface SourcesFocusEvents {
 
   /**
-   * Adds a listener interface to receive mouse events.
+   * Adds a listener interface to receive focus events.
    * 
    * @param listener the listener interface to add
+   * @deprecated use <code>addFocusHandler</code> and <cod>addBlurHandler</code>
+   *             instead.
    */
   @Deprecated
   void addFocusListener(FocusListener listener);

@@ -19,13 +19,13 @@ package com.google.gwt.user.client.ui;
  * A widget that implements this interface sources the events defined by the
  * {@link com.google.gwt.user.client.ui.ClickListener} interface.
  */
-@Deprecated
 public interface SourcesClickEvents {
 
   /**
    * Adds a listener interface to receive click events.
    * 
    * @param listener the listener interface to add
+   * @deprecated use <code>addClickHandler</code> instead
    */
   @Deprecated
   void addClickListener(ClickListener listener);

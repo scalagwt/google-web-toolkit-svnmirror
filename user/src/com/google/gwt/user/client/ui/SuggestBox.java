@@ -17,8 +17,6 @@ package com.google.gwt.user.client.ui;
 
 import com.google.gwt.event.dom.client.AllFocusHandlers;
 import com.google.gwt.event.dom.client.AllKeyHandlers;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.HasAllKeyHandlers;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
@@ -420,8 +418,6 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
     }
   };
 
-  private String value;
-
   /**
    * Constructor for {@link SuggestBox}. Creates a
    * {@link MultiWordSuggestOracle} and {@link TextBox} to use with this
@@ -582,7 +578,7 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
   }
 
   public String getValue() {
-    return value;
+    return box.getValue();
   }
 
   public boolean isAnimationEnabled() {
@@ -652,16 +648,14 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
 
   public void setText(String text) {
     box.setText(text);
-    setValue(text);
   }
 
   public void setValue(String newValue) {
-    if (value == newValue || (value != null && value.equals(newValue))) {
-      return;
-    }
-    String oldValue = value;
-    this.value = newValue;
-    ValueChangeEvent.fire(this, oldValue, newValue);
+    box.setValue(newValue);
+  }
+
+  public void setValue(String value, boolean fireEvents) {
+    box.setValue(value, fireEvents);
   }
 
   /**
@@ -681,11 +675,8 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
   }
 
   private void addEventsToTextBox() {
-    class TextBoxEvents extends AllKeyHandlers implements ChangeHandler {
-
-      public void onChange(ChangeEvent event) {
-        setValue(getText());
-      }
+    class TextBoxEvents extends AllKeyHandlers implements
+        ValueChangeHandler<String> {
 
       public void onKeyDown(KeyDownEvent event) {
         // Make sure that the menu is actually showing. These keystrokes
@@ -717,6 +708,10 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
         fireEvent(event);
       }
 
+      public void onValueChange(ValueChangeEvent<String> event) {
+         fireEvent(event);
+      }
+
       private void refreshSuggestions() {
         // Get the raw text.
         String text = box.getText();
@@ -739,7 +734,7 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
 
     TextBoxEvents events = new TextBoxEvents();
     events.addKeyHandlersTo(box);
-    box.addChangeHandler(events);
+    box.addValueChangeHandler(events);
   }
 
   private void fireSuggestionEvent(Suggestion selectedSuggestion) {

@@ -51,7 +51,7 @@ abstract class L<T> implements EventHandler {
     }
 
     public void onValueChange(ValueChangeEvent<String> event) {
-      listener.onHistoryChanged(event.getNewValue());
+      listener.onHistoryChanged(event.getValue());
     }
   }
 

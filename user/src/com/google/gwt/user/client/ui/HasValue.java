@@ -33,9 +33,18 @@ public interface HasValue<T> extends HasValueChangeHandlers<T> {
   T getValue();
 
   /**
-   * Sets this object's value.
+   * Sets this object's value. Should call setValue(T value, false).
    * 
    * @param value the object's new value
    */
   void setValue(T value);
+
+  /**
+   * Sets this object's value. Fires {@link com.google.gwt.event.logical.shared.ValueChangeEvent} when fireEvents is
+   * true.
+   * 
+   * @param value the object's new value
+   * @param fireEvents fire events if true
+   */
+  void setValue(T value, boolean fireEvents);
 }

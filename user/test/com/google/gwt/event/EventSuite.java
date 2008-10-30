@@ -18,7 +18,6 @@ package com.google.gwt.event;
 import com.google.gwt.event.dom.client.EventsTest;
 import com.google.gwt.event.dom.client.GWTEventsTest;
 import com.google.gwt.event.shared.HandlerManagerTest;
-import com.google.gwt.event.shared.JSHanderRegistryTest;
 import com.google.gwt.junit.tools.GWTTestSuite;
 
 import junit.framework.Test;
@@ -36,8 +35,7 @@ public class EventSuite {
     suite.addTestSuite(GWTEventsTest.class);
     
     // ...dom.shared
-    suite.addTestSuite(HandlerManagerTest.class);
-    suite.addTestSuite(JSHanderRegistryTest.class);
+    suite.addTestSuite(HandlerManagerTest.class); 
 
     return suite;
   }

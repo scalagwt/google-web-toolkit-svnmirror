@@ -59,6 +59,6 @@ public class HistoryExample implements EntryPoint, ValueChangeHandler<String> {
   public void onValueChange(ValueChangeEvent<String> event) {
     // This method is called whenever the application's history changes. Set
     // the label to reflect the current history token.
-    lbl.setText("The current history token is: " + event.getNewValue());
+    lbl.setText("The current history token is: " + event.getValue());
   }
 }

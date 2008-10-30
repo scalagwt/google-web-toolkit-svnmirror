@@ -19,7 +19,7 @@ package com.google.gwt.user.client.ui;
  * A widget that implements this interface fires the events defined by the
  * {@link com.google.gwt.user.client.ui.FormHandler} interface.
  */
-@Deprecated
+
 public interface FiresFormEvents {
 
   /**

@@ -57,8 +57,8 @@ public abstract class HistoryImpl implements HasValueChangeHandlers<String>,
   /**
    * Fires the {@link ValueChangeEvent} to all handlers with the given tokens.
    */
-  public void fireHistoryChangedImpl(String oldToken, String newToken) {
-    ValueChangeEvent.fire(this, oldToken, newToken);
+  public void fireHistoryChangedImpl(String newToken) {
+    ValueChangeEvent.fire(this, newToken);
   }
 
   public HandlerManager getHandlers() {
@@ -68,24 +68,22 @@ public abstract class HistoryImpl implements HasValueChangeHandlers<String>,
   public abstract boolean init();
 
   public final void newItem(String historyToken, boolean issueEvent) {
-    String oldToken = getToken();
     historyToken = (historyToken == null) ? "" : historyToken;
     if (!historyToken.equals(getToken())) {
       setToken(historyToken);
       nativeUpdate(historyToken);
       if (issueEvent) {
-        fireHistoryChangedImpl(oldToken, historyToken);
+        fireHistoryChangedImpl(historyToken);
       }
     }
   }
 
   public final void newItemOnEvent(String historyToken) {
-    String oldToken = getToken();
     historyToken = (historyToken == null) ? "" : historyToken;
     if (!historyToken.equals(getToken())) {
       setToken(historyToken);
       nativeUpdateOnEvent(historyToken);
-      fireHistoryChanged(oldToken, historyToken);
+      fireHistoryChanged(historyToken);
     }
   }
 
@@ -103,19 +101,19 @@ public abstract class HistoryImpl implements HasValueChangeHandlers<String>,
 
   protected abstract void nativeUpdateOnEvent(String historyToken);
 
-  private void fireHistoryChanged(String oldToken, String newToken) {
+  private void fireHistoryChanged(String newToken) {
     UncaughtExceptionHandler handler = GWT.getUncaughtExceptionHandler();
     if (handler != null) {
-      fireHistoryChangedAndCatch(oldToken, newToken, handler);
+      fireHistoryChangedAndCatch(newToken, handler);
     } else {
-      fireHistoryChangedImpl(oldToken, newToken);
+      fireHistoryChangedImpl(newToken);
     }
   }
 
-  private void fireHistoryChangedAndCatch(String oldToken, String newToken,
+  private void fireHistoryChangedAndCatch(String newToken,
       UncaughtExceptionHandler handler) {
     try {
-      fireHistoryChangedImpl(oldToken, newToken);
+      fireHistoryChangedImpl(newToken);
     } catch (Throwable e) {
       handler.onUncaughtException(e);
     }

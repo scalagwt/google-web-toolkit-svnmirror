@@ -31,45 +31,43 @@ public class ValueChangeEvent<I> extends AbstractEvent<ValueChangeHandler<I>> {
   private static Type<ValueChangeHandler<?>> TYPE;
 
   /**
-   * Fires a boolean value change event on all registered handlers in the
-   * handler manager. Will not fire if the old and new values are the same
-   * object.
-   * 
-   * @param <S> The event source.
-   * @param source the source of the handlers. Must have value change handlers
-   *          and a handler manager.
-   * @param oldValue the old value
-   * @param newValue the new value
-   */
-  public static <S extends HasValueChangeHandlers<Boolean> & HasHandlers> void fire(
-      S source, boolean oldValue, boolean newValue) {
-    if (TYPE != null) {
-      fire(source, Boolean.valueOf(oldValue), Boolean.valueOf(newValue));
-    }
-  }
-
-  /**
    * Fires a value change event on all registered handlers in the handler
-   * manager. Will not fire if the old and new values are the same object as
-   * that is against the value change constract.
+   * manager.
    * 
    * @param <I> the old value type
    * @param <S> The event source.
    * @param source the source of the handlers. Must have value change handlers
    *          and a handler manager.
-   * @param oldValue the old value
-   * @param newValue the new value
+   * @param value the value
    */
   public static <I, S extends HasValueChangeHandlers<I> & HasHandlers> void fire(
-      S source, I oldValue, I newValue) {
+      S source, I value) {
     if (TYPE != null) {
       HandlerManager handlers = source.getHandlers();
-      if (handlers != null && oldValue != newValue
-          && handlers.isEventHandled(TYPE)) {
+      if (handlers != null && handlers.isEventHandled(TYPE)) {
         ValueChangeEvent<I> event = new ValueChangeEvent<I>();
-        event.setOldValue(oldValue);
-        event.setNewValue(newValue);
+        event.setValue(value);
         handlers.fireEvent(event);
+      }
+    }
+  }
+
+  /**
+   * Fires value change event if the old value is not equal to the new value.
+   * 
+   * @param <I> the old value type
+   * @param <S> The event source.
+   * @param source the source of the handlers. Must have value change handlers
+   *          and a handler manager.
+   * @param oldValue the oldValue
+   * @param newValue the newValue
+   */
+  public static <I, S extends HasValueChangeHandlers<I> & HasHandlers> void fireIfNotEqual(
+      S source, I oldValue, I newValue) {
+    if (TYPE != null) {
+      if (oldValue != newValue
+          && (oldValue == null || !oldValue.equals(newValue))) {
+        fire(source, newValue);
       }
     }
   }
@@ -86,9 +84,7 @@ public class ValueChangeEvent<I> extends AbstractEvent<ValueChangeHandler<I>> {
     return TYPE;
   }
 
-  private I oldValue;
-
-  private I newValue;
+  private I value;
 
   /**
    * Constructor. Should only be used by subclasses, almost always for testing.
@@ -97,30 +93,12 @@ public class ValueChangeEvent<I> extends AbstractEvent<ValueChangeHandler<I>> {
   }
 
   /**
-   * Gets the new value.
+   * Gets the value.
    * 
-   * @return the new value
+   * @return the value
    */
-  public I getNewValue() {
-    return newValue;
-  }
-
-  /**
-   * Gets the old value.
-   * 
-   * @return the old value
-   */
-  public I getOldValue() {
-    return oldValue;
-  }
-
-  /**
-   * Sets the new value.
-   * 
-   * @param newValue the new value
-   */
-  public void setNewValue(I newValue) {
-    this.newValue = newValue;
+  public I getValue() {
+    return value;
   }
 
   @Override
@@ -137,11 +115,11 @@ public class ValueChangeEvent<I> extends AbstractEvent<ValueChangeHandler<I>> {
   }
 
   /**
-   * Sets the old value.
+   * Sets the value.
    * 
-   * @param oldValue the old value
+   * @param value the value
    */
-  protected final void setOldValue(I oldValue) {
-    this.oldValue = oldValue;
+  protected final void setValue(I value) {
+    this.value = value;
   }
 }

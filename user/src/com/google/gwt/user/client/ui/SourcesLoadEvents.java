@@ -19,13 +19,13 @@ package com.google.gwt.user.client.ui;
  * A widget that implements this interface sources the events defined by the
  * {@link com.google.gwt.user.client.ui.LoadListener} interface.
  */
-@Deprecated
 public interface SourcesLoadEvents {
 
   /**
    * Adds a listener interface to receive load events.
    * 
    * @param listener the listener interface to add
+   * @deprecated use <code>addLoadHandler</code> instead
    */
   @Deprecated
   void addLoadListener(LoadListener listener);

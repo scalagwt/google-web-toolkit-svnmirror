@@ -51,10 +51,12 @@ import java.util.Iterator;
  * {@example com.google.gwt.examples.TabPanelExample}
  * </p>
  */
+
+//Cannot do anything about tab panel implementing TabListener until next release.
+@SuppressWarnings("deprecation")
 public class TabPanel extends Composite implements TabListener,
     SourcesTabEvents, HasWidgets, HasAnimation, IndexedPanel,
-    HasBeforeSelectionHandlers<Integer>, HasSelectionHandlers<Integer>,
-    BeforeSelectionHandler<Integer>, SelectionHandler<Integer> {
+    HasBeforeSelectionHandlers<Integer>, HasSelectionHandlers<Integer> {
   /**
    * This extension of DeckPanel overrides the public mutator methods to prevent
    * external callers from adding to the state of the DeckPanel.
@@ -198,8 +200,7 @@ public class TabPanel extends Composite implements TabListener,
     panel.setCellHeight(deck, "100%");
     tabBar.setWidth("100%");
 
-    tabBar.addBeforeSelectionHandler(this);
-    tabBar.addSelectionHandler(this);
+    tabBar.addTabListener(this);
     initWidget(panel);
     setStyleName("gwt-TabPanel");
     deck.setStyleName("gwt-TabPanelBottom");

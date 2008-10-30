@@ -16,30 +16,14 @@
 
 package com.google.gwt.museum.client.defaultmuseum;
 
-import com.google.gwt.event.dom.client.AllKeyHandlers;
-import com.google.gwt.event.dom.client.KeyDownEvent;
-import com.google.gwt.event.dom.client.KeyPressEvent;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.logical.shared.SelectionEvent;
-import com.google.gwt.event.logical.shared.SelectionHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.event.shared.AbstractEvent;
-import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.museum.client.common.AbstractIssue;
-import com.google.gwt.user.client.ui.ChangeListener;
-import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.FocusListener;
-import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.museum.client.common.EventReporter;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SuggestBox;
-import com.google.gwt.user.client.ui.SuggestionEvent;
-import com.google.gwt.user.client.ui.SuggestionHandler;
-import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 
 import java.util.Arrays;
 import java.util.List;
@@ -50,35 +34,7 @@ import java.util.List;
 @SuppressWarnings("deprecation")
 public class VisualsForSuggestBoxEvents extends AbstractIssue {
 
-  private abstract class CheckBoxEvent extends CheckBox implements
-      ValueChangeHandler<Boolean> {
-    String name;
-    HandlerRegistration reg;
-
-    public CheckBoxEvent(String name, Panel p) {
-      this.name = name;
-      this.setText(name);
-      p.add(this);
-      this.addValueChangeHandler(this);
-      this.setChecked(true);
-    }
-
-    public void onValueChange(ValueChangeEvent<Boolean> event) {
-      if (event.getNewValue().booleanValue()) {
-        report("add " + name);
-        addHandler();
-      } else {
-        report("remove " + name);
-        removeHandler();
-      }
-    }
-
-    abstract void addHandler();
-
-    abstract void removeHandler();
-  }
-
-  VerticalPanel report = new VerticalPanel();
+  HorizontalPanel report = new HorizontalPanel();
 
   @Override
   public Widget createIssue() {
@@ -86,8 +42,12 @@ public class VisualsForSuggestBoxEvents extends AbstractIssue {
 
     p.add(createSuggestBox("suggest 1", p));
     p.add(createSuggestBox("suggest 2", p));
+    report.setBorderWidth(3);
+
+    report.setCellWidth(report.getWidget(0), "300px");
+    report.setCellWidth(report.getWidget(1), "300px");
+
     p.add(report);
-    report("reporting");
     return p;
   }
 
@@ -117,81 +77,42 @@ public class VisualsForSuggestBoxEvents extends AbstractIssue {
     final SuggestBox b = new SuggestBox(oracle);
     b.setTitle(suggestBoxName);
     p.add(b);
-    class MyHandler extends AllKeyHandlers implements ChangeListener,
-        FocusListener, ValueChangeHandler<String>,
-        SelectionHandler<Suggestion>, SuggestionHandler {
+    final EventReporter handler = new EventReporter(report);
 
-      public void onChange(Widget sender) {
-        report("change: " + sender.getClass());
-      }
-
-      public void onFocus(Widget sender) {
-        report("focus: " + sender.getClass());
-      }
-
-      public void onKeyDown(KeyDownEvent event) {
-        report(event);
-      }
-
-      public void onKeyPress(KeyPressEvent event) {
-        report(event);
-      }
-
-      public void onKeyUp(KeyUpEvent event) {
-        report(event);
-      }
-
-      public void onLostFocus(Widget sender) {
-        report("blur: " + sender.getClass());
-      }
-
-      public void onSelection(SelectionEvent<Suggestion> event) {
-        report(event);
-      }
-
-      public void onSuggestionSelected(SuggestionEvent event) {
-        report("suggestion:" + event.getSelectedSuggestion());
-      }
-
-      public void onValueChange(ValueChangeEvent<String> event) {
-        report(event);
-      }
-    }
-    final MyHandler handler = new MyHandler();
-    new CheckBoxEvent("KeyDown", p) {
+    handler.new CheckBoxEvent("KeyDown", p) {
 
       @Override
-      void addHandler() {
+      public void addHandler() {
         reg = b.addKeyDownHandler(handler);
       }
 
       @Override
-      void removeHandler() {
+      public void removeHandler() {
         reg.removeHandler();
       }
     };
 
-    new CheckBoxEvent("ChangeListener", p) {
+    handler.new CheckBoxEvent("ChangeListener", p) {
 
       @Override
-      void addHandler() {
+      public void addHandler() {
         b.addChangeListener(handler);
       }
 
       @Override
-      void removeHandler() {
+      public void removeHandler() {
         b.removeChangeListener(handler);
       }
     };
-    new CheckBoxEvent("Suggestion listener", p) {
+    handler.new CheckBoxEvent("Suggestion listener", p) {
 
       @Override
-      void addHandler() {
+      public void addHandler() {
         b.addEventHandler(handler);
       }
 
       @Override
-      void removeHandler() {
+      public void removeHandler() {
         b.removeEventHandler(handler);
       }
     };
@@ -202,18 +123,5 @@ public class VisualsForSuggestBoxEvents extends AbstractIssue {
     b.addSelectionHandler(handler);
     b.addValueChangeHandler(handler);
     return b;
-  }
-
-  private void report(AbstractEvent<?> event) {
-    String title = ((UIObject) event.getSource()).getTitle();
-    report(title + " fired " + event.toDebugString());
-  }
-
-  // will be replaced by logging
-  private void report(String s) {
-    report.insert(new Label(s), 0);
-    if (report.getWidgetCount() == 10) {
-      report.remove(9);
-    }
   }
 }

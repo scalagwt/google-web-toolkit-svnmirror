@@ -103,8 +103,7 @@ public class CheckBox extends ButtonBase implements HasName, HasValue<Boolean> {
     if (!isEventHandled(ValueChangeEvent.getType())) {
       this.addClickHandler(new ClickHandler() {
         public void onClick(ClickEvent event) {
-          boolean isChecked = isChecked();
-          ValueChangeEvent.fire(CheckBox.this, !isChecked, isChecked);
+          ValueChangeEvent.fire(CheckBox.this, isChecked());
         }
       });
     }
@@ -160,10 +159,9 @@ public class CheckBox extends ButtonBase implements HasName, HasValue<Boolean> {
    * @param checked <code>true</code> to check the check box
    */
   public void setChecked(boolean checked) {
-    boolean wasChecked = this.isChecked();
     DOM.setElementPropertyBoolean(inputElem, "checked", checked);
     DOM.setElementPropertyBoolean(inputElem, "defaultChecked", checked);
-    ValueChangeEvent.fire(this, wasChecked, checked);
+    ValueChangeEvent.fire(this, checked);
   }
 
   @Override
@@ -213,24 +211,27 @@ public class CheckBox extends ButtonBase implements HasName, HasValue<Boolean> {
     DOM.setInnerText(labelElem, text);
   }
 
-  /**
-   * Sets this object's value.
-   * 
-   * @param value the object's new value
-   */
-  public void setValue(boolean value) {
-    setChecked(value);
+  public void setValue(Boolean value) {
+    setValue(value, false);
   }
 
-  public void setValue(Boolean value) {
+  public void setValue(Boolean value, boolean fireEvents) {
+    if (this.isChecked() == value.booleanValue()) {
+      return;
+    }
     setChecked(value);
+    ValueChangeEvent.fire(this, value);
   }
 
   // Unlike other widgets the CheckBox sinks on its input element, not its
   // wrapper element.
   @Override
   public void sinkEvents(int eventBitsToAdd) {
-    DOM.sinkEvents(inputElem, eventBitsToAdd | DOM.getEventsSunk(inputElem));
+    if (eventsToSink == -1) {
+      DOM.sinkEvents(inputElem, eventBitsToAdd | DOM.getEventsSunk(inputElem));
+    } else {
+      eventsToSink |= eventBitsToAdd;
+     }
   }
 
   /**

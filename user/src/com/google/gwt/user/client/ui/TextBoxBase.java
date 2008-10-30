@@ -20,6 +20,8 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.HasChangeHandlers;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
@@ -29,7 +31,7 @@ import com.google.gwt.user.client.ui.impl.TextBoxImpl;
  * Abstract base class for all text entry widgets.
  */
 public class TextBoxBase extends FocusWidget implements SourcesChangeEvents,
-    HasChangeHandlers, HasText, HasName {
+    HasChangeHandlers, HasText, HasName, HasValue<String> {
 
   /**
    * Text alignment constant, used in
@@ -88,9 +90,23 @@ public class TextBoxBase extends FocusWidget implements SourcesChangeEvents,
   public HandlerRegistration addChangeHandler(ChangeHandler handler) {
     return addDomHandler(ChangeEvent.getType(), handler);
   }
+
   @Deprecated
   public void addChangeListener(ChangeListener listener) {
     addChangeHandler(new L.Change(listener));
+  }
+
+  public HandlerRegistration addValueChangeHandler(
+      ValueChangeHandler<String> handler) {
+    // Initialization code
+    if (!isEventHandled(ValueChangeEvent.getType())) {
+      addChangeHandler(new ChangeHandler() {
+        public void onChange(ChangeEvent event) {
+          setValue(getText());
+        }
+      });
+    }
+    return addHandler(ValueChangeEvent.getType(), handler);
   }
 
   /**
@@ -143,6 +159,10 @@ public class TextBoxBase extends FocusWidget implements SourcesChangeEvents,
 
   public String getText() {
     return DOM.getElementProperty(getElement(), "value");
+  }
+
+  public String getValue() {
+    return getText();
   }
 
   /**
@@ -274,6 +294,18 @@ public class TextBoxBase extends FocusWidget implements SourcesChangeEvents,
    */
   public void setTextAlignment(TextAlignConstant align) {
     DOM.setStyleAttribute(getElement(), "textAlign", align.getTextAlignString());
+  }
+
+  public void setValue(String value) {
+    setValue(value, false);
+  }
+
+  public void setValue(String value, boolean fireEvents) {
+    String oldValue = getText();
+    setText(value);
+    if (fireEvents) {
+      ValueChangeEvent.fireIfNotEqual(this, oldValue, value);
+    }
   }
 
   protected TextBoxImpl getImpl() {
