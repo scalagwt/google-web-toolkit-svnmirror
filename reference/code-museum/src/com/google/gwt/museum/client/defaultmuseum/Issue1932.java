@@ -132,12 +132,10 @@ public class Issue1932 extends AbstractIssue {
             int absY = event.getClientY() + Window.getScrollTop();
             RootPanel.get().add(positioner, absX, absY);
 
-            echo.setHTML(
-              "event.clientX: " + event.getClientX() + "<br>" +
-              "event.clientY: " + event.getClientY() + "<br>" +
-              "absolute left: " + positioner.getAbsoluteLeft() + "<br>" +
-              "absolute top: " + positioner.getAbsoluteTop()
-            );
+            echo.setHTML("event.clientX: " + event.getClientX() + "<br>"
+                + "event.clientY: " + event.getClientY() + "<br>"
+                + "absolute left: " + positioner.getAbsoluteLeft() + "<br>"
+                + "absolute top: " + positioner.getAbsoluteTop());
             break;
         }
         return true;

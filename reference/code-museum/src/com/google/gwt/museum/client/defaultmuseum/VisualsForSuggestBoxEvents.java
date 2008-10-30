@@ -77,7 +77,7 @@ public class VisualsForSuggestBoxEvents extends AbstractIssue {
     final SuggestBox b = new SuggestBox(oracle);
     b.setTitle(suggestBoxName);
     p.add(b);
-    final EventReporter handler = new EventReporter(report);
+    final EventReporter<String> handler = new EventReporter<String>(report);
 
     handler.new CheckBoxEvent("KeyDown", p) {
 

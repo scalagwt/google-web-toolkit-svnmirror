@@ -35,6 +35,7 @@ import com.google.gwt.user.client.ui.Widget;
 /**
  * Testing disclosure events.
  */
+@SuppressWarnings("deprecation")
 public class VisualsForDisclosurePanelEvents extends AbstractIssue {
 
   VerticalPanel report = new VerticalPanel();
@@ -96,7 +97,7 @@ public class VisualsForDisclosurePanelEvents extends AbstractIssue {
     return widget;
   }
 
-  private void report(AbstractEvent event) {
+  private void report(AbstractEvent<?> event) {
     String title = ((UIObject) event.getSource()).getTitle();
     report(title + " fired " + event.toDebugString());
   }

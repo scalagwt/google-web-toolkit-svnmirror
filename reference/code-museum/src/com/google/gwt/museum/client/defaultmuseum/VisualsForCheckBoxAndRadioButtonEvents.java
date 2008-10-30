@@ -62,7 +62,7 @@ public class VisualsForCheckBoxAndRadioButtonEvents extends AbstractIssue {
     p.add(radioPrime);
     b.setTitle("Radio Button");
     p.add(radio);
-    handler = new EventReporter(p);
+    handler = new EventReporter<Boolean>(p);
     radio.addKeyboardListener(handler);
     handler.addKeyHandlersTo(radio);
     radio.addBlurHandler(handler);
