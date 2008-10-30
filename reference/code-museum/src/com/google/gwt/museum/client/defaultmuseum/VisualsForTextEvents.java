@@ -41,7 +41,7 @@ public class VisualsForTextEvents extends AbstractIssue {
     final TextBox b = new TextBox();
     b.setTitle("text box");
     p.add(b);
-    EventReporter<String> handler = new EventReporter<String>(p);
+    EventReporter<String, Object> handler = new EventReporter<String, Object>(p);
     p.add(new Button("change value with event", new ClickHandler() {
       public void onClick(ClickEvent event) {
         b.setValue("emily", true);
@@ -60,7 +60,7 @@ public class VisualsForTextEvents extends AbstractIssue {
     RichTextArea rich = new RichTextArea();
     rich.setTitle("rich text box");
     p.add(rich);
-    handler = new EventReporter<String>(p);
+    handler = new EventReporter<String, Object>(p);
     rich.addKeyboardListener(handler);
     handler.addKeyHandlersTo(rich);
     rich.addBlurHandler(handler);

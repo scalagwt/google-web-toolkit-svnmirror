@@ -75,10 +75,11 @@ import java.util.List;
  * {@example com.google.gwt.examples.MenuBarExample}
  * </p>
  */
-//Nothing we can do about MenuBar implementing PopupListener until next release.
+// Nothing we can do about MenuBar implementing PopupListener until next
+// release.
 @SuppressWarnings("deprecation")
 public class MenuBar extends Widget implements PopupListener, HasAnimation,
-    HasCloseHandlers<MenuBar> {
+    HasCloseHandlers<PopupPanel> {
   /**
    * An {@link ImageBundle} that provides images for {@link MenuBar}.
    */
@@ -175,8 +176,8 @@ public class MenuBar extends Widget implements PopupListener, HasAnimation,
     this(false, images);
   }
 
-  public HandlerRegistration addCloseHandler(CloseHandler<MenuBar> handler) {
-   return  super.addHandler(CloseEvent.getType(), handler);
+  public HandlerRegistration addCloseHandler(CloseHandler<PopupPanel> handler) {
+    return super.addHandler(CloseEvent.getType(), handler);
   }
 
   /**
@@ -486,6 +487,7 @@ public class MenuBar extends Widget implements PopupListener, HasAnimation,
     // When the menu popup closes, remember that no item is
     // currently showing a popup menu.
     onHide();
+    CloseEvent.fire(MenuBar.this, sender);
     shownChildMenu = null;
     popup = null;
   }
@@ -940,7 +942,6 @@ public class MenuBar extends Widget implements PopupListener, HasAnimation,
       popup.hide();
       focus();
     }
-    CloseEvent.fire(this,this);
   }
 
   /*
@@ -1112,7 +1113,7 @@ public class MenuBar extends Widget implements PopupListener, HasAnimation,
     if (shownChildMenu != null) {
       doItemAction(itemToBeSelected, false);
     }
-  } 
+  }
 
   /**
    * Set the colspan of a {@link MenuItem} or {@link MenuItemSeparator}.

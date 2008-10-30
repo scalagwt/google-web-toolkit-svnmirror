@@ -41,7 +41,8 @@ public class VisualsForCheckBoxAndRadioButtonEvents extends AbstractIssue {
     final CheckBox b = new CheckBox("My Checkbox");
     b.setTitle("text box");
     p.add(b);
-    EventReporter<Boolean> handler = new EventReporter<Boolean>(p);
+    EventReporter<Boolean, Object> handler = new EventReporter<Boolean, Object>(
+        p);
     p.add(new Button("change value with event", new ClickHandler() {
       public void onClick(ClickEvent event) {
         b.setValue(false, true);
@@ -62,7 +63,7 @@ public class VisualsForCheckBoxAndRadioButtonEvents extends AbstractIssue {
     p.add(radioPrime);
     b.setTitle("Radio Button");
     p.add(radio);
-    handler = new EventReporter<Boolean>(p);
+    handler = new EventReporter<Boolean, Object>(p);
     radio.addKeyboardListener(handler);
     handler.addKeyHandlersTo(radio);
     radio.addBlurHandler(handler);
