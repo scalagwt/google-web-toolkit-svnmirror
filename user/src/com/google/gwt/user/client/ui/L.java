@@ -486,7 +486,7 @@ abstract class L<T> implements EventHandler {
       for (Type<H> key : keys) {
         int handlerCount = manager.getHandlerCount(key);
         // We are removing things as we traverse, have to go backward
-        for (int i = handlerCount - 1; i <= 0; i--) {
+        for (int i = handlerCount - 1; i >= 0; i--) {
           H handler = manager.getHandler(key, i);
           if (handler instanceof L && ((L) handler).listener.equals(listener)) {
             manager.removeHandler(key, handler);
