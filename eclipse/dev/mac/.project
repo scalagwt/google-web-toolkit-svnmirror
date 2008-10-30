@@ -22,14 +22,14 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>core</name>
-			<type>2</type>
-			<location>GWT_ROOT/dev/core</location>
-		</link>
-		<link>
 			<name>mac</name>
 			<type>2</type>
-			<location>GWT_ROOT/dev/mac</location>
+			<locationURI>GWT_ROOT/dev/mac</locationURI>
+		</link>
+		<link>
+			<name>core</name>
+			<type>2</type>
+			<locationURI>GWT_ROOT/dev/core</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

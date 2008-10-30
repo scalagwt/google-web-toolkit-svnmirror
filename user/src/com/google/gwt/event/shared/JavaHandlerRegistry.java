@@ -50,7 +50,8 @@ class JavaHandlerRegistry extends HashMap<AbstractEvent.Type<?>, ArrayList<?>> {
 
   public <H extends EventHandler> H getHandler(AbstractEvent.Type<H> eventKey,
       int index) {
-    assert (index < getHandlerCount(eventKey));
+    int handlerCount = getHandlerCount(eventKey);
+    assert (index < handlerCount);
     ArrayList<H> l = get(eventKey);
     return  l.get(index);
   }

@@ -30,7 +30,7 @@
 		<link>
 			<name>src-output</name>
 			<type>2</type>
-			<location>C:/gwt/release1_6/samples/showcase/src-output</location>
+			<location>/Applications/eclipse/Eclipse.app/Contents/MacOS/C::/gwt/release1_6/samples/showcase/src-output</location>
 		</link>
 	</linkedResources>
 </projectDescription>
