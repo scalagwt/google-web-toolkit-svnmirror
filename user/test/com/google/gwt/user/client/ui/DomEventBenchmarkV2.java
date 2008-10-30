@@ -38,6 +38,7 @@ import java.util.List;
  * way to simplify branch merging. TODO(rjrjr) This should be resolved when the
  * 1_6_event branch is merged in to releases/1.6
  */
+@SuppressWarnings("deprecation")
 public class DomEventBenchmarkV2 extends Benchmark {
 
   /**
@@ -50,7 +51,7 @@ public class DomEventBenchmarkV2 extends Benchmark {
   private static final int NUM_WIDGETS = 250;
 
   protected final IntRange listenerRange =
-      new IntRange(10, 10000, Operator.MULTIPLY, 10);
+      new IntRange(4, 400, Operator.MULTIPLY, 10);
 
   private List<SimpleCheckBox> widgets;
   private List<ClickListener> listeners;
@@ -66,7 +67,7 @@ public class DomEventBenchmarkV2 extends Benchmark {
   public void testSimpleCheckBoxAddAndRemoveForClicks() {
   }
 
-  @Setup("reset")
+  @Setup("reset") 
   public void testSimpleCheckBoxAddAndRemoveForClicks(
       @RangeEnum(RegistrationStyle.class) RegistrationStyle style, 
       @RangeField("listenerRange") Integer numListeners) {
@@ -107,7 +108,7 @@ public class DomEventBenchmarkV2 extends Benchmark {
   public void testSimpleCheckBoxAddForClicks() {
   }
 
-  @Setup("reset")
+  @Setup("reset") 
   public void testSimpleCheckBoxAddForClicks(
       @RangeEnum(RegistrationStyle.class) RegistrationStyle style, 
       @RangeField("listenerRange") Integer numListeners) {
