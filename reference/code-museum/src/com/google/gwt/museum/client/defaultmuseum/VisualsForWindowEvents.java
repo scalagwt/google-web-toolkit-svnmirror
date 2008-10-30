@@ -41,7 +41,7 @@ public class VisualsForWindowEvents extends AbstractIssue implements
     CloseHandler<Window>, Window.ClosingHandler, Window.ScrollHandler,
     ResizeHandler {
   static int numResizes = 0;
-  
+
   private ArrayList<HandlerRegistration> registrations = new ArrayList<HandlerRegistration>();
   private FlowPanel messages = new FlowPanel();
 

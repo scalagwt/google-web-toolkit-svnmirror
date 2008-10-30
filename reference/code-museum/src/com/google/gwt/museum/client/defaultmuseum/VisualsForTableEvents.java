@@ -82,8 +82,8 @@ public class VisualsForTableEvents extends AbstractIssue {
     g.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         Cell cell = g.getCellForEvent(event);
-        g.setText(0, cell.getCellIndex(), "clicked on " 
-            + cell.getCellIndex() + "," + cell.getRowIndex());
+        g.setText(0, cell.getCellIndex(), "clicked on " + cell.getCellIndex()
+            + "," + cell.getRowIndex());
       }
 
     });

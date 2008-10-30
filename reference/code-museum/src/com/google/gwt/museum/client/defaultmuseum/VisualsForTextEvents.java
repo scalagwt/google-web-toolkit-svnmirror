@@ -73,12 +73,12 @@ public class VisualsForTextEvents extends AbstractIssue {
 
   @Override
   public String getInstructions() {
-    return null;
+    return "type and click into text boxes, see that correct events show up";
   }
 
   @Override
   public String getSummary() {
-    return null;
+    return "Text widget event tests";
   }
 
   @Override

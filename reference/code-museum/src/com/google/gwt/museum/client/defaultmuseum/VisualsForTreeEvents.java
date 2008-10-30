@@ -67,12 +67,12 @@ public class VisualsForTreeEvents extends AbstractIssue {
 
   @Override
   public String getInstructions() {
-    return "Open each node, make sure everything looks right";
+    return "Open each node, ensure you see the right events in the window title";
   }
 
   @Override
   public String getSummary() {
-    return "simple tree, used for generic tree tests";
+    return "Event Tree tests";
   }
 
   @Override

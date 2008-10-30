@@ -58,7 +58,7 @@ public class VisualsForCheckBoxAndRadioButtonEvents extends AbstractIssue {
     // Rich text box:
     final RadioButton radio = new RadioButton("A", "With events");
     p.add(radio);
-    final RadioButton radioPrime = new RadioButton("A","No events");
+    final RadioButton radioPrime = new RadioButton("A", "No events");
     p.add(radioPrime);
     b.setTitle("Radio Button");
     p.add(radio);
@@ -75,18 +75,18 @@ public class VisualsForCheckBoxAndRadioButtonEvents extends AbstractIssue {
         radio.setValue(true, true);
       }
     }));
-    
+
     return p;
   }
 
   @Override
   public String getInstructions() {
-    return null;
+    return "Click on CheckBox and Radio Button, use change value events,see that correct events are firing";
   }
 
   @Override
   public String getSummary() {
-    return null;
+    return "CheckBox and RadioButton test";
   }
 
   @Override

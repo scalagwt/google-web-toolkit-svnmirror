@@ -52,12 +52,12 @@ public class VisualsForDisclosurePanelEvents extends AbstractIssue {
 
   @Override
   public String getInstructions() {
-    return "Select suggestions from suggest box, check report for events being fired";
+    return "Click on disclosure panel, see the expected events firing";
   }
 
   @Override
   public String getSummary() {
-    return "suggest box event visual test";
+    return "DisclosurePanel event tests";
   }
 
   @Override
