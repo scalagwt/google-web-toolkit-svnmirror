@@ -209,7 +209,7 @@ public class Showcase implements EntryPoint {
     // Setup a history handler to reselect the associate menu item
     final ValueChangeHandler<String> historyHandler = new ValueChangeHandler<String>() {
       public void onValueChange(ValueChangeEvent<String> event) {
-        TreeItem item = itemTokens.get(event.getNewValue());
+        TreeItem item = itemTokens.get(event.getValue());
         if (item == null) {
           item = app.getMainMenu().getItem(0).getChild(0);
         }
