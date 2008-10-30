@@ -50,9 +50,11 @@ import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 
 /**
  * Helper class to create visual tests.
+ * 
+ * @param <V> value type
  */
-public class EventReporter extends AllKeyHandlers implements ChangeListener,
-    FocusListener, ValueChangeHandler<String>, SelectionHandler<Suggestion>,
+public class EventReporter<V> extends AllKeyHandlers implements ChangeListener,
+    FocusListener, ValueChangeHandler<V>, SelectionHandler<Suggestion>,
     SuggestionHandler, KeyboardListener, ChangeHandler, BlurHandler,
     FocusHandler, ClickHandler, ClickListener {
 
@@ -169,7 +171,7 @@ public class EventReporter extends AllKeyHandlers implements ChangeListener,
     report("suggestion:" + event.getSelectedSuggestion());
   }
 
-  public void onValueChange(ValueChangeEvent<String> event) {
+  public void onValueChange(ValueChangeEvent<V> event) {
     report(event);
   }
 
