@@ -29,7 +29,7 @@ public class HandlerManager {
   // Used to optimize the JavaScript handler container structure.
   static int EXPECTED_HANDLERS = 5;
 
-  private static final boolean useJs = GWT.isScript();
+  private static final boolean useJs = GWT.isClient();
   private static int index = -EXPECTED_HANDLERS;
 
   /**
@@ -104,7 +104,30 @@ public class HandlerManager {
     if (firingDepth > 0) {
       enqueueAdd(type, handler);
     } else {
-      doAdd(type, handler);
+      if (useJs) {
+        int base = type.hashCode();
+        boolean needsFlattening = javaScriptRegistry.addHandler(base, handler);
+        if (needsFlattening) {
+          javaScriptRegistry.unflatten(base);
+          if (firingDepth > 0) {
+            enqueueAdd(type, handler);
+          } else {
+            if (useJs) {
+              int base1 = type.hashCode();
+              boolean needsFlattening1 = javaScriptRegistry.addHandler(base1,
+                  handler);
+              if (needsFlattening1) {
+                javaScriptRegistry.unflatten(base1);
+                addHandler(type, handler);
+              }
+            } else {
+              javaRegistry.addHandler(type, handler);
+            }
+          }
+        }
+      } else {
+        javaRegistry.addHandler(type, handler);
+      }
     }
     return new HandlerRegistration(this, type, handler);
   }
@@ -165,7 +188,7 @@ public class HandlerManager {
   public <HandlerType extends EventHandler> HandlerType getHandler(
       AbstractEvent.Type<HandlerType> type, int index) {
     if (useJs) {
-      return  javaScriptRegistry.getHandler(type, index);
+      return javaScriptRegistry.getHandler(type, index);
     } else {
       return javaRegistry.getHandler(type, index);
     }
@@ -213,16 +236,7 @@ public class HandlerManager {
       doRemove(type, handler);
     }
   }
-
-  private <H extends EventHandler> void doAdd(AbstractEvent.Type<H> type,
-      final H handler) {
-    if (useJs) {
-      javaScriptRegistry.addHandler(type, handler);
-    } else {
-      javaRegistry.addHandler(type, handler);
-    }
-  }
-
+ 
   private <H extends EventHandler> void doRemove(AbstractEvent.Type<H> type,
       final H handler) {
     if (useJs) {
@@ -255,7 +269,7 @@ public class HandlerManager {
     // Do Adds first in case someone does a quick add/remove
     if (addQueue != null) {
       for (int i = 0; i < addQueue.size(); i += 2) {
-        doAdd((AbstractEvent.Type) addQueue.get(i),
+        addHandler((AbstractEvent.Type) addQueue.get(i),
             (EventHandler) addQueue.get(i + 1));
       }
       addQueue = null;

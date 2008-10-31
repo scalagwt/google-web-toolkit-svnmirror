@@ -43,19 +43,23 @@ class JsHandlerRegistry extends JavaScriptObject {
   }
 
   public final <H extends EventHandler> void addHandler(
-      AbstractEvent.Type<H> eventKey, H handler) {
-    // The base is the equivalent to a c pointer into the flattened handler data
-    // structure.
-    int base = eventKey.hashCode();
-    int count = getCount(base);
+      AbstractEvent.Type<H> type, H handler) {
+    if (type != null) {
+      // The base is the equivalent to a c pointer into the flattened handler
+      // data
+      // structure.
+      int base = type.hashCode();
+      int count = getCount(base);
 
-    // If we already have the maximum number of handlers we can store in the
-    // flattened data structure, store the handlers in an external list instead.
-    if (count == HandlerManager.EXPECTED_HANDLERS && isFlattened(base)) {
-      unflatten(base);
+      // If we already have the maximum number of handlers we can store in the
+      // flattened data structure, store the handlers in an external list
+      // instead.
+      if (count == HandlerManager.EXPECTED_HANDLERS && isFlattened(base)) {
+        unflatten(base);
+      }
+      setHandler(base, count, handler, isFlattened(base));
+      setCount(base, count + 1);
     }
-    setHandler(base, count, handler, isFlattened(base));
-    setCount(base, count + 1);
   }
 
   public final <T> void clearHandlers(Type<T> type) {
@@ -119,6 +123,32 @@ class JsHandlerRegistry extends JavaScriptObject {
     assert result : handler + " did not exist";
   }
 
+  final native boolean addHandler(int base, EventHandler handler) /*-{
+    var count = this[base];
+    var myHandler = handler;
+    count = count ? count : 0;
+    var flattened = (this[base + 1] == null);
+    if (flattened){
+      if(count == @com.google.gwt.event.shared.HandlerManager::EXPECTED_HANDLERS) return true;
+      this[base + 2 + count] = myHandler;
+    } else {
+      this[base + 1][count] = myHandler;
+    }
+    this[base] = count + 1;
+    return false;
+  }-*/;
+
+  final native void unflatten(int base) /*-{
+    var handlerList = {};
+    var count = this[base];
+    var start = base + 2;
+     for(var i = 0; i < count;i++){
+       handlerList[i] = this[start + i];
+       this[start + i] = null;
+      }
+     this[base + 1] = handlerList;
+  }-*/;
+
   private native int getCount(int index) /*-{
     var count = this[index];
     return count == null? 0:count;
@@ -172,16 +202,5 @@ class JsHandlerRegistry extends JavaScriptObject {
 
   private native void setHandlerList(int base, JavaScriptObject handlerList) /*-{
     this[base + 1] = handlerList;
-  }-*/;
-
-  private native void unflatten(int base) /*-{
-    var handlerList = {};
-    var count = this[base];
-    var start = base + 2;
-     for(var i = 0; i < count;i++){
-       handlerList[i] = this[start + i];
-       this[start + i] = null;
-      }
-     this[base + 1] = handlerList;
   }-*/;
 }
