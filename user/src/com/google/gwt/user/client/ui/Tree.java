@@ -273,15 +273,15 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
   }
 
   public HandlerRegistration addBlurHandler(BlurHandler handler) {
-    return addDomHandler(BlurEvent.getType(), handler);
+    return addDomHandler(handler, BlurEvent.getType());
   }
 
   public HandlerRegistration addCloseHandler(CloseHandler<TreeItem> handler) {
-    return addHandler(CloseEvent.getType(), handler);
+    return addHandler(handler, CloseEvent.getType());
   }
 
   public HandlerRegistration addFocusHandler(FocusHandler handler) {
-    return addDomHandler(FocusEvent.getType(), handler);
+    return addDomHandler(handler, FocusEvent.getType());
   }
 
   @Deprecated
@@ -327,24 +327,24 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
   }
 
   public HandlerRegistration addKeyDownHandler(KeyDownHandler handler) {
-    return addDomHandler(KeyDownEvent.getType(), handler);
+    return addDomHandler(handler, KeyDownEvent.getType());
   }
 
   public HandlerRegistration addKeyPressHandler(KeyPressHandler handler) {
-    return addDomHandler(KeyPressEvent.getType(), handler);
+    return addDomHandler(handler, KeyPressEvent.getType());
   }
 
   public HandlerRegistration addKeyUpHandler(KeyUpHandler handler) {
-    return addDomHandler(KeyUpEvent.getType(), handler);
+    return addDomHandler(handler, KeyUpEvent.getType());
   }
 
   public final HandlerRegistration addOpenHandler(OpenHandler<TreeItem> handler) {
-    return addHandler(OpenEvent.getType(), handler);
+    return addHandler(handler, OpenEvent.getType());
   }
 
   public HandlerRegistration addSelectionHandler(
       SelectionHandler<TreeItem> handler) {
-    return addHandler(SelectionEvent.getType(), handler);
+    return addHandler(handler, SelectionEvent.getType());
   }
 
   @Deprecated

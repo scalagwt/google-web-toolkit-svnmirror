@@ -249,12 +249,12 @@ public class TabPanel extends Composite implements TabListener,
 
   public HandlerRegistration addBeforeSelectionHandler(
       BeforeSelectionHandler<Integer> handler) {
-    return addHandler(BeforeSelectionEvent.getType(), handler);
+    return addHandler(handler, BeforeSelectionEvent.getType());
   }
 
   public HandlerRegistration addSelectionHandler(
       SelectionHandler<Integer> handler) {
-    return addHandler(SelectionEvent.getType(), handler);
+    return addHandler(handler, SelectionEvent.getType());
   }
 
   @Deprecated

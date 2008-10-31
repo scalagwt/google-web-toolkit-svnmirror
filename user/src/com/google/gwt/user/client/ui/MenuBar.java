@@ -177,7 +177,7 @@ public class MenuBar extends Widget implements PopupListener, HasAnimation,
   }
 
   public HandlerRegistration addCloseHandler(CloseHandler<PopupPanel> handler) {
-    return super.addHandler(CloseEvent.getType(), handler);
+    return super.addHandler(handler, CloseEvent.getType());
   }
 
   /**

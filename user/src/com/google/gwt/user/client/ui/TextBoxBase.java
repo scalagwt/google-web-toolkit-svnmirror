@@ -88,7 +88,7 @@ public class TextBoxBase extends FocusWidget implements SourcesChangeEvents,
   }
 
   public HandlerRegistration addChangeHandler(ChangeHandler handler) {
-    return addDomHandler(ChangeEvent.getType(), handler);
+    return addDomHandler(handler, ChangeEvent.getType());
   }
 
   @Deprecated
@@ -106,7 +106,7 @@ public class TextBoxBase extends FocusWidget implements SourcesChangeEvents,
         }
       });
     }
-    return addHandler(ValueChangeEvent.getType(), handler);
+    return addHandler(handler, ValueChangeEvent.getType());
   }
 
   /**

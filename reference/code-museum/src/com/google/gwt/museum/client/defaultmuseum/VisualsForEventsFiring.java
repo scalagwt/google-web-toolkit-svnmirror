@@ -79,11 +79,11 @@ public class VisualsForEventsFiring extends AbstractIssue {
   private static class CustomImage extends Image implements
       HasDoubleClickHandlers, HasContextMenuHandlers {
     public HandlerRegistration addContextMenuHandler(ContextMenuHandler handler) {
-      return addDomHandler(ContextMenuEvent.getType(), handler);
+      return addDomHandler(handler, ContextMenuEvent.getType());
     }
 
     public HandlerRegistration addDoubleClickHandler(DoubleClickHandler handler) {
-      return addDomHandler(DoubleClickEvent.getType(), handler);
+      return addDomHandler(handler, DoubleClickEvent.getType());
     }
   }
 

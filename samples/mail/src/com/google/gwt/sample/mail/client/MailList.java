@@ -48,7 +48,7 @@ public class MailList extends Composite implements CellClickHandler,
     table.setWidth("100%");
 
     // Hook up events.
-    table.addCellClickHandler(this);
+    table.addClickHandler(this);
     newerButton.addClickHandler(this);
     olderButton.addClickHandler(this);
 

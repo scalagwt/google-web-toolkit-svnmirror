@@ -97,7 +97,7 @@ public class ListBox extends FocusWidget implements SourcesChangeEvents,
   }
 
   public HandlerRegistration addChangeHandler(ChangeHandler handler) {
-    return addDomHandler(ChangeEvent.getType(), handler);
+    return addDomHandler(handler, ChangeEvent.getType());
   }
 
   @Deprecated

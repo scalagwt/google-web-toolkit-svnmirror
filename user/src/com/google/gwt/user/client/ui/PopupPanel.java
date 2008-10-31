@@ -325,7 +325,7 @@ public class PopupPanel extends SimplePanel implements SourcesPopupEvents,
   }
 
   public HandlerRegistration addCloseHandler(CloseHandler<PopupPanel> handler) {
-    return addHandler(CloseEvent.getType(), handler);
+    return addHandler(handler, CloseEvent.getType());
   }
 
   @Deprecated

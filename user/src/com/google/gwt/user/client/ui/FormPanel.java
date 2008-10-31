@@ -406,7 +406,7 @@ public class FormPanel extends SimplePanel implements FiresFormEvents,
    */
   public HandlerRegistration addSubmitCompleteHandler(
       SubmitCompleteHandler handler) {
-    return addHandler(SubmitCompleteEvent.getType(), handler);
+    return addHandler(handler, SubmitCompleteEvent.getType());
   }
 
   /**
@@ -415,7 +415,7 @@ public class FormPanel extends SimplePanel implements FiresFormEvents,
    * @param handler the handler
    */
   public HandlerRegistration addSubmitHandler(SubmitHandler handler) {
-    return addHandler(SubmitEvent.getType(), handler);
+    return addHandler(handler, SubmitEvent.getType());
   }
 
   /**

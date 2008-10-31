@@ -154,9 +154,9 @@ public class DialogBox extends DecoratedPopupPanel implements HasHTML, HasText {
     sinkEvents(Event.MOUSEEVENTS);
 
     MouseHandlers mouse = new MouseHandlers();
-    addDomHandler(MouseDownEvent.getType(), mouse);
-    addDomHandler(MouseUpEvent.getType(), mouse);
-    addDomHandler(MouseMoveEvent.getType(), mouse);
+    addDomHandler(mouse, MouseDownEvent.getType());
+    addDomHandler(mouse, MouseUpEvent.getType());
+    addDomHandler(mouse, MouseMoveEvent.getType());
     windowWidth = Window.getClientWidth();
     clientLeft = Document.get().getBodyOffsetLeft();
     clientTop = Document.get().getBodyOffsetTop();

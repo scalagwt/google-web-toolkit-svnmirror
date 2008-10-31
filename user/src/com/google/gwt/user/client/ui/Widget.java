@@ -123,7 +123,7 @@ public class Widget extends UIObject implements EventListener, HasHandlers {
    * @return {@link HandlerRegistration} used to remove the handler
    */
   protected final <H extends EventHandler> HandlerRegistration addDomHandler(
-      DomEvent.Type<H> type, final H handler) {
+      final H handler, DomEvent.Type<H> type) {
     if (type != null) {
       // Manual inlink sinkEvents.
       int eventBitsToAdd = type.getNativeEventTypeInt();
@@ -145,7 +145,7 @@ public class Widget extends UIObject implements EventListener, HasHandlers {
    * @return {@link HandlerRegistration} used to remove the handler
    */
   protected final <H extends EventHandler> HandlerRegistration addHandler(
-      AbstractEvent.Type<H> type, final H handler) {
+      final H handler, AbstractEvent.Type<H> type) {
     return handlerManager.addHandler(type, handler);
   }
  

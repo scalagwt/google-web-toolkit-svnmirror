@@ -93,7 +93,7 @@ public class Hyperlink extends Widget implements HasHTML, SourcesClickEvents,
   }
 
   public HandlerRegistration addClickHandler(ClickHandler handler) {
-    return addHandler(ClickEvent.getType(), handler);
+    return addHandler(handler, ClickEvent.getType());
   }
 
   @Deprecated

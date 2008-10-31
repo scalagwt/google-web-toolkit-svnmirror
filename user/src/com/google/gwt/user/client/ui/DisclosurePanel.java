@@ -355,7 +355,7 @@ public final class DisclosurePanel extends Composite implements
 
   public HandlerRegistration addCloseHandler(
       CloseHandler<DisclosurePanel> handler) {
-    return addHandler(CloseEvent.getType(), handler);
+    return addHandler(handler, CloseEvent.getType());
   }
 
   /**
@@ -370,7 +370,7 @@ public final class DisclosurePanel extends Composite implements
   }
 
   public HandlerRegistration addOpenHandler(OpenHandler<DisclosurePanel> handler) {
-    return addHandler(OpenEvent.getType(), handler);
+    return addHandler(handler, OpenEvent.getType());
   }
 
   public void clear() {

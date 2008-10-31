@@ -107,7 +107,7 @@ public class CheckBox extends ButtonBase implements HasName, HasValue<Boolean> {
         }
       });
     }
-    return addHandler(ValueChangeEvent.getType(), handler);
+    return addHandler(handler, ValueChangeEvent.getType());
   }
 
   @Override

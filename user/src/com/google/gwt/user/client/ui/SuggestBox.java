@@ -519,25 +519,25 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
   }
 
   public HandlerRegistration addKeyDownHandler(KeyDownHandler handler) {
-    return addDomHandler(KeyDownEvent.getType(), handler);
+    return addDomHandler(handler, KeyDownEvent.getType());
   }
 
   public HandlerRegistration addKeyPressHandler(KeyPressHandler handler) {
-    return addDomHandler(KeyPressEvent.getType(), handler);
+    return addDomHandler(handler, KeyPressEvent.getType());
   }
 
   public HandlerRegistration addKeyUpHandler(KeyUpHandler handler) {
-    return addDomHandler(KeyUpEvent.getType(), handler);
+    return addDomHandler(handler, KeyUpEvent.getType());
   }
 
   public HandlerRegistration addSelectionHandler(
       SelectionHandler<Suggestion> handler) {
-    return addHandler(SelectionEvent.getType(), handler);
+    return addHandler(handler, SelectionEvent.getType());
   }
 
   public HandlerRegistration addValueChangeHandler(
       ValueChangeHandler<String> handler) {
-    return addHandler(ValueChangeEvent.getType(), handler);
+    return addHandler(handler, ValueChangeEvent.getType());
   }
 
   /**
