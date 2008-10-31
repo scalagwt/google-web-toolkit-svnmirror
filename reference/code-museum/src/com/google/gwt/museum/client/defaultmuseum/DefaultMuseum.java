@@ -27,6 +27,7 @@ public class DefaultMuseum extends Museum implements EntryPoint {
 
   public DefaultMuseum() {
     addVisuals();
+    addBugs();
   }
 
   public void addBugs() {
@@ -58,5 +59,6 @@ public class DefaultMuseum extends Museum implements EntryPoint {
     addIssue(new VisualsForTree());
     addIssue(new VisualsForTreeEvents());
     addIssue(new VisualsForWindowEvents());
+    addIssue(new VisualsForDialogBox());
   }
 }
