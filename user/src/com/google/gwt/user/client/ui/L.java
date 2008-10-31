@@ -258,7 +258,7 @@ abstract class L<T> implements EventHandler {
 
     public void onMouseDown(MouseDownEvent event) {
       listener.onMouseDown(source(event), event.getClientX(),
-          event.getScreenY());
+          event.getClientY());
     }
 
     public void onMouseMove(MouseMoveEvent event) {
