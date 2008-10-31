@@ -73,10 +73,7 @@ public class CloseEvent<T> extends AbstractEvent<CloseHandler<T>> {
    * @return returns the handler type
    */
   public static Type<CloseHandler<?>> getType() {
-    if (TYPE == null) {
-      TYPE = new Type<CloseHandler<?>>();
-    }
-    return TYPE;
+    return TYPE != null ? TYPE : (TYPE = new Type<CloseHandler<?>>());
   }
 
   private T target;
@@ -122,7 +119,7 @@ public class CloseEvent<T> extends AbstractEvent<CloseHandler<T>> {
   }
 
   /**
-   * Was the target automatically closed? 
+   * Was the target automatically closed?
    * 
    * @param autoClosed autoClosed
    */
