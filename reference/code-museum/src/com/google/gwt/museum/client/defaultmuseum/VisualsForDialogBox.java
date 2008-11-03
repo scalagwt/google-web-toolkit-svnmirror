@@ -167,7 +167,7 @@ public class VisualsForDialogBox extends AbstractIssue {
   private VisibleDialogBox showVisibleDialog() {
     final VisibleDialogBox dialog = new VisibleDialogBox();
     dialog.setModal(false);
-    dialog.setText("I'm a dialog");
+    dialog.setText("I'm a god damn dialog");
 
     dialog.center();
 

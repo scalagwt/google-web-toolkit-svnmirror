@@ -16,11 +16,23 @@
 package com.google.gwt.user.client.ui;
 
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.event.dom.client.MouseDownEvent;
+import com.google.gwt.event.dom.client.MouseDownHandler;
+import com.google.gwt.event.dom.client.MouseMoveEvent;
+import com.google.gwt.event.dom.client.MouseMoveHandler;
+import com.google.gwt.event.dom.client.MouseOutEvent;
+import com.google.gwt.event.dom.client.MouseOutHandler;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseOverHandler;
+import com.google.gwt.event.dom.client.MouseUpEvent;
+import com.google.gwt.event.dom.client.MouseUpHandler;
+import com.google.gwt.event.logical.shared.ResizeEvent;
+import com.google.gwt.event.logical.shared.ResizeHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.WindowResizeListener;
 
 /**
  * A form of popup that has a caption area at the top and can be dragged by the
@@ -61,8 +73,37 @@ import com.google.gwt.user.client.WindowResizeListener;
  * {@example com.google.gwt.examples.DialogBoxExample}
  * </p>
  */
+@SuppressWarnings("deprecation")
 public class DialogBox extends DecoratedPopupPanel implements HasHTML, HasText,
     MouseListener {
+  
+  private class MouseHandler implements MouseDownHandler, MouseUpHandler,
+      MouseOutHandler, MouseOverHandler, MouseMoveHandler {
+
+    public void onMouseDown(MouseDownEvent event) {
+      DialogBox.this.onMouseDown(caption, event.getRelativeX(getElement()), 
+          event.getRelativeY(getElement()));
+    }
+
+    public void onMouseMove(MouseMoveEvent event) {
+      DialogBox.this.onMouseMove(caption, event.getRelativeX(getElement()), 
+          event.getRelativeY(getElement()));
+    }
+
+    public void onMouseOut(MouseOutEvent event) {
+      DialogBox.this.onMouseLeave(caption);
+    }
+
+    public void onMouseOver(MouseOverEvent event) {
+      DialogBox.this.onMouseEnter(caption);
+    }
+
+    public void onMouseUp(MouseUpEvent event) {
+      DialogBox.this.onMouseUp(caption, event.getRelativeX(getElement()), 
+          event.getRelativeY(getElement()));
+    }
+  }
+  
   /**
    * The default style name.
    */
@@ -71,11 +112,11 @@ public class DialogBox extends DecoratedPopupPanel implements HasHTML, HasText,
   private HTML caption = new HTML();
   private boolean dragging;
   private int dragStartX, dragStartY;
-  private MouseListenerCollection mouseListeners = new MouseListenerCollection();
-  private WindowResizeListener resizeListener;
   private int windowWidth;
   private int clientLeft;
   private int clientTop;
+
+  private HandlerRegistration resizeHandlerRegistration;
 
   /**
    * Creates an empty dialog box. It should not be shown until its child widget
@@ -116,15 +157,20 @@ public class DialogBox extends DecoratedPopupPanel implements HasHTML, HasText,
     DOM.appendChild(td, caption.getElement());
     adopt(caption);
     caption.setStyleName("Caption");
-    mouseListeners.add(this);
-
+    
     // Set the style name
     setStyleName(DEFAULT_STYLENAME);
-    sinkEvents(Event.MOUSEEVENTS);
 
     windowWidth = Window.getClientWidth();
     clientLeft = Document.get().getBodyOffsetLeft();
     clientTop = Document.get().getBodyOffsetTop();
+    
+    MouseHandler mouseHandler = new MouseHandler();
+    addDomHandler(mouseHandler, MouseDownEvent.getType());
+    addDomHandler(mouseHandler, MouseUpEvent.getType());
+    addDomHandler(mouseHandler, MouseMoveEvent.getType());
+    addDomHandler(mouseHandler, MouseOverEvent.getType());
+    addDomHandler(mouseHandler, MouseOutEvent.getType());
   }
 
   public String getHTML() {
@@ -137,31 +183,27 @@ public class DialogBox extends DecoratedPopupPanel implements HasHTML, HasText,
 
   @Override
   public void hide() {
-    Window.removeWindowResizeListener(resizeListener);
+    resizeHandlerRegistration.removeHandler();
+    resizeHandlerRegistration = null;
     super.hide();
   }
 
   @Override
   public void onBrowserEvent(Event event) {
-    super.onBrowserEvent(event);
-
-    // Only trigger mouse events if the event occurs in the caption wrapper
-    if (!dragging
-        && !getCellElement(0, 1).getParentElement().isOrHasChild(
-            event.getTarget())) {
-      return;
-    }
-
-    // Trigger a mouse event as if it originated in the caption
+    // If we're not yet dragging, only trigger mouse events if the event occurs
+    // in the caption wrapper
     switch (event.getTypeInt()) {
       case Event.ONMOUSEDOWN:
       case Event.ONMOUSEUP:
       case Event.ONMOUSEMOVE:
       case Event.ONMOUSEOVER:
       case Event.ONMOUSEOUT:
-        mouseListeners.fireMouseEvent(caption, event);
-        break;
+        if (!dragging && !isCaptionEvent(event)) {
+          return;
+        }
     }
+
+    super.onBrowserEvent(event);
   }
 
   @Override
@@ -169,47 +211,42 @@ public class DialogBox extends DecoratedPopupPanel implements HasHTML, HasText,
     // We need to preventDefault() on mouseDown events (outside of the
     // DialogBox content) to keep text from being selected when it
     // is dragged.
-    if (DOM.eventGetType(event) == Event.ONMOUSEDOWN) {
-      if (DOM.isOrHasChild(caption.getElement(), DOM.eventGetTarget(event))) {
-        DOM.eventPreventDefault(event);
-      }
+    if (DOM.eventGetType(event) == Event.ONMOUSEDOWN && isCaptionEvent(event)) {
+      DOM.eventPreventDefault(event);
     }
 
     return super.onEventPreview(event);
   }
 
+  /**
+   * @deprecated Use {@link #beginDragging(int, int)} instead
+   */
+  @Deprecated
   public void onMouseDown(Widget sender, int x, int y) {
-    dragging = true;
-    DOM.setCapture(getElement());
-    dragStartX = x;
-    dragStartY = y;
+    beginDragging(x, y);
   }
 
+  @Deprecated
   public void onMouseEnter(Widget sender) {
   }
 
+  @Deprecated
   public void onMouseLeave(Widget sender) {
   }
-
+  /**
+   * @deprecated Use {@link #continueDragging(int, int)} instead
+   */
+  @Deprecated
   public void onMouseMove(Widget sender, int x, int y) {
-    if (dragging) {
-      int absX = x + getAbsoluteLeft();
-      int absY = y + getAbsoluteTop();
-
-      // if the mouse is off the screen to the left, right, or top, don't
-      // move the dialog box. This would let users lose dialog boxes, which
-      // would be bad for modal popups.
-      if (absX < clientLeft || absX >= windowWidth || absY < clientTop) {
-        return;
-      }
-
-      setPopupPosition(absX - dragStartX, absY - dragStartY);
-    }
+    continueDragging(x, y);
   }
 
+  /**
+   * @deprecated Use {@link #finishDragging(int, int)} instead
+   */
+  @Deprecated
   public void onMouseUp(Widget sender, int x, int y) {
-    dragging = false;
-    DOM.releaseCapture(getElement());
+    finishDragging();
   }
 
   /**
@@ -238,15 +275,37 @@ public class DialogBox extends DecoratedPopupPanel implements HasHTML, HasText,
 
   @Override
   public void show() {
-    if (resizeListener == null) {
-      resizeListener = new WindowResizeListener() {
-        public void onWindowResized(int width, int height) {
-          windowWidth = width;
+    if (resizeHandlerRegistration == null) {
+      resizeHandlerRegistration = Window.addResizeHandler(new ResizeHandler() {
+        public void onResize(ResizeEvent event) {
+          windowWidth = event.getWidth();
         }
-      };
+      });
     }
-    Window.addWindowResizeListener(resizeListener);
     super.show();
+  }
+
+  protected void beginDragging(int x, int y) {
+    dragging = true;
+    DOM.setCapture(getElement());
+    dragStartX = x;
+    dragStartY = y;
+  }
+
+  protected void continueDragging(int x, int y) {
+    if (dragging) {
+      int absX = x + getAbsoluteLeft();
+      int absY = y + getAbsoluteTop();
+
+      // if the mouse is off the screen to the left, right, or top, don't
+      // move the dialog box. This would let users lose dialog boxes, which
+      // would be bad for modal popups.
+      if (absX < clientLeft || absX >= windowWidth || absY < clientTop) {
+        return;
+      }
+
+      setPopupPosition(absX - dragStartX, absY - dragStartY);
+    }
   }
 
   @Override
@@ -268,6 +327,11 @@ public class DialogBox extends DecoratedPopupPanel implements HasHTML, HasText,
     caption.onDetach();
   }
 
+  protected void finishDragging() {
+    dragging = false;
+    DOM.releaseCapture(getElement());
+  }
+
   /**
    * <b>Affected Elements:</b>
    * <ul>
@@ -282,5 +346,10 @@ public class DialogBox extends DecoratedPopupPanel implements HasHTML, HasText,
     super.onEnsureDebugId(baseID);
     caption.ensureDebugId(baseID + "-caption");
     ensureDebugId(getCellElement(1, 1), baseID, "content");
+  }
+
+  private boolean isCaptionEvent(Event event) {
+    return getCellElement(0, 1).getParentElement().isOrHasChild(
+        event.getTarget());
   }
 }
