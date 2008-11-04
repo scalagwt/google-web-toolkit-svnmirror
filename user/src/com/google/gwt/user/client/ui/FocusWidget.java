@@ -92,7 +92,7 @@ public abstract class FocusWidget extends Widget implements SourcesClickEvents,
 
   @Deprecated
   public void addClickListener(ClickListener listener) {
-    addClickHandler(new L.Click(listener));
+    L.Click.add(this, listener);
   }
 
   public HandlerRegistration addFocusHandler(FocusHandler handler) {
@@ -152,7 +152,7 @@ public abstract class FocusWidget extends Widget implements SourcesClickEvents,
 
   @Deprecated
   public void addMouseWheelListener(MouseWheelListener listener) {
-    addMouseWheelHandler(new L.MouseWheel(listener));
+    L.MouseWheel.add(this, listener);
   }
 
   /**

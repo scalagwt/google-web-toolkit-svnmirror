@@ -330,7 +330,7 @@ public class PopupPanel extends SimplePanel implements SourcesPopupEvents,
 
   @Deprecated
   public void addPopupListener(final PopupListener listener) {
-    addCloseHandler(new L.Popup(listener));
+    L.Popup.add(this, listener);
   }
 
   /**

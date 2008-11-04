@@ -15,7 +15,6 @@
  */
 package com.google.gwt.user.client.ui;
 
-import com.google.gwt.event.dom.client.AllFocusHandlers;
 import com.google.gwt.event.dom.client.AllKeyHandlers;
 import com.google.gwt.event.dom.client.HasAllKeyHandlers;
 import com.google.gwt.event.dom.client.KeyDownEvent;
@@ -485,9 +484,8 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
    */
   @Deprecated
   public void addClickListener(final ClickListener listener) {
-    L.Click legacy = new L.Click(listener);
+    L.Click legacy = L.Click.add(box, listener);
     legacy.setSource(this);
-    box.addClickHandler(legacy);
   }
 
   /**
@@ -508,14 +506,13 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
    */
   @Deprecated
   public void addFocusListener(final FocusListener listener) {
-    L.Focus focus = new L.Focus(listener);
+    L.Focus focus = L.Focus.add(box, listener);
     focus.setSource(this);
-    AllFocusHandlers.addHandlers(box, focus);
   }
 
   @Deprecated
   public void addKeyboardListener(KeyboardListener listener) {
-    AllKeyHandlers.addHandlers(this, new L.Keyboard(listener));
+    L.Keyboard.add(this, listener);
   }
 
   public HandlerRegistration addKeyDownHandler(KeyDownHandler handler) {

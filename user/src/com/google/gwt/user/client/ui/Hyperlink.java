@@ -98,7 +98,7 @@ public class Hyperlink extends Widget implements HasHTML, SourcesClickEvents,
 
   @Deprecated
   public void addClickListener(ClickListener listener) {
-    addClickHandler(new L.Click(listener));
+    L.Click.add(this, listener);
   }
 
   public String getHTML() {

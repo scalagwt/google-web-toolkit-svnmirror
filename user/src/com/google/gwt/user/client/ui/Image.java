@@ -430,7 +430,7 @@ public class Image extends Widget implements SourcesLoadEvents,
 
   @Deprecated
   public void addLoadListener(LoadListener listener) {
-    addLoadHandler(new L.Load(listener));
+    L.Load.add(this, listener);
   }
 
   public HandlerRegistration addMouseDownHandler(MouseDownHandler handler) {
@@ -464,7 +464,7 @@ public class Image extends Widget implements SourcesLoadEvents,
 
   @Deprecated
   public void addMouseWheelListener(MouseWheelListener listener) {
-    addMouseWheelHandler(new L.MouseWheel(listener));
+    L.MouseWheel.add(this, listener);
   }
 
   /**

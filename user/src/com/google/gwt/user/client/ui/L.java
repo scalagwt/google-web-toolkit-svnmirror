@@ -33,11 +33,14 @@ import com.google.gwt.event.dom.client.HasAllFocusHandlers;
 import com.google.gwt.event.dom.client.HasAllKeyHandlers;
 import com.google.gwt.event.dom.client.HasChangeHandlers;
 import com.google.gwt.event.dom.client.HasClickHandlers;
+import com.google.gwt.event.dom.client.HasLoadHandlers;
 import com.google.gwt.event.dom.client.HasMouseDownHandlers;
 import com.google.gwt.event.dom.client.HasMouseMoveHandlers;
 import com.google.gwt.event.dom.client.HasMouseOutHandlers;
 import com.google.gwt.event.dom.client.HasMouseOverHandlers;
 import com.google.gwt.event.dom.client.HasMouseUpHandlers;
+import com.google.gwt.event.dom.client.HasMouseWheelHandlers;
+import com.google.gwt.event.dom.client.HasScrollHandlers;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyPressEvent;
@@ -64,6 +67,7 @@ import com.google.gwt.event.logical.shared.BeforeSelectionEvent;
 import com.google.gwt.event.logical.shared.BeforeSelectionHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.event.logical.shared.HasCloseHandlers;
 import com.google.gwt.event.logical.shared.OpenEvent;
 import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
@@ -106,15 +110,17 @@ abstract class L<T> implements EventHandler {
 
   public static class Click extends L<ClickListener> implements ClickHandler {
     @Deprecated
-    public static void add(HasClickHandlers source, ClickListener listener) {
-      source.addClickHandler(new Click(listener));
+    public static Click add(HasClickHandlers source, ClickListener listener) {
+      Click rtn = new Click(listener);
+      source.addClickHandler(rtn);
+      return rtn;
     }
 
     public static void remove(Widget eventSource, ClickListener listener) {
       baseRemove(eventSource, listener, ClickEvent.getType());
     }
 
-    protected Click(ClickListener listener) {
+    private Click(ClickListener listener) {
       super(listener);
     }
 
@@ -137,7 +143,7 @@ abstract class L<T> implements EventHandler {
           OpenEvent.getType());
     }
 
-    protected Disclosure(DisclosureHandler listener) {
+    private Disclosure(DisclosureHandler listener) {
       super(listener);
     }
 
@@ -156,9 +162,11 @@ abstract class L<T> implements EventHandler {
   public static class Focus extends L<FocusListener> implements FocusHandler,
       BlurHandler {
 
-    public static <EventSourceType extends Widget & HasAllFocusHandlers> void add(
+    public static <EventSourceType extends Widget & HasAllFocusHandlers> Focus add(
         EventSourceType source, FocusListener listener) {
-      AllFocusHandlers.addHandlers(source, new Focus(listener));
+      Focus rtn = new Focus(listener);
+      AllFocusHandlers.addHandlers(source, rtn);
+      return rtn;
     }
 
     public static void remove(Widget eventSource, FocusListener listener) {
@@ -166,7 +174,7 @@ abstract class L<T> implements EventHandler {
           ErrorEvent.getType());
     }
 
-    public Focus(FocusListener listener) {
+    private Focus(FocusListener listener) {
       super(listener);
     }
 
@@ -193,7 +201,7 @@ abstract class L<T> implements EventHandler {
           FormPanel.SubmitCompleteEvent.getType());
     }
 
-    protected Form(FormHandler listener) {
+    private Form(FormHandler listener) {
       super(listener);
     }
 
@@ -214,12 +222,16 @@ abstract class L<T> implements EventHandler {
   public static class Load extends L<LoadListener> implements LoadHandler,
       ErrorHandler {
 
+    public static void add(HasLoadHandlers source, LoadListener listener) {
+      source.addLoadHandler(new Load(listener));
+    }
+
     public static void remove(Widget eventSource, LoadListener listener) {
       baseRemove(eventSource, listener, LoadEvent.getType(),
           ErrorEvent.getType());
     }
 
-    protected Load(LoadListener listener) {
+    private Load(LoadListener listener) {
       super(listener);
     }
 
@@ -252,7 +264,7 @@ abstract class L<T> implements EventHandler {
           MouseOutEvent.getType());
     }
 
-    protected Mouse(MouseListener listener) {
+    private Mouse(MouseListener listener) {
       super(listener);
     }
 
@@ -280,11 +292,15 @@ abstract class L<T> implements EventHandler {
   }
   public static class MouseWheel extends L<MouseWheelListener> implements
       MouseWheelHandler {
+    public static void add(HasMouseWheelHandlers source, MouseWheelListener listener) {
+      source.addMouseWheelHandler(new MouseWheel(listener));
+    }
+
     public static void remove(Widget eventSource, MouseWheelListener listener) {
       baseRemove(eventSource, listener, MouseWheelEvent.getType());
     }
 
-    protected MouseWheel(MouseWheelListener listener) {
+    private MouseWheel(MouseWheelListener listener) {
       super(listener);
     }
 
@@ -297,11 +313,15 @@ abstract class L<T> implements EventHandler {
   public static class Popup extends L<PopupListener> implements
       CloseHandler<PopupPanel> {
 
+    public static void add(HasCloseHandlers<PopupPanel> source, PopupListener listener) {
+      source.addCloseHandler(new Popup(listener));
+    }
+
     public static void remove(Widget eventSource, PopupListener listener) {
       baseRemove(eventSource, listener, CloseEvent.getType());
     }
 
-    protected Popup(PopupListener listener) {
+    private Popup(PopupListener listener) {
       super(listener);
     }
 
@@ -313,12 +333,16 @@ abstract class L<T> implements EventHandler {
 
   public static class Scroll extends L<ScrollListener> implements ScrollHandler {
 
+    public static void add(HasScrollHandlers source, ScrollListener listener) {
+      source.addScrollHandler(new Scroll(listener));
+    }
+
     public static void remove(Widget eventSource, ScrollListener listener) {
       baseRemove(eventSource, listener, ScrollEvent.getType(),
           ErrorEvent.getType());
     }
 
-    protected Scroll(ScrollListener listener) {
+    private Scroll(ScrollListener listener) {
       super(listener);
     }
 
@@ -341,7 +365,7 @@ abstract class L<T> implements EventHandler {
       baseRemove(eventSource, listener, SelectionEvent.getType());
     }
 
-    protected Suggestion(SuggestionHandler listener) {
+    private Suggestion(SuggestionHandler listener) {
       super(listener);
     }
 
@@ -371,7 +395,7 @@ abstract class L<T> implements EventHandler {
           BeforeSelectionEvent.getType());
     }
 
-    protected Tab(TabListener listener) {
+    private Tab(TabListener listener) {
       super(listener);
     }
 
@@ -399,7 +423,7 @@ abstract class L<T> implements EventHandler {
       baseRemove(eventSource, listener, ClickEvent.getType());
     }
 
-    protected Table(TableListener listener) {
+    private Table(TableListener listener) {
       super(listener);
     }
 
@@ -425,7 +449,7 @@ abstract class L<T> implements EventHandler {
       baseRemove(eventSource, listener, ValueChangeEvent.getType());
     }
 
-    protected Tree(TreeListener listener) {
+    private Tree(TreeListener listener) {
       super(listener);
     }
 
@@ -455,7 +479,7 @@ abstract class L<T> implements EventHandler {
           KeyUpEvent.getType(), KeyPressEvent.getType());
     }
 
-    public Keyboard(KeyboardListener listener) {
+    private Keyboard(KeyboardListener listener) {
       super(listener);
     }
 

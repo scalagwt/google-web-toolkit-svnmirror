@@ -160,7 +160,7 @@ public class Label extends Widget implements HasHorizontalAlignment, HasText,
 
   @Deprecated
   public void addMouseWheelListener(MouseWheelListener listener) {
-    addMouseWheelHandler(new L.MouseWheel(listener));
+    L.MouseWheel.add(this, listener);
   }
 
   public Direction getDirection() {

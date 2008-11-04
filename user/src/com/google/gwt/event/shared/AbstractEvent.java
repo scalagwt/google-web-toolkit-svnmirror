@@ -15,7 +15,6 @@
  */
 package com.google.gwt.event.shared;
 
-
 /**
  * Root of all gwt events. All gwt events are considered dead and should no
  * longer be accessed once the {@link HandlerManager} which originally fired the

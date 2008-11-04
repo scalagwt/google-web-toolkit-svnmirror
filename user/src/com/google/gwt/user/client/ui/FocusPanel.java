@@ -15,8 +15,6 @@
  */
 package com.google.gwt.user.client.ui;
 
-import com.google.gwt.event.dom.client.AllFocusHandlers;
-import com.google.gwt.event.dom.client.AllKeyHandlers;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -78,7 +76,7 @@ public class FocusPanel extends SimplePanel implements HasFocus,
 
   @Deprecated
   public void addClickListener(ClickListener listener) {
-    addClickHandler(new L.Click(listener));
+    L.Click.add(this, listener);
   }
 
   public HandlerRegistration addFocusHandler(FocusHandler handler) {
@@ -87,12 +85,12 @@ public class FocusPanel extends SimplePanel implements HasFocus,
 
   @Deprecated
   public void addFocusListener(FocusListener listener) {
-    AllFocusHandlers.addHandlers(this, new L.Focus(listener));
+    L.Focus.add(this, listener);
   }
 
   @Deprecated
   public void addKeyboardListener(KeyboardListener listener) {
-    AllKeyHandlers.addHandlers(this, new L.Keyboard(listener));
+    L.Keyboard.add(this, listener);
   }
 
   public HandlerRegistration addKeyDownHandler(KeyDownHandler handler) {
@@ -138,7 +136,7 @@ public class FocusPanel extends SimplePanel implements HasFocus,
 
   @Deprecated
   public void addMouseWheelListener(MouseWheelListener listener) {
-    addMouseWheelHandler(new L.MouseWheel(listener));
+    L.MouseWheel.add(this, listener);
   }
 
   public int getTabIndex() {

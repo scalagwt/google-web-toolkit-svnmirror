@@ -46,7 +46,7 @@ abstract class L<T> implements EventHandler {
       baseRemove(manager, listener, ValueChangeEvent.getType());
     }
 
-    protected HistoryChange(HistoryListener listener) {
+    private HistoryChange(HistoryListener listener) {
       super(listener);
     }
 
@@ -70,7 +70,7 @@ abstract class L<T> implements EventHandler {
           CloseEvent.getType());
     }
 
-    protected WindowClose(WindowCloseListener listener) {
+    private WindowClose(WindowCloseListener listener) {
       super(listener);
     }
 
@@ -98,7 +98,7 @@ abstract class L<T> implements EventHandler {
       baseRemove(manager, listener, ResizeEvent.getType());
     }
 
-    protected WindowResize(WindowResizeListener listener) {
+    private WindowResize(WindowResizeListener listener) {
       super(listener);
     }
 
@@ -119,7 +119,7 @@ abstract class L<T> implements EventHandler {
       baseRemove(manager, listener, Window.ScrollEvent.getType());
     }
 
-    protected WindowScroll(WindowScrollListener listener) {
+    private WindowScroll(WindowScrollListener listener) {
       super(listener);
     }
 
@@ -131,7 +131,7 @@ abstract class L<T> implements EventHandler {
   // This is an internal helper method with the current formulation, we have
   // lost the info needed to make it safe by this point.
   @SuppressWarnings("unchecked")
-  private static void baseRemove(HandlerManager manager,
+  protected static void baseRemove(HandlerManager manager,
       EventListener listener, Type... keys) {
     if (manager != null) {
       for (Type key : keys) {
