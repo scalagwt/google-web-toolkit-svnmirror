@@ -81,13 +81,11 @@ public class DialogBox extends DecoratedPopupPanel implements HasHTML, HasText,
       MouseOutHandler, MouseOverHandler, MouseMoveHandler {
 
     public void onMouseDown(MouseDownEvent event) {
-      DialogBox.this.onMouseDown(caption, event.getRelativeX(getElement()), 
-          event.getRelativeY(getElement()));
+      beginDragging(event);
     }
 
     public void onMouseMove(MouseMoveEvent event) {
-      DialogBox.this.onMouseMove(caption, event.getRelativeX(getElement()), 
-          event.getRelativeY(getElement()));
+      continueDragging(event);
     }
 
     public void onMouseOut(MouseOutEvent event) {
@@ -99,8 +97,7 @@ public class DialogBox extends DecoratedPopupPanel implements HasHTML, HasText,
     }
 
     public void onMouseUp(MouseUpEvent event) {
-      DialogBox.this.onMouseUp(caption, event.getRelativeX(getElement()), 
-          event.getRelativeY(getElement()));
+      endDragging(event);
     }
   }
   
@@ -118,13 +115,14 @@ public class DialogBox extends DecoratedPopupPanel implements HasHTML, HasText,
 
   private HandlerRegistration resizeHandlerRegistration;
 
+
   /**
-   * Creates an empty dialog box. It should not be shown until its child widget
-   * has been added using {@link #add(Widget)}.
-   */
-  public DialogBox() {
-    this(false);
-  }
+     * Creates an empty dialog box. It should not be shown until its child widget
+     * has been added using {@link #add(Widget)}.
+     */
+    public DialogBox() {
+      this(false);
+    }
 
   /**
    * Creates an empty dialog box specifying its "auto-hide" property. It should
@@ -172,10 +170,10 @@ public class DialogBox extends DecoratedPopupPanel implements HasHTML, HasText,
     addDomHandler(mouseHandler, MouseOverEvent.getType());
     addDomHandler(mouseHandler, MouseOutEvent.getType());
   }
-
-  public String getHTML() {
-    return caption.getHTML();
-  }
+  
+ public String getHTML() {
+  return caption.getHTML();
+}
 
   public String getText() {
     return caption.getText();
@@ -219,11 +217,15 @@ public class DialogBox extends DecoratedPopupPanel implements HasHTML, HasText,
   }
 
   /**
-   * @deprecated Use {@link #beginDragging(int, int)} instead
+   * @deprecated Use {@link #beginDragging} instead and {@link #getCaption}
+   *             instead
    */
   @Deprecated
   public void onMouseDown(Widget sender, int x, int y) {
-    beginDragging(x, y);
+    dragging = true;
+    DOM.setCapture(getElement());
+    dragStartX = x;
+    dragStartY = y;
   }
 
   @Deprecated
@@ -233,20 +235,34 @@ public class DialogBox extends DecoratedPopupPanel implements HasHTML, HasText,
   @Deprecated
   public void onMouseLeave(Widget sender) {
   }
+
   /**
-   * @deprecated Use {@link #continueDragging(int, int)} instead
+   * @deprecated Use {@link #continueDragging} and {@link #getCaption} instead
    */
   @Deprecated
   public void onMouseMove(Widget sender, int x, int y) {
-    continueDragging(x, y);
+    if (dragging) {
+      int absX = x + getAbsoluteLeft();
+      int absY = y + getAbsoluteTop();
+
+      // if the mouse is off the screen to the left, right, or top, don't
+      // move the dialog box. This would let users lose dialog boxes, which
+      // would be bad for modal popups.
+      if (absX < clientLeft || absX >= windowWidth || absY < clientTop) {
+        return;
+      }
+
+      setPopupPosition(absX - dragStartX, absY - dragStartY);
+    }
   }
 
   /**
-   * @deprecated Use {@link #finishDragging(int, int)} instead
+   * @deprecated Use {@link #finishDragging} and {@link #getCaption} instead
    */
   @Deprecated
   public void onMouseUp(Widget sender, int x, int y) {
-    finishDragging();
+    dragging = false;
+    DOM.releaseCapture(getElement());
   }
 
   /**
@@ -260,7 +276,6 @@ public class DialogBox extends DecoratedPopupPanel implements HasHTML, HasText,
   public void setHTML(String html) {
     caption.setHTML(html);
   }
-
   /**
    * Sets the text inside the caption.
    * 
@@ -285,27 +300,30 @@ public class DialogBox extends DecoratedPopupPanel implements HasHTML, HasText,
     super.show();
   }
 
-  protected void beginDragging(int x, int y) {
-    dragging = true;
-    DOM.setCapture(getElement());
-    dragStartX = x;
-    dragStartY = y;
+  /**
+   * Called on mouse down in the caption area, begins the dragging loop by
+   * turning on event capture.
+   * 
+   * @see DOM#setCapture
+   * @see #continueDragging
+   * @param event
+   */
+  protected void beginDragging(MouseDownEvent event) {
+    onMouseDown(caption, event.getRelativeX(getElement()), 
+        event.getRelativeY(getElement()));
   }
 
-  protected void continueDragging(int x, int y) {
-    if (dragging) {
-      int absX = x + getAbsoluteLeft();
-      int absY = y + getAbsoluteTop();
-
-      // if the mouse is off the screen to the left, right, or top, don't
-      // move the dialog box. This would let users lose dialog boxes, which
-      // would be bad for modal popups.
-      if (absX < clientLeft || absX >= windowWidth || absY < clientTop) {
-        return;
-      }
-
-      setPopupPosition(absX - dragStartX, absY - dragStartY);
-    }
+  /**
+   * Called on mouse move in the caption area, continues dragging if it 
+   * was started by {@link #beginDragging}. 
+   * 
+   * @see #beginDragging
+   * @see #endDragging
+   * @param event
+   */
+  protected void continueDragging(MouseMoveEvent event) {
+    onMouseMove(caption, event.getRelativeX(getElement()), 
+        event.getRelativeY(getElement()));
   }
 
   @Override
@@ -327,9 +345,26 @@ public class DialogBox extends DecoratedPopupPanel implements HasHTML, HasText,
     caption.onDetach();
   }
 
-  protected void finishDragging() {
-    dragging = false;
-    DOM.releaseCapture(getElement());
+  /**
+   * Called on mouse up in the caption area, ends dragging by ending event
+   * capture.
+   * 
+   * @see DOM#releaseCapture
+   * @see #beginDragging
+   * @see #endDragging
+   */
+  protected void endDragging(MouseUpEvent event) {
+    onMouseUp(caption, event.getRelativeX(getElement()), 
+        event.getRelativeY(getElement()));
+  }
+  
+  /**
+   * Provides access to the widget that displays the dialog's caption.
+   * 
+   * @return the Caption widget
+   */
+  protected Widget getCaption() {
+    return caption;
   }
 
   /**
