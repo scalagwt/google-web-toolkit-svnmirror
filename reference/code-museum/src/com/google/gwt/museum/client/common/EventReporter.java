@@ -44,6 +44,7 @@ import com.google.gwt.user.client.ui.HasHTML;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.KeyboardListener;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.MouseListener;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SuggestionEvent;
 import com.google.gwt.user.client.ui.SuggestionHandler;
@@ -63,7 +64,7 @@ public class EventReporter<V, T> extends AllKeyHandlers implements
     ChangeListener, FocusListener, ValueChangeHandler<V>,
     SelectionHandler<Suggestion>, SuggestionHandler, KeyboardListener,
     ChangeHandler, BlurHandler, FocusHandler, ClickHandler, ClickListener,
-    CloseHandler<T> {
+    CloseHandler<T>, MouseListener {
 
   /**
    * Add/remove handlers via check box.
@@ -203,6 +204,27 @@ public class EventReporter<V, T> extends AllKeyHandlers implements
 
   private void report(AbstractEvent<?> event) {
     report(getInfo(event.getSource()) + " fired " + event.toDebugString());
+  }
+
+  public void onMouseDown(Widget sender, int x, int y) {
+    report(getInfo(sender) + "mouse down");
+  }
+
+  public void onMouseEnter(Widget sender) {
+    report(getInfo(sender) + "mouse enter");
+  }
+
+  public void onMouseLeave(Widget sender) {
+    report(getInfo(sender) + "mouse leave");
+  }
+
+  public void onMouseMove(Widget sender, int x, int y) {
+    report(getInfo(sender) + "mouse move");
+  }
+
+  public void onMouseUp(Widget sender, int x, int y) {
+    report(getInfo(sender) + "mouse up");
+
   }
 
 }

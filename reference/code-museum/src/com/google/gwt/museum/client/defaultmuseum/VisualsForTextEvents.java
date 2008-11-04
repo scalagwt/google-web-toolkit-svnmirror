@@ -55,7 +55,7 @@ public class VisualsForTextEvents extends AbstractIssue {
     b.addBlurHandler(handler);
     b.addFocusListener(handler);
     b.addValueChangeHandler(handler);
-
+    b.addMouseListener(handler);
     // Rich text box:
     RichTextArea rich = new RichTextArea();
     rich.setTitle("rich text box");

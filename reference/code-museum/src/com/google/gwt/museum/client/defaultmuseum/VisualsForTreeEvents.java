@@ -23,6 +23,7 @@ import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.museum.client.common.AbstractIssue;
+import com.google.gwt.museum.client.common.EventReporter;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
@@ -38,6 +39,11 @@ public class VisualsForTreeEvents extends AbstractIssue {
   public Widget createIssue() {
     VerticalPanel p = new VerticalPanel();
     Tree t = VisualsForTree.createTree();
+    p.add(t);
+    EventReporter<Object, TreeItem> handler = new EventReporter<Object, TreeItem>(
+        p);
+    t.addKeyboardListener(handler);
+    t.addMouseListener(handler);
 
     t.addSelectionHandler(new SelectionHandler<TreeItem>() {
       public void onSelection(SelectionEvent<TreeItem> event) {
@@ -52,7 +58,6 @@ public class VisualsForTreeEvents extends AbstractIssue {
       }
 
     });
-    p.add(t);
 
     t.addOpenHandler(new OpenHandler<TreeItem>() {
 
@@ -61,7 +66,7 @@ public class VisualsForTreeEvents extends AbstractIssue {
       }
 
     });
-    p.add(t);
+
     return p;
   }
 
