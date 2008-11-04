@@ -26,6 +26,7 @@ public interface FiresDisclosureEvents {
    * 
    * @param handler the handler to add
    */
+  @Deprecated
   void addEventHandler(DisclosureHandler handler);
   
   /**
@@ -33,5 +34,6 @@ public interface FiresDisclosureEvents {
    * 
    * @param handler the handler to remove.
    */
+  @Deprecated
   void removeEventHandler(DisclosureHandler handler);
 }

@@ -50,7 +50,7 @@ public abstract class Composite extends Widget {
     // Delegate events to the widget.
     widget.onBrowserEvent(event);
   }
-
+ 
   /**
    * Provides subclasses access to the topmost widget that defines this
    * composite.
@@ -99,7 +99,12 @@ public abstract class Composite extends Widget {
     // default (note: it's not necessary to clear this in onDetach(), because
     // the widget's onDetach will do so).
     DOM.setEventListener(getElement(), this);
-
+    int bitsToAdd = eventsToSink;
+    eventsToSink = -1;
+    if (bitsToAdd > 0) {
+      sinkEvents(bitsToAdd);
+    }
+     
     // Call onLoad() directly, because we're not calling super.onAttach().
     onLoad();
   }

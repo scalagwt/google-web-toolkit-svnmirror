@@ -26,6 +26,7 @@ public interface SourcesTabEvents {
    * 
    * @param listener the listener interface to add
    */
+  @Deprecated
   void addTabListener(TabListener listener);
 
   /**
@@ -33,5 +34,6 @@ public interface SourcesTabEvents {
    * 
    * @param listener the listener interface to remove
    */
+  @Deprecated
   void removeTabListener(TabListener listener);
 }

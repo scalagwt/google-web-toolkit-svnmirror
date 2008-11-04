@@ -20,6 +20,7 @@ import java.util.EventListener;
 /**
  * Event listener interface for 'change' events.
  */
+@Deprecated
 public interface ChangeListener extends EventListener {
 
   /**
@@ -28,5 +29,6 @@ public interface ChangeListener extends EventListener {
    * 
    * @param sender the widget that has changed.
    */
+  @Deprecated
   void onChange(Widget sender);
 }

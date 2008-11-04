@@ -16,6 +16,29 @@
 package com.google.gwt.user.client.ui;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.BlurEvent;
+import com.google.gwt.event.dom.client.BlurHandler;
+import com.google.gwt.event.dom.client.FocusEvent;
+import com.google.gwt.event.dom.client.FocusHandler;
+import com.google.gwt.event.dom.client.HasAllFocusHandlers;
+import com.google.gwt.event.dom.client.HasAllKeyHandlers;
+import com.google.gwt.event.dom.client.HasKeyCodes;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
+import com.google.gwt.event.dom.client.KeyPressEvent;
+import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.event.logical.shared.HasCloseHandlers;
+import com.google.gwt.event.logical.shared.HasOpenHandlers;
+import com.google.gwt.event.logical.shared.HasSelectionHandlers;
+import com.google.gwt.event.logical.shared.OpenEvent;
+import com.google.gwt.event.logical.shared.OpenHandler;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
@@ -35,19 +58,18 @@ import java.util.Map;
  * <p>
  * <img class='gallery' src='Tree.png'/>
  * </p>
- * <h3>CSS Style Rules</h3>
- * <ul class='css'>
- * <li>.gwt-Tree { the tree itself }</li>
- * <li>.gwt-Tree .gwt-TreeItem { a tree item }</li>
- * <li>.gwt-Tree .gwt-TreeItem-selected { a selected tree item }</li>
- * </ul>
+ * <h3>CSS Style Rules</h3> <ul class='css'> <li>.gwt-Tree { the tree itself }</li>
+ * <li>.gwt-Tree .gwt-TreeItem { a tree item }</li> <li>.gwt-Tree
+ * .gwt-TreeItem-selected { a selected tree item }</li> </ul>
  * <p>
  * <h3>Example</h3>
  * {@example com.google.gwt.examples.TreeExample}
  * </p>
  */
 public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
-    HasFocus, HasAnimation {
+    HasFocus, HasAnimation, HasAllKeyHandlers, HasAllFocusHandlers,
+    HasSelectionHandlers<TreeItem>, HasOpenHandlers<TreeItem>,
+    HasCloseHandlers<TreeItem> {
 
   /**
    * Provides images to support the the deprecated case where a url prefix is
@@ -76,13 +98,13 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
 
       @Override
       public void applyTo(ImagePrototypeElement img) {
-        DOM.setImgSrc(img.<Element>cast(), imageUrl);
+        DOM.setImgSrc(img.<Element> cast(), imageUrl);
       }
 
       @Override
       public ImagePrototypeElement createElement() {
         Element img = DOM.createImg();
-        applyTo(img.<ImagePrototypeElement>cast());
+        applyTo(img.<ImagePrototypeElement> cast());
         return img.cast();
       }
 
@@ -125,8 +147,11 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
   }
 
   private static final int OTHER_KEY_DOWN = 63233;
+
   private static final int OTHER_KEY_LEFT = 63234;
+
   private static final int OTHER_KEY_RIGHT = 63235;
+
   private static final int OTHER_KEY_UP = 63232;
 
   static native boolean shouldTreeDelegateFocusToElement(Element elem) /*-{
@@ -145,10 +170,10 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
       case OTHER_KEY_RIGHT:
       case OTHER_KEY_UP:
       case OTHER_KEY_LEFT:
-      case KeyboardListener.KEY_DOWN:
-      case KeyboardListener.KEY_RIGHT:
-      case KeyboardListener.KEY_UP:
-      case KeyboardListener.KEY_LEFT:
+      case HasKeyCodes.KEY_DOWN:
+      case HasKeyCodes.KEY_RIGHT:
+      case HasKeyCodes.KEY_UP:
+      case HasKeyCodes.KEY_LEFT:
         return true;
       default:
         return false;
@@ -162,23 +187,23 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
   private static int standardizeKeycode(int code) {
     switch (code) {
       case OTHER_KEY_DOWN:
-        code = KeyboardListener.KEY_DOWN;
+        code = HasKeyCodes.KEY_DOWN;
         break;
       case OTHER_KEY_RIGHT:
-        code = KeyboardListener.KEY_RIGHT;
+        code = HasKeyCodes.KEY_RIGHT;
         break;
       case OTHER_KEY_UP:
-        code = KeyboardListener.KEY_UP;
+        code = HasKeyCodes.KEY_UP;
         break;
       case OTHER_KEY_LEFT:
-        code = KeyboardListener.KEY_LEFT;
+        code = HasKeyCodes.KEY_LEFT;
         break;
     }
     if (LocaleInfo.getCurrentLocale().isRTL()) {
-      if (code == KeyboardListener.KEY_RIGHT) {
-        code = KeyboardListener.KEY_LEFT;
-      } else if (code == KeyboardListener.KEY_LEFT) {
-        code = KeyboardListener.KEY_RIGHT;
+      if (code == HasKeyCodes.KEY_RIGHT) {
+        code = HasKeyCodes.KEY_LEFT;
+      } else if (code == HasKeyCodes.KEY_LEFT) {
+        code = HasKeyCodes.KEY_RIGHT;
       }
     }
     return code;
@@ -188,18 +213,21 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
    * Map of TreeItem.widget -> TreeItem.
    */
   private final Map<Widget, TreeItem> childWidgets = new HashMap<Widget, TreeItem>();
+
   private TreeItem curSelection;
+
   private Element focusable;
-  private FocusListenerCollection focusListeners;
+
   private TreeImages images;
+
   private String indentValue;
+
   private boolean isAnimationEnabled = false;
-  private KeyboardListenerCollection keyboardListeners;
+
   private boolean lastWasKeyDown;
 
-  private TreeListenerCollection listeners;
-  private MouseListenerCollection mouseListeners = null;
   private TreeItem root;
+
   private boolean useLeafImages;
 
   /**
@@ -244,11 +272,21 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
     addItem(widget);
   }
 
+  public HandlerRegistration addBlurHandler(BlurHandler handler) {
+    return addDomHandler(handler, BlurEvent.getType());
+  }
+
+  public HandlerRegistration addCloseHandler(CloseHandler<TreeItem> handler) {
+    return addHandler(handler, CloseEvent.getType());
+  }
+
+  public HandlerRegistration addFocusHandler(FocusHandler handler) {
+    return addDomHandler(handler, FocusEvent.getType());
+  }
+
+  @Deprecated
   public void addFocusListener(FocusListener listener) {
-    if (focusListeners == null) {
-      focusListeners = new FocusListenerCollection();
-    }
-    focusListeners.add(listener);
+    L.Focus.add(this, listener);
   }
 
   /**
@@ -277,30 +315,41 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
    * Adds a new tree item containing the specified widget.
    * 
    * @param widget the widget to be added
+   * @return the new item
    */
   public TreeItem addItem(Widget widget) {
     return root.addItem(widget);
   }
 
+  @Deprecated
   public void addKeyboardListener(KeyboardListener listener) {
-    if (keyboardListeners == null) {
-      keyboardListeners = new KeyboardListenerCollection();
-    }
-    keyboardListeners.add(listener);
+    L.Keyboard.add(this, listener);
   }
 
-  public void addMouseListener(MouseListener listener) {
-    if (mouseListeners == null) {
-      mouseListeners = new MouseListenerCollection();
-    }
-    mouseListeners.add(listener);
+  public HandlerRegistration addKeyDownHandler(KeyDownHandler handler) {
+    return addDomHandler(handler, KeyDownEvent.getType());
   }
 
+  public HandlerRegistration addKeyPressHandler(KeyPressHandler handler) {
+    return addDomHandler(handler, KeyPressEvent.getType());
+  }
+
+  public HandlerRegistration addKeyUpHandler(KeyUpHandler handler) {
+    return addDomHandler(handler, KeyUpEvent.getType());
+  }
+
+  public final HandlerRegistration addOpenHandler(OpenHandler<TreeItem> handler) {
+    return addHandler(handler, OpenEvent.getType());
+  }
+
+  public HandlerRegistration addSelectionHandler(
+      SelectionHandler<TreeItem> handler) {
+    return addHandler(handler, SelectionEvent.getType());
+  }
+
+  @Deprecated
   public void addTreeListener(TreeListener listener) {
-    if (listeners == null) {
-      listeners = new TreeListenerCollection();
-    }
-    listeners.add(listener);
+    L.Tree.add(this, listener);
   }
 
   /**
@@ -376,6 +425,10 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
     return FocusPanel.impl.getTabIndex(focusable);
   }
 
+  public TreeItem getValue() {
+    return getSelectedItem();
+  }
+
   public boolean isAnimationEnabled() {
     return isAnimationEnabled;
   }
@@ -429,10 +482,6 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
       }
 
       case Event.ONMOUSEDOWN: {
-        if (mouseListeners != null) {
-          mouseListeners.fireMouseEvent(this, event);
-        }
-
         // Currently, the way we're using image bundles causes extraneous events
         // to be sunk on individual items' open/close images. This leads to an
         // extra event reaching the Tree, which we will ignore here.
@@ -441,49 +490,6 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
         }
         break;
       }
-
-      case Event.ONMOUSEUP: {
-        if (mouseListeners != null) {
-          mouseListeners.fireMouseEvent(this, event);
-        }
-        break;
-      }
-
-      case Event.ONMOUSEMOVE: {
-        if (mouseListeners != null) {
-          mouseListeners.fireMouseEvent(this, event);
-        }
-        break;
-      }
-
-      case Event.ONMOUSEOVER: {
-        if (mouseListeners != null) {
-          mouseListeners.fireMouseEvent(this, event);
-        }
-        break;
-      }
-
-      case Event.ONMOUSEOUT: {
-        if (mouseListeners != null) {
-          mouseListeners.fireMouseEvent(this, event);
-        }
-        break;
-      }
-
-      case Event.ONFOCUS:
-        if (focusListeners != null) {
-          focusListeners.fireFocusEvent(this, event);
-        }
-        break;
-
-      case Event.ONBLUR: {
-        if (focusListeners != null) {
-          focusListeners.fireFocusEvent(this, event);
-        }
-
-        break;
-      }
-
       case Event.ONKEYDOWN: {
         keyboardNavigation(event);
         lastWasKeyDown = true;
@@ -499,7 +505,7 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
       }
 
       case Event.ONKEYUP: {
-        if (DOM.eventGetKeyCode(event) == KeyboardListener.KEY_TAB) {
+        if (DOM.eventGetKeyCode(event) == HasKeyCodes.KEY_TAB) {
           ArrayList<Element> chain = new ArrayList<Element>();
           collectElementChain(chain, getElement(), DOM.eventGetTarget(event));
           TreeItem item = findItemByChain(chain, 0, root);
@@ -507,7 +513,6 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
             setSelectedItem(item, true);
           }
         }
-
         lastWasKeyDown = false;
         break;
       }
@@ -519,18 +524,12 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
         if (isArrowKey(DOM.eventGetKeyCode(event))) {
           DOM.eventCancelBubble(event, true);
           DOM.eventPreventDefault(event);
+          return;
         }
-      }
-      // Intentional fall through
-      case Event.ONKEYPRESS: {
-        if (keyboardListeners != null) {
-          keyboardListeners.fireKeyboardEvent(this, event);
-        }
-        break;
       }
     }
 
-    // We must call SynthesizedWidget's implementation for all other events.
+    // We must call super for all handlers.
     super.onBrowserEvent(event);
   }
 
@@ -546,10 +545,9 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
     return true;
   }
 
+  @Deprecated
   public void removeFocusListener(FocusListener listener) {
-    if (focusListeners != null) {
-      focusListeners.remove(listener);
-    }
+    L.Focus.remove(this, listener);
   }
 
   /**
@@ -570,16 +568,14 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
     }
   }
 
+  @Deprecated
   public void removeKeyboardListener(KeyboardListener listener) {
-    if (keyboardListeners != null) {
-      keyboardListeners.remove(listener);
-    }
+    L.Keyboard.remove(this, listener);
   }
 
+  @Deprecated
   public void removeTreeListener(TreeListener listener) {
-    if (listeners != null) {
-      listeners.remove(listener);
-    }
+    L.Tree.remove(this, listener);
   }
 
   public void setAccessKey(char key) {
@@ -650,6 +646,8 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
 
   /**
    * Iterator of tree items.
+   * 
+   * @return the iterator
    */
   public Iterator<TreeItem> treeItemIterator() {
     List<TreeItem> accum = new ArrayList<TreeItem>();
@@ -715,9 +713,11 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
     widget.setParent(this);
   }
 
-  void fireStateChanged(TreeItem item) {
-    if (listeners != null) {
-      listeners.fireItemStateChanged(item);
+  void fireStateChanged(TreeItem item, boolean open) {
+    if (open) {
+      OpenEvent.fire(this, item);
+    } else {
+      CloseEvent.fire(this, item);
     }
   }
 
@@ -953,19 +953,19 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
       int code = DOM.eventGetKeyCode(event);
 
       switch (standardizeKeycode(code)) {
-        case KeyboardListener.KEY_UP: {
+        case HasKeyCodes.KEY_UP: {
           moveSelectionUp(curSelection);
           break;
         }
-        case KeyboardListener.KEY_DOWN: {
+        case HasKeyCodes.KEY_DOWN: {
           moveSelectionDown(curSelection, true);
           break;
         }
-        case KeyboardListener.KEY_LEFT: {
+        case HasKeyCodes.KEY_LEFT: {
           maybeCollapseTreeItem();
           break;
         }
-        case KeyboardListener.KEY_RIGHT: {
+        case HasKeyCodes.KEY_RIGHT: {
           maybeExpandTreeItem();
           break;
         }
@@ -1119,7 +1119,6 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
     if (curSelection != null) {
       curSelection.setSelected(false);
     }
-
     curSelection = item;
 
     if (moveFocus && curSelection != null) {
@@ -1127,8 +1126,8 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
 
       // Select the item and fire the selection event.
       curSelection.setSelected(true);
-      if (fireEvents && (listeners != null)) {
-        listeners.fireItemSelected(curSelection);
+      if (fireEvents) {
+        SelectionEvent.fire(this, curSelection);
       }
     }
   }

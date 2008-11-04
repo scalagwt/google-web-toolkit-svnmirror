@@ -26,6 +26,7 @@ public interface FiresSuggestionEvents {
    * 
    * @param handler the handler to add
    */
+  @Deprecated
   void addEventHandler(SuggestionHandler handler);
 
   /**
@@ -33,5 +34,6 @@ public interface FiresSuggestionEvents {
    * 
    * @param handler the handler to remove.
    */
+  @Deprecated
   void removeEventHandler(SuggestionHandler handler);
 }

@@ -16,6 +16,8 @@
 
 package com.google.gwt.user.client.ui;
 
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.DomEvent;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Event;
@@ -53,42 +55,42 @@ import com.google.gwt.user.client.Event;
  * 
  * <tr>
  * <td>up</td>
- * <td> {@link #getUpFace()} </td>
+ * <td> {@link #getUpFace()}</td>
  * <td>face shown when button is up</td>
- * <td> none</td>
+ * <td>none</td>
  * </tr>
  * 
  * <tr>
  * <td>down</td>
- * <td> {@link #getDownFace()} </td>
+ * <td> {@link #getDownFace()}</td>
  * <td>face shown when button is down</td>
- * <td> up </td>
+ * <td>up</td>
  * </tr>
  * 
  * <tr>
  * <td>up-hovering</td>
- * <td> {@link #getUpHoveringFace()} </td>
+ * <td> {@link #getUpHoveringFace()}</td>
  * <td>face shown when button is up and hovering</td>
- * <td> up </td>
+ * <td>up</td>
  * </tr>
  * 
  * <tr>
  * <td>up-disabled</td>
- * <td> {@link #getUpDisabledFace()} </td>
+ * <td> {@link #getUpDisabledFace()}</td>
  * <td>face shown when button is up and disabled</td>
- * <td> up</td>
+ * <td>up</td>
  * </tr>
  * 
  * <tr>
  * <td>down-hovering</td>
- * <td> {@link #getDownHoveringFace()} </td>
+ * <td> {@link #getDownHoveringFace()}</td>
  * <td>face shown when button is down and hovering</td>
- * <td> down</td>
+ * <td>down</td>
  * </tr>
  * 
  * <tr>
  * <td>down-disabled</td>
- * <td> {@link #getDownDisabledFace()} </td>
+ * <td> {@link #getDownDisabledFace()}</td>
  * <td>face shown when button is down and disabled</td>
  * <td>down</td>
  * </tr>
@@ -107,8 +109,8 @@ public abstract class CustomButton extends ButtonBase {
     private Element face;
 
     /**
-     * Constructor for <code>Face</code>. Creates a new face that delegates
-     * to the supplied face.
+     * Constructor for <code>Face</code>. Creates a new face that delegates to
+     * the supplied face.
      * 
      * @param delegateTo default content provider
      */
@@ -185,8 +187,8 @@ public abstract class CustomButton extends ButtonBase {
     /**
      * Get the name of the face. This property is also used as a modifier on the
      * <code>CustomButton</code> style. <p/> For instance, if the
-     * <code>CustomButton</code> style is "gwt-PushButton" and the face name
-     * is "up", then the CSS class name will be "gwt-PushButton-up".
+     * <code>CustomButton</code> style is "gwt-PushButton" and the face name is
+     * "up", then the CSS class name will be "gwt-PushButton-up".
      * 
      * @return the face's name
      */
@@ -327,6 +329,29 @@ public abstract class CustomButton extends ButtonBase {
    * Constructor for <code>CustomButton</code>.
    * 
    * @param upImage image for the default (up) face of the button
+   * @param handler the click handler
+   */
+  public CustomButton(Image upImage, ClickHandler handler) {
+    this(upImage);
+    addClickHandler(handler);
+  }
+
+  /**
+   * Constructor for <code>CustomButton</code>.
+   * 
+   * @param upImage image for the default (up) face of the button
+   * @param listener the click listener
+   */
+  @Deprecated
+  public CustomButton(Image upImage, ClickListener listener) {
+    this(upImage);
+    addClickListener(listener);
+  }
+
+  /**
+   * Constructor for <code>CustomButton</code>.
+   * 
+   * @param upImage image for the default (up) face of the button
    * @param downImage image for the down face of the button
    */
   public CustomButton(Image upImage, Image downImage) {
@@ -339,10 +364,10 @@ public abstract class CustomButton extends ButtonBase {
    * 
    * @param upImage image for the default (up) face of the button
    * @param downImage image for the down face of the button
-   * @param listener clickListener
+   * @param handler clickListener
    */
-  public CustomButton(Image upImage, Image downImage, ClickListener listener) {
-    this(upImage, listener);
+  public CustomButton(Image upImage, Image downImage, ClickHandler handler) {
+    this(upImage, handler);
     getDownFace().setImage(downImage);
   }
 
@@ -350,11 +375,13 @@ public abstract class CustomButton extends ButtonBase {
    * Constructor for <code>CustomButton</code>.
    * 
    * @param upImage image for the default (up) face of the button
-   * @param listener the click listener
+   * @param downImage image for the down face of the button
+   * @param listener clickListener
    */
-  public CustomButton(Image upImage, ClickListener listener) {
-    this(upImage);
-    addClickListener(listener);
+  @Deprecated
+  public CustomButton(Image upImage, Image downImage, ClickListener listener) {
+    this(upImage, listener);
+    getDownFace().setImage(downImage);
   }
 
   /**
@@ -371,8 +398,20 @@ public abstract class CustomButton extends ButtonBase {
    * Constructor for <code>CustomButton</code>.
    * 
    * @param upText the text for the default (up) face of the button
+   * @param handler the click handler
+   */
+  public CustomButton(String upText, ClickHandler handler) {
+    this(upText);
+    addClickHandler(handler);
+  }
+
+  /**
+   * Constructor for <code>CustomButton</code>.
+   * 
+   * @param upText the text for the default (up) face of the button
    * @param listener the click listener
    */
+  @Deprecated
   public CustomButton(String upText, ClickListener listener) {
     this(upText);
     addClickListener(listener);
@@ -394,8 +433,21 @@ public abstract class CustomButton extends ButtonBase {
    * 
    * @param upText the text for the default (up) face of the button
    * @param downText the text for the down face of the button
+   * @param handler the click handler
+   */
+  public CustomButton(String upText, String downText, ClickHandler handler) {
+    this(upText, downText);
+    addClickHandler(handler);
+  }
+
+  /**
+   * Constructor for <code>CustomButton</code>.
+   * 
+   * @param upText the text for the default (up) face of the button
+   * @param downText the text for the down face of the button
    * @param listener the click listener
    */
+  @Deprecated
   public CustomButton(String upText, String downText, ClickListener listener) {
     this(upText, downText);
     addClickListener(listener);
@@ -408,7 +460,8 @@ public abstract class CustomButton extends ButtonBase {
     // Use FocusPanel.impl rather than FocusWidget because only FocusPanel.impl
     // works across browsers to create a focusable element.
     super(FocusPanel.impl.createFocusable());
-    sinkEvents(Event.ONCLICK | Event.MOUSEEVENTS | Event.FOCUSEVENTS | Event.KEYEVENTS);
+    sinkEvents(Event.ONCLICK | Event.MOUSEEVENTS | Event.FOCUSEVENTS
+        | Event.KEYEVENTS);
     setUpFace(createFace(null, "up", UP));
     setStyleName(STYLENAME_DEFAULT);
 
@@ -549,8 +602,8 @@ public abstract class CustomButton extends ButtonBase {
         break;
       case Event.ONMOUSEOUT:
         Element to = DOM.eventGetToElement(event);
-        if (DOM.isOrHasChild(getElement(), DOM.eventGetTarget(event)) &&
-            (to == null || !DOM.isOrHasChild(getElement(), to))) {
+        if (DOM.isOrHasChild(getElement(), DOM.eventGetTarget(event))
+            && (to == null || !DOM.isOrHasChild(getElement(), to))) {
           if (isCapturing) {
             onClickCancel();
           }
@@ -692,7 +745,7 @@ public abstract class CustomButton extends ButtonBase {
    * widget display.
    */
   protected void onClick() {
-    fireClickListeners();
+    fireClickListeners(null);
   }
 
   /**
@@ -710,8 +763,8 @@ public abstract class CustomButton extends ButtonBase {
    * subclasses should also override {@link #onClick()} and
    * {@link #onClickCancel()} to restore normal visual state. Each
    * <code>onClickStart</code> will eventually be followed by either
-   * <code>onClick</code> or <code>onClickCancel</code>, depending on
-   * whether the click is completed.
+   * <code>onClick</code> or <code>onClickCancel</code>, depending on whether
+   * the click is completed.
    */
   protected void onClickStart() {
   }
@@ -741,6 +794,10 @@ public abstract class CustomButton extends ButtonBase {
     if (curFace == null) {
       setCurrentFace(getUpFace());
     }
+  }
+
+  void fireClickListeners(Event nativeEvent) {
+    DomEvent.unsafeFireNativeEvent(Event.ONCLICK, getHandlers());
   }
 
   /**

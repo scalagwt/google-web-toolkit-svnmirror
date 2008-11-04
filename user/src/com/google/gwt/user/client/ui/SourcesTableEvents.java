@@ -26,6 +26,7 @@ public interface SourcesTableEvents {
    * 
    * @param listener the listener interface to add
    */
+  @Deprecated
   void addTableListener(TableListener listener);
 
   /**
@@ -33,5 +34,6 @@ public interface SourcesTableEvents {
    * 
    * @param listener the listener interface to remove
    */
+  @Deprecated
   void removeTableListener(TableListener listener);
 }

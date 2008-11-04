@@ -15,6 +15,12 @@
  */
 package com.google.gwt.user.client.ui;
 
+import com.google.gwt.event.dom.client.DomEvent;
+import com.google.gwt.event.logical.shared.HasHandlers;
+import com.google.gwt.event.shared.AbstractEvent;
+import com.google.gwt.event.shared.EventHandler;
+import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
@@ -24,11 +30,26 @@ import com.google.gwt.user.client.EventListener;
  * support for receiving events from the browser and being added directly to
  * {@link com.google.gwt.user.client.ui.Panel panels}.
  */
-public class Widget extends UIObject implements EventListener {
-
+public class Widget extends UIObject implements EventListener, HasHandlers {
+  /**
+   * A bit-map of the events that should be sunk when the widget is attached to
+   * the DOM. We delay the sinking of events to improve startup performance.
+   */
+  int eventsToSink;
   private boolean attached;
+
   private Object layoutData;
   private Widget parent;
+  private final HandlerManager handlerManager = new HandlerManager(this);
+
+  /**
+   * Returns this widget's {@link HandlerManager} used for event management.
+   * 
+   * @return the handler manager
+   */
+  public final HandlerManager getHandlers() {
+    return handlerManager;
+  }
 
   /**
    * Gets this widget's parent panel.
@@ -50,7 +71,20 @@ public class Widget extends UIObject implements EventListener {
     return attached;
   }
 
-  public void onBrowserEvent(Event event) {
+  /**
+   * Is the given event handled by this widget?
+   * 
+   * @param type the event type
+   * @return is it handled?
+   */
+  public boolean isEventHandled(AbstractEvent.Type<?> type) {
+    return handlerManager != null && handlerManager.isEventHandled(type);
+  }
+
+  public void onBrowserEvent(Event nativeEvent) {
+    if (handlerManager != null) {
+      DomEvent.fireNativeEvent(nativeEvent, handlerManager);
+    }
   }
 
   /**
@@ -69,6 +103,53 @@ public class Widget extends UIObject implements EventListener {
     }
   }
 
+  @Override
+  public void sinkEvents(int eventBitsToAdd) {
+    if (isOrWasAttached()) {
+      super.sinkEvents(eventBitsToAdd);
+    } else {
+      eventsToSink |= eventBitsToAdd;
+    }
+  }
+
+  /**
+   * Adds a native event handler to the widget and sinks the corresponding
+   * native event. If you do not want to sink the native event, use the generic
+   * addHandler method instead.
+   * 
+   * @param <H> the type of handler to add
+   * @param type the event key
+   * @param handler the handler
+   * @return {@link HandlerRegistration} used to remove the handler
+   */
+  protected final <H extends EventHandler> HandlerRegistration addDomHandler(
+      final H handler, DomEvent.Type<H> type) {
+    if (type != null) {
+      // Manual inlink sinkEvents.
+      int eventBitsToAdd = type.getNativeEventTypeInt();
+      if (isOrWasAttached()) {
+        super.sinkEvents(eventBitsToAdd);
+      } else {
+        eventsToSink |= eventBitsToAdd;
+      }
+    }
+    return handlerManager.addHandler(type, handler);
+  }
+
+  /**
+   * Adds this handler to the widget.
+   * 
+   * @param <H> the type of handler to add
+   * @param type the event type
+   * @param handler the handler
+   * @return {@link HandlerRegistration} used to remove the handler
+   */
+  protected final <H extends EventHandler> HandlerRegistration addHandler(
+      final H handler, AbstractEvent.Type<H> type) {
+    return handlerManager.addHandler(type, handler);
+  }
+ 
+
   /**
    * If a widget implements HasWidgets, it must override this method and call
    * onAttach() for each of its child widgets.
@@ -85,6 +166,18 @@ public class Widget extends UIObject implements EventListener {
    * @see Panel#onDetach()
    */
   protected void doDetachChildren() {
+  }
+
+  /**
+   * Fires an event. Usually used when passing an event from one source to
+   * another.
+   * 
+   * @param event the event
+   */
+  protected void fireEvent(AbstractEvent<?> event) {
+    if (handlerManager != null) {
+      handlerManager.fireEvent(event);
+    }
   }
 
   /**
@@ -107,7 +200,15 @@ public class Widget extends UIObject implements EventListener {
     }
 
     attached = true;
+
+    // Event hookup code
     DOM.setEventListener(getElement(), this);
+
+    int bitsToAdd = eventsToSink;
+    eventsToSink = -1;
+    if (bitsToAdd > 0) {
+      sinkEvents(bitsToAdd);
+    }
     doAttachChildren();
 
     // onLoad() gets called only *after* all of the children are attached and
@@ -164,6 +265,24 @@ public class Widget extends UIObject implements EventListener {
   }
 
   /**
+   * Removes the given handler from the specified event key. Normally,
+   * applications should call {@link HandlerRegistration#removeHandler()}
+   * instead. This method is provided primary to support the deprecated
+   * listeners api.
+   * 
+   * @param <H> handler type
+   * 
+   * @param key the event key
+   * @param handler the handler
+   */
+  protected <H extends EventHandler> void removeHandler(
+      AbstractEvent.Type<H> key, final H handler) {
+    if (handlerManager != null) {
+      handlerManager.removeHandler(key, handler);
+    }
+  }
+
+  /**
    * Gets the panel-defined layout data associated with this widget.
    * 
    * @return the widget's layout data
@@ -171,6 +290,15 @@ public class Widget extends UIObject implements EventListener {
    */
   Object getLayoutData() {
     return layoutData;
+  }
+
+  /**
+   * Has this widget ever been attached?
+   * 
+   * @return has this widget been attached
+   */
+  final boolean isOrWasAttached() {
+    return eventsToSink == -1;
   }
 
   @Override

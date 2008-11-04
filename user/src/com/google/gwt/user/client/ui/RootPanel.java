@@ -15,23 +15,21 @@
  */
 package com.google.gwt.user.client.ui;
 
+import com.google.gwt.core.client.impl.RawJsMapImpl;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.i18n.client.BidiUtils;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.WindowCloseListener;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * The panel to which all other widgets must ultimately be added. RootPanels are
- * never created directly. Rather, they are accessed via {@link RootPanel#get()}.
+ * never created directly. Rather, they are accessed via {@link RootPanel#get()}
+ * .
  * 
  * <p>
  * Most applications will add widgets to the default root panel in their
@@ -60,21 +58,22 @@ public class RootPanel extends AbsolutePanel {
     }
   }
 
-  private static Map<String, RootPanel> rootPanels = new HashMap<String, RootPanel>();
-  private static Set<Widget> widgetsToDetach = new HashSet<Widget>();
+  private static RawJsMapImpl<RootPanel> rootPanels = new RawJsMapImpl<RootPanel>();
+  private static boolean hooked;
+  private static WidgetCollection widgetsToDetach = new WidgetCollection(null);
 
   /**
    * Marks a widget as detached and removes it from the detach list.
    * 
    * If an element belonging to a widget originally passed to
-   * {@link #detachOnWindowClose(Widget)} has been removed from the document, calling
-   * this method will cause it to be marked as detached immediately. Failure to
-   * do so will keep the widget from being garbage collected until the page is
-   * unloaded.
+   * {@link #detachOnWindowClose(Widget)} has been removed from the document,
+   * calling this method will cause it to be marked as detached immediately.
+   * Failure to do so will keep the widget from being garbage collected until
+   * the page is unloaded.
    * 
    * This method may only be called per widget, and only for widgets that were
-   * originally passed to {@link #detachOnWindowClose(Widget)}. Any widget in the
-   * detach list, whose element is no longer in the document when the page
+   * originally passed to {@link #detachOnWindowClose(Widget)}. Any widget in
+   * the detach list, whose element is no longer in the document when the page
    * unloads, will cause an assertion error.
    * 
    * @param widget the widget that no longer needs to be cleaned up when the
@@ -88,7 +87,7 @@ public class RootPanel extends AbsolutePanel {
         + "not currently in the detach list";
 
     widget.onDetach();
-    widgetsToDetach.remove(widget);
+    widgetsToDetach.add(widget);
   }
 
   /**
@@ -134,7 +133,7 @@ public class RootPanel extends AbsolutePanel {
    */
   public static RootPanel get(String id) {
     // See if this RootPanel is already created.
-    RootPanel rp = rootPanels.get(id);
+    RootPanel rp = rootPanels.safeGet(id);
     if (rp != null) {
       return rp;
     }
@@ -150,7 +149,8 @@ public class RootPanel extends AbsolutePanel {
     // Note that the code in this if block only happens once -
     // on the first RootPanel.get(String) or RootPanel.get()
     // call.
-    if (rootPanels.size() == 0) {
+    if (hooked == false) {
+      hooked = true;
       hookWindowClosing();
 
       // If we're in a RTL locale, set the RTL directionality
@@ -170,7 +170,7 @@ public class RootPanel extends AbsolutePanel {
       rp = new RootPanel(elem);
     }
 
-    rootPanels.put(id, rp);
+    rootPanels.safePut(id, rp);
     detachOnWindowClose(rp);
     return rp;
   }
@@ -216,13 +216,9 @@ public class RootPanel extends AbsolutePanel {
 
   private static void hookWindowClosing() {
     // Catch the window closing event.
-    Window.addWindowCloseListener(new WindowCloseListener() {
-      public void onWindowClosed() {
+    Window.addCloseHandler(new CloseHandler<Window>() {
+      public void onClose(CloseEvent<Window> closeEvent) {
         detachWidgets();
-      }
-
-      public String onWindowClosing() {
-        return null;
       }
     });
   }

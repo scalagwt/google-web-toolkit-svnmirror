@@ -26,6 +26,7 @@ import java.util.Date;
  * Test the same things as I18NTest but with a different module which
  * uses different locales.
  */
+@SuppressWarnings("deprecation")
 public class I18N2Test extends GWTTestCase {
   @Override
   public String getModuleName() {

@@ -26,6 +26,7 @@ public interface SourcesTreeEvents {
    * 
    * @param listener the listener interface to add
    */
+  @Deprecated
   void addTreeListener(TreeListener listener);
 
   /**
@@ -33,5 +34,6 @@ public interface SourcesTreeEvents {
    * 
    * @param listener the listener interface to remove
    */
+  @Deprecated
   void removeTreeListener(TreeListener listener);
 }
