@@ -15,8 +15,6 @@
  */
 package com.google.gwt.sample.mail.client;
 
-import com.google.gwt.event.dom.client.CellClickEvent;
-import com.google.gwt.event.dom.client.CellClickHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Composite;
@@ -27,8 +25,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 /**
  * A composite that displays a list of emails that can be selected.
  */
-public class MailList extends Composite implements CellClickHandler,
-    ClickHandler {
+public class MailList extends Composite implements ClickHandler {
 
   private static final int VISIBLE_EMAIL_COUNT = 10;
 
@@ -70,14 +67,6 @@ public class MailList extends Composite implements CellClickHandler,
     update();
   }
 
-  public void onCellClick(CellClickEvent event) {
-    // Select the row that was clicked (-1 to account for header row).
-    int row = event.getRowIndex();
-    if (row > 0) {
-      selectRow(row - 1);
-    }
-  }
-
   public void onClick(ClickEvent event) {
     Object sender = event.getSource();
     if (sender == olderButton) {
@@ -99,6 +88,12 @@ public class MailList extends Composite implements CellClickHandler,
         styleRow(selectedRow, false);
         selectedRow = -1;
         update();
+      }
+    } else if (sender == table) {
+      // Select the row that was clicked (-1 to account for header row).
+      int row = table.getCellForEvent(event).getRowIndex();
+      if (row > 0) {
+        selectRow(row - 1);
       }
     }
   }
