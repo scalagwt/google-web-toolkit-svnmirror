@@ -22,6 +22,7 @@ import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.dom.client.HasAllFocusHandlers;
 import com.google.gwt.event.dom.client.HasAllKeyHandlers;
+import com.google.gwt.event.dom.client.HasAllMouseHandlers;
 import com.google.gwt.event.dom.client.HasKeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
@@ -29,6 +30,18 @@ import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.event.dom.client.MouseDownEvent;
+import com.google.gwt.event.dom.client.MouseDownHandler;
+import com.google.gwt.event.dom.client.MouseMoveEvent;
+import com.google.gwt.event.dom.client.MouseMoveHandler;
+import com.google.gwt.event.dom.client.MouseOutEvent;
+import com.google.gwt.event.dom.client.MouseOutHandler;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseOverHandler;
+import com.google.gwt.event.dom.client.MouseUpEvent;
+import com.google.gwt.event.dom.client.MouseUpHandler;
+import com.google.gwt.event.dom.client.MouseWheelEvent;
+import com.google.gwt.event.dom.client.MouseWheelHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.logical.shared.HasCloseHandlers;
@@ -69,7 +82,7 @@ import java.util.Map;
 public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
     HasFocus, HasAnimation, HasAllKeyHandlers, HasAllFocusHandlers,
     HasSelectionHandlers<TreeItem>, HasOpenHandlers<TreeItem>,
-    HasCloseHandlers<TreeItem> {
+    HasCloseHandlers<TreeItem>, SourcesMouseEvents, HasAllMouseHandlers {
 
   /**
    * Provides images to support the the deprecated case where a url prefix is
@@ -338,6 +351,35 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
     return addDomHandler(handler, KeyUpEvent.getType());
   }
 
+  public HandlerRegistration addMouseDownHandler(MouseDownHandler handler) {
+    return addHandler(handler,MouseDownEvent.getType());
+  }
+
+  @Deprecated
+  public void addMouseListener(MouseListener listener) {
+    L.Mouse.add(this, listener);
+  }
+
+  public HandlerRegistration addMouseMoveHandler(MouseMoveHandler handler) {
+    return addDomHandler(handler,MouseMoveEvent.getType());
+  }
+
+  public HandlerRegistration addMouseOutHandler(MouseOutHandler handler) {
+    return addDomHandler(handler,MouseOutEvent.getType());
+  }
+
+  public HandlerRegistration addMouseOverHandler(MouseOverHandler handler) {
+    return addDomHandler(handler,MouseOverEvent.getType());
+  }
+
+  public HandlerRegistration addMouseUpHandler(MouseUpHandler handler) {
+    return addDomHandler(handler,MouseUpEvent.getType());
+  }
+
+  public HandlerRegistration addMouseWheelHandler(MouseWheelHandler handler) {
+    return addDomHandler(handler,MouseWheelEvent.getType());
+  }
+
   public final HandlerRegistration addOpenHandler(OpenHandler<TreeItem> handler) {
     return addHandler(handler, OpenEvent.getType());
   }
@@ -571,6 +613,11 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
   @Deprecated
   public void removeKeyboardListener(KeyboardListener listener) {
     L.Keyboard.remove(this, listener);
+  }
+
+  @Deprecated
+  public void removeMouseListener(MouseListener listener) {
+    L.Mouse.remove(this, listener);
   }
 
   @Deprecated
