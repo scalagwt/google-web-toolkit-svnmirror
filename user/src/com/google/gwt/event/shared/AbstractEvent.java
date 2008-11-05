@@ -131,7 +131,7 @@ public abstract class AbstractEvent<H extends EventHandler> {
    * 
    * @return whether the event is live
    */
-  protected boolean isLive() {
+  protected final boolean isLive() {
     return !dead;
   }
 

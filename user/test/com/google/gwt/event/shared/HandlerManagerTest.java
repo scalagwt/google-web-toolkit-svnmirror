@@ -151,11 +151,21 @@ public class HandlerManagerTest extends HandlerTestBase {
       public void onMouseDown(MouseDownEvent event) {
         add(this);
       }
+
+      @Override
+      public String toString() {
+        return "two";
+      }
     };
     MouseDownHandler one = new MouseDownHandler() {
       public void onMouseDown(MouseDownEvent event) {
         manager.addHandler(MouseDownEvent.getType(), two).removeHandler();
         add(this);
+      }
+
+      @Override
+      public String toString() {
+        return "one";
       }
     };
     manager.addHandler(MouseDownEvent.getType(), one);

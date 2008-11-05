@@ -42,24 +42,34 @@ class JsHandlerRegistry extends JavaScriptObject {
   protected JsHandlerRegistry() {
   }
 
-  public final <H extends EventHandler> void addHandler(
-      AbstractEvent.Type<H> type, H handler) {
-    if (type != null) {
-      // The base is the equivalent to a c pointer into the flattened handler
-      // data
-      // structure.
-      int base = type.hashCode();
-      int count = getCount(base);
+  public final <H extends EventHandler> void addHandler(HandlerManager manager,
+      Type<H> type, H myHandler) {
 
-      // If we already have the maximum number of handlers we can store in the
-      // flattened data structure, store the handlers in an external list
-      // instead.
-      if (count == HandlerManager.EXPECTED_HANDLERS && isFlattened(base)) {
-        unflatten(base);
+    // The base is the equivalent to a c pointer into the flattened handler
+    // data structure.
+    int base = type.hashCode();
+    int count = getCount(base);
+    boolean flattened = isFlattened(base);
+    H handler = myHandler;
+    // If we already have the maximum number of handlers we can store in the
+    // flattened data structure, store the handlers in an external list
+    // instead.
+    if ((count == HandlerManager.EXPECTED_HANDLERS) & flattened) {
+      // As long as we are only adding to the end of a a handler list, should
+      // not need to queue.
+      if (manager.firingDepth > 0) {
+        manager.enqueueAdd(type, myHandler);
+        return;
       }
-      setHandler(base, count, handler, isFlattened(base));
-      setCount(base, count + 1);
+      unflatten(base);
+      flattened = false;
     }
+    if (flattened) {
+      setFlatHandler(base, count, handler);
+    } else {
+      setHandler(base, count, handler);
+    }
+    setCount(base, count + 1);
   }
 
   public final <T> void clearHandlers(Type<T> type) {
@@ -81,13 +91,22 @@ class JsHandlerRegistry extends JavaScriptObject {
     int base = type.hashCode();
     int count = getCount(base);
     boolean isFlattened = isFlattened(base);
+    if (isFlattened) {
+      for (int i = 0; i < count; i++) {
+        // Gets the given handler to fire.
+        H handler = (H) getFlatHandler(base, i);
+        // Fires the handler.
+        event.dispatch(handler);
+      }
+    } else {
+      JavaScriptObject handlers = getHandlers(base);
+      for (int i = 0; i < count; i++) {
+        // Gets the given handler to fire.
+        H handler = (H) getHandler(handlers, i);
 
-    for (int i = 0; i < count; i++) {
-      // Gets the given handler to fire.
-      H handler = (H) getHandler(base, i, isFlattened);
-
-      // Fires the handler.
-      event.dispatch(handler);
+        // Fires the handler.
+        event.dispatch(handler);
+      }
     }
   }
 
@@ -123,19 +142,9 @@ class JsHandlerRegistry extends JavaScriptObject {
     assert result : handler + " did not exist";
   }
 
-  final native boolean addHandler(int base, EventHandler handler) /*-{
-    var count = this[base];
-    var myHandler = handler;
-    count = count ? count : 0;
-    var flattened = (this[base + 1] == null);
-    if (flattened){
-      if(count == @com.google.gwt.event.shared.HandlerManager::EXPECTED_HANDLERS) return true;
-      this[base + 2 + count] = myHandler;
-    } else {
-      this[base + 1][count] = myHandler;
-    }
-    this[base] = count + 1;
-    return false;
+  final native int getCount(int index) /*-{
+    var count = this[index];
+    return count == null? 0:count;
   }-*/;
 
   final native void unflatten(int base) /*-{
@@ -149,13 +158,20 @@ class JsHandlerRegistry extends JavaScriptObject {
      this[base + 1] = handlerList;
   }-*/;
 
-  private native int getCount(int index) /*-{
-    var count = this[index];
-    return count == null? 0:count;
+  private native EventHandler getFlatHandler(int base, int index) /*-{
+    return this[base + 2 + index];
   }-*/;
 
   private native EventHandler getHandler(int base, int index, boolean flattened) /*-{
     return flattened? this[base + 2 + index]: this[base + 1][index];
+  }-*/;
+
+  private native EventHandler getHandler(JavaScriptObject handlers, int index) /*-{
+    return handlers[index];
+  }-*/;
+
+  private native JavaScriptObject getHandlers(int base) /*-{
+    return  this[base + 1];
   }-*/;
 
   private native boolean isFlattened(int base) /*-{
@@ -189,6 +205,14 @@ class JsHandlerRegistry extends JavaScriptObject {
 
   private native void setCount(int index, int count) /*-{
     this[index] = count;
+  }-*/;
+
+  private native void setFlatHandler(int base, int index, EventHandler handler) /*-{
+    this[base + 2 + index] = handler;
+  }-*/;
+
+  private native void setHandler(int base, int index, EventHandler handler) /*-{
+    this[base + 1][index] = handler;
   }-*/;
 
   private native void setHandler(int base, int index, EventHandler handler,

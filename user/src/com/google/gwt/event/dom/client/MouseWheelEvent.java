@@ -26,8 +26,7 @@ public class MouseWheelEvent extends MouseEvent<MouseWheelHandler> {
    * Event type for mouse wheel events. Represents the meta-data associated with
    * this event.
    */
-  private static Type<MouseWheelHandler> TYPE = new Type<MouseWheelHandler>(
-      Event.ONMOUSEWHEEL, "mousewheel", new MouseWheelEvent());
+  private static Type<MouseWheelHandler> TYPE;
 
   /**
    * Ensures the existence of the handler TYPE, so the system knows to start
@@ -36,6 +35,11 @@ public class MouseWheelEvent extends MouseEvent<MouseWheelHandler> {
    * @return the handler TYPE
    */
   public static Type<MouseWheelHandler> getType() {
+    if (TYPE == null) {
+      String[] events = {"mousewheel", "DOMMouseScroll"};
+      TYPE = new Type<MouseWheelHandler>(Event.ONMOUSEWHEEL, events,
+          new MouseWheelEvent());
+    }
     return TYPE;
   }
 

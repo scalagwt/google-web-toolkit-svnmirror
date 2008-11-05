@@ -15,7 +15,7 @@
  */
 package com.google.gwt.event.dom.client;
 
-import com.google.gwt.core.client.impl.RawJsMapImpl; 
+import com.google.gwt.core.client.impl.RawJsMapImpl;
 import com.google.gwt.event.shared.AbstractEvent;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.HandlerManager;
@@ -50,17 +50,40 @@ public abstract class DomEvent<H extends EventHandler> extends AbstractEvent<H> 
       this.nativeEventTypeInt = nativeEventTypeInt;
     }
 
-    Type(int nativeEventTypeInt, String nativeEventTypeString,
+    /**
+     * This is a highly dangerous method that allows dom event types to be
+     * triggered by the {@link DomEvent#fireNativeEvent(Event, HandlerManager)}
+     * method. It should only be used by implementors supporting new dom events.
+     * <p>
+     * Any such dom event type must act as a flyweight around a native event
+     * object.
+     * </p>
+     * 
+     * 
+     * @param nativeEventTypeInt the integer value used by sink events to set up
+     *          event handling for this dom type
+     * @param eventName the raw js event name
+     * @param cached the cached object instance that will be used as a flyweight
+     *          to wrap a native event
+     */
+    protected Type(int nativeEventTypeInt, String eventName,
         DomEvent<HandlerType> cached) {
       this.cached = cached;
       // All clinit activity should take place here for DomEvent.
-      if (registered == null) {
-        registered = new RawJsMapImpl<Type<?>>();
-        reverseRegistered = new RawJsMapImpl<Type<?>>();
-      }
       this.nativeEventTypeInt = nativeEventTypeInt;
-      registered.put(nativeEventTypeString, this);
+      if (registered == null) {
+        init();
+      }
+      registered.put(eventName, this);
       reverseRegistered.put(nativeEventTypeInt + "", this);
+    }
+
+    Type(int nativeEventTypeInt, String[] eventNames,
+        DomEvent<HandlerType> cached) {
+      this(nativeEventTypeInt, eventNames[0], cached);
+      for (int i = 1; i < eventNames.length; i++) {
+        registered.put(eventNames[i], this);
+      }
     }
 
     /**
@@ -85,10 +108,15 @@ public abstract class DomEvent<H extends EventHandler> extends AbstractEvent<H> 
    * @param manager the event manager
    */
   public static void fireNativeEvent(Event nativeEvent, HandlerManager manager) {
-    if (registered != null) {
-      final DomEvent.Type<?> typeKey = registered.get(nativeEvent.getType());
-      if (typeKey != null) {
-        fire(nativeEvent, manager, typeKey);
+    final DomEvent.Type<?> typeKey = registered.get(nativeEvent.getType());
+    if (typeKey != null) {
+      if (manager != null) {
+        // Store and restore native event just in case we are in recursive
+        // loop.
+        Event currentNative = typeKey.cached.nativeEvent;
+        typeKey.cached.setNativeEvent(nativeEvent);
+        manager.fireEvent(typeKey.cached);
+        typeKey.cached.setNativeEvent(currentNative);
       }
     }
   }
@@ -103,35 +131,38 @@ public abstract class DomEvent<H extends EventHandler> extends AbstractEvent<H> 
    * the compiler to avoid instantiating event types that are never handlers.
    * </p>
    * 
+   * @deprecated should go away after triggering of native events is introduced
    * @param eventType the GWT event type representing the type of the native
    *          event.
    * @param handlers the handler manager containing the handlers
    */
-  public static void unsafeFireNativeEvent(int eventType, HandlerManager handlers) {
+  public static void unsafeFireNativeEvent(int eventType,
+      HandlerManager handlers) {
     if (registered != null) {
       final DomEvent.Type<?> typeKey = reverseRegistered.get(eventType + "");
       if (typeKey != null) {
-        fire(null, handlers, typeKey);
+        if (handlers != null) {
+          // Store and restore native event just in case we are in recursive
+          // loop.
+          Event currentNative = null;
+          if (typeKey.cached.isLive()) {
+            currentNative = typeKey.cached.nativeEvent;
+          }
+          typeKey.cached.setNativeEvent(null);
+          handlers.fireEvent(typeKey.cached);
+          if (currentNative != null) {
+            typeKey.cached.setNativeEvent(currentNative);
+          }
+        }
       }
     }
   }
 
-  private static void fire(Event nativeEvent, HandlerManager manager,
-      DomEvent.Type<?> typeKey) {
-    if (manager == null) {
-      return;
-    }
-    // Store and restore native event just in case we are in recursive
-    // loop.
-    Event currentNative = null;
-    if (typeKey.cached.isLive()) {
-      currentNative = typeKey.cached.nativeEvent;
-    }
-    typeKey.cached.setNativeEvent(nativeEvent);
-    manager.fireEvent(typeKey.cached);
-    if (currentNative != null) {
-      typeKey.cached.setNativeEvent(currentNative);
-    }
+  // This method can go away once we have eager clinits.
+  static void init() {
+    registered = new RawJsMapImpl<Type<?>>();
+    reverseRegistered = new RawJsMapImpl<Type<?>>();
+    // At the cost of a bit extra constanct
   }
 
   private Event nativeEvent;
@@ -160,7 +191,7 @@ public abstract class DomEvent<H extends EventHandler> extends AbstractEvent<H> 
    * 
    * @param nativeEvent the native event
    */
-  public void setNativeEvent(Event nativeEvent) {
+  public final void setNativeEvent(Event nativeEvent) {
     this.nativeEvent = nativeEvent;
   }
 

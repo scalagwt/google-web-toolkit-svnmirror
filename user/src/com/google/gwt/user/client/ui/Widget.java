@@ -40,7 +40,7 @@ public class Widget extends UIObject implements EventListener, HasHandlers {
 
   private Object layoutData;
   private Widget parent;
-  private final HandlerManager handlerManager = new HandlerManager(this);
+  private HandlerManager handlerManager;
 
   /**
    * Returns this widget's {@link HandlerManager} used for event management.
@@ -78,13 +78,11 @@ public class Widget extends UIObject implements EventListener, HasHandlers {
    * @return is it handled?
    */
   public boolean isEventHandled(AbstractEvent.Type<?> type) {
-    return handlerManager != null && handlerManager.isEventHandled(type);
+    return handlerManager == null || handlerManager.isEventHandled(type);
   }
 
   public void onBrowserEvent(Event nativeEvent) {
-    if (handlerManager != null) {
-      DomEvent.fireNativeEvent(nativeEvent, handlerManager);
-    }
+    DomEvent.fireNativeEvent(nativeEvent, handlerManager);
   }
 
   /**
@@ -125,7 +123,7 @@ public class Widget extends UIObject implements EventListener, HasHandlers {
   protected final <H extends EventHandler> HandlerRegistration addDomHandler(
       final H handler, DomEvent.Type<H> type) {
     if (type != null) {
-      // Manual inlink sinkEvents.
+      // Manual inline sinkEvents.
       int eventBitsToAdd = type.getNativeEventTypeInt();
       if (isOrWasAttached()) {
         super.sinkEvents(eventBitsToAdd);
@@ -133,7 +131,7 @@ public class Widget extends UIObject implements EventListener, HasHandlers {
         eventsToSink |= eventBitsToAdd;
       }
     }
-    return handlerManager.addHandler(type, handler);
+    return ensureHandlers().addHandler(type, handler);
   }
 
   /**
@@ -146,9 +144,8 @@ public class Widget extends UIObject implements EventListener, HasHandlers {
    */
   protected final <H extends EventHandler> HandlerRegistration addHandler(
       final H handler, AbstractEvent.Type<H> type) {
-    return handlerManager.addHandler(type, handler);
+    return ensureHandlers().addHandler(type, handler);
   }
- 
 
   /**
    * If a widget implements HasWidgets, it must override this method and call
@@ -166,6 +163,16 @@ public class Widget extends UIObject implements EventListener, HasHandlers {
    * @see Panel#onDetach()
    */
   protected void doDetachChildren() {
+  }
+
+  /**
+   * Ensures the existence of the handler manager.
+   * 
+   * @return the handler manager
+   * */
+  protected HandlerManager ensureHandlers() {
+    return handlerManager == null ? handlerManager = new HandlerManager(this)
+        : handlerManager;
   }
 
   /**
@@ -262,24 +269,6 @@ public class Widget extends UIObject implements EventListener, HasHandlers {
    * browser's document.
    */
   protected void onUnload() {
-  }
-
-  /**
-   * Removes the given handler from the specified event key. Normally,
-   * applications should call {@link HandlerRegistration#removeHandler()}
-   * instead. This method is provided primary to support the deprecated
-   * listeners api.
-   * 
-   * @param <H> handler type
-   * 
-   * @param key the event key
-   * @param handler the handler
-   */
-  protected <H extends EventHandler> void removeHandler(
-      AbstractEvent.Type<H> key, final H handler) {
-    if (handlerManager != null) {
-      handlerManager.removeHandler(key, handler);
-    }
   }
 
   /**

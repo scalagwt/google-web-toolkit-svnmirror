@@ -60,6 +60,9 @@ public class HandlerManager {
     return index;
   }
 
+  // package protected to allow it to be used in JsHandlerRegistry
+  int firingDepth = 0;
+
   // Only one of JsHandlerRegistry and JavaHandlerRegistry are live at once.
   private final JsHandlerRegistry javaScriptRegistry;
 
@@ -67,8 +70,6 @@ public class HandlerManager {
 
   // source of the event.
   private final Object source;
-
-  private int firingDepth = 0;
 
   private List<Object> removalQueue;
 
@@ -99,32 +100,13 @@ public class HandlerManager {
    * @return the handler registration, can be stored in order to remove the
    *         handler later
    */
-  public <HandlerType extends EventHandler> HandlerRegistration addHandler(
+  public final <HandlerType extends EventHandler> HandlerRegistration addHandler(
       AbstractEvent.Type<HandlerType> type, final HandlerType handler) {
-    if (firingDepth > 0) {
-      enqueueAdd(type, handler);
+    if (useJs) {
+      javaScriptRegistry.addHandler(this, type, handler);
     } else {
-      if (useJs) {
-        int base = type.hashCode();
-        boolean needsFlattening = javaScriptRegistry.addHandler(base, handler);
-        if (needsFlattening) {
-          javaScriptRegistry.unflatten(base);
-          if (firingDepth > 0) {
-            enqueueAdd(type, handler);
-          } else {
-            if (useJs) {
-              int base1 = type.hashCode();
-              boolean needsFlattening1 = javaScriptRegistry.addHandler(base1,
-                  handler);
-              if (needsFlattening1) {
-                javaScriptRegistry.unflatten(base1);
-                addHandler(type, handler);
-              }
-            } else {
-              javaRegistry.addHandler(type, handler);
-            }
-          }
-        }
+      if (firingDepth > 0) {
+        enqueueAdd(type, handler);
       } else {
         javaRegistry.addHandler(type, handler);
       }
@@ -152,7 +134,9 @@ public class HandlerManager {
    */
   public void fireEvent(AbstractEvent<?> event) {
     // If it not live we should clear the source and make it live.
-    revive(event);
+    if (event.isLive() == false) {
+      revive(event);
+    }
     Object oldSource = event.getSource();
     event.setSource(source);
     try {
@@ -236,17 +220,8 @@ public class HandlerManager {
       doRemove(type, handler);
     }
   }
- 
-  private <H extends EventHandler> void doRemove(AbstractEvent.Type<H> type,
-      final H handler) {
-    if (useJs) {
-      javaScriptRegistry.removeHandler(type, handler);
-    } else {
-      javaRegistry.removeHandler(type, handler);
-    }
-  }
 
-  private <H extends EventHandler> void enqueueAdd(AbstractEvent.Type<H> type,
+  <H extends EventHandler> void enqueueAdd(AbstractEvent.Type<H> type,
       final H handler) {
     if (addQueue == null) {
       addQueue = new ArrayList<Object>();
@@ -255,12 +230,21 @@ public class HandlerManager {
     }
   }
 
-  private <H extends EventHandler> void enqueueRemove(
-      AbstractEvent.Type<H> type, final H handler) {
+  <H extends EventHandler> void enqueueRemove(AbstractEvent.Type<H> type,
+      final H handler) {
     if (removalQueue == null) {
       removalQueue = new ArrayList<Object>();
       removalQueue.add(type);
       removalQueue.add(handler);
+    }
+  }
+
+  private <H extends EventHandler> void doRemove(AbstractEvent.Type<H> type,
+      final H handler) {
+    if (useJs) {
+      javaScriptRegistry.removeHandler(type, handler);
+    } else {
+      javaRegistry.removeHandler(type, handler);
     }
   }
 
