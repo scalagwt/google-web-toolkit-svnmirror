@@ -132,7 +132,7 @@ public class EventsTest extends TestCase {
         "onDoubleClick");
   }
 
-  private void checkFire(AbstractEvent event, HandlerRegistration registration,
+  private void checkFire(AbstractEvent<?> event, HandlerRegistration registration,
       Flag flag, String eventName) {
 
     flag.flag = false;

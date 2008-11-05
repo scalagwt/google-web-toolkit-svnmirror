@@ -46,16 +46,12 @@ public class HandlerRegistration {
 
   /**
    * Removes the given handler from its manager.
-   * 
-   * @param <H> handler type
    */
+  @SuppressWarnings("unchecked")
   // This is safe because when the elements were passed in they conformed to
   // Type<H>,H.
-  @SuppressWarnings("unchecked")
-  public <H extends EventHandler> void removeHandler() {
-    Type<H> myType = (Type<H>) type;
-    H myHandler = (H) handler;
-    manager.removeHandler(myType, myHandler);
+  public void removeHandler() {
+    manager.removeHandler((Type<EventHandler>) type, (EventHandler) handler);
   }
 
   EventHandler getHandler() {
