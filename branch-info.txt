@@ -6,4 +6,4 @@ Copies:
 /releases/1.6/1_6_clean_events was created from r3770
 
 Merges:
- 
+ -> The next merge into trunk will be r3770:????
