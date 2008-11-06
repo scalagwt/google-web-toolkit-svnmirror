@@ -72,8 +72,8 @@ public class EventReporter<V, T> extends AllKeyHandlers implements
    */
   public abstract class CheckBoxEvent extends CheckBox implements
       ValueChangeHandler<Boolean> {
-    String name;
     protected HandlerRegistration reg;
+    String name;
 
     public CheckBoxEvent(String name, Panel p) {
       this.name = name;
@@ -182,6 +182,26 @@ public class EventReporter<V, T> extends AllKeyHandlers implements
     report("blur: " + sender.getClass());
   }
 
+  public void onMouseDown(Widget sender, int x, int y) {
+    report(getInfo(sender) + "mouse down");
+  }
+
+  public void onMouseEnter(Widget sender) {
+    report(getInfo(sender) + "mouse enter");
+  }
+
+  public void onMouseLeave(Widget sender) {
+    report(getInfo(sender) + "mouse leave");
+  }
+
+  public void onMouseMove(Widget sender, int x, int y) {
+    report(getInfo(sender) + "mouse move");
+  }
+
+  public void onMouseUp(Widget sender, int x, int y) {
+    report(getInfo(sender) + "mouse up");
+  }
+
   public void onSelection(SelectionEvent<Suggestion> event) {
     report(event);
   }
@@ -204,27 +224,6 @@ public class EventReporter<V, T> extends AllKeyHandlers implements
 
   private void report(GwtEvent<?> event) {
     report(getInfo(event.getSource()) + " fired " + event.toDebugString());
-  }
-
-  public void onMouseDown(Widget sender, int x, int y) {
-    report(getInfo(sender) + "mouse down");
-  }
-
-  public void onMouseEnter(Widget sender) {
-    report(getInfo(sender) + "mouse enter");
-  }
-
-  public void onMouseLeave(Widget sender) {
-    report(getInfo(sender) + "mouse leave");
-  }
-
-  public void onMouseMove(Widget sender, int x, int y) {
-    report(getInfo(sender) + "mouse move");
-  }
-
-  public void onMouseUp(Widget sender, int x, int y) {
-    report(getInfo(sender) + "mouse up");
-
   }
 
 }
