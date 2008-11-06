@@ -103,6 +103,8 @@ public class CheckBox extends ButtonBase implements HasName, HasValue<Boolean> {
     if (!isEventHandled(ValueChangeEvent.getType())) {
       this.addClickHandler(new ClickHandler() {
         public void onClick(ClickEvent event) {
+          // No need to compare old value and new value--click handler 
+          // only fires on real click, and value always toggles
           ValueChangeEvent.fire(CheckBox.this, isChecked());
         }
       });
@@ -154,14 +156,14 @@ public class CheckBox extends ButtonBase implements HasName, HasValue<Boolean> {
   }
 
   /**
-   * Checks or unchecks this check box.
+   * Checks or unchecks this check box. Does not fire {@link ValueChangeEvent}.
+   * (If you want the event to fire, use {@link #setValue(boolean, boolean)})
    * 
    * @param checked <code>true</code> to check the check box
    */
   public void setChecked(boolean checked) {
     DOM.setElementPropertyBoolean(inputElem, "checked", checked);
     DOM.setElementPropertyBoolean(inputElem, "defaultChecked", checked);
-    ValueChangeEvent.fire(this, checked);
   }
 
   @Override
@@ -216,11 +218,13 @@ public class CheckBox extends ButtonBase implements HasName, HasValue<Boolean> {
   }
 
   public void setValue(Boolean value, boolean fireEvents) {
-    if (this.isChecked() == value.booleanValue()) {
+    if (isChecked() == value) {
       return;
     }
     setChecked(value);
-    ValueChangeEvent.fire(this, value);
+    if (fireEvents) {
+      ValueChangeEvent.fire(this, value);
+    }
   }
 
   // Unlike other widgets the CheckBox sinks on its input element, not its

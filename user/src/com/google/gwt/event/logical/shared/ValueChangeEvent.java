@@ -54,13 +54,15 @@ public class ValueChangeEvent<I> extends GwtEvent<ValueChangeHandler<I>> {
 
   /**
    * Fires value change event if the old value is not equal to the new value.
+   * Use this call rather than making the decision to short circuit yourself for
+   * safe handling of null.
    * 
    * @param <I> the old value type
    * @param <S> The event source.
    * @param source the source of the handlers. Must have value change handlers
    *          and a handler manager.
-   * @param oldValue the oldValue
-   * @param newValue the newValue
+   * @param oldValue the oldValue, may be null
+   * @param newValue the newValue, may be null
    */
   public static <I, S extends HasValueChangeHandlers<I> & HasHandlers> void fireIfNotEqual(
       S source, I oldValue, I newValue) {
