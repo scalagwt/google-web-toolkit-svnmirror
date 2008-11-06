@@ -183,8 +183,7 @@ public class VisualsForDialogBox extends AbstractIssue {
     final VisibleDialogBox dialog = new VisibleDialogBox();
     dialog.setModal(false);
     dialog.center();
-    dialog.getCaptionWrapper().addMouseDownHandler(new MouseDownHandler(){
-
+    dialog.getCaptionWrapper().addMouseDownHandler(new MouseDownHandler() {
       public void onMouseDown(MouseDownEvent event) {
         dialog.pass(VisibleEvents.captionMouseDown);
       }
