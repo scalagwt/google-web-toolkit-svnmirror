@@ -18,8 +18,7 @@ package com.google.gwt.event.dom.client;
 import com.google.gwt.event.shared.HandlerRegistration;
 
 /**
- * A widget that implements this interface is a public source of
- * {@link ClickEvent} events.
+ * A widget that implements this interface provides registration for {@link ClickHandler} instances.
  */
 public interface HasClickHandlers {
   /**

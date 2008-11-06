@@ -30,10 +30,9 @@ public class ClickEvent extends DomEvent<ClickHandler> {
       Event.ONCLICK, "click", new ClickEvent());
 
   /**
-   * Ensures the existence of the handler TYPE, so the system knows to start
-   * firing events and then returns it.
+   * Gets the event type associated with click events.
    * 
-   * @return the handler TYPE
+   * @return the handler type
    */
   public static Type<ClickHandler> getType() {
     return TYPE;
