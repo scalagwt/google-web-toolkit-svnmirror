@@ -20,7 +20,6 @@ import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.core.ext.TreeLogger.Type;
 import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
-import com.google.gwt.dev.BootStrapPlatform;
 import com.google.gwt.dev.GWTShell;
 import com.google.gwt.dev.cfg.BindingProperty;
 import com.google.gwt.dev.cfg.ConfigurationProperty;
@@ -201,8 +200,6 @@ public class JUnitShell extends GWTShell {
    */
   private static JUnitShell getUnitTestShell() {
     if (unitTestShell == null) {
-      BootStrapPlatform.init();
-      BootStrapPlatform.applyPlatformHacks();
       unitTestShell = new JUnitShell();
       unitTestShell.lastLaunchFailed = true;
       String[] args = unitTestShell.synthesizeArgs();

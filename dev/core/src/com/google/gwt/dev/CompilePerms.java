@@ -116,7 +116,8 @@ public class CompilePerms {
       return true;
     }
   }
-  static class ArgProcessor extends Link.ArgProcessor {
+
+  static class ArgProcessor extends CompileArgProcessor {
     public ArgProcessor(CompilePermsOptions options) {
       super(options);
       registerHandler(new ArgHandlerPerms(options));
@@ -129,7 +130,7 @@ public class CompilePerms {
   }
 
   /**
-   * Concrete class to implement all compiler options.
+   * Concrete class to implement compiler perm options.
    */
   static class CompilePermsOptionsImpl extends CompileTaskOptionsImpl implements
       CompilePermsOptions {
@@ -145,6 +146,7 @@ public class CompilePerms {
 
     public void copyFrom(CompilePermsOptions other) {
       super.copyFrom(other);
+
       setPermsToCompile(other.getPermsToCompile());
     }
 
@@ -200,7 +202,7 @@ public class CompilePerms {
     return new File(compilerWorkDir, "permutation-" + permNumber + ".js");
   }
 
-  private CompilePermsOptionsImpl options;
+  private final CompilePermsOptionsImpl options;
 
   public CompilePerms(CompilePermsOptions options) {
     this.options = new CompilePermsOptionsImpl(options);

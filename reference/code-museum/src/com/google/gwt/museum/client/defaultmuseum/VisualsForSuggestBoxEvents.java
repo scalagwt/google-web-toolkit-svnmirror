@@ -16,8 +16,11 @@
 
 package com.google.gwt.museum.client.defaultmuseum;
 
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.museum.client.common.AbstractIssue;
 import com.google.gwt.museum.client.common.EventReporter;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.Panel;
@@ -77,6 +80,14 @@ public class VisualsForSuggestBoxEvents extends AbstractIssue {
     final SuggestBox b = new SuggestBox(oracle);
     b.setTitle(suggestBoxName);
     p.add(b);
+    final CheckBox selectsFirst = new CheckBox("Selects first suggestion");
+    selectsFirst.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+      public void onValueChange(ValueChangeEvent<Boolean> event) {
+        b.setSelectsFirstItem(event.getValue());
+      }
+    });
+    selectsFirst.setChecked(b.getSelectsFirstItem());
+    p.add(selectsFirst);
     final EventReporter<String, SuggestBox> handler = new EventReporter<String, SuggestBox>(
         report);
 

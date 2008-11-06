@@ -16,6 +16,7 @@
 package com.google.gwt.user.client.rpc;
 
 import com.google.gwt.user.client.rpc.TestSetFactory.MarkerTypeTreeMap;
+import com.google.gwt.user.client.rpc.TestSetFactory.MarkerTypeTreeSet;
 import com.google.gwt.user.client.rpc.TestSetFactory.SerializableDoublyLinkedNode;
 import com.google.gwt.user.client.rpc.TestSetFactory.SerializablePrivateNoArg;
 import com.google.gwt.user.client.rpc.TestSetFactory.SerializableWithTwoArrays;
@@ -30,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.Vector;
 import java.util.Map.Entry;
 
@@ -351,6 +353,30 @@ public class TestSetValidator {
     return true;
   }
 
+  // also checks whether the sorting of entries is maintained or not.
+  public static boolean isValid(TreeSet<MarkerTypeTreeSet> expected,
+      TreeSet<MarkerTypeTreeSet> set) {
+    if (set == null) {
+      return false;
+    }
+    if (!equalsWithNullCheck(set.comparator(), expected.comparator())) {
+      return false;
+    }
+    int size = 0;
+    if ((size = expected.size()) != set.size()) {
+      return false;
+    }
+    // entrySet returns entries in the sorted order
+    List<MarkerTypeTreeSet> actualList = new ArrayList<MarkerTypeTreeSet>(set);
+    List<MarkerTypeTreeSet> expectedList = new ArrayList<MarkerTypeTreeSet>(expected);
+    for (int index = 0; index < size; index++) {
+      if (!equalsWithNullCheck(expectedList.get(index), actualList.get(index))) {
+        return false;
+      }
+    }
+    return true;
+  }
+  
   public static boolean isValid(Vector expected, Vector actual) {
     if (actual == null) {
       return false;
@@ -479,6 +505,12 @@ public class TestSetValidator {
     return true;
   }
 
+  /**
+   * Wrap an exception in RuntimeException if necessary so it doesn't have to be listed in
+   * throws clauses.
+   * 
+   * @param caught exception to wrap
+   */
   public static void rethrowException(Throwable caught) {
     if (caught instanceof RuntimeException) {
       throw (RuntimeException) caught;
@@ -486,7 +518,6 @@ public class TestSetValidator {
       throw new RuntimeException(caught);
     }
   }
-
   private static boolean equalsWithNullCheck(Object a, Object b) {
     return a == b || (a != null && a.equals(b));
   }

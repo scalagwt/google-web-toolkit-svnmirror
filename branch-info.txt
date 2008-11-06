@@ -3,7 +3,9 @@ Tracks interactions between this branch and other branches.
 See: http://code.google.com/p/google-web-toolkit/wiki/ManagingMerges
 
 Copies:
-/releases/1.6/1_6_clean_events was created from r3770
+/branches/1_6_clean_events was created from /releases/1.6@r3770
 
 Merges:
- -> The next merge into trunk will be r3770:????
+/releases/1.6@r3770:3957 was merged (????) into this branch
+
+ -> The next merge into this branch will be r3957:????
