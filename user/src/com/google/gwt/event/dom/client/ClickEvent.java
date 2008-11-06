@@ -26,7 +26,7 @@ public class ClickEvent extends DomEvent<ClickHandler> {
    * Event type for click events. Represents the meta-data associated with this
    * event.
    */
-  private static Type<ClickHandler> TYPE = new Type<ClickHandler>(
+  private final static Type<ClickHandler> TYPE = new Type<ClickHandler>(
       Event.ONCLICK, "click", new ClickEvent());
 
   /**
