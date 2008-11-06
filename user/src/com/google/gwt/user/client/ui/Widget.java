@@ -124,7 +124,7 @@ public class Widget extends UIObject implements EventListener, HasHandlers {
       final H handler, DomEvent.Type<H> type) {
     if (type != null) {
       // Manual inline sinkEvents.
-      int eventBitsToAdd = type.getNativeEventTypeInt();
+      int eventBitsToAdd = type.getEventToSink();
       if (isOrWasAttached()) {
         super.sinkEvents(eventBitsToAdd);
       } else {
