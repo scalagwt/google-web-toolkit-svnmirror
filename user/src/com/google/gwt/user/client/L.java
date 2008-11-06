@@ -24,7 +24,7 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.event.shared.AbstractEvent.Type;
+import com.google.gwt.event.shared.GwtEvent.Type;
 
 import java.util.EventListener;
 

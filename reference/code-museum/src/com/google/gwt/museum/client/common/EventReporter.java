@@ -34,7 +34,7 @@ import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.event.shared.AbstractEvent;
+import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.ChangeListener;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -202,7 +202,7 @@ public class EventReporter<V, T> extends AllKeyHandlers implements
     }
   }
 
-  private void report(AbstractEvent<?> event) {
+  private void report(GwtEvent<?> event) {
     report(getInfo(event.getSource()) + " fired " + event.toDebugString());
   }
 

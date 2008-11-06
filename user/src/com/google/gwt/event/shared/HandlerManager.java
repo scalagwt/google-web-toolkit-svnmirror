@@ -16,7 +16,7 @@
 package com.google.gwt.event.shared;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.shared.AbstractEvent.Type;
+import com.google.gwt.event.shared.GwtEvent.Type;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +38,7 @@ public class HandlerManager {
    * @param event the event
    * @return is the event live
    */
-  public static boolean isLive(AbstractEvent<?> event) {
+  public static boolean isLive(GwtEvent<?> event) {
     return event.isLive();
   }
 
@@ -47,7 +47,7 @@ public class HandlerManager {
    * 
    * @param event the event
    */
-  public static void revive(AbstractEvent<?> event) {
+  public static void revive(GwtEvent<?> event) {
     if (event.isLive() == false) {
       event.revive();
     }
@@ -101,7 +101,7 @@ public class HandlerManager {
    *         handler later
    */
   public final <HandlerType extends EventHandler> HandlerRegistration addHandler(
-      AbstractEvent.Type<HandlerType> type, final HandlerType handler) {
+      GwtEvent.Type<HandlerType> type, final HandlerType handler) {
     if (useJs) {
       javaScriptRegistry.addHandler(this, type, handler);
     } else {
@@ -132,7 +132,7 @@ public class HandlerManager {
    * 
    * @param event the event
    */
-  public void fireEvent(AbstractEvent<?> event) {
+  public void fireEvent(GwtEvent<?> event) {
     // If it not live we should clear the source and make it live.
     if (event.isLive() == false) {
       revive(event);
@@ -170,7 +170,7 @@ public class HandlerManager {
    * @return the given handler
    */
   public <HandlerType extends EventHandler> HandlerType getHandler(
-      AbstractEvent.Type<HandlerType> type, int index) {
+      GwtEvent.Type<HandlerType> type, int index) {
     if (useJs) {
       return javaScriptRegistry.getHandler(type, index);
     } else {
@@ -213,7 +213,7 @@ public class HandlerManager {
    * @param handler the handler
    */
   public <HandlerType extends EventHandler> void removeHandler(
-      AbstractEvent.Type<HandlerType> type, final HandlerType handler) {
+      GwtEvent.Type<HandlerType> type, final HandlerType handler) {
     if (firingDepth > 0) {
       enqueueRemove(type, handler);
     } else {
@@ -221,7 +221,7 @@ public class HandlerManager {
     }
   }
 
-  <H extends EventHandler> void enqueueAdd(AbstractEvent.Type<H> type,
+  <H extends EventHandler> void enqueueAdd(GwtEvent.Type<H> type,
       final H handler) {
     if (addQueue == null) {
       addQueue = new ArrayList<Object>();
@@ -230,7 +230,7 @@ public class HandlerManager {
     }
   }
 
-  <H extends EventHandler> void enqueueRemove(AbstractEvent.Type<H> type,
+  <H extends EventHandler> void enqueueRemove(GwtEvent.Type<H> type,
       final H handler) {
     if (removalQueue == null) {
       removalQueue = new ArrayList<Object>();
@@ -239,7 +239,7 @@ public class HandlerManager {
     }
   }
 
-  private <H extends EventHandler> void doRemove(AbstractEvent.Type<H> type,
+  private <H extends EventHandler> void doRemove(GwtEvent.Type<H> type,
       final H handler) {
     if (useJs) {
       javaScriptRegistry.removeHandler(type, handler);
@@ -253,14 +253,14 @@ public class HandlerManager {
     // Do Adds first in case someone does a quick add/remove
     if (addQueue != null) {
       for (int i = 0; i < addQueue.size(); i += 2) {
-        addHandler((AbstractEvent.Type) addQueue.get(i),
+        addHandler((GwtEvent.Type) addQueue.get(i),
             (EventHandler) addQueue.get(i + 1));
       }
       addQueue = null;
     }
     if (removalQueue != null) {
       for (int i = 0; i < removalQueue.size(); i += 2) {
-        doRemove((AbstractEvent.Type) removalQueue.get(i),
+        doRemove((GwtEvent.Type) removalQueue.get(i),
             (EventHandler) removalQueue.get(i + 1));
       }
       removalQueue = null;

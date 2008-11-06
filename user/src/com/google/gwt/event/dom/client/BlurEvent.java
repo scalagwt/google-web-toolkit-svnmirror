@@ -26,7 +26,7 @@ public class BlurEvent extends DomEvent<BlurHandler> {
    * Event type for blur events. Represents the meta-data associated with this
    * event.
    */
-  private static Type<BlurHandler> TYPE = new Type<BlurHandler>(Event.ONBLUR,
+  private static final Type<BlurHandler> TYPE = new Type<BlurHandler>(Event.ONBLUR,
       "blur", new BlurEvent());
 
   /**
@@ -42,7 +42,7 @@ public class BlurEvent extends DomEvent<BlurHandler> {
   /**
    * Protected constructor, use
    * {@link DomEvent#fireNativeEvent}
-   * to fire click events.
+   * to fire blur events.
    */
   protected BlurEvent() {
   }

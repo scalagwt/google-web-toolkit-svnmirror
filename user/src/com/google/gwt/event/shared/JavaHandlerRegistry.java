@@ -16,7 +16,7 @@
 
 package com.google.gwt.event.shared;
 
-import com.google.gwt.event.shared.AbstractEvent.Type;
+import com.google.gwt.event.shared.GwtEvent.Type;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,7 +24,7 @@ import java.util.HashMap;
 /**
  * The default Handler manager's handler registry.
  */
-class JavaHandlerRegistry extends HashMap<AbstractEvent.Type<?>, ArrayList<?>> {
+class JavaHandlerRegistry extends HashMap<GwtEvent.Type<?>, ArrayList<?>> {
 
   public <H extends EventHandler> void addHandler(Type<H> type, H handler) {
     ArrayList<H> l = get(type);
@@ -39,7 +39,7 @@ class JavaHandlerRegistry extends HashMap<AbstractEvent.Type<?>, ArrayList<?>> {
     super.remove(type);
   }
 
-  public <H extends EventHandler> void fireEvent(AbstractEvent<H> event) {
+  public <H extends EventHandler> void fireEvent(GwtEvent<H> event) {
     Type<H> type = event.getAssociatedType();
     int count = getHandlerCount(type);
     for (int i = 0; i < count; i++) {
@@ -48,7 +48,7 @@ class JavaHandlerRegistry extends HashMap<AbstractEvent.Type<?>, ArrayList<?>> {
     }
   }
 
-  public <H extends EventHandler> H getHandler(AbstractEvent.Type<H> eventKey,
+  public <H extends EventHandler> H getHandler(GwtEvent.Type<H> eventKey,
       int index) {
     int handlerCount = getHandlerCount(eventKey);
     assert (index < handlerCount);
@@ -56,7 +56,7 @@ class JavaHandlerRegistry extends HashMap<AbstractEvent.Type<?>, ArrayList<?>> {
     return  l.get(index);
   }
 
-  public int getHandlerCount(AbstractEvent.Type<?> eventKey) {
+  public int getHandlerCount(GwtEvent.Type<?> eventKey) {
     ArrayList<?> l = super.get(eventKey);
     if (l == null) {
       return 0;
@@ -65,7 +65,7 @@ class JavaHandlerRegistry extends HashMap<AbstractEvent.Type<?>, ArrayList<?>> {
     }
   }
 
-  public <H> void removeHandler(AbstractEvent.Type<H> eventKey, H handler) {
+  public <H> void removeHandler(GwtEvent.Type<H> eventKey, H handler) {
     ArrayList<H> l = get(eventKey);
     if (l != null) {
       l.remove(handler);
@@ -73,7 +73,7 @@ class JavaHandlerRegistry extends HashMap<AbstractEvent.Type<?>, ArrayList<?>> {
   }
 
   @SuppressWarnings("unchecked")
-  private <H> ArrayList<H> get(AbstractEvent.Type<H> type) {
+  private <H> ArrayList<H> get(GwtEvent.Type<H> type) {
     // This cast is safe because we control the puts.
     return (ArrayList<H>) super.get(type);
   }

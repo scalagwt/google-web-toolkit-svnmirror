@@ -17,7 +17,7 @@ package com.google.gwt.user.client.ui;
 
 import com.google.gwt.event.dom.client.DomEvent;
 import com.google.gwt.event.logical.shared.HasHandlers;
-import com.google.gwt.event.shared.AbstractEvent;
+import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -77,7 +77,7 @@ public class Widget extends UIObject implements EventListener, HasHandlers {
    * @param type the event type
    * @return is it handled?
    */
-  public boolean isEventHandled(AbstractEvent.Type<?> type) {
+  public boolean isEventHandled(GwtEvent.Type<?> type) {
     return handlerManager == null || handlerManager.isEventHandled(type);
   }
 
@@ -143,7 +143,7 @@ public class Widget extends UIObject implements EventListener, HasHandlers {
    * @return {@link HandlerRegistration} used to remove the handler
    */
   protected final <H extends EventHandler> HandlerRegistration addHandler(
-      final H handler, AbstractEvent.Type<H> type) {
+      final H handler, GwtEvent.Type<H> type) {
     return ensureHandlers().addHandler(type, handler);
   }
 
@@ -181,7 +181,7 @@ public class Widget extends UIObject implements EventListener, HasHandlers {
    * 
    * @param event the event
    */
-  protected void fireEvent(AbstractEvent<?> event) {
+  protected void fireEvent(GwtEvent<?> event) {
     if (handlerManager != null) {
       handlerManager.fireEvent(event);
     }

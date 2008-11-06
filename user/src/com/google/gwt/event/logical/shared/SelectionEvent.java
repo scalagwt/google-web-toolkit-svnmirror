@@ -15,7 +15,7 @@
  */
 package com.google.gwt.event.logical.shared;
 
-import com.google.gwt.event.shared.AbstractEvent;
+import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerManager;
 
 /**
@@ -23,7 +23,7 @@ import com.google.gwt.event.shared.HandlerManager;
  * 
  * @param <I> the type being selected
  */
-public class SelectionEvent<I> extends AbstractEvent<SelectionHandler<I>> {
+public class SelectionEvent<I> extends GwtEvent<SelectionHandler<I>> {
 
   /**
    * Handler type.

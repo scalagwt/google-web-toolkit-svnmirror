@@ -15,7 +15,7 @@
  */
 package com.google.gwt.event.logical.shared;
 
-import com.google.gwt.event.shared.AbstractEvent;
+import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerManager;
 
 /**
@@ -23,7 +23,7 @@ import com.google.gwt.event.shared.HandlerManager;
  * 
  * @param <I> the value about to be changed
  */
-public class ValueChangeEvent<I> extends AbstractEvent<ValueChangeHandler<I>> {
+public class ValueChangeEvent<I> extends GwtEvent<ValueChangeHandler<I>> {
 
   /**
    * Handler type.

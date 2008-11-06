@@ -16,7 +16,7 @@
 package com.google.gwt.event.dom.client;
 
 import com.google.gwt.core.client.impl.PrivateMap;
-import com.google.gwt.event.shared.AbstractEvent;
+import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Event;
@@ -30,14 +30,14 @@ import com.google.gwt.user.client.Event;
  * @param <H> handler type
  * 
  */
-public abstract class DomEvent<H extends EventHandler> extends AbstractEvent<H> {
+public abstract class DomEvent<H extends EventHandler> extends GwtEvent<H> {
   /**
    * Type class used by dom event subclasses.
    * 
    * @param <HandlerType> handler type
    */
   public static class Type<HandlerType extends EventHandler> extends
-      AbstractEvent.Type<HandlerType> {
+      GwtEvent.Type<HandlerType> {
     private final int nativeEventTypeInt;
     private DomEvent<HandlerType> cached;
 

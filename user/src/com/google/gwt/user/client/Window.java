@@ -24,7 +24,7 @@ import com.google.gwt.event.logical.shared.HasHandlers;
 import com.google.gwt.event.logical.shared.HasResizeHandlers;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
-import com.google.gwt.event.shared.AbstractEvent;
+import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -47,7 +47,7 @@ public class Window {
    * Fired just before the browser window closes or navigates to a different
    * site.
    */
-  public static class ClosingEvent extends AbstractEvent<Window.ClosingHandler> {
+  public static class ClosingEvent extends GwtEvent<Window.ClosingHandler> {
     /**
      * The event type.
      */
@@ -307,7 +307,7 @@ public class Window {
   /**
    * Fired when the browser window is scrolled.
    */
-  public static class ScrollEvent extends AbstractEvent<Window.ScrollHandler> {
+  public static class ScrollEvent extends GwtEvent<Window.ScrollHandler> {
     /**
      * The event type.
      */
@@ -706,7 +706,7 @@ public class Window {
    * @return {@link HandlerRegistration} used to remove the handler
    */
   private static <HandlerType extends EventHandler> HandlerRegistration addHandler(
-      AbstractEvent.Type<HandlerType> type, final HandlerType handler) {
+      GwtEvent.Type<HandlerType> type, final HandlerType handler) {
     return getHandlers().addHandler(type, handler);
   }
 
@@ -747,7 +747,7 @@ public class Window {
    * 
    * @param event the event
    */
-  private static void fireEvent(AbstractEvent<?> event) {
+  private static void fireEvent(GwtEvent<?> event) {
     if (handlers != null) {
       handlers.fireEvent(event);
     }

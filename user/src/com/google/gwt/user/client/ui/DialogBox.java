@@ -16,6 +16,7 @@
 package com.google.gwt.user.client.ui;
 
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.event.dom.client.HasAllMouseHandlers;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.dom.client.MouseMoveEvent;
@@ -48,14 +49,11 @@ import com.google.gwt.user.client.Window;
  * <li>.gwt-DialogBox .Caption { the caption }</li>
  * <li>.gwt-DialogBox .dialogContent { the wrapepr around the content }</li>
  * <li>.gwt-DialogBox .dialogTopLeft { the top left cell }</li>
- * <li>.gwt-DialogBox .dialogTopLeftInner { the inner element of the cell }</li>
- * <li>.gwt-DialogBox .dialogTopCenter { the top center cell, where the caption
- * is located }</li>
  * <li>.gwt-DialogBox .dialogTopCenterInner { the inner element of the cell }</li>
- * <li>.gwt-DialogBox .dialogTopRight { the top right cell }</li>
- * <li>.gwt-DialogBox .dialogTopRightInner { the inner element of the cell }</li>
- * <li>.gwt-DialogBox .dialogMiddleLeft { the middle left cell }</li>
- * <li>.gwt-DialogBox .dialogMiddleLeftInner { the inner element of the cell }</li>
+ * <li>.gwt-DialogBox .dialogTopRight { the top right cell }</li> <li>
+ * .gwt-DialogBox .dialogTopRightInner { the inner element of the cell }</li>
+ * <li>.gwt-DialogBox .dialogMiddleLeft { the middle left cell }</li> <li>
+ * .gwt-DialogBox .dialogMiddleLeftInner { the inner element of the cell }</li>
  * <li>.gwt-DialogBox .dialogMiddleCenter { the middle center cell, where the
  * content is located }</li>
  * <li>.gwt-DialogBox .dialogMiddleCenterInner { the inner element of the cell }</li>
@@ -67,7 +65,6 @@ import com.google.gwt.user.client.Window;
  * <li>.gwt-DialogBox .dialogBottomCenterInner { the inner element of the cell }</li>
  * <li>.gwt-DialogBox .dialogBottomRight { the bottom right cell }</li>
  * <li>.gwt-DialogBox .dialogBottomRightInner { the inner element of the cell }</li>
- * </ul>
  * <p>
  * <h3>Example</h3>
  * {@example com.google.gwt.examples.DialogBoxExample}
@@ -76,7 +73,7 @@ import com.google.gwt.user.client.Window;
 @SuppressWarnings("deprecation")
 public class DialogBox extends DecoratedPopupPanel implements HasHTML, HasText,
     MouseListener {
-  
+
   private class MouseHandler implements MouseDownHandler, MouseUpHandler,
       MouseOutHandler, MouseOverHandler, MouseMoveHandler {
 
@@ -100,7 +97,7 @@ public class DialogBox extends DecoratedPopupPanel implements HasHTML, HasText,
       endDragging(event);
     }
   }
-  
+
   /**
    * The default style name.
    */
@@ -115,14 +112,13 @@ public class DialogBox extends DecoratedPopupPanel implements HasHTML, HasText,
 
   private HandlerRegistration resizeHandlerRegistration;
 
-
   /**
-     * Creates an empty dialog box. It should not be shown until its child widget
-     * has been added using {@link #add(Widget)}.
-     */
-    public DialogBox() {
-      this(false);
-    }
+   * Creates an empty dialog box. It should not be shown until its child widget
+   * has been added using {@link #add(Widget)}.
+   */
+  public DialogBox() {
+    this(false);
+  }
 
   /**
    * Creates an empty dialog box specifying its "auto-hide" property. It should
@@ -143,8 +139,8 @@ public class DialogBox extends DecoratedPopupPanel implements HasHTML, HasText,
    * 
    * @param autoHide <code>true</code> if the dialog should be automatically
    *          hidden when the user clicks outside of it
-   * @param modal <code>true</code> if keyboard and mouse events for widgets
-   *          not contained by the dialog should be ignored
+   * @param modal <code>true</code> if keyboard and mouse events for widgets not
+   *          contained by the dialog should be ignored
    */
   public DialogBox(boolean autoHide, boolean modal) {
     super(autoHide, modal, "dialog");
@@ -155,14 +151,14 @@ public class DialogBox extends DecoratedPopupPanel implements HasHTML, HasText,
     DOM.appendChild(td, caption.getElement());
     adopt(caption);
     caption.setStyleName("Caption");
-    
+
     // Set the style name
     setStyleName(DEFAULT_STYLENAME);
 
     windowWidth = Window.getClientWidth();
     clientLeft = Document.get().getBodyOffsetLeft();
     clientTop = Document.get().getBodyOffsetTop();
-    
+
     MouseHandler mouseHandler = new MouseHandler();
     addDomHandler(mouseHandler, MouseDownEvent.getType());
     addDomHandler(mouseHandler, MouseUpEvent.getType());
@@ -170,10 +166,19 @@ public class DialogBox extends DecoratedPopupPanel implements HasHTML, HasText,
     addDomHandler(mouseHandler, MouseOverEvent.getType());
     addDomHandler(mouseHandler, MouseOutEvent.getType());
   }
-  
- public String getHTML() {
-  return caption.getHTML();
-}
+
+  /**
+   * Provides access to the widget that displays the dialog's caption.
+   * 
+   * @return the Caption widget wrapper
+   */
+  public <C extends Widget & HasAllMouseHandlers> Widget getCaptionWrapper() {
+    return caption;
+  }
+
+  public String getHTML() {
+    return caption.getHTML();
+  }
 
   public String getText() {
     return caption.getText();
@@ -276,6 +281,7 @@ public class DialogBox extends DecoratedPopupPanel implements HasHTML, HasText,
   public void setHTML(String html) {
     caption.setHTML(html);
   }
+
   /**
    * Sets the text inside the caption.
    * 
@@ -309,20 +315,20 @@ public class DialogBox extends DecoratedPopupPanel implements HasHTML, HasText,
    * @param event
    */
   protected void beginDragging(MouseDownEvent event) {
-    onMouseDown(caption, event.getRelativeX(getElement()), 
+    onMouseDown(caption, event.getRelativeX(getElement()),
         event.getRelativeY(getElement()));
   }
 
   /**
-   * Called on mouse move in the caption area, continues dragging if it 
-   * was started by {@link #beginDragging}. 
+   * Called on mouse move in the caption area, continues dragging if it was
+   * started by {@link #beginDragging}.
    * 
    * @see #beginDragging
    * @see #endDragging
    * @param event
    */
   protected void continueDragging(MouseMoveEvent event) {
-    onMouseMove(caption, event.getRelativeX(getElement()), 
+    onMouseMove(caption, event.getRelativeX(getElement()),
         event.getRelativeY(getElement()));
   }
 
@@ -354,17 +360,8 @@ public class DialogBox extends DecoratedPopupPanel implements HasHTML, HasText,
    * @see #endDragging
    */
   protected void endDragging(MouseUpEvent event) {
-    onMouseUp(caption, event.getRelativeX(getElement()), 
+    onMouseUp(caption, event.getRelativeX(getElement()),
         event.getRelativeY(getElement()));
-  }
-  
-  /**
-   * Provides access to the widget that displays the dialog's caption.
-   * 
-   * @return the Caption widget
-   */
-  protected Widget getCaption() {
-    return caption;
   }
 
   /**

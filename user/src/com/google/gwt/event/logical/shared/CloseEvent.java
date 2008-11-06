@@ -15,7 +15,7 @@
  */
 package com.google.gwt.event.logical.shared;
 
-import com.google.gwt.event.shared.AbstractEvent;
+import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerManager;
 
 /**
@@ -23,7 +23,7 @@ import com.google.gwt.event.shared.HandlerManager;
  * 
  * @param <T> the type being closed
  */
-public class CloseEvent<T> extends AbstractEvent<CloseHandler<T>> {
+public class CloseEvent<T> extends GwtEvent<CloseHandler<T>> {
 
   /**
    * Handler type.

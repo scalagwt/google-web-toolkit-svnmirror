@@ -17,7 +17,7 @@
 package com.google.gwt.event.shared;
 
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.event.shared.AbstractEvent.Type;
+import com.google.gwt.event.shared.GwtEvent.Type;
 
 /**
  * Default JavaScript handler registry. This is in the shared package so we
@@ -86,7 +86,7 @@ class JsHandlerRegistry extends JavaScriptObject {
   // Adding the extra field to js getHandler() broke the inlining so using the
   // unsafe cast instead.
   @SuppressWarnings("unchecked")
-  public final <H extends EventHandler> void fireEvent(AbstractEvent<H> event) {
+  public final <H extends EventHandler> void fireEvent(GwtEvent<H> event) {
     Type<H> type = event.getAssociatedType();
     int base = type.hashCode();
     int count = getCount(base);
@@ -114,7 +114,7 @@ class JsHandlerRegistry extends JavaScriptObject {
   // unsafe cast instead.
   @SuppressWarnings("unchecked")
   public final <H extends EventHandler> H getHandler(
-      AbstractEvent.Type<H> type, int index) {
+      GwtEvent.Type<H> type, int index) {
     int base = type.hashCode();
     int count = getCount(base);
     if (index >= count) {
@@ -123,11 +123,11 @@ class JsHandlerRegistry extends JavaScriptObject {
     return (H) getHandler(base, index, isFlattened(base));
   }
 
-  public final int getHandlerCount(AbstractEvent.Type<?> eventKey) {
+  public final int getHandlerCount(GwtEvent.Type<?> eventKey) {
     return getCount(eventKey.hashCode());
   }
 
-  public final <H> void removeHandler(AbstractEvent.Type<H> eventKey,
+  public final <H> void removeHandler(GwtEvent.Type<H> eventKey,
       EventHandler handler) {
     int base = eventKey.hashCode();
 

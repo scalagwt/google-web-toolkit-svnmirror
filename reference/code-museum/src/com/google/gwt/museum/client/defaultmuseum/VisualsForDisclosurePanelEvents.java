@@ -20,7 +20,7 @@ import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.logical.shared.OpenEvent;
 import com.google.gwt.event.logical.shared.OpenHandler;
-import com.google.gwt.event.shared.AbstractEvent;
+import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.museum.client.common.AbstractIssue;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DisclosureEvent;
@@ -97,7 +97,7 @@ public class VisualsForDisclosurePanelEvents extends AbstractIssue {
     return widget;
   }
 
-  private void report(AbstractEvent<?> event) {
+  private void report(GwtEvent<?> event) {
     String title = ((UIObject) event.getSource()).getTitle();
     report(title + " fired " + event.toDebugString());
   }

@@ -16,13 +16,13 @@
 
 package com.google.gwt.event.logical.shared;
 
-import com.google.gwt.event.shared.AbstractEvent;
+import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerManager;
 
 /**
  * Fired when the event source is resized.
  */
-public class ResizeEvent extends AbstractEvent<ResizeHandler> {
+public class ResizeEvent extends GwtEvent<ResizeHandler> {
 
   /**
    * The event type.

@@ -15,7 +15,7 @@
  */
 package com.google.gwt.event.logical.shared;
 
-import com.google.gwt.event.shared.AbstractEvent;
+import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.HandlerManager;
 
@@ -74,8 +74,8 @@ public class LogicalEventsTest extends TestCase {
   }
 
   @SuppressWarnings("unchecked")
-  private <H extends EventHandler> void simpleFire(AbstractEvent.Type<H> type,
-      AbstractEvent instance) {
+  private <H extends EventHandler> void simpleFire(GwtEvent.Type<H> type,
+      GwtEvent instance) {
     Fire f = new Fire();
     manager.addHandler(type, (H) f);
     manager.fireEvent(instance);

@@ -23,7 +23,7 @@ package com.google.gwt.event.shared;
  * @param <H> handler type
  * 
  */
-public abstract class AbstractEvent<H extends EventHandler> {
+public abstract class GwtEvent<H extends EventHandler> {
 
   /**
    * Type class used to register events with the {@link HandlerManager}.
@@ -63,7 +63,7 @@ public abstract class AbstractEvent<H extends EventHandler> {
   /**
    * Constructor.
    */
-  protected AbstractEvent() {
+  protected GwtEvent() {
   }
 
   /**

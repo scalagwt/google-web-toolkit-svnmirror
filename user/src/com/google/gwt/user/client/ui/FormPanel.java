@@ -20,7 +20,7 @@ import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.FormElement;
-import com.google.gwt.event.shared.AbstractEvent;
+import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Command;
@@ -65,7 +65,7 @@ public class FormPanel extends SimplePanel implements FiresFormEvents,
    * Fired when a form has been submitted successfully.
    */
   public static class SubmitCompleteEvent extends
-      AbstractEvent<SubmitCompleteHandler> {
+      GwtEvent<SubmitCompleteHandler> {
     /**
      * The event type.
      */
@@ -127,7 +127,7 @@ public class FormPanel extends SimplePanel implements FiresFormEvents,
   /**
    * Fired when the form is submitted.
    */
-  public static class SubmitEvent extends AbstractEvent<SubmitHandler> {
+  public static class SubmitEvent extends GwtEvent<SubmitHandler> {
     /**
      * The event type.
      */

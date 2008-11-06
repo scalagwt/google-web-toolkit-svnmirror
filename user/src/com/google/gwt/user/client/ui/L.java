@@ -73,10 +73,10 @@ import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.shared.AbstractEvent;
+import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.event.shared.AbstractEvent.Type;
+import com.google.gwt.event.shared.GwtEvent.Type;
 
 import java.util.EventListener;
 
@@ -535,7 +535,7 @@ abstract class L<T> implements EventHandler {
     this.source = source;
   }
 
-  Widget source(AbstractEvent<?> event) {
+  Widget source(GwtEvent<?> event) {
     if (source == null) {
       return (Widget) event.getSource();
     } else {

@@ -15,7 +15,7 @@
  */
 package com.google.gwt.event.shared;
 
-import com.google.gwt.event.shared.AbstractEvent.Type;
+import com.google.gwt.event.shared.GwtEvent.Type;
 
 /**
  * HandlerRegistration instances are returned by
