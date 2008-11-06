@@ -15,7 +15,7 @@
  */
 package com.google.gwt.user.client.ui;
 
-import com.google.gwt.core.client.impl.RawJsMapImpl;
+import com.google.gwt.core.client.impl.PrivateMap;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
@@ -58,7 +58,7 @@ public class RootPanel extends AbsolutePanel {
     }
   }
 
-  private static RawJsMapImpl<RootPanel> rootPanels = new RawJsMapImpl<RootPanel>();
+  private static PrivateMap<RootPanel> rootPanels = new PrivateMap<RootPanel>();
   private static boolean hooked;
   private static WidgetCollection widgetsToDetach = new WidgetCollection(null);
 

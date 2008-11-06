@@ -15,7 +15,18 @@
  */
 package com.google.gwt.user.client.ui;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.HasAllKeyHandlers;
+import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.dom.client.HasKeyCodes;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
+import com.google.gwt.event.dom.client.KeyEvent;
+import com.google.gwt.event.dom.client.KeyPressEvent;
+import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.BeforeSelectionEvent;
 import com.google.gwt.event.logical.shared.BeforeSelectionHandler;
 import com.google.gwt.event.logical.shared.HasBeforeSelectionHandlers;
@@ -25,35 +36,50 @@ import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
-
 /**
  * A horizontal bar of folder-style tabs, most commonly used as part of a
  * {@link com.google.gwt.user.client.ui.TabPanel}.
  * <p>
  * <img class='gallery' src='TabBar.png'/>
  * </p>
- * <h3>CSS Style Rules</h3> <ul class='css'> <li>.gwt-TabBar { the tab bar
- * itself }</li> <li>.gwt-TabBar .gwt-TabBarFirst { the left edge of the bar }</li>
- * <li>.gwt-TabBar .gwt-TabBarFirst-wrapper { table cell around the left edge }</li>
- * <li>.gwt-TabBar .gwt-TabBarRest { the right edge of the bar }</li> <li>
- * .gwt-TabBar .gwt-TabBarRest-wrapper { table cell around the right edge }</li>
- * <li>.gwt-TabBar .gwt-TabBarItem { unselected tabs }</li> <li>.gwt-TabBar
- * .gwt-TabBarItem-wrapper { table cell around tab }</li> <li>.gwt-TabBar
- * .gwt-TabBarItem-selected { additional style for selected tabs }</li> <li>
- * .gwt-TabBar .gwt-TabBarItem-wrapper-selected { table cell around selected
- * tab}</li>
- * 
- * <li>.gwt-TabBar .gwt-TabBarItem-disabled { additional style for disabled tabs
- * }</li> <li>.gwt-TabBar .gwt-TabBarItem-wrapper-disabled { table cell around
- * disabled tab }</li> </ul>
- * 
+ * <h3>CSS Style Rules</h3>
+ * <ul class='css'>
+ * <li>.gwt-TabBar { the tab bar itself }</li>
+ * <li>.gwt-TabBar .gwt-TabBarFirst { the left edge of the bar }</li>
+ * <li>.gwt-TabBar .gwt-TabBarFirst-wrapper { table cell around the left edge }
+ * </li>
+ * <li>.gwt-TabBar .gwt-TabBarRest { the right edge of the bar }</li>
+ * <li>.gwt-TabBar .gwt-TabBarRest-wrapper { table cell around the right edge }
+ * </li>
+ * <li>.gwt-TabBar .gwt-TabBarItem { unselected tabs }</li>
+ * <li>.gwt-TabBar .gwt-TabBarItem-wrapper { table cell around tab }</li>
+ * <li>.gwt-TabBar .gwt-TabBarItem-selected { additional style for selected
+ * tabs } </li>
+ * <li>.gwt-TabBar .gwt-TabBarItem-wrapper-selected { table cell around
+ * selected tab }</li>
+ * <li>.gwt-TabBar .gwt-TabBarItem-disabled { additional style for disabled
+ * tabs } </li>
+ * <li>.gwt-TabBar .gwt-TabBarItem-wrapper-disabled { table cell around
+ * disabled tab }</li>
+ * </ul>
  * <p>
  * <h3>Example</h3>
  * {@example com.google.gwt.examples.TabBarExample}
  * </p>
- */
+ */ 
+@SuppressWarnings("deprecation")
 public class TabBar extends Composite implements SourcesTabEvents,
-    HasBeforeSelectionHandlers<Integer>, HasSelectionHandlers<Integer> {
+    HasBeforeSelectionHandlers<Integer>, HasSelectionHandlers<Integer>,
+    ClickListener, KeyboardListener {
+
+  /**
+   * Set of characteristic interfaces supported by {@link TabBar} tabs.
+   * 
+   * Note that this set might expand over time, so implement this interface at
+   * your own risk.
+   */
+  public interface TabWrapper extends HasAllKeyHandlers, HasClickHandlers {
+  }
 
   /**
    * <code>ClickDelegatePanel</code> decorates any widget with the minimal
@@ -61,7 +87,8 @@ public class TabBar extends Composite implements SourcesTabEvents,
    * {@link SourcesClickEvents} is not implemented due to the fact that only a
    * single observer is needed.
    */
-  private class ClickDelegatePanel extends Composite {
+  private class ClickDelegatePanel extends Composite implements
+      HasClickHandlers, HasAllKeyHandlers, TabWrapper {
     private SimplePanel focusablePanel;
     private boolean enabled = true;
 
@@ -78,6 +105,22 @@ public class TabBar extends Composite implements SourcesTabEvents,
       }
 
       sinkEvents(Event.ONCLICK | Event.ONKEYDOWN);
+    }
+
+    public HandlerRegistration addClickHandler(ClickHandler handler) {
+      return addHandler(handler, ClickEvent.getType());
+    }
+
+    public HandlerRegistration addKeyDownHandler(KeyDownHandler handler) {
+      return addHandler(handler, KeyDownEvent.getType());
+    }
+
+    public HandlerRegistration addKeyPressHandler(KeyPressHandler handler) {
+      return addDomHandler(handler, KeyPressEvent.getType());
+    }
+
+    public HandlerRegistration addKeyUpHandler(KeyUpHandler handler) {
+      return addDomHandler(handler, KeyUpEvent.getType());
     }
 
     public SimplePanel getFocusablePanel() {
@@ -98,14 +141,18 @@ public class TabBar extends Composite implements SourcesTabEvents,
       switch (DOM.eventGetType(event)) {
         case Event.ONCLICK:
           TabBar.this.selectTabByTabWidget(this);
+          TabBar.this.onClick(this);
           break;
 
         case Event.ONKEYDOWN:
           if (((char) DOM.eventGetKeyCode(event)) == HasKeyCodes.KEY_ENTER) {
             TabBar.this.selectTabByTabWidget(this);
           }
+          TabBar.this.onKeyDown(this, (char) event.getKeyCode(),
+              KeyEvent.getKeyModifiers(event));
           break;
       }
+      super.onBrowserEvent(event);
     }
 
     public void setEnabled(boolean enabled) {
@@ -234,6 +281,20 @@ public class TabBar extends Composite implements SourcesTabEvents,
   }
 
   /**
+   * Gets the wrapper for the given tab.
+   * 
+   * @param index the tab's index.
+   * @return the tab wrapper
+   */
+  public final TabWrapper getTabWrapper(int index) {
+    if (index >= getTabCount()) {
+      return null;
+    }
+    ClickDelegatePanel p = (ClickDelegatePanel) panel.getWidget(index + 1);
+    return p;
+  }
+
+  /**
    * Inserts a new tab at the specified index.
    * 
    * @param text the new tab's text
@@ -288,6 +349,37 @@ public class TabBar extends Composite implements SourcesTabEvents,
   }
 
   /**
+   * @deprecated add a click handler to the individual tab wrappers instead.
+   */
+  public void onClick(Widget sender) {
+  }
+
+  /**
+   * @deprecated add a key down handler to the individual tab wrappers instead.
+   */
+  public void onKeyDown(Widget sender, char keyCode, int modifiers) {
+  }
+
+  /**
+   * @deprecated this method has been doing nothing for the entire last release,
+   *             if what you wanted to do was to listen to key press events on
+   *             tabs, add the key press handler to the individual tab wrappers
+   *             instead.
+   */
+  public void onKeyPress(Widget sender, char keyCode, int modifiers) {
+  }
+
+  /**
+   * @deprecated this method has been doing nothing for the entire last release,
+   *             if what you wanted to do was to listen to key up events on
+   *             tabs, add the key up handler to the individual tab wrappers
+   *             instead.
+   * 
+   */
+  public void onKeyUp(Widget sender, char keyCode, int modifiers) {
+  }
+
+  /**
    * Removes the tab at the specified index.
    * 
    * @param index the index of the tab to be removed
@@ -318,8 +410,7 @@ public class TabBar extends Composite implements SourcesTabEvents,
    */
   public boolean selectTab(int index) {
     checkTabIndex(index);
-    BeforeSelectionEvent<?> event = BeforeSelectionEvent.fire(this,
-    index);
+    BeforeSelectionEvent<?> event = BeforeSelectionEvent.fire(this, index);
 
     if (event != null && event.isCanceled()) {
       return false;

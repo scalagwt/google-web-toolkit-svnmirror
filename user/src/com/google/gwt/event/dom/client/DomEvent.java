@@ -15,7 +15,7 @@
  */
 package com.google.gwt.event.dom.client;
 
-import com.google.gwt.core.client.impl.RawJsMapImpl;
+import com.google.gwt.core.client.impl.PrivateMap;
 import com.google.gwt.event.shared.AbstractEvent;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.HandlerManager;
@@ -39,7 +39,7 @@ public abstract class DomEvent<H extends EventHandler> extends AbstractEvent<H> 
   public static class Type<HandlerType extends EventHandler> extends
       AbstractEvent.Type<HandlerType> {
     private final int nativeEventTypeInt;
-    DomEvent<HandlerType> cached;
+    private DomEvent<HandlerType> cached;
 
     /**
      * Constructor.
@@ -74,15 +74,15 @@ public abstract class DomEvent<H extends EventHandler> extends AbstractEvent<H> 
       if (registered == null) {
         init();
       }
-      registered.put(eventName, this);
-      reverseRegistered.put(nativeEventTypeInt + "", this);
+      registered.unsafePut(eventName, this);
+      reverseRegistered.unsafePut(nativeEventTypeInt + "", this);
     }
 
     Type(int nativeEventTypeInt, String[] eventNames,
         DomEvent<HandlerType> cached) {
       this(nativeEventTypeInt, eventNames[0], cached);
       for (int i = 1; i < eventNames.length; i++) {
-        registered.put(eventNames[i], this);
+        registered.unsafePut(eventNames[i], this);
       }
     }
 
@@ -97,9 +97,9 @@ public abstract class DomEvent<H extends EventHandler> extends AbstractEvent<H> 
     }
   }
 
-  private static RawJsMapImpl<Type<?>> registered;
+  private static PrivateMap<Type<?>> registered;
 
-  private static RawJsMapImpl<Type<?>> reverseRegistered;
+  private static PrivateMap<Type<?>> reverseRegistered;
 
   /**
    * Fires the given native event on the manager.
@@ -108,7 +108,7 @@ public abstract class DomEvent<H extends EventHandler> extends AbstractEvent<H> 
    * @param manager the event manager
    */
   public static void fireNativeEvent(Event nativeEvent, HandlerManager manager) {
-    final DomEvent.Type<?> typeKey = registered.get(nativeEvent.getType());
+    final DomEvent.Type<?> typeKey = registered.unsafeGet(nativeEvent.getType());
     if (typeKey != null) {
       if (manager != null) {
         // Store and restore native event just in case we are in recursive
@@ -139,7 +139,7 @@ public abstract class DomEvent<H extends EventHandler> extends AbstractEvent<H> 
   public static void unsafeFireNativeEvent(int eventType,
       HandlerManager handlers) {
     if (registered != null) {
-      final DomEvent.Type<?> typeKey = reverseRegistered.get(eventType + "");
+      final DomEvent.Type<?> typeKey = reverseRegistered.unsafeGet(eventType + "");
       if (typeKey != null) {
         if (handlers != null) {
           // Store and restore native event just in case we are in recursive
@@ -160,8 +160,8 @@ public abstract class DomEvent<H extends EventHandler> extends AbstractEvent<H> 
 
   // This method can go away once we have eager clinits.
   static void init() {
-    registered = new RawJsMapImpl<Type<?>>();
-    reverseRegistered = new RawJsMapImpl<Type<?>>();
+    registered = new PrivateMap<Type<?>>();
+    reverseRegistered = new PrivateMap<Type<?>>();
     // At the cost of a bit extra constanct
   }
 
