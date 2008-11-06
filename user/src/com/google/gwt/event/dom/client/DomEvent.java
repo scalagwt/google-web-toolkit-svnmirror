@@ -16,8 +16,8 @@
 package com.google.gwt.event.dom.client;
 
 import com.google.gwt.core.client.impl.PrivateMap;
-import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.EventHandler;
+import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Event;
 
@@ -32,54 +32,55 @@ import com.google.gwt.user.client.Event;
  */
 public abstract class DomEvent<H extends EventHandler> extends GwtEvent<H> {
   /**
-   * Type class used by dom event subclasses.
+   * Type class used by dom event subclasses. Type is specialized for dom in
+   * order to carry information about the native event.
    * 
-   * @param <HandlerType> handler type
+   * @param <H> handler type
    */
-  public static class Type<HandlerType extends EventHandler> extends
-      GwtEvent.Type<HandlerType> {
-    private final int nativeEventTypeInt;
-    private DomEvent<HandlerType> cached;
+  public static class Type<H extends EventHandler> extends GwtEvent.Type<H> {
+    private final int eventToSink;
+    private DomEvent<H> flyweight;
 
     /**
      * Constructor.
      * 
-     * @param nativeEventTypeInt the native event type
+     * @param eventToSink the native event type to sink
+     * 
      */
-    public Type(int nativeEventTypeInt) {
-      this.nativeEventTypeInt = nativeEventTypeInt;
+    public Type(int eventToSink) {
+      this.eventToSink = eventToSink;
     }
 
     /**
-     * This is a highly dangerous method that allows dom event types to be
-     * triggered by the {@link DomEvent#fireNativeEvent(Event, HandlerManager)}
-     * method. It should only be used by implementors supporting new dom events.
+     * This constructor allows dom event types to be triggered by the
+     * {@link DomEvent#fireNativeEvent(Event, HandlerManager)} method. It should
+     * only be used by implementors supporting new dom events.
      * <p>
      * Any such dom event type must act as a flyweight around a native event
      * object.
      * </p>
      * 
      * 
-     * @param nativeEventTypeInt the integer value used by sink events to set up
-     *          event handling for this dom type
-     * @param eventName the raw js event name
-     * @param cached the cached object instance that will be used as a flyweight
+     * @param eventToSink the integer value used by sink events to set up event
+     *          handling for this dom type
+     * @param eventName the raw native event name
+     * @param flyweight the instance that will be used as a flyweight
      *          to wrap a native event
      */
-    protected Type(int nativeEventTypeInt, String eventName,
-        DomEvent<HandlerType> cached) {
-      this.cached = cached;
-      // All clinit activity should take place here for DomEvent.
-      this.nativeEventTypeInt = nativeEventTypeInt;
+    protected Type(int eventToSink, String eventName, DomEvent<H> flyweight) {
+      this.flyweight = flyweight;
+      this.eventToSink = eventToSink;
+
+      // Until we have eager clinits implemented, we are manually initializing
+      // DomEvent here.
       if (registered == null) {
         init();
       }
       registered.unsafePut(eventName, this);
-      reverseRegistered.unsafePut(nativeEventTypeInt + "", this);
+      reverseRegistered.put(eventToSink, this);
     }
 
-    Type(int nativeEventTypeInt, String[] eventNames,
-        DomEvent<HandlerType> cached) {
+    Type(int nativeEventTypeInt, String[] eventNames, DomEvent<H> cached) {
       this(nativeEventTypeInt, eventNames[0], cached);
       for (int i = 1; i < eventNames.length; i++) {
         registered.unsafePut(eventNames[i], this);
@@ -87,13 +88,15 @@ public abstract class DomEvent<H extends EventHandler> extends GwtEvent<H> {
     }
 
     /**
-     * Gets the native {@link Event} type integer corresponding to the native
-     * event.
+     * Gets the integer defined by the native {@link Event} type needed to hook
+     * up event handling when the user calls
+     * {@link com.google.gwt.user.client.DOM#sinkEvents(com.google.gwt.user.client.Element, int)}
+     * .
      * 
      * @return the native event type
      */
-    public int getNativeEventTypeInt() {
-      return nativeEventTypeInt;
+    public int getEventToSink() {
+      return eventToSink;
     }
   }
 
@@ -102,22 +105,20 @@ public abstract class DomEvent<H extends EventHandler> extends GwtEvent<H> {
   private static PrivateMap<Type<?>> reverseRegistered;
 
   /**
-   * Fires the given native event on the manager.
+   * Fires the given native event on the specified handlers.
    * 
    * @param nativeEvent the native event
-   * @param manager the event manager
+   * @param handlers the event manager containing the handlers to fire
    */
-  public static void fireNativeEvent(Event nativeEvent, HandlerManager manager) {
+  public static void fireNativeEvent(Event nativeEvent, HandlerManager handlers) {
     final DomEvent.Type<?> typeKey = registered.unsafeGet(nativeEvent.getType());
-    if (typeKey != null) {
-      if (manager != null) {
-        // Store and restore native event just in case we are in recursive
-        // loop.
-        Event currentNative = typeKey.cached.nativeEvent;
-        typeKey.cached.setNativeEvent(nativeEvent);
-        manager.fireEvent(typeKey.cached);
-        typeKey.cached.setNativeEvent(currentNative);
-      }
+    if (typeKey != null && handlers != null) {
+      // Store and restore native event just in case we are in recursive
+      // loop.
+      Event currentNative = typeKey.flyweight.nativeEvent;
+      typeKey.flyweight.setNativeEvent(nativeEvent);
+      handlers.fireEvent(typeKey.flyweight);
+      typeKey.flyweight.setNativeEvent(currentNative);
     }
   }
 
@@ -139,20 +140,18 @@ public abstract class DomEvent<H extends EventHandler> extends GwtEvent<H> {
   public static void unsafeFireNativeEvent(int eventType,
       HandlerManager handlers) {
     if (registered != null) {
-      final DomEvent.Type<?> typeKey = reverseRegistered.unsafeGet(eventType + "");
-      if (typeKey != null) {
-        if (handlers != null) {
-          // Store and restore native event just in case we are in recursive
-          // loop.
-          Event currentNative = null;
-          if (typeKey.cached.isLive()) {
-            currentNative = typeKey.cached.nativeEvent;
-          }
-          typeKey.cached.setNativeEvent(null);
-          handlers.fireEvent(typeKey.cached);
-          if (currentNative != null) {
-            typeKey.cached.setNativeEvent(currentNative);
-          }
+      final DomEvent.Type<?> typeKey = reverseRegistered.get(eventType);
+      if (typeKey != null && handlers != null) {
+        // Store and restore native event just in case we are in recursive
+        // loop.
+        Event currentNative = null;
+        if (typeKey.flyweight.isLive()) {
+          currentNative = typeKey.flyweight.nativeEvent;
+        }
+        typeKey.flyweight.setNativeEvent(null);
+        handlers.fireEvent(typeKey.flyweight);
+        if (currentNative != null) {
+          typeKey.flyweight.setNativeEvent(currentNative);
         }
       }
     }
@@ -162,7 +161,6 @@ public abstract class DomEvent<H extends EventHandler> extends GwtEvent<H> {
   static void init() {
     registered = new PrivateMap<Type<?>>();
     reverseRegistered = new PrivateMap<Type<?>>();
-    // At the cost of a bit extra constanct
   }
 
   private Event nativeEvent;
