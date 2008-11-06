@@ -17,6 +17,8 @@ package com.google.gwt.museum.client.defaultmuseum;
 
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.event.dom.client.MouseDownEvent;
+import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.museum.client.common.AbstractIssue;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -33,7 +35,7 @@ import java.util.Map;
 public class VisualsForDialogBox extends AbstractIssue {
 
   enum VisibleEvents {
-    mouseDown, mouseEnter, mouseLeave, mouseMove, mouseUp
+    mouseDown, mouseEnter, mouseLeave, mouseMove, mouseUp,captionMouseDown
   }
 
   private final class VisibleDialogBox extends DialogBox {
@@ -128,6 +130,11 @@ public class VisualsForDialogBox extends AbstractIssue {
       super.onMouseUp(sender, x, y);
     }
 
+    public void pass(VisibleEvents event) {
+      eventToElement.get(event).setInnerHTML(
+          "<span style='color:green'>pass</span>");
+    }
+
     private Element addResultRow(String eventName) {
       int row = layout.getRowCount();
       layout.setHTML(row, 0, eventName);
@@ -139,11 +146,6 @@ public class VisualsForDialogBox extends AbstractIssue {
     private boolean isCloseBoxEvent(Event event) {
       return Document.get().getElementById("vis-closebox").isOrHasChild(
           event.getTarget());
-    }
-
-    private void pass(VisibleEvents event) {
-      eventToElement.get(event).setInnerHTML(
-          "<span style='color:green'>pass</span>");
     }
   }
 
@@ -180,8 +182,13 @@ public class VisualsForDialogBox extends AbstractIssue {
   private VisibleDialogBox showVisibleDialog() {
     final VisibleDialogBox dialog = new VisibleDialogBox();
     dialog.setModal(false);
-
     dialog.center();
+    dialog.getCaptionWrapper().addMouseDownHandler(new MouseDownHandler(){
+
+      public void onMouseDown(MouseDownEvent event) {
+        dialog.pass(VisibleEvents.captionMouseDown);
+      }
+    });
 
     return dialog;
   }
