@@ -700,13 +700,13 @@ public class Window {
   /**
    * Adds this handler to the Window.
    * 
-   * @param <HandlerType> the type of handler to add
+   * @param <H> the type of handler to add
    * @param type the event type
    * @param handler the handler
    * @return {@link HandlerRegistration} used to remove the handler
    */
-  private static <HandlerType extends EventHandler> HandlerRegistration addHandler(
-      GwtEvent.Type<HandlerType> type, final HandlerType handler) {
+  private static <H extends EventHandler> HandlerRegistration addHandler(
+      GwtEvent.Type<H> type, final H handler) {
     return getHandlers().addHandler(type, handler);
   }
 
