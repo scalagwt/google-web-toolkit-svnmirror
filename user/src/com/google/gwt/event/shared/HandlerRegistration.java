@@ -13,48 +13,23 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.google.gwt.event.shared;
 
-import com.google.gwt.event.shared.GwtEvent.Type;
-
 /**
- * HandlerRegistration instances are returned by
- * HandlerManager.addEventHandler() and used to remove event handler
- * registrations.
+ * Registration returned from a call to
+ * {@link HandlerManager#addHandler(com.google.gwt.event.shared.GwtEvent.Type, EventHandler)}
+ * . Use the handler registration to remove handlers when they are no longer
+ * needed.
+ * 
+ * Note, this interface is under the control of the {@link HandlerManager} class
+ * and may be expanded over time, so extend {@link DefaultHandlerRegistration}
+ * if you do not wish to get compiler errors if we extend the handler registry
+ * functionality.
  */
-public class HandlerRegistration {
-
-  private HandlerManager manager;
-  EventHandler handler;
-  private Type<?> type;
-
-  /**
-   * Creates a new handler registration.
-   * 
-   * @param <H> Handler type
-   * 
-   * @param manager the handler manager
-   * @param type the event type
-   * @param handler the handler
-   */
-  protected <H extends EventHandler> HandlerRegistration(
-      HandlerManager manager, Type<H> type, H handler) {
-    this.manager = manager;
-    this.handler = handler;
-    this.type = type;
-  }
-
+public interface HandlerRegistration {
   /**
    * Removes the given handler from its manager.
    */
-  @SuppressWarnings("unchecked")
-  // This is safe because when the elements were passed in they conformed to
-  // Type<H>,H.
-  public void removeHandler() {
-    manager.removeHandler((Type<EventHandler>) type, (EventHandler) handler);
-  }
-
-  EventHandler getHandler() {
-    return handler;
-  }
+  void removeHandler();
 }

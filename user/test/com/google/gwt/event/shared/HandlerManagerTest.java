@@ -24,8 +24,8 @@ import com.google.gwt.user.client.Event;
 
 /**
  * Handler manager test.
- * 
  */
+@SuppressWarnings("deprecation")
 public class HandlerManagerTest extends HandlerTestBase {
 
   public void testAddHandlers() {

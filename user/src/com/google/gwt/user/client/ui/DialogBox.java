@@ -49,8 +49,6 @@ import com.google.gwt.user.client.Window;
  * <li>.gwt-DialogBox .Caption { the caption }</li>
  * <li>.gwt-DialogBox .dialogContent { the wrapepr around the content }</li>
  * <li>.gwt-DialogBox .dialogTopLeft { the top left cell }</li>
- * <li>.gwt-DialogBox .dialogTopCenterInner { the inner element of the cell }</li>
- * <li>.gwt-DialogBox .dialogTopRight { the top right cell }</li> <li>
  * .gwt-DialogBox .dialogTopRightInner { the inner element of the cell }</li>
  * <li>.gwt-DialogBox .dialogMiddleLeft { the middle left cell }</li> <li>
  * .gwt-DialogBox .dialogMiddleLeftInner { the inner element of the cell }</li>
@@ -74,14 +72,15 @@ import com.google.gwt.user.client.Window;
 public class DialogBox extends DecoratedPopupPanel implements HasHTML, HasText,
     MouseListener {
   /**
-   * Set of characteristic interfaces supported by the {@link DialogBox} caption wrappers.
+   * Set of characteristic interfaces supported by the {@link DialogBox} caption
+   * wrappers.
    * 
    * Note that this set might expand over time, so implement this interface at
    * your own risk.
    */
   public interface CaptionWrapper extends HasAllMouseHandlers {
   }
-  
+
   private class CaptionWrapperImpl extends HTML implements CaptionWrapper {
   }
 
@@ -113,7 +112,7 @@ public class DialogBox extends DecoratedPopupPanel implements HasHTML, HasText,
    * The default style name.
    */
   private static final String DEFAULT_STYLENAME = "gwt-DialogBox";
-  
+
   private CaptionWrapperImpl caption = new CaptionWrapperImpl();
   private boolean dragging;
   private int dragStartX, dragStartY;
@@ -137,7 +136,7 @@ public class DialogBox extends DecoratedPopupPanel implements HasHTML, HasText,
    * {@link #add(Widget)}.
    * 
    * @param autoHide <code>true</code> if the dialog should be automatically
-   *          hidden when the user clicks outside of it
+   * hidden when the user clicks outside of it
    */
   public DialogBox(boolean autoHide) {
     this(autoHide, true);
@@ -149,9 +148,9 @@ public class DialogBox extends DecoratedPopupPanel implements HasHTML, HasText,
    * {@link #add(Widget)}.
    * 
    * @param autoHide <code>true</code> if the dialog should be automatically
-   *          hidden when the user clicks outside of it
+   * hidden when the user clicks outside of it
    * @param modal <code>true</code> if keyboard and mouse events for widgets not
-   *          contained by the dialog should be ignored
+   * contained by the dialog should be ignored
    */
   public DialogBox(boolean autoHide, boolean modal) {
     super(autoHide, modal, "dialog");
@@ -234,7 +233,7 @@ public class DialogBox extends DecoratedPopupPanel implements HasHTML, HasText,
 
   /**
    * @deprecated Use {@link #beginDragging} instead and {@link #getCaption}
-   *             instead
+   * instead
    */
   @Deprecated
   public void onMouseDown(Widget sender, int x, int y) {

@@ -16,7 +16,7 @@
 
 package com.google.gwt.museum.client.common;
 
-import com.google.gwt.event.dom.client.AllKeyHandlers;
+import com.google.gwt.event.dom.client.HandlesAllKeyEvents;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -59,7 +59,7 @@ import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
  * @param <T> target type
  */
 @SuppressWarnings("deprecation")
-public class EventReporter<V, T> extends AllKeyHandlers implements
+public class EventReporter<V, T> extends HandlesAllKeyEvents implements
     ChangeListener, FocusListener, ValueChangeHandler<V>,
     SelectionHandler<Suggestion>, SuggestionHandler, KeyboardListener,
     ChangeHandler, BlurHandler, FocusHandler, ClickHandler, ClickListener,

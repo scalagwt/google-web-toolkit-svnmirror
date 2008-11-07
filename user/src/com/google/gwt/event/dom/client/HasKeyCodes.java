@@ -22,79 +22,82 @@ package com.google.gwt.event.dom.client;
  * becomes a pain, as almost all current listeners use the short form
  * <codE>KEY_ALT</code> when referring to key codes.
  */
+
+// Need to have a team discussion to decide if we want this pattern in general.
+// Until then, just turning checkstyle off.
 // CHECKSTYLE_OFF
 @SuppressWarnings("all")
 public interface HasKeyCodes {
   /**
    * Alt key code.
    */
-  public static final int KEY_ALT = 18;
+  int KEY_ALT = 18;
 
   /**
    * Backspace key code.
    */
-  public static final int KEY_BACKSPACE = 8;
+  int KEY_BACKSPACE = 8;
 
   /**
    * Control key code.
    */
-  public static final int KEY_CTRL = 17;
+  int KEY_CTRL = 17;
 
   /**
    * Delete key code.
    */
-  public static final int KEY_DELETE = 46;
+  int KEY_DELETE = 46;
 
   /**
    * Down arrow code.
    */
-  public static final int KEY_DOWN = 40;
+  int KEY_DOWN = 40;
 
   /**
    * End key code.
    */
-  public static final int KEY_END = 35;
+  int KEY_END = 35;
   /**
    * Enter key code.
    */
-  public static final int KEY_ENTER = 13;
+  int KEY_ENTER = 13;
   /**
    * Escape key code.
    */
-  public static final int KEY_ESCAPE = 27;
+  int KEY_ESCAPE = 27;
   /**
    * Home key code.
    */
-  public static final int KEY_HOME = 36;
+  int KEY_HOME = 36;
   /**
    * Left key code.
    */
-  public static final int KEY_LEFT = 37;
+  int KEY_LEFT = 37;
   /**
    * Page down key code.
    */
-  public static final int KEY_PAGEDOWN = 34;
+  int KEY_PAGEDOWN = 34;
   /**
    * Page up key code.
    */
-  public static final int KEY_PAGEUP = 33;
+  int KEY_PAGEUP = 33;
   /**
    * Right arrow key code.
    */
-  public static final int KEY_RIGHT = 39;
+  int KEY_RIGHT = 39;
 
   /**
    * Shift key code.
    */
-  public static final int KEY_SHIFT = 16;
+  int KEY_SHIFT = 16;
   /**
    * Tab key code.
    */
-  public static final int KEY_TAB = 9;
+  int KEY_TAB = 9;
 
   /**
    * Up Arrow key code.
    */
-  public static final int KEY_UP = 38;
+  int KEY_UP = 38;
 
 }

@@ -17,17 +17,13 @@ package com.google.gwt.event.dom.client;
 
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.junit.client.GWTTestCase;
+import com.google.gwt.event.shared.HandlerTestBase;
 
 /**
  * Events test.
  */
 // TODO(ECC) check that max handlers work properly.
-public class GWTEventsTest extends GWTTestCase {
-
-  public String getModuleName() {
-    return "com.google.gwt.event.Event";
-  }
+public class DomEventTest extends HandlerTestBase {
 
   HandlerManager manager;
 
@@ -46,8 +42,8 @@ public class GWTEventsTest extends GWTTestCase {
             flag.flag = true;
           }
         });
-    HandlerRegistration upRegistration = manager.addHandler(KeyUpEvent.getType(),
-        new KeyUpHandler() {
+    HandlerRegistration upRegistration = manager.addHandler(
+        KeyUpEvent.getType(), new KeyUpHandler() {
           public void onKeyUp(KeyUpEvent event) {
             flag.flag = true;
           }
@@ -135,7 +131,7 @@ public class GWTEventsTest extends GWTTestCase {
         "onDoubleClick");
   }
 
-  private void checkFire(DomEvent event, HandlerRegistration registration,
+  private void checkFire(DomEvent<?> event, HandlerRegistration registration,
       Flag flag, String eventName) {
 
     flag.flag = false;

@@ -15,7 +15,7 @@
  */
 package com.google.gwt.user.client.ui;
 
-import com.google.gwt.event.dom.client.AllKeyHandlers;
+import com.google.gwt.event.dom.client.HandlesAllKeyEvents;
 import com.google.gwt.event.dom.client.HasAllKeyHandlers;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
@@ -692,7 +692,7 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
   }
 
   private void addEventsToTextBox() {
-    class TextBoxEvents extends AllKeyHandlers implements
+    class TextBoxEvents extends HandlesAllKeyEvents implements
         ValueChangeHandler<String> {
 
       public void onKeyDown(KeyDownEvent event) {

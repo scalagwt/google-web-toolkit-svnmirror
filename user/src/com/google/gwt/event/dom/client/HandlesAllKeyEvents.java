@@ -17,38 +17,38 @@
 package com.google.gwt.event.dom.client;
 
 /**
- * Adaptor used to create and add all the Key handlers at once.
+ * Receiver used to handle all key events at once.
  * 
- * <br/> WARNING, PLEASE READ: As this class is intended for developers who wish
- * to create all key events in GWT, new key handlers will be added to it.
+ * WARNING, PLEASE READ: As this class is intended for developers who wish to
+ * handle all key events in GWT, new key handler interfaces will be added to it.
  * Therefore, updates to GWT could cause breaking API changes.
  * 
  */
-public abstract class AllKeyHandlers implements KeyDownHandler, KeyUpHandler,
-    KeyPressHandler {
+public abstract class HandlesAllKeyEvents implements KeyDownHandler,
+    KeyUpHandler, KeyPressHandler {
 
   /**
-   * Convenience method to add all key handlers at once.
+   * Convenience method used to handle all key events from an event source.
    * 
-   * @param <EventHandler> event handler type
-   * @param source event source
-   * @param handlers handlers to add
+   * @param <H> receiver type, must implement all key handlers
+   * @param eventSource the event source
+   * @param reciever the receiver implementing all key handlers
    */
-  public static <EventHandler extends KeyDownHandler & KeyUpHandler & KeyPressHandler> void addHandlers(
-      HasAllKeyHandlers source, EventHandler handlers) {
-    source.addKeyDownHandler(handlers);
-    source.addKeyPressHandler(handlers);
-    source.addKeyUpHandler(handlers);
+  public static <H extends KeyDownHandler & KeyUpHandler & KeyPressHandler> void addHandlers(
+      HasAllKeyHandlers eventSource, H reciever) {
+    eventSource.addKeyDownHandler(reciever);
+    eventSource.addKeyPressHandler(reciever);
+    eventSource.addKeyUpHandler(reciever);
   }
 
   /**
    * Constructor.
    */
-  public AllKeyHandlers() {
+  public HandlesAllKeyEvents() {
   }
 
   /**
-   * Adds all the key handlers to the given event source.
+   * Convenience method to handle all key events from an event source.
    * 
    * @param source the event source
    */

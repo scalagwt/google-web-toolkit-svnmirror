@@ -17,8 +17,7 @@
 package com.google.gwt.user.client.ui;
 
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.event.dom.client.AllFocusHandlers;
-import com.google.gwt.event.dom.client.AllKeyHandlers;
+import com.google.gwt.event.dom.client.HandlesAllKeyEvents;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -29,6 +28,7 @@ import com.google.gwt.event.dom.client.ErrorEvent;
 import com.google.gwt.event.dom.client.ErrorHandler;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
+import com.google.gwt.event.dom.client.HandlesAllFocusEvents;
 import com.google.gwt.event.dom.client.HasAllFocusHandlers;
 import com.google.gwt.event.dom.client.HasAllKeyHandlers;
 import com.google.gwt.event.dom.client.HasChangeHandlers;
@@ -167,7 +167,7 @@ abstract class L<T> implements EventHandler {
     public static <EventSourceType extends Widget & HasAllFocusHandlers> Focus add(
         EventSourceType source, FocusListener listener) {
       Focus rtn = new Focus(listener);
-      AllFocusHandlers.addHandlers(source, rtn);
+      HandlesAllFocusEvents.handle(source, rtn);
       return rtn;
     }
 
@@ -473,7 +473,7 @@ abstract class L<T> implements EventHandler {
 
     public static <EventSourceType extends Widget & HasAllKeyHandlers> void add(
         EventSourceType source, KeyboardListener listener) {
-      AllKeyHandlers.addHandlers(source, new Keyboard(listener));
+      HandlesAllKeyEvents.addHandlers(source, new Keyboard(listener));
     }
 
     public static void remove(Widget eventSource, KeyboardListener listener) {

@@ -26,10 +26,11 @@ import java.util.List;
  * handlers on passed in events.
  */
 public class HandlerManager {
+
   // Used to optimize the JavaScript handler container structure.
   static int EXPECTED_HANDLERS = 5;
-
   private static final boolean useJs = GWT.isClient();
+
   private static int index = -EXPECTED_HANDLERS;
 
   /**
@@ -111,7 +112,7 @@ public class HandlerManager {
         javaRegistry.addHandler(type, handler);
       }
     }
-    return new HandlerRegistration(this, type, handler);
+    return new DefaultHandlerRegistration(this, type, handler);
   }
 
   /**
