@@ -26,12 +26,10 @@ import java.util.List;
  * handlers on passed in events.
  */
 public class HandlerManager {
-
   // Used to optimize the JavaScript handler container structure.
   static int EXPECTED_HANDLERS = 5;
   private static final boolean useJs = GWT.isClient();
-
-  private static int index = -EXPECTED_HANDLERS;
+  private static int index;
 
   /**
    * Is the given event live?
@@ -95,14 +93,14 @@ public class HandlerManager {
   /**
    * Adds a handle.
    * 
-   * @param <HandlerType> The type of handler.
+   * @param <H> The type of handler.
    * @param type the event type associated with this handler
    * @param handler the handler
    * @return the handler registration, can be stored in order to remove the
    * handler later
    */
-  public final <HandlerType extends EventHandler> HandlerRegistration addHandler(
-      GwtEvent.Type<HandlerType> type, final HandlerType handler) {
+  public final <H extends EventHandler> HandlerRegistration addHandler(
+      GwtEvent.Type<H> type, final H handler) {
     if (useJs) {
       javaScriptRegistry.addHandler(this, type, handler);
     } else {
@@ -165,13 +163,13 @@ public class HandlerManager {
   /**
    * Gets the handler at the given index.
    * 
-   * @param <HandlerType> the event handler type
+   * @param <H> the event handler type
    * @param index the index
    * @param type the handler's event type
    * @return the given handler
    */
-  public <HandlerType extends EventHandler> HandlerType getHandler(
-      GwtEvent.Type<HandlerType> type, int index) {
+  public <H extends EventHandler> H getHandler(
+      GwtEvent.Type<H> type, int index) {
     if (useJs) {
       return javaScriptRegistry.getHandler(type, index);
     } else {
@@ -208,13 +206,13 @@ public class HandlerManager {
    * applications should call {@link HandlerRegistration#removeHandler()}
    * instead.
    * 
-   * @param <HandlerType> handler type
+   * @param <H> handler type
    * 
    * @param type the event type
    * @param handler the handler
    */
-  public <HandlerType extends EventHandler> void removeHandler(
-      GwtEvent.Type<HandlerType> type, final HandlerType handler) {
+  public <H extends EventHandler> void removeHandler(
+      GwtEvent.Type<H> type, final H handler) {
     if (firingDepth > 0) {
       enqueueRemove(type, handler);
     } else {
