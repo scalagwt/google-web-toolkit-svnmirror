@@ -98,7 +98,7 @@ public class HandlerManager {
    * @param type the event type associated with this handler
    * @param handler the handler
    * @return the handler registration, can be stored in order to remove the
-   *         handler later
+   * handler later
    */
   public final <HandlerType extends EventHandler> HandlerRegistration addHandler(
       GwtEvent.Type<HandlerType> type, final HandlerType handler) {
