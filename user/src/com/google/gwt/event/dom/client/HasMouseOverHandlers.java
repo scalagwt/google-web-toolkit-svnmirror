@@ -18,8 +18,8 @@ package com.google.gwt.event.dom.client;
 import com.google.gwt.event.shared.HandlerRegistration;
 
 /**
- * A widget that implements this interface is a public source of
- * {@link MouseOverEvent} events.
+ * A widget that implements this interface provides registration for
+ * {@link MouseOverHandler} instances.
  */
 public interface HasMouseOverHandlers {
   /**

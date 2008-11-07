@@ -26,14 +26,13 @@ public class ErrorEvent extends DomEvent<ErrorHandler> {
    * Event type for error events. Represents the meta-data associated with this
    * event.
    */
-  private static Type<ErrorHandler> TYPE = new Type<ErrorHandler>(
+  private static final Type<ErrorHandler> TYPE = new Type<ErrorHandler>(
       Event.ONERROR, "error", new ErrorEvent());
 
   /**
-   * Ensures the existence of the handler TYPE, so the system knows to start
-   * firing events and then returns it.
+   * Gets the event type associated with error events.
    * 
-   * @return the handler TYPE
+   * @return the handler type
    */
   public static Type<ErrorHandler> getType() {
     return TYPE;
@@ -41,8 +40,8 @@ public class ErrorEvent extends DomEvent<ErrorHandler> {
 
   /**
    * Protected constructor, use
-   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)}
-   * to fire click events.
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)
+   * to fire error events.
    */
   protected ErrorEvent() {
   }

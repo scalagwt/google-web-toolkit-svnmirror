@@ -26,14 +26,13 @@ public class KeyUpEvent extends KeyCodeEvent<KeyUpHandler> {
    * Event type for key up events. Represents the meta-data associated with this
    * event.
    */
-  private static Type<KeyUpHandler> TYPE = new Type<KeyUpHandler>(
+  private static final Type<KeyUpHandler> TYPE = new Type<KeyUpHandler>(
       Event.ONKEYUP, "keyup", new KeyUpEvent());
 
   /**
-   * Ensures the existence of the handler TYPE, so the system knows to start
-   * firing events and then returns it.
+   * Gets the event type associated with key up events.
    * 
-   * @return the handler TYPE
+   * @return the handler type
    */
   public static Type<KeyUpHandler> getType() {
     return TYPE;
@@ -41,8 +40,8 @@ public class KeyUpEvent extends KeyCodeEvent<KeyUpHandler> {
 
   /**
    * Protected constructor, use
-   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)}
-   * to fire click events.
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)
+   * to fire key up events.
    */
   protected KeyUpEvent() {
   }

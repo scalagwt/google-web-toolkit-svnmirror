@@ -27,14 +27,13 @@ public class MouseOutEvent extends MouseEvent<MouseOutHandler> {
    * Event type for mouse out events. Represents the meta-data associated with
    * this event.
    */
-  private static Type<MouseOutHandler> TYPE = new Type<MouseOutHandler>(
+  private static final Type<MouseOutHandler> TYPE = new Type<MouseOutHandler>(
       Event.ONMOUSEOUT, "mouseout", new MouseOutEvent());
 
   /**
-   * Ensures the existence of the handler TYPE, so the system knows to start
-   * firing events and then returns it.
+   * Gets the event type associated with mouse out events.
    * 
-   * @return the handler TYPE
+   * @return the handler type
    */
   public static Type<MouseOutHandler> getType() {
     return TYPE;
@@ -42,8 +41,8 @@ public class MouseOutEvent extends MouseEvent<MouseOutHandler> {
 
   /**
    * Protected constructor, use
-   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)}
-   * to fire click events.
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)
+   * to fire mouse out events.
    */
   protected MouseOutEvent() {
   }

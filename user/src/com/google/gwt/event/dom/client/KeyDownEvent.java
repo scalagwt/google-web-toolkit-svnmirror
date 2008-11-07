@@ -26,14 +26,13 @@ public class KeyDownEvent extends KeyCodeEvent<KeyDownHandler> {
    * Event type for key down events. Represents the meta-data associated with
    * this event.
    */
-  private static Type<KeyDownHandler> TYPE = new Type<KeyDownHandler>(
+  private static final Type<KeyDownHandler> TYPE = new Type<KeyDownHandler>(
       Event.ONKEYDOWN, "keydown", new KeyDownEvent());
 
   /**
-   * Ensures the existence of the handler TYPE, so the system knows to start
-   * firing events and then returns it.
+   * Gets the event type associated with key down events.
    * 
-   * @return the handler TYPE
+   * @return the handler type
    */
   public static Type<KeyDownHandler> getType() {
     return TYPE;
@@ -41,8 +40,8 @@ public class KeyDownEvent extends KeyCodeEvent<KeyDownHandler> {
 
   /**
    * Protected constructor, use
-   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)}
-   * to fire click events.
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)
+   * to fire key down events.
    */
   protected KeyDownEvent() {
   }

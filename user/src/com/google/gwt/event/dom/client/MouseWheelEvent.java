@@ -26,27 +26,22 @@ public class MouseWheelEvent extends MouseEvent<MouseWheelHandler> {
    * Event type for mouse wheel events. Represents the meta-data associated with
    * this event.
    */
-  private static Type<MouseWheelHandler> TYPE;
+  private static final Type<MouseWheelHandler> TYPE = new Type<MouseWheelHandler>(
+      Event.ONMOUSEWHEEL, "mousewheel", new MouseWheelEvent());
 
   /**
-   * Ensures the existence of the handler TYPE, so the system knows to start
-   * firing events and then returns it.
+   * Gets the event type associated with mouse wheel events.
    * 
-   * @return the handler TYPE
+   * @return the handler type
    */
   public static Type<MouseWheelHandler> getType() {
-    if (TYPE == null) {
-      String[] events = {"mousewheel", "DOMMouseScroll"};
-      TYPE = new Type<MouseWheelHandler>(Event.ONMOUSEWHEEL, events,
-          new MouseWheelEvent());
-    }
     return TYPE;
   }
 
   /**
    * Protected constructor, use
-   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)}
-   * to fire click events.
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)
+   * to fire mouse wheel events.
    */
   protected MouseWheelEvent() {
   }

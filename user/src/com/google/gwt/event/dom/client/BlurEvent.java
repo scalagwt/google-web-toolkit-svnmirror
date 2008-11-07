@@ -26,14 +26,13 @@ public class BlurEvent extends DomEvent<BlurHandler> {
    * Event type for blur events. Represents the meta-data associated with this
    * event.
    */
-  private static final Type<BlurHandler> TYPE = new Type<BlurHandler>(Event.ONBLUR,
-      "blur", new BlurEvent());
+  private static final Type<BlurHandler> TYPE = new Type<BlurHandler>(
+      Event.ONBLUR, "blur", new BlurEvent());
 
   /**
-   * Ensures the existence of the handler TYPE, so the system knows to start
-   * firing events and then returns it.
+   * Gets the event type associated with blur events.
    * 
-   * @return the handler TYPE
+   * @return the handler type
    */
   public static Type<BlurHandler> getType() {
     return TYPE;
@@ -41,7 +40,7 @@ public class BlurEvent extends DomEvent<BlurHandler> {
 
   /**
    * Protected constructor, use
-   * {@link DomEvent#fireNativeEvent}
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)
    * to fire blur events.
    */
   protected BlurEvent() {

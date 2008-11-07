@@ -26,14 +26,13 @@ public class LoadEvent extends DomEvent<LoadHandler> {
    * Event type for load events. Represents the meta-data associated with this
    * event.
    */
-  private static Type<LoadHandler> TYPE = new Type<LoadHandler>(Event.ONLOAD,
-      "load", new LoadEvent());
+  private static final Type<LoadHandler> TYPE = new Type<LoadHandler>(
+      Event.ONLOAD, "load", new LoadEvent());
 
   /**
-   * Ensures the existence of the handler TYPE, so the system knows to start
-   * firing events and then returns it.
+   * Gets the event type associated with load events.
    * 
-   * @return the handler TYPE
+   * @return the handler type
    */
   public static Type<LoadHandler> getType() {
     return TYPE;
@@ -41,8 +40,8 @@ public class LoadEvent extends DomEvent<LoadHandler> {
 
   /**
    * Protected constructor, use
-   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)}
-   * to fire click events.
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)
+   * to fire load events.
    */
   protected LoadEvent() {
   }

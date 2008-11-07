@@ -26,14 +26,13 @@ public class DoubleClickEvent extends DomEvent<DoubleClickHandler> {
    * Event type for double click events. Represents the meta-data associated
    * with this event.
    */
-  private static Type<DoubleClickHandler> TYPE = new Type<DoubleClickHandler>(
+  private static final Type<DoubleClickHandler> TYPE = new Type<DoubleClickHandler>(
       Event.ONDBLCLICK, "dblclick", new DoubleClickEvent());
 
   /**
-   * Ensures the existence of the handler TYPE, so the system knows to start
-   * firing events and then returns it.
+   * Gets the event type associated with double click events.
    * 
-   * @return the handler TYPE
+   * @return the handler type
    */
   public static Type<DoubleClickHandler> getType() {
     return TYPE;
@@ -41,8 +40,8 @@ public class DoubleClickEvent extends DomEvent<DoubleClickHandler> {
 
   /**
    * Protected constructor, use
-   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)}
-   * to fire click events.
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)
+   * to fire double click events.
    */
   protected DoubleClickEvent() {
   }

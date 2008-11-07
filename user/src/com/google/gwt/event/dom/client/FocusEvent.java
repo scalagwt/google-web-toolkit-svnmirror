@@ -26,14 +26,13 @@ public class FocusEvent extends DomEvent<FocusHandler> {
    * Event type for focus events. Represents the meta-data associated with this
    * event.
    */
-  private static Type<FocusHandler> TYPE = new Type<FocusHandler>(
+  private static final Type<FocusHandler> TYPE = new Type<FocusHandler>(
       Event.ONFOCUS, "focus", new FocusEvent());
 
   /**
-   * Ensures the existence of the handler TYPE, so the system knows to start
-   * firing events and then returns it.
+   * Gets the event type associated with focus events.
    * 
-   * @return the handler TYPE
+   * @return the handler type
    */
   public static Type<FocusHandler> getType() {
     return TYPE;
@@ -41,8 +40,8 @@ public class FocusEvent extends DomEvent<FocusHandler> {
 
   /**
    * Protected constructor, use
-   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)}
-   * to fire click events.
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)
+   * to fire focus events.
    */
   protected FocusEvent() {
   }

@@ -26,14 +26,13 @@ public class MouseMoveEvent extends MouseEvent<MouseMoveHandler> {
    * Event type for mouse move events. Represents the meta-data associated with
    * this event.
    */
-  private static Type<MouseMoveHandler> TYPE = new Type<MouseMoveHandler>(
+  private static final Type<MouseMoveHandler> TYPE = new Type<MouseMoveHandler>(
       Event.ONMOUSEMOVE, "mousemove", new MouseMoveEvent());
 
   /**
-   * Ensures the existence of the handler TYPE, so the system knows to start
-   * firing events and then returns it.
+   * Gets the event type associated with mouse move events.
    * 
-   * @return the handler TYPE
+   * @return the handler type
    */
   public static Type<MouseMoveHandler> getType() {
     return TYPE;
@@ -41,8 +40,8 @@ public class MouseMoveEvent extends MouseEvent<MouseMoveHandler> {
 
   /**
    * Protected constructor, use
-   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)}
-   * to fire click events.
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)
+   * to fire mouse move events.
    */
   protected MouseMoveEvent() {
   }

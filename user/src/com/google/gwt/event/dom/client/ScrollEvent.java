@@ -26,14 +26,13 @@ public class ScrollEvent extends DomEvent<ScrollHandler> {
    * Event type for scroll events. Represents the meta-data associated with this
    * event.
    */
-  private static Type<ScrollHandler> TYPE = new Type<ScrollHandler>(
+  private static final Type<ScrollHandler> TYPE = new Type<ScrollHandler>(
       Event.ONSCROLL, "scroll", new ScrollEvent());
 
   /**
-   * Ensures the existence of the handler TYPE, so the system knows to start
-   * firing events and then returns it.
+   * Gets the event type associated with scroll events.
    * 
-   * @return the handler TYPE
+   * @return the handler type
    */
   public static Type<ScrollHandler> getType() {
     return TYPE;
@@ -41,8 +40,8 @@ public class ScrollEvent extends DomEvent<ScrollHandler> {
 
   /**
    * Protected constructor, use
-   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)}
-   * to fire click events.
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)
+   * to fire scroll events.
    */
   protected ScrollEvent() {
   }

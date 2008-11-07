@@ -27,14 +27,13 @@ public class MouseOverEvent extends MouseEvent<MouseOverHandler> {
    * Event type for mouse over events. Represents the meta-data associated with
    * this event.
    */
-  private static Type<MouseOverHandler> TYPE = new Type<MouseOverHandler>(
+  private static final Type<MouseOverHandler> TYPE = new Type<MouseOverHandler>(
       Event.ONMOUSEOVER, "mouseover", new MouseOverEvent());
 
   /**
-   * Ensures the existence of the handler TYPE, so the system knows to start
-   * firing events and then returns it.
+   * Gets the event type associated with mouse over events.
    * 
-   * @return the handler TYPE
+   * @return the handler type
    */
   public static Type<MouseOverHandler> getType() {
     return TYPE;
@@ -42,8 +41,8 @@ public class MouseOverEvent extends MouseEvent<MouseOverHandler> {
 
   /**
    * Protected constructor, use
-   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)}
-   * to fire click events.
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)
+   * to fire mouse over events.
    */
   protected MouseOverEvent() {
   }

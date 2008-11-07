@@ -26,14 +26,13 @@ public class ContextMenuEvent extends DomEvent<ContextMenuHandler> {
    * Event type for context menu events. Represents the meta-data associated
    * with this event.
    */
-  private static Type<ContextMenuHandler> TYPE = new Type<ContextMenuHandler>(
+  private static final Type<ContextMenuHandler> TYPE = new Type<ContextMenuHandler>(
       Event.ONCONTEXTMENU, "contextmenu", new ContextMenuEvent());
 
   /**
-   * Ensures the existence of the handler TYPE, so the system knows to start
-   * firing events and then returns it.
+   * Gets the event type associated with context menu events.
    * 
-   * @return the handler TYPE
+   * @return the handler type
    */
   public static Type<ContextMenuHandler> getType() {
     return TYPE;
@@ -41,8 +40,8 @@ public class ContextMenuEvent extends DomEvent<ContextMenuHandler> {
 
   /**
    * Protected constructor, use
-   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)}
-   * to fire click events.
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)
+   * to fire context menu events.
    */
   protected ContextMenuEvent() {
   }

@@ -26,14 +26,13 @@ public class LoseCaptureEvent extends DomEvent<LoseCaptureHandler> {
    * Event type for lose capture events. Represents the meta-data associated
    * with this event.
    */
-  private static Type<LoseCaptureHandler> TYPE = new Type<LoseCaptureHandler>(
+  private static final Type<LoseCaptureHandler> TYPE = new Type<LoseCaptureHandler>(
       Event.ONLOSECAPTURE, "losecapture", new LoseCaptureEvent());
 
   /**
-   * Ensures the existence of the handler TYPE, so the system knows to start
-   * firing events and then returns it.
+   * Gets the event type associated with lose capture events.
    * 
-   * @return the handler TYPE
+   * @return the handler type
    */
   public static Type<LoseCaptureHandler> getType() {
     return TYPE;
@@ -41,8 +40,8 @@ public class LoseCaptureEvent extends DomEvent<LoseCaptureHandler> {
 
   /**
    * Protected constructor, use
-   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)}
-   * to fire click events.
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)
+   * to fire lose capture events.
    */
   protected LoseCaptureEvent() {
   }

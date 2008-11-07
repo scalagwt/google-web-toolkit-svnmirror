@@ -26,14 +26,13 @@ public class MouseUpEvent extends MouseEvent<MouseUpHandler> {
    * Event type for mouse up events. Represents the meta-data associated with
    * this event.
    */
-  private static Type<MouseUpHandler> TYPE = new Type<MouseUpHandler>(
+  private static final Type<MouseUpHandler> TYPE = new Type<MouseUpHandler>(
       Event.ONMOUSEUP, "mouseup", new MouseUpEvent());
 
   /**
-   * Ensures the existence of the handler TYPE, so the system knows to start
-   * firing events and then returns it.
+   * Gets the event type associated with mouse up events.
    * 
-   * @return the handler TYPE
+   * @return the handler type
    */
   public static Type<MouseUpHandler> getType() {
     return TYPE;
@@ -41,8 +40,8 @@ public class MouseUpEvent extends MouseEvent<MouseUpHandler> {
 
   /**
    * Protected constructor, use
-   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)}
-   * to fire click events.
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)
+   * to fire mouse up events.
    */
   protected MouseUpEvent() {
   }

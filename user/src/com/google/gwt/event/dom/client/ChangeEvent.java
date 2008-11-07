@@ -26,14 +26,13 @@ public class ChangeEvent extends DomEvent<ChangeHandler> {
    * Event type for change events. Represents the meta-data associated with this
    * event.
    */
-  private static Type<ChangeHandler> TYPE = new Type<ChangeHandler>(
+  private static final Type<ChangeHandler> TYPE = new Type<ChangeHandler>(
       Event.ONCHANGE, "change", new ChangeEvent());
 
   /**
-   * Ensures the existence of the handler TYPE, so the system knows to start
-   * firing events and then returns it.
+   * Gets the event type associated with change events.
    * 
-   * @return the handler TYPE
+   * @return the handler type
    */
   public static Type<ChangeHandler> getType() {
     return TYPE;
@@ -41,8 +40,8 @@ public class ChangeEvent extends DomEvent<ChangeHandler> {
 
   /**
    * Protected constructor, use
-   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)}
-   * to fire click events.
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)
+   * to fire change events.
    */
   protected ChangeEvent() {
   }

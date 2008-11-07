@@ -26,14 +26,13 @@ public class KeyPressEvent extends KeyEvent<KeyPressHandler> {
    * Event type for key press events. Represents the meta-data associated with
    * this event.
    */
-  private static Type<KeyPressHandler> TYPE = new Type<KeyPressHandler>(
+  private static final Type<KeyPressHandler> TYPE = new Type<KeyPressHandler>(
       Event.ONKEYPRESS, "keypress", new KeyPressEvent());
 
   /**
-   * Ensures the existence of the handler TYPE, so the system knows to start
-   * firing events and then returns it.
+   * Gets the event type associated with key press events.
    * 
-   * @return the handler TYPE
+   * @return the handler type
    */
   public static Type<KeyPressHandler> getType() {
     return TYPE;
@@ -41,8 +40,8 @@ public class KeyPressEvent extends KeyEvent<KeyPressHandler> {
 
   /**
    * Protected constructor, use
-   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)}
-   * to fire click events.
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)
+   * to fire key press events.
    */
   protected KeyPressEvent() {
   }
