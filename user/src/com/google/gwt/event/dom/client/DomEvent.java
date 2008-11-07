@@ -22,10 +22,10 @@ import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Event;
 
 /**
- * {@link DomEvent} is a subclass of AbstractEvent that provides events that map
- * to DOM Level 2 Events. It provides an additional method to access the
- * underlying native browser event object as well as a subclass of
- * AbstractEvent.Key that understands GWT event bits used by sinkEvents().
+ * {@link DomEvent} is a subclass of {@link GwtEvent} that provides events that
+ * map to DOM Level 2 Events. It provides an additional method to access the
+ * underlying native browser event object as well as a subclass of {@link Type}
+ * that understands GWT event bits used by sinkEvents().
  * 
  * @param <H> handler type
  * 
