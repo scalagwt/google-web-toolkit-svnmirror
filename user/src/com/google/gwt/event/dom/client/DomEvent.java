@@ -62,10 +62,10 @@ public abstract class DomEvent<H extends EventHandler> extends GwtEvent<H> {
      * 
      * 
      * @param eventToSink the integer value used by sink events to set up event
-     *          handling for this dom type
+     * handling for this dom type
      * @param eventName the raw native event name
-     * @param flyweight the instance that will be used as a flyweight
-     *          to wrap a native event
+     * @param flyweight the instance that will be used as a flyweight to wrap a
+     * native event
      */
     protected Type(int eventToSink, String eventName, DomEvent<H> flyweight) {
       this.flyweight = flyweight;
@@ -80,10 +80,11 @@ public abstract class DomEvent<H extends EventHandler> extends GwtEvent<H> {
       reverseRegistered.put(eventToSink, this);
     }
 
-    Type(int nativeEventTypeInt, String[] eventNames, DomEvent<H> cached) {
-      this(nativeEventTypeInt, eventNames[0], cached);
-      for (int i = 1; i < eventNames.length; i++) {
-        registered.unsafePut(eventNames[i], this);
+    Type(int nativeEventTypeInt, String eventName, DomEvent<H> cached,
+        String... auxNames) {
+      this(nativeEventTypeInt, eventName, cached);
+      for (int i = 0; i < auxNames.length; i++) {
+        registered.unsafePut(auxNames[i], this);
       }
     }
 
@@ -112,7 +113,7 @@ public abstract class DomEvent<H extends EventHandler> extends GwtEvent<H> {
    */
   public static void fireNativeEvent(Event nativeEvent, HandlerManager handlers) {
     final DomEvent.Type<?> typeKey = registered.unsafeGet(nativeEvent.getType());
-    if (typeKey != null && handlers != null) {
+    if (handlers != null) {
       // Store and restore native event just in case we are in recursive
       // loop.
       Event currentNative = typeKey.flyweight.nativeEvent;
@@ -134,14 +135,15 @@ public abstract class DomEvent<H extends EventHandler> extends GwtEvent<H> {
    * 
    * @deprecated should go away after triggering of native events is introduced
    * @param eventType the GWT event type representing the type of the native
-   *          event.
+   * event.
    * @param handlers the handler manager containing the handlers
    */
+  @Deprecated
   public static void unsafeFireNativeEvent(int eventType,
       HandlerManager handlers) {
     if (registered != null) {
       final DomEvent.Type<?> typeKey = reverseRegistered.get(eventType);
-      if (typeKey != null && handlers != null) {
+      if (typeKey != null) {
         // Store and restore native event just in case we are in recursive
         // loop.
         Event currentNative = null;

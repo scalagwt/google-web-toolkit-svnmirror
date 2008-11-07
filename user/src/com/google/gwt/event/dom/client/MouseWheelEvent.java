@@ -27,7 +27,7 @@ public class MouseWheelEvent extends MouseEvent<MouseWheelHandler> {
    * this event.
    */
   private static final Type<MouseWheelHandler> TYPE = new Type<MouseWheelHandler>(
-      Event.ONMOUSEWHEEL, "mousewheel", new MouseWheelEvent());
+      Event.ONMOUSEWHEEL, "mousewheel", new MouseWheelEvent(), "DOMMouseScroll");
 
   /**
    * Gets the event type associated with mouse wheel events.
