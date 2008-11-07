@@ -91,7 +91,11 @@ public abstract class Composite extends Widget {
 
   @Override
   protected void onAttach() {
-    // Call the widget's onAttach() first.
+    if (!isOrWasAttached()) {
+      widget.sinkEvents(eventsToSink);
+      eventsToSink = -1;
+    }
+
     widget.onAttach();
 
     // Clobber the widget's call to setEventListener(), causing all events to
@@ -99,12 +103,7 @@ public abstract class Composite extends Widget {
     // default (note: it's not necessary to clear this in onDetach(), because
     // the widget's onDetach will do so).
     DOM.setEventListener(getElement(), this);
-    int bitsToAdd = eventsToSink;
-    eventsToSink = -1;
-    if (bitsToAdd > 0) {
-      sinkEvents(bitsToAdd);
-    }
-     
+
     // Call onLoad() directly, because we're not calling super.onAttach().
     onLoad();
   }
