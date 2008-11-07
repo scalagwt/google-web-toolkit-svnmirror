@@ -87,32 +87,31 @@ import java.util.List;
  * <img class='gallery' src='SuggestBox.png'/>
  * </p>
  * 
- * <h3>CSS Style Rules</h3> <ul class='css'> <li>.gwt-SuggestBox { the suggest
- * box itself }</li> <li>.gwt-SuggestBoxPopup { the suggestion popup }</li> <li>
- * .gwt-SuggestBoxPopup .item { an unselected suggestion }</li> <li>
- * .gwt-SuggestBoxPopup .item-selected { a selected suggestion }</li> <li>
- * .gwt-SuggestBoxPopup .suggestPopupTopLeft { the top left cell }</li> <li>
- * .gwt-SuggestBoxPopup .suggestPopupTopLeftInner { the inner element of the
- * cell }</li> <li>.gwt-SuggestBoxPopup .suggestPopupTopCenter { the top center
- * cell }</li> <li>.gwt-SuggestBoxPopup .suggestPopupTopCenterInner { the inner
- * element of the cell }</li> <li>.gwt-SuggestBoxPopup .suggestPopupTopRight {
- * the top right cell }</li> <li>.gwt-SuggestBoxPopup .suggestPopupTopRightInner
- * { the inner element of the cell }</li> <li>.gwt-SuggestBoxPopup
- * .suggestPopupMiddleLeft { the middle left cell }</li> <li>
- * .gwt-SuggestBoxPopup .suggestPopupMiddleLeftInner { the inner element of the
- * cell }</li> <li>.gwt-SuggestBoxPopup .suggestPopupMiddleCenter { the middle
- * center cell }</li> <li>.gwt-SuggestBoxPopup .suggestPopupMiddleCenterInner {
- * the inner element of the cell }</li> <li>.gwt-SuggestBoxPopup
- * .suggestPopupMiddleRight { the middle right cell }</li> <li>
- * .gwt-SuggestBoxPopup .suggestPopupMiddleRightInner { the inner element of the
- * cell }</li> <li>.gwt-SuggestBoxPopup .suggestPopupBottomLeft { the bottom
- * left cell }</li> <li>.gwt-SuggestBoxPopup .suggestPopupBottomLeftInner { the
- * inner element of the cell }</li> <li>.gwt-SuggestBoxPopup
- * .suggestPopupBottomCenter { the bottom center cell }</li> <li>
- * .gwt-SuggestBoxPopup .suggestPopupBottomCenterInner { the inner element of
- * the cell }</li> <li>.gwt-SuggestBoxPopup .suggestPopupBottomRight { the
- * bottom right cell }</li> <li>.gwt-SuggestBoxPopup
- * .suggestPopupBottomRightInner { the inner element of the cell }</li> </ul>
+ * <h3>CSS Style Rules</h3> 
+ * <ul class='css'> 
+ * <li>.gwt-SuggestBox { the suggest
+ * box itself }</li> 
+ * <li>.gwt-SuggestBoxPopup { the suggestion popup }</li> 
+ * <li>.gwt-SuggestBoxPopup .item { an unselected suggestion }</li> 
+ * <li>.gwt-SuggestBoxPopup .item-selected { a selected suggestion }</li> 
+ * <li>.gwt-SuggestBoxPopup .suggestPopupTopLeft { the top left cell }</li> 
+ * <li>.gwt-SuggestBoxPopup .suggestPopupTopLeftInner { the inner element of the cell }</li> 
+ * <li>.gwt-SuggestBoxPopup .suggestPopupTopCenter { the top center cell }</li> 
+ * <li>.gwt-SuggestBoxPopup .suggestPopupTopCenterInner { the inner element of the cell }</li> 
+ * <li>.gwt-SuggestBoxPopup .suggestPopupTopRight { the top right cell }</li> 
+ * <li>.gwt-SuggestBoxPopup .suggestPopupTopRightInner { the inner element of the cell }</li> 
+ * <li>.gwt-SuggestBoxPopup .suggestPopupMiddleLeft { the middle left cell }</li> 
+ * <li>.gwt-SuggestBoxPopup .suggestPopupMiddleLeftInner { the inner element of the cell }</li> 
+ * <li>.gwt-SuggestBoxPopup .suggestPopupMiddleCenter { the middle center cell }</li> 
+ * <li>.gwt-SuggestBoxPopup .suggestPopupMiddleCenterInner { the inner element of the cell }</li> 
+ * <li>.gwt-SuggestBoxPopup .suggestPopupMiddleRight { the middle right cell }</li> 
+ * <li>.gwt-SuggestBoxPopup .suggestPopupMiddleRightInner { the inner element of the cell }</li> 
+ * <li>.gwt-SuggestBoxPopup .suggestPopupBottomLeft { the bottom left cell }</li> 
+ * <li>.gwt-SuggestBoxPopup .suggestPopupBottomLeftInner { the inner element of the cell }</li> 
+ * <li>.gwt-SuggestBoxPopup .suggestPopupBottomCenter { the bottom center cell }</li> 
+ * <li>.gwt-SuggestBoxPopup .suggestPopupBottomCenterInner { the inner element of the cell }</li> 
+ * <li>.gwt-SuggestBoxPopup .suggestPopupBottomRight { the bottom right cell }</li> 
+ * <li>.gwt-SuggestBoxPopup .suggestPopupBottomRightInner { the inner element of the cell }</li> </ul>
  * 
  * @see SuggestOracle
  * @see MultiWordSuggestOracle

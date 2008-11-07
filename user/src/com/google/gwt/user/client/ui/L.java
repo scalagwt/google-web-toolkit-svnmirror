@@ -73,18 +73,20 @@ import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.EventHandler;
+import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.GwtEvent.Type;
 
 import java.util.EventListener;
 
 /**
- * Root of legacy listener support hierarchy.
+ * Legacy listener support hierarchy for
+ * <code>com.google.gwt.user.client.ui</code>. Gathers the bulk of the legacy
+ * glue code in one place, for easy deletion when Listener methods are deleted.
  * 
+ * @see com.google.gwt.user.client.L
  * @param <T> listener type
- * 
  */
 @Deprecated
 abstract class L<T> implements EventHandler {

@@ -24,8 +24,8 @@ import com.google.gwt.event.logical.shared.HasHandlers;
 import com.google.gwt.event.logical.shared.HasResizeHandlers;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
-import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.EventHandler;
+import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.http.client.URL;
@@ -58,8 +58,8 @@ public class Window {
     }
 
     /**
-     * The message to display to the user in an attempt to keep them on the
-     * page.
+     * The message to display to the user to see whether they really want to
+     * leave the page.
      */
     private String message = null;
 

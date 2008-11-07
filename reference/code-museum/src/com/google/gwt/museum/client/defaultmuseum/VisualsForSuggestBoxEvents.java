@@ -18,6 +18,7 @@ package com.google.gwt.museum.client.defaultmuseum;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.museum.client.common.AbstractIssue;
 import com.google.gwt.museum.client.common.EventReporter;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -92,7 +93,7 @@ public class VisualsForSuggestBoxEvents extends AbstractIssue {
         report);
 
     handler.new CheckBoxEvent("KeyDown", p) {
-
+      HandlerRegistration reg;
       @Override
       public void addHandler() {
         reg = b.addKeyDownHandler(handler);
@@ -101,6 +102,7 @@ public class VisualsForSuggestBoxEvents extends AbstractIssue {
       @Override
       public void removeHandler() {
         reg.removeHandler();
+        reg = null;
       }
     };
 

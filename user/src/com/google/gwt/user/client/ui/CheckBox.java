@@ -99,7 +99,8 @@ public class CheckBox extends ButtonBase implements HasName, HasValue<Boolean> {
 
   public HandlerRegistration addValueChangeHandler(
       ValueChangeHandler<Boolean> handler) {
-    // Is this the first value change event? If so, add hooking ability
+    // Is this the first value change event? If so, time to listen to clicks
+    // on the checkbox
     if (!isEventHandled(ValueChangeEvent.getType())) {
       this.addClickHandler(new ClickHandler() {
         public void onClick(ClickEvent event) {
@@ -231,11 +232,11 @@ public class CheckBox extends ButtonBase implements HasName, HasValue<Boolean> {
   // wrapper element.
   @Override
   public void sinkEvents(int eventBitsToAdd) {
-    if (eventsToSink == -1) {
+    if (isOrWasAttached()) {
       DOM.sinkEvents(inputElem, eventBitsToAdd | DOM.getEventsSunk(inputElem));
     } else {
-      eventsToSink |= eventBitsToAdd;
-     }
+      super.sinkEvents(eventBitsToAdd);
+    }
   }
 
   /**

@@ -35,7 +35,6 @@ import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.GwtEvent;
-import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.ChangeListener;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.ClickListener;
@@ -72,7 +71,6 @@ public class EventReporter<V, T> extends AllKeyHandlers implements
    */
   public abstract class CheckBoxEvent extends CheckBox implements
       ValueChangeHandler<Boolean> {
-    protected HandlerRegistration reg;
     String name;
 
     public CheckBoxEvent(String name, Panel p) {
@@ -80,7 +78,7 @@ public class EventReporter<V, T> extends AllKeyHandlers implements
       this.setText(name);
       p.add(this);
       this.addValueChangeHandler(this);
-      this.setChecked(true);
+      this.setValue(true, true);
     }
 
     public abstract void addHandler();
