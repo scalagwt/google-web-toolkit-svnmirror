@@ -24,11 +24,8 @@ import com.google.gwt.event.shared.HandlerTestBase;
  */
 // TODO(ECC) check that max handlers work properly.
 public class DomEventTest extends HandlerTestBase {
-
-  HandlerManager manager;
-
+  private HandlerManager manager;
   static class Flag {
-
     public boolean flag = false;
   }
 
