@@ -15,22 +15,16 @@
 			<arguments>
 			</arguments>
 		</buildCommand>
-		<buildCommand>
-			<name>com.google.gwt.eclipse.plugin.gwtModuleBuilder</name>
-			<arguments>
-			</arguments>
-		</buildCommand>
 	</buildSpec>
 	<natures>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 		<nature>com.atlassw.tools.eclipse.checkstyle.CheckstyleNature</nature>
-		<nature>com.google.gwt.eclipse.plugin.gwtNature</nature>
 	</natures>
 	<linkedResources>
 		<link>
 			<name>core</name>
 			<type>2</type>
-			<locationURI>GWT_ROOT/samples/dynatable</locationURI>
+			<location>GWT_ROOT/samples/dynatable</location>
 		</link>
 	</linkedResources>
 </projectDescription>
