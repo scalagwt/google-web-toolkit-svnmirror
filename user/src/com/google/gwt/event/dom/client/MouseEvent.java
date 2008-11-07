@@ -29,41 +29,19 @@ import com.google.gwt.user.client.Window;
 public abstract class MouseEvent<H extends EventHandler> extends DomEvent<H> {
 
   /**
-   * The native Dom button codes.
+   * Left mouse button down.
    */
-  public enum Button {
-    /**
-     * Left button.
-     */
-    LEFT,
-    /**
-     * Middle button.
-     */
-    MIDDLE,
-    /**
-     * Right button.
-     */
-    RIGHT;
+  public static final int BUTTON_LEFT = Event.BUTTON_LEFT;
 
-    /**
-     * Gets the button codes.
-     * 
-     * @param buttonCode the button code
-     * @return which button
-     */
-    public static Button valueOf(int buttonCode) {
-      switch (buttonCode) {
-        case Event.BUTTON_LEFT:
-          return LEFT;
-        case Event.BUTTON_RIGHT:
-          return RIGHT;
-        case Event.BUTTON_MIDDLE:
-          return MIDDLE;
-        default:
-          throw new IllegalStateException("Unknown button code " + buttonCode);
-      }
-    }
-  }
+  /**
+   * Right mouse button down.
+   */
+  public static final int BUTTON_RIGHT = Event.BUTTON_RIGHT;
+
+  /**
+   * Middle button down.
+   */
+  public static final int BUTTON_MIDDLE = Event.BUTTON_MIDDLE;
 
   /**
    * Gets the x coordinate relative to the given element.
@@ -90,12 +68,13 @@ public abstract class MouseEvent<H extends EventHandler> extends DomEvent<H> {
   }
 
   /**
-   * Gets the button value.
+   * Gets the button value. Compare it to {@link MouseEvent#BUTTON_LEFT},
+   * {@link MouseEvent#BUTTON_RIGHT}, {@link MouseEvent#BUTTON_MIDDLE}
    * 
    * @return gets the button value.
    */
-  public Button getButton() {
-    return Button.valueOf(getNativeEvent().getButton());
+  public int getButton() {
+    return getNativeEvent().getButton();
   }
 
   /**
