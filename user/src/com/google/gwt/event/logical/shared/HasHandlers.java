@@ -25,7 +25,7 @@ import com.google.gwt.event.shared.HandlerManager;
 
 public interface HasHandlers {
   /**
-   * Gets this object's handlers.
+   * Gets this object's handlers. May return null if there are no handlers.
    * 
    * @return the handlers
    */
