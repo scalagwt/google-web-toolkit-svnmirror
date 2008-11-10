@@ -45,7 +45,6 @@ import java.util.Set;
 /**
  * Tests Internationalization. Assumes locale is set to piglatin_UK
  */
-@SuppressWarnings("deprecation")
 public class I18NTest extends GWTTestCase {
 
   @Override
@@ -147,7 +146,7 @@ public class I18NTest extends GWTTestCase {
     Colors colors = (Colors) GWT.create(Colors.class);
     assertNotNull(colors);
     // No piglatin version exists for grey
-    assertEquals("Ä�rÃ©Ã½", colors.grey());
+    assertEquals("ĝréý", colors.grey());
     assertEquals("ackblay", colors.black());
   }
 
@@ -381,11 +380,11 @@ public class I18NTest extends GWTTestCase {
         types.stringDoesNotTrimTrailingThreeSpaces());
     assertEquals("", types.stringEmpty());
     String jaBlue = types.stringJapaneseBlue();
-    assertEquals("ã�‚ã�Š", jaBlue);
+    assertEquals("あお", jaBlue);
     String jaGreen = types.stringJapaneseGreen();
-    assertEquals("ã�¿ã�©ã‚Š", jaGreen);
+    assertEquals("みどり", jaGreen);
     String jaRed = types.stringJapaneseRed();
-    assertEquals("ã�‚ã�‹", jaRed);
+    assertEquals("あか", jaRed);
   }
 
   public void testConstantsWithLookup() {
@@ -534,7 +533,7 @@ public class I18NTest extends GWTTestCase {
     assertEquals("repeatedArgs: a, b, a, b, a, b, a, b",
         s.testLotsOfUsageOfArgs("a", "b"));
     assertEquals("\"~\" ~~ \"~~~~ \"\"", s.testWithXs());
-    assertEquals("ã�Šå¥½ä½ å¥½å¥½", s.unicode("å¥½", "å¥½"));
+    assertEquals("お好你好好", s.unicode("好", "好"));
     assertEquals("", s.empty());
     assertEquals("{quoted}", s.quotedBraces());
   }
