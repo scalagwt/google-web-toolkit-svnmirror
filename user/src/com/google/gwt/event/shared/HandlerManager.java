@@ -131,7 +131,7 @@ public class HandlerManager {
    * 
    * @param event the event
    */
-  public void fireEvent(GwtEvent<?> event) {
+  public final void fireEvent(GwtEvent<?> event) {
     // If it not live we should clear the source and make it live.
     if (event.isLive() == false) {
       revive(event);
@@ -140,10 +140,12 @@ public class HandlerManager {
     event.setSource(source);
     try {
       firingDepth++;
-      if (useJs) {
-        javaScriptRegistry.fireEvent(event);
-      } else {
-        javaRegistry.fireEvent(event);
+      if (onBeforeFire(event)) {
+        if (useJs) {
+          javaScriptRegistry.fireEvent(event);
+        } else {
+          javaRegistry.fireEvent(event);
+        }
       }
     } finally {
       firingDepth--;
@@ -168,8 +170,7 @@ public class HandlerManager {
    * @param type the handler's event type
    * @return the given handler
    */
-  public <H extends EventHandler> H getHandler(
-      GwtEvent.Type<H> type, int index) {
+  public <H extends EventHandler> H getHandler(GwtEvent.Type<H> type, int index) {
     if (useJs) {
       return javaScriptRegistry.getHandler(type, index);
     } else {
@@ -211,13 +212,23 @@ public class HandlerManager {
    * @param type the event type
    * @param handler the handler
    */
-  public <H extends EventHandler> void removeHandler(
-      GwtEvent.Type<H> type, final H handler) {
+  public <H extends EventHandler> void removeHandler(GwtEvent.Type<H> type,
+      final H handler) {
     if (firingDepth > 0) {
       enqueueRemove(type, handler);
     } else {
       doRemove(type, handler);
     }
+  }
+
+  /**
+   * Called before an event is fired on its handlers.
+   * 
+   * @param event the event
+   * @return whether to fire the event
+   */
+  protected boolean onBeforeFire(GwtEvent<?> event) {
+    return true;
   }
 
   <H extends EventHandler> void enqueueAdd(GwtEvent.Type<H> type,
