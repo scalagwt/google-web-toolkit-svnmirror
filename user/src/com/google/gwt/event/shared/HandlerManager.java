@@ -102,6 +102,17 @@ public class HandlerManager {
    */
   public <H extends EventHandler> HandlerRegistration addHandler(
       GwtEvent.Type<H> type, final H handler) {
+    
+    /*
+     * We used to keep the enqueue / dequeue entirely inside HandlerManager.
+     * However, we found a 30% speed improvement in handler registration if
+     * JsHandlerRegistry is allowed to make its own decision about queuing. Thus
+     * the funny code path here. 
+     * 
+     * No parallel optimization was made for removing handlers, as that 
+     * rarely happens anyway, and is not a significant contributer to startup
+     * time. 
+     */
     if (useJs) {
       javaScriptRegistry.addHandler(this, type, handler);
     } else {

@@ -55,7 +55,7 @@ class JsHandlerRegistry extends JavaScriptObject {
     // flattened data structure, store the handlers in an external list
     // instead.
     if ((count == HandlerManager.EXPECTED_HANDLERS) & flattened) {
-      // As long as we are only adding to the end of a a handler list, should
+      // As long as we are only adding to the end of a handler list, should
       // not need to queue.
       if (manager.firingDepth > 0) {
         manager.enqueueAdd(type, myHandler);
