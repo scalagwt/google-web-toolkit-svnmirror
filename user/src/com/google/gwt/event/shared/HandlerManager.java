@@ -64,14 +64,15 @@ public class HandlerManager {
 
   // Only one of JsHandlerRegistry and JavaHandlerRegistry are live at once.
   private final JsHandlerRegistry javaScriptRegistry;
-
   private final JavaHandlerRegistry javaRegistry;
 
   // source of the event.
   private final Object source;
 
+  // pending queue of removes that were called during event firing.
   private List<Object> removalQueue;
 
+  // pending queue of adds that were called during event firing.
   private ArrayList<Object> addQueue;
 
   /**
@@ -99,7 +100,7 @@ public class HandlerManager {
    * @return the handler registration, can be stored in order to remove the
    * handler later
    */
-  public final <H extends EventHandler> HandlerRegistration addHandler(
+  public <H extends EventHandler> HandlerRegistration addHandler(
       GwtEvent.Type<H> type, final H handler) {
     if (useJs) {
       javaScriptRegistry.addHandler(this, type, handler);
@@ -131,6 +132,8 @@ public class HandlerManager {
    * 
    * @param event the event
    */
+  // Final so we can manage buffering adds and removes without a subclass
+  // throwing all our calculations off.
   public final void fireEvent(GwtEvent<?> event) {
     // If it not live we should clear the source and make it live.
     if (event.isLive() == false) {
@@ -140,12 +143,10 @@ public class HandlerManager {
     event.setSource(source);
     try {
       firingDepth++;
-      if (onBeforeFire(event)) {
-        if (useJs) {
-          javaScriptRegistry.fireEvent(event);
-        } else {
-          javaRegistry.fireEvent(event);
-        }
+      if (useJs) {
+        javaScriptRegistry.fireEvent(event);
+      } else {
+        javaRegistry.fireEvent(event);
       }
     } finally {
       firingDepth--;
@@ -221,16 +222,7 @@ public class HandlerManager {
     }
   }
 
-  /**
-   * Called before an event is fired on its handlers.
-   * 
-   * @param event the event
-   * @return whether to fire the event
-   */
-  protected boolean onBeforeFire(GwtEvent<?> event) {
-    return true;
-  }
-
+  // Package protected so JsHandlerRegistry can call enqueueAdd.
   <H extends EventHandler> void enqueueAdd(GwtEvent.Type<H> type,
       final H handler) {
     if (addQueue == null) {
@@ -240,21 +232,21 @@ public class HandlerManager {
     }
   }
 
-  <H extends EventHandler> void enqueueRemove(GwtEvent.Type<H> type,
-      final H handler) {
-    if (removalQueue == null) {
-      removalQueue = new ArrayList<Object>();
-      removalQueue.add(type);
-      removalQueue.add(handler);
-    }
-  }
-
   private <H extends EventHandler> void doRemove(GwtEvent.Type<H> type,
       final H handler) {
     if (useJs) {
       javaScriptRegistry.removeHandler(type, handler);
     } else {
       javaRegistry.removeHandler(type, handler);
+    }
+  }
+
+  private <H extends EventHandler> void enqueueRemove(GwtEvent.Type<H> type,
+      final H handler) {
+    if (removalQueue == null) {
+      removalQueue = new ArrayList<Object>();
+      removalQueue.add(type);
+      removalQueue.add(handler);
     }
   }
 
