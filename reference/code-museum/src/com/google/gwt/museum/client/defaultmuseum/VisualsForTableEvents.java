@@ -29,7 +29,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.HTMLTable.Cell;
 
 /**
- * A simple tree used to quickly exercise tree behavior.
+ * Visual test for table events.
  */
 public class VisualsForTableEvents extends AbstractIssue {
   final Grid g = new Grid(5, 5);

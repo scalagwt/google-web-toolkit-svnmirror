@@ -53,7 +53,7 @@ public class VisualsForDisclosurePanelEvents extends AbstractIssue {
 
   @Override
   public String getInstructions() {
-    return "Click on disclosure panel, see the expected events firing";
+    return "Click on disclosure panel, see the expected Open and Close events firing";
   }
 
   @Override

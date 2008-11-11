@@ -61,7 +61,7 @@ public class VisualsForPopupEvents extends AbstractIssue {
 
   private void createButton(boolean autoHide, boolean modal, VerticalPanel panel) {
     final String text = " popup " + (modal ? " modal " : " non-modal ")
-        + (autoHide ? "auto hide" : " persistant");
+        + (autoHide ? "auto hide" : " persistent");
     panel.add(new HTML("<h2>" + text + "</h2>"));
     final PopupPanel p = new PopupPanel(autoHide, modal);
     p.setTitle(text);

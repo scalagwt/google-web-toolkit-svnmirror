@@ -109,244 +109,11 @@ public class VisualsForEventsFiring extends AbstractIssue {
     layout.setHTML(0, 1, "<b>Event</b>");
     layout.setHTML(0, 2, "<b>Status</b>");
 
-    // Mouse and click events
-    {
-      // Create a button to trigger events
-      Button button = new Button("Double-click me") {
-        @Override
-        public void onBrowserEvent(Event event) {
-          super.onBrowserEvent(event);
-
-          // Verify that values associated with events are defined. For some
-          // values, we just want to make sure we can get them without any
-          // errors.
-          assert event.getClientX() > 0;
-          assert event.getClientY() > 0;
-          assert event.getScreenX() > 0;
-          assert event.getScreenY() > 0;
-          event.getAltKey();
-          event.getCtrlKey();
-          event.getShiftKey();
-          event.getMetaKey();
-        }
-      };
-
-      // Setup the tests
-      addTest(Event.ONCLICK, "click", button);
-      addDependentTest(Event.ONMOUSEDOWN, "mousedown");
-      addDependentTest(Event.ONMOUSEUP, "mouseup");
-      addDependentTest(Event.ONMOUSEOVER, "mouseover");
-      addDependentTest(Event.ONMOUSEOUT, "mouseout");
-      addDependentTest(Event.ONMOUSEMOVE, "mousemove");
-
-      // Add event handlers
-      button.addClickHandler(new ClickHandler() {
-        public void onClick(ClickEvent event) {
-          passTest(event.getNativeEvent());
-        }
-      });
-      button.addMouseDownHandler(new MouseDownHandler() {
-        public void onMouseDown(MouseDownEvent event) {
-          event.getNativeButton();
-          passTest(event.getNativeEvent());
-        }
-      });
-      button.addMouseUpHandler(new MouseUpHandler() {
-        public void onMouseUp(MouseUpEvent event) {
-          event.getNativeButton();
-          passTest(event.getNativeEvent());
-        }
-      });
-      button.addMouseMoveHandler(new MouseMoveHandler() {
-        public void onMouseMove(MouseMoveEvent event) {
-          passTest(event.getNativeEvent());
-        }
-      });
-      button.addMouseOutHandler(new MouseOutHandler() {
-        public void onMouseOut(MouseOutEvent event) {
-          assert event.getFromElement() != null;
-          assert event.getToElement() != null;
-          passTest(event.getNativeEvent());
-        }
-      });
-      button.addMouseOverHandler(new MouseOverHandler() {
-        public void onMouseOver(MouseOverEvent event) {
-          assert event.getFromElement() != null;
-          assert event.getToElement() != null;
-          passTest(event.getNativeEvent());
-        }
-      });
-    }
-
-    // Keyboard events
-    {
-      // Setup a text box to trigger the events
-      TextBox textBox = new TextBox();
-
-      // Setup the tests
-      textBox.setText("Type a letter");
-      addTest(Event.ONKEYDOWN, "keydown", textBox);
-      addDependentTest(Event.ONKEYPRESS, "keypress");
-      addDependentTest(Event.ONKEYUP, "keyup");
-      addDependentTest(Event.ONFOCUS, "focus");
-      addDependentTest(Event.ONBLUR, "blur");
-      addDependentTest(Event.ONCHANGE, "change");
-
-      // Add event handlers
-      textBox.addKeyDownHandler(new KeyDownHandler() {
-        public void onKeyDown(KeyDownEvent event) {
-          event.isAutoRepeat();
-          event.isAltKeyDown();
-          event.isControlKeyDown();
-          event.isShiftKeyDown();
-          event.isMetaKeyDown();
-          assert event.getNativeKeyCode() > 0;
-          passTest(event.getNativeEvent());
-        }
-      });
-      textBox.addKeyUpHandler(new KeyUpHandler() {
-        public void onKeyUp(KeyUpEvent event) {
-          event.isAltKeyDown();
-          event.isControlKeyDown();
-          event.isShiftKeyDown();
-          event.isMetaKeyDown();
-          assert event.getNativeKeyCode() > 0;
-          passTest(event.getNativeEvent());
-        }
-      });
-      textBox.addKeyPressHandler(new KeyPressHandler() {
-        public void onKeyPress(KeyPressEvent event) {
-          event.isAltKeyDown();
-          event.isControlKeyDown();
-          event.isShiftKeyDown();
-          event.isMetaKeyDown();
-          assert event.getCharCode() > 0;
-          passTest(event.getNativeEvent());
-        }
-      });
-      textBox.addFocusHandler(new FocusHandler() {
-        public void onFocus(FocusEvent event) {
-          passTest(event.getNativeEvent());
-        }
-      });
-      textBox.addBlurHandler(new BlurHandler() {
-        public void onBlur(BlurEvent event) {
-          passTest(event.getNativeEvent());
-        }
-      });
-      textBox.addChangeHandler(new ChangeHandler() {
-        public void onChange(ChangeEvent event) {
-          passTest(event.getNativeEvent());
-        }
-      });
-    }
-
-    // onscroll and onmousewheel
-    {
-      // Create a widget to trigger events
-      String scrollableMessage = "Scroll to the bottom<br>(using mouse wheel<br>"
-          + "if supported)";
-      HTML scrollableContents = new HTML(scrollableMessage);
-      scrollableContents.setPixelSize(400, 400);
-      scrollableContents.getElement().getStyle().setProperty("textAlign",
-          "left");
-      ScrollPanel scrollable = new ScrollPanel(scrollableContents) {
-        @Override
-        public void onBrowserEvent(Event event) {
-          super.onBrowserEvent(event);
-
-          // Verify that values associated with events are defined
-          if (event.getTypeInt() == Event.ONMOUSEWHEEL) {
-            event.getClientX();
-            event.getClientY();
-            event.getScreenX();
-            event.getScreenY();
-            event.getMouseWheelVelocityY();
-            passTest(event);
-          }
-        }
-      };
-      scrollable.sinkEvents(Event.ONMOUSEWHEEL);
-
-      // Setup the tests
-      scrollable.setAlwaysShowScrollBars(true);
-      scrollable.setPixelSize(200, 100);
-      addTest(Event.ONSCROLL, "scroll", scrollable);
-      addDependentTest(Event.ONMOUSEWHEEL, "mousewheel");
-
-      // Add event handlers
-      scrollable.addScrollHandler(new ScrollHandler() {
-        public void onScroll(ScrollEvent event) {
-          passTest(event.getNativeEvent());
-        }
-      });
-    }
-
-    // onload
-    {
-      // Create an image to trigger events
-      final CustomImage loadable = new CustomImage();
-
-      // Setup the tests
-      addTest(Event.ONERROR, "error", loadable);
-      addDependentTest(Event.ONLOAD, "load");
-      addDependentTest(Event.ONCONTEXTMENU, "contextMenu");
-      addDependentTest(Event.ONDBLCLICK, "dblclick");
-
-      // Add the handlers
-      loadable.addErrorHandler(new ErrorHandler() {
-        public void onError(ErrorEvent event) {
-          loadable.setUrl("issues/images/gwtLogo.png");
-          passTest(event.getNativeEvent());
-        }
-      });
-      loadable.addLoadHandler(new LoadHandler() {
-        public void onLoad(LoadEvent event) {
-          passTest(event.getNativeEvent());
-        }
-      });
-      loadable.addDoubleClickHandler(new DoubleClickHandler() {
-        public void onDoubleClick(DoubleClickEvent event) {
-          passTest(event.getNativeEvent());
-        }
-      });
-      loadable.addContextMenuHandler(new ContextMenuHandler() {
-        public void onContextMenu(ContextMenuEvent event) {
-          passTest(event.getNativeEvent());
-        }
-      });
-
-      // Trigger the events
-      loadable.setUrl("imageDoesNotExist.abc");
-    }
-
-    // Window level events
-    {
-      Label windowLabel = new Label("Window level events");
-
-      // Setup the tests
-      addTest(WINDOW_EVENT_SCROLL, "window.onscroll", windowLabel);
-      addDependentTest(WINDOW_EVENT_RESIZE, "window.onresize");
-      addDependentTest(WINDOW_EVENT_CLOSING, "window.onbeforeunload");
-
-      // Add event handlers
-      Window.addWindowScrollHandler(new Window.ScrollHandler() {
-        public void onWindowScroll(Window.ScrollEvent event) {
-          passTest(WINDOW_EVENT_SCROLL);
-        }
-      });
-      Window.addResizeHandler(new ResizeHandler() {
-        public void onResize(ResizeEvent event) {
-          passTest(WINDOW_EVENT_RESIZE);
-        }
-      });
-      Window.addWindowClosingHandler(new Window.ClosingHandler() {
-        public void onWindowClosing(Window.ClosingEvent event) {
-          event.setMessage("Stay and verify that window.onbeforeunload() has passed");
-          passTest(WINDOW_EVENT_CLOSING);
-        }
-      });
-    }
+    prepMouseEvents();
+    prepKeyboardEvents();
+    prepSrollAndMouseWheelEvents();
+    prepLoadEvents();
+    prepWindowEvents();
 
     // The following are not testable or not supported in all browsers
     // onlosecapture
@@ -435,5 +202,239 @@ public class VisualsForEventsFiring extends AbstractIssue {
     } else {
       layout.setHTML(rowIndex, 1, "pass");
     }
+  }
+
+  private void prepKeyboardEvents() {
+    // Setup a text box to trigger the events
+    TextBox textBox = new TextBox();
+
+    // Setup the tests
+    textBox.setText("Type a letter");
+    addTest(Event.ONKEYDOWN, "keydown", textBox);
+    addDependentTest(Event.ONKEYPRESS, "keypress");
+    addDependentTest(Event.ONKEYUP, "keyup");
+    addDependentTest(Event.ONFOCUS, "focus");
+    addDependentTest(Event.ONBLUR, "blur");
+    addDependentTest(Event.ONCHANGE, "change");
+
+    // Add event handlers
+    textBox.addKeyDownHandler(new KeyDownHandler() {
+      public void onKeyDown(KeyDownEvent event) {
+        event.isAutoRepeat();
+        event.isAltKeyDown();
+        event.isControlKeyDown();
+        event.isShiftKeyDown();
+        event.isMetaKeyDown();
+        assert event.getNativeKeyCode() > 0;
+        passTest(event.getNativeEvent());
+      }
+    });
+    textBox.addKeyUpHandler(new KeyUpHandler() {
+      public void onKeyUp(KeyUpEvent event) {
+        event.isAltKeyDown();
+        event.isControlKeyDown();
+        event.isShiftKeyDown();
+        event.isMetaKeyDown();
+        assert event.getNativeKeyCode() > 0;
+        passTest(event.getNativeEvent());
+      }
+    });
+    textBox.addKeyPressHandler(new KeyPressHandler() {
+      public void onKeyPress(KeyPressEvent event) {
+        event.isAltKeyDown();
+        event.isControlKeyDown();
+        event.isShiftKeyDown();
+        event.isMetaKeyDown();
+        assert event.getCharCode() > 0;
+        passTest(event.getNativeEvent());
+      }
+    });
+    textBox.addFocusHandler(new FocusHandler() {
+      public void onFocus(FocusEvent event) {
+        passTest(event.getNativeEvent());
+      }
+    });
+    textBox.addBlurHandler(new BlurHandler() {
+      public void onBlur(BlurEvent event) {
+        passTest(event.getNativeEvent());
+      }
+    });
+    textBox.addChangeHandler(new ChangeHandler() {
+      public void onChange(ChangeEvent event) {
+        passTest(event.getNativeEvent());
+      }
+    });
+  }
+
+  private void prepLoadEvents() {
+    // Create an image to trigger events
+    final CustomImage loadable = new CustomImage();
+
+    // Setup the tests
+    addTest(Event.ONERROR, "error", loadable);
+    addDependentTest(Event.ONLOAD, "load");
+    addDependentTest(Event.ONCONTEXTMENU, "contextMenu");
+    addDependentTest(Event.ONDBLCLICK, "dblclick");
+
+    // Add the handlers
+    loadable.addErrorHandler(new ErrorHandler() {
+      public void onError(ErrorEvent event) {
+        loadable.setUrl("issues/images/gwtLogo.png");
+        passTest(event.getNativeEvent());
+      }
+    });
+    loadable.addLoadHandler(new LoadHandler() {
+      public void onLoad(LoadEvent event) {
+        passTest(event.getNativeEvent());
+      }
+    });
+    loadable.addDoubleClickHandler(new DoubleClickHandler() {
+      public void onDoubleClick(DoubleClickEvent event) {
+        passTest(event.getNativeEvent());
+      }
+    });
+    loadable.addContextMenuHandler(new ContextMenuHandler() {
+      public void onContextMenu(ContextMenuEvent event) {
+        passTest(event.getNativeEvent());
+      }
+    });
+
+    // Trigger the events
+    loadable.setUrl("imageDoesNotExist.abc");
+  }
+
+  private void prepMouseEvents() {
+    // Create a button to trigger events
+    Button button = new Button("Click me") {
+      @Override
+      public void onBrowserEvent(Event event) {
+        super.onBrowserEvent(event);
+
+        // Verify that values associated with events are defined. For some
+        // values, we just want to make sure we can get them without any
+        // errors.
+        assert event.getClientX() > 0;
+        assert event.getClientY() > 0;
+        assert event.getScreenX() > 0;
+        assert event.getScreenY() > 0;
+        event.getAltKey();
+        event.getCtrlKey();
+        event.getShiftKey();
+        event.getMetaKey();
+      }
+    };
+
+    // Setup the tests
+    addTest(Event.ONCLICK, "click", button);
+    addDependentTest(Event.ONMOUSEDOWN, "mousedown");
+    addDependentTest(Event.ONMOUSEUP, "mouseup");
+    addDependentTest(Event.ONMOUSEOVER, "mouseover");
+    addDependentTest(Event.ONMOUSEOUT, "mouseout");
+    addDependentTest(Event.ONMOUSEMOVE, "mousemove");
+
+    // Add event handlers
+    button.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        passTest(event.getNativeEvent());
+      }
+    });
+    button.addMouseDownHandler(new MouseDownHandler() {
+      public void onMouseDown(MouseDownEvent event) {
+        event.getNativeButton();
+        passTest(event.getNativeEvent());
+      }
+    });
+    button.addMouseUpHandler(new MouseUpHandler() {
+      public void onMouseUp(MouseUpEvent event) {
+        event.getNativeButton();
+        passTest(event.getNativeEvent());
+      }
+    });
+    button.addMouseMoveHandler(new MouseMoveHandler() {
+      public void onMouseMove(MouseMoveEvent event) {
+        passTest(event.getNativeEvent());
+      }
+    });
+    button.addMouseOutHandler(new MouseOutHandler() {
+      public void onMouseOut(MouseOutEvent event) {
+        assert event.getFromElement() != null;
+        assert event.getToElement() != null;
+        passTest(event.getNativeEvent());
+      }
+    });
+    button.addMouseOverHandler(new MouseOverHandler() {
+      public void onMouseOver(MouseOverEvent event) {
+        assert event.getFromElement() != null;
+        assert event.getToElement() != null;
+        passTest(event.getNativeEvent());
+      }
+    });
+  }
+
+  private void prepSrollAndMouseWheelEvents() {
+    // Create a widget to trigger events
+    String scrollableMessage = "Scroll to the bottom<br>(using mouse wheel<br>"
+        + "if supported)";
+    HTML scrollableContents = new HTML(scrollableMessage);
+    scrollableContents.setPixelSize(400, 400);
+    scrollableContents.getElement().getStyle().setProperty("textAlign",
+        "left");
+    ScrollPanel scrollable = new ScrollPanel(scrollableContents) {
+      @Override
+      public void onBrowserEvent(Event event) {
+        super.onBrowserEvent(event);
+
+        // Verify that values associated with events are defined
+        if (event.getTypeInt() == Event.ONMOUSEWHEEL) {
+          event.getClientX();
+          event.getClientY();
+          event.getScreenX();
+          event.getScreenY();
+          event.getMouseWheelVelocityY();
+          passTest(event);
+        }
+      }
+    };
+    scrollable.sinkEvents(Event.ONMOUSEWHEEL);
+
+    // Setup the tests
+    scrollable.setAlwaysShowScrollBars(true);
+    scrollable.setPixelSize(200, 100);
+    addTest(Event.ONSCROLL, "scroll", scrollable);
+    addDependentTest(Event.ONMOUSEWHEEL, "mousewheel");
+
+    // Add event handlers
+    scrollable.addScrollHandler(new ScrollHandler() {
+      public void onScroll(ScrollEvent event) {
+        passTest(event.getNativeEvent());
+      }
+    });
+  }
+
+  private void prepWindowEvents() {
+    Label windowLabel = new Label("Window level events");
+
+    // Setup the tests
+    addTest(WINDOW_EVENT_SCROLL, "window.onscroll", windowLabel);
+    addDependentTest(WINDOW_EVENT_RESIZE, "window.onresize");
+    addDependentTest(WINDOW_EVENT_CLOSING, "window.onbeforeunload");
+
+    // Add event handlers
+    Window.addWindowScrollHandler(new Window.ScrollHandler() {
+      public void onWindowScroll(Window.ScrollEvent event) {
+        passTest(WINDOW_EVENT_SCROLL);
+      }
+    });
+    Window.addResizeHandler(new ResizeHandler() {
+      public void onResize(ResizeEvent event) {
+        passTest(WINDOW_EVENT_RESIZE);
+      }
+    });
+    Window.addWindowClosingHandler(new Window.ClosingHandler() {
+      public void onWindowClosing(Window.ClosingEvent event) {
+        event.setMessage("Stay and verify that window.onbeforeunload() has passed");
+        passTest(WINDOW_EVENT_CLOSING);
+      }
+    });
   }
 }
