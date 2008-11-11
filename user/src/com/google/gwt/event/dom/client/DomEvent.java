@@ -109,12 +109,14 @@ public abstract class DomEvent<H extends EventHandler> extends GwtEvent<H> {
    * Fires the given native event on the specified handlers.
    * 
    * @param nativeEvent the native event
-   * @param handlers the event manager containing the handlers to fire
+   * @param handlers the event manager containing the handlers to fire (may be
+   *          null)
    */
   public static void fireNativeEvent(Event nativeEvent, HandlerManager handlers) {
-    if (registered != null) {
+    assert nativeEvent != null : "nativeEvent must not be null";
+    if (registered != null && handlers != null) {
       final DomEvent.Type<?> typeKey = registered.unsafeGet(nativeEvent.getType());
-      if (handlers != null) {
+      if (typeKey != null) {
         // Store and restore native event just in case we are in recursive
         // loop.
         Event currentNative = typeKey.flyweight.nativeEvent;
