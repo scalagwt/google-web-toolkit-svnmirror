@@ -23,8 +23,7 @@ import com.google.gwt.event.shared.EventHandler;
  * 
  * @param <H> handler type
  */
-public abstract class KeyCodeEvent<H extends EventHandler> extends KeyEvent<H>
-    implements HasKeyCodes {
+public abstract class KeyCodeEvent<H extends EventHandler> extends KeyEvent<H> {
   /**
    * Does the key code represent an arrow key?
    * 
@@ -33,10 +32,10 @@ public abstract class KeyCodeEvent<H extends EventHandler> extends KeyEvent<H>
    */
   public static boolean isArrow(int keyCode) {
     switch (keyCode) {
-      case KEY_DOWN:
-      case KEY_RIGHT:
-      case KEY_UP:
-      case KEY_LEFT:
+      case KeyCodes.KEY_DOWN:
+      case KeyCodes.KEY_RIGHT:
+      case KeyCodes.KEY_UP:
+      case KeyCodes.KEY_LEFT:
         return true;
       default:
         return false;
@@ -44,11 +43,12 @@ public abstract class KeyCodeEvent<H extends EventHandler> extends KeyEvent<H>
   }
 
   /**
-   * Gets the current key code.
+   * Gets the native key code. These key codes are enumerated in the
+   * {@link KeyCodes} class.
    * 
    * @return the key code
    */
-  public int getKeyCode() {
+  public int getNativeKeyCode() {
     return getNativeEvent().getKeyCode();
   }
 
@@ -58,7 +58,7 @@ public abstract class KeyCodeEvent<H extends EventHandler> extends KeyEvent<H>
    * @return is the key code alpha numeric.
    */
   public boolean isAlphaNumeric() {
-    final int keycode = getKeyCode();
+    final int keycode = getNativeKeyCode();
     return (48 <= keycode && keycode <= 57) || (65 <= keycode && keycode <= 90);
   }
 
@@ -68,7 +68,7 @@ public abstract class KeyCodeEvent<H extends EventHandler> extends KeyEvent<H>
    * @return whether this is a down arrow key event
    */
   public boolean isDownArrow() {
-    return getKeyCode() == KEY_DOWN;
+    return getNativeKeyCode() == KeyCodes.KEY_DOWN;
   }
 
   /**
@@ -77,7 +77,7 @@ public abstract class KeyCodeEvent<H extends EventHandler> extends KeyEvent<H>
    * @return whether this is a left arrow key event
    */
   public boolean isLeftArrow() {
-    return getKeyCode() == KEY_LEFT;
+    return getNativeKeyCode() == KeyCodes.KEY_LEFT;
   }
 
   /**
@@ -86,7 +86,7 @@ public abstract class KeyCodeEvent<H extends EventHandler> extends KeyEvent<H>
    * @return whether this is a right arrow key event
    */
   public boolean isRightArrow() {
-    return getKeyCode() == KEY_RIGHT;
+    return getNativeKeyCode() == KeyCodes.KEY_RIGHT;
   }
 
   /**
@@ -95,12 +95,12 @@ public abstract class KeyCodeEvent<H extends EventHandler> extends KeyEvent<H>
    * @return whether this is a right arrow key event
    */
   public boolean isUpArrow() {
-    return getKeyCode() == KEY_UP;
+    return getNativeKeyCode() == KeyCodes.KEY_UP;
   }
 
   @Override
   public String toDebugString() {
-    return super.toDebugString() + "[" + getKeyCode() + "]";
+    return super.toDebugString() + "[" + getNativeKeyCode() + "]";
   }
 
 }

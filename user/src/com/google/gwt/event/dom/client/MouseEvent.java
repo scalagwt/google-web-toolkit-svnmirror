@@ -27,22 +27,6 @@ import com.google.gwt.user.client.Window;
  * 
  */
 public abstract class MouseEvent<H extends EventHandler> extends DomEvent<H> {
-
-  /**
-   * Left mouse button down.
-   */
-  public static final int BUTTON_LEFT = Event.BUTTON_LEFT;
-
-  /**
-   * Right mouse button down.
-   */
-  public static final int BUTTON_RIGHT = Event.BUTTON_RIGHT;
-
-  /**
-   * Middle button down.
-   */
-  public static final int BUTTON_MIDDLE = Event.BUTTON_MIDDLE;
-
   /**
    * Gets the x coordinate relative to the given element.
    * 
@@ -68,16 +52,6 @@ public abstract class MouseEvent<H extends EventHandler> extends DomEvent<H> {
   }
 
   /**
-   * Gets the button value. Compare it to {@link MouseEvent#BUTTON_LEFT},
-   * {@link MouseEvent#BUTTON_RIGHT}, {@link MouseEvent#BUTTON_MIDDLE}
-   * 
-   * @return gets the button value.
-   */
-  public int getButton() {
-    return getNativeEvent().getButton();
-  }
-
-  /**
    * Gets the mouse x-position within the browser window's client area.
    * 
    * @return the mouse x-position
@@ -93,6 +67,16 @@ public abstract class MouseEvent<H extends EventHandler> extends DomEvent<H> {
    */
   public int getClientY() {
     return getNativeEvent().getClientY();
+  }
+
+  /**
+   * Gets the button value. Compare it to {@link Event#BUTTON_LEFT},
+   * {@link Event#BUTTON_RIGHT}, {@link Event#BUTTON_MIDDLE}
+   * 
+   * @return the button value
+   */
+  public int getNativeButton() {
+    return getNativeEvent().getButton();
   }
 
   /**

@@ -15,6 +15,11 @@
  */
 package com.google.gwt.user.client.ui;
 
+import static com.google.gwt.event.dom.client.KeyCodes.KEY_DOWN;
+import static com.google.gwt.event.dom.client.KeyCodes.KEY_ENTER;
+import static com.google.gwt.event.dom.client.KeyCodes.KEY_TAB;
+import static com.google.gwt.event.dom.client.KeyCodes.KEY_UP;
+
 import com.google.gwt.event.dom.client.HandlesAllKeyEvents;
 import com.google.gwt.event.dom.client.HasAllKeyHandlers;
 import com.google.gwt.event.dom.client.KeyDownEvent;
@@ -41,7 +46,6 @@ import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 
 import java.util.Collection;
 import java.util.List;
-
 /**
  * A {@link SuggestBox} is a text box or text area which displays a
  * pre-configured set of selections that match the user's input.
@@ -699,7 +703,7 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
         // Make sure that the menu is actually showing. These keystrokes
         // are only relevant when choosing a suggestion.
         if (suggestionPopup.isAttached()) {
-          switch (event.getKeyCode()) {
+          switch (event.getNativeKeyCode()) {
             case KEY_DOWN:
               suggestionMenu.selectItem(suggestionMenu.getSelectedItemIndex() + 1);
               break;

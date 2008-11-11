@@ -17,7 +17,7 @@ package com.google.gwt.sample.mail.client;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.HasKeyCodes;
+import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
@@ -60,8 +60,8 @@ public class AboutDialog extends DialogBox {
     // Use the popup's key preview hooks to close the dialog when either
     // enter or escape is pressed.
     switch (key) {
-      case HasKeyCodes.KEY_ENTER:
-      case HasKeyCodes.KEY_ESCAPE:
+      case KeyCodes.KEY_ENTER:
+      case KeyCodes.KEY_ESCAPE:
         hide();
         break;
     }

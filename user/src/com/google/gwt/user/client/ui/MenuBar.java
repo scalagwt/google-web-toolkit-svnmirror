@@ -16,7 +16,7 @@
 package com.google.gwt.user.client.ui;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.KeyCodeEvent;
+import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.logical.shared.HasCloseHandlers;
@@ -431,7 +431,7 @@ public class MenuBar extends Widget implements PopupListener, HasAnimation,
       case Event.ONKEYDOWN: {
         int keyCode = DOM.eventGetKeyCode(event);
         switch (keyCode) {
-          case KeyCodeEvent.KEY_LEFT:
+          case  KeyCodes.KEY_LEFT:
             if (LocaleInfo.getCurrentLocale().isRTL()) {
               moveToNextItem();
             } else {
@@ -439,7 +439,7 @@ public class MenuBar extends Widget implements PopupListener, HasAnimation,
             }
             eatEvent(event);
             break;
-          case KeyCodeEvent.KEY_RIGHT:
+          case KeyCodes.KEY_RIGHT:
             if (LocaleInfo.getCurrentLocale().isRTL()) {
               moveToPrevItem();
             } else {
@@ -447,19 +447,19 @@ public class MenuBar extends Widget implements PopupListener, HasAnimation,
             }
             eatEvent(event);
             break;
-          case KeyCodeEvent.KEY_UP:
+          case KeyCodes.KEY_UP:
             moveUp();
             eatEvent(event);
             break;
-          case KeyCodeEvent.KEY_DOWN:
+          case KeyCodes.KEY_DOWN:
             moveDown();
             eatEvent(event);
             break;
-          case KeyCodeEvent.KEY_ESCAPE:
+          case KeyCodes.KEY_ESCAPE:
             closeAllParents();
             eatEvent(event);
             break;
-          case KeyCodeEvent.KEY_ENTER:
+          case KeyCodes.KEY_ENTER:
             if (!selectFirstItemIfNoneSelected()) {
               doItemAction(selectedItem, true);
               eatEvent(event);

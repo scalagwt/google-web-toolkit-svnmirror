@@ -23,7 +23,7 @@ import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.dom.client.HasAllFocusHandlers;
 import com.google.gwt.event.dom.client.HasAllKeyHandlers;
 import com.google.gwt.event.dom.client.HasAllMouseHandlers;
-import com.google.gwt.event.dom.client.HasKeyCodes;
+import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyPressEvent;
@@ -183,10 +183,10 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
       case OTHER_KEY_RIGHT:
       case OTHER_KEY_UP:
       case OTHER_KEY_LEFT:
-      case HasKeyCodes.KEY_DOWN:
-      case HasKeyCodes.KEY_RIGHT:
-      case HasKeyCodes.KEY_UP:
-      case HasKeyCodes.KEY_LEFT:
+      case KeyCodes.KEY_DOWN:
+      case KeyCodes.KEY_RIGHT:
+      case KeyCodes.KEY_UP:
+      case KeyCodes.KEY_LEFT:
         return true;
       default:
         return false;
@@ -200,23 +200,23 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
   private static int standardizeKeycode(int code) {
     switch (code) {
       case OTHER_KEY_DOWN:
-        code = HasKeyCodes.KEY_DOWN;
+        code = KeyCodes.KEY_DOWN;
         break;
       case OTHER_KEY_RIGHT:
-        code = HasKeyCodes.KEY_RIGHT;
+        code = KeyCodes.KEY_RIGHT;
         break;
       case OTHER_KEY_UP:
-        code = HasKeyCodes.KEY_UP;
+        code = KeyCodes.KEY_UP;
         break;
       case OTHER_KEY_LEFT:
-        code = HasKeyCodes.KEY_LEFT;
+        code = KeyCodes.KEY_LEFT;
         break;
     }
     if (LocaleInfo.getCurrentLocale().isRTL()) {
-      if (code == HasKeyCodes.KEY_RIGHT) {
-        code = HasKeyCodes.KEY_LEFT;
-      } else if (code == HasKeyCodes.KEY_LEFT) {
-        code = HasKeyCodes.KEY_RIGHT;
+      if (code == KeyCodes.KEY_RIGHT) {
+        code = KeyCodes.KEY_LEFT;
+      } else if (code == KeyCodes.KEY_LEFT) {
+        code = KeyCodes.KEY_RIGHT;
       }
     }
     return code;
@@ -547,7 +547,7 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
       }
 
       case Event.ONKEYUP: {
-        if (DOM.eventGetKeyCode(event) == HasKeyCodes.KEY_TAB) {
+        if (DOM.eventGetKeyCode(event) == KeyCodes.KEY_TAB) {
           ArrayList<Element> chain = new ArrayList<Element>();
           collectElementChain(chain, getElement(), DOM.eventGetTarget(event));
           TreeItem item = findItemByChain(chain, 0, root);
@@ -1000,19 +1000,19 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
       int code = DOM.eventGetKeyCode(event);
 
       switch (standardizeKeycode(code)) {
-        case HasKeyCodes.KEY_UP: {
+        case KeyCodes.KEY_UP: {
           moveSelectionUp(curSelection);
           break;
         }
-        case HasKeyCodes.KEY_DOWN: {
+        case KeyCodes.KEY_DOWN: {
           moveSelectionDown(curSelection, true);
           break;
         }
-        case HasKeyCodes.KEY_LEFT: {
+        case KeyCodes.KEY_LEFT: {
           maybeCollapseTreeItem();
           break;
         }
-        case HasKeyCodes.KEY_RIGHT: {
+        case KeyCodes.KEY_RIGHT: {
           maybeExpandTreeItem();
           break;
         }

@@ -486,7 +486,7 @@ abstract class L<T> implements EventHandler {
     }
 
     public void onKeyDown(KeyDownEvent event) {
-      listener.onKeyDown(source(event), (char) event.getKeyCode(),
+      listener.onKeyDown(source(event), (char) event.getNativeKeyCode(),
           event.getKeyModifiers());
     }
 
@@ -497,7 +497,7 @@ abstract class L<T> implements EventHandler {
 
     public void onKeyUp(KeyUpEvent event) {
       source(event);
-      listener.onKeyUp(source(event), (char) event.getKeyCode(),
+      listener.onKeyUp(source(event), (char) event.getNativeKeyCode(),
           event.getKeyModifiers());
     }
   }

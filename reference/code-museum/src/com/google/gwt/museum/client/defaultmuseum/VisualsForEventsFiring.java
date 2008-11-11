@@ -147,13 +147,13 @@ public class VisualsForEventsFiring extends AbstractIssue {
       });
       button.addMouseDownHandler(new MouseDownHandler() {
         public void onMouseDown(MouseDownEvent event) {
-          event.getButton();
+          event.getNativeButton();
           passTest(event.getNativeEvent());
         }
       });
       button.addMouseUpHandler(new MouseUpHandler() {
         public void onMouseUp(MouseUpEvent event) {
-          event.getButton();
+          event.getNativeButton();
           passTest(event.getNativeEvent());
         }
       });
@@ -200,7 +200,7 @@ public class VisualsForEventsFiring extends AbstractIssue {
           event.isControlKeyDown();
           event.isShiftKeyDown();
           event.isMetaKeyDown();
-          assert event.getKeyCode() > 0;
+          assert event.getNativeKeyCode() > 0;
           passTest(event.getNativeEvent());
         }
       });
@@ -210,7 +210,7 @@ public class VisualsForEventsFiring extends AbstractIssue {
           event.isControlKeyDown();
           event.isShiftKeyDown();
           event.isMetaKeyDown();
-          assert event.getKeyCode() > 0;
+          assert event.getNativeKeyCode() > 0;
           passTest(event.getNativeEvent());
         }
       });

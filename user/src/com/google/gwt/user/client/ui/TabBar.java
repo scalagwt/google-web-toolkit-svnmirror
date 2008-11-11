@@ -19,7 +19,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasAllKeyHandlers;
 import com.google.gwt.event.dom.client.HasClickHandlers;
-import com.google.gwt.event.dom.client.HasKeyCodes;
+import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyEvent;
@@ -145,7 +145,7 @@ public class TabBar extends Composite implements SourcesTabEvents,
           break;
 
         case Event.ONKEYDOWN:
-          if (((char) DOM.eventGetKeyCode(event)) == HasKeyCodes.KEY_ENTER) {
+          if (((char) DOM.eventGetKeyCode(event)) == KeyCodes.KEY_ENTER) {
             TabBar.this.selectTabByTabWidget(this);
           }
           TabBar.this.onKeyDown(this, (char) event.getKeyCode(),
