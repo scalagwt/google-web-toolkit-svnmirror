@@ -39,7 +39,6 @@ public class EventSuite {
     // ...dom.shared
     suite.addTestSuite(HandlerManagerTest.class);
 
-   
     return suite;
   }
 }

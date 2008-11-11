@@ -215,15 +215,6 @@ class JsHandlerRegistry extends JavaScriptObject {
     this[base + 1][index] = handler;
   }-*/;
 
-  private native void setHandler(int base, int index, EventHandler handler,
-      boolean flattened) /*-{
-    if(flattened) {
-      this[base + 2 + index] = handler;
-    } else {
-      this[base + 1][index] = handler;
-    }
-  }-*/;
-
   private native void setHandlerList(int base, JavaScriptObject handlerList) /*-{
     this[base + 1] = handlerList;
   }-*/;
