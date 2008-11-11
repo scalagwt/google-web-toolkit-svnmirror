@@ -183,16 +183,6 @@ public class Widget extends UIObject implements EventListener, HasHandlers {
   }
 
   /**
-   * Ensures the existence of the handler manager.
-   * 
-   * @return the handler manager
-   * */
-  protected HandlerManager ensureHandlers() {
-    return handlerManager == null ? handlerManager = new HandlerManager(this)
-        : handlerManager;
-  }
-
-  /**
    * Fires an event. Usually used when passing an event from one source to
    * another.
    * 
@@ -294,6 +284,16 @@ public class Widget extends UIObject implements EventListener, HasHandlers {
    * browser's document.
    */
   protected void onUnload() {
+  }
+
+  /**
+   * Ensures the existence of the handler manager.
+   * 
+   * @return the handler manager
+   * */
+  HandlerManager ensureHandlers() {
+    return handlerManager == null ? handlerManager = new HandlerManager(this)
+        : handlerManager;
   }
 
   /**
