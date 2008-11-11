@@ -76,7 +76,7 @@ public class FocusPanel extends SimplePanel implements HasFocus,
 
   @Deprecated
   public void addClickListener(ClickListener listener) {
-    L.Click.add(this, listener);
+    ListenerWrapper.Click.add(this, listener);
   }
 
   public HandlerRegistration addFocusHandler(FocusHandler handler) {
@@ -85,12 +85,12 @@ public class FocusPanel extends SimplePanel implements HasFocus,
 
   @Deprecated
   public void addFocusListener(FocusListener listener) {
-    L.Focus.add(this, listener);
+    ListenerWrapper.Focus.add(this, listener);
   }
 
   @Deprecated
   public void addKeyboardListener(KeyboardListener listener) {
-    L.Keyboard.add(this, listener);
+    ListenerWrapper.Keyboard.add(this, listener);
   }
 
   public HandlerRegistration addKeyDownHandler(KeyDownHandler handler) {
@@ -111,7 +111,7 @@ public class FocusPanel extends SimplePanel implements HasFocus,
 
   @Deprecated
   public void addMouseListener(MouseListener listener) {
-    L.Mouse.add(this, listener);
+    ListenerWrapper.Mouse.add(this, listener);
   }
 
   public HandlerRegistration addMouseMoveHandler(MouseMoveHandler handler) {
@@ -136,7 +136,7 @@ public class FocusPanel extends SimplePanel implements HasFocus,
 
   @Deprecated
   public void addMouseWheelListener(MouseWheelListener listener) {
-    L.MouseWheel.add(this, listener);
+    ListenerWrapper.MouseWheel.add(this, listener);
   }
 
   public int getTabIndex() {
@@ -145,27 +145,27 @@ public class FocusPanel extends SimplePanel implements HasFocus,
 
   @Deprecated
   public void removeClickListener(ClickListener listener) {
-    L.Click.remove(this, listener);
+    ListenerWrapper.Click.remove(this, listener);
   }
 
   @Deprecated
   public void removeFocusListener(FocusListener listener) {
-    L.Focus.remove(this, listener);
+    ListenerWrapper.Focus.remove(this, listener);
   }
 
   @Deprecated
   public void removeKeyboardListener(KeyboardListener listener) {
-    L.Keyboard.remove(this, listener);
+    ListenerWrapper.Keyboard.remove(this, listener);
   }
 
   @Deprecated
   public void removeMouseListener(MouseListener listener) {
-    L.Mouse.remove(this, listener);
+    ListenerWrapper.Mouse.remove(this, listener);
   }
 
   @Deprecated
   public void removeMouseWheelListener(MouseWheelListener listener) {
-    L.MouseWheel.remove(this, listener);
+    ListenerWrapper.MouseWheel.remove(this, listener);
   }
 
   public void setAccessKey(char key) {

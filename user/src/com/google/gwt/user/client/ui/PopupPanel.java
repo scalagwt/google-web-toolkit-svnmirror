@@ -330,7 +330,7 @@ public class PopupPanel extends SimplePanel implements SourcesPopupEvents,
 
   @Deprecated
   public void addPopupListener(final PopupListener listener) {
-    L.Popup.add(this, listener);
+    ListenerWrapper.Popup.add(this, listener);
   }
 
   /**
@@ -562,7 +562,7 @@ public class PopupPanel extends SimplePanel implements SourcesPopupEvents,
 
   @Deprecated
   public void removePopupListener(PopupListener listener) {
-    L.Popup.remove(this, listener);
+    ListenerWrapper.Popup.remove(this, listener);
   }
 
   public void setAnimationEnabled(boolean enable) {

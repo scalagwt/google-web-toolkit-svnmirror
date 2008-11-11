@@ -366,7 +366,7 @@ public final class DisclosurePanel extends Composite implements
    */
   @Deprecated
   public void addEventHandler(final DisclosureHandler handler) {
-    L.Disclosure.add(this, handler);
+    ListenerWrapper.Disclosure.add(this, handler);
   }
 
   public HandlerRegistration addOpenHandler(OpenHandler<DisclosurePanel> handler) {
@@ -440,7 +440,7 @@ public final class DisclosurePanel extends Composite implements
    */
   @Deprecated
   public void removeEventHandler(DisclosureHandler handler) {
-    L.Disclosure.remove(this, handler);
+    ListenerWrapper.Disclosure.remove(this, handler);
   }
 
   public void setAnimationEnabled(boolean enable) {

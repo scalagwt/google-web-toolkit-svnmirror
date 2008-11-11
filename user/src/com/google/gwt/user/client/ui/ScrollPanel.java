@@ -53,7 +53,7 @@ public class ScrollPanel extends SimplePanel implements SourcesScrollEvents,
 
   @Deprecated
   public void addScrollListener(ScrollListener listener) {
-    L.Scroll.add(this, listener);
+    ListenerWrapper.Scroll.add(this, listener);
   }
 
   /**
@@ -88,7 +88,7 @@ public class ScrollPanel extends SimplePanel implements SourcesScrollEvents,
 
   @Deprecated
   public void removeScrollListener(ScrollListener listener) {
-    L.Scroll.remove(this, listener);
+    ListenerWrapper.Scroll.remove(this, listener);
   }
 
   /**

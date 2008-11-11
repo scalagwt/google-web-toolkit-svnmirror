@@ -17,7 +17,6 @@
 package com.google.gwt.user.client.ui;
 
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.event.dom.client.HandlesAllKeyEvents;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -29,6 +28,7 @@ import com.google.gwt.event.dom.client.ErrorHandler;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.dom.client.HandlesAllFocusEvents;
+import com.google.gwt.event.dom.client.HandlesAllKeyEvents;
 import com.google.gwt.event.dom.client.HasAllFocusHandlers;
 import com.google.gwt.event.dom.client.HasAllKeyHandlers;
 import com.google.gwt.event.dom.client.HasChangeHandlers;
@@ -89,9 +89,9 @@ import java.util.EventListener;
  * @param <T> listener type
  */
 @Deprecated
-abstract class L<T> implements EventHandler {
+abstract class ListenerWrapper<T> implements EventHandler {
 
-  public static class Change extends L<ChangeListener> implements ChangeHandler {
+  public static class Change extends ListenerWrapper<ChangeListener> implements ChangeHandler {
     @Deprecated
     public static void add(HasChangeHandlers source, ChangeListener listener) {
       source.addChangeHandler(new Change(listener));
@@ -110,7 +110,7 @@ abstract class L<T> implements EventHandler {
     }
   }
 
-  public static class Click extends L<ClickListener> implements ClickHandler {
+  public static class Click extends ListenerWrapper<ClickListener> implements ClickHandler {
     @Deprecated
     public static Click add(HasClickHandlers source, ClickListener listener) {
       Click rtn = new Click(listener);
@@ -131,7 +131,7 @@ abstract class L<T> implements EventHandler {
     }
   }
 
-  public static class Disclosure extends L<DisclosureHandler> implements
+  public static class Disclosure extends ListenerWrapper<DisclosureHandler> implements
       CloseHandler<DisclosurePanel>, OpenHandler<DisclosurePanel> {
 
     public static void add(DisclosurePanel source, DisclosureHandler listener) {
@@ -161,7 +161,7 @@ abstract class L<T> implements EventHandler {
   /*
    * Handler wrapper for {@link FocusListener}.
    */
-  public static class Focus extends L<FocusListener> implements FocusHandler,
+  public static class Focus extends ListenerWrapper<FocusListener> implements FocusHandler,
       BlurHandler {
 
     public static <EventSourceType extends Widget & HasAllFocusHandlers> Focus add(
@@ -189,7 +189,7 @@ abstract class L<T> implements EventHandler {
     }
   }
 
-  public static class Form extends L<FormHandler> implements
+  public static class Form extends ListenerWrapper<FormHandler> implements
       FormPanel.SubmitHandler, FormPanel.SubmitCompleteHandler {
 
     public static void add(FormPanel source, FormHandler listener) {
@@ -221,7 +221,7 @@ abstract class L<T> implements EventHandler {
     }
   }
 
-  public static class Load extends L<LoadListener> implements LoadHandler,
+  public static class Load extends ListenerWrapper<LoadListener> implements LoadHandler,
       ErrorHandler {
 
     public static void add(HasLoadHandlers source, LoadListener listener) {
@@ -246,7 +246,7 @@ abstract class L<T> implements EventHandler {
     }
   }
 
-  public static class Mouse extends L<MouseListener> implements
+  public static class Mouse extends ListenerWrapper<MouseListener> implements
       MouseDownHandler, MouseUpHandler, MouseOutHandler, MouseOverHandler,
       MouseMoveHandler {
 
@@ -292,7 +292,7 @@ abstract class L<T> implements EventHandler {
       listener.onMouseUp(source(event), event.getClientX(), event.getClientY());
     }
   }
-  public static class MouseWheel extends L<MouseWheelListener> implements
+  public static class MouseWheel extends ListenerWrapper<MouseWheelListener> implements
       MouseWheelHandler {
     public static void add(HasMouseWheelHandlers source, MouseWheelListener listener) {
       source.addMouseWheelHandler(new MouseWheel(listener));
@@ -312,7 +312,7 @@ abstract class L<T> implements EventHandler {
     }
   }
 
-  public static class Popup extends L<PopupListener> implements
+  public static class Popup extends ListenerWrapper<PopupListener> implements
       CloseHandler<PopupPanel> {
 
     public static void add(HasCloseHandlers<PopupPanel> source, PopupListener listener) {
@@ -333,7 +333,7 @@ abstract class L<T> implements EventHandler {
     }
   }
 
-  public static class Scroll extends L<ScrollListener> implements ScrollHandler {
+  public static class Scroll extends ListenerWrapper<ScrollListener> implements ScrollHandler {
 
     public static void add(HasScrollHandlers source, ScrollListener listener) {
       source.addScrollHandler(new Scroll(listener));
@@ -356,7 +356,7 @@ abstract class L<T> implements EventHandler {
     }
   }
 
-  public static class Suggestion extends L<SuggestionHandler> implements
+  public static class Suggestion extends ListenerWrapper<SuggestionHandler> implements
       SelectionHandler<SuggestOracle.Suggestion> {
     @Deprecated
     public static void add(SuggestBox source, SuggestionHandler listener) {
@@ -377,7 +377,7 @@ abstract class L<T> implements EventHandler {
     }
   }
 
-  public static class Tab extends L<TabListener> implements
+  public static class Tab extends ListenerWrapper<TabListener> implements
       SelectionHandler<Integer>, BeforeSelectionHandler<Integer> {
     @Deprecated
     public static void add(TabBar source, TabListener listener) {
@@ -414,7 +414,7 @@ abstract class L<T> implements EventHandler {
     }
   }
 
-  public static class Table extends L<TableListener> implements
+  public static class Table extends ListenerWrapper<TableListener> implements
       ClickHandler {
     @Deprecated
     public static void add(HasClickHandlers source, TableListener listener) {
@@ -436,7 +436,7 @@ abstract class L<T> implements EventHandler {
     }
   }
 
-  public static class Tree extends L<TreeListener> implements
+  public static class Tree extends ListenerWrapper<TreeListener> implements
       SelectionHandler<TreeItem>, CloseHandler<TreeItem>, OpenHandler<TreeItem> {
     @Deprecated
     public static void add(com.google.gwt.user.client.ui.Tree tree,
@@ -468,7 +468,7 @@ abstract class L<T> implements EventHandler {
     }
   }
 
-  static class Keyboard extends L<KeyboardListener> implements KeyDownHandler,
+  static class Keyboard extends ListenerWrapper<KeyboardListener> implements KeyDownHandler,
       KeyUpHandler, KeyPressHandler {
 
     public static <EventSourceType extends Widget & HasAllKeyHandlers> void add(
@@ -477,7 +477,7 @@ abstract class L<T> implements EventHandler {
     }
 
     public static void remove(Widget eventSource, KeyboardListener listener) {
-      L.baseRemove(eventSource, listener, KeyDownEvent.getType(),
+      ListenerWrapper.baseRemove(eventSource, listener, KeyDownEvent.getType(),
           KeyUpEvent.getType(), KeyPressEvent.getType());
     }
 
@@ -514,7 +514,7 @@ abstract class L<T> implements EventHandler {
         // We are removing things as we traverse, have to go backward
         for (int i = handlerCount - 1; i >= 0; i--) {
           H handler = manager.getHandler(key, i);
-          if (handler instanceof L && ((L) handler).listener.equals(listener)) {
+          if (handler instanceof ListenerWrapper && ((ListenerWrapper) handler).listener.equals(listener)) {
             manager.removeHandler(key, handler);
           }
         }
@@ -529,7 +529,7 @@ abstract class L<T> implements EventHandler {
 
   private Widget source;
 
-  protected L(T listener) {
+  protected ListenerWrapper(T listener) {
     this.listener = listener;
   }
 

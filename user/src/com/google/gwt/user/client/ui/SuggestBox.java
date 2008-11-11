@@ -473,7 +473,7 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
    */
   @Deprecated
   public void addChangeListener(final ChangeListener listener) {
-    L.Change legacy = new L.Change(listener);
+    ListenerWrapper.Change legacy = new ListenerWrapper.Change(listener);
     legacy.setSource(this);
     box.addChangeHandler(legacy);
   }
@@ -487,7 +487,7 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
    */
   @Deprecated
   public void addClickListener(final ClickListener listener) {
-    L.Click legacy = L.Click.add(box, listener);
+    ListenerWrapper.Click legacy = ListenerWrapper.Click.add(box, listener);
     legacy.setSource(this);
   }
 
@@ -497,7 +497,7 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
    * @deprecated use addSelectionHandler instead.
    */
   public void addEventHandler(final SuggestionHandler handler) {
-    L.Suggestion.add(this, handler);
+    ListenerWrapper.Suggestion.add(this, handler);
   }
 
   /**
@@ -509,13 +509,13 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
    */
   @Deprecated
   public void addFocusListener(final FocusListener listener) {
-    L.Focus focus = L.Focus.add(box, listener);
+    ListenerWrapper.Focus focus = ListenerWrapper.Focus.add(box, listener);
     focus.setSource(this);
   }
 
   @Deprecated
   public void addKeyboardListener(KeyboardListener listener) {
-    L.Keyboard.add(this, listener);
+    ListenerWrapper.Keyboard.add(this, listener);
   }
 
   public HandlerRegistration addKeyDownHandler(KeyDownHandler handler) {
@@ -597,27 +597,27 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
 
   @Deprecated
   public void removeChangeListener(ChangeListener listener) {
-    L.Change.remove(box, listener);
+    ListenerWrapper.Change.remove(box, listener);
   }
 
   @Deprecated
   public void removeClickListener(ClickListener listener) {
-    L.Click.remove(box, listener);
+    ListenerWrapper.Click.remove(box, listener);
   }
 
   @Deprecated
   public void removeEventHandler(SuggestionHandler handler) {
-    L.Suggestion.remove(this, handler);
+    ListenerWrapper.Suggestion.remove(this, handler);
   }
 
   @Deprecated
   public void removeFocusListener(FocusListener listener) {
-    L.Focus.remove(this, listener);
+    ListenerWrapper.Focus.remove(this, listener);
   }
 
   @Deprecated
   public void removeKeyboardListener(KeyboardListener listener) {
-    L.Keyboard.remove(this, listener);
+    ListenerWrapper.Keyboard.remove(this, listener);
   }
 
   public void setAccessKey(char key) {

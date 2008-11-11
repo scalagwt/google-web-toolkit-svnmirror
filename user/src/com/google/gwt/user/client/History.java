@@ -80,7 +80,7 @@ public class History {
    */
   @Deprecated
   public static void addHistoryListener(HistoryListener listener) {
-    L.HistoryChange.add(listener);
+    ListenerWrapper.HistoryChange.add(listener);
   }
 
   /**
@@ -191,6 +191,6 @@ public class History {
    */
   @Deprecated
   public static void removeHistoryListener(HistoryListener listener) {
-    L.HistoryChange.remove(impl.getHandlers(), listener);
+    ListenerWrapper.HistoryChange.remove(impl.getHandlers(), listener);
   }
 }

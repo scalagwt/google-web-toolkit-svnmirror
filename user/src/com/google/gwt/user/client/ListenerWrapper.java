@@ -37,8 +37,8 @@ import java.util.EventListener;
  * @param <T> listener type
  */
 @Deprecated
-abstract class L<T> implements EventHandler {
-  public static class HistoryChange extends L<HistoryListener> implements
+abstract class ListenerWrapper<T> implements EventHandler {
+  public static class HistoryChange extends ListenerWrapper<HistoryListener> implements
       ValueChangeHandler<String> {
     @Deprecated
     public static void add(HistoryListener listener) {
@@ -58,7 +58,7 @@ abstract class L<T> implements EventHandler {
     }
   }
 
-  public static class WindowClose extends L<WindowCloseListener> implements
+  public static class WindowClose extends ListenerWrapper<WindowCloseListener> implements
       Window.ClosingHandler, CloseHandler<Window> {
     @Deprecated
     public static void add(WindowCloseListener listener) {
@@ -89,7 +89,7 @@ abstract class L<T> implements EventHandler {
     }
   }
 
-  public static class WindowResize extends L<WindowResizeListener> implements
+  public static class WindowResize extends ListenerWrapper<WindowResizeListener> implements
       ResizeHandler {
     @Deprecated
     public static void add(WindowResizeListener listener) {
@@ -110,7 +110,7 @@ abstract class L<T> implements EventHandler {
     }
   }
 
-  public static class WindowScroll extends L<WindowScrollListener> implements
+  public static class WindowScroll extends ListenerWrapper<WindowScrollListener> implements
       Window.ScrollHandler {
     @Deprecated
     public static void add(WindowScrollListener listener) {
@@ -141,7 +141,7 @@ abstract class L<T> implements EventHandler {
         int handlerCount = manager.getHandlerCount(key);
         for (int i = 0; i < handlerCount; i++) {
           EventHandler handler = manager.getHandler(key, i);
-          if (handler instanceof L && ((L) handler).listener.equals(listener)) {
+          if (handler instanceof ListenerWrapper && ((ListenerWrapper) handler).listener.equals(listener)) {
             manager.removeHandler(key, handler);
           }
         }
@@ -154,7 +154,7 @@ abstract class L<T> implements EventHandler {
    */
   protected final T listener;
 
-  protected L(T listener) {
+  protected ListenerWrapper(T listener) {
     this.listener = listener;
   }
 }

@@ -233,7 +233,7 @@ public class TabBar extends Composite implements SourcesTabEvents,
 
   @Deprecated
   public void addTabListener(TabListener listener) {
-    L.Tab.add(this, listener);
+    ListenerWrapper.Tab.add(this, listener);
   }
 
   /**
@@ -397,7 +397,7 @@ public class TabBar extends Composite implements SourcesTabEvents,
 
   @Deprecated
   public void removeTabListener(TabListener listener) {
-    L.Tab.remove(this, listener);
+    ListenerWrapper.Tab.remove(this, listener);
   }
 
   /**

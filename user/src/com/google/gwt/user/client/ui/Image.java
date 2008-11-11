@@ -417,7 +417,7 @@ public class Image extends Widget implements SourcesLoadEvents,
 
   @Deprecated
   public void addClickListener(ClickListener listener) {
-    L.Click.add(this, listener);
+    ListenerWrapper.Click.add(this, listener);
   }
 
   public HandlerRegistration addErrorHandler(ErrorHandler handler) {
@@ -430,7 +430,7 @@ public class Image extends Widget implements SourcesLoadEvents,
 
   @Deprecated
   public void addLoadListener(LoadListener listener) {
-    L.Load.add(this, listener);
+    ListenerWrapper.Load.add(this, listener);
   }
 
   public HandlerRegistration addMouseDownHandler(MouseDownHandler handler) {
@@ -439,7 +439,7 @@ public class Image extends Widget implements SourcesLoadEvents,
 
   @Deprecated
   public void addMouseListener(MouseListener listener) {
-    L.Mouse.add(this, listener);
+    ListenerWrapper.Mouse.add(this, listener);
   }
 
   public HandlerRegistration addMouseMoveHandler(MouseMoveHandler handler) {
@@ -464,7 +464,7 @@ public class Image extends Widget implements SourcesLoadEvents,
 
   @Deprecated
   public void addMouseWheelListener(MouseWheelListener listener) {
-    L.MouseWheel.add(this, listener);
+    ListenerWrapper.MouseWheel.add(this, listener);
   }
 
   /**
@@ -528,22 +528,22 @@ public class Image extends Widget implements SourcesLoadEvents,
 
   @Deprecated
   public void removeClickListener(ClickListener listener) {
-    L.Click.remove(this, listener);
+    ListenerWrapper.Click.remove(this, listener);
   }
 
   @Deprecated
   public void removeLoadListener(LoadListener listener) {
-    L.Load.remove(this, listener);
+    ListenerWrapper.Load.remove(this, listener);
   }
 
   @Deprecated
   public void removeMouseListener(MouseListener listener) {
-    L.Mouse.remove(this, listener);
+    ListenerWrapper.Mouse.remove(this, listener);
   }
 
   @Deprecated
   public void removeMouseWheelListener(MouseWheelListener listener) {
-    L.MouseWheel.remove(this, listener);
+    ListenerWrapper.MouseWheel.remove(this, listener);
   }
 
   /**

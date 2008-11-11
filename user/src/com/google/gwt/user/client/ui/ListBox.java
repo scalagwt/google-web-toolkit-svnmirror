@@ -102,7 +102,7 @@ public class ListBox extends FocusWidget implements SourcesChangeEvents,
 
   @Deprecated
   public void addChangeListener(ChangeListener listener) {
-    addChangeHandler(new L.Change(listener));
+    addChangeHandler(new ListenerWrapper.Change(listener));
   }
 
   /**
@@ -255,7 +255,7 @@ public class ListBox extends FocusWidget implements SourcesChangeEvents,
 
   @Deprecated
   public void removeChangeListener(ChangeListener listener) {
-    L.Change.remove(this, listener);
+    ListenerWrapper.Change.remove(this, listener);
   }
 
   /**

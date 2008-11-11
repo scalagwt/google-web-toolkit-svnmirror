@@ -299,7 +299,7 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
 
   @Deprecated
   public void addFocusListener(FocusListener listener) {
-    L.Focus.add(this, listener);
+    ListenerWrapper.Focus.add(this, listener);
   }
 
   /**
@@ -336,7 +336,7 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
 
   @Deprecated
   public void addKeyboardListener(KeyboardListener listener) {
-    L.Keyboard.add(this, listener);
+    ListenerWrapper.Keyboard.add(this, listener);
   }
 
   public HandlerRegistration addKeyDownHandler(KeyDownHandler handler) {
@@ -357,7 +357,7 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
 
   @Deprecated
   public void addMouseListener(MouseListener listener) {
-    L.Mouse.add(this, listener);
+    ListenerWrapper.Mouse.add(this, listener);
   }
 
   public HandlerRegistration addMouseMoveHandler(MouseMoveHandler handler) {
@@ -391,7 +391,7 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
 
   @Deprecated
   public void addTreeListener(TreeListener listener) {
-    L.Tree.add(this, listener);
+    ListenerWrapper.Tree.add(this, listener);
   }
 
   /**
@@ -589,7 +589,7 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
 
   @Deprecated
   public void removeFocusListener(FocusListener listener) {
-    L.Focus.remove(this, listener);
+    ListenerWrapper.Focus.remove(this, listener);
   }
 
   /**
@@ -612,17 +612,17 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
 
   @Deprecated
   public void removeKeyboardListener(KeyboardListener listener) {
-    L.Keyboard.remove(this, listener);
+    ListenerWrapper.Keyboard.remove(this, listener);
   }
 
   @Deprecated
   public void removeMouseListener(MouseListener listener) {
-    L.Mouse.remove(this, listener);
+    ListenerWrapper.Mouse.remove(this, listener);
   }
 
   @Deprecated
   public void removeTreeListener(TreeListener listener) {
-    L.Tree.remove(this, listener);
+    ListenerWrapper.Tree.remove(this, listener);
   }
 
   public void setAccessKey(char key) {

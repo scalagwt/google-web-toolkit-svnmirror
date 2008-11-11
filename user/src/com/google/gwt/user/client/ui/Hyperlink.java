@@ -98,7 +98,7 @@ public class Hyperlink extends Widget implements HasHTML, SourcesClickEvents,
 
   @Deprecated
   public void addClickListener(ClickListener listener) {
-    L.Click.add(this, listener);
+    ListenerWrapper.Click.add(this, listener);
   }
 
   public String getHTML() {
@@ -130,7 +130,7 @@ public class Hyperlink extends Widget implements HasHTML, SourcesClickEvents,
 
   @Deprecated
   public void removeClickListener(ClickListener listener) {
-    L.Click.remove(this, listener);
+    ListenerWrapper.Click.remove(this, listener);
   }
 
   public void setHTML(String html) {
