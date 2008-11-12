@@ -790,22 +790,22 @@ public class Window {
 
   private static void maybeInitializeCloseHandlers() {
     if (GWT.isClient() && !closeHandlersInitialized) {
-      closeHandlersInitialized = true;
       impl.initWindowCloseHandler();
+      closeHandlersInitialized = true;
     }
   }
 
   private static void maybeInitializeResizeHandlers() {
     if (GWT.isClient() && !resizeHandlersInitialized) {
-      resizeHandlersInitialized = true;
       impl.initWindowResizeHandler();
+      resizeHandlersInitialized = true;
     }
   }
 
   private static void maybeInitializeScrollHandlers() {
     if (GWT.isClient() && !scrollHandlersInitialized) {
-      scrollHandlersInitialized = true;
       impl.initWindowScrollHandler();
+      scrollHandlersInitialized = true;
     }
   }
 
