@@ -33,8 +33,11 @@ import com.google.gwt.user.client.Element;
  * <img class='gallery' src='CheckBox.png'/>
  * </p>
  * 
- * <h3>CSS Style Rules</h3> <ul class='css'> <li>.gwt-CheckBox { }</li> <li>
- * .gwt-CheckBox-disabled { Applied when Checkbox is disabled }</li> </ul>
+ * <h3>CSS Style Rules</h3>
+ * <ul class='css'>
+ * <li>.gwt-CheckBox { }</li>
+ * <li>.gwt-CheckBox-disabled { Applied when Checkbox is disabled }</li>
+ * </ul>
  * 
  * <p>
  * <h3>Example</h3>
@@ -99,7 +102,7 @@ public class CheckBox extends ButtonBase implements HasName, HasValue<Boolean> {
 
   public HandlerRegistration addValueChangeHandler(
       ValueChangeHandler<Boolean> handler) {
-    // Is this the first value change event? If so, time to listen to clicks
+    // Is this the first value change handler? If so, time to listen to clicks
     // on the checkbox
     if (!isEventHandled(ValueChangeEvent.getType())) {
       this.addClickHandler(new ClickHandler() {
@@ -198,12 +201,9 @@ public class CheckBox extends ButtonBase implements HasName, HasValue<Boolean> {
   @Override
   public void setTabIndex(int index) {
     // Need to guard against call to setTabIndex before inputElem is
-    // initialized.
-    // This happens because FocusWidget's (a superclass of CheckBox) setElement
-    // method
-    // calls setTabIndex before inputElem is initialized. See CheckBox's
-    // protected
-    // constructor for more information.
+    // initialized. This happens because FocusWidget's (a superclass of
+    // CheckBox) setElement method calls setTabIndex before inputElem is
+    // initialized. See CheckBox's protected constructor for more information.
     if (inputElem != null) {
       getFocusImpl().setTabIndex(inputElem, index);
     }

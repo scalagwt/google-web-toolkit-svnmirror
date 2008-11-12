@@ -49,9 +49,14 @@ import com.google.gwt.user.client.Window;
  * <li>.gwt-DialogBox .Caption { the caption }</li>
  * <li>.gwt-DialogBox .dialogContent { the wrapepr around the content }</li>
  * <li>.gwt-DialogBox .dialogTopLeft { the top left cell }</li>
- * .gwt-DialogBox .dialogTopRightInner { the inner element of the cell }</li>
- * <li>.gwt-DialogBox .dialogMiddleLeft { the middle left cell }</li> <li>
- * .gwt-DialogBox .dialogMiddleLeftInner { the inner element of the cell }</li>
+ * <li>.gwt-DialogBox .dialogTopLeftInner { the inner element of the cell }</li>
+ * <li>.gwt-DialogBox .dialogTopCenter { the top center cell, where the caption
+ * is located }</li>
+ * <li>.gwt-DialogBox .dialogTopCenterInner { the inner element of the cell }</li>
+ * <li>.gwt-DialogBox .dialogTopRight { the top right cell }</li>
+ * <li>.gwt-DialogBox .dialogTopRightInner { the inner element of the cell }</li>
+ * <li>.gwt-DialogBox .dialogMiddleLeft { the middle left cell }</li>
+ * <li>.gwt-DialogBox .dialogMiddleLeftInner { the inner element of the cell }</li>
  * <li>.gwt-DialogBox .dialogMiddleCenter { the middle center cell, where the
  * content is located }</li>
  * <li>.gwt-DialogBox .dialogMiddleCenterInner { the inner element of the cell }</li>

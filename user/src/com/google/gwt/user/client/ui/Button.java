@@ -27,7 +27,10 @@ import com.google.gwt.event.dom.client.ClickHandler;
  * <img class='gallery' src='Button.png'/>
  * </p>
  * 
- * <h3>CSS Style Rules</h3> <ul class="css"> <li>.gwt-Button { }</li> </ul>
+ * <h3>CSS Style Rules</h3>
+ * <ul class="css">
+ * <li>.gwt-Button { }</li>
+ * </ul>
  * 
  * <p>
  * <h3>Example</h3>
