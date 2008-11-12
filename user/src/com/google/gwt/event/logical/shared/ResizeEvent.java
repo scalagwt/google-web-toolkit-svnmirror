@@ -33,8 +33,7 @@ public class ResizeEvent extends GwtEvent<ResizeHandler> {
    * Fires a resize event on all registered handlers in the handler source.
    * 
    * @param <S> The handler source
-   * @param source the source of the handlers. Must have resize handlers and a
-   *          handler manager.
+   * @param source the source of the handlers
    * @param width the new width
    * @param height the new height
    */

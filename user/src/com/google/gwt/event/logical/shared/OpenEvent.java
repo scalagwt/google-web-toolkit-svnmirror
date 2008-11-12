@@ -35,8 +35,7 @@ public class OpenEvent<T> extends GwtEvent<OpenHandler<T>> {
    * 
    * @param <T> the target type
    * @param <S> The event source
-   * @param source the source of the handlers. Must have open handlers and a
-   *          handler manager.
+   * @param source the source of the handlers
    * @param target the target
    */
   public static <T, S extends HasOpenHandlers<T> & HasHandlers> void fire(

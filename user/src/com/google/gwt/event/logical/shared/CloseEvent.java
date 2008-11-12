@@ -35,8 +35,7 @@ public class CloseEvent<T> extends GwtEvent<CloseHandler<T>> {
    * 
    * @param <T> the target type
    * @param <S> The event source
-   * @param source the source of the handlers. Must have close handlers and a
-   *          handler manager.
+   * @param source the source of the handlers 
    * @param target the target
    * @param autoClosed was the target closed automatically
    */
@@ -58,8 +57,7 @@ public class CloseEvent<T> extends GwtEvent<CloseHandler<T>> {
    * 
    * @param <T> the target type
    * @param <S> The event source
-   * @param source the source of the handlers. Must have close handlers and a
-   *          handler manager.
+   * @param source the source of the handlers
    * @param target the target
    */
   public static <T, S extends HasCloseHandlers<T> & HasHandlers> void fire(

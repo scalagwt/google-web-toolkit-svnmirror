@@ -36,8 +36,7 @@ public class ValueChangeEvent<I> extends GwtEvent<ValueChangeHandler<I>> {
    * 
    * @param <I> the old value type
    * @param <S> The event source
-   * @param source the source of the handlers. Must have value change handlers
-   *          and a handler manager.
+   * @param source the source of the handlers
    * @param value the value
    */
   public static <I, S extends HasValueChangeHandlers<I> & HasHandlers> void fire(
@@ -59,8 +58,7 @@ public class ValueChangeEvent<I> extends GwtEvent<ValueChangeHandler<I>> {
    * 
    * @param <I> the old value type
    * @param <S> The event source
-   * @param source the source of the handlers. Must have value change handlers
-   *          and a handler manager.
+   * @param source the source of the handlers
    * @param oldValue the oldValue, may be null
    * @param newValue the newValue, may be null
    */

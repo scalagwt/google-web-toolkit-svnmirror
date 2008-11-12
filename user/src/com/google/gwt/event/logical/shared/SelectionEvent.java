@@ -35,8 +35,7 @@ public class SelectionEvent<I> extends GwtEvent<SelectionHandler<I>> {
    * 
    * @param <I> the selected item type
    * @param <S> The event source
-   * @param source the source of the handlers. Must have selection handlers and
-   *          a handler manager.
+   * @param source the source of the handlers
    * @param selectedItem the selected item
    */
   public static <I, S extends HasSelectionHandlers<I> & HasHandlers> void fire(
