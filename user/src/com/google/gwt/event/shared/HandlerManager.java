@@ -16,9 +16,11 @@
 package com.google.gwt.event.shared;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.shared.GwtEvent.Type;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -26,32 +28,251 @@ import java.util.List;
  * handlers on passed in events.
  */
 public class HandlerManager {
-  // Used to optimize the JavaScript handler container structure.
-  static int EXPECTED_HANDLERS = 5;
-  private static final boolean useJs = GWT.isClient();
-  private static int index;
-
   /**
-   * Is the given event live?
-   * 
-   * @param event the event
-   * @return is the event live
+   * The default Handler manager's handler registry for running in Java code.
    */
-  public static boolean isLive(GwtEvent<?> event) {
-    return event.isLive();
-  }
+  private static class JavaHandlerRegistry extends
+      HashMap<GwtEvent.Type<?>, ArrayList<?>> {
 
-  /**
-   * Revives the given event.
-   * 
-   * @param event the event
-   */
-  public static void revive(GwtEvent<?> event) {
-    if (event.isLive() == false) {
-      event.revive();
+    public <H extends EventHandler> void addHandler(Type<H> type, H handler) {
+      ArrayList<H> l = get(type);
+      if (l == null) {
+        l = new ArrayList<H>();
+        super.put(type, l);
+      }
+      l.add(handler);
+    }
+
+    public <H extends EventHandler> void fireEvent(GwtEvent<H> event) {
+      Type<H> type = event.getAssociatedType();
+      int count = getHandlerCount(type);
+      for (int i = 0; i < count; i++) {
+        H handler = getHandler(type, i);
+        event.dispatch(handler);
+      }
+    }
+
+    public <H extends EventHandler> H getHandler(GwtEvent.Type<H> eventKey,
+        int index) {
+      ArrayList<H> l = get(eventKey);
+      return l.get(index);
+    }
+
+    public int getHandlerCount(GwtEvent.Type<?> eventKey) {
+      ArrayList<?> l = super.get(eventKey);
+      if (l == null) {
+        return 0;
+      } else {
+        return l.size();
+      }
+    }
+
+    public <H> void removeHandler(GwtEvent.Type<H> eventKey, H handler) {
+      ArrayList<H> l = get(eventKey);
+      if (l != null) {
+        l.remove(handler);
+      }
+    }
+
+    @SuppressWarnings("unchecked")
+    private <H> ArrayList<H> get(GwtEvent.Type<H> type) {
+      // This cast is safe because we control the puts.
+      return (ArrayList<H>) super.get(type);
     }
   }
 
+  /**
+   * Default JavaScript handler registry. This is in the shared class but should
+   * never be called outside of a GWT runtime environment.
+   * 
+   * The JsHandlerRegistry makes use of the fact that in the large majority of
+   * cases, only one or two handlers are added for each event type. Therefore,
+   * rather than storing handlers in a list of lists, we store then in a single
+   * flattened array with an escape clause to handle the rare case where we have
+   * more handlers then expected.
+   */
+  private static class JsHandlerRegistry extends JavaScriptObject {
+
+    /**
+     * Required constructor.
+     */
+    protected JsHandlerRegistry() {
+    }
+
+    public final <H extends EventHandler> void addHandler(
+        HandlerManager manager, Type<H> type, H myHandler) {
+
+      // The base is the equivalent to a c pointer into the flattened handler
+      // data structure.
+      int base = type.hashCode();
+      int count = getCount(base);
+      boolean flattened = isFlattened(base);
+      H handler = myHandler;
+      // If we already have the maximum number of handlers we can store in the
+      // flattened data structure, store the handlers in an external list
+      // instead.
+      if ((count == EXPECTED_HANDLERS) & flattened) {
+        // As long as we are only adding to the end of a handler list, should
+        // not need to queue.
+        if (manager.firingDepth > 0) {
+          manager.enqueueAdd(type, myHandler);
+          return;
+        }
+        unflatten(base);
+        flattened = false;
+      }
+      if (flattened) {
+        setFlatHandler(base, count, handler);
+      } else {
+        setHandler(base, count, handler);
+      }
+      setCount(base, count + 1);
+    }
+
+    public final <H extends EventHandler> void fireEvent(GwtEvent<H> event) {
+      Type<H> type = event.getAssociatedType();
+      int base = type.hashCode();
+      int count = getCount(base);
+      boolean isFlattened = isFlattened(base);
+      if (isFlattened) {
+        for (int i = 0; i < count; i++) {
+          // Gets the given handler to fire.
+          H handler = getFlatHandler(base, i);
+          // Fires the handler.
+          event.dispatch(handler);
+        }
+      } else {
+        JavaScriptObject handlers = getHandlers(base);
+        for (int i = 0; i < count; i++) {
+          // Gets the given handler to fire.
+
+          H handler = getHandler(handlers, i);
+
+          // Fires the handler.
+          event.dispatch(handler);
+        }
+      }
+    }
+
+    public final <H extends EventHandler> H getHandler(GwtEvent.Type<H> type,
+        int index) {
+      int base = type.hashCode();
+      int count = getCount(base);
+      if (index >= count) {
+        throw new IndexOutOfBoundsException("index: " + index);
+      }
+      return getHandler(base, index, isFlattened(base));
+    }
+
+    public final int getHandlerCount(GwtEvent.Type<?> eventKey) {
+      return getCount(eventKey.hashCode());
+    }
+
+    public final <H> void removeHandler(GwtEvent.Type<H> eventKey,
+        EventHandler handler) {
+      int base = eventKey.hashCode();
+
+      // Removing a handler is unusual, so smaller code is preferable then
+      // handling both flat and dangling list of pointers.
+      if (isFlattened(base)) {
+        unflatten(base);
+      }
+      boolean result = removeHelper(base, handler);
+      // Hiding this behind an assertion as we'd rather not force the compiler
+      // to
+      // have to include all handler.toString() instances.
+      assert result : handler + " did not exist";
+    }
+
+    private native int getCount(int index) /*-{
+      var count = this[index];
+      return count == null? 0:count;
+    }-*/;
+
+    private native <H extends EventHandler> H getFlatHandler(int base, int index) /*-{
+      return this[base + 2 + index];
+    }-*/;
+
+    private native <H extends EventHandler> H getHandler(int base, int index,
+        boolean flattened) /*-{
+      return flattened? this[base + 2 + index]: this[base + 1][index];
+    }-*/;
+
+    private native <H extends EventHandler> H getHandler(
+        JavaScriptObject handlers, int index) /*-{
+      return handlers[index];
+    }-*/;
+
+    private native JavaScriptObject getHandlers(int base) /*-{
+      return  this[base + 1];
+    }-*/;
+
+    private native boolean isFlattened(int base) /*-{
+      return this[base + 1] == null;
+    }-*/;
+
+    private native boolean removeHelper(int base, EventHandler handler) /*-{
+      // Find the handler.
+      var count = this[base];
+      var handlerList = this[base + 1];
+      var handlerIndex = -1;
+      for(var index = 0;  index < count; index++){
+        if(handlerList[index] == handler){
+          handlerIndex = index;
+          break;
+        }
+      }
+      if(handlerIndex == -1) {
+        return false;
+      }
+
+      // Remove the handler.
+      var last = count -1;
+      for(; handlerIndex < last; handlerIndex++){
+        handlerList[handlerIndex] = handlerList[handlerIndex+1]
+      }
+      handlerList[last] = null;
+      this[base] = this[base]-1;
+      return true;
+    }-*/;
+
+    private native void setCount(int index, int count) /*-{
+      this[index] = count;
+    }-*/;
+
+    private native void setFlatHandler(int base, int index, EventHandler handler) /*-{
+      this[base + 2 + index] = handler;
+    }-*/;
+
+    private native void setHandler(int base, int index, EventHandler handler) /*-{
+      this[base + 1][index] = handler;
+    }-*/;
+
+    private native void setHandlerList(int base, JavaScriptObject handlerList) /*-{
+      this[base + 1] = handlerList;
+    }-*/;
+
+    private native void unflatten(int base) /*-{
+      var handlerList = {};
+      var count = this[base];
+      var start = base + 2;
+       for(var i = 0; i < count;i++){
+         handlerList[i] = this[start + i];
+         this[start + i] = null;
+        }
+       this[base + 1] = handlerList;
+    }-*/;
+  }
+
+  // Used to optimize the JavaScript handler container structure.
+  private static int EXPECTED_HANDLERS = 5;
+
+  private static final boolean useJs = GWT.isClient();
+
+  private static int index;
+ 
+  // Used to assign hash codes to gwt event types so they are easy to store in a
+  // js structure.
   static int createKeyIndex() {
     // Need to leave space for the size and the unflattened list if we end up
     // needing it.
@@ -59,12 +280,10 @@ public class HandlerManager {
     return index;
   }
 
-  // package protected to allow it to be used in JsHandlerRegistry
-  int firingDepth = 0;
-
+  private int firingDepth = 0;
   // Only one of JsHandlerRegistry and JavaHandlerRegistry are live at once.
-  private final JsHandlerRegistry javaScriptRegistry;
-  private final JavaHandlerRegistry javaRegistry;
+  private JsHandlerRegistry javaScriptRegistry;
+  private JavaHandlerRegistry javaRegistry;
 
   // source of the event.
   private final Object source;
@@ -82,11 +301,9 @@ public class HandlerManager {
    */
   public HandlerManager(Object source) {
     if (useJs) {
-      javaScriptRegistry = JsHandlerRegistry.create();
-      javaRegistry = null;
+      javaScriptRegistry = JavaScriptObject.createObject().cast();
     } else {
       javaRegistry = new JavaHandlerRegistry();
-      javaScriptRegistry = null;
     }
     this.source = source;
   }
@@ -94,7 +311,7 @@ public class HandlerManager {
   /**
    * Adds a handle.
    * 
-   * @param <H> The type of handler.
+   * @param <H> The type of handler
    * @param type the event type associated with this handler
    * @param handler the handler
    * @return the handler registration, can be stored in order to remove the
@@ -102,16 +319,15 @@ public class HandlerManager {
    */
   public <H extends EventHandler> HandlerRegistration addHandler(
       GwtEvent.Type<H> type, final H handler) {
-    
+
     /*
      * We used to keep the enqueue / dequeue entirely inside HandlerManager.
      * However, we found a 30% speed improvement in handler registration if
      * JsHandlerRegistry is allowed to make its own decision about queuing. Thus
-     * the funny code path here. 
+     * the funny code path here.
      * 
-     * No parallel optimization was made for removing handlers, as that 
-     * rarely happens anyway, and is not a significant contributer to startup
-     * time. 
+     * No parallel optimization was made for removing handlers, as that rarely
+     * happens anyway, and is not a significant contributer to startup time.
      */
     if (useJs) {
       javaScriptRegistry.addHandler(this, type, handler);
@@ -126,19 +342,6 @@ public class HandlerManager {
   }
 
   /**
-   * Clears all the handlers associated with the given type.
-   * 
-   * @param type the type
-   */
-  public void clearHandlers(Type<?> type) {
-    if (useJs) {
-      javaScriptRegistry.clearHandlers(type);
-    } else {
-      javaRegistry.clearHandlers(type);
-    }
-  }
-
-  /**
    * Fires the given event to the handlers listening to the event's type.
    * 
    * @param event the event
@@ -146,9 +349,9 @@ public class HandlerManager {
   // Final so we can manage buffering adds and removes without a subclass
   // throwing all our calculations off.
   public final void fireEvent(GwtEvent<?> event) {
-    // If it not live we should clear the source and make it live.
+    // If it not live we should revive it.
     if (event.isLive() == false) {
-      revive(event);
+      event.revive();
     }
     Object oldSource = event.getSource();
     event.setSource(source);
@@ -183,6 +386,9 @@ public class HandlerManager {
    * @return the given handler
    */
   public <H extends EventHandler> H getHandler(GwtEvent.Type<H> type, int index) {
+    assert index < getHandlerCount(type) : "handlers for " + type.getClass()
+        + " have size: " + getHandlerCount(type)
+        + " so do not have a handler at index:" + index;
     if (useJs) {
       return javaScriptRegistry.getHandler(type, index);
     } else {
@@ -223,6 +429,10 @@ public class HandlerManager {
    * 
    * @param type the event type
    * @param handler the handler
+   * @deprecated We currently believe this method will not be needed after
+   * listeners are removed in GWT 2.0. If you have a use case for it after that
+   * time, please add your comments to issue
+   * http://code.google.com/p/google-web-toolkit/issues/detail?id=3102
    */
   public <H extends EventHandler> void removeHandler(GwtEvent.Type<H> type,
       final H handler) {
@@ -233,22 +443,21 @@ public class HandlerManager {
     }
   }
 
-  // Package protected so JsHandlerRegistry can call enqueueAdd.
-  <H extends EventHandler> void enqueueAdd(GwtEvent.Type<H> type,
-      final H handler) {
-    if (addQueue == null) {
-      addQueue = new ArrayList<Object>();
-      addQueue.add(type);
-      addQueue.add(handler);
-    }
-  }
-
   private <H extends EventHandler> void doRemove(GwtEvent.Type<H> type,
       final H handler) {
     if (useJs) {
       javaScriptRegistry.removeHandler(type, handler);
     } else {
       javaRegistry.removeHandler(type, handler);
+    }
+  }
+
+  private <H extends EventHandler> void enqueueAdd(GwtEvent.Type<H> type,
+      final H handler) {
+    if (addQueue == null) {
+      addQueue = new ArrayList<Object>();
+      addQueue.add(type);
+      addQueue.add(handler);
     }
   }
 
