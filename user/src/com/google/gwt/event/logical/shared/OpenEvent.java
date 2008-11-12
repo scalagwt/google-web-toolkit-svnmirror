@@ -31,7 +31,8 @@ public class OpenEvent<T> extends GwtEvent<OpenHandler<T>> {
   private static Type<OpenHandler<?>> TYPE;
 
   /**
-   * Fires a open event on all registered handlers in the handler manager.
+   * Fires a open event on all registered handlers in the handler manager.If no
+   * such handlers exist, this method will do nothing.
    * 
    * @param <T> the target type
    * @param <S> The event source
@@ -51,7 +52,7 @@ public class OpenEvent<T> extends GwtEvent<OpenHandler<T>> {
   }
 
   /**
-   * Gets the abstract type associated with this event.
+   * Gets the type associated with this event.
    * 
    * @return returns the handler type
    */
@@ -65,7 +66,7 @@ public class OpenEvent<T> extends GwtEvent<OpenHandler<T>> {
   private T target;
 
   /**
-   * Constructor. Should only be used by subclasses, almost always for testing.
+   * Creates a new open event.
    */
   protected OpenEvent() {
   }
@@ -86,6 +87,7 @@ public class OpenEvent<T> extends GwtEvent<OpenHandler<T>> {
 
   // Because of type erasure, our static type is
   // wild carded, yet the "real" type should use our I param.
+
   @SuppressWarnings("unchecked")
   @Override
   protected final Type<OpenHandler<T>> getAssociatedType() {

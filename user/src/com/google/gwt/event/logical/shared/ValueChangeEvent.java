@@ -32,7 +32,7 @@ public class ValueChangeEvent<I> extends GwtEvent<ValueChangeHandler<I>> {
 
   /**
    * Fires a value change event on all registered handlers in the handler
-   * manager.
+   * manager.If no such handlers exist, this method will do nothing.
    * 
    * @param <I> the old value type
    * @param <S> The event source
@@ -73,7 +73,7 @@ public class ValueChangeEvent<I> extends GwtEvent<ValueChangeHandler<I>> {
   }
 
   /**
-   * Gets the abstract type associated with this event.
+   * Gets the type associated with this event.
    * 
    * @return returns the handler type
    */
@@ -87,7 +87,7 @@ public class ValueChangeEvent<I> extends GwtEvent<ValueChangeHandler<I>> {
   private I value;
 
   /**
-   * Constructor. Should only be used by subclasses, almost always for testing.
+   * Creates a value change event.
    */
   protected ValueChangeEvent() {
   }
@@ -106,8 +106,8 @@ public class ValueChangeEvent<I> extends GwtEvent<ValueChangeHandler<I>> {
     handler.onValueChange(this);
   }
 
-  // Because of type erasure, our static type is
-  // wild carded, yet the "real" type should use our I param.
+  // The instance knows its BeforeSelectionHandler is of type I, but the TYPE
+  // field itself does not, so we have to do an unsafe cast here.
   @SuppressWarnings("unchecked")
   @Override
   protected Type<ValueChangeHandler<I>> getAssociatedType() {

@@ -35,7 +35,7 @@ public class CloseEvent<T> extends GwtEvent<CloseHandler<T>> {
    * 
    * @param <T> the target type
    * @param <S> The event source
-   * @param source the source of the handlers 
+   * @param source the source of the handlers
    * @param target the target
    * @param autoClosed was the target closed automatically
    */
@@ -53,7 +53,8 @@ public class CloseEvent<T> extends GwtEvent<CloseHandler<T>> {
   }
 
   /**
-   * Fires a close event on all registered handlers in the handler manager.
+   * Fires a close event on all registered handlers in the handler manager. If
+   * no such handlers exist, this method will do nothing.
    * 
    * @param <T> the target type
    * @param <S> The event source
@@ -66,7 +67,7 @@ public class CloseEvent<T> extends GwtEvent<CloseHandler<T>> {
   }
 
   /**
-   * Gets the abstract type associated with this event.
+   * Gets the type associated with this event.
    * 
    * @return returns the handler type
    */
@@ -79,7 +80,7 @@ public class CloseEvent<T> extends GwtEvent<CloseHandler<T>> {
   private boolean autoClosed;
 
   /**
-   * Constructor. Should only be used by subclasses, almost always for testing.
+   * Creates a new close event.
    */
   protected CloseEvent() {
   }
@@ -108,8 +109,8 @@ public class CloseEvent<T> extends GwtEvent<CloseHandler<T>> {
     handler.onClose(this);
   }
 
-  // Because of type erasure, our static type is
-  // wild carded, yet the "real" type should use our I param.
+  // The instance knows its BeforeSelectionHandler is of type I, but the TYPE
+  // field itself does not, so we have to do an unsafe cast here.
   @SuppressWarnings("unchecked")
   @Override
   protected final Type<CloseHandler<T>> getAssociatedType() {

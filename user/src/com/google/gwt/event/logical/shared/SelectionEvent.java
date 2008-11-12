@@ -31,7 +31,8 @@ public class SelectionEvent<I> extends GwtEvent<SelectionHandler<I>> {
   private static Type<SelectionHandler<?>> TYPE;
 
   /**
-   * Fires a selection event on all registered handlers in the handler manager.
+   * Fires a selection event on all registered handlers in the handler
+   * manager.If no such handlers exist, this method will do nothing.
    * 
    * @param <I> the selected item type
    * @param <S> The event source
@@ -51,7 +52,7 @@ public class SelectionEvent<I> extends GwtEvent<SelectionHandler<I>> {
   }
 
   /**
-   * Gets the abstract type associated with this event.
+   * Gets the type associated with this event.
    * 
    * @return returns the handler type
    */
@@ -65,7 +66,7 @@ public class SelectionEvent<I> extends GwtEvent<SelectionHandler<I>> {
   private I selectedItem;
 
   /**
-   * Constructor. Should only be used by subclasses, almost always for testing.
+   * Creates a new selection event.
    */
   protected SelectionEvent() {
   }
@@ -84,8 +85,8 @@ public class SelectionEvent<I> extends GwtEvent<SelectionHandler<I>> {
     handler.onSelection(this);
   }
 
-  // Because of type erasure, our static type is
-  // wild carded, yet the "real" type should use our I param.
+  // The instance knows its BeforeSelectionHandler is of type I, but the TYPE
+  // field itself does not, so we have to do an unsafe cast here.
   @SuppressWarnings("unchecked")
   @Override
   protected Type<SelectionHandler<I>> getAssociatedType() {

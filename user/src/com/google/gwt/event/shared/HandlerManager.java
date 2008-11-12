@@ -270,7 +270,7 @@ public class HandlerManager {
   private static final boolean useJs = GWT.isClient();
 
   private static int index;
- 
+
   // Used to assign hash codes to gwt event types so they are easy to store in a
   // js structure.
   static int createKeyIndex() {
