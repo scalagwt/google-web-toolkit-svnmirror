@@ -33,7 +33,7 @@ import java.util.EventListener;
  * Gathers the bulk of the legacy glue code in one place, for easy deletion when
  * Listener methods are deleted. 
  * 
- * @see com.google.gwt.user.L
+ * @see com.google.gwt.user.ListenerWrapper
  * @param <T> listener type
  */
 @Deprecated
