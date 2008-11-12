@@ -33,17 +33,17 @@ public class BeforeSelectionEvent<I> extends
 
   /**
    * Fires a before selection event on all registered handlers in the handler
-   * manager.
+   * manager. If no such handlers exist, this method will do nothing.
    * 
    * @param <I> the item type
-   * @param <S> The event source.
-   * @param source the source of the handlers. Must have before selection
-   *          handlers and a handler manager.
+   * @param <S> The event source type
+   * @param source the source of the handlers
    * @param item the item
    * @return the event so that the caller can check if it was canceled
    */
   public static <I, S extends HasBeforeSelectionHandlers<I> & HasHandlers> BeforeSelectionEvent<I> fire(
       S source, I item) {
+    // If no handlers exist, then type can be null.
     if (TYPE != null) {
       HandlerManager handlers = source.getHandlers();
       if (handlers != null) {
@@ -57,7 +57,7 @@ public class BeforeSelectionEvent<I> extends
   }
 
   /**
-   * Gets the abstract type associated with this event.
+   * Gets the type associated with this event.
    * 
    * @return returns the handler type
    */
@@ -73,7 +73,7 @@ public class BeforeSelectionEvent<I> extends
   private boolean canceled;
 
   /**
-   * Constructor. Should only be used by subclasses, almost always for testing.
+   * Creates a new before selection event.
    */
   protected BeforeSelectionEvent() {
   }
@@ -99,7 +99,7 @@ public class BeforeSelectionEvent<I> extends
    * 
    * @return is canceled
    */
-  public boolean isCanceled() {
+  public final boolean isCanceled() {
     return canceled;
   }
 
@@ -108,8 +108,8 @@ public class BeforeSelectionEvent<I> extends
     handler.onBeforeSelection(this);
   }
 
-  // Because of type erasure, our static type is
-  // wild carded, yet the "real" type should use our I param.
+  // The instance knows its BeforeSelectionHandler is of type I, but the TYPE
+  // field itself does not, so we have to do an unsafe cast here.
   @SuppressWarnings("unchecked")
   @Override
   protected Type<BeforeSelectionHandler<I>> getAssociatedType() {
