@@ -78,15 +78,14 @@ public class DialogBox extends DecoratedPopupPanel implements HasHTML, HasText,
     MouseListener {
   /**
    * Set of characteristic interfaces supported by the {@link DialogBox} caption
-   * wrappers.
-   * 
+   *
    * Note that this set might expand over time, so implement this interface at
    * your own risk.
    */
-  public interface CaptionWrapper extends HasAllMouseHandlers {
+  public interface Caption extends HasAllMouseHandlers {
   }
 
-  private class CaptionWrapperImpl extends HTML implements CaptionWrapper {
+  private class CaptionImpl extends HTML implements Caption {
   }
 
   private class MouseHandler implements MouseDownHandler, MouseUpHandler,
@@ -118,7 +117,7 @@ public class DialogBox extends DecoratedPopupPanel implements HasHTML, HasText,
    */
   private static final String DEFAULT_STYLENAME = "gwt-DialogBox";
 
-  private CaptionWrapperImpl caption = new CaptionWrapperImpl();
+  private CaptionImpl caption = new CaptionImpl();
   private boolean dragging;
   private int dragStartX, dragStartY;
   private int windowWidth;
@@ -183,11 +182,11 @@ public class DialogBox extends DecoratedPopupPanel implements HasHTML, HasText,
   }
 
   /**
-   * Provides access to the widget that displays the dialog's caption.
+   * Provides access to the dialog's caption.
    * 
-   * @return the Caption widget wrapper
+   * @return the logical caption for this dialog box
    */
-  public CaptionWrapper getCaptionWrapper() {
+  public Caption getCaption() {
     return caption;
   }
 

@@ -78,7 +78,7 @@ public class TabBar extends Composite implements SourcesTabEvents,
    * Note that this set might expand over time, so implement this interface at
    * your own risk.
    */
-  public interface TabWrapper extends HasAllKeyHandlers, HasClickHandlers {
+  public interface Tab extends HasAllKeyHandlers, HasClickHandlers {
   }
 
   /**
@@ -87,8 +87,7 @@ public class TabBar extends Composite implements SourcesTabEvents,
    * {@link SourcesClickEvents} is not implemented due to the fact that only a
    * single observer is needed.
    */
-  private class ClickDelegatePanel extends Composite implements
-      HasClickHandlers, HasAllKeyHandlers, TabWrapper {
+  private class ClickDelegatePanel extends Composite implements Tab {
     private SimplePanel focusablePanel;
     private boolean enabled = true;
 
@@ -225,7 +224,7 @@ public class TabBar extends Composite implements SourcesTabEvents,
   /**
    * Adds a new tab with the specified widget.
    * 
-   * @param widget the new tab's widget.
+   * @param widget the new tab's widget
    */
   public void addTab(Widget widget) {
     insertTab(widget, getTabCount());
@@ -246,6 +245,20 @@ public class TabBar extends Composite implements SourcesTabEvents,
       return -1;
     }
     return panel.getWidgetIndex(selectedTab) - 1;
+  }
+
+  /**
+   * Gets the given tab.
+   * 
+   * @param index the tab's index
+   * @return the tab wrapper
+   */
+   public final Tab getTab(int index) {
+    if (index >= getTabCount()) {
+      return null;
+    }
+    ClickDelegatePanel p = (ClickDelegatePanel) panel.getWidget(index + 1);
+    return p;
   }
 
   /**
@@ -278,20 +291,6 @@ public class TabBar extends Composite implements SourcesTabEvents,
       // This will be a focusable panel holding a user-supplied widget.
       return focusablePanel.getElement().getParentElement().getInnerHTML();
     }
-  }
-
-  /**
-   * Gets the wrapper for the given tab.
-   * 
-   * @param index the tab's index.
-   * @return the tab wrapper
-   */
-  public final TabWrapper getTabWrapper(int index) {
-    if (index >= getTabCount()) {
-      return null;
-    }
-    ClickDelegatePanel p = (ClickDelegatePanel) panel.getWidget(index + 1);
-    return p;
   }
 
   /**
@@ -328,8 +327,8 @@ public class TabBar extends Composite implements SourcesTabEvents,
   /**
    * Inserts a new tab at the specified index.
    * 
-   * @param widget widget to be used in the new tab.
-   * @param beforeIndex the index before which this tab will be inserted.
+   * @param widget widget to be used in the new tab
+   * @param beforeIndex the index before which this tab will be inserted
    */
   public void insertTab(Widget widget, int beforeIndex) {
     insertTabWidget(widget, beforeIndex);
@@ -349,7 +348,9 @@ public class TabBar extends Composite implements SourcesTabEvents,
   }
 
   /**
-   * @deprecated add a click handler to the individual tab wrappers instead.
+   * @deprecated add a {@link BeforeSelectionHandler} instead. Alternatively, if
+   * you need to access to the individual tabs, add a click handler to each
+   * {@link Tab} element instead.
    */
   public void onClick(Widget sender) {
   }
@@ -404,7 +405,7 @@ public class TabBar extends Composite implements SourcesTabEvents,
    * Programmatically selects the specified tab. Use index -1 to specify that no
    * tab should be selected.
    * 
-   * @param index the index of the tab to be selected.
+   * @param index the index of the tab to be selected
    * @return <code>true</code> if successful, <code>false</code> if the change
    *         is denied by the {@link BeforeSelectionHandler}.
    */
@@ -496,8 +497,8 @@ public class TabBar extends Composite implements SourcesTabEvents,
   /**
    * Inserts a new tab at the specified index.
    * 
-   * @param widget widget to be used in the new tab.
-   * @param beforeIndex the index before which this tab will be inserted.
+   * @param widget widget to be used in the new tab
+   * @param beforeIndex the index before which this tab will be inserted
    */
   protected void insertTabWidget(Widget widget, int beforeIndex) {
     checkInsertBeforeTabIndex(beforeIndex);

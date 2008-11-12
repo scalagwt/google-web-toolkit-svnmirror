@@ -35,7 +35,7 @@ import java.util.Map;
 public class VisualsForDialogBox extends AbstractIssue {
 
   enum VisibleEvents {
-    mouseDown, mouseEnter, mouseLeave, mouseMove, mouseUp,captionMouseDown
+    mouseDown, mouseEnter, mouseLeave, mouseMove, mouseUp, captionMouseDown
   }
 
   private final class VisibleDialogBox extends DialogBox {
@@ -72,6 +72,11 @@ public class VisualsForDialogBox extends AbstractIssue {
         eventToElement.put(e, addResultRow(e.name()));
       }
       add(layout);
+    }
+
+    @Override
+    public DialogBox.Caption getCaption() {
+      return super.getCaption();
     }
 
     @Override
@@ -183,7 +188,7 @@ public class VisualsForDialogBox extends AbstractIssue {
     final VisibleDialogBox dialog = new VisibleDialogBox();
     dialog.setModal(false);
     dialog.center();
-    dialog.getCaptionWrapper().addMouseDownHandler(new MouseDownHandler() {
+    dialog.getCaption().addMouseDownHandler(new MouseDownHandler() {
       public void onMouseDown(MouseDownEvent event) {
         dialog.pass(VisibleEvents.captionMouseDown);
       }
