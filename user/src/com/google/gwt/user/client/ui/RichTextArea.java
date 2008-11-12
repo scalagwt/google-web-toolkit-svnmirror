@@ -24,8 +24,8 @@ import com.google.gwt.user.client.ui.impl.RichTextAreaImpl;
  * 
  * Because some browsers do not support rich text editing, and others support
  * only a limited subset of functionality, there are two formatter interfaces,
- * accessed via {@link #getBasicFormatter()} and {@link #getExtendedFormatter()}
- * . A browser that does not support rich text editing at all will return
+ * accessed via {@link #getBasicFormatter()} and {@link #getExtendedFormatter()}.
+ * A browser that does not support rich text editing at all will return
  * <code>null</code> for both of these, while one that supports only the basic
  * functionality will return <code>null</code> for the latter.
  * 
@@ -33,7 +33,9 @@ import com.google.gwt.user.client.ui.impl.RichTextAreaImpl;
  * <img class='gallery' src='RichTextArea.png'/>
  * </p>
  * 
- * <h3>CSS Style Rules</h3> <ul class="css"> <li>.gwt-RichTextArea { }</li>
+ * <h3>CSS Style Rules</h3>
+ * <ul class="css">
+ * <li>.gwt-RichTextArea { }</li>
  * </ul>
  */
 public class RichTextArea extends FocusWidget implements HasHTML,

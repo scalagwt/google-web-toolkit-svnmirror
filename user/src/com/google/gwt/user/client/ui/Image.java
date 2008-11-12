@@ -67,7 +67,10 @@ import java.util.HashMap;
  * will be lost.
  * </p>
  * 
- * <h3>CSS Style Rules</h3> <ul class="css"> <li>.gwt-Image { }</li> </ul>
+ * <h3>CSS Style Rules</h3>
+ * <ul class="css">
+ * <li>.gwt-Image { }</li>
+ * </ul>
  * 
  * Tranformations between clipped and unclipped state will result in a loss of
  * any style names that were set/added; the only style names that are preserved

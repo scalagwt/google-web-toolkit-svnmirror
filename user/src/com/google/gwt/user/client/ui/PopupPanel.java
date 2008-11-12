@@ -55,9 +55,11 @@ import com.google.gwt.user.client.ui.impl.PopupImpl;
  * <h3>Example</h3>
  * {@example com.google.gwt.examples.PopupPanelExample}
  * </p>
- * <h3>CSS Style Rules</h3> <ul class='css'> <li>.gwt-PopupPanel { the outside
- * of the popup }</li> <li>.gwt-PopupPanel .popupContent { the wrapper around
- * the content }</li> </ul>
+ * <h3>CSS Style Rules</h3>
+ * <ul class='css'>
+ * <li>.gwt-PopupPanel { the outside of the popup }</li>
+ * <li>.gwt-PopupPanel .popupContent { the wrapper around the content }</li>
+ * </ul>
  */
 public class PopupPanel extends SimplePanel implements SourcesPopupEvents,
     EventPreview, HasAnimation, HasCloseHandlers<PopupPanel> {

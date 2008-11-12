@@ -32,7 +32,10 @@ import com.google.gwt.event.shared.HandlerRegistration;
  * <img class='gallery' src='ListBox.png'/>
  * </p>
  * 
- * <h3>CSS Style Rules</h3> <ul class='css'> <li>.gwt-ListBox { }</li> </ul>
+ * <h3>CSS Style Rules</h3>
+ * <ul class='css'>
+ * <li>.gwt-ListBox { }</li>
+ * </ul>
  * 
  * <p>
  * <h3>Example</h3>

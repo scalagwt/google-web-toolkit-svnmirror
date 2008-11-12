@@ -43,7 +43,10 @@ import com.google.gwt.i18n.client.HasDirection;
  * This widget uses a &lt;div&gt; element, causing it to be displayed with block
  * layout.
  * 
- * <h3>CSS Style Rules</h3> <ul class='css'> <li>.gwt-Label { }</li> </ul>
+ * <h3>CSS Style Rules</h3>
+ * <ul class='css'>
+ * <li>.gwt-Label { }</li>
+ * </ul>
  * 
  * <p>
  * <h3>Example</h3>

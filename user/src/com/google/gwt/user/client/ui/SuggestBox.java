@@ -275,15 +275,12 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
             left = textBoxAbsoluteLeft - offsetWidthDiff;
 
             // If the suggestion popup is not as wide as the text box, always
-            // align
-            // to the right edge of the text box. Otherwise, figure out whether
-            // to
-            // right-align or left-align the popup.
+            // align to the right edge of the text box. Otherwise, figure out
+            // whether to right-align or left-align the popup.
             if (offsetWidthDiff > 0) {
 
               // Make sure scrolling is taken into account, since
-              // box.getAbsoluteLeft()
-              // takes scrolling into account.
+              // box.getAbsoluteLeft() takes scrolling into account.
               int windowRight = Window.getClientWidth()
                   + Window.getScrollLeft();
               int windowLeft = Window.getScrollLeft();
@@ -293,25 +290,20 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
                   + textBoxOffsetWidth;
 
               // Distance from the right edge of the text box to the right edge
-              // of the
-              // window
+              // of the window
               int distanceToWindowRight = windowRight
                   - textBoxLeftValForRightEdge;
 
               // Distance from the right edge of the text box to the left edge
-              // of the
-              // window
+              // of the window
               int distanceFromWindowLeft = textBoxLeftValForRightEdge
                   - windowLeft;
 
               // If there is not enough space for the overflow of the popup's
-              // width to
-              // the right of the text box and there IS enough space for the
-              // overflow
-              // to the right of the text box, then left-align the popup.
-              // However, if
-              // there is not enough space on either side, stick with
-              // right-alignment.
+              // width to the right of the text box and there IS enough space
+              // for the overflow to the right of the text box, then left-align
+              // the popup. However, if there is not enough space on either
+              // side, stick with right-alignment.
               if (distanceFromWindowLeft < offsetWidth
                   && distanceToWindowRight >= offsetWidthDiff) {
                 // Align with the left edge of the text box.
@@ -324,36 +316,28 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
             left = box.getAbsoluteLeft();
 
             // If the suggestion popup is not as wide as the text box, always
-            // align
-            // to the left edge of the text box. Otherwise, figure out whether
-            // to
-            // left-align or right-align the popup.
+            // align to the left edge of the text box. Otherwise, figure out
+            // whether to left-align or right-align the popup.
             if (offsetWidthDiff > 0) {
               // Make sure scrolling is taken into account, since
-              // box.getAbsoluteLeft()
-              // takes scrolling into account.
+              // box.getAbsoluteLeft() takes scrolling into account.
               int windowRight = Window.getClientWidth()
                   + Window.getScrollLeft();
               int windowLeft = Window.getScrollLeft();
 
               // Distance from the left edge of the text box to the right edge
-              // of the
-              // window
+              // of the window
               int distanceToWindowRight = windowRight - left;
 
               // Distance from the left edge of the text box to the left edge of
-              // the
-              // window
+              // the window
               int distanceFromWindowLeft = left - windowLeft;
 
               // If there is not enough space for the overflow of the popup's
-              // width to
-              // the right of hte text box, and there IS enough space for the
-              // overflow
-              // to the left of the text box, then right-align the popup.
-              // However, if
-              // there is not enough space on either side, then stick with
-              // left-alignment.
+              // width to the right of hte text box, and there IS enough space
+              // for the overflow to the left of the text box, then right-align
+              // the popup. However, if there is not enough space on either
+              // side, then stick with left-alignment.
               if (distanceToWindowRight < offsetWidth
                   && distanceFromWindowLeft >= offsetWidthDiff) {
                 // Align with the right edge of the text box.
@@ -367,8 +351,7 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
           int top = box.getAbsoluteTop();
 
           // Make sure scrolling is taken into account, since
-          // box.getAbsoluteTop()
-          // takes scrolling into account.
+          // box.getAbsoluteTop() takes scrolling into account.
           int windowTop = Window.getScrollTop();
           int windowBottom = Window.getScrollTop() + Window.getClientHeight();
 
@@ -377,20 +360,15 @@ public class SuggestBox extends Composite implements HasText, HasFocus,
           int distanceFromWindowTop = top - windowTop;
 
           // Distance from the bottom edge of the window to the bottom edge of
-          // the
-          // text box
+          // the text box
           int distanceToWindowBottom = windowBottom
               - (top + box.getOffsetHeight());
 
           // If there is not enough space for the popup's height below the text
-          // box
-          // and there IS enough space for the popup's height above the text
-          // box,
-          // then then position the popup above the text box. However, if there
-          // is
-          // not enough space on either side, then stick with displaying the
-          // popup
-          // below the text box.
+          // box and there IS enough space for the popup's height above the text
+          // box, then then position the popup above the text box. However, if
+          // there is not enough space on either side, then stick with
+          // displaying the popup below the text box.
           if (distanceToWindowBottom < offsetHeight
               && distanceFromWindowTop >= offsetHeight) {
             top -= offsetHeight;

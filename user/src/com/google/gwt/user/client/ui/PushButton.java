@@ -25,9 +25,10 @@ import com.google.gwt.event.dom.client.ClickHandler;
  * <img class='gallery' src='PushButton.png'/>
  * </p>
  * 
- * <h3>CSS Style Rules</h3> <ul class="css"> <li>
- * .gwt-PushButton-up/down/up-hovering/down-hovering/up-disabled/down-disabled
- * {.html-face}</li> </ul>
+ * <h3>CSS Style Rules</h3>
+ * <ul class="css">
+ * <li>.gwt-PushButton-up/down/up-hovering/down-hovering/up-disabled/down-disabled {.html-face}</li>
+ * </ul>
  * 
  * <p>
  * <h3>Example</h3> {@example com.google.gwt.examples.PushButtonExample}

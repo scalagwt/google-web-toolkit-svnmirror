@@ -28,8 +28,7 @@ import com.google.gwt.user.client.Window;
 
 /**
  * The panel to which all other widgets must ultimately be added. RootPanels are
- * never created directly. Rather, they are accessed via {@link RootPanel#get()}
- * .
+ * never created directly. Rather, they are accessed via {@link RootPanel#get()}.
  * 
  * <p>
  * Most applications will add widgets to the default root panel in their
