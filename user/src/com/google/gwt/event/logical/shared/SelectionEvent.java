@@ -34,7 +34,7 @@ public class SelectionEvent<I> extends GwtEvent<SelectionHandler<I>> {
    * Fires a selection event on all registered handlers in the handler manager.
    * 
    * @param <I> the selected item type
-   * @param <S> The event source.
+   * @param <S> The event source
    * @param source the source of the handlers. Must have selection handlers and
    *          a handler manager.
    * @param selectedItem the selected item

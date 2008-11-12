@@ -34,7 +34,7 @@ public class OpenEvent<T> extends GwtEvent<OpenHandler<T>> {
    * Fires a open event on all registered handlers in the handler manager.
    * 
    * @param <T> the target type
-   * @param <S> The event source.
+   * @param <S> The event source
    * @param source the source of the handlers. Must have open handlers and a
    *          handler manager.
    * @param target the target

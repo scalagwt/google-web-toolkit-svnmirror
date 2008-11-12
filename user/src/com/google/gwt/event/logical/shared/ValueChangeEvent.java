@@ -35,7 +35,7 @@ public class ValueChangeEvent<I> extends GwtEvent<ValueChangeHandler<I>> {
    * manager.
    * 
    * @param <I> the old value type
-   * @param <S> The event source.
+   * @param <S> The event source
    * @param source the source of the handlers. Must have value change handlers
    *          and a handler manager.
    * @param value the value
@@ -58,7 +58,7 @@ public class ValueChangeEvent<I> extends GwtEvent<ValueChangeHandler<I>> {
    * safe handling of null.
    * 
    * @param <I> the old value type
-   * @param <S> The event source.
+   * @param <S> The event source
    * @param source the source of the handlers. Must have value change handlers
    *          and a handler manager.
    * @param oldValue the oldValue, may be null
