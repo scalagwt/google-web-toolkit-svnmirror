@@ -13,8 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
-package com.google.gwt.core.client.impl;
+package com.google.gwt.event.dom.client;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -22,11 +21,11 @@ import com.google.gwt.core.client.JavaScriptObject;
 import java.util.HashMap;
 
 /**
- * Private map implementation used by gwt team.
+ * Lightweight map implementation. Package protected due to non-final API.
  * 
  * @param <V> value type
  */
-public class PrivateMap<V> {
+class PrivateMap<V> {
 
   /**
    * Js version of our map.
