@@ -71,9 +71,12 @@ import java.util.Map;
  * <p>
  * <img class='gallery' src='Tree.png'/>
  * </p>
- * <h3>CSS Style Rules</h3> <ul class='css'> <li>.gwt-Tree { the tree itself }</li>
- * <li>.gwt-Tree .gwt-TreeItem { a tree item }</li> <li>.gwt-Tree
- * .gwt-TreeItem-selected { a selected tree item }</li> </ul>
+ * <h3>CSS Style Rules</h3>
+ * <ul class='css'>
+ * <li>.gwt-Tree { the tree itself }</li>
+ * <li>.gwt-Tree .gwt-TreeItem { a tree item }</li>
+ * <li>.gwt-Tree .gwt-TreeItem-selected { a selected tree item }</li>
+ * </ul>
  * <p>
  * <h3>Example</h3>
  * {@example com.google.gwt.examples.TreeExample}
@@ -160,11 +163,8 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
   }
 
   private static final int OTHER_KEY_DOWN = 63233;
-
   private static final int OTHER_KEY_LEFT = 63234;
-
   private static final int OTHER_KEY_RIGHT = 63235;
-
   private static final int OTHER_KEY_UP = 63232;
 
   static native boolean shouldTreeDelegateFocusToElement(Element elem) /*-{
@@ -465,10 +465,6 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
 
   public int getTabIndex() {
     return FocusPanel.impl.getTabIndex(focusable);
-  }
-
-  public TreeItem getValue() {
-    return getSelectedItem();
   }
 
   public boolean isAnimationEnabled() {
