@@ -38,7 +38,7 @@ public class Widget extends UIObject implements EventListener, HasHandlers {
    * <p>
    * Package protected to allow Composite to see it.
    */
-  int eventsToSink = 0;
+  int eventsToSink;
   private boolean attached;
 
   private Object layoutData;
