@@ -40,7 +40,10 @@ import com.google.gwt.user.client.History;
  * <img class='gallery' src='Hyperlink.png'/>
  * </p>
  * 
- * <h3>CSS Style Rules</h3> <ul class='css'> <li>.gwt-Hyperlink { }</li> </ul>
+ * <h3>CSS Style Rules</h3>
+ * <ul class='css'>
+ * <li>.gwt-Hyperlink { }</li>
+ * </ul>
  * 
  * <p>
  * <h3>Example</h3> {@example com.google.gwt.examples.HistoryExample}
