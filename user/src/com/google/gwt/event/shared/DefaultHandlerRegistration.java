@@ -22,9 +22,9 @@ import com.google.gwt.event.shared.GwtEvent.Type;
  */
 public class DefaultHandlerRegistration implements HandlerRegistration {
 
-  private HandlerManager manager;
-  EventHandler handler;
-  private Type<?> type;
+  private final HandlerManager manager;
+  private final EventHandler handler;
+  private final Type<?> type;
 
   /**
    * Creates a new handler registration.
@@ -45,7 +45,7 @@ public class DefaultHandlerRegistration implements HandlerRegistration {
   /**
    * Removes the given handler from its manager.
    */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "deprecation"})
   // This is safe because when the elements were passed in they conformed to
   // Type<H>,H.
   public void removeHandler() {
