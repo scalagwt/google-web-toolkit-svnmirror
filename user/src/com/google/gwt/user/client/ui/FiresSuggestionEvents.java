@@ -24,6 +24,7 @@ public interface FiresSuggestionEvents {
   /**
    * Adds a handler interface to receive suggestion events.
    * 
+   * @deprecated add a selection handler instead
    * @param handler the handler to add
    */
   @Deprecated
@@ -32,7 +33,7 @@ public interface FiresSuggestionEvents {
   /**
    * Removes a previously added handler interface.
    * 
-   * @param handler the handler to remove.
+   * @param handler the handler to remove
    */
   @Deprecated
   void removeEventHandler(SuggestionHandler handler);
