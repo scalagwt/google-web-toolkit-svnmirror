@@ -54,19 +54,11 @@ import com.google.gwt.user.client.Event;
  * <li>.gwt-TabBar .gwt-TabBarItem { unselected tabs }</li>
  * <li>.gwt-TabBar .gwt-TabBarItem-wrapper { table cell around tab }</li>
  * <li>.gwt-TabBar .gwt-TabBarItem-selected { additional style for selected
- * tabs } </li>
- * <li>.gwt-TabBar .gwt-TabBarItem-wrapper-selected { table cell around
- * selected tab }</li>
- * <li>.gwt-TabBar .gwt-TabBarItem-disabled { additional style for disabled
- * tabs } </li>
- * <li>.gwt-TabBar .gwt-TabBarItem-wrapper-disabled { table cell around
- * disabled tab }</li>
- * </ul>
  * <p>
  * <h3>Example</h3>
  * {@example com.google.gwt.examples.TabBarExample}
  * </p>
- */ 
+ */
 @SuppressWarnings("deprecation")
 public class TabBar extends Composite implements SourcesTabEvents,
     HasBeforeSelectionHandlers<Integer>, HasSelectionHandlers<Integer>,
@@ -250,10 +242,14 @@ public class TabBar extends Composite implements SourcesTabEvents,
   /**
    * Gets the given tab.
    * 
+   * This method is final because the Tab interface will expand. Therefore
+   * it is highly likely that subclasses which implemented this method would end up
+   * breaking.
+   * 
    * @param index the tab's index
    * @return the tab wrapper
    */
-   public final Tab getTab(int index) {
+  public final Tab getTab(int index) {
     if (index >= getTabCount()) {
       return null;
     }
@@ -363,18 +359,16 @@ public class TabBar extends Composite implements SourcesTabEvents,
 
   /**
    * @deprecated this method has been doing nothing for the entire last release,
-   *             if what you wanted to do was to listen to key press events on
-   *             tabs, add the key press handler to the individual tab wrappers
-   *             instead.
+   * if what you wanted to do was to listen to key press events on tabs, add the
+   * key press handler to the individual tab wrappers instead.
    */
   public void onKeyPress(Widget sender, char keyCode, int modifiers) {
   }
 
   /**
    * @deprecated this method has been doing nothing for the entire last release,
-   *             if what you wanted to do was to listen to key up events on
-   *             tabs, add the key up handler to the individual tab wrappers
-   *             instead.
+   * if what you wanted to do was to listen to key up events on tabs, add the
+   * key up handler to the individual tab wrappers instead.
    * 
    */
   public void onKeyUp(Widget sender, char keyCode, int modifiers) {
@@ -407,7 +401,7 @@ public class TabBar extends Composite implements SourcesTabEvents,
    * 
    * @param index the index of the tab to be selected
    * @return <code>true</code> if successful, <code>false</code> if the change
-   *         is denied by the {@link BeforeSelectionHandler}.
+   * is denied by the {@link BeforeSelectionHandler}.
    */
   public boolean selectTab(int index) {
     checkTabIndex(index);
@@ -488,7 +482,7 @@ public class TabBar extends Composite implements SourcesTabEvents,
    * Subclasses can use this method to wrap tabs in decorator panels.
    * 
    * @return a {@link SimplePanel} to wrap the tab contents, or null to leave
-   *         tabs unwrapped
+   * tabs unwrapped
    */
   protected SimplePanel createTabTextWrapper() {
     return null;
@@ -558,7 +552,7 @@ public class TabBar extends Composite implements SourcesTabEvents,
    * 
    * @param tabWidget The widget for the tab to be selected
    * @return true if the tab corresponding to the widget for the tab could
-   *         located and selected, false otherwise
+   * located and selected, false otherwise
    */
   private boolean selectTabByTabWidget(Widget tabWidget) {
     int numTabs = panel.getWidgetCount() - 1;
