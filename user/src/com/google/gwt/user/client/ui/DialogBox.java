@@ -276,7 +276,7 @@ public class DialogBox extends DecoratedPopupPanel implements HasHTML, HasText,
   }
 
   /**
-   * @deprecated Use {@link #finishDragging} and {@link #getCaption} instead
+   * @deprecated Use {@link #endDragging} and {@link #getCaption} instead
    */
   @Deprecated
   public void onMouseUp(Widget sender, int x, int y) {
@@ -326,7 +326,7 @@ public class DialogBox extends DecoratedPopupPanel implements HasHTML, HasText,
    * 
    * @see DOM#setCapture
    * @see #continueDragging
-   * @param event
+   * @param event the mouse down event that triggered dragging
    */
   protected void beginDragging(MouseDownEvent event) {
     onMouseDown(caption, event.getRelativeX(getElement()),
@@ -339,7 +339,7 @@ public class DialogBox extends DecoratedPopupPanel implements HasHTML, HasText,
    * 
    * @see #beginDragging
    * @see #endDragging
-   * @param event
+   * @param event the mouse move event that continues dragging
    */
   protected void continueDragging(MouseMoveEvent event) {
     onMouseMove(caption, event.getRelativeX(getElement()),
@@ -368,6 +368,7 @@ public class DialogBox extends DecoratedPopupPanel implements HasHTML, HasText,
   /**
    * Called on mouse up in the caption area, ends dragging by ending event
    * capture.
+   * @param event  the mouse up event that ended dragging
    * 
    * @see DOM#releaseCapture
    * @see #beginDragging
