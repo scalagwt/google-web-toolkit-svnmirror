@@ -80,7 +80,9 @@ public class BeforeSelectionEvent<I> extends
   }
 
   /**
-   * Cancel the selection event.
+   * Cancel the before selection event.  
+   * 
+   * Classes overriding this method should still call super.cancel().
    */
   public void cancel() {
     canceled = true;
@@ -100,7 +102,7 @@ public class BeforeSelectionEvent<I> extends
    * 
    * @return is canceled
    */
-  public final boolean isCanceled() {
+  public boolean isCanceled() {
     return canceled;
   }
 
