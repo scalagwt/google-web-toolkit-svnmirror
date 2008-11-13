@@ -42,7 +42,6 @@ public class VisualsForDialogBox extends AbstractIssue {
     private FlexTable layout = null;
 
     private final Map<VisibleEvents, Element> eventToElement =
-        new HashMap<VisibleEvents, Element>();
 
     private boolean maybeClose;
 
@@ -64,7 +63,6 @@ public class VisualsForDialogBox extends AbstractIssue {
 
       final String style =
           "float:right; border: 1px solid blue; color:blue;"
-              + "font-weight:bold; font-size:85%";
       setHTML("I Gots a Close Box<div id='vis-closebox' style='" + style
           + "'>&nbsp;X&nbsp;</div>");
 
@@ -72,11 +70,6 @@ public class VisualsForDialogBox extends AbstractIssue {
         eventToElement.put(e, addResultRow(e.name()));
       }
       add(layout);
-    }
-
-    @Override
-    public DialogBox.Caption getCaption() {
-      return super.getCaption();
     }
 
     @Override
