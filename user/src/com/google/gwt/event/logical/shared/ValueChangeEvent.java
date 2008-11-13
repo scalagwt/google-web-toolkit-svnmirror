@@ -83,7 +83,7 @@ public class ValueChangeEvent<I> extends GwtEvent<ValueChangeHandler<I>> {
     return TYPE;
   }
 
-  private I value;
+  private final I value;
 
   /**
    * Creates a value change event.
