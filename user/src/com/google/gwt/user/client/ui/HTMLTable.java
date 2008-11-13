@@ -50,7 +50,7 @@ public abstract class HTMLTable extends Panel implements SourcesTableEvents,
     /**
      * Creates a cell.
      * @param rowIndex the cell's row
-     * @param cellIndex the cell's inded
+     * @param cellIndex the cell's index
      */
     protected Cell(int rowIndex, int cellIndex) {
       this.cellIndex = cellIndex;
