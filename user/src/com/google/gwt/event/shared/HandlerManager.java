@@ -116,7 +116,7 @@ public class HandlerManager {
    */
   public HandlerManager(Object source) {
     if (useJs) {
-      javaScriptRegistry = JavaScriptObject.createObject().cast();
+      javaScriptRegistry = null;
     } else {
       javaRegistry = new JavaHandlerRegistry();
     }
