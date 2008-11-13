@@ -25,6 +25,8 @@ public interface FiresFormEvents {
   /**
    * Adds a handler interface to receive click events.
    * 
+   * @deprecated use {@link FormPanel#addSubmitCompleteHandler} and
+   * {@link FormPanel#addSubmitHandler} instead
    * @param handler the handler interface to add
    */
   @Deprecated
