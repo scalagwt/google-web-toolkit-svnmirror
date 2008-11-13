@@ -40,7 +40,7 @@ public class DoubleClickEvent extends DomEvent<DoubleClickHandler> {
 
   /**
    * Protected constructor, use
-   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)}
    * to fire double click events.
    */
   protected DoubleClickEvent() {

@@ -40,7 +40,7 @@ public class ErrorEvent extends DomEvent<ErrorHandler> {
 
   /**
    * Protected constructor, use
-   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)}
    * to fire error events.
    */
   protected ErrorEvent() {

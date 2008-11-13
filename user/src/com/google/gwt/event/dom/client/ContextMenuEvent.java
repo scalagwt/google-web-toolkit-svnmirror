@@ -40,7 +40,7 @@ public class ContextMenuEvent extends DomEvent<ContextMenuHandler> {
 
   /**
    * Protected constructor, use
-   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)}
    * to fire context menu events.
    */
   protected ContextMenuEvent() {

@@ -93,7 +93,7 @@ public abstract class GwtEvent<H extends EventHandler> {
   /**
    * The toString() for abstract event is overridden to avoid accidently
    * including class literals in the the compiled output. Use
-   * {@link AbstractEvent} #toDebugString to get more information about the
+   * {@link GwtEvent} #toDebugString to get more information about the
    * event.
    */
   @Override
@@ -104,7 +104,7 @@ public abstract class GwtEvent<H extends EventHandler> {
   /**
    * Asserts that the event still should be accessed. All events are considered
    * to be "dead" after their original handler manager finishes firing them. An
-   * event can be revived by calling {@link AbstractEvent#revive()}.
+   * event can be revived by calling {@link GwtEvent#revive()}.
    */
   protected void assertLive() {
     assert (!dead) : "This event has already finished being processed by its original handler manager, so you can no longer access it";

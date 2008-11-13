@@ -40,7 +40,7 @@ public class KeyDownEvent extends KeyCodeEvent<KeyDownHandler> {
 
   /**
    * Protected constructor, use
-   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)}
    * to fire key down events.
    */
   protected KeyDownEvent() {

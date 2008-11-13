@@ -40,7 +40,7 @@ public class LoadEvent extends DomEvent<LoadHandler> {
 
   /**
    * Protected constructor, use
-   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)}
    * to fire load events.
    */
   protected LoadEvent() {

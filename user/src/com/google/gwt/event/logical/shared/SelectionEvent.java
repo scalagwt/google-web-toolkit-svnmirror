@@ -44,8 +44,7 @@ public class SelectionEvent<I> extends GwtEvent<SelectionHandler<I>> {
     if (TYPE != null) {
       HandlerManager handlers = source.getHandlers();
       if (handlers != null) {
-        SelectionEvent<I> event = new SelectionEvent<I>();
-        event.setSelectedItem(selectedItem);
+        SelectionEvent<I> event = new SelectionEvent<I>(selectedItem);
         handlers.fireEvent(event);
       }
     }
@@ -63,12 +62,15 @@ public class SelectionEvent<I> extends GwtEvent<SelectionHandler<I>> {
     return TYPE;
   }
 
-  private I selectedItem;
+  private final I selectedItem;
 
   /**
    * Creates a new selection event.
+   * 
+   * @param selectedItem selected item
    */
-  protected SelectionEvent() {
+  protected SelectionEvent(I selectedItem) {
+    this.selectedItem = selectedItem;
   }
 
   /**
@@ -91,14 +93,5 @@ public class SelectionEvent<I> extends GwtEvent<SelectionHandler<I>> {
   @Override
   protected Type<SelectionHandler<I>> getAssociatedType() {
     return (Type) TYPE;
-  }
-
-  /**
-   * Sets the selected item.
-   * 
-   * @param selectedItem the selected item
-   */
-  protected final void setSelectedItem(I selectedItem) {
-    this.selectedItem = selectedItem;
   }
 }

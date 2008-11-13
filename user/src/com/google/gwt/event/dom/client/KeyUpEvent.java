@@ -40,7 +40,7 @@ public class KeyUpEvent extends KeyCodeEvent<KeyUpHandler> {
 
   /**
    * Protected constructor, use
-   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)}
    * to fire key up events.
    */
   protected KeyUpEvent() {

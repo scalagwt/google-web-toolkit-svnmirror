@@ -31,28 +31,6 @@ public class CloseEvent<T> extends GwtEvent<CloseHandler<T>> {
   private static Type<CloseHandler<?>> TYPE;
 
   /**
-   * Fires a close event on all registered handlers in the handler manager.
-   * 
-   * @param <T> the target type
-   * @param <S> The event source
-   * @param source the source of the handlers
-   * @param target the target
-   * @param autoClosed was the target closed automatically
-   */
-  public static <T, S extends HasCloseHandlers<T> & HasHandlers> void fire(
-      S source, T target, boolean autoClosed) {
-    if (TYPE != null) {
-      HandlerManager handlers = source.getHandlers();
-      if (handlers != null) {
-        CloseEvent<T> event = new CloseEvent<T>();
-        event.autoClosed = autoClosed;
-        event.setTarget(target);
-        handlers.fireEvent(event);
-      }
-    }
-  }
-
-  /**
    * Fires a close event on all registered handlers in the handler manager. If
    * no such handlers exist, this method will do nothing.
    * 
@@ -67,6 +45,26 @@ public class CloseEvent<T> extends GwtEvent<CloseHandler<T>> {
   }
 
   /**
+   * Fires a close event on all registered handlers in the handler manager.
+   * 
+   * @param <T> the target type
+   * @param <S> The event source
+   * @param source the source of the handlers
+   * @param target the target
+   * @param autoClosed was the target closed automatically
+   */
+  public static <T, S extends HasCloseHandlers<T> & HasHandlers> void fire(
+      S source, T target, boolean autoClosed) {
+    if (TYPE != null) {
+      HandlerManager handlers = source.getHandlers();
+      if (handlers != null) {
+        CloseEvent<T> event = new CloseEvent<T>(target, autoClosed);
+        handlers.fireEvent(event);
+      }
+    }
+  }
+
+  /**
    * Gets the type associated with this event.
    * 
    * @return returns the handler type
@@ -75,14 +73,19 @@ public class CloseEvent<T> extends GwtEvent<CloseHandler<T>> {
     return TYPE != null ? TYPE : (TYPE = new Type<CloseHandler<?>>());
   }
 
-  private T target;
+  private final T target;
 
-  private boolean autoClosed;
+  private final boolean autoClosed;
 
   /**
    * Creates a new close event.
+   * 
+   * @param target the target
+   * @param autoClosed whether it is auto closed
    */
-  protected CloseEvent() {
+  protected CloseEvent(T target, boolean autoClosed) {
+    this.autoClosed = autoClosed;
+    this.target = target;
   }
 
   /**
@@ -115,23 +118,5 @@ public class CloseEvent<T> extends GwtEvent<CloseHandler<T>> {
   @Override
   protected final Type<CloseHandler<T>> getAssociatedType() {
     return (Type) TYPE;
-  }
-
-  /**
-   * Was the target automatically closed?
-   * 
-   * @param autoClosed autoClosed
-   */
-  protected final void setAutoClosed(boolean autoClosed) {
-    this.autoClosed = autoClosed;
-  }
-
-  /**
-   * Sets the target.
-   * 
-   * @param target the target
-   */
-  protected final void setTarget(T target) {
-    this.target = target;
   }
 }

@@ -40,7 +40,7 @@ public class BlurEvent extends DomEvent<BlurHandler> {
 
   /**
    * Protected constructor, use
-   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)}
    * to fire blur events.
    */
   protected BlurEvent() {

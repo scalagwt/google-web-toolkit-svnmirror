@@ -66,11 +66,11 @@ public class LogicalEventsTest extends TestCase {
   public void testSimpleFire() {
     simpleFire(BeforeSelectionEvent.getType(),
         new BeforeSelectionEvent<String>());
-    simpleFire(SelectionEvent.getType(), new SelectionEvent<String>());
-    simpleFire(CloseEvent.getType(), new CloseEvent<String>());
-    simpleFire(OpenEvent.getType(), new OpenEvent<String>());
+    simpleFire(SelectionEvent.getType(), new SelectionEvent<String>(null));
+    simpleFire(CloseEvent.getType(), new CloseEvent<String>(null,false));
+    simpleFire(OpenEvent.getType(), new OpenEvent<String>(null));
     simpleFire(ResizeEvent.getType(), new ResizeEvent(0, 0));
-    simpleFire(ValueChangeEvent.getType(), new ValueChangeEvent<String>());
+    simpleFire(ValueChangeEvent.getType(), new ValueChangeEvent<String>(null));
   }
 
   @SuppressWarnings("unchecked")

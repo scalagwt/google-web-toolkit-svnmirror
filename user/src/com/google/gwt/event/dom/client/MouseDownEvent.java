@@ -40,7 +40,7 @@ public class MouseDownEvent extends MouseEvent<MouseDownHandler> {
 
   /**
    * Protected constructor, use
-   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)}
    * to fire mouse down events.
    */
   protected MouseDownEvent() {

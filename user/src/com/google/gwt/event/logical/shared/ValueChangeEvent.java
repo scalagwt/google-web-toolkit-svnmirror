@@ -44,8 +44,7 @@ public class ValueChangeEvent<I> extends GwtEvent<ValueChangeHandler<I>> {
     if (TYPE != null) {
       HandlerManager handlers = source.getHandlers();
       if (handlers != null && handlers.isEventHandled(TYPE)) {
-        ValueChangeEvent<I> event = new ValueChangeEvent<I>();
-        event.setValue(value);
+        ValueChangeEvent<I> event = new ValueChangeEvent<I>(value);
         handlers.fireEvent(event);
       }
     }
@@ -88,8 +87,10 @@ public class ValueChangeEvent<I> extends GwtEvent<ValueChangeHandler<I>> {
 
   /**
    * Creates a value change event.
+   * @param value the value
    */
-  protected ValueChangeEvent() {
+  protected ValueChangeEvent(I value) {
+    this.value = value;
   }
 
   /**
@@ -112,14 +113,5 @@ public class ValueChangeEvent<I> extends GwtEvent<ValueChangeHandler<I>> {
   @Override
   protected Type<ValueChangeHandler<I>> getAssociatedType() {
     return (Type) TYPE;
-  }
-
-  /**
-   * Sets the value.
-   * 
-   * @param value the value
-   */
-  protected final void setValue(I value) {
-    this.value = value;
   }
 }

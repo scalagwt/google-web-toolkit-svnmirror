@@ -40,7 +40,7 @@ public class MouseMoveEvent extends MouseEvent<MouseMoveHandler> {
 
   /**
    * Protected constructor, use
-   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)}
    * to fire mouse move events.
    */
   protected MouseMoveEvent() {

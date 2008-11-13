@@ -24,7 +24,7 @@ import com.google.gwt.user.client.Event;
  * (http://www.quirksmode.org/js/keys.html), we do some trivial normalization
  * here, but do not attempt any complex patching, so user be warned.
  * 
- * @param <H>
+ * @param <H> The event handler type 
  */
 public abstract class KeyEvent<H extends EventHandler> extends DomEvent<H> {
 

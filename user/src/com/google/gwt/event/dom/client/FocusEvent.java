@@ -40,7 +40,7 @@ public class FocusEvent extends DomEvent<FocusHandler> {
 
   /**
    * Protected constructor, use
-   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)}
    * to fire focus events.
    */
   protected FocusEvent() {

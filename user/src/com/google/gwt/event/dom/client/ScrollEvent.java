@@ -40,7 +40,7 @@ public class ScrollEvent extends DomEvent<ScrollHandler> {
 
   /**
    * Protected constructor, use
-   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)}
    * to fire scroll events.
    */
   protected ScrollEvent() {

@@ -44,8 +44,7 @@ public class OpenEvent<T> extends GwtEvent<OpenHandler<T>> {
     if (TYPE != null) {
       HandlerManager handlers = source.getHandlers();
       if (handlers != null) {
-        OpenEvent<T> event = new OpenEvent<T>();
-        event.setTarget(target);
+        OpenEvent<T> event = new OpenEvent<T>(target);
         handlers.fireEvent(event);
       }
     }
@@ -63,12 +62,15 @@ public class OpenEvent<T> extends GwtEvent<OpenHandler<T>> {
     return TYPE;
   }
 
-  private T target;
+  private final T target;
 
   /**
    * Creates a new open event.
+   * 
+   * @param target the ui object being opened
    */
-  protected OpenEvent() {
+  protected OpenEvent(T target) {
+    this.target = target;
   }
 
   /**
@@ -92,14 +94,5 @@ public class OpenEvent<T> extends GwtEvent<OpenHandler<T>> {
   @Override
   protected final Type<OpenHandler<T>> getAssociatedType() {
     return (Type) TYPE;
-  }
-
-  /**
-   * Sets the target.
-   * 
-   * @param target the target
-   */
-  protected final void setTarget(T target) {
-    this.target = target;
   }
 }

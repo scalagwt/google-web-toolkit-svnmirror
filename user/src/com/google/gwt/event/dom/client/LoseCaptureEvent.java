@@ -40,7 +40,7 @@ public class LoseCaptureEvent extends DomEvent<LoseCaptureHandler> {
 
   /**
    * Protected constructor, use
-   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)}
    * to fire lose capture events.
    */
   protected LoseCaptureEvent() {

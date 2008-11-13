@@ -40,7 +40,7 @@ public class ChangeEvent extends DomEvent<ChangeHandler> {
 
   /**
    * Protected constructor, use
-   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)}
    * to fire change events.
    */
   protected ChangeEvent() {

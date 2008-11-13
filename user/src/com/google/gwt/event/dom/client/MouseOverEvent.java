@@ -41,7 +41,7 @@ public class MouseOverEvent extends MouseEvent<MouseOverHandler> {
 
   /**
    * Protected constructor, use
-   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)}
    * to fire mouse over events.
    */
   protected MouseOverEvent() {

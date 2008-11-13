@@ -40,7 +40,7 @@ public class MouseWheelEvent extends MouseEvent<MouseWheelHandler> {
 
   /**
    * Protected constructor, use
-   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)}
    * to fire mouse wheel events.
    */
   protected MouseWheelEvent() {

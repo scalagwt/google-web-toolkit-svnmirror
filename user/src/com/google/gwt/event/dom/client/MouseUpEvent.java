@@ -40,7 +40,7 @@ public class MouseUpEvent extends MouseEvent<MouseUpHandler> {
 
   /**
    * Protected constructor, use
-   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)
+   * {@link DomEvent#fireNativeEvent(Event, com.google.gwt.event.shared.HandlerManager)}
    * to fire mouse up events.
    */
   protected MouseUpEvent() {
