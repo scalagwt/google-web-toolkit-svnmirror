@@ -16,6 +16,7 @@
 
 package com.google.gwt.event.shared;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.DomEvent;
 import com.google.gwt.event.dom.client.MouseDownEvent;
@@ -25,7 +26,6 @@ import com.google.gwt.user.client.Event;
 /**
  * Handler manager test.
  */
-@SuppressWarnings("deprecation")
 public class HandlerManagerTest extends HandlerTestBase {
 
   public void testAddHandlers() {
@@ -34,6 +34,7 @@ public class HandlerManagerTest extends HandlerTestBase {
     addHandlers(manager);
   }
 
+  @SuppressWarnings("deprecation")
   private void addHandlers(HandlerManager manager) {
     manager.addHandler(MouseDownEvent.getType(), mouse1);
     manager.addHandler(MouseDownEvent.getType(), mouse2);
@@ -64,6 +65,7 @@ public class HandlerManagerTest extends HandlerTestBase {
     assertNotFired(click1, click2);
   }
 
+  @SuppressWarnings("deprecation")
   public void testRemoveHandlers() {
     HandlerManager manager = new HandlerManager("bogus source");
     addHandlers(manager);
@@ -172,18 +174,46 @@ public class HandlerManagerTest extends HandlerTestBase {
     manager.addHandler(MouseDownEvent.getType(), mouse1);
     manager.addHandler(MouseDownEvent.getType(), mouse2);
     manager.addHandler(MouseDownEvent.getType(), mouse3);
-    manager.fireEvent(new MouseDownEvent() {
-    });
+    manager.fireEvent(new MouseDownEvent() { });
     assertFired(one, mouse1, mouse2, mouse3);
     assertNotFired(two);
 
     reset();
-    manager.fireEvent(new MouseDownEvent() {
-    });
+    manager.fireEvent(new MouseDownEvent() { });
     assertFired(one, mouse1, mouse2, mouse3);
     assertNotFired(two);
   }
+  
+  @SuppressWarnings("deprecation")
+  public void testConcurrentAddAfterRemoveIsNotClobbered() {
+    final HandlerManager manager = new HandlerManager("bogus source");
 
+    MouseDownHandler one = new MouseDownHandler() {
+      public void onMouseDown(MouseDownEvent event) {
+        manager.removeHandler(MouseDownEvent.getType(), mouse1);
+        manager.addHandler(MouseDownEvent.getType(), mouse1);
+        add(this);
+      }
+    };
+    manager.addHandler(MouseDownEvent.getType(), one);
+
+    if (!GWT.isScript()) {
+      try {
+        manager.fireEvent(new MouseDownEvent() { });
+        fail("Should have thrown on remove");
+      } catch (AssertionError e) { /* pass */ }
+      return;
+    }
+    
+    // Web mode, no asserts, so remove will quietly succeed. 
+    manager.fireEvent(new MouseDownEvent() { });
+    assertFired(one);
+    reset();
+    manager.fireEvent(new MouseDownEvent() { });
+    assertFired(one, mouse1);
+ }
+
+  @SuppressWarnings("deprecation")
   public void testMultiFiring() {
 
     HandlerManager manager = new HandlerManager("source1");

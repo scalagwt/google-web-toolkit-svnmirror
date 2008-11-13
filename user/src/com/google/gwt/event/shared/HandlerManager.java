@@ -18,6 +18,7 @@ package com.google.gwt.event.shared;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.shared.GwtEvent.Type;
+import com.google.gwt.user.client.Command;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -70,7 +71,12 @@ public class HandlerManager {
     public <H> void removeHandler(GwtEvent.Type<H> eventKey, H handler) {
       ArrayList<H> l = get(eventKey);
       if (l != null) {
-        l.remove(handler);
+        boolean result = l.remove(handler);
+        if (!result) { 
+          // The client code has a similar assert. Relying on asserts in 
+          // server code is dicey
+          throw new IllegalArgumentException("Tried to remove unknown handler");
+        }
       }
     }
 
@@ -100,7 +106,7 @@ public class HandlerManager {
     }
 
     public final <H extends EventHandler> void addHandler(
-        HandlerManager manager, Type<H> type, H myHandler) {
+        Type<H> type, H myHandler) {
 
       // The base is the equivalent to a c pointer into the flattened handler
       // data structure.
@@ -112,12 +118,6 @@ public class HandlerManager {
       // flattened data structure, store the handlers in an external list
       // instead.
       if ((count == EXPECTED_HANDLERS) & flattened) {
-        // As long as we are only adding to the end of a handler list, should
-        // not need to queue.
-        if (manager.firingDepth > 0) {
-          manager.enqueueAdd(type, myHandler);
-          return;
-        }
         unflatten(base);
         flattened = false;
       }
@@ -172,15 +172,14 @@ public class HandlerManager {
         EventHandler handler) {
       int base = eventKey.hashCode();
 
-      // Removing a handler is unusual, so smaller code is preferable then
+      // Removing a handler is unusual, so smaller code is preferable to
       // handling both flat and dangling list of pointers.
       if (isFlattened(base)) {
         unflatten(base);
       }
       boolean result = removeHelper(base, handler);
       // Hiding this behind an assertion as we'd rather not force the compiler
-      // to
-      // have to include all handler.toString() instances.
+      // to have to include all handler.toString() instances.
       assert result : handler + " did not exist";
     }
 
@@ -248,10 +247,6 @@ public class HandlerManager {
       this[base + 1][index] = handler;
     }-*/;
 
-    private native void setHandlerList(int base, JavaScriptObject handlerList) /*-{
-      this[base + 1] = handlerList;
-    }-*/;
-
     private native void unflatten(int base) /*-{
       var handlerList = {};
       var count = this[base];
@@ -287,13 +282,10 @@ public class HandlerManager {
 
   // source of the event.
   private final Object source;
-
-  // pending queue of removes that were called during event firing.
-  private List<Object> removalQueue;
-
-  // pending queue of adds that were called during event firing.
-  private ArrayList<Object> addQueue;
-
+  
+  // Add and remove operations received during dispatch.
+  private List<Command> deferredDeltas;
+  
   /**
    * Creates a handler manager with the given source.
    * 
@@ -319,24 +311,10 @@ public class HandlerManager {
    */
   public <H extends EventHandler> HandlerRegistration addHandler(
       GwtEvent.Type<H> type, final H handler) {
-
-    /*
-     * We used to keep the enqueue / dequeue entirely inside HandlerManager.
-     * However, we found a 30% speed improvement in handler registration if
-     * JsHandlerRegistry is allowed to make its own decision about queuing. Thus
-     * the funny code path here.
-     * 
-     * No parallel optimization was made for removing handlers, as that rarely
-     * happens anyway, and is not a significant contributer to startup time.
-     */
-    if (useJs) {
-      javaScriptRegistry.addHandler(this, type, handler);
+    if (firingDepth > 0) {
+      enqueueAdd(type, handler);
     } else {
-      if (firingDepth > 0) {
-        enqueueAdd(type, handler);
-      } else {
-        javaRegistry.addHandler(type, handler);
-      }
+      doAdd(type, handler);
     }
     return new DefaultHandlerRegistration(this, type, handler);
   }
@@ -388,7 +366,7 @@ public class HandlerManager {
   public <H extends EventHandler> H getHandler(GwtEvent.Type<H> type, int index) {
     assert index < getHandlerCount(type) : "handlers for " + type.getClass()
         + " have size: " + getHandlerCount(type)
-        + " so do not have a handler at index:" + index;
+        + " so do not have a handler at index: " + index;
     if (useJs) {
       return javaScriptRegistry.getHandler(type, index);
     } else {
@@ -443,6 +421,22 @@ public class HandlerManager {
     }
   }
 
+  private void defer(Command command) {
+    if (deferredDeltas == null) {
+      deferredDeltas = new ArrayList<Command>();
+    }
+    deferredDeltas.add(command);
+  }
+
+  private <H extends EventHandler> void doAdd(GwtEvent.Type<H> type,
+      final H handler) {
+    if (useJs) {
+      javaScriptRegistry.addHandler(type, handler);
+    } else {
+      javaRegistry.addHandler(type, handler);
+    }
+  }
+
   private <H extends EventHandler> void doRemove(GwtEvent.Type<H> type,
       final H handler) {
     if (useJs) {
@@ -452,40 +446,34 @@ public class HandlerManager {
     }
   }
 
-  private <H extends EventHandler> void enqueueAdd(GwtEvent.Type<H> type,
+  private <H extends EventHandler> void enqueueAdd(final GwtEvent.Type<H> type,
       final H handler) {
-    if (addQueue == null) {
-      addQueue = new ArrayList<Object>();
-      addQueue.add(type);
-      addQueue.add(handler);
-    }
+    defer(new Command() {
+      public void execute() {
+        doAdd(type, handler);
+      }
+    });
   }
 
-  private <H extends EventHandler> void enqueueRemove(GwtEvent.Type<H> type,
-      final H handler) {
-    if (removalQueue == null) {
-      removalQueue = new ArrayList<Object>();
-      removalQueue.add(type);
-      removalQueue.add(handler);
-    }
+  private <H extends EventHandler> void enqueueRemove(
+      final GwtEvent.Type<H> type, final H handler) {
+    defer(new Command() {
+      public void execute() {
+        doRemove(type, handler);
+      }
+    });
   }
 
   @SuppressWarnings("unchecked")
   private void handleQueuedAddsAndRemoves() {
-    // Do Adds first in case someone does a quick add/remove
-    if (addQueue != null) {
-      for (int i = 0; i < addQueue.size(); i += 2) {
-        addHandler((GwtEvent.Type) addQueue.get(i),
-            (EventHandler) addQueue.get(i + 1));
+    if (deferredDeltas != null) {
+      try {
+        for (Command c : deferredDeltas) {
+         c.execute(); 
+        }
+      } finally {
+        deferredDeltas = null;
       }
-      addQueue = null;
-    }
-    if (removalQueue != null) {
-      for (int i = 0; i < removalQueue.size(); i += 2) {
-        doRemove((GwtEvent.Type) removalQueue.get(i),
-            (EventHandler) removalQueue.get(i + 1));
-      }
-      removalQueue = null;
     }
   }
 }
