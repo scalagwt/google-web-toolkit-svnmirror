@@ -25,6 +25,7 @@ public interface SourcesTreeEvents {
    * Adds a listener interface to receive tree events.
    * 
    * @param listener the listener interface to add
+   * @deprecated use addSelectionHandler,addOpenHandler, and addCloseHandler instead
    */
   @Deprecated
   void addTreeListener(TreeListener listener);

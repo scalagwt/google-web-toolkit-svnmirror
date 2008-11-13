@@ -25,6 +25,7 @@ public interface SourcesTabEvents {
    * Adds a listener interface to receive click events.
    * 
    * @param listener the listener interface to add
+   * @deprecated use addBeforeSelectionHandler and addSelectionHandler instead
    */
   @Deprecated
   void addTabListener(TabListener listener);

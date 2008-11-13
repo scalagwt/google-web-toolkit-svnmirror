@@ -24,7 +24,8 @@ public interface SourcesScrollEvents {
   /**
    * Adds a listener interface to receive scroll events.
    * 
-   * @param listener the listener interface to add.
+   * @param listener the listener interface to add
+   * @deprecated use addScrollHandler instead
    */
   @Deprecated
   void addScrollListener(ScrollListener listener);
@@ -32,7 +33,7 @@ public interface SourcesScrollEvents {
   /**
    * Removes a previously added scroll listener.
    * 
-   * @param listener the listener interface to remove.
+   * @param listener the listener interface to remove
    */
   @Deprecated
   void removeScrollListener(ScrollListener listener);
