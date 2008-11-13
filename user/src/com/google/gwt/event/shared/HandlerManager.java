@@ -72,11 +72,7 @@ public class HandlerManager {
       ArrayList<H> l = get(eventKey);
       if (l != null) {
         boolean result = l.remove(handler);
-        if (!result) { 
-          // The client code has a similar assert. Relying on asserts in 
-          // server code is dicey
-          throw new IllegalArgumentException("Tried to remove unknown handler");
-        }
+        assert result : "Tried to remove unknown handler";
       }
     }
 
