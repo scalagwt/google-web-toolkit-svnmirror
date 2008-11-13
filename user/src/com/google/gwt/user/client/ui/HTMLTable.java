@@ -47,19 +47,35 @@ public abstract class HTMLTable extends Panel implements SourcesTableEvents,
     private final int rowIndex;
     private final int cellIndex;
     
+    /**
+     * Creates a cell.
+     * @param rowIndex the cell's row
+     * @param cellIndex the cell's inded
+     */
     protected Cell(int rowIndex, int cellIndex) {
       this.cellIndex = cellIndex;
       this.rowIndex = rowIndex;
     }
-    
+     
+    /**
+     * Gets the cell index.
+     * @return the cell index
+     */
     public int getCellIndex() {
       return cellIndex;
     }
-    
+    /**
+     * Gets the cell's element.
+     * @return the cell's element.
+     */
     public Element getElement() {
       return getCellFormatter().getElement(cellIndex, rowIndex);
     }
     
+    /**
+     * Get row index.
+     * @return the row index
+     */
     public int getRowIndex() {
       return rowIndex;
     }
@@ -804,7 +820,7 @@ public abstract class HTMLTable extends Panel implements SourcesTableEvents,
    * Adds a listener to the current table.
    * 
    * @param listener listener to add
-   * @deprecated
+   * @deprecated add a click handler instead and use {@link HTMLTable#getCellForEvent(ClickEvent)} to get the cell information
    */
   public void addTableListener(TableListener listener) {
     ListenerWrapper.Table.add(this, listener);
