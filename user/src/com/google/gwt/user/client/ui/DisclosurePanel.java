@@ -305,7 +305,7 @@ public final class DisclosurePanel extends Composite implements
    * Creates a DisclosurePanel that will be initially closed using the specified
    * text in the header.
    * 
-   * @param headerText the text to be displayed in the header.
+   * @param headerText the text to be displayed in the header
    */
   public DisclosurePanel(String headerText) {
     this(createDefaultImages(), headerText, false);
@@ -363,6 +363,8 @@ public final class DisclosurePanel extends Composite implements
    * notification.
    * 
    * @param handler the handler to be added (should not be null)
+   * @deprecated use {@link DisclosurePanel#addOpenHandler(OpenHandler)} and
+   * {@link DisclosurePanel#addCloseHandler(CloseHandler)} instead
    */
   @Deprecated
   public void addEventHandler(final DisclosureHandler handler) {
@@ -400,7 +402,7 @@ public final class DisclosurePanel extends Composite implements
    * the header widget does provide such access.
    * 
    * @return a reference to the header widget if it implements {@link HasText},
-   *         <code>null</code> otherwise
+   * <code>null</code> otherwise
    */
   public HasText getHeaderTextAccessor() {
     Widget widget = header.getWidget();
@@ -484,7 +486,7 @@ public final class DisclosurePanel extends Composite implements
    * Changes the visible state of this <code>DisclosurePanel</code>.
    * 
    * @param isOpen <code>true</code> to open the panel, <code>false</code> to
-   *          close
+   * close
    */
   public void setOpen(boolean isOpen) {
     if (this.isOpen != isOpen) {
