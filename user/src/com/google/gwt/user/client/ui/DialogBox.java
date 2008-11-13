@@ -183,10 +183,14 @@ public class DialogBox extends DecoratedPopupPanel implements HasHTML, HasText,
 
   /**
    * Provides access to the dialog's caption.
+   *
+   * This method is final because the Caption interface will expand. Therefore
+   * it is highly likely that subclasses which implemented this method would end up
+   * breaking.
    * 
    * @return the logical caption for this dialog box
    */
-  public Caption getCaption() {
+  public final Caption getCaption() {
     return caption;
   }
 
