@@ -529,7 +529,7 @@ public class PopupPanel extends SimplePanel implements SourcesPopupEvents,
    * 
    * @param key the key code of the depressed key
    * @param modifiers keyboard modifiers, as specified in
-   *          {@link com.google.gwt.event.dom.client.HasKeyCodes}.
+   *          {@link com.google.gwt.event.dom.client.KeyCodes}.
    * @return <code>false</code> to suppress the event
    */
   public boolean onKeyDownPreview(char key, int modifiers) {
@@ -542,7 +542,7 @@ public class PopupPanel extends SimplePanel implements SourcesPopupEvents,
    * 
    * @param key the unicode character pressed
    * @param modifiers keyboard modifiers, as specified in
-   *          {@link com.google.gwt.event.dom.client.HasKeyCodes}.
+   *          {@link com.google.gwt.event.dom.client.KeyCodes}.
    * @return <code>false</code> to suppress the event
    */
   public boolean onKeyPressPreview(char key, int modifiers) {
@@ -555,7 +555,7 @@ public class PopupPanel extends SimplePanel implements SourcesPopupEvents,
    * 
    * @param key the key code of the released key
    * @param modifiers keyboard modifiers, as specified in
-   *          {@link com.google.gwt.event.dom.client.HasKeyCodes}.
+   *          {@link com.google.gwt.event.dom.client.KeyCodes}.
    * @return <code>false</code> to suppress the event
    */
   public boolean onKeyUpPreview(char key, int modifiers) {
