@@ -20,8 +20,8 @@ import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.FormElement;
-import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.EventHandler;
+import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
@@ -85,6 +85,10 @@ public class FormPanel extends SimplePanel implements FiresFormEvents,
 
     private String resultHtml;
 
+    /**
+     * Create a submit complete event
+     * @param resultsHtml the results from submitting the form
+     */
     protected SubmitCompleteEvent(String resultsHtml) {
       this.resultHtml = resultsHtml;
     }
@@ -403,6 +407,7 @@ public class FormPanel extends SimplePanel implements FiresFormEvents,
    * Adds a {@link SubmitCompleteEvent} handler.
    * 
    * @param handler the handler
+   * @return the handler registration used to remove the handler
    */
   public HandlerRegistration addSubmitCompleteHandler(
       SubmitCompleteHandler handler) {
@@ -413,6 +418,7 @@ public class FormPanel extends SimplePanel implements FiresFormEvents,
    * Adds a {@link SubmitEvent} handler.
    * 
    * @param handler the handler
+   * @return the handler registration used to remove the handler
    */
   public HandlerRegistration addSubmitHandler(SubmitHandler handler) {
     return addHandler(handler, SubmitEvent.getType());
