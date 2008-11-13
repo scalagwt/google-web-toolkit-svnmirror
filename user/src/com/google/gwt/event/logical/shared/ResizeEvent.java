@@ -63,8 +63,6 @@ public class ResizeEvent extends GwtEvent<ResizeHandler> {
   private final int width;
   private final int height;
 
-   
-
   /**
    * Construct a new {@link ResizeEvent}.
    * 

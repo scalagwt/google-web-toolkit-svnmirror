@@ -39,7 +39,8 @@ public class BeforeSelectionEvent<I> extends
    * @param <S> The event source type
    * @param source the source of the handlers
    * @param item the item
-   * @return the event so that the caller can check if it was canceled
+   * @return the event so that the caller can check if it was canceled, or null
+   * if no handlers of this event type have been registered
    */
   public static <I, S extends HasBeforeSelectionHandlers<I> & HasHandlers> BeforeSelectionEvent<I> fire(
       S source, I item) {

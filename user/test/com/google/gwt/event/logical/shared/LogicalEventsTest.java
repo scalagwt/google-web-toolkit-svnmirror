@@ -15,8 +15,8 @@
  */
 package com.google.gwt.event.logical.shared;
 
-import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.EventHandler;
+import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerManager;
 
 import junit.framework.TestCase;
@@ -69,7 +69,7 @@ public class LogicalEventsTest extends TestCase {
     simpleFire(SelectionEvent.getType(), new SelectionEvent<String>());
     simpleFire(CloseEvent.getType(), new CloseEvent<String>());
     simpleFire(OpenEvent.getType(), new OpenEvent<String>());
-    simpleFire(ResizeEvent.getType(), new ResizeEvent());
+    simpleFire(ResizeEvent.getType(), new ResizeEvent(0, 0));
     simpleFire(ValueChangeEvent.getType(), new ValueChangeEvent<String>());
   }
 
