@@ -17,11 +17,14 @@
 package com.google.gwt.event.dom.client;
 
 /**
- * Convenience interface used to implement all key handlers at once. In the
- * unlikely event that more key handler subtypes are added to GWT, this
- * interface will be expanded, so only implement this interface if you wish to
- * have your widget break if a new key event type is introduced.
+ * Convenience interface used to implement all key handlers at once.
  * 
+ * <p>
+ * WARNING, PLEASE READ: In the unlikely event that more key handler subtypes
+ * are added to GWT, this interface will be expanded, so only implement this
+ * interface if you wish to have your widget break if a new key event type is
+ * introduced.
+ * </p>
  */
 public interface HasAllKeyHandlers extends HasKeyUpHandlers,
     HasKeyDownHandlers, HasKeyPressHandlers {
