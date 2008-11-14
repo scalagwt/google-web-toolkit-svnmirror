@@ -42,7 +42,7 @@ public abstract class GwtEvent<H extends EventHandler> {
      * Constructor.
      */
     public Type() {
-      index = HandlerManager.createKeyIndex();
+      index = HandlerManager.createTypeHashCode();
     }
 
     // We override hash code to make it as efficient as possible.
