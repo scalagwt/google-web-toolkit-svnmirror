@@ -51,17 +51,7 @@ public abstract class KeyCodeEvent<H extends EventHandler> extends KeyEvent<H> {
   public int getNativeKeyCode() {
     return getNativeEvent().getKeyCode();
   }
-
-  /**
-   * Is the key code alpha-numeric (i.e. A-z or 0-9)?
-   * 
-   * @return is the key code alpha numeric.
-   */
-  public boolean isAlphaNumeric() {
-    final int keycode = getNativeKeyCode();
-    return (48 <= keycode && keycode <= 57) || (65 <= keycode && keycode <= 90);
-  }
-
+ 
   /**
    * Is this a key down arrow?
    * 
@@ -102,5 +92,4 @@ public abstract class KeyCodeEvent<H extends EventHandler> extends KeyEvent<H> {
   public String toDebugString() {
     return super.toDebugString() + "[" + getNativeKeyCode() + "]";
   }
-
 }
