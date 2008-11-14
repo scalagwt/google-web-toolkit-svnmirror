@@ -35,7 +35,7 @@ public class HandlerManager {
   private static class JavaHandlerRegistry extends
       HashMap<GwtEvent.Type<?>, ArrayList<?>> {
 
-    public <H extends EventHandler> void addHandler(Type<H> type, H handler) {
+    private <H extends EventHandler> void addHandler(Type<H> type, H handler) {
       ArrayList<H> l = get(type);
       if (l == null) {
         l = new ArrayList<H>();
@@ -44,7 +44,7 @@ public class HandlerManager {
       l.add(handler);
     }
 
-    public <H extends EventHandler> void fireEvent(GwtEvent<H> event) {
+    private <H extends EventHandler> void fireEvent(GwtEvent<H> event) {
       Type<H> type = event.getAssociatedType();
       int count = getHandlerCount(type);
       for (int i = 0; i < count; i++) {
@@ -53,13 +53,19 @@ public class HandlerManager {
       }
     }
 
-    public <H extends EventHandler> H getHandler(GwtEvent.Type<H> eventKey,
+    @SuppressWarnings("unchecked")
+    private <H> ArrayList<H> get(GwtEvent.Type<H> type) {
+      // This cast is safe because we control the puts.
+      return (ArrayList<H>) super.get(type);
+    }
+
+    private <H extends EventHandler> H getHandler(GwtEvent.Type<H> eventKey,
         int index) {
       ArrayList<H> l = get(eventKey);
       return l.get(index);
     }
 
-    public int getHandlerCount(GwtEvent.Type<?> eventKey) {
+    private int getHandlerCount(GwtEvent.Type<?> eventKey) {
       ArrayList<?> l = super.get(eventKey);
       if (l == null) {
         return 0;
@@ -68,18 +74,12 @@ public class HandlerManager {
       }
     }
 
-    public <H> void removeHandler(GwtEvent.Type<H> eventKey, H handler) {
+    private <H> void removeHandler(GwtEvent.Type<H> eventKey, H handler) {
       ArrayList<H> l = get(eventKey);
       if (l != null) {
         boolean result = l.remove(handler);
         assert result : "Tried to remove unknown handler";
       }
-    }
-
-    @SuppressWarnings("unchecked")
-    private <H> ArrayList<H> get(GwtEvent.Type<H> type) {
-      // This cast is safe because we control the puts.
-      return (ArrayList<H>) super.get(type);
     }
   }
 
@@ -101,7 +101,7 @@ public class HandlerManager {
     protected JsHandlerRegistry() {
     }
 
-    public final <H extends EventHandler> void addHandler(
+    private <H extends EventHandler> void addHandler(
         Type<H> type, H myHandler) {
 
       // The base is the equivalent to a c pointer into the flattened handler
@@ -125,7 +125,7 @@ public class HandlerManager {
       setCount(base, count + 1);
     }
 
-    public final <H extends EventHandler> void fireEvent(GwtEvent<H> event) {
+    private <H extends EventHandler> void fireEvent(GwtEvent<H> event) {
       Type<H> type = event.getAssociatedType();
       int base = type.hashCode();
       int count = getCount(base);
@@ -150,7 +150,16 @@ public class HandlerManager {
       }
     }
 
-    public final <H extends EventHandler> H getHandler(GwtEvent.Type<H> type,
+    private native int getCount(int index) /*-{
+      var count = this[index];
+      return count == null? 0:count;
+    }-*/;
+
+    private native <H extends EventHandler> H getFlatHandler(int base, int index) /*-{
+      return this[base + 2 + index];
+    }-*/;
+
+    private <H extends EventHandler> H getHandler(GwtEvent.Type<H> type,
         int index) {
       int base = type.hashCode();
       int count = getCount(base);
@@ -160,11 +169,29 @@ public class HandlerManager {
       return getHandler(base, index, isFlattened(base));
     }
 
-    public final int getHandlerCount(GwtEvent.Type<?> eventKey) {
+    private native <H extends EventHandler> H getHandler(int base, int index,
+        boolean flattened) /*-{
+      return flattened? this[base + 2 + index]: this[base + 1][index];
+    }-*/;
+
+    private native <H extends EventHandler> H getHandler(
+        JavaScriptObject handlers, int index) /*-{
+      return handlers[index];
+    }-*/;
+
+    private int getHandlerCount(GwtEvent.Type<?> eventKey) {
       return getCount(eventKey.hashCode());
     }
 
-    public final <H> void removeHandler(GwtEvent.Type<H> eventKey,
+    private native JavaScriptObject getHandlers(int base) /*-{
+      return  this[base + 1];
+    }-*/;
+
+    private native boolean isFlattened(int base) /*-{
+      return this[base + 1] == null;
+    }-*/;
+
+    private <H> void removeHandler(GwtEvent.Type<H> eventKey,
         EventHandler handler) {
       int base = eventKey.hashCode();
 
@@ -178,33 +205,6 @@ public class HandlerManager {
       // to have to include all handler.toString() instances.
       assert result : handler + " did not exist";
     }
-
-    private native int getCount(int index) /*-{
-      var count = this[index];
-      return count == null? 0:count;
-    }-*/;
-
-    private native <H extends EventHandler> H getFlatHandler(int base, int index) /*-{
-      return this[base + 2 + index];
-    }-*/;
-
-    private native <H extends EventHandler> H getHandler(int base, int index,
-        boolean flattened) /*-{
-      return flattened? this[base + 2 + index]: this[base + 1][index];
-    }-*/;
-
-    private native <H extends EventHandler> H getHandler(
-        JavaScriptObject handlers, int index) /*-{
-      return handlers[index];
-    }-*/;
-
-    private native JavaScriptObject getHandlers(int base) /*-{
-      return  this[base + 1];
-    }-*/;
-
-    private native boolean isFlattened(int base) /*-{
-      return this[base + 1] == null;
-    }-*/;
 
     private native boolean removeHelper(int base, EventHandler handler) /*-{
       // Find the handler.
