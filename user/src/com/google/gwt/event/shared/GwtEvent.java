@@ -16,9 +16,10 @@
 package com.google.gwt.event.shared;
 
 /**
- * Root of all gwt events. All gwt events are considered dead and should no
+ * Root of all GWT events. All GWT events are considered dead and should no
  * longer be accessed once the {@link HandlerManager} which originally fired the
- * event finishes with it.
+ * event finishes with it. That is, don't hold on to event objects outside of
+ * your handler methods.
  * 
  * @param <H> handler type
  * 
@@ -35,7 +36,7 @@ public abstract class GwtEvent<H extends EventHandler> {
    * @param <H> handler type
    */
   public static class Type<H> {
-    private int index;
+    private final int index;
 
     /**
      * Constructor.
