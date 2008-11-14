@@ -6,6 +6,6 @@ Copies:
 /branches/1_6_clean_events was created from /releases/1.6@r3770
 
 Merges:
-/releases/1.6@r3770:3957 was merged (????) into this branch
+/releases/1.6@r3770:3957 was merged (3963) into this branch
 
  -> The next merge into this branch will be r3957:????
