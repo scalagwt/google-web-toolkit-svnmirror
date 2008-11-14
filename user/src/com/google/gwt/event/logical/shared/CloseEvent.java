@@ -106,13 +106,12 @@ public class CloseEvent<T> extends GwtEvent<CloseHandler<T>> {
     return autoClosed;
   }
 
-  // @param autoClosed was the close event triggered automatically
   @Override
   protected void dispatch(CloseHandler<T> handler) {
     handler.onClose(this);
   }
 
-  // The instance knows its BeforeSelectionHandler is of type I, but the TYPE
+  // The instance knows its of type T, but the TYPE
   // field itself does not, so we have to do an unsafe cast here.
   @SuppressWarnings("unchecked")
   @Override
