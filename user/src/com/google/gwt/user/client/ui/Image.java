@@ -206,6 +206,8 @@ public class Image extends Widget implements SourcesLoadEvents,
        */
       DeferredCommand.addCommand(new Command() {
         public void execute() {
+          // TODO(ecc) once event triggering is committed, this call should
+          // fire a native load event instead.
           image.fireEvent(new LoadEvent() {
           });
         }

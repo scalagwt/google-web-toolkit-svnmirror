@@ -797,7 +797,7 @@ public abstract class CustomButton extends ButtonBase {
   }
 
   void fireClickListeners(Event nativeEvent) {
-    // Joel's triggering of native events should replace this.
+    // TODO(ecc) Once event triggering is committed, should fire a native click event instead.
     fireEvent(new ClickEvent() {
     });
   }
