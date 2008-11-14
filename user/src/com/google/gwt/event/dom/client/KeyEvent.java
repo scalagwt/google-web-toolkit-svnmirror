@@ -16,8 +16,6 @@
 package com.google.gwt.event.dom.client;
 
 import com.google.gwt.event.shared.EventHandler;
-import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Event;
 
 /**
  * Base class for Key events. The native keyboard events are somewhat a mess
@@ -27,46 +25,6 @@ import com.google.gwt.user.client.Event;
  * @param <H> The event handler type 
  */
 public abstract class KeyEvent<H extends EventHandler> extends DomEvent<H> {
-
-  /**
-   * Alt modifier.
-   */
-  public static final int MODIFIER_ALT = 4;
-  /**
-   * Control modifier.
-   */
-  public static final int MODIFIER_CTRL = 2;
-  /**
-   * Meta modifier.
-   */
-  public static final int MODIFIER_META = 8;
-  /**
-   * Shift modifier.
-   */
-  public static final int MODIFIER_SHIFT = 1;
-
-  /**
-   * Gets the key modifiers associated with this event.
-   * 
-   * @param event the event
-   * 
-   * @return the modifiers as defined in {@link KeyCodeEvent}.
-   */
-  public static int getKeyModifiers(Event event) {
-    return (DOM.eventGetShiftKey(event) ? MODIFIER_SHIFT : 0)
-        | (DOM.eventGetMetaKey(event) ? MODIFIER_META : 0)
-        | (DOM.eventGetCtrlKey(event) ? MODIFIER_CTRL : 0)
-        | (DOM.eventGetAltKey(event) ? MODIFIER_ALT : 0);
-  }
-
-  /**
-   * Gets the key modifiers associated with this event.
-   * 
-   * @return the modifiers as defined in {@link KeyCodeEvent}.
-   */
-  public int getKeyModifiers() {
-    return getKeyModifiers(this.getNativeEvent());
-  }
 
   /**
    * Is the <code>alt</code> key down?
