@@ -101,8 +101,7 @@ public class HandlerManager {
     protected JsHandlerRegistry() {
     }
 
-    private <H extends EventHandler> void addHandler(
-        Type<H> type, H myHandler) {
+    private <H extends EventHandler> void addHandler(Type<H> type, H myHandler) {
 
       // The base is the equivalent to a c pointer into the flattened handler
       // data structure.
@@ -132,18 +131,20 @@ public class HandlerManager {
       boolean isFlattened = isFlattened(base);
       if (isFlattened) {
         for (int i = 0; i < count; i++) {
-          // Gets the given handler to fire.
-          H handler = getFlatHandler(base, i);
+          // Gets the given handler to fire. JavaScript array has no intrinsic
+          // typing information, so cast is inherently necessary.
+          @SuppressWarnings("unchecked")
+          H handler = (H) getFlatHandler(base, i);
           // Fires the handler.
           event.dispatch(handler);
         }
       } else {
         JavaScriptObject handlers = getHandlers(base);
         for (int i = 0; i < count; i++) {
-          // Gets the given handler to fire.
-
-          H handler = getHandler(handlers, i);
-
+          // Gets the given handler to fire. JavaScript array has no intrinsic
+          // typing information, so cast is inherently necessary.
+          @SuppressWarnings("unchecked")
+          H handler = (H) getHandler(handlers, i);
           // Fires the handler.
           event.dispatch(handler);
         }
@@ -155,27 +156,24 @@ public class HandlerManager {
       return count == null? 0:count;
     }-*/;
 
-    private native <H extends EventHandler> H getFlatHandler(int base, int index) /*-{
+    private native EventHandler getFlatHandler(int base, int index) /*-{
       return this[base + 2 + index];
     }-*/;
 
+    // JavaScript arrays have no intrinsic type, so cast is inherently necessary
+    @SuppressWarnings("unchecked")
     private <H extends EventHandler> H getHandler(GwtEvent.Type<H> type,
         int index) {
       int base = type.hashCode();
-      int count = getCount(base);
-      if (index >= count) {
-        throw new IndexOutOfBoundsException("index: " + index);
-      }
-      return getHandler(base, index, isFlattened(base));
+      return (H) getHandler(base, index, isFlattened(base));
     }
 
-    private native <H extends EventHandler> H getHandler(int base, int index,
+    private native EventHandler getHandler(int base, int index,
         boolean flattened) /*-{
       return flattened? this[base + 2 + index]: this[base + 1][index];
     }-*/;
 
-    private native <H extends EventHandler> H getHandler(
-        JavaScriptObject handlers, int index) /*-{
+    private native EventHandler getHandler(JavaScriptObject handlers, int index) /*-{
       return handlers[index];
     }-*/;
 
@@ -278,10 +276,10 @@ public class HandlerManager {
 
   // source of the event.
   private final Object source;
-  
+
   // Add and remove operations received during dispatch.
   private List<Command> deferredDeltas;
-  
+
   /**
    * Creates a handler manager with the given source.
    * 
@@ -465,7 +463,7 @@ public class HandlerManager {
     if (deferredDeltas != null) {
       try {
         for (Command c : deferredDeltas) {
-         c.execute(); 
+          c.execute();
         }
       } finally {
         deferredDeltas = null;
