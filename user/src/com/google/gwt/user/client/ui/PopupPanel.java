@@ -464,17 +464,17 @@ public class PopupPanel extends SimplePanel implements SourcesPopupEvents,
     switch (type) {
       case Event.ONKEYDOWN: {
         boolean allow = onKeyDownPreview((char) DOM.eventGetKeyCode(event),
-            ListenerWrapper.getKeyModifiers(event));
+            KeyboardListenerCollection.getKeyboardModifiers(event));
         return allow && (eventTargetsPopup || !modal);
       }
       case Event.ONKEYUP: {
         boolean allow = onKeyUpPreview((char) DOM.eventGetKeyCode(event),
-            ListenerWrapper.getKeyModifiers(event));
+            KeyboardListenerCollection.getKeyboardModifiers(event));
         return allow && (eventTargetsPopup || !modal);
       }
       case Event.ONKEYPRESS: {
         boolean allow = onKeyPressPreview((char) DOM.eventGetKeyCode(event),
-            ListenerWrapper.getKeyModifiers(event));
+            KeyboardListenerCollection.getKeyboardModifiers(event));
         return allow && (eventTargetsPopup || !modal);
       }
 

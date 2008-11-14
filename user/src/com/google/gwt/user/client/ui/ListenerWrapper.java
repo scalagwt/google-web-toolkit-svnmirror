@@ -77,8 +77,6 @@ import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.GwtEvent.Type;
-import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Event;
 
 import java.util.EventListener;
 
@@ -489,19 +487,19 @@ abstract class ListenerWrapper<T> implements EventHandler {
 
     public void onKeyDown(KeyDownEvent event) {
       listener.onKeyDown(source(event), (char) event.getNativeKeyCode(),
-          ListenerWrapper.getKeyModifiers(event.getNativeEvent()));
+          KeyboardListenerCollection.getKeyboardModifiers(event.getNativeEvent()));
     }
 
     public void onKeyPress(KeyPressEvent event) {
       listener.onKeyPress(source(event), 
           (char) event.getNativeEvent().getKeyCode(), 
-          ListenerWrapper.getKeyModifiers(event.getNativeEvent()));
+          KeyboardListenerCollection.getKeyboardModifiers(event.getNativeEvent()));
     }
 
     public void onKeyUp(KeyUpEvent event) {
       source(event);
       listener.onKeyUp(source(event), (char) event.getNativeKeyCode(), 
-          ListenerWrapper.getKeyModifiers(event.getNativeEvent()));
+          KeyboardListenerCollection.getKeyboardModifiers(event.getNativeEvent()));
     }
   }
 
@@ -523,20 +521,6 @@ abstract class ListenerWrapper<T> implements EventHandler {
         }
       }
     }
-  }
-
-  /**
-   * Gets the key modifiers associated with this event.
-   * 
-   * @param event the event
-   * 
-   * @return the modifiers as defined in {@link KeyboardListener}.
-   */
-  static int getKeyModifiers(Event event) {
-    return (DOM.eventGetShiftKey(event) ? KeyboardListener.MODIFIER_SHIFT : 0)
-        | (DOM.eventGetMetaKey(event) ? KeyboardListener.MODIFIER_META : 0)
-        | (DOM.eventGetCtrlKey(event) ? KeyboardListener.MODIFIER_CTRL : 0)
-        | (DOM.eventGetAltKey(event) ? KeyboardListener.MODIFIER_ALT : 0);
   }
 
   /**

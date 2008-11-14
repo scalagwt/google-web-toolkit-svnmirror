@@ -139,7 +139,7 @@ public class TabBar extends Composite implements SourcesTabEvents,
             TabBar.this.selectTabByTabWidget(this);
           }
           TabBar.this.onKeyDown(this, (char) event.getKeyCode(),
-              ListenerWrapper.getKeyModifiers(event));
+              KeyboardListenerCollection.getKeyboardModifiers(event));
           break;
       }
       super.onBrowserEvent(event);
