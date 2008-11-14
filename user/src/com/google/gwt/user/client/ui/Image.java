@@ -21,7 +21,6 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.DomEvent;
 import com.google.gwt.event.dom.client.ErrorEvent;
 import com.google.gwt.event.dom.client.ErrorHandler;
 import com.google.gwt.event.dom.client.HasAllMouseHandlers;
@@ -207,8 +206,8 @@ public class Image extends Widget implements SourcesLoadEvents,
        */
       DeferredCommand.addCommand(new Command() {
         public void execute() {
-          DomEvent.unsafeFireNativeEvent(Event.ONLOAD,
-              image.getHandlers());
+          image.fireEvent(new LoadEvent() {
+          });
         }
       });
     }

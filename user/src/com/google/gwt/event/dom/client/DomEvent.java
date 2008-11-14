@@ -76,7 +76,6 @@ public abstract class DomEvent<H extends EventHandler> extends GwtEvent<H> {
         init();
       }
       registered.unsafePut(eventName, this);
-      reverseRegistered.put(eventToSink, this);
     }
 
     Type(int nativeEventTypeInt, String eventName, DomEvent<H> cached,
@@ -101,9 +100,7 @@ public abstract class DomEvent<H extends EventHandler> extends GwtEvent<H> {
   }
 
   private static PrivateMap<Type<?>> registered;
-
-  private static PrivateMap<Type<?>> reverseRegistered;
-
+ 
   /**
    * Fires the given native event on the specified handlers.
    * 
@@ -125,47 +122,10 @@ public abstract class DomEvent<H extends EventHandler> extends GwtEvent<H> {
       }
     }
   }
-
-  /**
-   * Fires the given native event on the manager with a null underlying native
-   * event.
-   * 
-   * <p>
-   * This method is used in the rare case that GWT widgets have to fire native
-   * events but do not have access to the corresponding native event. It allows
-   * the compiler to avoid instantiating event types that are never handlers.
-   * </p>
-   * 
-   * @deprecated should go away after triggering of native events is introduced
-   * @param eventType the GWT event type representing the type of the native
-   * event.
-   * @param handlers the handler manager containing the handlers
-   */
-  @Deprecated
-  public static void unsafeFireNativeEvent(int eventType,
-      HandlerManager handlers) {
-    if (registered != null) {
-      final DomEvent.Type<?> typeKey = reverseRegistered.get(eventType);
-      if (typeKey != null) {
-        // Store and restore native event just in case we are in recursive
-        // loop.
-        Event currentNative = null;
-        if (typeKey.flyweight.isLive()) {
-          currentNative = typeKey.flyweight.nativeEvent;
-        }
-        typeKey.flyweight.setNativeEvent(null);
-        handlers.fireEvent(typeKey.flyweight);
-        if (currentNative != null) {
-          typeKey.flyweight.setNativeEvent(currentNative);
-        }
-      }
-    }
-  }
-
+ 
   // This method can go away once we have eager clinits.
   static void init() {
     registered = new PrivateMap<Type<?>>();
-    reverseRegistered = new PrivateMap<Type<?>>();
   }
 
   private Event nativeEvent;

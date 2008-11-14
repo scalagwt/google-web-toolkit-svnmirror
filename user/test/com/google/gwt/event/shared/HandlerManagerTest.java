@@ -18,10 +18,8 @@ package com.google.gwt.event.shared;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.DomEvent;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
-import com.google.gwt.user.client.Event;
 
 /**
  * Handler manager test.
@@ -39,7 +37,8 @@ public class HandlerManagerTest extends HandlerTestBase {
     manager.addHandler(MouseDownEvent.getType(), mouse1);
     manager.addHandler(MouseDownEvent.getType(), mouse2);
     manager.addHandler(MouseDownEvent.getType(), adaptor1);
-    DomEvent.unsafeFireNativeEvent(Event.ONMOUSEDOWN, manager);
+    manager.fireEvent(new MouseDownEvent() {
+    });
     assertEquals(3, manager.getHandlerCount(MouseDownEvent.getType()));
     assertFired(mouse1, mouse2, adaptor1);
     manager.addHandler(MouseDownEvent.getType(), mouse3);
@@ -60,7 +59,8 @@ public class HandlerManagerTest extends HandlerTestBase {
     assertEquals(3, manager.getHandlerCount(ClickEvent.getType()));
 
     reset();
-    DomEvent.unsafeFireNativeEvent(Event.ONMOUSEDOWN, manager);
+    manager.fireEvent(new MouseDownEvent() {
+    });
     assertFired(mouse1, mouse2, mouse3, adaptor1);
     assertNotFired(click1, click2);
   }
@@ -71,20 +71,24 @@ public class HandlerManagerTest extends HandlerTestBase {
     addHandlers(manager);
     // Gets rid of first instance.
     manager.removeHandler(MouseDownEvent.getType(), adaptor1);
-    DomEvent.unsafeFireNativeEvent(Event.ONMOUSEDOWN, manager);
+    manager.fireEvent(new MouseDownEvent() {
+    });
     assertFired(mouse1, mouse2, mouse3, adaptor1);
     assertNotFired(click1, click2);
 
     // Gets rid of second instance.
     manager.removeHandler(MouseDownEvent.getType(), adaptor1);
     reset();
-    DomEvent.unsafeFireNativeEvent(Event.ONMOUSEDOWN, manager);
+    manager.fireEvent(new MouseDownEvent() {
+    });
+
     assertFired(mouse1, mouse2, mouse3);
     assertNotFired(adaptor1, click1, click2);
 
     // Checks to see if click events are still working.
     reset();
-    DomEvent.unsafeFireNativeEvent(Event.ONCLICK, manager);
+    manager.fireEvent(new ClickEvent() {
+    });
 
     assertNotFired(mouse1, mouse2, mouse3);
     assertFired(click1, click2, adaptor1);
@@ -174,16 +178,18 @@ public class HandlerManagerTest extends HandlerTestBase {
     manager.addHandler(MouseDownEvent.getType(), mouse1);
     manager.addHandler(MouseDownEvent.getType(), mouse2);
     manager.addHandler(MouseDownEvent.getType(), mouse3);
-    manager.fireEvent(new MouseDownEvent() { });
+    manager.fireEvent(new MouseDownEvent() {
+    });
     assertFired(one, mouse1, mouse2, mouse3);
     assertNotFired(two);
 
     reset();
-    manager.fireEvent(new MouseDownEvent() { });
+    manager.fireEvent(new MouseDownEvent() {
+    });
     assertFired(one, mouse1, mouse2, mouse3);
     assertNotFired(two);
   }
-  
+
   @SuppressWarnings("deprecation")
   public void testConcurrentAddAfterRemoveIsNotClobbered() {
     final HandlerManager manager = new HandlerManager("bogus source");
@@ -199,19 +205,23 @@ public class HandlerManagerTest extends HandlerTestBase {
 
     if (!GWT.isScript()) {
       try {
-        manager.fireEvent(new MouseDownEvent() { });
+        manager.fireEvent(new MouseDownEvent() {
+        });
         fail("Should have thrown on remove");
-      } catch (AssertionError e) { /* pass */ }
+      } catch (AssertionError e) { /* pass */
+      }
       return;
     }
-    
-    // Web mode, no asserts, so remove will quietly succeed. 
-    manager.fireEvent(new MouseDownEvent() { });
+
+    // Web mode, no asserts, so remove will quietly succeed.
+    manager.fireEvent(new MouseDownEvent() {
+    });
     assertFired(one);
     reset();
-    manager.fireEvent(new MouseDownEvent() { });
+    manager.fireEvent(new MouseDownEvent() {
+    });
     assertFired(one, mouse1);
- }
+  }
 
   @SuppressWarnings("deprecation")
   public void testMultiFiring() {
@@ -247,7 +257,8 @@ public class HandlerManagerTest extends HandlerTestBase {
     });
 
     reset();
-    DomEvent.unsafeFireNativeEvent(Event.ONMOUSEDOWN, manager);
+    manager.fireEvent(new MouseDownEvent() {
+    });
     assertFired(mouse1, adaptor1, mouse3);
   }
 }

@@ -16,8 +16,8 @@
 
 package com.google.gwt.user.client.ui;
 
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.DomEvent;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Event;
@@ -387,7 +387,7 @@ public abstract class CustomButton extends ButtonBase {
   /**
    * Constructor for <code>CustomButton</code>.
    * 
-   * @param upText the text for the default (up) face of the button.
+   * @param upText the text for the default (up) face of the button
    */
   public CustomButton(String upText) {
     this();
@@ -672,7 +672,7 @@ public abstract class CustomButton extends ButtonBase {
    * Sets whether this button is enabled.
    * 
    * @param enabled <code>true</code> to enable the button, <code>false</code>
-   *          to disable it
+   * to disable it
    */
   @Override
   public final void setEnabled(boolean enabled) {
@@ -779,7 +779,7 @@ public abstract class CustomButton extends ButtonBase {
    * Sets whether this button is down.
    * 
    * @param down <code>true</code> to press the button, <code>false</code>
-   *          otherwise
+   * otherwise
    */
   protected void setDown(boolean down) {
     if (down != isDown()) {
@@ -797,7 +797,9 @@ public abstract class CustomButton extends ButtonBase {
   }
 
   void fireClickListeners(Event nativeEvent) {
-    DomEvent.unsafeFireNativeEvent(Event.ONCLICK, getHandlers());
+    // Joel's triggering of native events should replace this.
+    fireEvent(new ClickEvent() {
+    });
   }
 
   /**
