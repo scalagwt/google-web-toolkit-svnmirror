@@ -3,14 +3,6 @@ Tracks interactions between this branch and other branches.
 See: http://code.google.com/p/google-web-toolkit/wiki/ManagingMerges
 
 Copies:
-/releases/1.6/ was created (r3732) as a straight copy from /trunk/@r3683
+/branches/1_6_datepicker/ was created (r4094) as a straight copy from /releases/1.6/(r4093)
 
 Merges:
-/trunk revisions c3688,c3703,c3700,c3704,c3707,c3715,c3717,c3724,3725 were merged (r3739) into this branch
-/releases/1.5/@r3630:3863 was merged (r3864) into this branch
-/releases/1.6/@r3739:3876 was merged (r3877) into trunk
-/releases/1.6/@r3878:3944 was merged (r3945) into trunk, skipping c3878
-/releases/1.6/@r3944:4025 was merged (r????) into trunk
-/branches/1_6_clean_events@3936:4088 was merged (r4092) into this branch
-
----> The next merge into trunk will be 4025:HEAD
