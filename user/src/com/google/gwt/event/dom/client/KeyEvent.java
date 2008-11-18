@@ -16,6 +16,7 @@
 package com.google.gwt.event.dom.client;
 
 import com.google.gwt.event.shared.EventHandler;
+import com.google.gwt.user.client.Event;
 
 /**
  * Base class for Key events. The native keyboard events are somewhat a mess
@@ -33,6 +34,21 @@ public abstract class KeyEvent<H extends EventHandler> extends DomEvent<H> {
    */
   public boolean isAltKeyDown() {
     return getNativeEvent().getAltKey();
+  }
+
+  /**
+   * Does this event have any modifier keys down? Specifically. is the control,
+   * meta, shift, or alt key currently pressed?
+   * 
+   * @return whether this event have any modifier key down
+   */
+  public boolean isAnyModifierKeyDown() {
+    Event nativeEvent = getNativeEvent();
+    boolean alt = nativeEvent.getAltKey();
+    boolean ctrl = nativeEvent.getCtrlKey();
+    boolean meta = nativeEvent.getMetaKey();
+    boolean shift = nativeEvent.getShiftKey();
+    return alt || ctrl || meta || shift;
   }
 
   /**
