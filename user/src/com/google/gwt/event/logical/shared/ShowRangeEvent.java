@@ -16,29 +16,63 @@
 package com.google.gwt.event.logical.shared;
 
 import com.google.gwt.event.shared.GwtEvent;
+import com.google.gwt.event.shared.HandlerManager;
 
 /**
- * Fired after an event source shows a range of values.
+ * Represents a show range event.
  * 
- * @param <V> the type of value shown in the range
+ * @param <V> the type of range
  */
 public class ShowRangeEvent<V> extends GwtEvent<ShowRangeHandler<V>> {
 
   /**
-   * Event type for {@link ShowRangeEvent}.
+   * Handler type.
    */
-  public static final Type<ShowRangeHandler<?>> TYPE = new Type<ShowRangeHandler<?>>();
-
-  private V start;
-  private V end;
+  private static Type<ShowRangeHandler<?>> TYPE;
 
   /**
-   * Constructs a ShowRangeEvent event.
+   * Fires a show range event on all registered handlers in the handler manager.
    * 
-   * @param start start of range
-   * @param end end of range
+   * @param <V> the type of range
+   * @param <S> the event source
+   * @param source the source of the handlers
+   * @param start the start of the range
+   * @param end the end of the range
    */
-  public ShowRangeEvent(V start, V end) {
+  public static <V, S extends HasShowRangeHandlers<V> & HasHandlers> void fire(
+      S source, V start, V end) {
+    if (TYPE != null) {
+      HandlerManager handlers = source.getHandlers();
+      if (handlers != null) {
+        ShowRangeEvent<V> event = new ShowRangeEvent<V>(start, end);
+        handlers.fireEvent(event);
+      }
+    }
+  }
+
+  /**
+   * Gets the type associated with this event.
+   * 
+   * @return returns the handler type
+   */
+  public static Type<ShowRangeHandler<?>> getType() {
+    if (TYPE == null) {
+      TYPE = new Type<ShowRangeHandler<?>>();
+    }
+    return TYPE;
+  }
+
+  private final V start;
+
+  private final V end;
+
+  /**
+   * Creates a new show range event.
+   * 
+   * @param start start of the range
+   * @param end end of the range
+   */
+  protected ShowRangeEvent(V start, V end) {
     this.start = start;
     this.end = end;
   }
@@ -46,20 +80,18 @@ public class ShowRangeEvent<V> extends GwtEvent<ShowRangeHandler<V>> {
   /**
    * Gets the end of the range.
    * 
-   * @return range end
+   * @return end of the range
    */
   public V getEnd() {
-    assertLive();
     return end;
   }
 
   /**
    * Gets the start of the range.
    * 
-   * @return range start
+   * @return start of the range
    */
   public V getStart() {
-    assertLive();
     return start;
   }
 
@@ -68,8 +100,11 @@ public class ShowRangeEvent<V> extends GwtEvent<ShowRangeHandler<V>> {
     handler.onShowRange(this);
   }
 
+  // Because of type erasure, our static type is
+  // wild carded, yet the "real" type should use our I param.
+  @SuppressWarnings("unchecked")
   @Override
-  protected final Type getAssociatedType() {
-    return TYPE;
+  protected final Type<ShowRangeHandler<V>> getAssociatedType() {
+    return (Type) TYPE;
   }
 }
