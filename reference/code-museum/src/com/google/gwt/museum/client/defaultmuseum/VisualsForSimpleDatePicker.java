@@ -46,7 +46,7 @@ public class VisualsForSimpleDatePicker extends AbstractIssue {
 
   @Override
   public boolean hasCSS() {
-    return true;
+    return false;
   }
 
 }
