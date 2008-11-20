@@ -185,16 +185,16 @@ public class DatePicker extends Composite implements
     }
   }
 
-  private DateStyler styler = new DateStyler();
-  private Date highlightedDate;
-  private MonthSelector monthSelector;
-  private CalendarView calendar;
-  private CalendarModel model;
+  private final DateStyler styler = new DateStyler();
+  private final MonthSelector monthSelector;
+  private final CalendarView view;
+  private final CalendarModel model;
   private Date value;
+  private Date highlighted;
   private StandardCss css = StandardCss.DEFAULT;
 
   /**
-   * Constructor.
+   * Create a new date picker.
    */
   public DatePicker() {
     this(new DefaultMonthSelector(), new DefaultCalendarView(),
@@ -205,20 +205,23 @@ public class DatePicker extends Composite implements
    * Constructor for use by subType()s.
    * 
    * @param monthSelector the month selector
-   * @param calendarView the calendar view
-   * @param model the calendar model
+   * @param calendarView the view view
+   * @param model the view model
    */
 
   protected DatePicker(MonthSelector monthSelector, CalendarView calendarView,
       CalendarModel model) {
-    this.setModel(model);
+
+    this.model = model;
     this.monthSelector = monthSelector;
     monthSelector.setDatePicker(this);
-    this.calendar = calendarView;
-    calendar.setDatePicker(this);
-    calendar.setup();
+    this.view = calendarView;
+    view.setDatePicker(this);
+
+    view.setup();
     monthSelector.setup();
     this.setup();
+
     showDate(new Date());
     addGlobalStyleToDate(new Date(), css().dayIsToday());
   }
@@ -233,7 +236,7 @@ public class DatePicker extends Composite implements
   public void addGlobalStyleToDate(Date date, String styleName) {
     styler.setStyleName(date, styleName, true);
     if (isDateVisible(date)) {
-      calendar.addStyleToDate(date, styleName);
+      view.addStyleToDate(date, styleName);
     }
   }
 
@@ -247,15 +250,15 @@ public class DatePicker extends Composite implements
 
   /**
    * Adds a show range handler and immediately activate the handler on the
-   * current calendar view.
+   * current view.
    * 
    * @param handler the handler
    * @return the handler registration
    */
   public HandlerRegistration addShowRangeHandlerAndFire(
       ShowRangeHandler<Date> handler) {
-    ShowRangeEvent event = new ShowRangeEvent(calendar.getFirstDate(),
-        calendar.getLastDate()) {
+    ShowRangeEvent event = new ShowRangeEvent(view.getFirstDate(),
+        view.getLastDate()) {
     };
     handler.onShowRange(event);
     return addShowRangeHandler(handler);
@@ -269,7 +272,7 @@ public class DatePicker extends Composite implements
    * @param styleName style name
    */
   public final void addStyleToVisibleDate(Date visibleDate, String styleName) {
-    calendar.addStyleToDate(visibleDate, styleName);
+    view.addStyleToDate(visibleDate, styleName);
   }
 
   /**
@@ -281,7 +284,7 @@ public class DatePicker extends Composite implements
    */
   public final void addStyleToVisibleDates(Iterable<Date> visibleDates,
       String styleName) {
-    getCalendarView().addStyleToDates(visibleDates, styleName);
+    getView().addStyleToDates(visibleDates, styleName);
   }
 
   public HandlerRegistration addValueChangeHandler(
@@ -314,7 +317,7 @@ public class DatePicker extends Composite implements
    * @return the highlighted date
    */
   public final Date getHighlightedDate() {
-    return highlightedDate;
+    return highlighted;
   }
 
   /**
@@ -333,7 +336,7 @@ public class DatePicker extends Composite implements
    * @return is the date currently shown
    */
   public boolean isDateVisible(Date date) {
-    return calendar.isDateVisible(date);
+    return view.isDateVisible(date);
   }
 
   /**
@@ -344,7 +347,7 @@ public class DatePicker extends Composite implements
    */
   public boolean isVisibleDateEnabled(Date date) {
     assert isDateVisible(date) : date + " is not visible";
-    return calendar.isDateEnabled(date);
+    return view.isDateEnabled(date);
   }
 
   /**
@@ -356,7 +359,7 @@ public class DatePicker extends Composite implements
   public void removeGlobalStyleFromDate(Date date, String styleName) {
     styler.setStyleName(date, styleName, false);
     if (isDateVisible(date)) {
-      calendar.removeStyleFromDate(date, styleName);
+      view.removeStyleFromDate(date, styleName);
     }
   }
 
@@ -371,7 +374,7 @@ public class DatePicker extends Composite implements
     while (dates.hasNext()) {
       Date date = dates.next();
       assert (isDateVisible(date)) : date + " should be visible";
-      calendar.removeStyleFromDate(date, styleName);
+      view.removeStyleFromDate(date, styleName);
     }
   }
 
@@ -385,7 +388,7 @@ public class DatePicker extends Composite implements
   public final void setEnabledOnVisibleDate(Date date, boolean enabled) {
     assert isDateVisible(date) : date
         + " cannot be enabled or disabled as it is not visible";
-    getCalendarView().setDateEnabled(date, enabled);
+    getView().setDateEnabled(date, enabled);
   }
 
   /**
@@ -397,7 +400,7 @@ public class DatePicker extends Composite implements
    */
   public final void setEnabledOnVisibleDates(Iterable<Date> dates,
       boolean enabled) {
-    getCalendarView().setDatesEnabled(dates, enabled);
+    getView().setDatesEnabled(dates, enabled);
   }
 
   /**
@@ -410,7 +413,7 @@ public class DatePicker extends Composite implements
   }
 
   /**
-   * Sets the {@link DatePicker}'s  value.
+   * Sets the {@link DatePicker}'s value.
    * 
    * @param date the new value
    */
@@ -449,15 +452,6 @@ public class DatePicker extends Composite implements
   }
 
   /**
-   * Gets the {@link CalendarView} associated with this date picker.
-   * 
-   * @return calendar view
-   */
-  protected final CalendarView getCalendarView() {
-    return calendar;
-  }
-
-  /**
    * Gets the {@link CalendarModel} associated with this date picker.
    * 
    * @return the model
@@ -476,6 +470,15 @@ public class DatePicker extends Composite implements
   }
 
   /**
+   * Gets the {@link CalendarView} associated with this date picker.
+   * 
+   * @return view view
+   */
+  protected final CalendarView getView() {
+    return view;
+  }
+
+  /**
    * Sets up the date picker.
    */
   protected void setup() {
@@ -484,7 +487,7 @@ public class DatePicker extends Composite implements
     setStyleName(panel.getElement(), css.datePicker());
     setStyleName(css().datePicker());
     panel.add(this.getMonthSelector());
-    panel.add(this.getCalendarView());
+    panel.add(this.getView());
   }
 
   /**
@@ -501,24 +504,21 @@ public class DatePicker extends Composite implements
    * Refreshes all components of this date picker.
    */
   final void refreshAll() {
-    highlightedDate = null;
-    calendar.refresh();
+    highlighted = null;
+    view.refresh();
     monthSelector.refresh();
-    ShowRangeEvent.fire(this, getCalendarView().getFirstDate(),
-        getCalendarView().getLastDate());
+    ShowRangeEvent.fire(this, getView().getFirstDate(),
+        getView().getLastDate());
   }
 
   /**
    * Sets the highlighted date.
    * 
-   * @param highlightedDate highlighted date
+   * @param highlighted highlighted date
    */
   void setHighlightedDate(Date highlightedDate) {
-    this.highlightedDate = highlightedDate;
+    this.highlighted = highlightedDate;
     HighlightEvent.fire(this, highlightedDate);
   }
 
-  private void setModel(CalendarModel model) {
-    this.model = model;
-  }
 }
