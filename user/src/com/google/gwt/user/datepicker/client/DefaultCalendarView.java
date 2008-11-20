@@ -113,7 +113,7 @@ public final class DefaultCalendarView extends CalendarView {
           accum += " " + css().dayIsHighlighted();
 
           if (isHighlighted() && isSelected()) {
-            accum += " " + css().dayIsSelectedAndHighlighted();
+            accum += " " + css().dayIsValueAndHighlighted();
           }
         }
         if (!isEnabled()) {

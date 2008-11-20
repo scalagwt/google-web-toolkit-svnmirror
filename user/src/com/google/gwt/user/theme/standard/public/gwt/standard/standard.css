@@ -1150,8 +1150,12 @@ html>body .gwt-DecoratedTabBar .gwt-TabBarItem-selected .tabTopRight {
   cursor: hand;
 }
 
-.datePickerDayIsSelected {
+.datePickerDayIsValue {
   background: #aaccee;
+}
+
+.datePickerDayIsValueAndHighlighted {
+  background: #bbddff;
 }
 
 .datePickerDayIsDisabled {
@@ -1163,9 +1167,6 @@ html>body .gwt-DecoratedTabBar .gwt-TabBarItem-selected .tabTopRight {
   padding: 0px;
 }
 
-.datePickerDayIsSelectedAndHighlighted {
-   background: #bbddff;
-}
 
 /* 
 * Month selector styles 
@@ -1185,9 +1186,9 @@ html>body .gwt-DecoratedTabBar .gwt-TabBarItem-selected .tabTopRight {
 }
 
 .datePickerPreviousButton {
-   text-align: left;
+  text-align: left;
 }
 
 .datePickerNextButton {
-     text-align: right; 
+  text-align: right; 
 }

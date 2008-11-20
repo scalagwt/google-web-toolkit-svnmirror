@@ -80,16 +80,16 @@ public class DatePicker extends Composite implements
       return day("Highlighted");
     }
 
-    public String dayIsSelected() {
-      return day("Selected");
-    }
-
-    public String dayIsSelectedAndHighlighted() {
-      return dayIsSelected() + "AndHighlighted";
-    }
-
     public String dayIsToday() {
       return day("Today");
+    }
+
+    public String dayIsValue() {
+      return day("Value");
+    }
+
+    public String dayIsValueAndHighlighted() {
+      return dayIsValue() + "AndHighlighted";
     }
 
     public String dayIsWeekend() {
@@ -190,7 +190,7 @@ public class DatePicker extends Composite implements
   private MonthSelector monthSelector;
   private CalendarView calendar;
   private CalendarModel model;
-  private Date selectedDate;
+  private Date value;
   private StandardCss css = StandardCss.DEFAULT;
 
   /**
@@ -202,7 +202,7 @@ public class DatePicker extends Composite implements
   }
 
   /**
-   * Constructor for use by subgetType()s.
+   * Constructor for use by subType()s.
    * 
    * @param monthSelector the month selector
    * @param calendarView the calendar view
@@ -318,12 +318,12 @@ public class DatePicker extends Composite implements
   }
 
   /**
-   * Gets the selected date, if any.
+   * Gets the {@link DatePicker}'s value.
    * 
-   * @return the selected date
+   * @return the value
    */
   public final Date getValue() {
-    return selectedDate;
+    return value;
   }
 
   /**
@@ -376,13 +376,6 @@ public class DatePicker extends Composite implements
   }
 
   /**
-   * Selects the current highlighted date.
-   */
-  public final void selectHighlightedDate() {
-    setValue(getHighlightedDate());
-  }
-
-  /**
    * Sets a visible date to be enabled or disabled. This is only set until the
    * next time the DatePicker is refreshed.
    * 
@@ -417,32 +410,32 @@ public class DatePicker extends Composite implements
   }
 
   /**
-   * Sets the selected date.
+   * Sets the {@link DatePicker}'s  value.
    * 
-   * @param date the new selected date
+   * @param date the new value
    */
   public final void setValue(Date date) {
     setValue(date, true);
   }
 
   /**
-   * Sets the selected date.
+   * Sets the {@link DatePicker}'s value.
    * 
-   * @param newSelected the new selected date
+   * @param newValue the new value for this date picker
    * @param fireEvents should events be fired.
    */
-  public final void setValue(Date newSelected, boolean fireEvents) {
-    Date oldSelected = selectedDate;
+  public final void setValue(Date newValue, boolean fireEvents) {
+    Date oldSelected = value;
 
     if (oldSelected != null) {
-      removeGlobalStyleFromDate(oldSelected, css().dayIsSelected());
+      removeGlobalStyleFromDate(oldSelected, css().dayIsValue());
     }
 
-    selectedDate = CalendarUtil.copyDate(newSelected);
-    if (selectedDate != null) {
-      addGlobalStyleToDate(selectedDate, css().dayIsSelected());
+    value = CalendarUtil.copyDate(newValue);
+    if (value != null) {
+      addGlobalStyleToDate(value, css().dayIsValue());
     }
-    ValueChangeEvent.fire(this, newSelected);
+    ValueChangeEvent.fire(this, newValue);
   }
 
   /**
