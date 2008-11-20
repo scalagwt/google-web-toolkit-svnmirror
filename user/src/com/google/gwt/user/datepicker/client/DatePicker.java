@@ -292,12 +292,13 @@ public class DatePicker extends Composite implements
   }
 
   /**
-   * Gets the currently shown date.
+   * Returns the first shown date.
    * 
-   * @return the current date shown
+   * @return the first date.
    */
-  public Date getDateShown() {
-    return getModel().getCurrentMonth();
+  // Final because the view should always control the value of the first date.
+  public final Date getFirstDate() {
+    return view.getFirstDate();
   }
 
   /**
@@ -317,6 +318,16 @@ public class DatePicker extends Composite implements
    */
   public final Date getHighlightedDate() {
     return highlighted;
+  }
+
+  /**
+   * Returns the last shown date.
+   * 
+   * @return the last date.
+   */
+  // Final because the view should always control the value of the last date.
+  public final Date getLastDate() {
+    return view.getLastDate();
   }
 
   /**
@@ -441,11 +452,13 @@ public class DatePicker extends Composite implements
   }
 
   /**
-   * Shows the given date.
+   * Shows the given date, use {@link #getFirstDate()} and
+   * {@link #getLastDate()} to access the exact date range the date picker chose
+   * to display.
    * 
    * @param date the date to show
    */
-  public final void showDate(Date date) {
+  public void showDate(Date date) {
     getModel().setCurrentMonth(date);
     refreshAll();
   }
@@ -478,6 +491,17 @@ public class DatePicker extends Composite implements
   }
 
   /**
+   * Refreshes all components of this date picker.
+   */
+  protected final void refreshAll() {
+    highlighted = null;
+    getModel().refresh();
+    getView().refresh();
+    getMonthSelector().refresh();
+    ShowRangeEvent.fire(this, getFirstDate(), getLastDate());
+  }
+
+  /**
    * Sets up the date picker.
    */
   protected void setup() {
@@ -497,18 +521,6 @@ public class DatePicker extends Composite implements
    */
   final StandardCss css() {
     return css;
-  }
-
-  /**
-   * Refreshes all components of this date picker.
-   */
-  final void refreshAll() {
-    highlighted = null;
-    getModel().refresh();
-    getView().refresh();
-    getMonthSelector().refresh();
-    ShowRangeEvent.fire(this, getView().getFirstDate(),
-        getView().getLastDate());
   }
 
   /**
