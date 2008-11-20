@@ -202,20 +202,20 @@ public class DatePicker extends Composite implements
   }
 
   /**
-   * Constructor for use by subType()s.
+   * Creates a new date picker.
    * 
    * @param monthSelector the month selector
-   * @param calendarView the view view
-   * @param model the view model
+   * @param view the view
+   * @param model the model
    */
 
-  protected DatePicker(MonthSelector monthSelector, CalendarView calendarView,
+  protected DatePicker(MonthSelector monthSelector, CalendarView view,
       CalendarModel model) {
 
     this.model = model;
     this.monthSelector = monthSelector;
     monthSelector.setDatePicker(this);
-    this.view = calendarView;
+    this.view = view;
     view.setDatePicker(this);
 
     view.setup();
@@ -415,10 +415,10 @@ public class DatePicker extends Composite implements
   /**
    * Sets the {@link DatePicker}'s value.
    * 
-   * @param date the new value
+   * @param newValue the new value
    */
-  public final void setValue(Date date) {
-    setValue(date, true);
+  public final void setValue(Date newValue) {
+    setValue(newValue, true);
   }
 
   /**
@@ -472,7 +472,7 @@ public class DatePicker extends Composite implements
   /**
    * Gets the {@link CalendarView} associated with this date picker.
    * 
-   * @return view view
+   * @return the view
    */
   protected final CalendarView getView() {
     return view;
