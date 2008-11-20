@@ -42,8 +42,8 @@ public abstract class KeyEvent<H extends EventHandler> extends DomEvent<H> {
    * @return whether this event have any modifier key down
    */
   public boolean isAnyModifierKeyDown() {
-    return isControlKeyDown() | isShiftKeyDown() | isMetaKeyDown()
-        | isAltKeyDown();
+    return isControlKeyDown() || isShiftKeyDown() || isMetaKeyDown()
+        || isAltKeyDown();
   }
 
   /**
