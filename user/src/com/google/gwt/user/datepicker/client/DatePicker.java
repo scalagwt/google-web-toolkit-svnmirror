@@ -427,10 +427,10 @@ public class DatePicker extends Composite implements
    * @param fireEvents should events be fired.
    */
   public final void setValue(Date newValue, boolean fireEvents) {
-    Date oldSelected = value;
+    Date oldValue = value;
 
-    if (oldSelected != null) {
-      removeGlobalStyleFromDate(oldSelected, css().dayIsValue());
+    if (oldValue != null) {
+      removeGlobalStyleFromDate(oldValue, css().dayIsValue());
     }
 
     value = CalendarUtil.copyDate(newValue);
@@ -504,6 +504,7 @@ public class DatePicker extends Composite implements
    */
   final void refreshAll() {
     highlighted = null;
+    getModel().refresh();
     getView().refresh();
     getMonthSelector().refresh();
     ShowRangeEvent.fire(this, getView().getFirstDate(),
