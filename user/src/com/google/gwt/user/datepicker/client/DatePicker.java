@@ -28,7 +28,6 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasValue;
-import com.google.gwt.user.client.ui.Widget;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -236,7 +235,7 @@ public class DatePicker extends Composite implements
   public void addGlobalStyleToDate(Date date, String styleName) {
     styler.setStyleName(date, styleName, true);
     if (isDateVisible(date)) {
-      view.addStyleToDate(date, styleName);
+      getView().addStyleToDate(date, styleName);
     }
   }
 
@@ -257,8 +256,8 @@ public class DatePicker extends Composite implements
    */
   public HandlerRegistration addShowRangeHandlerAndFire(
       ShowRangeHandler<Date> handler) {
-    ShowRangeEvent event = new ShowRangeEvent(view.getFirstDate(),
-        view.getLastDate()) {
+    ShowRangeEvent event = new ShowRangeEvent(getView().getFirstDate(),
+        getView().getLastDate()) {
     };
     handler.onShowRange(event);
     return addShowRangeHandler(handler);
@@ -272,7 +271,7 @@ public class DatePicker extends Composite implements
    * @param styleName style name
    */
   public final void addStyleToVisibleDate(Date visibleDate, String styleName) {
-    view.addStyleToDate(visibleDate, styleName);
+    getView().addStyleToDate(visibleDate, styleName);
   }
 
   /**
@@ -336,7 +335,7 @@ public class DatePicker extends Composite implements
    * @return is the date currently shown
    */
   public boolean isDateVisible(Date date) {
-    return view.isDateVisible(date);
+    return getView().isDateVisible(date);
   }
 
   /**
@@ -347,7 +346,7 @@ public class DatePicker extends Composite implements
    */
   public boolean isVisibleDateEnabled(Date date) {
     assert isDateVisible(date) : date + " is not visible";
-    return view.isDateEnabled(date);
+    return getView().isDateEnabled(date);
   }
 
   /**
@@ -359,7 +358,7 @@ public class DatePicker extends Composite implements
   public void removeGlobalStyleFromDate(Date date, String styleName) {
     styler.setStyleName(date, styleName, false);
     if (isDateVisible(date)) {
-      view.removeStyleFromDate(date, styleName);
+      getView().removeStyleFromDate(date, styleName);
     }
   }
 
@@ -374,7 +373,7 @@ public class DatePicker extends Composite implements
     while (dates.hasNext()) {
       Date date = dates.next();
       assert (isDateVisible(date)) : date + " should be visible";
-      view.removeStyleFromDate(date, styleName);
+      getView().removeStyleFromDate(date, styleName);
     }
   }
 
@@ -465,7 +464,7 @@ public class DatePicker extends Composite implements
    * 
    * @return the month selector
    */
-  protected final Widget getMonthSelector() {
+  protected final MonthSelector getMonthSelector() {
     return monthSelector;
   }
 
@@ -505,8 +504,8 @@ public class DatePicker extends Composite implements
    */
   final void refreshAll() {
     highlighted = null;
-    view.refresh();
-    monthSelector.refresh();
+    getView().refresh();
+    getMonthSelector().refresh();
     ShowRangeEvent.fire(this, getView().getFirstDate(),
         getView().getLastDate());
   }
