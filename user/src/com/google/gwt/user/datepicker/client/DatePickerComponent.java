@@ -35,10 +35,6 @@ abstract class DatePickerComponent extends Composite {
     getDatePicker().refreshAll();
   }
 
-  protected DatePicker.Css css() {
-    return datePicker.css();
-  }
-
   protected DatePicker getDatePicker() {
     return datePicker;
   }
@@ -62,6 +58,10 @@ abstract class DatePickerComponent extends Composite {
    * Set up the component.
    */
   protected abstract void setup();
+
+  DatePicker.StandardCss css() {
+    return datePicker.css();
+  }
 
   void setDatePicker(DatePicker me) {
     this.datePicker = me;

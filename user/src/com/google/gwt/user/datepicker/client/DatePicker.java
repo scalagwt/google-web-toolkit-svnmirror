@@ -42,14 +42,18 @@ public class DatePicker extends Composite implements
     HasHighlightHandlers<Date>, HasShowRangeHandlers<Date>, HasValue<Date> {
 
   /**
-   * Convenience class to group css handling code.
+   * Convenience class to group css style names.
    */
-  static class StandardCss extends StandardCssImpl implements DatePicker.Css {
+  static class StandardCss {
 
-    static DatePicker.Css DEFAULT = new StandardCss("gwt-DatePicker", "datePicker");
+    static StandardCss DEFAULT = new StandardCss("gwt-DatePicker", "datePicker");
 
-    public StandardCss(String widgetName, String baseStyleName) {
-      super(widgetName, baseStyleName);
+    private String baseName;
+    private String widgetName;
+
+    public StandardCss(String widgetName, String baseName) {
+      this.widgetName = widgetName;
+      this.baseName = baseName;
     }
 
     public String datePicker() {
@@ -100,6 +104,14 @@ public class DatePicker extends Composite implements
       return wrap("DaysLabel");
     }
 
+    public String getBaseStyleName() {
+      return baseName;
+    }
+
+    public String getWidgetStyleName() {
+      return widgetName;
+    }
+
     public String month() {
       return wrap("Month");
     }
@@ -122,6 +134,16 @@ public class DatePicker extends Composite implements
 
     public String weekendLabel() {
       return wrap("WeekendLabel");
+    }
+
+    /**
+     * Prepends the base name to the given style.
+     * 
+     * @param style style name
+     * @return style name
+     */
+    protected String wrap(String style) {
+      return baseName + style;
     }
   }
 
@@ -163,171 +185,20 @@ public class DatePicker extends Composite implements
     }
   }
 
-  /**
-   * Styles defined by the date picker widget that can be used by its
-   * components.
-   */
-  protected interface Css {
-    /**
-     * Widget style name.
-     * 
-     * @return the widget's style name
-     */
-    String datePicker();
-  
-    /**
-     * Day style.
-     * 
-     * @return the style
-     */
-    String day();
-  
-    /**
-     * Disabled day style.
-     * 
-     * @return the style
-     */
-    String dayIsDisabled();
-  
-    /**
-     * Filler day style.
-     * 
-     * @return the style
-     */
-    String dayIsFiller();
-  
-    /**
-     * Highlighted day style.
-     * 
-     * @return the style
-     */
-    String dayIsHighlighted();
-  
-    /**
-     * Selected day style.
-     * 
-     * @return the style
-     */
-    String dayIsSelected();
-  
-    /**
-     * Selected and highlighted day style.
-     * 
-     * @return the style
-     */
-    String dayIsSelectedAndHighlighted();
-  
-    /**
-     * Today's day style.
-     * 
-     * @return style
-     */
-    String dayIsToday();
-  
-    /**
-     * Weekend day style.
-     * 
-     * @return the style
-     */
-    String dayIsWeekend();
-  
-    /**
-     * Days container style.
-     * 
-     * @return the style
-     */
-    String days();
-  
-    /**
-     * Label for months style.
-     * 
-     * @return the style
-     */
-    String month();
-  
-    /**
-     * Month selector style.
-     * 
-     * @return the style
-     */
-    String monthSelector();
-  
-    /**
-     * The navigation next button style.
-     * 
-     * @return the style
-     */
-    String nextButton();
-  
-    /**
-     * The navigation previous button style.
-     * 
-     * @return the getType()
-     */
-    String previousButton();
-  
-    /**
-     * Label for weekdays style.
-     * 
-     * @return the style
-     */
-    String weekdayLabel();
-  
-    /**
-     * Label for weekends style.
-     * 
-     * @return the style
-     */
-    String weekendLabel();
-  }
-
-  /**
-   * 
-   * Creates a {@link DatePicker.Css} instance with the given style name. Note, this does
-   * not change the base name used for auxiliary styles. So, for instance,
-   * create("myDatePicker") would replace the default "gwt-DatePicker" with
-   * "myDatePicker" but would not effect the style "monthSelector".
-   * 
-   * @param styleName widget's style name.
-   * @return the created css
-   */
-  public static DatePicker.Css createCss(String styleName) {
-    return new StandardCss(styleName, "datePicker");
-  }
-
-  /**
-   * Sets the default css for {@link DatePicker}.
-   * 
-   * @param css the css.
-   */
-  public static void setDefaultCss(DatePicker.Css css) {
-    StandardCss.DEFAULT = css;
-  }
-
   private DateStyler styler = new DateStyler();
   private Date highlightedDate;
   private MonthSelector monthSelector;
   private CalendarView calendar;
   private CalendarModel model;
   private Date selectedDate;
-  private DatePicker.Css css;
+  private StandardCss css = StandardCss.DEFAULT;
 
   /**
    * Constructor.
    */
   public DatePicker() {
     this(new DefaultMonthSelector(), new DefaultCalendarView(),
-        new CalendarModel(), StandardCss.DEFAULT);
-  }
-
-  /**
-   * Constructor.
-   * 
-   * @param css the css to use with this date picker
-   */
-  public DatePicker(DatePicker.Css css) {
-    this(new DefaultMonthSelector(), new DefaultCalendarView(),
-        new CalendarModel(), css);
+        new CalendarModel());
   }
 
   /**
@@ -336,13 +207,11 @@ public class DatePicker extends Composite implements
    * @param monthSelector the month selector
    * @param calendarView the calendar view
    * @param model the calendar model
-   * @param css the css to use
    */
 
   protected DatePicker(MonthSelector monthSelector, CalendarView calendarView,
-      CalendarModel model, DatePicker.Css css) {
+      CalendarModel model) {
     this.setModel(model);
-    this.css = css;
     this.monthSelector = monthSelector;
     monthSelector.setDatePicker(this);
     this.calendar = calendarView;
@@ -543,7 +412,7 @@ public class DatePicker extends Composite implements
    */
   @Override
   public void setStyleName(String styleName) {
-    css = createCss(styleName);
+    css = new StandardCss(styleName, "datePicker");
     super.setStyleName(styleName);
   }
 
@@ -626,12 +495,12 @@ public class DatePicker extends Composite implements
   }
 
   /**
-   * Gets the {@link DatePicker.Css} associated with this date picker for use by extended
-   * month and cell grids.
+   * Gets the {@link DatePicker.Css} associated with this date picker for use by
+   * extended month and cell grids.
    * 
    * @return the css.
    */
-  final DatePicker.Css css() {
+  final StandardCss css() {
     return css;
   }
 
@@ -656,7 +525,7 @@ public class DatePicker extends Composite implements
     HighlightEvent.fire(this, highlightedDate);
   }
 
-  final void setModel(CalendarModel model) {
+  private void setModel(CalendarModel model) {
     this.model = model;
   }
 }
