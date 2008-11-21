@@ -1163,7 +1163,7 @@ html>body .gwt-DecoratedTabBar .gwt-TabBarItem-selected .tabTopRight {
 }
 
 .datePickerDayIsHighlighted {
-  border: 1px solid #eeeeee;
+  background: #F0E68C;
   padding: 0px;
 }
 
