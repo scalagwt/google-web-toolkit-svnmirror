@@ -64,7 +64,9 @@ public class VisualsForDateBox extends AbstractIssue {
     HorizontalPanel p = new HorizontalPanel();
     v.add(p);
     final DateBox start = new DateBox();
+    start.setWidth("15em");
     final DateBox end = new DateBox();
+    end.setWidth("15em");
     start.setAnimationEnabled(true);
 
     end.setAnimationEnabled(true);

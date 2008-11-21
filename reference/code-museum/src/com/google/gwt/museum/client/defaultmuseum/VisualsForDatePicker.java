@@ -25,7 +25,7 @@ import java.util.Date;
 /**
  * Date picker demo.
  */
-public class VisualsForSimpleDatePicker extends AbstractIssue {
+public class VisualsForDatePicker extends AbstractIssue {
 
   @Override
   public Widget createIssue() {
