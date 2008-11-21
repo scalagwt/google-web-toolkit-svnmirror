@@ -35,6 +35,7 @@ public abstract class CalendarView extends DatePickerComponent {
   /**
    * Adds a style name to the cell of the supplied date. This style is only set
    * until the next time the {@link CalendarView} is refreshed.
+   * 
    * @param styleName style name to add
    * @param date date that will have the supplied style added
    */
@@ -67,6 +68,7 @@ public abstract class CalendarView extends DatePickerComponent {
 
   /**
    * Removes a visible style name from the cell of the supplied date.
+   * 
    * @param styleName style name to remove
    * @param date date that will have the supplied style added
    */
@@ -75,6 +77,7 @@ public abstract class CalendarView extends DatePickerComponent {
   /**
    * Enables or Disables a particular date. by default all valid dates are
    * enabled after a rendering event. Disabled dates cannot be selected.
+   * 
    * @param enabled true for enabled, false for disabled
    * @param date date to enable or disable
    */
