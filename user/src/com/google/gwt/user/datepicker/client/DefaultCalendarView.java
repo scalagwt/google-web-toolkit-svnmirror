@@ -149,8 +149,8 @@ public final class DefaultCalendarView extends CalendarView {
   }
 
   @Override
-  public void addStyleToDate(Date date, String styleName) {
-    assert isDateVisible(date) : "You tried to add style " + styleName + " to "
+  public void addStyleToDate(String styleName, Date date) {
+    assert getDatePicker().isDateVisible(date) : "You tried to add style " + styleName + " to "
         + date + ". The calendar is currently showing " + getFirstDate()
         + " to " + getLastDate();
     getCell(date).addStyleName(styleName);
@@ -192,12 +192,12 @@ public final class DefaultCalendarView extends CalendarView {
   }
 
   @Override
-  public void removeStyleFromDate(Date date, String styleName) {
+  public void removeStyleFromDate(String styleName, Date date) {
     getCell(date).removeStyleName(styleName);
   }
 
   @Override
-  public void setDateEnabled(Date date, boolean enabled) {
+  public void setDateEnabled(boolean enabled, Date date) {
     getCell(date).setEnabled(enabled);
   }
 

@@ -228,13 +228,14 @@ public class DatePicker extends Composite implements
   /**
    * Globally adds a style name to a date. i.e. the style name is associated
    * with the date each time it is rendered.
+   * 
    * @param styleName style name
    * @param date date
    */
   public void addGlobalStyleToDate(String styleName, Date date) {
     styler.setStyleName(date, styleName, true);
     if (isDateVisible(date)) {
-      getView().addStyleToDate(date, styleName);
+      getView().addStyleToDate(styleName, date);
     }
   }
 
@@ -255,8 +256,8 @@ public class DatePicker extends Composite implements
    */
   public HandlerRegistration addShowRangeHandlerAndFire(
       ShowRangeHandler<Date> handler) {
-    ShowRangeEvent<Date> event = new ShowRangeEvent<Date>(getView().getFirstDate(),
-        getView().getLastDate()) {
+    ShowRangeEvent<Date> event = new ShowRangeEvent<Date>(
+        getView().getFirstDate(), getView().getLastDate()) {
     };
     handler.onShowRange(event);
     return addShowRangeHandler(handler);
@@ -265,22 +266,26 @@ public class DatePicker extends Composite implements
   /**
    * Shows the given style name on the specified date. This is only set until
    * the next time the DatePicker is refreshed.
+   * 
    * @param styleName style name
    * @param visibleDate current visible date
    */
   public final void addStyleToVisibleDate(String styleName, Date visibleDate) {
-    getView().addStyleToDate(visibleDate, styleName);
+    getView().addStyleToDate(styleName, visibleDate);
   }
 
   /**
    * Adds a style name on a set of currently visible dates. This is only set
    * until the next time the DatePicker is refreshed.
+   * 
    * @param styleName style name to remove
    * @param visibleDates dates that will have the supplied style removed
    */
   public final void addStyleToVisibleDates(String styleName,
       Iterable<Date> visibleDates) {
-    getView().addStyleToDates(visibleDates, styleName);
+    for (Date date : visibleDates) {
+      getView().addStyleToDate(styleName, date);
+    }
   }
 
   public HandlerRegistration addValueChangeHandler(
@@ -297,7 +302,7 @@ public class DatePicker extends Composite implements
    * </p>
    * 
    */
-  public Date getCurrentMonth(){
+  public Date getCurrentMonth() {
     return getModel().getCurrentMonth();
   }
 
@@ -356,7 +361,10 @@ public class DatePicker extends Composite implements
    * @return is the date currently shown
    */
   public boolean isDateVisible(Date date) {
-    return getView().isDateVisible(date);
+    CalendarView r = getView();
+    Date first = r.getFirstDate();
+    Date last = r.getLastDate();
+    return (date != null && (first.equals(date) || last.equals(date) || (first.before(date) && last.after(date))));
   }
 
   /**
@@ -372,18 +380,20 @@ public class DatePicker extends Composite implements
 
   /**
    * Globally removes a style from a date.
+   * 
    * @param styleName style name
    * @param date date
    */
   public void removeGlobalStyleFromDate(String styleName, Date date) {
     styler.setStyleName(date, styleName, false);
     if (isDateVisible(date)) {
-      getView().removeStyleFromDate(date, styleName);
+      getView().removeStyleFromDate(styleName, date);
     }
   }
 
   /**
    * Removes a style name from multiple visible dates.
+   * 
    * @param styleName style name to remove
    * @param dates dates that will have the supplied style removed
    */
@@ -392,9 +402,10 @@ public class DatePicker extends Composite implements
     while (dates.hasNext()) {
       Date date = dates.next();
       assert (isDateVisible(date)) : date + " should be visible";
-      getView().removeStyleFromDate(date, styleName);
+      getView().removeStyleFromDate(styleName, date);
     }
   }
+
   /**
    * Sets the date picker to show the given month, use {@link #getFirstDate()}
    * and {@link #getLastDate()} to access the exact date range the date picker
@@ -403,6 +414,7 @@ public class DatePicker extends Composite implements
    * A datepicker <b> may </b> show days not in the current month. It
    * <b>must</b> show all days in the current month.
    * </p>
+   * 
    * @param month the month to show
    */
   public void setCurrentMonth(Date month) {
@@ -413,24 +425,31 @@ public class DatePicker extends Composite implements
   /**
    * Sets a visible date to be enabled or disabled. This is only set until the
    * next time the DatePicker is refreshed.
+   * 
    * @param enabled is enabled
    * @param date the date
    */
   public final void setEnabledOnVisibleDate(boolean enabled, Date date) {
     assert isDateVisible(date) : date
         + " cannot be enabled or disabled as it is not visible";
-    getView().setDateEnabled(date, enabled);
+    getView().setDateEnabled(enabled, date);
   }
 
   /**
    * Sets a group of visible dates to be enabled or disabled. This is only set
    * until the next time the DatePicker is refreshed.
+   * 
    * @param enabled is enabled
    * @param dates the dates
    */
   public final void setEnabledOnVisibleDates(boolean enabled,
       Iterable<Date> dates) {
-    getView().setDatesEnabled(dates, enabled);
+    CalendarView r = getView();
+    for (Date date : dates) {
+      assert isDateVisible(date) : date
+          + " cannot be enabled or disabled as it is not visible";
+      r.setDateEnabled(enabled, date);
+    }
   }
 
   /**
@@ -522,8 +541,8 @@ public class DatePicker extends Composite implements
   }
 
   /**
-   * Gets the {@link DatePicker.Css} associated with this date picker for use by
-   * extended month and cell grids.
+   * Gets the css associated with this date picker for use by extended month and
+   * cell grids.
    * 
    * @return the css.
    */
