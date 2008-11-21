@@ -222,17 +222,16 @@ public class DatePicker extends Composite implements
     this.setup();
 
     setCurrentMonth(new Date());
-    addGlobalStyleToDate(new Date(), css().dayIsToday());
+    addGlobalStyleToDate(css().dayIsToday(), new Date());
   }
 
   /**
    * Globally adds a style name to a date. i.e. the style name is associated
    * with the date each time it is rendered.
-   * 
-   * @param date date
    * @param styleName style name
+   * @param date date
    */
-  public void addGlobalStyleToDate(Date date, String styleName) {
+  public void addGlobalStyleToDate(String styleName, Date date) {
     styler.setStyleName(date, styleName, true);
     if (isDateVisible(date)) {
       getView().addStyleToDate(date, styleName);
@@ -256,7 +255,7 @@ public class DatePicker extends Composite implements
    */
   public HandlerRegistration addShowRangeHandlerAndFire(
       ShowRangeHandler<Date> handler) {
-    ShowRangeEvent event = new ShowRangeEvent(getView().getFirstDate(),
+    ShowRangeEvent<Date> event = new ShowRangeEvent<Date>(getView().getFirstDate(),
         getView().getLastDate()) {
     };
     handler.onShowRange(event);
@@ -266,23 +265,21 @@ public class DatePicker extends Composite implements
   /**
    * Shows the given style name on the specified date. This is only set until
    * the next time the DatePicker is refreshed.
-   * 
-   * @param visibleDate current visible date
    * @param styleName style name
+   * @param visibleDate current visible date
    */
-  public final void addStyleToVisibleDate(Date visibleDate, String styleName) {
+  public final void addStyleToVisibleDate(String styleName, Date visibleDate) {
     getView().addStyleToDate(visibleDate, styleName);
   }
 
   /**
    * Adds a style name on a set of currently visible dates. This is only set
    * until the next time the DatePicker is refreshed.
-   * 
-   * @param visibleDates dates that will have the supplied style removed
    * @param styleName style name to remove
+   * @param visibleDates dates that will have the supplied style removed
    */
-  public final void addStyleToVisibleDates(Iterable<Date> visibleDates,
-      String styleName) {
+  public final void addStyleToVisibleDates(String styleName,
+      Iterable<Date> visibleDates) {
     getView().addStyleToDates(visibleDates, styleName);
   }
 
@@ -375,11 +372,10 @@ public class DatePicker extends Composite implements
 
   /**
    * Globally removes a style from a date.
-   * 
-   * @param date date
    * @param styleName style name
+   * @param date date
    */
-  public void removeGlobalStyleFromDate(Date date, String styleName) {
+  public void removeGlobalStyleFromDate(String styleName, Date date) {
     styler.setStyleName(date, styleName, false);
     if (isDateVisible(date)) {
       getView().removeStyleFromDate(date, styleName);
@@ -388,12 +384,11 @@ public class DatePicker extends Composite implements
 
   /**
    * Removes a style name from multiple visible dates.
-   * 
-   * @param dates dates that will have the supplied style removed
    * @param styleName style name to remove
+   * @param dates dates that will have the supplied style removed
    */
-  public final void removeStyleFromVisibleDates(Iterator<Date> dates,
-      String styleName) {
+  public final void removeStyleFromVisibleDates(String styleName,
+      Iterator<Date> dates) {
     while (dates.hasNext()) {
       Date date = dates.next();
       assert (isDateVisible(date)) : date + " should be visible";
@@ -418,11 +413,10 @@ public class DatePicker extends Composite implements
   /**
    * Sets a visible date to be enabled or disabled. This is only set until the
    * next time the DatePicker is refreshed.
-   * 
-   * @param date the date
    * @param enabled is enabled
+   * @param date the date
    */
-  public final void setEnabledOnVisibleDate(Date date, boolean enabled) {
+  public final void setEnabledOnVisibleDate(boolean enabled, Date date) {
     assert isDateVisible(date) : date
         + " cannot be enabled or disabled as it is not visible";
     getView().setDateEnabled(date, enabled);
@@ -431,12 +425,11 @@ public class DatePicker extends Composite implements
   /**
    * Sets a group of visible dates to be enabled or disabled. This is only set
    * until the next time the DatePicker is refreshed.
-   * 
-   * @param dates the dates
    * @param enabled is enabled
+   * @param dates the dates
    */
-  public final void setEnabledOnVisibleDates(Iterable<Date> dates,
-      boolean enabled) {
+  public final void setEnabledOnVisibleDates(boolean enabled,
+      Iterable<Date> dates) {
     getView().setDatesEnabled(dates, enabled);
   }
 
@@ -468,12 +461,12 @@ public class DatePicker extends Composite implements
     Date oldValue = value;
 
     if (oldValue != null) {
-      removeGlobalStyleFromDate(oldValue, css().dayIsValue());
+      removeGlobalStyleFromDate(css().dayIsValue(), oldValue);
     }
 
     value = CalendarUtil.copyDate(newValue);
     if (value != null) {
-      addGlobalStyleToDate(value, css().dayIsValue());
+      addGlobalStyleToDate(css().dayIsValue(), value);
     }
     ValueChangeEvent.fire(this, newValue);
   }
