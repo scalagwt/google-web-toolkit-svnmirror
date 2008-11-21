@@ -81,7 +81,7 @@ public abstract class CalendarView extends DatePickerComponent {
    * @param enabled true for enabled, false for disabled
    * @param date date to enable or disable
    */
-  public abstract void setDateEnabled(boolean enabled, Date date);
+  public abstract void setEnabledOnDate(boolean enabled, Date date);
 
   /**
    * Allows the calendar view to update the date picker's highlighted date.

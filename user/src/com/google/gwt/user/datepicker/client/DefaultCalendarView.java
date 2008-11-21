@@ -197,7 +197,7 @@ public final class DefaultCalendarView extends CalendarView {
   }
 
   @Override
-  public void setDateEnabled(boolean enabled, Date date) {
+  public void setEnabledOnDate(boolean enabled, Date date) {
     getCell(date).setEnabled(enabled);
   }
 

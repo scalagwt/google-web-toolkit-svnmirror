@@ -179,6 +179,7 @@ public class DatePicker extends Composite implements
       }
     }
 
+    @SuppressWarnings("deprecation")
     private String genKey(Date d) {
       return d.getYear() + "/" + d.getMonth() + "/" + d.getDate();
     }
@@ -268,10 +269,18 @@ public class DatePicker extends Composite implements
    * the next time the DatePicker is refreshed.
    * 
    * @param styleName style name
-   * @param visibleDate current visible date
+   * @param date visible date
+   * @param moreDates optional visible dates
    */
-  public final void addStyleToVisibleDate(String styleName, Date visibleDate) {
-    getView().addStyleToDate(styleName, visibleDate);
+  public final void addStyleToVisibleDates(String styleName, Date date,
+      Date... moreDates) {
+    assert (assertVisible(date, moreDates));
+    getView().addStyleToDate(styleName, date);
+    if (moreDates != null) {
+      for (Date d : moreDates) {
+        getView().addStyleToDate(styleName, d);
+      }
+    }
   }
 
   /**
@@ -395,6 +404,22 @@ public class DatePicker extends Composite implements
    * Removes a style name from multiple visible dates.
    * 
    * @param styleName style name to remove
+   * @param date a visible date
+   * @param moreDates optional additional visible dates
+   */
+  public final void removeStyleFromVisibleDates(String styleName, Date date,
+      Date... moreDates) {
+    assert (isDateVisible(date)) : date + " should be visible";
+    getView().removeStyleFromDate(styleName, date);
+    for (Date d : moreDates) {
+      getView().removeStyleFromDate(styleName, date);
+    }
+  }
+
+  /**
+   * Removes a style name from multiple visible dates.
+   * 
+   * @param styleName style name to remove
    * @param dates dates that will have the supplied style removed
    */
   public final void removeStyleFromVisibleDates(String styleName,
@@ -428,11 +453,17 @@ public class DatePicker extends Composite implements
    * 
    * @param enabled is enabled
    * @param date the date
+   * @param moreDates optional dates
    */
-  public final void setEnabledOnVisibleDate(boolean enabled, Date date) {
-    assert isDateVisible(date) : date
-        + " cannot be enabled or disabled as it is not visible";
-    getView().setDateEnabled(enabled, date);
+  public final void setEnabledOnVisibleDates(boolean enabled, Date date,
+      Date... moreDates) {
+    assert assertVisible(date, moreDates);
+    getView().setEnabledOnDate(enabled, date);
+    if (moreDates != null) {
+      for (Date d : moreDates) {
+        getView().setEnabledOnDate(enabled, d);
+      }
+    }
   }
 
   /**
@@ -448,7 +479,7 @@ public class DatePicker extends Composite implements
     for (Date date : dates) {
       assert isDateVisible(date) : date
           + " cannot be enabled or disabled as it is not visible";
-      r.setDateEnabled(enabled, date);
+      r.setEnabledOnDate(enabled, date);
     }
   }
 
@@ -555,9 +586,19 @@ public class DatePicker extends Composite implements
    * 
    * @param highlighted highlighted date
    */
-  void setHighlightedDate(Date highlightedDate) {
-    this.highlighted = highlightedDate;
-    HighlightEvent.fire(this, highlightedDate);
+  void setHighlightedDate(Date highlighted) {
+    this.highlighted = highlighted;
+    HighlightEvent.fire(this, highlighted);
+  }
+
+  private boolean assertVisible(Date date, Date... moreDates) {
+    assert isDateVisible(date) : date + " must be visible";
+    if (moreDates != null) {
+      for (Date d : moreDates) {
+        assert isDateVisible(d) : d + " must be visible";
+      }
+    }
+    return true;
   }
 
 }
