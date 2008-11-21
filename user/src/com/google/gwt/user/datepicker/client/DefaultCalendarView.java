@@ -73,7 +73,7 @@ public final class DefaultCalendarView extends CalendarView {
         if (selected) {
           getDatePicker().setValue(getValue());
           if (isFiller()) {
-            getDatePicker().showDate(getValue());
+            getDatePicker().setCurrentMonth(getValue());
           }
         }
         updateStyle();

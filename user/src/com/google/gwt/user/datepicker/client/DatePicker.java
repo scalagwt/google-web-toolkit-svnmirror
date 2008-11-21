@@ -221,7 +221,7 @@ public class DatePicker extends Composite implements
     monthSelector.setup();
     this.setup();
 
-    showDate(new Date());
+    setCurrentMonth(new Date());
     addGlobalStyleToDate(new Date(), css().dayIsToday());
   }
 
@@ -289,6 +289,19 @@ public class DatePicker extends Composite implements
   public HandlerRegistration addValueChangeHandler(
       ValueChangeHandler<Date> handler) {
     return addHandler(handler, ValueChangeEvent.getType());
+  }
+
+  /**
+   * Gets the current month the date picker is showing.
+   * 
+   * <p>
+   * A datepicker <b> may </b> show days not in the current month. It
+   * <b>must</b> show all days in the current month.
+   * </p>
+   * 
+   */
+  public Date getCurrentMonth(){
+    return getModel().getCurrentMonth();
   }
 
   /**
@@ -387,6 +400,20 @@ public class DatePicker extends Composite implements
       getView().removeStyleFromDate(date, styleName);
     }
   }
+  /**
+   * Sets the date picker to show the given month, use {@link #getFirstDate()}
+   * and {@link #getLastDate()} to access the exact date range the date picker
+   * chose to display.
+   * <p>
+   * A datepicker <b> may </b> show days not in the current month. It
+   * <b>must</b> show all days in the current month.
+   * </p>
+   * @param month the month to show
+   */
+  public void setCurrentMonth(Date month) {
+    getModel().setCurrentMonth(month);
+    refreshAll();
+  }
 
   /**
    * Sets a visible date to be enabled or disabled. This is only set until the
@@ -449,18 +476,6 @@ public class DatePicker extends Composite implements
       addGlobalStyleToDate(value, css().dayIsValue());
     }
     ValueChangeEvent.fire(this, newValue);
-  }
-
-  /**
-   * Shows the given date, use {@link #getFirstDate()} and
-   * {@link #getLastDate()} to access the exact date range the date picker chose
-   * to display.
-   * 
-   * @param date the date to show
-   */
-  public void showDate(Date date) {
-    getModel().setCurrentMonth(date);
-    refreshAll();
   }
 
   /**

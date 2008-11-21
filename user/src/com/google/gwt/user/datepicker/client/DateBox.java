@@ -301,7 +301,7 @@ public class DateBox extends Composite implements HasKeyDownHandlers,
     if (current == null) {
       current = new Date();
     }
-    picker.showDate(current);
+    picker.setCurrentMonth(current);
     popup.showRelativeTo(this);
   }
 
@@ -312,7 +312,7 @@ public class DateBox extends Composite implements HasKeyDownHandlers,
    */
   public void showDate(Date date) {
     picker.setValue(date, false);
-    picker.showDate(date);
+    picker.setCurrentMonth(date);
     setText(date);
     dirtyText = false;
   }
