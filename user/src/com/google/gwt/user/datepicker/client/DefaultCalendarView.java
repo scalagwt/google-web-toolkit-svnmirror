@@ -24,7 +24,7 @@ import java.util.Date;
 
 /**
  * Simple calendar view. Not extensible as we wish to evolve it freely over
- * time. Please copy though, as we like it getting used.
+ * time.
  */
 
 @SuppressWarnings(/* Date manipulation required */{"deprecation"})
@@ -71,7 +71,7 @@ public final class DefaultCalendarView extends CalendarView {
       @Override
       public void onSelected(boolean selected) {
         if (selected) {
-          getDatePicker().setValue(getValue());
+          getDatePicker().setValue(getValue(), true);
           if (isFiller()) {
             getDatePicker().setCurrentMonth(getValue());
           }

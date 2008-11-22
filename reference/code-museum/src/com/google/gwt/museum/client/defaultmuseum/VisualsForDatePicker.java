@@ -16,7 +16,16 @@
 
 package com.google.gwt.museum.client.defaultmuseum;
 
+import com.google.gwt.event.logical.shared.HighlightEvent;
+import com.google.gwt.event.logical.shared.HighlightHandler;
+import com.google.gwt.event.logical.shared.ShowRangeEvent;
+import com.google.gwt.event.logical.shared.ShowRangeHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.museum.client.common.AbstractIssue;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.datepicker.client.DatePicker;
 
@@ -29,9 +38,35 @@ public class VisualsForDatePicker extends AbstractIssue {
 
   @Override
   public Widget createIssue() {
+    VerticalPanel p = new VerticalPanel();
     DatePicker picker = new DatePicker();
-    picker.setValue(new Date());
-    return picker;
+    p.add(picker);
+    final Label value = new Label("value");
+    p.add(value);
+    final Label highlight = new Label("highlight");
+    p.add(highlight);
+    final Label range = new Label("range");
+    p.add(range);
+    picker.addValueChangeHandler(new ValueChangeHandler<Date>() {
+      public void onValueChange(ValueChangeEvent<Date> event) {
+        value.setText(DateTimeFormat.getShortDateFormat().format(event.getValue()));
+      }
+    });
+    picker.addHighlightHandler(new HighlightHandler<Date>() {
+      public void onHighlight(HighlightEvent<Date> event) {
+        highlight.setText(DateTimeFormat.getShortDateFormat().format(event.getHighlighted()));
+     }
+    });
+    picker.addShowRangeHandler(new ShowRangeHandler<Date>() {
+      public void onShowRange(ShowRangeEvent<Date> event) {
+        Date start = event.getStart();
+        Date end = event.getEnd();
+        DateTimeFormat format = DateTimeFormat.getShortDateFormat();
+        range.setText(format.format(start) + " - " + format.format(end));
+      }      
+    });
+//    picker.setValue(new Date());
+    return p;
   };
 
   @Override

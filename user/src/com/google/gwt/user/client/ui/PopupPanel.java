@@ -272,6 +272,8 @@ public class PopupPanel extends SimplePanel implements SourcesPopupEvents,
   private String desiredWidth;
 
   private boolean isAnimationEnabled = false;
+  
+  private Element autoHidePartner;
 
   /**
    * The {@link ResizeAnimation} used to open and close the {@link PopupPanel}s.
@@ -454,6 +456,7 @@ public class PopupPanel extends SimplePanel implements SourcesPopupEvents,
     return modal;
   }
 
+  @SuppressWarnings("deprecation")
   public boolean onEventPreview(Event event) {
     Element target = DOM.eventGetTarget(event);
 
@@ -485,7 +488,7 @@ public class PopupPanel extends SimplePanel implements SourcesPopupEvents,
           return true;
         }
 
-        if (!eventTargetsPopup && autoHide) {
+        if (!eventTargetsPopup && shouldAutoHide(event)) {
           hide(true);
           return true;
         }
@@ -503,7 +506,8 @@ public class PopupPanel extends SimplePanel implements SourcesPopupEvents,
         // If it's an outside click and auto-hide is enabled:
         // hide the popup and _don't_ eat the event. ONMOUSEDOWN is used to
         // prevent problems with showing a popup in response to a mousedown.
-        if (!eventTargetsPopup && autoHide && (type == Event.ONMOUSEDOWN)) {
+        if (!eventTargetsPopup && shouldAutoHide(event)
+            && (type == Event.ONMOUSEDOWN)) {
           hide(true);
           return true;
         }
@@ -581,6 +585,15 @@ public class PopupPanel extends SimplePanel implements SourcesPopupEvents,
   }
 
   /**
+   * If the auto hide partner is non null, its mouse events will 
+   * not hide a panel set to autohide.
+   * @param element new auto hide partner
+   */
+  public void setAutoHidePartner(Element element) {
+    this.autoHidePartner = element;
+  }
+
+  /**
    * Sets the height of the panel's child widget. If the panel's child widget
    * has not been set, the height passed in will be cached and used to set the
    * height immediately after the child widget is set.
@@ -613,7 +626,7 @@ public class PopupPanel extends SimplePanel implements SourcesPopupEvents,
   public void setModal(boolean modal) {
     this.modal = modal;
   }
-
+  
   /**
    * Sets the popup's position relative to the browser's client area. The
    * popup's position may be set before calling {@link #show()}.
@@ -820,7 +833,12 @@ public class PopupPanel extends SimplePanel implements SourcesPopupEvents,
       elt.blur();
     }
   }-*/;
-  
+
+  private boolean eventInPartner(Event event) {
+    return autoHidePartner != null
+      && autoHidePartner.isOrHasChild(event.getTarget());
+  }
+
   /**
    * Positions the popup, called after the offset width and height of the popup are known.
    * 
@@ -948,6 +966,11 @@ public class PopupPanel extends SimplePanel implements SourcesPopupEvents,
       top += relativeObject.getOffsetHeight();
     }
     setPopupPosition(left, top);
+  }
+  
+  private boolean shouldAutoHide(Event event) {
+    boolean shouldAutoHide = autoHide && !eventInPartner(event);
+    return shouldAutoHide;
   }
 
 }

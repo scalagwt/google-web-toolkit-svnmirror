@@ -22,7 +22,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
-import com.google.gwt.event.dom.client.HasKeyDownHandlers;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
@@ -33,8 +32,8 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasAnimation;
+import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TextBox;
 
@@ -43,26 +42,97 @@ import java.util.Date;
 /**
  * A simple date box.
  */
-public class DateBox extends Composite implements HasKeyDownHandlers,
-    HasAnimation {
+public class DateBox extends Composite implements HasAnimation, HasValue<Date> {
+
+  /**
+   * Implemented by a delegate to report errors parsing date values from the
+   * user's input.
+   */
+  public interface InvalidDateReporter {
+    /**
+     * Called when a valid date has been parsed, or the datebox has been
+     * cleared.
+     */
+    void clearError();
+    
+    /**
+     * Given an unparseable string, explain the situation to the user.
+     * 
+     * @param input what the user typed
+     */
+    void reportError(String input);
+  }
+
+  private class DateBoxHandler implements ValueChangeHandler<Date>,
+      FocusHandler, BlurHandler, ClickHandler, KeyDownHandler {
+
+    public void onBlur(BlurEvent event) {
+      if (!popup.isVisible()) {
+        updateDateFromTextBox();
+      }
+    }
+
+    public void onClick(ClickEvent event) {
+      showDatePicker();
+    }
+
+    public void onFocus(FocusEvent event) {
+      if (allowDPShow) {
+        showDatePicker();
+      }
+    }
+
+    public void onKeyDown(KeyDownEvent event) {
+      switch (event.getNativeKeyCode()) {
+        case KeyCodes.KEY_ENTER:
+        case KeyCodes.KEY_TAB:
+        case KeyCodes.KEY_ESCAPE:
+        case KeyCodes.KEY_UP:
+          updateDateFromTextBox();
+          hideDatePicker();
+          break;
+        case KeyCodes.KEY_DOWN:
+          showDatePicker();
+          break;
+      }
+    }
+
+    public void onValueChange(ValueChangeEvent<Date> event) {
+      setValue(event.getValue());
+      hideDatePicker();
+      preventDatePickerPopup();
+      box.setFocus(true);
+    }
+  }
 
   /**
    * Default style name.
    */
   public static final String DEFAULT_STYLENAME = "gwt-DateBox";
-  private static final DateTimeFormat DEFAULT_FORMATTER = DateTimeFormat.getMediumDateFormat();
-  private boolean dirtyText = false;
-  private PopupPanel popup = new PopupPanel();
-  private TextBox box = new TextBox();
-  private DatePicker picker;
-  private DateTimeFormat dateFormatter;
+
+  public static final InvalidDateReporter DEFAULT_INVALID_DATE_REPORTER =
+      new InvalidDateReporter() {
+        public void clearError() { }
+        public void reportError(String input) {  }
+      };
+  private static final DateTimeFormat DEFAULT_FORMATTER =
+      DateTimeFormat.getMediumDateFormat();
+
+  private final PopupPanel popup;
+  private final TextBox box = new TextBox();
+  private final DatePicker picker;
+
+  private final InvalidDateReporter invalidDateReporter;
+  private DateTimeFormat dateFormatter = DEFAULT_FORMATTER;
+
   private boolean allowDPShow = true;
 
   /**
-   * Create a new date box.
+   * Create a new date box with a new {@link DatePicker} and the
+   * {@link #DEFAULT_INVALID_DATE_REPORTER}, which does nothing.
    */
   public DateBox() {
-    this(new DatePicker());
+    this(new DatePicker(), DEFAULT_INVALID_DATE_REPORTER);
   }
 
   /**
@@ -70,69 +140,16 @@ public class DateBox extends Composite implements HasKeyDownHandlers,
    * 
    * @param picker the picker to drop down from the date box
    */
-  public DateBox(final DatePicker picker) {
-    this(picker, DEFAULT_FORMATTER);
-  }
-
-  /**
-   * Constructor.
-   * 
-   * @param picker the picker to drop down
-   * @param formatter date time formatter to use for parsing the dates in this
-   *          date box
-   */
-  public DateBox(final DatePicker picker, DateTimeFormat formatter) {
-    FlowPanel p = new FlowPanel();
-    this.dateFormatter = formatter;
-    p.add(box);
+  public DateBox(DatePicker picker, InvalidDateReporter invalidDateReporter) {
     this.picker = picker;
+    this.invalidDateReporter = invalidDateReporter;
+    this.popup = new PopupPanel();
+    popup.setAutoHideEnabled(true);
+    popup.setAutoHidePartner(box.getElement());
     popup.setWidget(picker);
-    initWidget(p);
+    initWidget(box);
     setStyleName(DEFAULT_STYLENAME);
 
-    class DateBoxHandler implements ValueChangeHandler<Date>, FocusHandler,
-        BlurHandler, ClickHandler, KeyDownHandler {
-
-      public void onBlur(BlurEvent event) {
-        if (dirtyText) {
-          updateDateFromTextBox();
-        }
-      }
-
-      public void onClick(ClickEvent event) {
-        showCurrentDate();
-      }
-
-      public void onFocus(FocusEvent event) {
-        if (allowDPShow) {
-          showCurrentDate();
-        }
-      }
-
-      public void onKeyDown(KeyDownEvent event) {
-        switch (event.getNativeKeyCode()) {
-          case KeyCodes.KEY_ENTER:
-          case KeyCodes.KEY_TAB:
-          case KeyCodes.KEY_ESCAPE:
-          case KeyCodes.KEY_UP:
-            updateDateFromTextBox();
-            popup.hide();
-            break;
-          case KeyCodes.KEY_DOWN:
-            showCurrentDate();
-            break;
-          default:
-            dirtyText = true;
-        }
-      }
-
-      public void onValueChange(ValueChangeEvent<Date> event) {
-        setText(event.getValue());
-        hideDatePicker();
-        preventDatePickerPopup();
-        box.setFocus(true);
-      }
-    }
     DateBoxHandler handler = new DateBoxHandler();
     picker.addValueChangeHandler(handler);
     box.addFocusHandler(handler);
@@ -141,16 +158,9 @@ public class DateBox extends Composite implements HasKeyDownHandlers,
     box.addKeyDownHandler(handler);
   }
 
-  public HandlerRegistration addKeyDownHandler(KeyDownHandler handler) {
-    return addHandler(handler, KeyDownEvent.getType());
-  }
-
-  /**
-   * Clears the current selection.
-   */
-  public void clear() {
-    picker.setValue(null, false);
-    box.setText("");
+  public HandlerRegistration addValueChangeHandler(
+      ValueChangeHandler<Date> handler) {
+    return addHandler(handler, ValueChangeEvent.getType());
   }
 
   /**
@@ -182,21 +192,23 @@ public class DateBox extends Composite implements HasKeyDownHandlers,
   }
 
   /**
-   * Get current text in text box.
-   * 
-   * @return the text in the date box
-   */
-  public String getText() {
-    return box.getText();
-  }
-
-  /**
    * Get text box.
    * 
    * @return the text box used to enter the formatted date
    */
   public TextBox getTextBox() {
     return box;
+  }
+
+  /**
+   * Get the date displayed, or null if the text box is empty, or cannot
+   * be interpretted. The {@link InvalidDateReporter} may fire as a side
+   * effect of this call.
+   * 
+   * @return the Date
+   */
+  public Date getValue() {
+    return parseDate(true);
   }
 
   /**
@@ -233,21 +245,17 @@ public class DateBox extends Composite implements HasKeyDownHandlers,
 
   /**
    * Sets the date format to the given format. If date box is not empty,
-   * contents of date box will be replaced with current date in new format.
+   * contents of date box will be replaced with current date in new format. If
+   * the date cannot be parsed, the current value will be preserved and the
+   * InvalidDateReporter notified as usual.
    * 
    * @param format format.
    */
   public void setDateFormat(DateTimeFormat format) {
     if (format != dateFormatter) {
+      Date date = getValue();
       dateFormatter = format;
-      String cur = box.getText();
-      if (cur != null && cur.length() != 0) {
-        try {
-          box.setText(dateFormatter.format(picker.getValue()));
-        } catch (IllegalArgumentException e) {
-          box.setText("");
-        }
-      }
+      setValue(date);
     }
   }
 
@@ -259,7 +267,7 @@ public class DateBox extends Composite implements HasKeyDownHandlers,
   public void setEnabled(boolean enabled) {
     box.setEnabled(enabled);
   }
-
+  
   /**
    * Explicitly focus/unfocus this widget. Only one widget can have focus at a
    * time, and the widget that does will receive all keyboard events.
@@ -283,21 +291,35 @@ public class DateBox extends Composite implements HasKeyDownHandlers,
   }
 
   /**
+   * Set the date.
+   */
+  public void setValue(Date date) {
+    setValue(date, false);
+  }
+
+  public void setValue(Date date, boolean fireEvents) {
+    Date oldDate = getValue();
+    
+    if (date == null) {
+      picker.setValue(null);
+      box.setText("");
+    } else {
+      picker.setValue(date, false);
+      picker.setCurrentMonth(date);
+      setDate(date);
+    }
+    
+    invalidDateReporter.clearError();
+    if (fireEvents) {
+      ValueChangeEvent.fireIfNotEqual(this, oldDate, date);
+    }
+  }
+
+  /**
    * Parses the current date box's value and shows that date.
    */
-  public void showCurrentDate() {
-    Date current = null;
-
-    String value = box.getText().trim();
-    if (!value.equals("")) {
-      try {
-        current = dateFormatter.parse(value);
-      } catch (IllegalArgumentException e) {
-        // Does not trigger error reporting because user has not left the text
-        // box yet.
-      }
-    }
-
+  public void showDatePicker() {
+    Date current = parseDate(false);
     if (current == null) {
       current = new Date();
     }
@@ -305,16 +327,19 @@ public class DateBox extends Composite implements HasKeyDownHandlers,
     popup.showRelativeTo(this);
   }
 
-  /**
-   * Show the given date.
-   * 
-   * @param date picker
-   */
-  public void showDate(Date date) {
-    picker.setValue(date, false);
-    picker.setCurrentMonth(date);
-    setText(date);
-    dirtyText = false;
+  private Date parseDate(boolean reportError) {
+    Date d = null;
+    String text = box.getText().trim();
+    if (!text.equals("")) {
+      try {
+        d = dateFormatter.parse(text);
+      } catch (IllegalArgumentException exception) {
+        if (reportError) {
+          invalidDateReporter.reportError(text);
+        }
+      }
+    }
+    return d;
   }
 
   private void preventDatePickerPopup() {
@@ -326,23 +351,18 @@ public class DateBox extends Composite implements HasKeyDownHandlers,
     });
   }
 
-  private void setText(Date value) {
+  /**
+   * Does the actual work of setting the date. Performs no validation, 
+   * fires no events.
+   */
+  private void setDate(Date value) {
     box.setText(dateFormatter.format(value));
-    dirtyText = false;
   }
-
+  
   private void updateDateFromTextBox() {
-    String text = box.getText().trim();
-    if (text.equals("")) {
-      return;
+    Date parsedDate = parseDate(true);
+    if (parsedDate != null) {
+      setValue(parsedDate);
     }
-    try {
-      Date d = dateFormatter.parse(text);
-      showDate(d);
-    } catch (IllegalArgumentException exception) {
-      // TODO(ECC) use new reporter interface here.
-    }
-    dirtyText = false;
   }
-
 }

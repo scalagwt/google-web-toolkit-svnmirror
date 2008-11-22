@@ -243,7 +243,7 @@ public class DatePicker extends Composite implements
   public HandlerRegistration addHighlightHandler(HighlightHandler<Date> handler) {
     return addHandler(handler, HighlightEvent.getType());
   }
-
+  
   public HandlerRegistration addShowRangeHandler(ShowRangeHandler<Date> handler) {
     return addHandler(handler, ShowRangeEvent.getType());
   }
@@ -258,7 +258,7 @@ public class DatePicker extends Composite implements
   public HandlerRegistration addShowRangeHandlerAndFire(
       ShowRangeHandler<Date> handler) {
     ShowRangeEvent<Date> event = new ShowRangeEvent<Date>(
-        getView().getFirstDate(), getView().getLastDate()) {
+      getView().getFirstDate(), getView().getLastDate()) {
     };
     handler.onShowRange(event);
     return addShowRangeHandler(handler);
@@ -498,7 +498,7 @@ public class DatePicker extends Composite implements
    * @param newValue the new value
    */
   public final void setValue(Date newValue) {
-    setValue(newValue, true);
+    setValue(newValue, false);
   }
 
   /**
@@ -518,7 +518,9 @@ public class DatePicker extends Composite implements
     if (value != null) {
       addGlobalStyleToDate(css().dayIsValue(), value);
     }
-    ValueChangeEvent.fire(this, newValue);
+    if (fireEvents) {
+      ValueChangeEvent.fireIfNotEqual(this, oldValue, newValue);
+    }
   }
 
   /**
@@ -558,7 +560,7 @@ public class DatePicker extends Composite implements
     getMonthSelector().refresh();
     ShowRangeEvent.fire(this, getFirstDate(), getLastDate());
   }
-
+  
   /**
    * Sets up the date picker.
    */
@@ -584,13 +586,12 @@ public class DatePicker extends Composite implements
   /**
    * Sets the highlighted date.
    * 
-   * @param highlighted highlighted date
+   * @param highlightedDate highlighted date
    */
   void setHighlightedDate(Date highlighted) {
     this.highlighted = highlighted;
     HighlightEvent.fire(this, highlighted);
   }
-
   private boolean assertVisible(Date date, Date... moreDates) {
     assert isDateVisible(date) : date + " must be visible";
     if (moreDates != null) {

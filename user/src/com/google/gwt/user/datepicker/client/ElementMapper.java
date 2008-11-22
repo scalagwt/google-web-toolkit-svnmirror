@@ -28,9 +28,9 @@ import java.util.NoSuchElementException;
 /**
  * Creates a mapping from elements to their associated ui objects.
  * 
- * @param <MappedType> the type that the element is mapped to
+ * @param <T> the type that the element is mapped to
  */
-class ElementMapper<MappedType extends UIObject> {
+class ElementMapper<T extends UIObject> {
 
   private static class FreeNode {
     int index;
@@ -57,7 +57,7 @@ class ElementMapper<MappedType extends UIObject> {
 
   private ElementMapper.FreeNode freeList = null;
 
-  private final ArrayList<MappedType> uiObjectList = new ArrayList<MappedType>();
+  private final ArrayList<T> uiObjectList = new ArrayList<T>();
 
   /**
    * Returns the uiObject associated with the given element.
@@ -65,7 +65,7 @@ class ElementMapper<MappedType extends UIObject> {
    * @param elem uiObject's element
    * @return the uiObject
    */
-  public MappedType get(Element elem) {
+  public T get(Element elem) {
     int index = getIndex(elem);
     if (index < 0) {
       return null;
@@ -78,7 +78,7 @@ class ElementMapper<MappedType extends UIObject> {
    * 
    * @param uiObject uiObject to add
    */
-  public void put(MappedType uiObject) {
+  public void put(T uiObject) {
     int index;
     if (freeList == null) {
       index = uiObjectList.size();
@@ -106,9 +106,9 @@ class ElementMapper<MappedType extends UIObject> {
    * 
    * @return the iterator
    */
-  public Iterator<MappedType> iterator() {
+  public Iterator<T> iterator() {
 
-    return new Iterator() {
+    return new Iterator<T>() {
       int lastIndex = -1;
       int nextIndex = -1;
       {
@@ -119,11 +119,11 @@ class ElementMapper<MappedType extends UIObject> {
         return nextIndex < uiObjectList.size();
       }
 
-      public Object next() {
+      public T next() {
         if (!hasNext()) {
           throw new NoSuchElementException();
         }
-        Object result = uiObjectList.get(nextIndex);
+        T result = uiObjectList.get(nextIndex);
         lastIndex = nextIndex;
         findNext();
         return result;
@@ -133,6 +133,7 @@ class ElementMapper<MappedType extends UIObject> {
         if (lastIndex < 0) {
           throw new IllegalStateException();
         }
+        // TODO(ecc) ???
         Widget w = (Widget) uiObjectList.get(lastIndex);
         assert (w.getParent() instanceof HTMLTable);
         w.removeFromParent();

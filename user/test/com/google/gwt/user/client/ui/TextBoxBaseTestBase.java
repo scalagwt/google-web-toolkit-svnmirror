@@ -104,16 +104,19 @@ public abstract class TextBoxBaseTestBase extends GWTTestCase {
     Handler h = new Handler();
     tb.addValueChangeHandler(h);
     tb.setText("able");
+    assertEquals("able", tb.getValue());
     assertNull(h.received);
-    
+
     tb.setValue("able");
+    assertEquals("able", tb.getValue());
     assertNull(h.received);
     tb.setValue("baker");
     assertNull(h.received);
 
     tb.setValue("baker", true);
+    assertEquals("baker", tb.getValue());
     assertNull(h.received);
-    
+
     tb.setValue("able", true);
     assertEquals("able", h.received);
 

@@ -26,11 +26,14 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.museum.client.common.AbstractIssue;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.datepicker.client.DateBox;
+import com.google.gwt.user.datepicker.client.DatePicker;
+import com.google.gwt.user.datepicker.client.DateBox.InvalidDateReporter;
 
 import java.util.Date;
 
@@ -38,20 +41,42 @@ import java.util.Date;
  * Visuals for date box.
  */
 public class VisualsForDateBox extends AbstractIssue {
-  
+
   @Override
   public Widget createIssue() {
-    return dateRange();
+    VerticalPanel v = new VerticalPanel();
+    v.add(new HTML("<div style='height:25px'></div>"));
+    v.add(dateRange());
+    v.add(new HTML("<div style='height:25px'></div>"));
+    final Label startErrors = makeErrorLabel();
+
+    Widget errorReportingDateBox = dateRange(new DateBox.InvalidDateReporter() {
+      public void clearError() {
+        startErrors.setText("");
+      }
+      public void reportError(String input) {
+        startErrors.setText("\"" + input + "\" is not a date");
+      }
+    });
+
+    v.add(errorReportingDateBox);
+    v.add(startErrors);
+
+    return v;
   }
 
   @Override
   public String getInstructions() {
-    return "Click on first date box, see that date picker is displayed, use arrow keys to navigate to second date box, select a date";
+    return "Click on first date box, see that date picker is displayed, "
+        + "use arrow keys to navigate to second date box, select a date. "
+        + "The second set includes an error display, see that it notices "
+        + "when you type garbage, and that its error message is cleared"
+        + "when you empty the field or provide a valid date.";
   }
 
   @Override
   public String getSummary() {
-   return "date box visual test";
+    return "date box visual test";
   }
 
   @Override
@@ -60,28 +85,32 @@ public class VisualsForDateBox extends AbstractIssue {
   }
 
   private Widget dateRange() {
+    return dateRange(null);
+  }
+
+  private Widget dateRange(InvalidDateReporter invalidDateReporter) {
     VerticalPanel v = new VerticalPanel();
     HorizontalPanel p = new HorizontalPanel();
     v.add(p);
-    final DateBox start = new DateBox();
-    start.setWidth("15em");
-    final DateBox end = new DateBox();
-    end.setWidth("15em");
+    final DateBox start = newDateBox(invalidDateReporter);
+    start.setWidth("13em");
+    final DateBox end = newDateBox(invalidDateReporter);
+    end.setWidth("13em");
     start.setAnimationEnabled(true);
 
     end.setAnimationEnabled(true);
 
-    start.addKeyDownHandler(new KeyDownHandler() {
+    start.getTextBox().addKeyDownHandler(new KeyDownHandler() {
       public void onKeyDown(KeyDownEvent e) {
         if (e.getNativeKeyCode() == KeyCodes.KEY_RIGHT
-            && start.getCursorPos() == start.getText().length()) {
+            && start.getCursorPos() == start.getTextBox().getText().length()) {
           start.hideDatePicker();
           end.setFocus(true);
         }
       }
     });
 
-    end.addKeyDownHandler(new KeyDownHandler() {
+    end.getTextBox().addKeyDownHandler(new KeyDownHandler() {
       public void onKeyDown(KeyDownEvent e) {
         if ((e.getNativeKeyCode() == KeyCodes.KEY_LEFT)
             && end.getCursorPos() == 0) {
@@ -97,13 +126,15 @@ public class VisualsForDateBox extends AbstractIssue {
       }
     });
 
-    start.showDate(new Date());
+    start.setValue(new Date());
 
     p.add(start);
     Label l = new Label(" - ");
     l.setStyleName("filler");
     p.add(l);
     p.add(end);
+    final Label value = new Label();
+    p.add(value);
     HorizontalPanel h2 = new HorizontalPanel();
     v.add(h2);
     h2.add(new Button("Short format", new ClickHandler() {
@@ -120,12 +151,38 @@ public class VisualsForDateBox extends AbstractIssue {
       }
     }));
 
-    h2.add(new Button("clear", new ClickHandler() {
+    h2.add(new Button("Clear", new ClickHandler() {
       public void onClick(ClickEvent sender) {
-        start.clear();
-        end.clear();
+        start.setValue(null);
+        end.setValue(null);
+      }
+    }));
+    
+    h2.add(new Button("Get Value", new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        DateTimeFormat f = DateTimeFormat.getShortDateFormat();
+        Date d1 = start.getValue();
+        Date d2 = end.getValue();
+        value.setText("Start: \"" 
+            + (d1 == null ? "null" : f.format(d1))
+            + "\" End:\"" 
+            + (d2 == null ? "null" : f.format(d2)) 
+            + "\"");
       }
     }));
     return v;
+  }
+
+  private Label makeErrorLabel() {
+    final Label startErrors = new Label();
+    startErrors.getElement().getStyle().setProperty("color", "red");
+    return startErrors;
+  }
+
+  private DateBox newDateBox(InvalidDateReporter invalidDateReporter) {
+    DateBox dateBox =
+        invalidDateReporter == null ? new DateBox() : new DateBox(
+            new DatePicker(), invalidDateReporter);
+    return dateBox;
   }
 }

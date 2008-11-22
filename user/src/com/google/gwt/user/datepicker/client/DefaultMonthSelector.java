@@ -23,9 +23,8 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.HTMLTable.CellFormatter;
 
 /**
- * A simple {@link MonthSelector} used for the default date picker. Not part of
- * the public API as we wish to evolve it freely over time. Please copy though,
- * as we like it getting used.
+ * A simple {@link MonthSelector} used for the default date picker. Not
+ * extensible as we wish to evolve it freely over time.
  */
 
 public final class DefaultMonthSelector extends MonthSelector {

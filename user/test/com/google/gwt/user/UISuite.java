@@ -26,6 +26,8 @@ import com.google.gwt.user.client.ui.CheckBoxTest;
 import com.google.gwt.user.client.ui.CompositeTest;
 import com.google.gwt.user.client.ui.CustomButtonTest;
 import com.google.gwt.user.client.ui.DOMTest;
+import com.google.gwt.user.client.ui.DateBoxTest;
+import com.google.gwt.user.client.ui.DatePickerTest;
 import com.google.gwt.user.client.ui.DeckPanelTest;
 import com.google.gwt.user.client.ui.DecoratedPopupTest;
 import com.google.gwt.user.client.ui.DecoratedStackPanelTest;
@@ -94,6 +96,8 @@ public class UISuite {
     suite.addTestSuite(CompositeTest.class);
     suite.addTestSuite(CookieTest.class);
     suite.addTestSuite(CustomButtonTest.class);
+    suite.addTestSuite(DateBoxTest.class);
+    suite.addTestSuite(DatePickerTest.class);
     suite.addTestSuite(DeckPanelTest.class);
     suite.addTestSuite(DecoratedPopupTest.class);
     suite.addTestSuite(DecoratedStackPanelTest.class);
