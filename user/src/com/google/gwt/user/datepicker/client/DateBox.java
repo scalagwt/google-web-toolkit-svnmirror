@@ -39,7 +39,22 @@ import com.google.gwt.user.client.ui.TextBox;
 import java.util.Date;
 
 /**
- * A simple date box.
+ * A text box that shows a {@link DatePicker} when the user focuses on it.
+ * 
+ * <h3>CSS Style Rules</h3>
+ * 
+ * <ul class="css">
+ * 
+ * <li>.gwt-DateBox { }</li>
+ * 
+ * <li>.dateBoxPopup { Applied to the popup around the DatePicker }</li>
+ * 
+ * </ul>
+ * 
+ * <p>
+ * <h3>Example</h3>
+ * {@example com.google.gwt.examples.DateBoxExample}
+ * </p>
  */
 public class DateBox extends Composite implements HasValue<Date> {
 
@@ -53,7 +68,7 @@ public class DateBox extends Composite implements HasValue<Date> {
      * cleared.
      */
     void clearError();
-    
+
     /**
      * Given an unparseable string, explain the situation to the user.
      * 
@@ -109,13 +124,14 @@ public class DateBox extends Composite implements HasValue<Date> {
    */
   public static final String DEFAULT_STYLENAME = "gwt-DateBox";
 
-  public static final InvalidDateReporter DEFAULT_INVALID_DATE_REPORTER =
-      new InvalidDateReporter() {
-        public void clearError() { }
-        public void reportError(String input) {  }
-      };
-  private static final DateTimeFormat DEFAULT_FORMATTER =
-      DateTimeFormat.getMediumDateFormat();
+  public static final InvalidDateReporter DEFAULT_INVALID_DATE_REPORTER = new InvalidDateReporter() {
+    public void clearError() {
+    }
+
+    public void reportError(String input) {
+    }
+  };
+  private static final DateTimeFormat DEFAULT_FORMATTER = DateTimeFormat.getMediumDateFormat();
 
   private final PopupPanel popup;
   private final TextBox box = new TextBox();
@@ -201,9 +217,9 @@ public class DateBox extends Composite implements HasValue<Date> {
   }
 
   /**
-   * Get the date displayed, or null if the text box is empty, or cannot
-   * be interpretted. The {@link InvalidDateReporter} may fire as a side
-   * effect of this call.
+   * Get the date displayed, or null if the text box is empty, or cannot be
+   * interpretted. The {@link InvalidDateReporter} may fire as a side effect of
+   * this call.
    * 
    * @return the Date
    */
@@ -259,7 +275,7 @@ public class DateBox extends Composite implements HasValue<Date> {
   public void setEnabled(boolean enabled) {
     box.setEnabled(enabled);
   }
-  
+
   /**
    * Explicitly focus/unfocus this widget. Only one widget can have focus at a
    * time, and the widget that does will receive all keyboard events.
@@ -291,7 +307,7 @@ public class DateBox extends Composite implements HasValue<Date> {
 
   public void setValue(Date date, boolean fireEvents) {
     Date oldDate = getValue();
-    
+
     if (date == null) {
       picker.setValue(null);
       box.setText("");
@@ -300,7 +316,7 @@ public class DateBox extends Composite implements HasValue<Date> {
       picker.setCurrentMonth(date);
       setDate(date);
     }
-    
+
     invalidDateReporter.clearError();
     if (fireEvents) {
       ValueChangeEvent.fireIfNotEqual(this, oldDate, date);
@@ -344,13 +360,13 @@ public class DateBox extends Composite implements HasValue<Date> {
   }
 
   /**
-   * Does the actual work of setting the date. Performs no validation, 
-   * fires no events.
+   * Does the actual work of setting the date. Performs no validation, fires no
+   * events.
    */
   private void setDate(Date value) {
     box.setText(dateFormatter.format(value));
   }
-  
+
   private void updateDateFromTextBox() {
     Date parsedDate = parseDate(true);
     if (parsedDate != null) {

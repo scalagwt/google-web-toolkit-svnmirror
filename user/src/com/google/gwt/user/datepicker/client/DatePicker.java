@@ -36,6 +36,50 @@ import java.util.Map;
 
 /**
  * Standard GWT date picker.
+ * 
+ * <h3>CSS Style Rules</h3>
+ * 
+ * <ul class="css">
+ * 
+ * <li>.gwt-DatePicker { }</li>
+ * 
+ * <li>.datePickerMonthSelector { the month selector widget }</li>
+ * 
+ * <li>.datePickerMonth { the month in the month selector widget } <li>
+ * 
+ * <li>.datePickerPreviousButton { the previous month button } <li>
+ * 
+ * <li>.datePickerNextButton { the next month button } <li>
+ * 
+ * <li>.datePickerDays { the portion of the picker that shows the days }</li>
+ * 
+ * <li>.datePickerWeekdayLabel { the label over weekdays }</li>
+ * 
+ * <li>.datePickerWeekendLabel { the label over weekends }</li>
+ * 
+ * <li>.datePickerDay { a single day }</li>
+ * 
+ * <li>.datePickerDayIsToday { today's date }</li>
+ * 
+ * <li>.datePickerDayIsWeekend { a weekend day }</li>
+ * 
+ * <li>.datePickerDayIsFiller { a day in another month }</li>
+ * 
+ * <li>.datePickerDayIsValue { the selected day }</li>
+ * 
+ * <li>.datePickerDayIsDisabled { a disabled day }</li>
+ * 
+ * <li>.datePickerDayIsHighlighted { the currently highlighted day }</li>
+ * 
+ * <li>.datePickerDayIsValueAndHighlighted { the highlighted day if it is also
+ * selected }</li>
+ * 
+ * </ul>
+ * 
+ * <p>
+ * <h3>Example</h3>
+ * {@example com.google.gwt.examples.DatePickerExample}
+ * </p>
  */
 public class DatePicker extends Composite implements
     HasHighlightHandlers<Date>, HasShowRangeHandlers<Date>, HasValue<Date> {

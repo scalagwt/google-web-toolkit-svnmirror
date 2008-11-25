@@ -88,7 +88,6 @@ public class CwDatePicker extends ContentWidget {
   public Widget onInitialize() {
     // Create a basic date picker
     DatePicker datePicker = new DatePicker();
-    datePicker.setValue(new Date());
     final TextBox textBox = new TextBox();
     textBox.setEnabled(false);
 
@@ -100,6 +99,9 @@ public class CwDatePicker extends ContentWidget {
         textBox.setValue(dateString);
       }
     });
+
+    // Set the default value
+    datePicker.setValue(new Date(), true);
 
     // Create a DateBox
     DateBox dateBox = new DateBox();
