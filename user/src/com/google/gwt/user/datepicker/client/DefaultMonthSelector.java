@@ -16,10 +16,10 @@
 
 package com.google.gwt.user.datepicker.client;
 
-import com.google.gwt.user.client.ui.ClickListener;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.PushButton;
-import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.HTMLTable.CellFormatter;
 
 /**
@@ -49,8 +49,8 @@ public final class DefaultMonthSelector extends MonthSelector {
   protected void setup() {
     // Set up backwards.
     backwards = new PushButton();
-    backwards.addClickListener(new ClickListener() {
-      public void onClick(Widget sender) {
+    backwards.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
         addMonths(-1);
       }
     });
@@ -61,8 +61,8 @@ public final class DefaultMonthSelector extends MonthSelector {
     forwards = new PushButton();
     forwards.getUpFace().setHTML("&raquo;");
     forwards.setStyleName(css().nextButton());
-    forwards.addClickListener(new ClickListener() {
-      public void onClick(Widget sender) {
+    forwards.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
         addMonths(+1);
       }
     });
@@ -74,9 +74,10 @@ public final class DefaultMonthSelector extends MonthSelector {
 
     CellFormatter formatter = grid.getCellFormatter();
     formatter.setStyleName(0, 1, css().month());
-    formatter.setWidth(0, 0, "20%");
-    formatter.setWidth(0, 2, "20%");
-    grid.setStyleName(css().days());
+    formatter.setWidth(0, 0, "1");
+    formatter.setWidth(0, 1, "100%");
+    formatter.setWidth(0, 2, "1");
+    grid.setStyleName(css().monthSelector());
     initWidget(grid);
   }
 

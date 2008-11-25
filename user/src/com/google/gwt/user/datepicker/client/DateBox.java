@@ -32,7 +32,6 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HasAnimation;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TextBox;
@@ -42,7 +41,7 @@ import java.util.Date;
 /**
  * A simple date box.
  */
-public class DateBox extends Composite implements HasAnimation, HasValue<Date> {
+public class DateBox extends Composite implements HasValue<Date> {
 
   /**
    * Implemented by a delegate to report errors parsing date values from the
@@ -147,6 +146,7 @@ public class DateBox extends Composite implements HasAnimation, HasValue<Date> {
     popup.setAutoHideEnabled(true);
     popup.setAutoHidePartner(box.getElement());
     popup.setWidget(picker);
+    popup.setStyleName("dateBoxPopup");
     initWidget(box);
     setStyleName(DEFAULT_STYLENAME);
 
@@ -218,10 +218,6 @@ public class DateBox extends Composite implements HasAnimation, HasValue<Date> {
     popup.hide();
   }
 
-  public boolean isAnimationEnabled() {
-    return popup.isAnimationEnabled();
-  }
-
   /**
    * @return true if date picker is currently visible, false if not
    */
@@ -237,10 +233,6 @@ public class DateBox extends Composite implements HasAnimation, HasValue<Date> {
    */
   public void setAccessKey(char key) {
     box.setAccessKey(key);
-  }
-
-  public void setAnimationEnabled(boolean enable) {
-    popup.setAnimationEnabled(enable);
   }
 
   /**

@@ -26,8 +26,8 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasValue;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -243,7 +243,7 @@ public class DatePicker extends Composite implements
   public HandlerRegistration addHighlightHandler(HighlightHandler<Date> handler) {
     return addHandler(handler, HighlightEvent.getType());
   }
-  
+
   public HandlerRegistration addShowRangeHandler(ShowRangeHandler<Date> handler) {
     return addHandler(handler, ShowRangeEvent.getType());
   }
@@ -258,7 +258,7 @@ public class DatePicker extends Composite implements
   public HandlerRegistration addShowRangeHandlerAndFire(
       ShowRangeHandler<Date> handler) {
     ShowRangeEvent<Date> event = new ShowRangeEvent<Date>(
-      getView().getFirstDate(), getView().getLastDate()) {
+        getView().getFirstDate(), getView().getLastDate()) {
     };
     handler.onShowRange(event);
     return addShowRangeHandler(handler);
@@ -560,12 +560,12 @@ public class DatePicker extends Composite implements
     getMonthSelector().refresh();
     ShowRangeEvent.fire(this, getFirstDate(), getLastDate());
   }
-  
+
   /**
    * Sets up the date picker.
    */
   protected void setup() {
-    FlowPanel panel = new FlowPanel();
+    VerticalPanel panel = new VerticalPanel();
     initWidget(panel);
     setStyleName(panel.getElement(), css.datePicker());
     setStyleName(css().datePicker());
@@ -586,12 +586,13 @@ public class DatePicker extends Composite implements
   /**
    * Sets the highlighted date.
    * 
-   * @param highlightedDate highlighted date
+   * @param highlighted highlighted date
    */
   void setHighlightedDate(Date highlighted) {
     this.highlighted = highlighted;
     HighlightEvent.fire(this, highlighted);
   }
+
   private boolean assertVisible(Date date, Date... moreDates) {
     assert isDateVisible(date) : date + " must be visible";
     if (moreDates != null) {
