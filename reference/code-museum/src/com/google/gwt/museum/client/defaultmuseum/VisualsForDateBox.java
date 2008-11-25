@@ -96,9 +96,9 @@ public class VisualsForDateBox extends AbstractIssue {
     start.setWidth("13em");
     final DateBox end = newDateBox(invalidDateReporter);
     end.setWidth("13em");
-    start.setAnimationEnabled(true);
+    // start.setAnimationEnabled(true);
 
-    end.setAnimationEnabled(true);
+    // end.setAnimationEnabled(true);
 
     start.getTextBox().addKeyDownHandler(new KeyDownHandler() {
       public void onKeyDown(KeyDownEvent e) {
