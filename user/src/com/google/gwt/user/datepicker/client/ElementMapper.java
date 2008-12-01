@@ -133,7 +133,9 @@ class ElementMapper<T extends UIObject> {
         if (lastIndex < 0) {
           throw new IllegalStateException();
         }
-        // TODO(ecc) ???
+        // TODO(ecc) Why are we casting to Widget and working only in tables?
+        // Is this code even executed? If not, let's yank it
+        // and throwing an UnsupportedOperationException
         Widget w = (Widget) uiObjectList.get(lastIndex);
         assert (w.getParent() instanceof HTMLTable);
         w.removeFromParent();
