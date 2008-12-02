@@ -35,22 +35,36 @@ public class DateValueChangeTester {
   }
 
   private final HasValue<Date> subject;
+  
+  /**
+   * The HasValue<Date> to be tested. It should have been freshly created
+   * before handing it to this tester.
+   */
   public DateValueChangeTester(HasValue<Date> subject) {
     this.subject = subject;
   }
   
+  /**
+   * Asserts that the default value is null, checks that value change
+   * events do and don't fire when appropriate, and that getValue() always
+   * returns what was handed to getValue().
+   */
   @SuppressWarnings("deprecation")
   public void run() {
-    subject.setValue(null);
     TestCase.assertNull(subject.getValue());
-    
-    Date able = new Date(1999, 5, 15);
-    subject.setValue(able);
-    TestCase.assertEquals(able, subject.getValue());
     
     DateValueChangeTester.Handler h = new Handler();
     subject.addValueChangeHandler(h);
     
+    subject.setValue(null);
+    TestCase.assertNull(subject.getValue());
+    TestCase.assertNull(h.received);
+    
+    Date able = new Date(1999, 5, 15);
+    subject.setValue(able);
+    TestCase.assertEquals(able, subject.getValue());
+    TestCase.assertNull(h.received);
+
     subject.setValue(able);
     TestCase.assertNull(h.received);
     

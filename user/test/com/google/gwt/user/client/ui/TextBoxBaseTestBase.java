@@ -98,11 +98,16 @@ public abstract class TextBoxBaseTestBase extends GWTTestCase {
   
   public void testValueChangeEvent() {
     TextBoxBase tb = createTextBoxBase();
-
     // To work cross-platform, the tb must be added to the root panel.
     RootPanel.get().add(tb);
+    
     Handler h = new Handler();
     tb.addValueChangeHandler(h);
+    
+    tb.setValue(null);
+    assertEquals("", tb.getValue());
+    assertNull(h.received);
+    
     tb.setText("able");
     assertEquals("able", tb.getValue());
     assertNull(h.received);
@@ -110,6 +115,7 @@ public abstract class TextBoxBaseTestBase extends GWTTestCase {
     tb.setValue("able");
     assertEquals("able", tb.getValue());
     assertNull(h.received);
+
     tb.setValue("baker");
     assertNull(h.received);
 
