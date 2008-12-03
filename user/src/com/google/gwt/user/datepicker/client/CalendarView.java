@@ -63,9 +63,6 @@ public abstract class CalendarView extends DatePickerComponent {
    */
   public abstract boolean isDateEnabled(Date date);
 
-  @Override
-  public abstract void refresh();
-
   /**
    * Removes a visible style name from the cell of the supplied date.
    * 

@@ -380,7 +380,7 @@ public class DatePicker extends Composite implements
   }
 
   /**
-   * Gets the highlighted date, if any.
+   * Gets the highlighted date (the one the mouse is hovering over), if any.
    * 
    * @return the highlighted date
    */
@@ -399,9 +399,9 @@ public class DatePicker extends Composite implements
   }
 
   /**
-   * Gets the {@link DatePicker}'s value.
+   * Returns the selected date, or null if none is selected.
    * 
-   * @return the value
+   * @return the selected date, or null
    */
   public final Date getValue() {
     return value;
@@ -456,7 +456,7 @@ public class DatePicker extends Composite implements
     assert (isDateVisible(date)) : date + " should be visible";
     getView().removeStyleFromDate(styleName, date);
     for (Date d : moreDates) {
-      getView().removeStyleFromDate(styleName, date);
+      getView().removeStyleFromDate(styleName, d);
     }
   }
 

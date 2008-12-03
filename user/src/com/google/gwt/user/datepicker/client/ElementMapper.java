@@ -17,13 +17,9 @@
 package com.google.gwt.user.datepicker.client;
 
 import com.google.gwt.user.client.Element;
-import com.google.gwt.user.client.ui.HTMLTable;
 import com.google.gwt.user.client.ui.UIObject;
-import com.google.gwt.user.client.ui.Widget;
 
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
 
 /**
  * Creates a mapping from elements to their associated ui objects.
@@ -99,57 +95,6 @@ class ElementMapper<T extends UIObject> {
   public void removeByElement(Element elem) {
     int index = getIndex(elem);
     removeImpl(elem, index);
-  }
-
-  /**
-   * Creates an iterator of uiObjects.
-   * 
-   * @return the iterator
-   */
-  public Iterator<T> iterator() {
-
-    return new Iterator<T>() {
-      int lastIndex = -1;
-      int nextIndex = -1;
-      {
-        findNext();
-      }
-
-      public boolean hasNext() {
-        return nextIndex < uiObjectList.size();
-      }
-
-      public T next() {
-        if (!hasNext()) {
-          throw new NoSuchElementException();
-        }
-        T result = uiObjectList.get(nextIndex);
-        lastIndex = nextIndex;
-        findNext();
-        return result;
-      }
-
-      public void remove() {
-        if (lastIndex < 0) {
-          throw new IllegalStateException();
-        }
-        // TODO(ecc) Why are we casting to Widget and working only in tables?
-        // Is this code even executed? If not, let's yank it
-        // and throwing an UnsupportedOperationException
-        Widget w = (Widget) uiObjectList.get(lastIndex);
-        assert (w.getParent() instanceof HTMLTable);
-        w.removeFromParent();
-        lastIndex = -1;
-      }
-
-      private void findNext() {
-        while (++nextIndex < uiObjectList.size()) {
-          if (uiObjectList.get(nextIndex) != null) {
-            return;
-          }
-        }
-      }
-    };
   }
 
   private void removeImpl(Element elem, int index) {
