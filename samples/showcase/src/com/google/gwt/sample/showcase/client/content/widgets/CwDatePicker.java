@@ -24,7 +24,7 @@ import com.google.gwt.sample.showcase.client.ShowcaseAnnotations.ShowcaseData;
 import com.google.gwt.sample.showcase.client.ShowcaseAnnotations.ShowcaseSource;
 import com.google.gwt.sample.showcase.client.ShowcaseAnnotations.ShowcaseStyle;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.datepicker.client.DateBox;
@@ -88,15 +88,14 @@ public class CwDatePicker extends ContentWidget {
   public Widget onInitialize() {
     // Create a basic date picker
     DatePicker datePicker = new DatePicker();
-    final TextBox textBox = new TextBox();
-    textBox.setEnabled(false);
+    final Label text = new Label();
 
     // Set the value in the text box when the user selects a date
     datePicker.addValueChangeHandler(new ValueChangeHandler<Date>() {
       public void onValueChange(ValueChangeEvent<Date> event) {
         Date date = event.getValue();
         String dateString = DateTimeFormat.getMediumDateFormat().format(date);
-        textBox.setValue(dateString);
+        text.setText(dateString);
       }
     });
 
@@ -109,7 +108,7 @@ public class CwDatePicker extends ContentWidget {
     // Combine the widgets into a panel and return them
     VerticalPanel vPanel = new VerticalPanel();
     vPanel.add(new HTML(constants.cwDatePickerLabel()));
-    vPanel.add(textBox);
+    vPanel.add(text);
     vPanel.add(datePicker);
     vPanel.add(new HTML(constants.cwDatePickerBoxLabel()));
     vPanel.add(dateBox);

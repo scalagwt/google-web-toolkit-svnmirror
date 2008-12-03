@@ -609,6 +609,10 @@ public class DatePicker extends Composite implements
    * Sets up the date picker.
    */
   protected void setup() {
+    /*
+     * Use a table (VerticalPanel) to get shrink-to-fit behavior. Divs expand to
+     * fill the available width, so we'd need to give it a size.
+     */ 
     VerticalPanel panel = new VerticalPanel();
     initWidget(panel);
     setStyleName(panel.getElement(), css.datePicker());

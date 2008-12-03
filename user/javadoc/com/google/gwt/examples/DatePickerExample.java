@@ -19,8 +19,8 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.datepicker.client.DatePicker;
 
 import java.util.Date;
@@ -30,14 +30,14 @@ public class DatePickerExample implements EntryPoint {
   public void onModuleLoad() {
     // Create a date picker
     DatePicker datePicker = new DatePicker();
-    final TextBox textBox = new TextBox();
+    final Label text = new Label();
 
     // Set the value in the text box when the user selects a date
     datePicker.addValueChangeHandler(new ValueChangeHandler<Date>() {
       public void onValueChange(ValueChangeEvent<Date> event) {
         Date date = event.getValue();
         String dateString = DateTimeFormat.getMediumDateFormat().format(date);
-        textBox.setValue(dateString);
+        text.setText(dateString);
       }
     });
 
@@ -45,7 +45,7 @@ public class DatePickerExample implements EntryPoint {
     datePicker.setValue(new Date(), true);
     
     // Add the widgets to the page
-    RootPanel.get().add(textBox);
+    RootPanel.get().add(text);
     RootPanel.get().add(datePicker);
   }
 }
