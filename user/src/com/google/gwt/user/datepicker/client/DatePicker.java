@@ -31,7 +31,6 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -211,14 +210,13 @@ public class DatePicker extends Composite implements
           info.put(key, current + styleName);
         }
       } else {
-        assert current != null : "Removing style " + styleName + " from date "
-            + d + " but the style name wasn't there";
-
-        String newValue = current.replaceAll(styleName, "");
-        if (newValue.trim().length() == 0) {
-          info.remove(key);
-        } else {
-          info.put(key, newValue);
+        if (current != null) {
+          String newValue = current.replaceAll(styleName, "");
+          if (newValue.trim().length() == 0) {
+            info.remove(key);
+          } else {
+            info.put(key, newValue);
+          }
         }
       }
     }
@@ -267,31 +265,17 @@ public class DatePicker extends Composite implements
     this.setup();
 
     setCurrentMonth(new Date());
-    addGlobalStyleToDate(css().dayIsToday(), new Date());
-  }
-
-  /**
-   * Globally adds a style name to a date. i.e. the style name is associated
-   * with the date each time it is rendered.
-   * 
-   * @param styleName style name
-   * @param date date
-   */
-  public void addGlobalStyleToDate(String styleName, Date date) {
-    styler.setStyleName(date, styleName, true);
-    if (isDateVisible(date)) {
-      getView().addStyleToDate(styleName, date);
-    }
+    addStyleToDates(css().dayIsToday(), new Date());
   }
 
   public HandlerRegistration addHighlightHandler(HighlightHandler<Date> handler) {
     return addHandler(handler, HighlightEvent.getType());
   }
-
+  
   public HandlerRegistration addShowRangeHandler(ShowRangeHandler<Date> handler) {
     return addHandler(handler, ShowRangeEvent.getType());
   }
-
+  
   /**
    * Adds a show range handler and immediately activate the handler on the
    * current view.
@@ -309,35 +293,63 @@ public class DatePicker extends Composite implements
   }
 
   /**
-   * Shows the given style name on the specified date. This is only set until
-   * the next time the DatePicker is refreshed.
-   * 
-   * @param styleName style name
-   * @param date visible date
-   * @param moreDates optional visible dates
+   * Add a style name to the given dates. 
    */
-  public final void addStyleToVisibleDates(String styleName, Date date,
-      Date... moreDates) {
-    assert (assertVisible(date, moreDates));
-    getView().addStyleToDate(styleName, date);
-    if (moreDates != null) {
-      for (Date d : moreDates) {
-        getView().addStyleToDate(styleName, d);
-      }
+  public void addStyleToDates(String styleName, Date date) {
+    styler.setStyleName(date, styleName, true);
+    if (isDateVisible(date)) {
+      getView().addStyleToDate(styleName, date);
     }
   }
 
   /**
-   * Adds a style name on a set of currently visible dates. This is only set
-   * until the next time the DatePicker is refreshed.
-   * 
-   * @param styleName style name to remove
-   * @param visibleDates dates that will have the supplied style removed
+   * Add a style name to the given dates. 
    */
-  public final void addStyleToVisibleDates(String styleName,
+  public void addStyleToDates(String styleName, Date date, Date... moreDates) {
+    addStyleToDates(styleName, date);
+    for (Date d : moreDates) {
+      addStyleToDates(styleName, d);
+    }
+  }
+
+  /**
+   * Add a style name to the given dates.
+   */
+  public void addStyleToDates(String styleName, Iterable<Date> dates) {
+    for (Date d : dates) {
+      addStyleToDates(styleName, d);
+    }
+  }
+
+  /**
+   * Adds the given style name to the specified dates, which must be visible. 
+   * This is only set until the next time the DatePicker is refreshed.
+   */
+  public void addTransientStyleToVisibleDates(String styleName, Date date) {
+    assert isDateVisible(date) : date + " must be visible";
+    getView().addStyleToDate(styleName, date);
+  }
+
+  /**
+   * Adds the given style name to the specified dates, which must be visible. 
+   * This is only set until the next time the DatePicker is refreshed.
+   */
+  public final void addTransientStyleToVisibleDates(String styleName, Date date,
+      Date... moreDates) {
+    addTransientStyleToVisibleDates(styleName, date);
+    for (Date d : moreDates) {
+      addTransientStyleToVisibleDates(styleName, d);
+    }
+  }
+
+  /**
+   * Adds the given style name to the specified dates, which must be visible. 
+   * This is only set until the next time the DatePicker is refreshed.
+   */
+  public final void addTransientStyleToVisibleDates(String styleName,
       Iterable<Date> visibleDates) {
-    for (Date date : visibleDates) {
-      getView().addStyleToDate(styleName, date);
+    for (Date d : visibleDates) {
+      addTransientStyleToVisibleDates(styleName, d);
     }
   }
 
@@ -370,16 +382,6 @@ public class DatePicker extends Composite implements
   }
 
   /**
-   * Gets the global style name associated with a date.
-   * 
-   * @param date the date
-   * @return the styles associated with this date
-   */
-  public String getGlobalStyleOfDate(Date date) {
-    return styler.getStyleName(date);
-  }
-
-  /**
    * Gets the highlighted date (the one the mouse is hovering over), if any.
    * 
    * @return the highlighted date
@@ -396,6 +398,17 @@ public class DatePicker extends Composite implements
   // Final because the view should always control the value of the last date.
   public final Date getLastDate() {
     return view.getLastDate();
+  }
+
+  /**
+   * Gets the style associated with a date (does not include styles
+   * set via {@link #addTransientStyleToVisibleDate}).
+   * 
+   * @param date the date
+   * @return the styles associated with this date
+   */
+  public String getStyleOfDate(Date date) {
+    return styler.getStyleName(date);
   }
 
   /**
@@ -432,12 +445,9 @@ public class DatePicker extends Composite implements
   }
 
   /**
-   * Globally removes a style from a date.
-   * 
-   * @param styleName style name
-   * @param date date
+   * Removes the styleName from the given dates (even if it is transient).
    */
-  public void removeGlobalStyleFromDate(String styleName, Date date) {
+  public void removeStyleFromDates(String styleName, Date date) {
     styler.setStyleName(date, styleName, false);
     if (isDateVisible(date)) {
       getView().removeStyleFromDate(styleName, date);
@@ -445,33 +455,21 @@ public class DatePicker extends Composite implements
   }
 
   /**
-   * Removes a style name from multiple visible dates.
-   * 
-   * @param styleName style name to remove
-   * @param date a visible date
-   * @param moreDates optional additional visible dates
+   * Removes the styleName from the given dates (even if it is transient).
    */
-  public final void removeStyleFromVisibleDates(String styleName, Date date,
-      Date... moreDates) {
-    assert (isDateVisible(date)) : date + " should be visible";
-    getView().removeStyleFromDate(styleName, date);
+  public void removeStyleFromDates(String styleName, Date date, Date... moreDates) {
+    removeStyleFromDates(styleName, date);
     for (Date d : moreDates) {
-      getView().removeStyleFromDate(styleName, d);
+      removeStyleFromDates(styleName, d);
     }
   }
 
   /**
-   * Removes a style name from multiple visible dates.
-   * 
-   * @param styleName style name to remove
-   * @param dates dates that will have the supplied style removed
+   * Removes the styleName from the given dates (even if it is transient).
    */
-  public final void removeStyleFromVisibleDates(String styleName,
-      Iterator<Date> dates) {
-    while (dates.hasNext()) {
-      Date date = dates.next();
-      assert (isDateVisible(date)) : date + " should be visible";
-      getView().removeStyleFromDate(styleName, date);
+  public void removeStyleFromDates(String styleName, Iterable<Date> dates) {
+    for (Date d : dates) {
+      removeStyleFromDates(styleName, d);
     }
   }
 
@@ -492,48 +490,44 @@ public class DatePicker extends Composite implements
   }
 
   /**
-   * Sets a visible date to be enabled or disabled. This is only set until the
-   * next time the DatePicker is refreshed.
-   * 
-   * @param enabled is enabled
-   * @param date the date
-   * @param moreDates optional dates
-   */
-  public final void setEnabledOnVisibleDates(boolean enabled, Date date,
-      Date... moreDates) {
-    assert assertVisible(date, moreDates);
-    getView().setEnabledOnDate(enabled, date);
-    if (moreDates != null) {
-      for (Date d : moreDates) {
-        getView().setEnabledOnDate(enabled, d);
-      }
-    }
-  }
-
-  /**
-   * Sets a group of visible dates to be enabled or disabled. This is only set
-   * until the next time the DatePicker is refreshed.
-   * 
-   * @param enabled is enabled
-   * @param dates the dates
-   */
-  public final void setEnabledOnVisibleDates(boolean enabled,
-      Iterable<Date> dates) {
-    CalendarView r = getView();
-    for (Date date : dates) {
-      assert isDateVisible(date) : date
-          + " cannot be enabled or disabled as it is not visible";
-      r.setEnabledOnDate(enabled, date);
-    }
-  }
-
-  /**
    * Sets the date picker style name.
    */
   @Override
   public void setStyleName(String styleName) {
     css = new StandardCss(styleName, "datePicker");
     super.setStyleName(styleName);
+  }
+
+  /**
+   * Sets a visible date to be enabled or disabled. This is only set until the
+   * next time the DatePicker is refreshed.
+   */
+  public final void setTransientEnabledOnVisibleDates(boolean enabled, Date date) {
+    assert isDateVisible(date) : date + " must be visible";
+    getView().setEnabledOnDate(enabled, date);
+  }
+
+  /**
+   * Sets a visible date to be enabled or disabled. This is only set until the
+   * next time the DatePicker is refreshed.
+   */
+  public final void setTransientEnabledOnVisibleDates(boolean enabled,
+      Date date, Date... moreDates) {
+    setTransientEnabledOnVisibleDates(enabled, date);
+    for (Date d : moreDates) {
+      setTransientEnabledOnVisibleDates(enabled, d);
+    }
+  }
+
+  /**
+   * Sets a group of visible dates to be enabled or disabled. This is only set
+   * until the next time the DatePicker is refreshed.
+   */
+  public final void setTransientEnabledOnVisibleDates(boolean enabled,
+      Iterable<Date> dates) {
+    for (Date d : dates) {
+      setTransientEnabledOnVisibleDates(enabled, d);
+    }
   }
 
   /**
@@ -555,12 +549,12 @@ public class DatePicker extends Composite implements
     Date oldValue = value;
 
     if (oldValue != null) {
-      removeGlobalStyleFromDate(css().dayIsValue(), oldValue);
+      removeStyleFromDates(css().dayIsValue(), oldValue);
     }
 
     value = CalendarUtil.copyDate(newValue);
     if (value != null) {
-      addGlobalStyleToDate(css().dayIsValue(), value);
+      addStyleToDates(css().dayIsValue(), value);
     }
     if (fireEvents) {
       ValueChangeEvent.fireIfNotEqual(this, oldValue, newValue);
@@ -640,15 +634,4 @@ public class DatePicker extends Composite implements
     this.highlighted = highlighted;
     HighlightEvent.fire(this, highlighted);
   }
-
-  private boolean assertVisible(Date date, Date... moreDates) {
-    assert isDateVisible(date) : date + " must be visible";
-    if (moreDates != null) {
-      for (Date d : moreDates) {
-        assert isDateVisible(d) : d + " must be visible";
-      }
-    }
-    return true;
-  }
-
 }

@@ -94,7 +94,7 @@ public final class DefaultCalendarView extends CalendarView {
         if (isFiller()) {
           dateStyle += " " + css().dayIsFiller();
         } else {
-          String extraStyle = getDatePicker().getGlobalStyleOfDate(current);
+          String extraStyle = getDatePicker().getStyleOfDate(current);
           if (extraStyle != null) {
             dateStyle += " " + extraStyle;
           }
