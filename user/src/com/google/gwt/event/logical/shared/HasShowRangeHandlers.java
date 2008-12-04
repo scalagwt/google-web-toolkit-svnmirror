@@ -23,7 +23,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
  * 
  * @param <V> the type of range
  */
-public interface HasShowRangeHandlers<V> {
+public interface HasShowRangeHandlers<V> extends HasHandlers {
   /**
    * Adds a {@link ShowRangeEvent} handler.
    * 

@@ -23,7 +23,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
  * 
  * @param <V> the highlighted value type
  */
-public interface HasHighlightHandlers<V> {
+public interface HasHighlightHandlers<V> extends HasHandlers {
   /**
    * Adds a {@link HighlightEvent} handler.
    * 
