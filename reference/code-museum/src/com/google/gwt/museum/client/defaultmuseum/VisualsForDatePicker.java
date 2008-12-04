@@ -39,33 +39,46 @@ public class VisualsForDatePicker extends AbstractIssue {
   @Override
   public Widget createIssue() {
     VerticalPanel p = new VerticalPanel();
-    DatePicker picker = new DatePicker();
+    final DatePicker picker = new DatePicker();
     p.add(picker);
-    final Label value = new Label("value");
+    final Label value = new Label("value: ");
     p.add(value);
-    final Label highlight = new Label("highlight");
+    final Label highlight = new Label("highlight: ");
     p.add(highlight);
-    final Label range = new Label("range");
+    final Label range = new Label("range: ");
     p.add(range);
     picker.addValueChangeHandler(new ValueChangeHandler<Date>() {
       public void onValueChange(ValueChangeEvent<Date> event) {
-        value.setText(DateTimeFormat.getShortDateFormat().format(event.getValue()));
+        value.setText("value: "
+            + DateTimeFormat.getShortDateFormat().format(event.getValue()));
       }
     });
     picker.addHighlightHandler(new HighlightHandler<Date>() {
+
+      @SuppressWarnings("deprecation")
+      @Override
+      // Should never be seen, as highlight should be cloned.
       public void onHighlight(HighlightEvent<Date> event) {
-        highlight.setText(DateTimeFormat.getShortDateFormat().format(event.getHighlighted()));
-     }
+        event.getHighlighted().setYear(1);
+        picker.getHighlightedDate().setYear(1);
+      }
+
+    });
+    picker.addHighlightHandler(new HighlightHandler<Date>() {
+      public void onHighlight(HighlightEvent<Date> event) {
+        highlight.setText("highlight: "
+            + DateTimeFormat.getShortDateFormat().format(event.getHighlighted()));
+      }
     });
     picker.addShowRangeHandler(new ShowRangeHandler<Date>() {
       public void onShowRange(ShowRangeEvent<Date> event) {
         Date start = event.getStart();
         Date end = event.getEnd();
         DateTimeFormat format = DateTimeFormat.getShortDateFormat();
-        range.setText(format.format(start) + " - " + format.format(end));
-      }      
+        range.setText("range: " + format.format(start) + " - "
+            + format.format(end));
+      }
     });
-//    picker.setValue(new Date());
     return p;
   };
 
