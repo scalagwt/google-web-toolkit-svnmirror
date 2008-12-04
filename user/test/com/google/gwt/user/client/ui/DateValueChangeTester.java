@@ -28,38 +28,38 @@ import java.util.Date;
 public class DateValueChangeTester {
   static class Handler implements ValueChangeHandler<Date> {
     Date received = null;
-    
+
     public void onValueChange(ValueChangeEvent<Date> event) {
       received = event.getValue();
     }
   }
 
   private final HasValue<Date> subject;
-  
+
   /**
-   * The HasValue<Date> to be tested. It should have been freshly created
-   * before handing it to this tester.
+   * The HasValue<Date> to be tested. It should have been freshly created before
+   * handing it to this tester.
    */
   public DateValueChangeTester(HasValue<Date> subject) {
     this.subject = subject;
   }
-  
+
   /**
-   * Asserts that the default value is null, checks that value change
-   * events do and don't fire when appropriate, and that getValue() always
-   * returns what was handed to getValue().
+   * Asserts that the default value is null, checks that value change events do
+   * and don't fire when appropriate, and that getValue() always returns what
+   * was handed to getValue().
    */
   @SuppressWarnings("deprecation")
   public void run() {
     TestCase.assertNull(subject.getValue());
-    
+
     DateValueChangeTester.Handler h = new Handler();
     subject.addValueChangeHandler(h);
-    
+
     subject.setValue(null);
     TestCase.assertNull(subject.getValue());
     TestCase.assertNull(h.received);
-    
+
     Date able = new Date(1999, 5, 15);
     subject.setValue(able);
     TestCase.assertEquals(able, subject.getValue());
@@ -67,18 +67,27 @@ public class DateValueChangeTester {
 
     subject.setValue(able);
     TestCase.assertNull(h.received);
-    
+
     Date baker = new Date(1965, 12, 7);
     subject.setValue(baker);
     TestCase.assertNull(h.received);
 
+    // Value has not changed, so should not fire a change event even though
+    // fire event is true.
     subject.setValue(baker, true);
     TestCase.assertNull(h.received);
-    
+
     subject.setValue(able, true);
     TestCase.assertEquals(able, h.received);
+    TestCase.assertNotSame(able, h.received);
 
     subject.setValue(baker, true);
     TestCase.assertEquals(baker, h.received);
+    TestCase.assertNotSame(baker, h.received);
+    
+    h.received = null;
+    // Value has changed, but boolean is false.
+    subject.setValue(baker, false);
+    TestCase.assertNull(h.received);
   }
 }

@@ -26,7 +26,7 @@ import java.util.Date;
  */
 public class CalendarUtil {
 
-  static final DateTimeConstants intlConstants;
+  static DateTimeConstants intlConstants;
 
   private static int firstDayOfWeekend;
 
@@ -34,11 +34,13 @@ public class CalendarUtil {
   private static int startingDay;
 
   static {
-    intlConstants = (DateTimeConstants) GWT.create(DateTimeConstants.class);
-    // Finding the start and end of weekend
-    firstDayOfWeekend = Integer.parseInt(intlConstants.weekendRange()[0]) - 1;
-    lastDayOfWeekend = Integer.parseInt(intlConstants.weekendRange()[1]) - 1;
-    startingDay = Integer.parseInt(CalendarUtil.intlConstants.firstDayOfTheWeek()) - 1;
+    if (GWT.isClient()) {
+      intlConstants = (DateTimeConstants) GWT.create(DateTimeConstants.class);
+      // Finding the start and end of weekend
+      firstDayOfWeekend = Integer.parseInt(intlConstants.weekendRange()[0]) - 1;
+      lastDayOfWeekend = Integer.parseInt(intlConstants.weekendRange()[1]) - 1;
+      startingDay = Integer.parseInt(CalendarUtil.intlConstants.firstDayOfTheWeek()) - 1;
+    }
   }
 
   /**
