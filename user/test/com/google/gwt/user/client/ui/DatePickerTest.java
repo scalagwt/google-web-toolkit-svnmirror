@@ -158,10 +158,10 @@ public class DatePickerTest extends GWTTestCase {
   }
 
   public void testDisabling() {
-    mockedDatePicker.setTransientEnabledOnVisibleDates(false, dateVisible1);
-    mockedDatePicker.setTransientEnabledOnVisibleDates(false, dateVisible2,
+    mockedDatePicker.setTransientEnabledOnDates(false, dateVisible1);
+    mockedDatePicker.setTransientEnabledOnDates(false, dateVisible2,
         dateVisible3);
-    mockedDatePicker.setTransientEnabledOnVisibleDates(false, datesVisibleList);
+    mockedDatePicker.setTransientEnabledOnDates(false, datesVisibleList);
     
     assertTrue(view.disabledDates.contains(dateVisible1));
     assertTrue(view.disabledDates.contains(dateVisible2));
@@ -169,10 +169,10 @@ public class DatePickerTest extends GWTTestCase {
     assertTrue(view.disabledDates.contains(dateVisible4));
     assertTrue(view.disabledDates.contains(dateVisible5));
 
-    mockedDatePicker.setTransientEnabledOnVisibleDates(true, dateVisible1);
-    mockedDatePicker.setTransientEnabledOnVisibleDates(true, dateVisible2,
+    mockedDatePicker.setTransientEnabledOnDates(true, dateVisible1);
+    mockedDatePicker.setTransientEnabledOnDates(true, dateVisible2,
         dateVisible3);
-    mockedDatePicker.setTransientEnabledOnVisibleDates(true, datesVisibleList);
+    mockedDatePicker.setTransientEnabledOnDates(true, datesVisibleList);
 
     assertFalse(view.disabledDates.contains(dateVisible1));
     assertFalse(view.disabledDates.contains(dateVisible2));
@@ -216,10 +216,10 @@ public class DatePickerTest extends GWTTestCase {
   }
 
   public void testTransientStyles() {
-    mockedDatePicker.addTransientStyleToVisibleDates(STYLE, dateVisible1);
-    mockedDatePicker.addTransientStyleToVisibleDates(STYLE, dateVisible2,
+    mockedDatePicker.addTransientStyleToDates(STYLE, dateVisible1);
+    mockedDatePicker.addTransientStyleToDates(STYLE, dateVisible2,
         dateVisible3);
-    mockedDatePicker.addTransientStyleToVisibleDates(STYLE, datesVisibleList);
+    mockedDatePicker.addTransientStyleToDates(STYLE, datesVisibleList);
     assertViewHasStyleOnVisibleDates(STYLE);
     assertPickerLacksStyleOnVisibleDates();
     

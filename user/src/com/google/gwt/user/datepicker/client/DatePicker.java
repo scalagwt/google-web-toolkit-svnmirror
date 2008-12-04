@@ -325,7 +325,7 @@ public class DatePicker extends Composite implements
    * Adds the given style name to the specified dates, which must be visible. 
    * This is only set until the next time the DatePicker is refreshed.
    */
-  public void addTransientStyleToVisibleDates(String styleName, Date date) {
+  public void addTransientStyleToDates(String styleName, Date date) {
     assert isDateVisible(date) : date + " must be visible";
     getView().addStyleToDate(styleName, date);
   }
@@ -334,11 +334,11 @@ public class DatePicker extends Composite implements
    * Adds the given style name to the specified dates, which must be visible. 
    * This is only set until the next time the DatePicker is refreshed.
    */
-  public final void addTransientStyleToVisibleDates(String styleName, Date date,
+  public final void addTransientStyleToDates(String styleName, Date date,
       Date... moreDates) {
-    addTransientStyleToVisibleDates(styleName, date);
+    addTransientStyleToDates(styleName, date);
     for (Date d : moreDates) {
-      addTransientStyleToVisibleDates(styleName, d);
+      addTransientStyleToDates(styleName, d);
     }
   }
 
@@ -346,10 +346,10 @@ public class DatePicker extends Composite implements
    * Adds the given style name to the specified dates, which must be visible. 
    * This is only set until the next time the DatePicker is refreshed.
    */
-  public final void addTransientStyleToVisibleDates(String styleName,
-      Iterable<Date> visibleDates) {
-    for (Date d : visibleDates) {
-      addTransientStyleToVisibleDates(styleName, d);
+  public final void addTransientStyleToDates(String styleName,
+      Iterable<Date> dates) {
+    for (Date d : dates) {
+      addTransientStyleToDates(styleName, d);
     }
   }
 
@@ -402,7 +402,7 @@ public class DatePicker extends Composite implements
 
   /**
    * Gets the style associated with a date (does not include styles
-   * set via {@link #addTransientStyleToVisibleDate}).
+   * set via {@link #addTransientStyleToDates}).
    * 
    * @param date the date
    * @return the styles associated with this date
@@ -421,6 +421,17 @@ public class DatePicker extends Composite implements
   }
 
   /**
+   * Is the visible date enabled?
+   * 
+   * @param date the date, which must be visible
+   * @return is the date enabled?
+   */
+  public boolean isDateEnabled(Date date) {
+    assert isDateVisible(date) : date + " is not visible";
+    return getView().isDateEnabled(date);
+  }
+
+  /**
    * Is the date currently shown in the date picker?
    * 
    * @param date
@@ -431,17 +442,6 @@ public class DatePicker extends Composite implements
     Date first = r.getFirstDate();
     Date last = r.getLastDate();
     return (date != null && (first.equals(date) || last.equals(date) || (first.before(date) && last.after(date))));
-  }
-
-  /**
-   * Is the visible date enabled?
-   * 
-   * @param date the date
-   * @return is the date enabled?
-   */
-  public boolean isVisibleDateEnabled(Date date) {
-    assert isDateVisible(date) : date + " is not visible";
-    return getView().isDateEnabled(date);
   }
 
   /**
@@ -502,7 +502,7 @@ public class DatePicker extends Composite implements
    * Sets a visible date to be enabled or disabled. This is only set until the
    * next time the DatePicker is refreshed.
    */
-  public final void setTransientEnabledOnVisibleDates(boolean enabled, Date date) {
+  public final void setTransientEnabledOnDates(boolean enabled, Date date) {
     assert isDateVisible(date) : date + " must be visible";
     getView().setEnabledOnDate(enabled, date);
   }
@@ -511,11 +511,11 @@ public class DatePicker extends Composite implements
    * Sets a visible date to be enabled or disabled. This is only set until the
    * next time the DatePicker is refreshed.
    */
-  public final void setTransientEnabledOnVisibleDates(boolean enabled,
+  public final void setTransientEnabledOnDates(boolean enabled,
       Date date, Date... moreDates) {
-    setTransientEnabledOnVisibleDates(enabled, date);
+    setTransientEnabledOnDates(enabled, date);
     for (Date d : moreDates) {
-      setTransientEnabledOnVisibleDates(enabled, d);
+      setTransientEnabledOnDates(enabled, d);
     }
   }
 
@@ -523,10 +523,10 @@ public class DatePicker extends Composite implements
    * Sets a group of visible dates to be enabled or disabled. This is only set
    * until the next time the DatePicker is refreshed.
    */
-  public final void setTransientEnabledOnVisibleDates(boolean enabled,
+  public final void setTransientEnabledOnDates(boolean enabled,
       Iterable<Date> dates) {
     for (Date d : dates) {
-      setTransientEnabledOnVisibleDates(enabled, d);
+      setTransientEnabledOnDates(enabled, d);
     }
   }
 
