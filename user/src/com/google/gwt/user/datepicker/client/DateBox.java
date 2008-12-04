@@ -319,7 +319,7 @@ public class DateBox extends Composite implements HasValue<Date> {
 
     invalidDateReporter.clearError();
     if (fireEvents) {
-      ValueChangeEvent.fireIfNotEqual(this, oldDate, date);
+      DateChangeEvent.fireIfNotEqualDates(this, oldDate, date);
     }
   }
 

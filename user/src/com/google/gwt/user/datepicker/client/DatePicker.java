@@ -189,6 +189,20 @@ public class DatePicker extends Composite implements
     }
   }
 
+  /**
+   * A date highlighted event that copied on read.
+   */
+  private class DateHighlightEvent extends HighlightEvent<Date> {
+    protected DateHighlightEvent(Date highlighted) {
+      super(highlighted);
+    }
+
+    @Override
+    public Date getHighlighted() {
+      return CalendarUtil.copyDate(super.getHighlighted());
+    }
+  }
+
   private class DateStyler {
     private Map<String, String> info = new HashMap<String, String>();
 
@@ -226,13 +240,13 @@ public class DatePicker extends Composite implements
       return d.getYear() + "/" + d.getMonth() + "/" + d.getDate();
     }
   }
-
   private final DateStyler styler = new DateStyler();
   private final MonthSelector monthSelector;
   private final CalendarView view;
   private final CalendarModel model;
   private Date value;
   private Date highlighted;
+
   private StandardCss css = StandardCss.DEFAULT;
 
   /**
@@ -267,7 +281,7 @@ public class DatePicker extends Composite implements
     setCurrentMonth(new Date());
     addStyleToDates(css().dayIsToday(), new Date());
   }
-
+  
   public HandlerRegistration addHighlightHandler(HighlightHandler<Date> handler) {
     return addHandler(handler, HighlightEvent.getType());
   }
@@ -275,7 +289,7 @@ public class DatePicker extends Composite implements
   public HandlerRegistration addShowRangeHandler(ShowRangeHandler<Date> handler) {
     return addHandler(handler, ShowRangeEvent.getType());
   }
-  
+
   /**
    * Adds a show range handler and immediately activate the handler on the
    * current view.
@@ -365,6 +379,7 @@ public class DatePicker extends Composite implements
    * A datepicker <b> may </b> show days not in the current month. It
    * <b>must</b> show all days in the current month.
    * </p>
+   * @return the current month
    * 
    */
   public Date getCurrentMonth() {
@@ -387,7 +402,7 @@ public class DatePicker extends Composite implements
    * @return the highlighted date
    */
   public final Date getHighlightedDate() {
-    return highlighted;
+    return CalendarUtil.copyDate(highlighted);
   }
 
   /**
@@ -417,7 +432,7 @@ public class DatePicker extends Composite implements
    * @return the selected date, or null
    */
   public final Date getValue() {
-    return value;
+    return CalendarUtil.copyDate(value);
   }
 
   /**
@@ -557,7 +572,7 @@ public class DatePicker extends Composite implements
       addStyleToDates(css().dayIsValue(), value);
     }
     if (fireEvents) {
-      ValueChangeEvent.fireIfNotEqual(this, oldValue, newValue);
+      DateChangeEvent.fireIfNotEqualDates(this, oldValue, newValue);
     }
   }
 
@@ -606,7 +621,7 @@ public class DatePicker extends Composite implements
     /*
      * Use a table (VerticalPanel) to get shrink-to-fit behavior. Divs expand to
      * fill the available width, so we'd need to give it a size.
-     */ 
+     */
     VerticalPanel panel = new VerticalPanel();
     initWidget(panel);
     setStyleName(panel.getElement(), css.datePicker());
@@ -632,6 +647,6 @@ public class DatePicker extends Composite implements
    */
   void setHighlightedDate(Date highlighted) {
     this.highlighted = highlighted;
-    HighlightEvent.fire(this, highlighted);
+    fireEvent(new DateHighlightEvent(highlighted));
   }
 }
