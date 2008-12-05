@@ -56,7 +56,6 @@ public class VisualsForDatePicker extends AbstractIssue {
     picker.addHighlightHandler(new HighlightHandler<Date>() {
 
       @SuppressWarnings("deprecation")
-      @Override
       // Should never be seen, as highlight should be cloned.
       public void onHighlight(HighlightEvent<Date> event) {
         event.getHighlighted().setYear(1);

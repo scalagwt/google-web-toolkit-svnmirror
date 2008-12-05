@@ -45,7 +45,6 @@ public class DateChangeEventTest extends TestCase {
       return handlers;
     }
 
-    @Override
     public Date getValue() {
       return value;
     }
