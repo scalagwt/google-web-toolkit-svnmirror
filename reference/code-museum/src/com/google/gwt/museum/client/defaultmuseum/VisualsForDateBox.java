@@ -18,9 +18,6 @@ package com.google.gwt.museum.client.defaultmuseum;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyDownEvent;
-import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -69,9 +66,10 @@ public class VisualsForDateBox extends AbstractIssue {
   public String getInstructions() {
     return "Click on first date box, see that date picker is displayed, "
         + "use arrow keys to navigate to second date box, select a date. "
-        + "The second set includes an error display, see that it notices "
-        + "when you type garbage, and that its error message is cleared"
-        + "when you empty the field or provide a valid date.";
+        + "The second set includes an error display (one, shared by both "
+        + "fields). See that it notices  when you type garbage, and that "
+        + "its error message is cleared when you empty the field or provide "
+        + "a valid date.";
   }
 
   @Override
@@ -96,29 +94,6 @@ public class VisualsForDateBox extends AbstractIssue {
     start.setWidth("13em");
     final DateBox end = newDateBox(invalidDateReporter);
     end.setWidth("13em");
-    // start.setAnimationEnabled(true);
-
-    // end.setAnimationEnabled(true);
-
-    start.getTextBox().addKeyDownHandler(new KeyDownHandler() {
-      public void onKeyDown(KeyDownEvent e) {
-        if (e.getNativeKeyCode() == KeyCodes.KEY_RIGHT
-            && start.getCursorPos() == start.getTextBox().getText().length()) {
-          start.hideDatePicker();
-          end.setFocus(true);
-        }
-      }
-    });
-
-    end.getTextBox().addKeyDownHandler(new KeyDownHandler() {
-      public void onKeyDown(KeyDownEvent e) {
-        if ((e.getNativeKeyCode() == KeyCodes.KEY_LEFT)
-            && end.getCursorPos() == 0) {
-          start.setFocus(true);
-          end.hideDatePicker();
-        }
-      }
-    });
 
     end.getDatePicker().addValueChangeHandler(new ValueChangeHandler<Date>() {
       public void onValueChange(ValueChangeEvent<Date> event) {
@@ -165,7 +140,7 @@ public class VisualsForDateBox extends AbstractIssue {
         Date d2 = end.getValue();
         value.setText("Start: \"" 
             + (d1 == null ? "null" : f.format(d1))
-            + "\" End:\"" 
+            + "\" End: \"" 
             + (d2 == null ? "null" : f.format(d2)) 
             + "\"");
       }
