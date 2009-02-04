@@ -588,6 +588,11 @@ public class PopupPanel extends SimplePanel implements SourcesPopupEvents,
     return true;
   }
 
+  @Override
+  protected void onUnload() {
+    hide();
+  }
+
   /**
    * Remove an autoHide partner.
    * 
