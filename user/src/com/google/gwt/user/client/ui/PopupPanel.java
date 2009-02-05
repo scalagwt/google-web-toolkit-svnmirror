@@ -462,14 +462,10 @@ public class PopupPanel extends SimplePanel implements SourcesPopupEvents,
    *          {@link CloseHandler#onClose(CloseEvent)} when the popup is closed
    */
   public void hide(boolean autoClosed) {
-    if (!showing) {
+    if (!isShowing()) {
       return;
     }
-    showing = false;
-    if (nativePreviewHandlerRegistration != null) {
-      nativePreviewHandlerRegistration.removeHandler();
-      nativePreviewHandlerRegistration = null;
-    }
+    cleanup();
 
     // Hide the popup
     resizeAnimation.setState(false);
@@ -590,7 +586,10 @@ public class PopupPanel extends SimplePanel implements SourcesPopupEvents,
 
   @Override
   protected void onUnload() {
-    hide();
+    // Just to be sure, we perform cleanup when the popup is unloaded (i.e.
+    // removed from the DOM). This is normally taken care of in hide(), but it
+    // can be missed if someone removes the popup directly from the RootPanel.
+    cleanup();
   }
 
   /**
@@ -896,6 +895,16 @@ public class PopupPanel extends SimplePanel implements SourcesPopupEvents,
       elt.blur();
     }
   }-*/;
+
+  private void cleanup() {
+    // Clear the 'showing' flag and make sure that the event preview is cleaned
+    // up.
+    showing = false;
+    if (nativePreviewHandlerRegistration != null) {
+      nativePreviewHandlerRegistration.removeHandler();
+      nativePreviewHandlerRegistration = null;
+    }
+  }
 
   /**
    * Does the event target one of the partner elements?
