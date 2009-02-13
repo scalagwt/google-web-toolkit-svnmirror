@@ -4,7 +4,8 @@ See: http://code.google.com/p/google-web-toolkit/wiki/ManagingMerges
 
 Copies:
 /branches/snapshot-2009.02.09/ was created (r4676) as a straight copy from /trunk/@r4674
-Cherry-pick from /changes/bobv/elide_rpc_type_names_r4602 (r4690)
 
 Merges:
+Cherry-pick from /changes/bobv/elide_rpc_type_names_r4602 (r4690)
+Merged c4705 from trunk (r4706)
 
