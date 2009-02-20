@@ -8,3 +8,4 @@ Copies:
 Merges:
 /releases/1.6/@r4582:4583 was merged (r4588) into this branch
 /trunk@c4592 was merged (r4593) this branch
+/trunk@c4820 was merged (r4827) this branch
