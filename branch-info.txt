@@ -8,4 +8,5 @@ Copies:
 Merges:
 Cherry-pick from /changes/bobv/elide_rpc_type_names_r4602 (r4690)
 Merged c4705 from trunk (r4706)
+Merged c4820 from trunk (r4821)
 
