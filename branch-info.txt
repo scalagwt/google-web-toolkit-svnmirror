@@ -10,3 +10,4 @@ Merges:
 /trunk@c4592 was merged (r4593) into this branch
 /trunk@c4820 was merged (r4827) into this branch
 /releases/1.6@c4611 was merged (r4857) into this branch (fixes CheckBox#getValue when detached)
+/trunk@c4859 was merged (r4864) into this branch (fixes getAbsoluteLeft/Top() on IE in standards-mode)
