@@ -5,3 +5,6 @@ See: http://code.google.com/p/google-web-toolkit/wiki/ManagingMerges
 Copies:
 /branches/snapshot-2009.02.26/ was created (r4883) as a straight copy from /trunk/@r4877
 
+Merges:
+/trunk@c4889 was merged (r4890) into this branch
+
