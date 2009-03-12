@@ -7,3 +7,4 @@ Copies:
 
 Merges:
 
+/trunk@c4995 was merged (r4996) into this branch, for fix to Issue 3464: DateBox cannot be mocked
