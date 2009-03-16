@@ -8,3 +8,4 @@ Copies:
 Merges:
 
 /trunk@c4995 was merged (r4996) into this branch, for fix to Issue 3464: DateBox cannot be mocked
+/trunk@c5017 was merged (r????) into this branch, Fix a bug in currency list generation for runtime locales.
