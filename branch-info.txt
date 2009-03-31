@@ -6,4 +6,5 @@ Copies:
 /branches/snapshot-2009.03.30 was created (r5135) as a straight copy from /trunk/@5111
 
 Merges:
-A rollback of /trunk@c4974 and /trunk@c4943 was merged (r????) into this branch to undo a compiler bug breaking method overrides
+A rollback of /trunk@c4974 and /trunk@c4943 was merged (r5137) into this branch to undo a compiler bug breaking method overrides
+Added imports to GenerateJavaAST so it would compile (r????)
