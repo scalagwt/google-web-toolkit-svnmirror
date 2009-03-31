@@ -20,19 +20,11 @@ import com.google.gwt.junit.client.GWTTestCase;
 
 import junit.framework.Assert;
 
-import java.util.EventListener;
-
 /**
  * Miscellaneous tests of the Java to JavaScript compiler.
  */
 @SuppressWarnings("unused")
 public class CompilerTest extends GWTTestCase {
-
-  interface Silly { }
-
-  interface SillyComparable<T extends Silly> extends Comparable<T> {
-    int compareTo(T obj);
-  }
 
   private abstract static class AbstractSuper {
     public static String foo() {
@@ -45,23 +37,6 @@ public class CompilerTest extends GWTTestCase {
   }
 
   private abstract static class Apple implements Fruit {
-  }
-
-  private abstract static class Bm2BaseEvent {
-  }
-
-  private abstract static class Bm2ComponentEvent extends Bm2BaseEvent {
-  }
-
-  private static class Bm2KeyNav<E extends Bm2ComponentEvent> implements
-      Bm2Listener<E> {
-    public int handleEvent(Bm2ComponentEvent ce) {
-      return 5;
-    }
-  }
-
-  private interface Bm2Listener<E extends Bm2BaseEvent> extends EventListener {
-    int handleEvent(E be);
   }
 
   private static class ConcreteSub extends AbstractSuper {
@@ -265,7 +240,7 @@ public class CompilerTest extends GWTTestCase {
    * superclass, it can be necessary to add a bridge method that overrides the
    * interface method and calls the inherited method.
    */
-  public void testBridgeMethods1() {
+  public void testBridgeMethods() {
     abstract class AbstractFoo {
       public int compareTo(AbstractFoo o) {
         return 0;
@@ -287,39 +262,10 @@ public class CompilerTest extends GWTTestCase {
     Comparable<AbstractFoo> comparable1 = new MyFooSub();
     assertEquals(0, comparable1.compareTo(new MyFoo()));
 
+  
     Comparable<AbstractFoo> comparable2 = new MyFoo();
     assertEquals(0, comparable2.compareTo(new MyFooSub()));
-  }
-
-  /**
-   * Issue 3304. Doing superclasses first is tricky when the superclass is a raw
-   * type.
-   */
-  @SuppressWarnings("unchecked")
-  public void testBridgeMethods2() {
-    Bm2KeyNav<?> obs = new Bm2KeyNav() {
-    };
-    assertEquals(5, obs.handleEvent(null));
-  }
-
-  /**
-   * When adding a bridge method, be sure to handle transitive overrides
-   * relationships.
-   */
-  public void testBridgeMethods3() {
-    class AbstractFoo implements Silly {
-      public int compareTo(AbstractFoo obj) {
-        if (FALSE) {
-          return compareTo(obj);
-        }
-        return 0;
-      }
-    }
-    class MyFoo extends AbstractFoo implements SillyComparable<AbstractFoo> {
-    }
-    
-    assertEquals(0, new MyFoo().compareTo(new MyFoo()));
-  }
+}
 
   public void testCastOptimizer() {
     Granny g = new Granny();
