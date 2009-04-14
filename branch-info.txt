@@ -10,4 +10,5 @@ A rollback of /trunk@c4974 and /trunk@c4943 was merged (r5137) into this branch 
 Added imports to GenerateJavaAST so it would compile (r5138)
 A rollback of /trunk@c5075 was merged (r5198) into this branch to undo a compiler bug breaking custom field serializers
 /trunk/@5215:5216 was merged (r5217) into this branch to fix a scrollLeft bug in RTL
-/trunk/@5222:5223 was merged (r????) into this branch to fix a scrollLeft bug in OldMozilla RTL
+/trunk/@5222:5223 was merged (r5224) into this branch to fix a scrollLeft bug in OldMozilla RTL
+/trunk/@5229:5230 was merged (r????) into this branch to fix a scrollLeft RTL bug in FF2 (same as the OldMozilla bug)
