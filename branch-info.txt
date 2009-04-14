@@ -1,0 +1,9 @@
+branch-info.txt for the 2009.04.14-r5230 snapshot branch.
+Tracks interactions between this branch and other branches.
+See: http://code.google.com/p/google-web-toolkit/wiki/ManagingMerges
+
+Copies:
+/branches/snapshot-2009.04.14 was created (r5234) as a straight copy from /trunk/@5230
+/branches/snapshot-2009.04.14-r5230 was created (r5235) as a rename of /branches/snapshot-2009.04.14
+
+Merges:
