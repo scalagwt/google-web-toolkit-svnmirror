@@ -6,4 +6,5 @@ Copies:
 /branches/snapshot-2009.04.14-r5307 was created (r5309) as a straight copy from /trunk/@5307
 
 Merges:
-
+Merged in r5314 from trunk (r5315):
+ svn merge -r5313:5314  https://google-web-toolkit.googlecode.com/svn/trunk  .
