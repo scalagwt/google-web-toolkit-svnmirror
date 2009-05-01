@@ -8,3 +8,6 @@ Copies:
 Merges:
 Merged in r5314 from trunk (r5315):
  svn merge -r5313:5314  https://google-web-toolkit.googlecode.com/svn/trunk  .
+Merged in r5317 from trunk (r5318):
+ svn merge -r5316:5317  https://google-web-toolkit.googlecode.com/svn/trunk  .
+
