@@ -117,7 +117,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -188,12 +187,6 @@ public class JavaToJavaScriptCompiler {
 
       // (4) Optimize the normalized Java AST for each permutation.
       optimize(options, jprogram);
-      
-      // (4.5) Choose an initial load order sequence for runAsync's
-      LinkedHashSet<Integer> initialLoadSequence = new LinkedHashSet<Integer>();
-      if (options.isAggressivelyOptimize() && options.isRunAsyncEnabled()) {
-        initialLoadSequence = CodeSplitter.pickInitialLoadSequence(logger, jprogram);
-      }
 
       // (5) "Normalize" the high-level Java tree into a lower-level tree more
       // suited for JavaScript code generation. Don't go reordering these
@@ -267,8 +260,7 @@ public class JavaToJavaScriptCompiler {
 
       // (10.5) Split up the program into fragments
       if (options.isAggressivelyOptimize() && options.isRunAsyncEnabled()) {
-        CodeSplitter.exec(logger, jprogram, jsProgram, postStringInterningMap,
-            initialLoadSequence);
+        CodeSplitter.exec(logger, jprogram, jsProgram, postStringInterningMap);
       }
 
       // (11) Perform any post-obfuscation normalizations.

@@ -13,18 +13,14 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.gwt.core.client.impl;
+package com.google.gwt.core.client;
 
-import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.core.client.JsArrayInteger;
 import com.google.gwt.xhr.client.ReadyStateChangeHandler;
 import com.google.gwt.xhr.client.XMLHttpRequest;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Queue;
 
 /**
@@ -39,8 +35,14 @@ import java.util.Queue;
  * 
  * <ul>
  * <li>0 -- the <em>base</em> fragment, which is initially downloaded
- * <li>1..m -- fragments for each split point
- * <li>m+1 -- the <em>leftovers</em> fragment of code that goes nowhere else
+ * <li>1-m -- the <em>exclusively live</em> fragments, holding the code needed
+ * exclusively for each split point
+ * <li>m -- the <em>secondary base</em> fragment for entry point 1. It holds
+ * precisely that code needed if entry point 1 is the first one reached after
+ * the application downloads.
+ * <li>m+1 -- the <em>leftovers fragment</em> for entry point 1. It holds all
+ * code not in fragments 0-(m-1) nor in fragment m.
+ * <li>(m+2)..(3m) -- secondary bases and leftovers for entry points 2..m
  * </ul>
  * 
  * <p>
@@ -79,8 +81,28 @@ public class AsyncFragmentLoader {
 
     private static final String LEFTOVERS_DOWNLOAD = "leftoversDownload";
 
+    /**
+     * @param splitPoint
+     * @return
+     */
     private static String downloadGroup(int splitPoint) {
       return "download" + splitPoint;
+    }
+  }
+
+  /**
+   * Handles a failure to download a base fragment.
+   */
+  private static class BaseDownloadFailed implements LoadErrorHandler {
+    private final LoadErrorHandler chainedHandler;
+
+    public BaseDownloadFailed(LoadErrorHandler chainedHandler) {
+      this.chainedHandler = chainedHandler;
+    }
+
+    public void loadFailed(Throwable reason) {
+      baseLoading = false;
+      chainedHandler.loadFailed(reason);
     }
   }
 
@@ -101,37 +123,25 @@ public class AsyncFragmentLoader {
   }
 
   /**
-   * Handles a failure to download a fragment in the initial sequence.
+   * Handles a failure to download a leftovers fragment.
    */
-  private static class InitialFragmentDownloadFailed implements
-      LoadErrorHandler {
+  private static class LeftoversDownloadFailed implements LoadErrorHandler {
     public void loadFailed(Throwable reason) {
-      initialFragmentsLoading = false;
-
-      // Cancel all pending downloads.
+      leftoversLoading = false;
 
       /*
-       * Make a local list of the handlers to run, in case one of them calls
-       * another runAsync
-       */
-      List<LoadErrorHandler> handlersToRun = new ArrayList<LoadErrorHandler>();
-
-      // add handlers that are waiting pending the initials download
-      assert waitingForInitialFragments.length() == waitingForInitialFragmentsErrorHandlers.size();
-      while (waitingForInitialFragments.length() > 0) {
-        handlersToRun.add(waitingForInitialFragmentsErrorHandlers.remove());
-        waitingForInitialFragments.shift();
-      }
-
-      // add handlers for pending initial fragment downloads
-      handlersToRun.addAll(initialFragmentErrorHandlers.values());
-      initialFragmentErrorHandlers.clear();
-
-      /*
-       * If an exception is thrown while canceling any of them, remember and
-       * throw the last one.
+       * Cancel all other pending downloads. If any exception is thrown while
+       * cancelling any of them, throw only the last one.
        */
       RuntimeException lastException = null;
+
+      assert waitingForLeftovers.size() == waitingForLeftoversErrorHandlers.size();
+
+      // Copy the list in case a handler makes another runAsync call
+      List<LoadErrorHandler> handlersToRun = new ArrayList<LoadErrorHandler>(
+          waitingForLeftoversErrorHandlers);
+      waitingForLeftoversErrorHandlers.clear();
+      waitingForLeftovers.clear();
 
       for (LoadErrorHandler handler : handlersToRun) {
         try {
@@ -147,6 +157,16 @@ public class AsyncFragmentLoader {
     }
   }
 
+  /**
+   * The first entry point reached after the program started.
+   */
+  private static int base = -1;
+
+  /**
+   * Whether the secondary base fragment is currently loading.
+   */
+  private static boolean baseLoading = false;
+
   private static final String HTTP_GET = "GET";
 
   /**
@@ -159,79 +179,64 @@ public class AsyncFragmentLoader {
   private static final int HTTP_STATUS_OK = 200;
 
   /**
-   * Error handlers for failure to download an initial fragment.
-   * 
-   * TODO(spoon) make it a lightweight integer map
+   * Whether the leftovers fragment has loaded yet.
    */
-  private static Map<Integer, LoadErrorHandler> initialFragmentErrorHandlers = new HashMap<Integer, LoadErrorHandler>();
+  private static boolean leftoversLoaded = false;
 
   /**
-   * Indicates that the next fragment in {@link #remainingInitialFragments} is
-   * currently downloading.
+   * Whether the leftovers fragment is currently loading.
    */
-  private static boolean initialFragmentsLoading = false;
-
-  /**
-   * The sequence of fragments to load initially, before anything else can be
-   * loaded. This array will hold the initial sequence of bases followed by the
-   * leftovers fragment. It is filled in by
-   * {@link com.google.gwt.dev.jjs.impl.CodeSplitter}.  It does *not* include
-   * the leftovers fragment, which must be loaded once all of these are finished.
-   */
-  private static int[] initialLoadSequence = new int[] { };
+  private static boolean leftoversLoading = false;
 
   /**
    * The total number of split points in the program, counting the initial entry
-   * as an honorary split point. This is changed to the correct value by
+   * as a split point. This is changed to the correct value by
    * {@link com.google.gwt.dev.jjs.impl.ReplaceRunAsyncs}.
    */
   private static int numEntries = 1;
 
   /**
-   * Base fragments that remain to be downloaded. It is lazily initialized in
-   * the first call to {@link #startLoadingNextInitial()}.  It does include
-   * the leftovers fragment.
-   */
-  private static JsArrayInteger remainingInitialFragments = null;
-
-  /**
    * Split points that have been reached, but that cannot be downloaded until
-   * the initial fragments finish downloading.
+   * the leftovers fragment finishes downloading.
    */
-  private static JsArrayInteger waitingForInitialFragments = createJsArrayInteger();
+  private static Queue<Integer> waitingForLeftovers = new LinkedList<Integer>();
 
   /**
    * Error handlers for the above queue.
-   * 
-   * TODO(spoon) change this to a lightweight JS collection
    */
-  private static Queue<LoadErrorHandler> waitingForInitialFragmentsErrorHandlers = new LinkedList<LoadErrorHandler>();
+  private static Queue<LoadErrorHandler> waitingForLeftoversErrorHandlers = new LinkedList<LoadErrorHandler>();
 
   /**
-   * Inform the loader that a fragment has now finished loading.
+   * Inform the loader that the code for an entry point has now finished
+   * loading.
+   * 
+   * @param entry The entry whose code fragment is now loaded.
    */
-  public static void fragmentHasLoaded(int fragment) {
-    logFragmentLoaded(fragment);
+  public static void fragmentHasLoaded(int entry) {
+    int fragment = base >= 0 ? entry : baseFragmentNumber(entry);
+    logEventProgress(LwmLabels.downloadGroup(entry), LwmLabels.END, fragment,
+        null);
 
-    if (isInitial(fragment)) {
-      assert (fragment == remainingInitialFragments.get(0));
-      remainingInitialFragments.shift();
-      initialFragmentErrorHandlers.remove(fragment);
+    if (base < 0) {
+      // The base fragment has loaded
+      base = entry;
+      baseLoading = false;
 
-      startLoadingNextInitial();
+      // Go ahead and download the appropriate leftovers fragment
+      startLoadingLeftovers();
     }
   }
 
   /**
    * Loads the specified split point.
    * 
-   * @param splitPoint the split point whose code needs to be loaded
+   * @param splitPoint the fragment to load
    */
   public static void inject(int splitPoint, LoadErrorHandler loadErrorHandler) {
-    if (haveInitialFragmentsLoaded()) {
+    if (leftoversLoaded) {
       /*
-       * The initial fragments has loaded. Immediately start loading the
-       * requested code.
+       * A base and a leftovers fragment have loaded. Load an exclusively live
+       * fragment.
        */
       logEventProgress(LwmLabels.downloadGroup(splitPoint), LwmLabels.BEGIN,
           splitPoint, null);
@@ -239,36 +244,46 @@ public class AsyncFragmentLoader {
       return;
     }
 
-    if (isInitial(splitPoint)) {
+    if (baseLoading || leftoversLoading) {
       /*
-       * The loading of an initial fragment will happen via
-       * startLoadingNextInitial(), so don't start it here. Do, however, record
-       * the error handler.
+       * Wait until the leftovers fragment has loaded before loading this one.
        */
-      initialFragmentErrorHandlers.put(splitPoint, loadErrorHandler);
-    } else {
-      /*
-       * For a non-initial fragment, queue it for later loading, once the
-       * initial fragments have all been loaded.
-       */
+      assert (waitingForLeftovers.size() == waitingForLeftoversErrorHandlers.size());
+      waitingForLeftovers.add(splitPoint);
+      waitingForLeftoversErrorHandlers.add(loadErrorHandler);
 
-      assert (waitingForInitialFragments.length() == waitingForInitialFragmentsErrorHandlers.size());
-      waitingForInitialFragments.push(splitPoint);
-      waitingForInitialFragmentsErrorHandlers.add(loadErrorHandler);
+      /*
+       * Also, restart the leftovers download if it previously failed.
+       */
+      if (!leftoversLoading) {
+        startLoadingLeftovers();
+      }
+
+      return;
     }
 
-    /*
-     * Start the initial downloads if they aren't running already.
-     */
-    if (!initialFragmentsLoading) {
-      startLoadingNextInitial();
-    }
-
-    return;
+    // Nothing has loaded or started to load. Treat this fragment as the base.
+    baseLoading = true;
+    logEventProgress(LwmLabels.downloadGroup(splitPoint), LwmLabels.BEGIN,
+        baseFragmentNumber(splitPoint), null);
+    startLoadingFragment(baseFragmentNumber(splitPoint),
+        new BaseDownloadFailed(loadErrorHandler));
   }
-  
+
+  /**
+   * Inform the loader that the "leftovers" fragment has loaded.
+   */
   public static void leftoversFragmentHasLoaded() {
-    fragmentHasLoaded(leftoversFragment());
+    leftoversLoaded = true;
+    leftoversLoading = false;
+    logEventProgress(LwmLabels.LEFTOVERS_DOWNLOAD, LwmLabels.END,
+        leftoversFragmentNumber(), null);
+
+    assert (waitingForLeftovers.size() == waitingForLeftoversErrorHandlers.size());
+    while (!waitingForLeftovers.isEmpty()) {
+      inject(waitingForLeftovers.remove(),
+          waitingForLeftoversErrorHandlers.remove());
+    }
   }
 
   /**
@@ -278,14 +293,18 @@ public class AsyncFragmentLoader {
     logEventProgress(eventGroup, type, null, null);
   }
 
-  private static native JsArrayInteger createJsArrayInteger() /*-{
-    return [];
-  }-*/;
+  /**
+   * Compute the fragment number for the base fragment of
+   * <code>splitPoint</code>.
+   */
+  private static int baseFragmentNumber(int splitPoint) {
+    return numEntries + 2 * (splitPoint - 1);
+  }
 
   private static native JavaScriptObject createStatsEvent(String eventGroup,
       String type, Integer fragment, Integer size) /*-{
     var evt = {
-     moduleName: @com.google.gwt.core.client.GWT::getModuleName()(), 
+      moduleName: @com.google.gwt.core.client.GWT::getModuleName()(), 
       subSystem: 'runAsync',
       evtGroup: eventGroup,
       millis: (new Date()).getTime(),
@@ -300,12 +319,8 @@ public class AsyncFragmentLoader {
     return evt;
   }-*/;
 
-  private static native void gwtInstallCode(String text) /*-{
-    __gwtInstallCode(text);
-  }-*/;
-
   /**
-   * Call the linker-supplied __gwtStartLoadingFragment function. It should
+   * Use the linker-supplied __gwtStartLoadingFragment function. It should
    * either start the download and return null or undefined, or it should return
    * a URL that should be downloaded to get the code. If it starts the download
    * itself, it can synchronously load it, e.g. from cache, if that makes sense.
@@ -314,32 +329,21 @@ public class AsyncFragmentLoader {
     return __gwtStartLoadingFragment(fragment);
   }-*/;
 
-  /**
-   * Return whether all initial fragments have completed loading.
-   */
-  private static boolean haveInitialFragmentsLoaded() {
-    return remainingInitialFragments != null
-        && remainingInitialFragments.length() > 0;
-  }
-
-  private static boolean isInitial(int splitPoint) {
-    if (splitPoint == leftoversFragment()) {
-      return true;
-    }
-    for (int sp : initialLoadSequence) {
-      if (sp == splitPoint) {
-        return true;
-      }
-    }
-    return false;
-  }
+  private static native void installCode(String text) /*-{
+    __gwtInstallCode(text);
+  }-*/;
 
   private static native boolean isStatsAvailable() /*-{
     return !!$stats;
   }-*/;
 
-  private static int leftoversFragment() {
-    return numEntries;
+  /**
+   * Compute the leftovers fragment number. This method can only be called once
+   * <code>base</code> has been set.
+   */
+  private static int leftoversFragmentNumber() {
+    assert (base >= 0);
+    return numEntries + 2 * (base - 1) + 1;
   }
 
   /**
@@ -352,12 +356,6 @@ public class AsyncFragmentLoader {
     @SuppressWarnings("unused")
     boolean toss = isStatsAvailable()
         && stats(createStatsEvent(eventGroup, type, fragment, size));
-  }
-
-  private static void logFragmentLoaded(int fragment) {
-    String logGroup = (fragment == leftoversFragment())
-        ? LwmLabels.LEFTOVERS_DOWNLOAD : LwmLabels.downloadGroup(fragment);
-    logEventProgress(logGroup, LwmLabels.END, fragment, null);
   }
 
   private static void startLoadingFragment(int fragment,
@@ -378,7 +376,7 @@ public class AsyncFragmentLoader {
                 && xhr.getResponseText() != null
                 && xhr.getResponseText().length() != 0) {
               try {
-                gwtInstallCode(xhr.getResponseText());
+                installCode(xhr.getResponseText());
               } catch (RuntimeException e) {
                 loadErrorHandler.loadFailed(e);
               }
@@ -394,40 +392,12 @@ public class AsyncFragmentLoader {
     }
   }
 
-  /**
-   * Start downloading the next fragment in the initial sequence, if there are
-   * any left.
-   */
-  private static void startLoadingNextInitial() {
-    if (remainingInitialFragments == null) {
-      // first call, so initialize remainingInitialFragments
-      remainingInitialFragments = createJsArrayInteger();
-      for (int sp : initialLoadSequence) {
-        remainingInitialFragments.push(sp);
-      }
-      remainingInitialFragments.push(leftoversFragment());
-    }
-
-    if (remainingInitialFragments.length() > 0) {
-      // start loading the next initial fragment
-      initialFragmentsLoading = true;
-      int nextSplitPoint = remainingInitialFragments.get(0);
-      logEventProgress(LwmLabels.downloadGroup(nextSplitPoint), LwmLabels.BEGIN,
-          nextSplitPoint, null);
-      startLoadingFragment(nextSplitPoint, new InitialFragmentDownloadFailed());
-      return;
-    }
-
-    // all initials are finished
-    initialFragmentsLoading = false;
-    assert (haveInitialFragmentsLoaded());
-    
-    // start loading any pending fragments
-    assert (waitingForInitialFragments.length() == waitingForInitialFragmentsErrorHandlers.size());
-    while (waitingForInitialFragments.length() > 0) {
-      startLoadingFragment(waitingForInitialFragments.shift(),
-          waitingForInitialFragmentsErrorHandlers.remove());
-    }
+  private static void startLoadingLeftovers() {
+    leftoversLoading = true;
+    logEventProgress(LwmLabels.LEFTOVERS_DOWNLOAD, LwmLabels.BEGIN,
+        leftoversFragmentNumber(), null);
+    startLoadingFragment(leftoversFragmentNumber(),
+        new LeftoversDownloadFailed());
   }
 
   /**
