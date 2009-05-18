@@ -1,0 +1,8 @@
+branch-info.txt for the 2009.05.12-r5406 snapshot branch.
+Tracks interactions between this branch and other branches.
+See: http://code.google.com/p/google-web-toolkit/wiki/ManagingMerges
+
+Copies:
+/branches/snapshot-2009.05.12-r5406 was created (r5412) as a straight copy from /trunk/@5406
+
+Merges:
