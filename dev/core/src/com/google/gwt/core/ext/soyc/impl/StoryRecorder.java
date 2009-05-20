@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.google.gwt.core.ext.soyc.impl;
 
 import com.google.gwt.core.ext.TreeLogger;
@@ -22,7 +21,6 @@ import com.google.gwt.core.ext.soyc.FunctionMember;
 import com.google.gwt.core.ext.soyc.Member;
 import com.google.gwt.core.ext.soyc.Range;
 import com.google.gwt.core.ext.soyc.Story;
-import com.google.gwt.core.ext.soyc.StoryRecorder;
 import com.google.gwt.core.ext.soyc.Story.Origin;
 import com.google.gwt.dev.jjs.Correlation;
 import com.google.gwt.dev.jjs.SourceInfo;
@@ -30,13 +28,11 @@ import com.google.gwt.dev.jjs.Correlation.Axis;
 import com.google.gwt.dev.jjs.ast.JDeclaredType;
 import com.google.gwt.dev.jjs.ast.JField;
 import com.google.gwt.dev.jjs.ast.JMethod;
-import com.google.gwt.dev.jjs.ast.JProgram;
 import com.google.gwt.dev.js.ast.JsFunction;
 import com.google.gwt.dev.util.HtmlTextOutput;
 import com.google.gwt.util.tools.Utility;
 
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -54,7 +50,7 @@ import java.util.zip.GZIPOutputStream;
 /**
  * Records {@link Story}s to a file for SOYC.
  */
-public class StoryRecorderImpl implements StoryRecorder {
+public class StoryRecorder {
 
   /**
    * Associates a SourceInfo with a Range.
@@ -67,6 +63,14 @@ public class StoryRecorderImpl implements StoryRecorder {
       this.range = range;
       this.info = info;
     }
+  }
+
+  /**
+   * Used to record dependencies of a program.
+   */
+  public static void recordStories(TreeLogger logger, OutputStream out,
+      List<Map<Range, SourceInfo>> sourceInfoMaps, String[] js) {
+    new StoryRecorder().recordStoriesImpl(logger, out, sourceInfoMaps, js);
   }
 
   private int curHighestFragment = 0;
@@ -92,33 +96,20 @@ public class StoryRecorderImpl implements StoryRecorder {
 
   private Map<Story, Integer> storyIds = new HashMap<Story, Integer>();
 
-  private FileOutputStream stream;
-
   private OutputStreamWriter writer;
 
-  /**
-   * Used to record dependencies of a program.
-   * 
-   * @param jprogram
-   * @param workDir
-   * @param permutationId
-   * @param logger
-   * @return The file that the dependencies are recorded in
-   */
-  public File recordStories(JProgram jprogram, File workDir, int permutationId,
-      TreeLogger logger, List<Map<Range, SourceInfo>> sourceInfoMaps,
-      String[] js) {
+  private StoryRecorder() {
+  }
+
+  protected void recordStoriesImpl(TreeLogger logger, OutputStream out,
+      List<Map<Range, SourceInfo>> sourceInfoMaps, String[] js) {
 
     logger = logger.branch(TreeLogger.INFO, "Creating Stories file for SOYC");
 
     this.js = js;
 
-    File storiesFile = new File(workDir, "stories"
-        + Integer.toString(permutationId) + ".xml.gz");
     try {
-      stream = new FileOutputStream(storiesFile, true);
-      writer = new OutputStreamWriter(new GZIPOutputStream(stream), "UTF-8");
-      storiesFile.getParentFile().mkdirs();
+      writer = new OutputStreamWriter(new GZIPOutputStream(out), "UTF-8");
       pw = new PrintWriter(writer);
       htmlOut = new HtmlTextOutput(pw, false);
 
@@ -185,8 +176,6 @@ public class StoryRecorderImpl implements StoryRecorder {
     } catch (Throwable e) {
       logger.log(TreeLogger.ERROR, "Could not open dependency file.", e);
     }
-
-    return storiesFile;
   }
 
   private void analyzeFragment(MemberFactory memberFactory,
