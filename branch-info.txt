@@ -8,3 +8,5 @@ Copies:
 Merges:
 /trunk c5445 was merged into this branch
 /trunk c5460 was merged (r5463) into this branch (radio button fix)
+/trunk c5450 was merged into this branch
+  svn merge -c5450 https://google-web-toolkit.googlecode.com/svn/trunk .
