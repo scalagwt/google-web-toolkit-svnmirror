@@ -66,6 +66,17 @@ public class SingleJsoImplTest extends GWTTestCase {
     String call(int a, int b);
   }
 
+  interface CreatedWithCast {
+    String foo();
+  }
+
+  interface CreatedWithCastToTag {
+  }
+
+  interface CreatedWithCastToTagSub extends CreatedWithCastToTag {
+    String foo();
+  }
+
   interface Divider extends Multiplier {
     int divide(int a, int b);
   }
@@ -77,6 +88,22 @@ public class SingleJsoImplTest extends GWTTestCase {
 
     public long returnLong() {
       return 5L;
+    }
+  }
+
+  /**
+   * Even though this type is never instantiated, it's necessary to ensure that
+   * the CreatedWithCast test isn't short-circuited due to type tightening.
+   */
+  static class JavaCreatedWithCast implements CreatedWithCast {
+    public String foo() {
+      return "foo";
+    }
+  }
+
+  static class JavaCreatedWithCastToTag implements CreatedWithCastToTagSub {
+    public String foo() {
+      return "foo";
     }
   }
 
@@ -186,6 +213,26 @@ public class SingleJsoImplTest extends GWTTestCase {
     }
 
     protected JsoCallsStaticMethodInSubclassSubclass() {
+    }
+  }
+
+  static class JsoCreatedWithCast extends JavaScriptObject implements
+      CreatedWithCast {
+    protected JsoCreatedWithCast() {
+    }
+
+    public final String foo() {
+      return "foo";
+    }
+  }
+
+  static class JsoCreatedWithCastToTag extends JavaScriptObject implements
+      CreatedWithCastToTagSub {
+    protected JsoCreatedWithCastToTag() {
+    }
+
+    public final String foo() {
+      return "foo";
     }
   }
 
@@ -450,6 +497,25 @@ public class SingleJsoImplTest extends GWTTestCase {
     a.acceptString3Array(a.returnString3Array());
     a.acceptObjectArray(a.returnStringArray());
     a.acceptObject3Array(a.returnString3Array());
+  }
+
+  /**
+   * Ensure that SingleJSO types that are referred to only via a cast to the
+   * interface type are retained. If the JsoCreatedWithCast type isn't rescued
+   * correctly, the cast in this test will throw a ClassCastException since the
+   * compiler would assume there are types that implement the interface.
+   */
+  public void testCreatedWithCast() {
+    try {
+      Object a = (CreatedWithCast) JavaScriptObject.createObject();
+    } catch (ClassCastException e) {
+      fail("a");
+    }
+    try {
+      Object b = (CreatedWithCastToTag) JavaScriptObject.createObject();
+    } catch (ClassCastException e) {
+      fail("b");
+    }
   }
 
   public void testDualCase() {

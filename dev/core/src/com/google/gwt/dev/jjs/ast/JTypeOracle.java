@@ -183,8 +183,8 @@ public class JTypeOracle implements Serializable {
    * 
    * @param type any type
    * @param instantiatedTypes a set of types assumed to be instantiated. If
-   *          <code>null</code>, then there are no assumptions about which
-   *          types are instantiated.
+   *          <code>null</code>, then there are no assumptions about which types
+   *          are instantiated.
    * @return whether the type is instantiated
    */
   private static boolean isInstantiatedType(JReferenceType type,
@@ -536,6 +536,25 @@ public class JTypeOracle implements Serializable {
   }
 
   /**
+   * Computes the set of all interfaces implemented by a type.
+   */
+  private Set<JInterfaceType> allSuperInterfaces(JDeclaredType type) {
+    Set<JInterfaceType> toReturn = new IdentityHashSet<JInterfaceType>();
+    List<JInterfaceType> q = new LinkedList<JInterfaceType>();
+    q.addAll(type.getImplements());
+
+    while (!q.isEmpty()) {
+      JInterfaceType t = q.remove(0);
+
+      if (toReturn.add(t)) {
+        q.addAll(t.getImplements());
+      }
+    }
+
+    return toReturn;
+  }
+
+  /**
    * Compute all of the things I might conceivably implement, either through
    * super types or sub types.
    */
@@ -653,7 +672,7 @@ public class JTypeOracle implements Serializable {
     for (JDeclaredType type : program.getDeclaredTypes()) {
       if (!program.isJavaScriptObject(type)) {
         if (type instanceof JClassType) {
-          dualImpl.addAll(type.getImplements());
+          dualImpl.addAll(allSuperInterfaces(type));
         }
         continue;
       }
@@ -673,7 +692,15 @@ public class JTypeOracle implements Serializable {
           assert intr.getMethods().size() == 0
               || intr.getMethods().get(0).getName().equals("$clinit");
           jsoSingleImpls.put(intr, program.getJavaScriptObject());
+
+          /*
+           * Pretend JSO had always implemented the tag interface. This helps
+           * simplify cast operations.
+           */
           jsoType.addImplements(intr);
+          add(couldBeImplementedMap, intr, jsoType);
+          add(isImplementedMap, intr, jsoType);
+          add(implementsMap, jsoType, intr);
           continue;
         }
 
