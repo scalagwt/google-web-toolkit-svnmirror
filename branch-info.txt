@@ -10,3 +10,6 @@ Merges:
 /trunk c5460 was merged (r5463) into this branch (radio button fix)
 /trunk c5450 was merged into this branch
   svn merge -c5450 https://google-web-toolkit.googlecode.com/svn/trunk .
+/trunk c5466,5467 were merged (r5468) into this branch
+  svn merge -c5466,5467 http://google-web-toolkit.googlecode.com/svn/trunk/
+
