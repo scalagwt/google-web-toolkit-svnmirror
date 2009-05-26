@@ -6,10 +6,11 @@ Copies:
 /branches/snapshot-2009.05.12-r5406 was created (r5412) as a straight copy from /trunk/@5406
 
 Merges:
-/trunk c5445 was merged into this branch
+/trunk c5445 was merged into this branch (SOYC artifact handling)
 /trunk c5460 was merged (r5463) into this branch (radio button fix)
-/trunk c5450 was merged into this branch
+/trunk c5450 was merged into this branch (I18N NumberFormat force Latin)
   svn merge -c5450 https://google-web-toolkit.googlecode.com/svn/trunk .
-/trunk c5466,5467 were merged (r5468) into this branch
+/trunk c5466,5467 were merged (r5468) into this branch (SingleJsoImpl rescuing and fix)
   svn merge -c5466,5467 http://google-web-toolkit.googlecode.com/svn/trunk/
-/trunk c5393 was ROLLED BACK in this branch
+/trunk c5393 was ROLLED BACK in this branch (IFRAME XHR change)
+/trunk c5472 was merged into this branch (ClassCircularityError on SingleJsoImpl)
