@@ -14,3 +14,5 @@ Merges:
   svn merge -c5466,5467 http://google-web-toolkit.googlecode.com/svn/trunk/
 /trunk c5393 was ROLLED BACK in this branch (IFRAME XHR change)
 /trunk c5472 was merged into this branch (ClassCircularityError on SingleJsoImpl)
+/trunk c5476 was merged into this branch (bug fix for r5450 and associated tests)
+  svn merge -c5476 https://google-web-toolkit.googlecode.com/svn/trunk .
