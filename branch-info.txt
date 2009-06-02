@@ -27,3 +27,5 @@ Reverted r5296 and r5293 (r5488) from trunk (due to aw3 latency regression):
 /trunk c5485,5492 were merged into this branch (IE8 fix)
   svn merge -c5485 https://google-web-toolkit.googlecode.com/svn/trunk .
   svn merge -c5492 https://google-web-toolkit.googlecode.com/svn/trunk .
+/releases/1.6 r5332 was merged into the branch (null checks on Element/Node.is and test)
+  svn merge -c5332 https://google-web-toolkit.googlecode.com/svn/releases/1.6 .
