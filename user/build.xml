@@ -100,6 +100,15 @@
     </gwt.junit>
   </target>
 
+  <target name="pretty-test" description="Run a remote test using a manually launched browser at the given host and path">
+    <echo message="Performing remote browser testing using a manually launched browser" />
+    <gwt.junit test.args="${test.args} -out www -style PRETTY -web" test.out="${junit.out}/manual" test.cases="default.web.tests" >
+      <extraclasspaths>
+        <pathelement location="${gwt.build}/out/dev/core/bin-test" />
+      </extraclasspaths>
+    </gwt.junit>
+  </target>
+
   <target name="selenium-test" description="Run a remote test using Selenium RC test at the given host and path" if="gwt.selenium.hosts">
     <echo message="Performing remote browser testing using Selenium RC at ${gwt.selenium.hosts}" />
     <gwt.junit test.args="${test.args} -out www -selenium ${gwt.selenium.hosts}" test.out="${junit.out}/selenium" test.cases="default.web.tests" >
