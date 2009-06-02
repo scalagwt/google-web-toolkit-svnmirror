@@ -20,3 +20,7 @@ Reverted r5296 and r5293 (r5488) from trunk (due to aw3 latency regression):
   svn merge -r 5296:5295 https://google-web-toolkit.googlecode.com/svn/trunk .
   svn merge -r 5293:5292 https://google-web-toolkit.googlecode.com/svn/trunk .
   (had minor conflicts in CodeSplitter.java, JavaToJavaScriptCompiler.java)
+/trunk c5487 was merged into this branch (MissingResourceException diag info)
+  svn merge -c5487 https://google-web-toolkit.googlecode.com/svn/trunk .
+/trunk c5490 was merged into this branch (Date diag info)
+  svn merge -c5490 https://google-web-toolkit.googlecode.com/svn/trunk .
