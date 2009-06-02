@@ -16,7 +16,7 @@ Merges:
 /trunk c5472 was merged into this branch (ClassCircularityError on SingleJsoImpl)
 /trunk c5476 was merged into this branch (bug fix for r5450 and associated tests)
   svn merge -c5476 https://google-web-toolkit.googlecode.com/svn/trunk .
-Reverted r5296 and r5293 (r????) from trunk (due to aw3 latency regression):
+Reverted r5296 and r5293 (r5488) from trunk (due to aw3 latency regression):
   svn merge -r 5296:5295 https://google-web-toolkit.googlecode.com/svn/trunk .
   svn merge -r 5293:5292 https://google-web-toolkit.googlecode.com/svn/trunk .
   (had minor conflicts in CodeSplitter.java, JavaToJavaScriptCompiler.java)
