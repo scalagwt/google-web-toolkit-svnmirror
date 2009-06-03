@@ -1,0 +1,9 @@
+branch-info.txt for the snapshot-2009.06.02-r5498 branch
+Tracks interactions between this branch and other branches.
+See: http://code.google.com/p/google-web-toolkit/wiki/ManagingMerges
+
+Copies:
+/branches/snapshot-2009.06.02-r5498 was created (r5502) as a straight copy from /trunk/@5498
+   svn copy -r5498 https://google-web-toolkit.googlecode.com/svn/trunk https://google-web-toolkit.googlecode.com/svn/branches/snapshot-2009.06.02-r5498
+
+Merges:
