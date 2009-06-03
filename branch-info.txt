@@ -7,3 +7,7 @@ Copies:
    svn copy -r5498 https://google-web-toolkit.googlecode.com/svn/trunk https://google-web-toolkit.googlecode.com/svn/branches/snapshot-2009.06.02-r5498
 
 Merges:
+/branches/snapshot-2009.05.12-r5406 r5488 was merged into this branch
+   (reversion of trunk r5293 and r5296)
+   svn merge -c5488 \
+   https://google-web-toolkit.googlecode.com/svn/branches/snapshot-2009.05.12-r5406 .
