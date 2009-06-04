@@ -11,3 +11,6 @@ Merges:
    (reversion of trunk r5293 and r5296)
    svn merge -c5488 \
    https://google-web-toolkit.googlecode.com/svn/branches/snapshot-2009.05.12-r5406 .
+/trunk r5505-r5506 was merged into this branch
+   (CurrencyListGenerator nb locales)
+   svn merge --ignore-ancestry -r5504:5506 https://google-web-toolkit.googlecode.com/svn/trunk .
