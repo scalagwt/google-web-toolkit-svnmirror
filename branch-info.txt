@@ -29,3 +29,6 @@ Reverted r5296 and r5293 (r5488) from trunk (due to aw3 latency regression):
   svn merge -c5492 https://google-web-toolkit.googlecode.com/svn/trunk .
 /releases/1.6 r5332 was merged into the branch (null checks on Element/Node.is and test)
   svn merge -c5332 https://google-web-toolkit.googlecode.com/svn/releases/1.6 .
+/trunk r5505-r5506 was merged into this branch
+   (CurrencyListGenerator nb locales)
+   svn merge --ignore-ancestry -r5504:5506 https://google-web-toolkit.googlecode.com/svn/trunk .
