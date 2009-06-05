@@ -14,3 +14,5 @@ Merges:
 /trunk r5505-r5506 was merged into this branch
    (CurrencyListGenerator nb locales)
    svn merge --ignore-ancestry -r5504:5506 https://google-web-toolkit.googlecode.com/svn/trunk .
+/trunk r5510 was merged into this branch (Fix ICE)
+   svn merge --ignore-ancestry -c5510 https://google-web-toolkit.googlecode.com/svn/trunk .
