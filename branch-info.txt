@@ -18,3 +18,6 @@ Merges:
    svn merge --ignore-ancestry -c5510 https://google-web-toolkit.googlecode.com/svn/trunk .
 /trunk r5517 was merged into this branch (Fix IE hosted mode)
    svn merge -c5517 https://google-web-toolkit.googlecode.com/svn/trunk .
+/trunk 5523 was merged into this branch (Fix Linux web mode tests, OOPHM)
+   svn merge -c5523 https://google-web-toolkit.googlecode.com/svn/trunk .
+
