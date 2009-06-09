@@ -157,7 +157,7 @@ public abstract class ResourceFactory {
     return allResources;
   }
 
-  static String getResourceName(JClassType targetClass) {
+  public static String getResourceName(JClassType targetClass) {
     String name = targetClass.getName();
     if (targetClass.isMemberType()) {
       name = name.replace('.', '$');
