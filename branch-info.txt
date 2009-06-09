@@ -20,4 +20,6 @@ Merges:
    svn merge -c5517 https://google-web-toolkit.googlecode.com/svn/trunk .
 /trunk 5523 was merged into this branch (Fix Linux web mode tests, OOPHM)
    svn merge -c5523 https://google-web-toolkit.googlecode.com/svn/trunk .
+/trunk 5530 was merged into this branch (more fixes for 5523)
+   svn merge -c5530 https://google-web-toolkit.googlecode.com/svn/trunk .
 
