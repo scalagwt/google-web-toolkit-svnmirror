@@ -24,3 +24,5 @@ Merges:
    svn merge -c5530 https://google-web-toolkit.googlecode.com/svn/trunk .
 /trunk 5532 was merged into this branch (yet more fixes from 5523)
    svn merge -c5532 https://google-web-toolkit.googlecode.com/svn/trunk .
+/trunk 5538 was merged into this branch (final(?) fix from 5523)
+   svn merge -c5538 https://google-web-toolkit.googlecode.com/svn/trunk .
