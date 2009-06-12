@@ -27,24 +27,23 @@ import com.google.gwt.event.shared.HasHandlers;
 
 /**
  * Native implementation associated with
- * {@link com.google.gwt.user.client.History}.
- * User classes should not use this class directly.
+ * {@link com.google.gwt.user.client.History}. User classes should not use this
+ * class directly.
  * 
  * <p>
  * This base version uses the HTML5 standard window.onhashchange event to
  * determine when the URL hash identifier changes.
  * </p>
  */
-public class HistoryImpl implements HasValueChangeHandlers<String>,
-    HasHandlers {
+public class HistoryImpl implements HasValueChangeHandlers<String>, HasHandlers {
 
   public static native String getToken() /*-{
-    return $wnd.__gwt_historyToken || "";
-  }-*/;
+     return $wnd.__gwt_historyToken || "";
+   }-*/;
 
   protected static native void setToken(String token) /*-{
-    $wnd.__gwt_historyToken = token;
-  }-*/;
+     $wnd.__gwt_historyToken = token;
+   }-*/;
 
   private HandlerManager handlers = new HandlerManager(null);
 
@@ -67,6 +66,9 @@ public class HistoryImpl implements HasValueChangeHandlers<String>,
    * Fires the {@link ValueChangeEvent} to all handlers with the given tokens.
    */
   public void fireHistoryChangedImpl(String newToken) {
+    if ((newToken.length() > 0) && (newToken.charAt(0) == '!')) {
+      newToken = newToken.substring(1);
+    }
     ValueChangeEvent.fire(this, newToken);
   }
 
@@ -75,28 +77,28 @@ public class HistoryImpl implements HasValueChangeHandlers<String>,
   }
 
   public native boolean init() /*-{
-    var token = '';
+     var token = '';
 
-    // Get the initial token from the url's hash component.
-    var hash = $wnd.location.hash;
-    if (hash.length > 0) {
-      token = this.@com.google.gwt.user.client.impl.HistoryImpl::decodeFragment(Ljava/lang/String;)(hash.substring(1));
-    }
+     // Get the initial token from the url's hash component.
+     var hash = $wnd.location.hash;
+     if (hash.length > 0) {
+       token = this.@com.google.gwt.user.client.impl.HistoryImpl::decodeFragment(Ljava/lang/String;)(hash.substring(1));
+     }
 
-    @com.google.gwt.user.client.impl.HistoryImpl::setToken(Ljava/lang/String;)(token);
+     @com.google.gwt.user.client.impl.HistoryImpl::setToken(Ljava/lang/String;)(token);
 
-    var historyImpl = this;
-    $wnd.onhashchange = function() {
-      var token = '', hash = $wnd.location.hash;
-      if (hash.length > 0) {
-        token = historyImpl.@com.google.gwt.user.client.impl.HistoryImpl::decodeFragment(Ljava/lang/String;)(hash.substring(1));
-      }
+     var historyImpl = this;
+     $wnd.onhashchange = function() {
+       var token = '', hash = $wnd.location.hash;
+       if (hash.length > 0) {
+         token = historyImpl.@com.google.gwt.user.client.impl.HistoryImpl::decodeFragment(Ljava/lang/String;)(hash.substring(1));
+       }
 
-      historyImpl.@com.google.gwt.user.client.impl.HistoryImpl::newItemOnEvent(Ljava/lang/String;)(token);
-    };
+       historyImpl.@com.google.gwt.user.client.impl.HistoryImpl::newItemOnEvent(Ljava/lang/String;)(token);
+     };
 
-    return true;
-  }-*/;
+     return true;
+   }-*/;
 
   public final void newItem(String historyToken, boolean issueEvent) {
     historyToken = (historyToken == null) ? "" : historyToken;
@@ -119,22 +121,22 @@ public class HistoryImpl implements HasValueChangeHandlers<String>,
   }
 
   protected native String decodeFragment(String encodedFragment) /*-{
-    // decodeURI() does *not* decode the '#' character.
-    return decodeURI(encodedFragment.replace("%23", "#"));
-  }-*/;
+     // decodeURI() does *not* decode the '#' character.
+     return decodeURI(encodedFragment.replace("%23", "#"));
+   }-*/;
 
   protected native String encodeFragment(String fragment) /*-{
-    // encodeURI() does *not* encode the '#' character.
-    return encodeURI(fragment).replace("#", "%23");
-  }-*/;
+     // encodeURI() does *not* encode the '#' character.
+     return encodeURI(fragment).replace("#", "%23");
+   }-*/;
 
   /**
    * The standard updateHash implementation assigns to location.hash() with an
    * encoded history token.
    */
   protected native void nativeUpdate(String historyToken) /*-{
-    $wnd.location.hash = this.@com.google.gwt.user.client.impl.HistoryImpl::encodeFragment(Ljava/lang/String;)(historyToken);
-  }-*/;
+     $wnd.location.hash = this.@com.google.gwt.user.client.impl.HistoryImpl::encodeFragment(Ljava/lang/String;)(historyToken);
+   }-*/;
 
   protected void nativeUpdateOnEvent(String historyToken) {
     // Do nothing, the hash is already updated.
