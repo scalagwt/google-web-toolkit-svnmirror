@@ -7,4 +7,5 @@ Copies:
 $ svn cp https://google-web-toolkit.googlecode.com/svn/trunk@5570 https://google-web-toolkit.googlecode.com/svn/branches/snapshot-2009.06.16-r5570
 
 Merges:
-- None, yet.
+/trunk 5574, 5576-5579 was merged (r5581) into snapshot
+  $ svn merge -c 5574 -r 5576:5579 https://google-web-toolkit.googlecode.com/svn/trunk
