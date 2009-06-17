@@ -130,6 +130,10 @@ public final class ResourceGeneratorUtil {
    * This method is sensitive to the <code>locale</code> deferred-binding
    * property and will attempt to use a best-match lookup by removing locale
    * components.
+   * <p>
+   * Loading through a ClassLoader with this method is much slower than the
+   * other <code>findResources</code> methods which make use of the compiler's
+   * ResourceOracle.
    * 
    * @param logger a TreeLogger that will be used to report errors or warnings
    * @param context the ResourceContext in which the ResourceGenerator is
@@ -141,20 +145,16 @@ public final class ResourceGeneratorUtil {
    *          specified, using the name of the method and each of supplied
    *          extensions in the order in which they are specified
    * @return URLs for each {@link Source} annotation value defined on the
-   *         method, or an empty array if no sources could be found.
+   *         method.
    * @throws UnableToCompleteException if ore or more of the sources could not
    *           be found. The error will be reported via the <code>logger</code>
    *           provided to this method
-   * @deprecated Loading through a ClassLoader with this method is much slower
-   *             than the other <code>findResources</code> methods which make
-   *             use of the compiler's ResourceOracle.
    */
-  @Deprecated
   public static URL[] findResources(TreeLogger logger, ClassLoader classLoader,
       ResourceContext context, JMethod method, String[] defaultSuffixes)
       throws UnableToCompleteException {
     return findResources(logger, new ClassLoaderLocator(classLoader), context,
-        method, defaultSuffixes);
+        method, defaultSuffixes, true);
   }
 
   /**
@@ -167,15 +167,17 @@ public final class ResourceGeneratorUtil {
    * components.
    * <p>
    * The compiler's ResourceOracle will be used to resolve resource locations.
-   * If it is necessary to alter the manner in which resources are resolved, use
-   * the overload that accepts an arbitrary ClassLoader.
+   * If the desired resource cannot be found in the ResourceOracle, this method
+   * will fall back to using the current thread's context ClassLoader. If it is
+   * necessary to alter the way in which resources are located, use the overload
+   * that accepts a ClassLoader.
    * 
    * @param logger a TreeLogger that will be used to report errors or warnings
    * @param context the ResourceContext in which the ResourceGenerator is
    *          operating
    * @param method the method to examine for {@link Source} annotations
    * @return URLs for each {@link Source} annotation value defined on the
-   *         method, or an empty array if no sources could be found.
+   *         method.
    * @throws UnableToCompleteException if ore or more of the sources could not
    *           be found. The error will be reported via the <code>logger</code>
    *           provided to this method
@@ -195,8 +197,10 @@ public final class ResourceGeneratorUtil {
    * components.
    * <p>
    * The compiler's ResourceOracle will be used to resolve resource locations.
-   * If it is necessary to alter the manner in which resources are resolved, use
-   * the overload that accepts an arbitrary ClassLoader.
+   * If the desired resource cannot be found in the ResourceOracle, this method
+   * will fall back to using the current thread's context ClassLoader. If it is
+   * necessary to alter the way in which resources are located, use the overload
+   * that accepts a ClassLoader.
    * 
    * @param logger a TreeLogger that will be used to report errors or warnings
    * @param context the ResourceContext in which the ResourceGenerator is
@@ -207,7 +211,7 @@ public final class ResourceGeneratorUtil {
    *          specified, using the name of the method and each of supplied
    *          extensions in the order in which they are specified
    * @return URLs for each {@link Source} annotation value defined on the
-   *         method, or an empty array if no sources could be found.
+   *         method.
    * @throws UnableToCompleteException if ore or more of the sources could not
    *           be found. The error will be reported via the <code>logger</code>
    *           provided to this method
@@ -215,9 +219,25 @@ public final class ResourceGeneratorUtil {
   public static URL[] findResources(TreeLogger logger, ResourceContext context,
       JMethod method, String[] defaultSuffixes)
       throws UnableToCompleteException {
-    return findResources(logger, new ResourceOracleLocator(
-        context.getGeneratorContext().getResourcesOracle()), context, method,
-        defaultSuffixes);
+
+    // Try to find the resources with ResourceOracle
+    Locator locator = new ResourceOracleLocator(
+        context.getGeneratorContext().getResourcesOracle());
+
+    // Don't report errors since we have a fallback mechanism
+    URL[] toReturn = findResources(logger, locator, context, method,
+        defaultSuffixes, false);
+
+    if (toReturn == null) {
+      // Since not all resources were found, try with ClassLoader
+      locator = new ClassLoaderLocator(
+          Thread.currentThread().getContextClassLoader());
+
+      // Do report hard failures
+      toReturn = findResources(logger, locator, context, method,
+          defaultSuffixes, true);
+    }
+    return toReturn;
   }
 
   /**
@@ -237,9 +257,16 @@ public final class ResourceGeneratorUtil {
     }
   }
 
+  /**
+   * Main implementation of findResources.
+   * 
+   * @param reportErrors controls whether or not the inability to locate any
+   *          given resource should be a hard error (throw an UnableToComplete)
+   *          or a soft error (return null).
+   */
   private static URL[] findResources(TreeLogger logger, Locator locator,
-      ResourceContext context, JMethod method, String[] defaultSuffixes)
-      throws UnableToCompleteException {
+      ResourceContext context, JMethod method, String[] defaultSuffixes,
+      boolean reportErrors) throws UnableToCompleteException {
     logger = logger.branch(TreeLogger.DEBUG, "Finding resources");
 
     String locale;
@@ -253,7 +280,10 @@ public final class ResourceGeneratorUtil {
 
     checkForDeprecatedAnnotations(logger, method);
 
+    boolean error = false;
     Source resourceAnnotation = method.getAnnotation(Source.class);
+    URL[] toReturn;
+
     if (resourceAnnotation == null) {
       if (defaultSuffixes != null) {
         for (String extension : defaultSuffixes) {
@@ -263,44 +293,60 @@ public final class ResourceGeneratorUtil {
                   + extension), locale);
 
           if (resourceUrl != null) {
+            // Early out because we found a hit
             return new URL[] {resourceUrl};
           }
         }
       }
-      logger.log(TreeLogger.SPAM,
-          "No annotation and no hits with default extensions");
-      return new URL[0];
-    }
 
-    String[] resources = resourceAnnotation.value();
-
-    URL[] toReturn = new URL[resources.length];
-
-    boolean error = false;
-    int tagIndex = 0;
-    for (String resource : resources) {
-      // Try to find the resource relative to the package.
-      URL resourceURL = tryFindResource(locator, getPathRelativeToPackage(
-          method.getEnclosingType().getPackage(), resource), locale);
-
-      // If we didn't find the resource relative to the package, assume it is
-      // absolute.
-      if (resourceURL == null) {
-        resourceURL = tryFindResource(locator, resource, locale);
+      if (reportErrors) {
+        logger.log(TreeLogger.ERROR, "No " + Source.class.getName()
+            + " annotation and no resources found with default extensions");
       }
+      toReturn = null;
+      error = true;
 
-      if (resourceURL == null) {
-        logger.log(TreeLogger.ERROR, "Resource " + resource
-            + " not found on classpath. Is the name specified as "
-            + "Class.getResource() would expect?");
-        error = true;
+    } else {
+      // The user has put an @Source annotation on the accessor method
+      String[] resources = resourceAnnotation.value();
+
+      toReturn = new URL[resources.length];
+
+      int tagIndex = 0;
+      for (String resource : resources) {
+        // Try to find the resource relative to the package.
+        URL resourceURL = tryFindResource(locator, getPathRelativeToPackage(
+            method.getEnclosingType().getPackage(), resource), locale);
+
+        // If we didn't find the resource relative to the package, assume it is
+        // absolute.
+        if (resourceURL == null) {
+          resourceURL = tryFindResource(locator, resource, locale);
+        }
+
+        if (resourceURL == null) {
+          error = true;
+          if (reportErrors) {
+            logger.log(TreeLogger.ERROR, "Resource " + resource
+                + " not found. Is the name specified as Class.getResource()"
+                + " would expect?");
+          } else {
+            // Speculative attempts should not emit errors
+            logger.log(TreeLogger.DEBUG, "Stopping because " + resource
+                + " not found");
+          }
+        }
+
+        toReturn[tagIndex++] = resourceURL;
       }
-
-      toReturn[tagIndex++] = resourceURL;
     }
 
     if (error) {
-      throw new UnableToCompleteException();
+      if (reportErrors) {
+        throw new UnableToCompleteException();
+      } else {
+        return null;
+      }
     }
 
     return toReturn;
