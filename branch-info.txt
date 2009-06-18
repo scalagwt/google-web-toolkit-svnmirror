@@ -9,3 +9,6 @@ $ svn cp https://google-web-toolkit.googlecode.com/svn/trunk@5570 https://google
 Merges:
 /trunk 5574, 5576-5579 was merged (r5581) into snapshot
   $ svn merge -c 5574 -r 5576:5579 https://google-web-toolkit.googlecode.com/svn/trunk
+/trunk 5585 was merged (r5586) into snapshot
+  $ svn merge -c5585 https://google-web-toolkit.googlecode.com/svn/trunk
+
