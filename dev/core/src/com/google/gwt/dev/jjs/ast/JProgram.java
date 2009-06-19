@@ -1052,7 +1052,7 @@ public class JProgram extends JNode {
 
   public void setSplitPointInitialSequence(List<Integer> list) {
     assert splitPointInitialSequence.isEmpty();
-    splitPointInitialSequence.addAll(list);
+    splitPointInitialSequence = new ArrayList<Integer>(list);
   }
 
   /**
