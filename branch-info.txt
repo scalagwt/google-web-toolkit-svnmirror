@@ -28,3 +28,5 @@ Merges:
    svn merge -c5538 https://google-web-toolkit.googlecode.com/svn/trunk .
 /trunk 5554 was merged into this branch (fix breaking API change)
    svn merge -c5554 https://google-web-toolkit.googlecode.com/svn/trunk .
+/trunk 5627 was merged (r5653) into snapshot
+  $ svn merge -c5627 https://google-web-toolkit.googlecode.com/svn/trunk
