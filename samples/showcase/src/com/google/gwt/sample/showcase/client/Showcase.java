@@ -230,7 +230,7 @@ public class Showcase implements EntryPoint {
     app.addSelectionHandler(new SelectionHandler<TreeItem>() {
       public void onSelection(SelectionEvent<TreeItem> event) {
         TreeItem item = event.getSelectedItem();
-        String historyToken = ((Hyperlink)item.getWidget()).getTargetHistoryToken();
+        String historyToken = ((Hyperlink) item.getWidget()).getTargetHistoryToken();
         ContentWidget content = itemWidgets.get(item);
         if (content != null && !content.equals(app.getContent())) {
           History.newItem(historyToken);
@@ -444,7 +444,9 @@ public class Showcase implements EntryPoint {
     for (String localeName : localeNames) {
       if (!localeName.equals("default")) {
         String nativeName = LocaleInfo.getLocaleNativeDisplayName(localeName);
-        localeBox.addItem(nativeName, localeName);
+        // String hl = "<a href=?locale=" + localeName + ">" + nativeName + "</a>";        
+        // localeBox.addItem(hl, localeName, true);
+        localeBox.addItem(nativeName, localeName);        
         if (localeName.equals(currentLocale)) {
           localeBox.setSelectedIndex(localeBox.getItemCount() - 1);
         }
@@ -457,6 +459,9 @@ public class Showcase implements EntryPoint {
             "");
       }
     });
+        
+    
+    
     HorizontalPanel localeWrapper = new HorizontalPanel();
     localeWrapper.add(images.locale().createImage());
     localeWrapper.add(localeBox);

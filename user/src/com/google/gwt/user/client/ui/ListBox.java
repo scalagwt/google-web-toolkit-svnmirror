@@ -137,6 +137,17 @@ public class ListBox extends FocusWidget implements SourcesChangeEvents,
   }
 
   /**
+   * Adds an item to the list box, specifying an initial value for the item.
+   * 
+   * @param item the text of the item to be added
+   * @param value the item's value, to be submitted if it is part of a
+   *          {@link FormPanel}; cannot be <code>null</code>
+   */
+  public void addItem(String html, String value, boolean asHtml) {
+    insertItem(html, value, INSERT_AT_END, true);
+  }
+  
+  /**
    * Removes all items from the list box.
    */
   public void clear() {
@@ -229,6 +240,30 @@ public class ListBox extends FocusWidget implements SourcesChangeEvents,
     SelectElement select = getSelectElement();
     OptionElement option = Document.get().createOptionElement();
     option.setText(item);
+    option.setValue(value);
+
+    if ((index == -1) || (index == select.getLength())) {
+      select.add(option, null);
+    } else {
+      OptionElement before = select.getOptions().getItem(index);
+      select.add(option, before);
+    }
+  }  
+
+  /**
+   * Inserts an item into the list box, specifying an initial value for the
+   * item. If the index is less than zero, or greater than or equal to the
+   * length of the list, then the item will be appended to the end of the list.
+   * 
+   * @param item the text of the item to be inserted
+   * @param value the item's value, to be submitted if it is part of a
+   *          {@link FormPanel}.
+   * @param index the index at which to insert it
+   */
+  public void insertItem(String html, String value, int index, boolean asHtml) {
+    SelectElement select = getSelectElement();
+    OptionElement option = Document.get().createOptionElement();
+    option.setInnerHTML(html);
     option.setValue(value);
 
     if ((index == -1) || (index == select.getLength())) {

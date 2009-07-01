@@ -120,6 +120,11 @@
     </classpath>
   </taskdef>
 
+  <!-- jarjar is used to re-package HtmlUnit -->
+  <taskdef name="jarjar"   
+	classname="com.tonicsystems.jarjar.JarJarTask" classpath="${gwt.tools.lib}/tonicsystems/jarjar-1.0rc8.jar"/>  
+
+
   <!-- Global Custom Tasks -->
   <presetdef name="gwt.ant">
     <ant inheritall="false" target="${target}">

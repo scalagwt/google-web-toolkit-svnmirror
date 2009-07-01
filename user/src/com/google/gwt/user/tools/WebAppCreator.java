@@ -60,6 +60,7 @@ public final class WebAppCreator {
       registerHandler(new ArgHandlerOutDirExtension());
       registerHandler(new ArgHandlerNoEclipse());
       registerHandler(new ArgHandlerOnlyEclipse());
+      registerHandler(new ArgHandlerCrawlable());
     }
 
     @Override
@@ -138,6 +139,29 @@ public final class WebAppCreator {
     }
   }
 
+  private final class ArgHandlerCrawlable extends ArgHandlerFlag {
+    @Override
+    public String getPurpose() {
+      return "Make the application crawlable";
+    }
+
+    @Override
+    public String getTag() {
+      return "-crawlable";
+    }
+
+    @Override
+    public boolean isUndocumented() {
+      return false;
+    }
+
+    @Override
+    public boolean setFlag() {
+      crawlable = true;
+      return true;
+    }
+  }
+
   private final class ArgHandlerOnlyEclipse extends ArgHandlerFlag {
     @Override
     public String getPurpose() {
@@ -160,7 +184,7 @@ public final class WebAppCreator {
       return true;
     }
   }
-
+  
   private final class ArgHandlerOverwriteExtension extends ArgHandlerOverwrite {
     @Override
     public boolean setFlag() {
@@ -200,6 +224,7 @@ public final class WebAppCreator {
   private String moduleName;
   private boolean noEclipse;
   private boolean onlyEclipse;
+  private boolean crawlable = true;
   private File outDir;
   private boolean overwrite = false;
 
@@ -216,7 +241,8 @@ public final class WebAppCreator {
     String gwtDevPath = installPath + '/' + Utility.getDevJarName();
     String gwtServletPath = installPath + '/' + "gwt-servlet.jar";
     String gwtOophmPath = installPath + '/' + "gwt-dev-oophm.jar";
-
+    String gwtCrawlPath = installPath + '/' + "gwt-crawl.jar";
+      
     // Public builds generate a DTD reference.
     String gwtModuleDtd = "";
     int gwtVersion[] = About.getGwtVersionArray();
@@ -249,8 +275,8 @@ public final class WebAppCreator {
 
     // Create a map of replacements
     Map<String, String> replacements = new HashMap<String, String>();
+    replacements.put("@moduleDir", moduleShortName);
     replacements.put("@moduleShortName", moduleShortName);
-    replacements.put("@moduleName", moduleName);
     replacements.put("@clientPackage", modulePackageName + ".client");
     replacements.put("@serverPackage", modulePackageName + ".server");
     replacements.put("@gwtSdk", installPath);
@@ -289,13 +315,13 @@ public final class WebAppCreator {
 
     List<FileCreator> files = new ArrayList<FileCreator>();
     List<FileCreator> libs = new ArrayList<FileCreator>();
+    List<FileCreator> classes = new ArrayList<FileCreator>();
     if (!onlyEclipse) {
       files.add(new FileCreator(moduleDir, moduleShortName + ".gwt.xml",
           "Module.gwt.xml"));
       files.add(new FileCreator(warDir, moduleShortName + ".html",
           "AppHtml.html"));
       files.add(new FileCreator(warDir, moduleShortName + ".css", "AppCss.css"));
-      files.add(new FileCreator(webInfDir, "web.xml", "web.xml"));
       files.add(new FileCreator(clientDir, moduleShortName + ".java",
           "AppClassTemplate.java"));
       files.add(new FileCreator(clientDir, "GreetingService" + ".java",
@@ -307,15 +333,29 @@ public final class WebAppCreator {
       files.add(new FileCreator(outDir, "build.xml", "project.ant.xml"));
       files.add(new FileCreator(outDir, "README.txt", "README.txt"));
     }
+    
+    if (crawlable) {
+      files.add(new FileCreator(serverDir, "CrawlServlet.java", "CrawlServlet.java"));
+      files.add(new FileCreator(webInfDir, "web.xml", "webcrawlable.xml"));
+      libs.add(new FileCreator(libDir, "gwt-crawl.jar", gwtCrawlPath)); 
+      if (!noEclipse) {
+        files.add(new FileCreator(outDir, ".classpath", ".classpathcrawlable"));    
+      }
+    } else {
+      files.add(new FileCreator(webInfDir, "web.xml", "web.xml"));      
+    }
+    
     if (!noEclipse) {
       assert new File(gwtDevPath).isAbsolute();
       libs.add(new FileCreator(libDir, "gwt-servlet.jar", gwtServletPath));
-      files.add(new FileCreator(outDir, ".project", ".project"));
-      files.add(new FileCreator(outDir, ".classpath", ".classpath"));
+      files.add(new FileCreator(outDir, ".project", ".project"));  
       files.add(new FileCreator(outDir, moduleShortName + ".launch",
           "App.launch"));
+      if (!crawlable) { 
+        files.add(new FileCreator(outDir, ".classpath", ".classpath"));  
+      }
     }
-
+    
     // copy source files, replacing the content as needed
     for (FileCreator fileCreator : files) {
       URL url = WebAppCreator.class.getResource(fileCreator.sourceName + "src");
@@ -335,6 +375,7 @@ public final class WebAppCreator {
       FileInputStream is = new FileInputStream(fileCreator.sourceName);
       File file = Utility.createNormalFile(fileCreator.destDir,
           fileCreator.destName, overwrite, ignore);
+            
       if (file != null) {
         FileOutputStream os = new FileOutputStream(file);
         Util.copy(is, os);
