@@ -240,8 +240,8 @@ public final class WebAppCreator {
     String gwtUserPath = installPath + '/' + "gwt-user.jar";
     String gwtDevPath = installPath + '/' + Utility.getDevJarName();
     String gwtServletPath = installPath + '/' + "gwt-servlet.jar";
+    String gwtCrawlPath = installPath + "/crawl/";
     String gwtOophmPath = installPath + '/' + "gwt-dev-oophm.jar";
-    String gwtCrawlPath = installPath + '/' + "gwt-crawl.jar";
       
     // Public builds generate a DTD reference.
     String gwtModuleDtd = "";
@@ -268,6 +268,8 @@ public final class WebAppCreator {
     File warDir = Utility.getDirectory(outDir, "war", true);
     File webInfDir = Utility.getDirectory(warDir, "WEB-INF", true);
     File libDir = Utility.getDirectory(webInfDir, "lib", true);
+    File classesDir = Utility.getDirectory(webInfDir, "classes", true);
+    File crawlServletClassDir = Utility.getDirectory(webInfDir, "classes/com/google/gwt/user/crawl/", true);
     File moduleDir = Utility.getDirectory(srcDir, modulePackageName.replace(
         '.', '/'), true);
     File clientDir = Utility.getDirectory(moduleDir, "client", true);
@@ -316,6 +318,7 @@ public final class WebAppCreator {
     List<FileCreator> files = new ArrayList<FileCreator>();
     List<FileCreator> libs = new ArrayList<FileCreator>();
     List<FileCreator> classes = new ArrayList<FileCreator>();
+    
     if (!onlyEclipse) {
       files.add(new FileCreator(moduleDir, moduleShortName + ".gwt.xml",
           "Module.gwt.xml"));
@@ -335,9 +338,34 @@ public final class WebAppCreator {
     }
     
     if (crawlable) {
-      files.add(new FileCreator(serverDir, "CrawlServlet.java", "CrawlServlet.java"));
+//      files.add(new FileCreator(serverDir, "CrawlServlet.java", "CrawlServlet.java"));
+      
+      classes.add(new FileCreator(crawlServletClassDir, "CrawlServlet.class", gwtCrawlPath + "CrawlServlet.class"));
+      
       files.add(new FileCreator(webInfDir, "web.xml", "webcrawlable.xml"));
-      libs.add(new FileCreator(libDir, "gwt-crawl.jar", gwtCrawlPath)); 
+      
+      // read the directory here and copy all files from the crawl directory into the WEB-INF/lib directory
+      
+      
+      libs.add(new FileCreator(libDir, "htmlunit-2.5.jar", gwtCrawlPath + "htmlunit-2.5.jar"));
+      libs.add(new FileCreator(libDir, "commons-codec-1.3.jar", gwtCrawlPath + "commons-codec-1.3.jar"));
+      libs.add(new FileCreator(libDir, "htmlunit-core-js-2.5.jar", gwtCrawlPath + "htmlunit-core-js-2.5.jar"));
+      libs.add(new FileCreator(libDir, "commons-collections-3.2.1.jar", gwtCrawlPath + "commons-collections-3.2.1.jar"));
+      libs.add(new FileCreator(libDir, "commons-httpclient-3.1.jar", gwtCrawlPath + "commons-httpclient-3.1.jar"));
+      libs.add(new FileCreator(libDir, "sac-1.3.jar", gwtCrawlPath + "sac-1.3.jar"));
+      libs.add(new FileCreator(libDir, "commons-io-1.4.jar", gwtCrawlPath + "commons-io-1.4.jar"));
+      libs.add(new FileCreator(libDir, "serializer-2.7.1.jar", gwtCrawlPath + "serializer-2.7.1.jar"));
+      libs.add(new FileCreator(libDir, "commons-lang-2.4.jar", gwtCrawlPath + "commons-lang-2.4.jar"));
+      libs.add(new FileCreator(libDir, "servlet-api-2.5-20081211.jar", gwtCrawlPath + "servlet-api-2.5-20081211.jar"));
+      libs.add(new FileCreator(libDir, "xalan-2.7.1.jar", gwtCrawlPath + "xalan-2.7.1.jar"));
+      libs.add(new FileCreator(libDir, "cssparser-0.9.5.jar", gwtCrawlPath + "cssparser-0.9.5.jar"));
+      libs.add(new FileCreator(libDir, "xercesImpl-2.8.1.jar", gwtCrawlPath + "xercesImpl-2.8.1.jar"));
+      libs.add(new FileCreator(libDir, "xml-apis-1.3.04.jar", gwtCrawlPath + "xml-apis-1.3.04.jar"));
+      libs.add(new FileCreator(libDir, "commons-logging-1.1.1.jar", gwtCrawlPath + "commons-logging-1.1.1.jar"));
+      libs.add(new FileCreator(libDir, "nekohtml-1.9.12.jar", gwtCrawlPath + "nekohtml-1.9.12.jar"));
+      libs.add(new FileCreator(libDir, "gwt-crawl.jar", gwtCrawlPath + "gwt-crawl.jar"));
+      
+      
       if (!noEclipse) {
         files.add(new FileCreator(outDir, ".classpath", ".classpathcrawlable"));    
       }
@@ -381,6 +409,19 @@ public final class WebAppCreator {
         Util.copy(is, os);
       }
     }
+    
+    // copy classes directly
+    for (FileCreator fileCreator : classes) {
+      FileInputStream is = new FileInputStream(fileCreator.sourceName);
+      File file = Utility.createNormalFile(fileCreator.destDir,
+          fileCreator.destName, overwrite, ignore);
+            
+      if (file != null) {
+        FileOutputStream os = new FileOutputStream(file);
+        Util.copy(is, os);
+      }
+    }
+    
   }
 
   protected boolean run() {

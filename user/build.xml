@@ -34,6 +34,8 @@
     <mkdir dir="${javac.out}" />
     <gwt.javac>
       <classpath>
+	<pathelement location="${gwt.tools}/crawl/htmlunit-2.5.jar" />
+
         <pathelement location="${gwt.tools.lib}/tomcat/servlet-api-2.5.jar" />
         <pathelement location="${gwt.tools.lib}/junit/junit-3.8.1.jar" />
         <pathelement location="${gwt.tools.lib}/jfreechart/jfreechart-1.0.3.jar" />
@@ -41,6 +43,9 @@
         <pathelement location="${gwt.tools.lib}/w3c/sac/sac-1.3.jar" />
         <pathelement location="${gwt.tools.lib}/w3c/flute/flute-1.3.jar" />
         <pathelement location="${gwt.dev.jar}" />
+
+ 
+
       </classpath>
     </gwt.javac>
 
@@ -73,6 +78,19 @@
 
   <target name="build" depends="compile" description="Build and package this project">
     <mkdir dir="${gwt.build.lib}" />
+
+
+<!--    <mkdir dir="${gwt.build.lib}/crawldeps" /> -->
+    <!-- unjar each jar, rejar into one jar -->
+<!--    <unzip dest="${gwt.build.lib}/crawldeps">
+      <patternset>
+        <include name="**/*.class"/>
+	<exclude name="META-INF/**"/>
+      </patternset>
+      <zipfileset dir="${gwt.tools}/crawl" includes="*.jar"/>
+    </unzip> -->
+
+
     <gwt.jar>
       <fileset dir="src" excludes="**/package.html" />
       <fileset dir="super" excludes="**/package.html" />
@@ -80,7 +98,18 @@
       <zipfileset src="${gwt.tools.lib}/tomcat/servlet-api-2.5.jar" />
       <zipfileset src="${gwt.tools.lib}/w3c/sac/sac-1.3.jar" />
       <zipfileset src="${gwt.tools.lib}/w3c/flute/flute-1.3.jar" />
+
+  <!--    <fileset dir="${gwt.build.lib}/crawldeps" />  -->
+
     </gwt.jar>
+
+
+<!-- build gwt-crawl.jar -->
+   <gwt.jar destfile="${gwt.build.lib}/gwt-crawl.jar">
+     <fileset dir="${javac.out}" includes="com/google/gwt/user/crawl/CrawlServlet.class" />
+   </gwt.jar> 
+
+
   </target>
 
   <target name="checkstyle" description="Static analysis of source">

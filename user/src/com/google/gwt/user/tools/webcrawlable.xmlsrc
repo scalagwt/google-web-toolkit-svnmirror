@@ -24,7 +24,7 @@
   <!-- Servlet filter for crawlability -->
     <filter>
         <filter-name>crawlServlet</filter-name>
-        <filter-class>@serverPackage.CrawlServlet</filter-class>
+        <filter-class>com.google.gwt.user.crawl.CrawlServlet</filter-class>
     </filter>
     <filter-mapping>
         <filter-name>crawlServlet</filter-name>
