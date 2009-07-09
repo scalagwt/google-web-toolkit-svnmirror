@@ -6,4 +6,7 @@ Copies:
 /branches/snapshot-2009.07.07-r5687 was created (r5688) as a straight copy from /trunk/@5687
 
 Merges:
+/trunk 5691, 5696 was merged (r5697) into snapshot
+  $ svn merge -c5691 https://google-web-toolkit.googlecode.com/svn/trunk
+  $ svn merge -c5696 https://google-web-toolkit.googlecode.com/svn/trunk
 
