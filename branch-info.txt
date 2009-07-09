@@ -21,4 +21,7 @@ Merges:
   $ svn merge -c5641 https://google-web-toolkit.googlecode.com/svn/trunk
 /trunk 5627 was merged (r5646) into snapshot
   $ svn merge -c5627 https://google-web-toolkit.googlecode.com/svn/trunk
+/trunk 5691, 5696 was merged (r5699) into snapshot
+  $ svn merge -c5691 https://google-web-toolkit.googlecode.com/svn/trunk
+  $ svn merge -c5696 https://google-web-toolkit.googlecode.com/svn/trunk
 
