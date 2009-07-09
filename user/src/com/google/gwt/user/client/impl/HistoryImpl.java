@@ -38,16 +38,17 @@ import com.google.gwt.event.shared.HasHandlers;
 public class HistoryImpl implements HasValueChangeHandlers<String>,
     HasHandlers {
 
-  static boolean updateHashOnIE6 = true;
-
   /**
    * Sets whether the IE6 history implementation will update the URL hash when
    * creating a new item. This should be used only for applications with large
    * DOM structures that are suffering from performance problems when creating
    * a new history item on IE6 and 7.
+   *
+   * @deprecated This is no longer necessary, as the underlying performance
+   * problem has been solved. It is now a no-op.
    */
+  @Deprecated
   public static void setUpdateHashOnIE6(boolean updateHash) {
-    HistoryImpl.updateHashOnIE6 = updateHash;
   }
 
   public static native String getToken() /*-{
