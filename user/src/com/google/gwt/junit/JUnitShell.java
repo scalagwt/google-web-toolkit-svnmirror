@@ -211,6 +211,58 @@ public class JUnitShell extends GWTShell {
       registerHandler(new ArgHandlerString() {
         @Override
         public String getPurpose() {
+          return "Runs hosted mode via HTMLUnit given a list of browsers; "
+              + "e.g. IE6,IE7,FF2,FF3...";
+        }
+
+        @Override
+        public String getTag() {
+          return "-htmlunithosted";
+        }
+
+        @Override
+        public String[] getTagArgs() {
+          return new String[] {"browserNames"};
+        }
+
+        @Override
+        public boolean setString(String str) {
+          String[] targets = str.split(",");
+          numClients = targets.length;
+          runStyle = RunStyleHtmlUnitHosted.create(JUnitShell.this, targets);
+          return runStyle != null;
+        }
+      });
+
+      registerHandler(new ArgHandlerString() {
+        @Override
+        public String getPurpose() {
+          return "Runs web mode via HTMLUnit given a list of browsers; "
+              + "e.g. IE6,IE7,FF2,FF3...";
+        }
+
+        @Override
+        public String getTag() {
+          return "-htmlunit";
+        }
+
+        @Override
+        public String[] getTagArgs() {
+          return new String[] {"browserNames"};
+        }
+
+        @Override
+        public boolean setString(String str) {
+          String[] targets = str.split(",");
+          numClients = targets.length;
+          runStyle = RunStyleHtmlUnit.create(JUnitShell.this, targets);
+          return runStyle != null;
+        }
+      });
+
+      registerHandler(new ArgHandlerString() {
+        @Override
+        public String getPurpose() {
           return "Run external browsers in web mode (pass a comma separated list of executables.)";
         }
 
