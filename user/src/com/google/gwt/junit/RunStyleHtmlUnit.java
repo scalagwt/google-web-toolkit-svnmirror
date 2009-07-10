@@ -129,7 +129,7 @@ public class RunStyleHtmlUnit extends RunStyleRemote {
       // TODO(jat): find the browser name in BrowserVersion
       browsers[i] = browser;
     }
-    RunStyleHtmlUnit runStyle = new RunStyleHtmlUnit(shell, browsers);
+    RunStyleHtmlUnit runStyle = new RunStyleHtmlUnitHosted(shell, browsers);
     return runStyle;
   }
 
@@ -147,8 +147,12 @@ public class RunStyleHtmlUnit extends RunStyleRemote {
       String url = getMyUrl(moduleName);
       shell.getTopLogger().log(TreeLogger.INFO, "Starting " + url
           + " on browser " + browser);
-      threads.add(new HtmlUnitThread(browser, url));
+      threads.add(createHtmlUnitThread(browser, url));
     }
+  }
+
+  protected HtmlUnitThread createHtmlUnitThread(BrowserVersion browser, String url) {
+    return new HtmlUnitThread(browser, url);
   }
 
   @Override
