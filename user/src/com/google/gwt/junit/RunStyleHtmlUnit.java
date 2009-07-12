@@ -38,6 +38,9 @@ import java.util.List;
  */
 public class RunStyleHtmlUnit extends RunStyleRemote {
 
+  /**
+   * Runs HTMLUnit in a separate thread.
+   */
   protected class HtmlUnitThread extends Thread implements AlertHandler,
       IncorrectnessListener, OnbeforeunloadHandler {
 
@@ -126,7 +129,19 @@ public class RunStyleHtmlUnit extends RunStyleRemote {
     for (int i = 0; i < targetsIn.length; ++i) {
       String browserName = targetsIn[i];
       BrowserVersion browser = BrowserVersion.FIREFOX_2;
-      // TODO(jat): find the browser name in BrowserVersion
+      // TODO(jat): better way to do this
+      if ("ff2".equalsIgnoreCase(browserName)) {
+        browser = BrowserVersion.FIREFOX_2;
+      } else if ("ff3".equalsIgnoreCase(browserName)) {
+        browser = BrowserVersion.FIREFOX_3;
+      } else if ("ie6".equalsIgnoreCase(browserName)) {
+        browser = BrowserVersion.INTERNET_EXPLORER_6;
+      } else if ("ie7".equalsIgnoreCase(browserName)) {
+        browser = BrowserVersion.INTERNET_EXPLORER_7;
+      } else {
+        shell.getTopLogger().log(TreeLogger.WARN, "Unrecognized browser "
+            + browserName + " -- using ff2");
+      }
       browsers[i] = browser;
     }
     RunStyleHtmlUnit runStyle = new RunStyleHtmlUnitHosted(shell, browsers);
@@ -151,14 +166,14 @@ public class RunStyleHtmlUnit extends RunStyleRemote {
     }
   }
 
-  protected HtmlUnitThread createHtmlUnitThread(BrowserVersion browser, String url) {
-    return new HtmlUnitThread(browser, url);
-  }
-
   @Override
   public void maybeCompileModule(String moduleName)
       throws UnableToCompleteException {
-    // TODO(jat): substitute appropriate user agent
+    // TODO(jat): substitute appropriate user agent, support multiple agents
     shell.compileForWebMode(moduleName, "gecko1_8");
+  }
+
+  protected HtmlUnitThread createHtmlUnitThread(BrowserVersion browser, String url) {
+    return new HtmlUnitThread(browser, url);
   }
 }

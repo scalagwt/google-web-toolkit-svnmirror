@@ -19,6 +19,12 @@ import com.google.gwt.core.ext.UnableToCompleteException;
 
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.WebWindow;
+import com.gargoylesoftware.htmlunit.javascript.JavaScriptEngine;
+import com.gargoylesoftware.htmlunit.javascript.host.Window;
+
+import net.sourceforge.htmlunit.corejs.javascript.Context;
+import net.sourceforge.htmlunit.corejs.javascript.ScriptableObject;
 
 
 /**
@@ -26,6 +32,30 @@ import com.gargoylesoftware.htmlunit.WebClient;
  */
 public class RunStyleHtmlUnitHosted extends RunStyleHtmlUnit {
 
+  /**
+   * JavaScriptEngine subclass that provides a hook of initializing the
+   * __gwt_HostedModePlugin property on any new window, so it acts just like
+   * Firefox with the XPCOM plugin installed.
+   */
+  private static class HostedJavaScriptEngine extends JavaScriptEngine {
+
+    private static final long serialVersionUID = 3594816610842448691L;
+
+    public HostedJavaScriptEngine(WebClient webClient) {
+      super(webClient);
+    }
+
+    @Override
+    protected void initHook(WebWindow webWindow, Context context, Window window) {
+      window.defineProperty("__gwt_HostedModePlugin",
+          new HostedModePluginObject(), ScriptableObject.READONLY);
+    }
+  }
+
+  /**
+   * Run HMTLUnit in a separate thread, replacing the default JavaScriptEngine
+   * with one that has the necessary hosted mode hooks.
+   */
   protected class HtmlUnitHostedThread extends HtmlUnitThread {
 
     public HtmlUnitHostedThread(BrowserVersion browser, String url) {
@@ -34,7 +64,8 @@ public class RunStyleHtmlUnitHosted extends RunStyleHtmlUnit {
 
     @Override
     protected void setupWebClient(WebClient webClient) {
-      HostedModePluginObject.setInjectHostedMode(true);
+      JavaScriptEngine hostedEngine = new HostedJavaScriptEngine(webClient);
+      webClient.setJavaScriptEngine(hostedEngine);
     }
   }
 
@@ -57,6 +88,7 @@ public class RunStyleHtmlUnitHosted extends RunStyleHtmlUnit {
 
   @Override
   protected String getMyUrl(String moduleName) {
+    // TODO(jat): get the correct address/port
     return super.getMyUrl(moduleName) + "?gwt.hosted=localhost:9997";
   }
 }
