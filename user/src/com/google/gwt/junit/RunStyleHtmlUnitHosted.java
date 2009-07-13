@@ -23,7 +23,6 @@ import com.gargoylesoftware.htmlunit.WebWindow;
 import com.gargoylesoftware.htmlunit.javascript.JavaScriptEngine;
 import com.gargoylesoftware.htmlunit.javascript.host.Window;
 
-import net.sourceforge.htmlunit.corejs.javascript.Context;
 import net.sourceforge.htmlunit.corejs.javascript.ScriptableObject;
 
 
@@ -46,7 +45,10 @@ public class RunStyleHtmlUnitHosted extends RunStyleHtmlUnit {
     }
 
     @Override
-    protected void initHook(WebWindow webWindow, Context context, Window window) {
+    public void initialize(WebWindow webWindow) {
+      // Hook in the hosted-mode plugin after initializing the JS engine.
+      super.initialize(webWindow);
+      Window window = (Window) webWindow.getScriptObject();
       window.defineProperty("__gwt_HostedModePlugin",
           new HostedModePluginObject(), ScriptableObject.READONLY);
     }

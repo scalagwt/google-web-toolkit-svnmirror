@@ -66,6 +66,10 @@ public class RunStyleHtmlUnit extends RunStyleRemote {
     }
 
     public void notify(String message, Object origin) {
+      if ("Obsolete content type encountered: 'text/javascript'.".equals(message)) {
+        // silently eat warning about text/javascript MIME type
+        return;
+      }
       shell.getTopLogger().log(TreeLogger.WARN, message);
     }
 

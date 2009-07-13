@@ -97,8 +97,8 @@ public class HostedModePluginObject extends ScriptableObject {
 
   private static final long serialVersionUID = -1815031145376726799L;
 
-  private Scriptable connectMethod = new ConnectMethod();
-  private Scriptable initMethod = new InitMethod();
+  private Scriptable connectMethod;
+  private Scriptable initMethod;
   private Window window;
 
   /**
@@ -121,8 +121,14 @@ public class HostedModePluginObject extends ScriptableObject {
   @Override
   public Object get(String name, Scriptable start) {
     if ("connect".equals(name)) {
+      if (connectMethod == null) {
+        connectMethod = new ConnectMethod();
+      }
       return connectMethod;
     } else if ("init".equals(name)) {
+      if (initMethod == null) {
+        initMethod = new InitMethod();
+      }
       return initMethod;
     }
     return NOT_FOUND;
