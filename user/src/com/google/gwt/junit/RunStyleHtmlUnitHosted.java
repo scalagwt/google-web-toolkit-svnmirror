@@ -15,8 +15,6 @@
  */
 package com.google.gwt.junit;
 
-import com.google.gwt.core.ext.UnableToCompleteException;
-
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebWindow;
@@ -24,7 +22,6 @@ import com.gargoylesoftware.htmlunit.javascript.JavaScriptEngine;
 import com.gargoylesoftware.htmlunit.javascript.host.Window;
 
 import net.sourceforge.htmlunit.corejs.javascript.ScriptableObject;
-
 
 /**
  * Runstyle for HTMLUnit in hosted mode.
@@ -71,17 +68,15 @@ public class RunStyleHtmlUnitHosted extends RunStyleHtmlUnit {
     }
   }
 
-  protected RunStyleHtmlUnitHosted(JUnitShell shell,
-      BrowserVersion[] browsers) {
-    super(shell, browsers);
+  public RunStyleHtmlUnitHosted(JUnitShell unitShell, String[] targets) {
+    super(unitShell, targets);
   }
-
+  
   @Override
-  public void maybeCompileModule(String moduleName)
-      throws UnableToCompleteException {
+  public void maybeCompileModule(String moduleName) {
     // No compilation needed for hosted mode
   }
-
+  
   @Override
   protected HtmlUnitThread createHtmlUnitThread(BrowserVersion browser,
       String url) {

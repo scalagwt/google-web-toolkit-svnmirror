@@ -22,7 +22,6 @@ import com.gargoylesoftware.htmlunit.AlertHandler;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.IncorrectnessListener;
-import com.gargoylesoftware.htmlunit.NicelyResynchronizingAjaxController;
 import com.gargoylesoftware.htmlunit.OnbeforeunloadHandler;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
@@ -31,7 +30,12 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Launches a web-mode test via HTMLUnit.
@@ -51,7 +55,6 @@ public class RunStyleHtmlUnit extends RunStyleRemote {
     public HtmlUnitThread(BrowserVersion browser, String url) {
       this.browser = browser;
       this.url = url;
-      start();
     }
 
     public void handleAlert(Page page, String message) {
@@ -81,103 +84,115 @@ public class RunStyleHtmlUnit extends RunStyleRemote {
       webClient.setThrowExceptionOnFailingStatusCode(false);
       webClient.setThrowExceptionOnScriptError(true);
       webClient.setOnbeforeunloadHandler(this);
-      webClient.setAjaxController(new NicelyResynchronizingAjaxController());
+      // TODO (amitmanjhi): synchronizing is unnecessary.
+      // webClient.setAjaxController(new NicelyResynchronizingAjaxController());
       setupWebClient(webClient);
       try {
         Page page = webClient.getPage(url);
         // TODO(jat): is this necessary?
         webClient.waitForBackgroundJavaScriptStartingBefore(2000);
         page.getEnclosingWindow().getJobManager().waitForJobs(60000);
-        shell.getTopLogger().log(TreeLogger.INFO, "getPage returned "
-            + ((HtmlPage) page).asXml());
+        shell.getTopLogger().log(TreeLogger.DEBUG,
+            "getPage returned " + ((HtmlPage) page).asXml());
       } catch (FailingHttpStatusCodeException e) {
-        shell.getTopLogger().log(TreeLogger.ERROR,
-            "HTTP request failed", e);
+        shell.getTopLogger().log(TreeLogger.ERROR, "HTTP request failed", e);
         return;
       } catch (MalformedURLException e) {
-        shell.getTopLogger().log(TreeLogger.ERROR,
-            "Bad URL", e);
+        shell.getTopLogger().log(TreeLogger.ERROR, "Bad URL", e);
         return;
       } catch (IOException e) {
-        shell.getTopLogger().log(TreeLogger.ERROR,
-            "I/O error on HTTP request", e);
+        shell.getTopLogger().log(TreeLogger.ERROR, "I/O error on HTTP request",
+            e);
         return;
       }
-//      synchronized (waitForUnload) {
-//        try {
-//          waitForUnload.wait();
-//        } catch (InterruptedException e) {
-//          shell.getTopLogger().log(TreeLogger.ERROR, "Interrupted wait", e);
-//        }
-//      }
+      // synchronized (waitForUnload) {
+      // try {
+      // waitForUnload.wait();
+      // } catch (InterruptedException e) {
+      // shell.getTopLogger().log(TreeLogger.ERROR, "Interrupted wait", e);
+      // }
+      // }
     }
 
     /**
      * Additional setup of the WebClient before starting test.
-     * 
-     * @param webClient
      */
     protected void setupWebClient(WebClient webClient) {
     }
   }
 
-  /**
-   * Create a RunStyleHtmlUnit instance with a list of browsers
-   * 
-   * @param shell
-   * @param targetsIn
-   * @return RunStyle instance
-   */
-  public static RunStyle create(JUnitShell shell, String[] targetsIn) {
-    BrowserVersion[] browsers = new BrowserVersion[targetsIn.length];
-    for (int i = 0; i < targetsIn.length; ++i) {
-      String browserName = targetsIn[i];
-      BrowserVersion browser = BrowserVersion.FIREFOX_2;
-      // TODO(jat): better way to do this
-      if ("ff2".equalsIgnoreCase(browserName)) {
-        browser = BrowserVersion.FIREFOX_2;
-      } else if ("ff3".equalsIgnoreCase(browserName)) {
-        browser = BrowserVersion.FIREFOX_3;
-      } else if ("ie6".equalsIgnoreCase(browserName)) {
-        browser = BrowserVersion.INTERNET_EXPLORER_6;
-      } else if ("ie7".equalsIgnoreCase(browserName)) {
-        browser = BrowserVersion.INTERNET_EXPLORER_7;
-      } else {
-        shell.getTopLogger().log(TreeLogger.WARN, "Unrecognized browser "
-            + browserName + " -- using ff2");
-      }
-      browsers[i] = browser;
+  private static final Map<String, BrowserVersion> BROWSER_MAP = createBrowserMap();
+
+  private static Map<String, BrowserVersion> createBrowserMap() {
+    Map<String, BrowserVersion> browserMap = new HashMap<String, BrowserVersion>();
+    for (BrowserVersion browser : new BrowserVersion[] {
+        BrowserVersion.FIREFOX_2, BrowserVersion.FIREFOX_3,
+        BrowserVersion.INTERNET_EXPLORER_6, BrowserVersion.INTERNET_EXPLORER_7}) {
+      browserMap.put(browser.getNickname(), browser);
     }
-    RunStyleHtmlUnit runStyle = new RunStyleHtmlUnitHosted(shell, browsers);
-    return runStyle;
+    return Collections.unmodifiableMap(browserMap);
   }
 
-  private BrowserVersion[] browsers;
-  private List<Thread> threads = new ArrayList<Thread>();
+  private final Set<BrowserVersion> browsers;
+  private final List<Thread> threads = new ArrayList<Thread>();
 
-  protected RunStyleHtmlUnit(JUnitShell shell, BrowserVersion[] browsers) {
+  /**
+   * Create a RunStyle instance with the passed-in browser targets.
+   */
+  public RunStyleHtmlUnit(JUnitShell shell, String[] targetsIn) {
     super(shell);
-    this.browsers = browsers;
+    this.browsers = getBrowserSet(targetsIn);
   }
 
   @Override
-  public void launchModule(String moduleName) throws UnableToCompleteException {
+  public void launchModule(String moduleName) {
     for (BrowserVersion browser : browsers) {
       String url = getMyUrl(moduleName);
-      shell.getTopLogger().log(TreeLogger.INFO, "Starting " + url
-          + " on browser " + browser);
-      threads.add(createHtmlUnitThread(browser, url));
+      HtmlUnitThread hut = createHtmlUnitThread(browser, url);
+      shell.getTopLogger().log(TreeLogger.INFO,
+          "Starting " + url + " on browser " + browser.getNickname());
+      hut.start();
+      threads.add(hut);
     }
   }
 
   @Override
   public void maybeCompileModule(String moduleName)
       throws UnableToCompleteException {
-    // TODO(jat): substitute appropriate user agent, support multiple agents
-    shell.compileForWebMode(moduleName, "gecko1_8");
+    shell.compileForWebMode(moduleName, getUserAgents());
   }
 
-  protected HtmlUnitThread createHtmlUnitThread(BrowserVersion browser, String url) {
+  public int numBrowsers() {
+    return browsers.size();
+  }
+
+  protected HtmlUnitThread createHtmlUnitThread(BrowserVersion browser,
+      String url) {
     return new HtmlUnitThread(browser, url);
+  }
+
+  private Set<BrowserVersion> getBrowserSet(String[] targetsIn) {
+    Set<BrowserVersion> browserSet = new HashSet<BrowserVersion>();
+    for (String browserName : targetsIn) {
+      BrowserVersion browser = BROWSER_MAP.get(browserName);
+      assert browser != null;
+      browserSet.add(browser);
+    }
+    return Collections.unmodifiableSet(browserSet);
+  }
+
+  private String[] getUserAgents() {
+    Map<BrowserVersion, String> userAgentMap = new HashMap<BrowserVersion, String>();
+    userAgentMap.put(BrowserVersion.FIREFOX_2, "gecko1_8");
+    userAgentMap.put(BrowserVersion.FIREFOX_3, "gecko");
+    userAgentMap.put(BrowserVersion.INTERNET_EXPLORER_6, "ie6");
+    userAgentMap.put(BrowserVersion.INTERNET_EXPLORER_7, "ie6");
+
+    String userAgents[] = new String[numBrowsers()];
+    int index = 0;
+    for (BrowserVersion browser : browsers) {
+      userAgents[index++] = userAgentMap.get(browser);
+    }
+    return userAgents;
   }
 }

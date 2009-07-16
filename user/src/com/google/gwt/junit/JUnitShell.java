@@ -66,10 +66,10 @@ import java.util.regex.Pattern;
  * </p>
  * 
  * <p>
- * The client classes consist of the translatable version of {@link
- * com.google.gwt.junit.client.GWTTestCase}, translatable JUnit classes, and the
- * user's own {@link com.google.gwt.junit.client.GWTTestCase}-derived class.
- * The client communicates to the server via RPC.
+ * The client classes consist of the translatable version of
+ * {@link com.google.gwt.junit.client.GWTTestCase}, translatable JUnit classes,
+ * and the user's own {@link com.google.gwt.junit.client.GWTTestCase}-derived
+ * class. The client communicates to the server via RPC.
  * </p>
  * 
  * <p>
@@ -228,8 +228,8 @@ public class JUnitShell extends GWTShell {
         @Override
         public boolean setString(String str) {
           String[] targets = str.split(",");
-          numClients = targets.length;
-          runStyle = RunStyleHtmlUnitHosted.create(JUnitShell.this, targets);
+          runStyle = new RunStyleHtmlUnitHosted(JUnitShell.this, targets);
+          numClients = ((RunStyleHtmlUnit) runStyle).numBrowsers();
           return runStyle != null;
         }
       });
@@ -254,8 +254,8 @@ public class JUnitShell extends GWTShell {
         @Override
         public boolean setString(String str) {
           String[] targets = str.split(",");
-          numClients = targets.length;
-          runStyle = RunStyleHtmlUnit.create(JUnitShell.this, targets);
+          runStyle = new RunStyleHtmlUnit(JUnitShell.this, targets);
+          numClients = ((RunStyleHtmlUnit) runStyle).numBrowsers();
           return runStyle != null;
         }
       });
@@ -389,8 +389,8 @@ public class JUnitShell extends GWTShell {
 
   /**
    * The amount of time to wait for all clients to complete a single test
-   * method, in milliseconds, measured from when the <i>last</i> client
-   * connects (and thus starts the test). 5 minutes.
+   * method, in milliseconds, measured from when the <i>last</i> client connects
+   * (and thus starts the test). 5 minutes.
    */
   private static final long TEST_METHOD_TIMEOUT_MILLIS = 30000000;
 
@@ -417,8 +417,8 @@ public class JUnitShell extends GWTShell {
 
   /**
    * Entry point for {@link com.google.gwt.junit.client.GWTTestCase}. Gets or
-   * creates the singleton {@link JUnitShell} and invokes its {@link
-   * #runTestImpl(String, TestCase, TestResult, Strategy)}.
+   * creates the singleton {@link JUnitShell} and invokes its
+   * {@link #runTestImpl(String, TestCase, TestResult, Strategy)}.
    */
   public static void runTest(String moduleName, TestCase testCase,
       TestResult testResult) throws UnableToCompleteException {
@@ -675,16 +675,16 @@ public class JUnitShell extends GWTShell {
     }
   }
 
-  void compileForWebMode(String moduleName, String userAgentString)
+  void compileForWebMode(String moduleName, String... userAgents)
       throws UnableToCompleteException {
     // Never fresh during JUnit.
     ModuleDef module = ModuleDefLoader.loadFromClassPath(getTopLogger(),
         moduleName, false);
-    if (userAgentString != null) {
+    if (userAgents != null && userAgents.length > 0) {
       Properties props = module.getProperties();
       Property userAgent = props.find("user.agent");
       if (userAgent instanceof BindingProperty) {
-        ((BindingProperty) userAgent).setAllowedValues(userAgentString);
+        ((BindingProperty) userAgent).setAllowedValues(userAgents);
       }
     }
     super.compile(getTopLogger(), module);
