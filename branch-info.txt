@@ -1,0 +1,8 @@
+branch-info.txt for the 2009.07.21 -r5768 snapshot branch.
+Tracks interactions between this branch and other branches.
+See: http://code.google.com/p/google-web-toolkit/wiki/ManagingMerges
+
+Copies:
+/branches/snapshot-2009.07.21-r5768 was created (r5770) as a straight copy from /trunk/@5768
+
+Merges:
