@@ -43,8 +43,12 @@ import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 import junit.framework.TestResult;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -691,11 +695,58 @@ public class JUnitShell extends GWTShell {
   }
 
   /**
+   * returns the set of banned {@code Platform} for a test method.
+   */
+  private Set<Platform> getBannedPlatforms(TestCase testCase) {
+    Class<?> testClass = testCase.getClass();
+    Set<Platform> bannedSet = new HashSet<Platform>();
+    if (testClass.isAnnotationPresent(DoNotRunWith.class)) {
+      bannedSet.addAll(Arrays.asList(testClass.getAnnotation(DoNotRunWith.class).value()));
+    }
+    try {
+      Method testMethod = testClass.getMethod(testCase.getName());
+      if (testMethod.isAnnotationPresent(DoNotRunWith.class)) {
+        bannedSet.addAll(Arrays.asList(testMethod.getAnnotation(
+            DoNotRunWith.class).value()));
+      }
+    } catch (SecurityException e) {
+      // should not happen
+      e.printStackTrace();
+    } catch (NoSuchMethodException e) {
+      // should not happen
+      e.printStackTrace();
+    }
+    return bannedSet;
+  }
+
+  private boolean mostNotExecuteTest(Set<Platform> bannedPlatforms) {
+    return runStyle instanceof RunStyleHtmlUnit
+        && bannedPlatforms.contains(Platform.Htmlunit);
+  }
+
+  /**
+   * Checks if a testCase should not be executed. Currently, a test is either
+   * executed on all clients (mentioned in this test) or on no clients.
+   * 
+   * @param testCase current testCase.
+   * @return true iff the test should not be executed on any of the specified
+   *         clients.
+   */
+  private boolean mustNotExecuteTest(TestCase testCase) {
+    // TODO: collect stats on tests that were not run
+    return mostNotExecuteTest(getBannedPlatforms(testCase));
+  }
+
+  /**
    * Runs a particular test case.
    */
   private void runTestImpl(String moduleName, TestCase testCase,
       TestResult testResult, Strategy strategy)
       throws UnableToCompleteException {
+
+    if (mustNotExecuteTest(testCase)) {
+      return;
+    }
 
     if (lastLaunchFailed) {
       throw new UnableToCompleteException();

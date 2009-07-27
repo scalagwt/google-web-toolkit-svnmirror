@@ -29,6 +29,7 @@ import com.google.gwt.dev.shell.ShellMainWindow;
 import com.google.gwt.dev.shell.ShellModuleSpaceHost;
 import com.google.gwt.dev.util.log.AbstractTreeLogger;
 import com.google.gwt.dev.util.log.PrintWriterTreeLogger;
+import com.google.gwt.junit.RunStyleHtmlUnitHosted;
 import com.google.gwt.util.tools.ArgHandlerString;
 
 import java.awt.Cursor;
@@ -50,6 +51,39 @@ import javax.swing.WindowConstants;
  * The main executable class for hosted mode shells based on SWT.
  */
 abstract class OophmHostedModeBase extends HostedModeBase {
+
+  abstract static class ArgProcessor extends HostedModeBase.ArgProcessor {
+    public ArgProcessor(OophmHostedModeBaseOptions options, boolean forceServer) {
+      super(options, forceServer);
+      registerHandler(new ArgHandlerPortHosted(options));
+    }
+  }
+
+  interface OophmHostedModeBaseOptions extends HostedModeBaseOptions,
+      OptionPortHosted {
+  }
+
+  /**
+   * Concrete class to implement all shell options.
+   */
+  static class OophmHostedModeBaseOptionsImpl extends HostedModeBaseOptionsImpl
+      implements OophmHostedModeBaseOptions {
+    private int portHosted;
+
+    public int getPortHosted() {
+      return portHosted;
+    }
+
+    public void setPortHosted(int port) {
+      portHosted = port;
+    }
+  }
+
+  interface OptionPortHosted {
+    int getPortHosted();
+
+    void setPortHosted(int portHosted);
+  }
 
   /**
    * Handles the -portHosted command line flag.
@@ -96,39 +130,6 @@ abstract class OophmHostedModeBase extends HostedModeBase {
       }
       return true;
     }
-  }
-
-  abstract static class ArgProcessor extends HostedModeBase.ArgProcessor {
-    public ArgProcessor(OophmHostedModeBaseOptions options, boolean forceServer) {
-      super(options, forceServer);
-      registerHandler(new ArgHandlerPortHosted(options));
-    }
-  }
-
-  interface OophmHostedModeBaseOptions extends HostedModeBaseOptions,
-      OptionPortHosted {
-  }
-
-  /**
-   * Concrete class to implement all shell options.
-   */
-  static class OophmHostedModeBaseOptionsImpl extends HostedModeBaseOptionsImpl
-      implements OophmHostedModeBaseOptions {
-    private int portHosted;
-
-    public int getPortHosted() {
-      return portHosted;
-    }
-
-    public void setPortHosted(int port) {
-      portHosted = port;
-    }
-  }
-
-  interface OptionPortHosted {
-    int getPortHosted();
-
-    void setPortHosted(int portHosted);
   }
 
   private class OophmBrowserWidgetHostImpl extends BrowserWidgetHostImpl {
@@ -199,6 +200,8 @@ abstract class OophmHostedModeBase extends HostedModeBase {
   protected static final String PACKAGE_PATH = OophmHostedModeBase.class.getPackage().getName().replace(
       '.', '/').concat("/shell/");
 
+  public static final boolean USE_HTML_UNIT = true;
+
   /**
    * Loads an image from the classpath in this package.
    */
@@ -218,7 +221,7 @@ abstract class OophmHostedModeBase extends HostedModeBase {
     if (prependPackage) {
       name = PACKAGE_PATH + name;
     }
-    
+
     URL url = (name == null) ? null : cl.getResource(name);
     if (url != null) {
       ImageIcon image = new ImageIcon(url);
@@ -300,7 +303,7 @@ abstract class OophmHostedModeBase extends HostedModeBase {
       String path = parsedUrl.getPath();
       String query = parsedUrl.getQuery();
       String hash = parsedUrl.getRef();
-      String hostedParam =  "gwt.hosted=" + listener.getEndpointIdentifier();
+      String hostedParam = "gwt.hosted=" + listener.getEndpointIdentifier();
       if (query == null) {
         query = hostedParam;
       } else {
@@ -316,18 +319,25 @@ abstract class OophmHostedModeBase extends HostedModeBase {
       getTopLogger().log(TreeLogger.ERROR, "Invalid URL " + url, e);
       throw new UnableToCompleteException();
     }
-    TreeLogger branch = getTopLogger().branch(TreeLogger.INFO,
-        "Launching firefox with " + url, null);
-    try {
-      Process browser = Runtime.getRuntime().exec("firefox " + url + "&");
-      int exitCode = browser.waitFor();
-      if (exitCode != 0) {
-        branch.log(TreeLogger.ERROR, "Exit code " + exitCode, null);
+    // TODO: for now, treat USE_HTML_UNIT as a constant. It will go away. 
+    if (USE_HTML_UNIT) {
+      getTopLogger().branch(TreeLogger.INFO, "Launching htmlunit with " + url,
+          null);
+      RunStyleHtmlUnitHosted.startHtmlUnitThread(url);
+    } else {
+      TreeLogger branch = getTopLogger().branch(TreeLogger.INFO,
+          "Launching firefox with " + url, null);
+      try {
+        Process browser = Runtime.getRuntime().exec("firefox " + url + "&");
+        int exitCode = browser.waitFor();
+        if (exitCode != 0) {
+          branch.log(TreeLogger.ERROR, "Exit code " + exitCode, null);
+        }
+      } catch (IOException e) {
+        branch.log(TreeLogger.ERROR, "Error starting browser", e);
+      } catch (InterruptedException e) {
+        branch.log(TreeLogger.ERROR, "Error starting browser", e);
       }
-    } catch (IOException e) {
-      branch.log(TreeLogger.ERROR, "Error starting browser", e);
-    } catch (InterruptedException e) {
-      branch.log(TreeLogger.ERROR, "Error starting browser", e);
     }
   }
 

@@ -13,6 +13,7 @@
       <classpath>
         <pathelement location="${gwt.tools.lib}/sun/swingworker/swing-worker-1.1.jar" />
         <pathelement location="${gwt.core.build}/bin" />
+        <pathelement location="${gwt.core.build}/../../user/bin" />
       </classpath>
     </gwt.javac>
   </target>

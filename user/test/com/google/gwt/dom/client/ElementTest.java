@@ -18,6 +18,8 @@ package com.google.gwt.dom.client;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.junit.DoNotRunWith;
+import com.google.gwt.junit.Platform;
 import com.google.gwt.junit.client.GWTTestCase;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
@@ -216,6 +218,7 @@ public class ElementTest extends GWTTestCase {
   /**
    * scroll[Left|Top], getAbsolute[Left|Top].
    */
+  @DoNotRunWith({Platform.Htmlunit})
   public void testGetAbsolutePositionWhenBodyScrolled() {
     Document doc = Document.get();
     BodyElement body = doc.getBody();
@@ -358,6 +361,7 @@ public class ElementTest extends GWTTestCase {
   /**
    * offset[Left|Top|Width|Height], offsetParent.
    */
+  @DoNotRunWith({Platform.Htmlunit})
   public void testOffsets() {
     DivElement outer = Document.get().createDivElement();
     DivElement middle = Document.get().createDivElement();
@@ -444,6 +448,7 @@ public class ElementTest extends GWTTestCase {
   /**
    * Tests that scrollLeft behaves as expected in RTL mode.
    */
+  @DoNotRunWith({Platform.Htmlunit})
   public void testScrollLeftInRtl() {
     final DivElement outer = Document.get().createDivElement();
     final DivElement inner = Document.get().createDivElement();
@@ -532,6 +537,7 @@ public class ElementTest extends GWTTestCase {
   /**
    * style.
    */
+  @DoNotRunWith({Platform.Htmlunit})
   public void testStyle() {
     DivElement div = Document.get().createDivElement();
 
@@ -545,6 +551,7 @@ public class ElementTest extends GWTTestCase {
   /**
    * Test that styles only allow camelCase.
    */
+  @DoNotRunWith({Platform.Htmlunit})
   public void testStyleCamelCase() {
     DivElement div = Document.get().createDivElement();
 

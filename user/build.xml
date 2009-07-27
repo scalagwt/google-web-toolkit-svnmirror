@@ -44,6 +44,27 @@
     <pathelement location="test_i18n_${gwt.i18n.test.InnerClassChar}" />
   </path>
 
+  <!--
+    Classpaths added for htmlunit libs 
+  -->
+  <property name="gwt.tools.htmlunitlib" location="${gwt.tools}/htmlunit/lib" />
+  <path id="htmlunit.libs">
+    <pathelement location="${gwt.tools.htmlunitlib}/commons-codec-1.3.jar" />
+    <pathelement location="${gwt.tools.htmlunitlib}/commons-collections-3.2.1.jar" />
+    <pathelement location="${gwt.tools.htmlunitlib}/commons-httpclient-3.1.jar" />
+    <pathelement location="${gwt.tools.htmlunitlib}/commons-io-1.4.jar" />
+    <pathelement location="${gwt.tools.htmlunitlib}/commons-lang-2.4.jar" />
+    <pathelement location="${gwt.tools.htmlunitlib}/commons-logging-1.1.1.jar" />
+    <pathelement location="${gwt.tools.htmlunitlib}/cssparser-0.9.5.jar" />
+    <pathelement location="${gwt.tools.htmlunitlib}/htmlunit-2.5.jar" />
+    <pathelement location="${gwt.tools.htmlunitlib}/htmlunit-core-js-2.5.jar" />
+    <pathelement location="${gwt.tools.htmlunitlib}/nekohtml-1.9.12.jar" />
+    <pathelement location="${gwt.tools.htmlunitlib}/sac-1.3.jar" />
+    <pathelement location="${gwt.tools.htmlunitlib}/serializer-2.7.1.jar" />
+    <pathelement location="${gwt.tools.htmlunitlib}/xalan-2.7.1.jar" />
+    <pathelement location="${gwt.tools.htmlunitlib}/xercesImpl-2.8.1.jar" />
+    <pathelement location="${gwt.tools.htmlunitlib}/xml-apis-1.3.04.jar" />
+  </path>
   <!-- Platform shouldn't matter here, just picking one -->
   <property.ensure name="gwt.dev.jar" location="${gwt.build.lib}/gwt-dev-${build.host.platform}.jar" />
 
@@ -58,6 +79,7 @@
         <pathelement location="${gwt.tools.lib}/w3c/sac/sac-1.3.jar" />
         <pathelement location="${gwt.tools.lib}/w3c/flute/flute-1.3.jar" />
         <pathelement location="${gwt.dev.jar}" />
+        <path refid="htmlunit.libs" />
       </classpath>
     </gwt.javac>
 
@@ -84,6 +106,7 @@
         <pathelement location="${gwt.tools.lib}/junit/junit-3.8.1.jar" />
         <pathelement location="${gwt.tools.lib}/selenium/selenium-java-client-driver.jar" />
         <pathelement location="${gwt.dev.jar}" />
+        <path refid="htmlunit.libs" />
       </classpath>
     </gwt.javac>
   </target>
@@ -167,6 +190,16 @@
     </gwt.junit>
   </target>
 
+  <target name="test.web.htmlunit" depends="compile, compile.tests" description="Run htmlunit web-mode tests for this project.">
+    <!-- TODO: add more browsers later -->
+    <gwt.junit test.args="${test.args} -htmlunit FF3" test.out="${junit.out}/${build.host.platform}-htmlunit-web-mode" test.cases="default.web.tests" >
+      <extraclasspaths>
+        <path refid="test.extraclasspath" />
+        <path refid="htmlunit.libs" />
+      </extraclasspaths>
+    </gwt.junit>
+  </target>
+  
   <target name="test.web.disableClassMetadata" depends="compile, compile.tests" description="Run only web-mode tests for this project.">
     <gwt.junit test.args="${test.args} -XdisableClassMetadata -out www -web" test.out="${junit.out}/${build.host.platform}-web-mode-disableClassMetadata" test.cases="default.web.tests" >
       <extraclasspaths>

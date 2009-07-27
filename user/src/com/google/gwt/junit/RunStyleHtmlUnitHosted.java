@@ -15,6 +15,9 @@
  */
 package com.google.gwt.junit;
 
+import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.dev.util.log.PrintWriterTreeLogger;
+
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebWindow;
@@ -27,6 +30,24 @@ import net.sourceforge.htmlunit.corejs.javascript.ScriptableObject;
  * Runstyle for HTMLUnit in hosted mode.
  */
 public class RunStyleHtmlUnitHosted extends RunStyleHtmlUnit {
+
+  /**
+   * Run HMTLUnit in a separate thread, replacing the default JavaScriptEngine
+   * with one that has the necessary hosted mode hooks.
+   */
+  protected static class HtmlUnitHostedThread extends HtmlUnitThread {
+
+    public HtmlUnitHostedThread(BrowserVersion browser, String url,
+        TreeLogger treeLogger) {
+      super(browser, url, treeLogger);
+    }
+
+    @Override
+    protected void setupWebClient(WebClient webClient) {
+      JavaScriptEngine hostedEngine = new HostedJavaScriptEngine(webClient);
+      webClient.setJavaScriptEngine(hostedEngine);
+    }
+  }
 
   /**
    * JavaScriptEngine subclass that provides a hook of initializing the
@@ -51,36 +72,32 @@ public class RunStyleHtmlUnitHosted extends RunStyleHtmlUnit {
     }
   }
 
-  /**
-   * Run HMTLUnit in a separate thread, replacing the default JavaScriptEngine
-   * with one that has the necessary hosted mode hooks.
-   */
-  protected class HtmlUnitHostedThread extends HtmlUnitThread {
+  public static HtmlUnitThread createHtmlUnitThread(BrowserVersion browser,
+      String url, TreeLogger treeLogger) {
+    return new HtmlUnitHostedThread(browser, url, treeLogger);
+  }
 
-    public HtmlUnitHostedThread(BrowserVersion browser, String url) {
-      super(browser, url);
-    }
-
-    @Override
-    protected void setupWebClient(WebClient webClient) {
-      JavaScriptEngine hostedEngine = new HostedJavaScriptEngine(webClient);
-      webClient.setJavaScriptEngine(hostedEngine);
-    }
+  public static void startHtmlUnitThread(String url) {
+    PrintWriterTreeLogger pw = new PrintWriterTreeLogger();
+    HtmlUnitThread thread = createHtmlUnitThread(
+        BrowserVersion.FIREFOX_2, url, pw);
+    thread.start();
   }
 
   public RunStyleHtmlUnitHosted(JUnitShell unitShell, String[] targets) {
     super(unitShell, targets);
   }
-  
+
   @Override
   public void maybeCompileModule(String moduleName) {
     // No compilation needed for hosted mode
   }
-  
+
   @Override
   protected HtmlUnitThread createHtmlUnitThread(BrowserVersion browser,
       String url) {
-    return new HtmlUnitHostedThread(browser, url);
+    return RunStyleHtmlUnitHosted.createHtmlUnitThread(browser, url,
+        shell.getTopLogger());
   }
 
   @Override

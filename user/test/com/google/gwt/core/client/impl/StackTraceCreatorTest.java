@@ -18,6 +18,8 @@ package com.google.gwt.core.client.impl;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.core.client.JsArrayString;
+import com.google.gwt.junit.DoNotRunWith;
+import com.google.gwt.junit.Platform;
 import com.google.gwt.junit.client.GWTTestCase;
 
 /**
@@ -57,6 +59,7 @@ public class StackTraceCreatorTest extends GWTTestCase {
   /**
    * Just make sure that reentrant behavior doesn't fail.
    */
+  @DoNotRunWith({Platform.Htmlunit})
   public static void testReentrantCalls() {
     if (!GWT.isScript()) {
       // StackTraceCreator.createStackTrace() is useless in hosted mode
@@ -68,6 +71,7 @@ public class StackTraceCreatorTest extends GWTTestCase {
     assertTrue(stack.length() > 0);
   }
 
+  @DoNotRunWith({Platform.Htmlunit})
   public static void testStackTraces() {
     Throwable t;
     try {

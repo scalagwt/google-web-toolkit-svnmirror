@@ -45,20 +45,22 @@ public class RunStyleHtmlUnit extends RunStyleRemote {
   /**
    * Runs HTMLUnit in a separate thread.
    */
-  protected class HtmlUnitThread extends Thread implements AlertHandler,
+  protected static class HtmlUnitThread extends Thread implements AlertHandler,
       IncorrectnessListener, OnbeforeunloadHandler {
 
-    private BrowserVersion browser;
-    private String url;
+    private final BrowserVersion browser;
+    private final String url;
     private Object waitForUnload = new Object();
+    private final TreeLogger treeLogger; 
 
-    public HtmlUnitThread(BrowserVersion browser, String url) {
+    public HtmlUnitThread(BrowserVersion browser, String url, TreeLogger treeLogger) {
       this.browser = browser;
       this.url = url;
+      this.treeLogger = treeLogger;
     }
 
     public void handleAlert(Page page, String message) {
-      shell.getTopLogger().log(TreeLogger.ERROR, "Alert: " + message);
+      treeLogger.log(TreeLogger.ERROR, "Alert: " + message);
     }
 
     public boolean handleEvent(Page page, String returnValue) {
@@ -73,7 +75,7 @@ public class RunStyleHtmlUnit extends RunStyleRemote {
         // silently eat warning about text/javascript MIME type
         return;
       }
-      shell.getTopLogger().log(TreeLogger.WARN, message);
+      treeLogger.log(TreeLogger.WARN, message);
     }
 
     @Override
@@ -92,16 +94,16 @@ public class RunStyleHtmlUnit extends RunStyleRemote {
         // TODO(jat): is this necessary?
         webClient.waitForBackgroundJavaScriptStartingBefore(2000);
         page.getEnclosingWindow().getJobManager().waitForJobs(60000);
-        shell.getTopLogger().log(TreeLogger.DEBUG,
+        treeLogger.log(TreeLogger.DEBUG,
             "getPage returned " + ((HtmlPage) page).asXml());
       } catch (FailingHttpStatusCodeException e) {
-        shell.getTopLogger().log(TreeLogger.ERROR, "HTTP request failed", e);
+        treeLogger.log(TreeLogger.ERROR, "HTTP request failed", e);
         return;
       } catch (MalformedURLException e) {
-        shell.getTopLogger().log(TreeLogger.ERROR, "Bad URL", e);
+        treeLogger.log(TreeLogger.ERROR, "Bad URL", e);
         return;
       } catch (IOException e) {
-        shell.getTopLogger().log(TreeLogger.ERROR, "I/O error on HTTP request",
+        treeLogger.log(TreeLogger.ERROR, "I/O error on HTTP request",
             e);
         return;
       }
@@ -165,10 +167,10 @@ public class RunStyleHtmlUnit extends RunStyleRemote {
   public int numBrowsers() {
     return browsers.size();
   }
-
+  
   protected HtmlUnitThread createHtmlUnitThread(BrowserVersion browser,
       String url) {
-    return new HtmlUnitThread(browser, url);
+    return new HtmlUnitThread(browser, url, shell.getTopLogger());
   }
 
   private Set<BrowserVersion> getBrowserSet(String[] targetsIn) {
