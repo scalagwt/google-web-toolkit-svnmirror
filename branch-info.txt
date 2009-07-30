@@ -8,3 +8,5 @@ Copies:
 Merges:
 /trunk c5819 was merged (r5835) into snapshot
   $ svn merge -c5819 http://google-web-toolkit.googlecode.com/svn/trunk .
+/trunk c5823 was merged (r5846) into snapshot
+  $ svn merge -c5823 http://google-web-toolkit.googlecode.com/svn/trunk .
