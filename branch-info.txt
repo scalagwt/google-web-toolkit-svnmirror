@@ -1,4 +1,4 @@
-branch-info.txt for the snapshot-2009.08.04-r5888 branch.
+branch-info.txt for the snapshot-2009.08.04-ihm-r5888 branch.
 Tracks interactions between this branch and other branches.
 See: http://code.google.com/p/google-web-toolkit/wiki/ManagingMerges
 
@@ -7,3 +7,6 @@ Copies:
 /branches/snapshot-2009.08.04-r5888
 
 Merges:
+/trunk r5910:5912 was merged into this branch
+  OOPHM wire protocol change (http://gwt-code-reviews.appspot.com/51835)
+  svn merge -r5910:5912 https://google-web-toolkit.googlecode.com/svn/trunk .
