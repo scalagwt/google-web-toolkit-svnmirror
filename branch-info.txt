@@ -10,3 +10,7 @@ Merges:
 /trunk r5910:5912 was merged into this branch
   OOPHM wire protocol change (http://gwt-code-reviews.appspot.com/51835)
   svn merge -r5910:5912 https://google-web-toolkit.googlecode.com/svn/trunk .
+
+/trunk r5915:5922 was merged into this branch
+  HTLMUnit changes
+  svn merge -r5915:5922 https://google-web-toolkit.googlecode.com/svn/trunk .
