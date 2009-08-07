@@ -3,9 +3,7 @@ Tracks interactions between this branch and other branches.
 See: http://code.google.com/p/google-web-toolkit/wiki/ManagingMerges
 
 Copies:
-/branches/snapshot-2009.08.04-r5888 was created (r5899) as a straight copy from /trunk/@5888
+/branches/snapshot-2009.08.04-ihm-r5888 was created (r5918) as a straight copy from 
+/branches/snapshot-2009.08.04-r5888
 
 Merges:
-/trunk c5896 was merged into this branch 
-  UiBinder
-  svn merge -c5896  https://google-web-toolkit.googlecode.com/svn/trunk .
