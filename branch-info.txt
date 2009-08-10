@@ -14,3 +14,7 @@ Merges:
 /trunk r5915:5922 was merged into this branch
   HTLMUnit changes
   svn merge -r5915:5922 https://google-web-toolkit.googlecode.com/svn/trunk .
+
+/branches/snapshot-2009.08.04-r5888 c5933 was merged into this branch 
+  Switch ImageBundleBuilder to use ImageIO.getImageReaders()...
+  svn merge -c5933 https://google-web-toolkit.googlecode.com/svn/branches/snapshot-2009.08.04-r5888 .
