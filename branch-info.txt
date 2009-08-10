@@ -18,3 +18,7 @@ Merges:
 /branches/snapshot-2009.08.04-r5888 c5933 was merged into this branch 
   Switch ImageBundleBuilder to use ImageIO.getImageReaders()...
   svn merge -c5933 https://google-web-toolkit.googlecode.com/svn/branches/snapshot-2009.08.04-r5888 .
+
+/trunk c5928 was merged into this branch
+  Fixes plugin backwards-compatibility fallback error in Safari introduced by trunk r5910:5912
+  svn merge -c5928 https://google-web-toolkit.googlecode.com/svn/trunk .
