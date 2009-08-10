@@ -9,3 +9,7 @@ Merges:
 /trunk c5896 was merged into this branch 
   UiBinder
   svn merge -c5896  https://google-web-toolkit.googlecode.com/svn/trunk .
+
+/trunk c5932 was merged into this branch 
+  Switch ImageBundleBuilder to use ImageIO.getImageReaders()...
+  svn merge -c5932 https://google-web-toolkit.googlecode.com/svn/trunk .
