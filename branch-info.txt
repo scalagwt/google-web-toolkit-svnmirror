@@ -22,3 +22,7 @@ Merges:
 /trunk c5928 was merged into this branch
   Fixes plugin backwards-compatibility fallback error in Safari introduced by trunk r5910:5912
   svn merge -c5928 https://google-web-toolkit.googlecode.com/svn/trunk .
+
+/trunk 5936 was merged into this branch
+  another wire protocol change to support the future ability to differentiate opening a new tab from refreshing an existing one
+  svn merge -c5936 https://google-web-toolkit.googlecode.com/svn/trunk .
