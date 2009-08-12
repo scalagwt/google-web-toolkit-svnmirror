@@ -26,3 +26,7 @@ Merges:
 /trunk 5936 was merged into this branch
   another wire protocol change to support the future ability to differentiate opening a new tab from refreshing an existing one
   svn merge -c5936 https://google-web-toolkit.googlecode.com/svn/trunk .
+
+/trunk 5903 was merged into this branch
+  Fixing the testcases parameter to gwt.junit in the test.web.htmlunit target.
+  svn merge -cr5903 https://google-web-toolkit.googlecode.com/svn/trunk/ .
