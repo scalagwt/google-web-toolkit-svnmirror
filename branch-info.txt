@@ -1,0 +1,9 @@
+branch-info.txt for the 2009.08.18-r5989 snapshot branch.
+Tracks interactions between this branch and other branches.
+See: http://code.google.com/p/google-web-toolkit/wiki/ManagingMerges
+
+Copies:
+/branches/snapshot-2009.08.18-r5989 was created (r5990) as a straight copy from /trunk/@5989
+
+Merges:
+
