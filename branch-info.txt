@@ -9,3 +9,4 @@ Merges:
 /trunk 6010 was merged (r6011) into snapshot
   $ svn merge -c6010 https://google-web-toolkit.googlecode.com/svn/trunk
 
+/trunk c6051 & c6052 were merged (r6064) into snapshot
