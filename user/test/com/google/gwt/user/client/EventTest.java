@@ -23,6 +23,8 @@ import com.google.gwt.event.dom.client.DoubleClickEvent;
 import com.google.gwt.event.dom.client.DoubleClickHandler;
 import com.google.gwt.event.dom.client.HasDoubleClickHandlers;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.junit.DoNotRunWith;
+import com.google.gwt.junit.Platform;
 import com.google.gwt.junit.client.GWTTestCase;
 import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.Event.NativePreviewHandler;
@@ -153,6 +155,7 @@ public class EventTest extends GWTTestCase {
    * Test that a double click results in exactly one simulated click event in
    * IE. See issue 3392 for more info.
    */
+  @DoNotRunWith(Platform.Htmlunit)
   public void testDoubleClickEvent() {
     TestLabel label = new TestLabel();
     RootPanel.get().add(label);
@@ -319,6 +322,29 @@ public class EventTest extends GWTTestCase {
     handler0.assertIsFired(true);
     handler1.assertIsFired(false);
     reg0.removeHandler();
+  }
+
+  /**
+   * Test that {@link Event#fireNativePreviewEvent(NativeEvent)} returns the
+   * correct value even if another event is fired while handling the current
+   * event.
+   */
+  public void testFireNativePreviewEventWithInterupt() {
+    NativePreviewHandler handler = new NativePreviewHandler() {
+      private boolean first = true;
+
+      public void onPreviewNativeEvent(NativePreviewEvent event) {
+        if (first) {
+          event.cancel();
+          first = false;
+          assertTrue(Event.fireNativePreviewEvent(null));
+          assertTrue(event.isCanceled());
+        }
+      }
+    };
+    HandlerRegistration reg = Event.addNativePreviewHandler(handler);
+    assertFalse(Event.fireNativePreviewEvent(null));
+    reg.removeHandler();
   }
 
   /**
@@ -521,6 +547,6 @@ public class EventTest extends GWTTestCase {
   }
 
   private native boolean isInternetExplorer() /*-{
-     return navigator.userAgent.toLowerCase().indexOf("msie") != -1;
-   }-*/;
+    return navigator.userAgent.toLowerCase().indexOf("msie") != -1;
+  }-*/;
 }

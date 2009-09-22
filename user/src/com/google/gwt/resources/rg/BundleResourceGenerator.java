@@ -20,12 +20,13 @@ import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.JMethod;
+import com.google.gwt.resources.ext.AbstractResourceGenerator;
 import com.google.gwt.resources.ext.ResourceContext;
 
 /**
  * This is a special case of ResourceGenerator that handles nested bundles.
  */
-public class BundleResourceGenerator extends AbstractResourceGenerator {
+public final class BundleResourceGenerator extends AbstractResourceGenerator {
 
   @Override
   public String createAssignment(TreeLogger logger, ResourceContext context,

@@ -16,6 +16,7 @@
 package com.google.gwt.dev.jjs;
 
 import com.google.gwt.core.ext.PropertyOracle;
+import com.google.gwt.core.ext.SelectionProperty;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.core.ext.linker.ArtifactSet;
@@ -26,9 +27,9 @@ import com.google.gwt.core.ext.linker.impl.StandardSymbolData;
 import com.google.gwt.core.ext.linker.impl.StandardCompilationAnalysis.SoycArtifact;
 import com.google.gwt.core.ext.soyc.Range;
 import com.google.gwt.core.ext.soyc.impl.DependencyRecorder;
+import com.google.gwt.core.ext.soyc.impl.SizeMapRecorder;
 import com.google.gwt.core.ext.soyc.impl.SplitPointRecorder;
 import com.google.gwt.core.ext.soyc.impl.StoryRecorder;
-import com.google.gwt.dev.PermutationResult;
 import com.google.gwt.dev.cfg.ModuleDef;
 import com.google.gwt.dev.jdt.RebindPermutationOracle;
 import com.google.gwt.dev.jdt.WebModeCompilerFrontEnd;
@@ -42,14 +43,12 @@ import com.google.gwt.dev.jjs.ast.JBlock;
 import com.google.gwt.dev.jjs.ast.JClassType;
 import com.google.gwt.dev.jjs.ast.JDeclaredType;
 import com.google.gwt.dev.jjs.ast.JExpression;
-import com.google.gwt.dev.jjs.ast.JField;
 import com.google.gwt.dev.jjs.ast.JGwtCreate;
 import com.google.gwt.dev.jjs.ast.JMethod;
 import com.google.gwt.dev.jjs.ast.JMethodBody;
 import com.google.gwt.dev.jjs.ast.JMethodCall;
 import com.google.gwt.dev.jjs.ast.JProgram;
 import com.google.gwt.dev.jjs.ast.JReboundEntryPoint;
-import com.google.gwt.dev.jjs.ast.JReferenceType;
 import com.google.gwt.dev.jjs.ast.JStatement;
 import com.google.gwt.dev.jjs.impl.ArrayNormalizer;
 import com.google.gwt.dev.jjs.impl.AssertionNormalizer;
@@ -58,6 +57,8 @@ import com.google.gwt.dev.jjs.impl.BuildTypeMap;
 import com.google.gwt.dev.jjs.impl.CastNormalizer;
 import com.google.gwt.dev.jjs.impl.CatchBlockNormalizer;
 import com.google.gwt.dev.jjs.impl.CodeSplitter;
+import com.google.gwt.dev.jjs.impl.CodeSplitter.MultipleDependencyGraphRecorder;
+import com.google.gwt.dev.jjs.impl.ControlFlowAnalyzer;
 import com.google.gwt.dev.jjs.impl.DeadCodeElimination;
 import com.google.gwt.dev.jjs.impl.EqualityNormalizer;
 import com.google.gwt.dev.jjs.impl.Finalizer;
@@ -67,6 +68,8 @@ import com.google.gwt.dev.jjs.impl.GenerateJavaAST;
 import com.google.gwt.dev.jjs.impl.GenerateJavaScriptAST;
 import com.google.gwt.dev.jjs.impl.JavaScriptObjectNormalizer;
 import com.google.gwt.dev.jjs.impl.JavaToJavaScriptMap;
+import com.google.gwt.dev.jjs.impl.JsFunctionClusterer;
+import com.google.gwt.dev.jjs.impl.JsIEBlockTextTransformer;
 import com.google.gwt.dev.jjs.impl.JsoDevirtualizer;
 import com.google.gwt.dev.jjs.impl.LongCastNormalizer;
 import com.google.gwt.dev.jjs.impl.LongEmulationNormalizer;
@@ -90,15 +93,16 @@ import com.google.gwt.dev.js.JsNormalizer;
 import com.google.gwt.dev.js.JsObfuscateNamer;
 import com.google.gwt.dev.js.JsPrettyNamer;
 import com.google.gwt.dev.js.JsReportGenerationVisitor;
-import com.google.gwt.dev.js.JsSourceGenerationVisitor;
+import com.google.gwt.dev.js.JsSourceGenerationVisitorWithSizeBreakdown;
+import com.google.gwt.dev.js.JsStackEmulator;
 import com.google.gwt.dev.js.JsStaticEval;
 import com.google.gwt.dev.js.JsStringInterner;
 import com.google.gwt.dev.js.JsSymbolResolver;
 import com.google.gwt.dev.js.JsUnusedFunctionRemover;
 import com.google.gwt.dev.js.JsVerboseNamer;
+import com.google.gwt.dev.js.SizeBreakdown;
 import com.google.gwt.dev.js.ast.JsName;
 import com.google.gwt.dev.js.ast.JsProgram;
-import com.google.gwt.dev.js.ast.JsStatement;
 import com.google.gwt.dev.util.AbstractTextOutput;
 import com.google.gwt.dev.util.DefaultTextOutput;
 import com.google.gwt.dev.util.Empty;
@@ -106,6 +110,7 @@ import com.google.gwt.dev.util.Memory;
 import com.google.gwt.dev.util.PerfLogger;
 import com.google.gwt.dev.util.TextOutput;
 import com.google.gwt.dev.util.Util;
+import com.google.gwt.dev.util.collect.Maps;
 
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.CompilationResult;
@@ -115,12 +120,11 @@ import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -128,19 +132,20 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 /**
- * Compiles the Java <code>JProgram</code> representation into its
- * corresponding JavaScript source.
+ * Compiles the Java <code>JProgram</code> representation into its corresponding
+ * JavaScript source.
  */
 public class JavaToJavaScriptCompiler {
 
   private static class PermutationResultImpl implements PermutationResult {
     private final ArtifactSet artifacts = new ArtifactSet();
     private final byte[][] js;
+    private final int permutationId;
     private final byte[] serializedSymbolMap;
     private final StatementRanges[] statementRanges;
 
     public PermutationResultImpl(String[] js, SymbolData[] symbolMap,
-        StatementRanges[] statementRanges) {
+        StatementRanges[] statementRanges, int permutationId) {
       byte[][] bytes = new byte[js.length][];
       for (int i = 0; i < js.length; ++i) {
         bytes[i] = Util.getBytes(js[i]);
@@ -155,6 +160,7 @@ public class JavaToJavaScriptCompiler {
             e);
       }
       this.statementRanges = statementRanges;
+      this.permutationId = permutationId;
     }
 
     public ArtifactSet getArtifacts() {
@@ -163,6 +169,10 @@ public class JavaToJavaScriptCompiler {
 
     public byte[][] getJs() {
       return js;
+    }
+
+    public int getPermutationId() {
+      return permutationId;
     }
 
     public byte[] getSerializedSymbolMap() {
@@ -181,15 +191,18 @@ public class JavaToJavaScriptCompiler {
    * @param unifiedAst the result of a
    *          {@link #precompile(TreeLogger, WebModeCompilerFrontEnd, String[], JJSOptions, boolean)}
    * @param rebindAnswers the set of rebind answers to resolve all outstanding
-   *          rebind decisions
-   * @param propertyOracles All property oracles corresponding to this permutation.
+   *          rebind decisions for this permutation
+   * @param propertyOracles all property oracles corresponding to this
+   *          permutation
+   * @param permutationId the unique id of this permutation
    * @return the output JavaScript
    * @throws UnableToCompleteException if an error other than
    *           {@link OutOfMemoryError} occurs
    */
   public static PermutationResult compilePermutation(TreeLogger logger,
       UnifiedAst unifiedAst, Map<String, String> rebindAnswers,
-      PropertyOracle[] propertyOracles, int permutationId) throws UnableToCompleteException {
+      PropertyOracle[] propertyOracles, int permutationId)
+      throws UnableToCompleteException {
     long permStart = System.currentTimeMillis();
     try {
       if (JProgram.isTracingEnabled()) {
@@ -212,13 +225,6 @@ public class JavaToJavaScriptCompiler {
         draftOptimize(jprogram);
       } else {
         optimize(options, jprogram);
-      }
-
-      // (4.5) Choose an initial load order sequence for runAsync's
-      LinkedHashSet<Integer> initialLoadSequence = new LinkedHashSet<Integer>();
-      if (options.isAggressivelyOptimize() && options.isRunAsyncEnabled()) {
-        initialLoadSequence = CodeSplitter.pickInitialLoadSequence(logger,
-            jprogram);
       }
 
       // (5) "Normalize" the high-level Java tree into a lower-level tree more
@@ -268,109 +274,84 @@ public class JavaToJavaScriptCompiler {
         } while (didChange);
       }
 
-      // (10) Obfuscate
-      final Map<JsName, String> stringLiteralMap;
+      /*
+       * Creates new variables, must run before code splitter and namer.
+       */
+      JsStackEmulator.exec(jsProgram, propertyOracles);
+
+      // (10) Split up the program into fragments
+      SoycArtifact dependencies = null;
+      if (options.isAggressivelyOptimize() && options.isRunAsyncEnabled()) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        CodeSplitter.exec(logger, jprogram, jsProgram, map,
+            chooseDependencyRecorder(options.isSoycEnabled(), baos));
+        if (baos.size() == 0 && options.isSoycEnabled()) {
+          recordNonSplitDependencies(jprogram, baos);
+        }
+        if (baos.size() > 0) {
+          dependencies = new SoycArtifact("dependencies" + permutationId
+              + ".xml.gz", baos.toByteArray());
+        }
+      }
+
+      // (10.5) Obfuscate
+      Map<JsName, String> obfuscateMap = Maps.create();
       switch (options.getOutput()) {
         case OBFUSCATED:
-          stringLiteralMap = JsStringInterner.exec(jsProgram);
+          obfuscateMap = JsStringInterner.exec(jprogram, jsProgram);
           JsObfuscateNamer.exec(jsProgram);
           break;
         case PRETTY:
           // We don't intern strings in pretty mode to improve readability
-          stringLiteralMap = new HashMap<JsName, String>();
           JsPrettyNamer.exec(jsProgram);
           break;
         case DETAILED:
-          stringLiteralMap = JsStringInterner.exec(jsProgram);
+          obfuscateMap = JsStringInterner.exec(jprogram, jsProgram);
           JsVerboseNamer.exec(jsProgram);
           break;
         default:
           throw new InternalCompilerException("Unknown output mode");
       }
 
-      JavaToJavaScriptMap postStringInterningMap = addStringLiteralMap(map,
-          stringLiteralMap);
-
-      // (10.5) Split up the program into fragments
-      if (options.isAggressivelyOptimize() && options.isRunAsyncEnabled()) {
-        CodeSplitter.exec(logger, jprogram, jsProgram, postStringInterningMap,
-            initialLoadSequence);
-      }
-
       // (11) Perform any post-obfuscation normalizations.
 
       // Work around an IE7 bug,
       // http://code.google.com/p/google-web-toolkit/issues/detail?id=1440
-      JsIEBlockSizeVisitor.exec(jsProgram);
+      // note, JsIEBlockTextTransformer now handles restructuring top level
+      // blocks, this class now handles non-top level blocks only. 
+      SelectionProperty userAgentProperty = null;
+      for (PropertyOracle oracle : propertyOracles) {
+        userAgentProperty = oracle.getSelectionProperty(logger, "user.agent");
+        if (userAgentProperty != null) {
+          break;
+        }
+      }
+      // if user agent is known or ie6, split overly large blocks
+      boolean splitBlocks = userAgentProperty == null || (
+          userAgentProperty != null &&
+              "ie6".equals(userAgentProperty.getCurrentValue()));
 
+      if (splitBlocks) {
+        JsIEBlockSizeVisitor.exec(jsProgram);
+      }
       JsBreakUpLargeVarStatements.exec(jsProgram, propertyOracles);
 
       // (12) Generate the final output text.
       String[] js = new String[jsProgram.getFragmentCount()];
-      List<Map<Range, SourceInfo>> sourceInfoMaps = options.isSoycEnabled()
-          ? new ArrayList<Map<Range, SourceInfo>>(jsProgram.getFragmentCount())
-          : null;
       StatementRanges[] ranges = new StatementRanges[js.length];
-      for (int i = 0; i < js.length; i++) {
-        DefaultTextOutput out = new DefaultTextOutput(
-            options.getOutput().shouldMinimize());
-        JsSourceGenerationVisitor v;
-        if (sourceInfoMaps != null) {
-          v = new JsReportGenerationVisitor(out);
-        } else {
-          v = new JsSourceGenerationVisitor(out);
-        }
-        v.accept(jsProgram.getFragmentBlock(i));
-        js[i] = out.toString();
-        if (sourceInfoMaps != null) {
-          sourceInfoMaps.add(((JsReportGenerationVisitor) v).getSourceInfoMap());
-        }
-        ranges[i] = v.getStatementRanges();
-      }
+      SizeBreakdown[] sizeBreakdowns = options.isSoycEnabled()
+          ? new SizeBreakdown[js.length] : null;
+      List<Map<Range, SourceInfo>> sourceInfoMaps = options.isSoycExtra()
+          ? new ArrayList<Map<Range, SourceInfo>>() : null;
+      generateJavaScriptCode(options, jsProgram, map, js, ranges,
+          sizeBreakdowns, sourceInfoMaps, splitBlocks);
 
       PermutationResult toReturn = new PermutationResultImpl(js,
-          makeSymbolMap(symbolTable), ranges);
+          makeSymbolMap(symbolTable), ranges, permutationId);
+      toReturn.getArtifacts().add(
+          makeSoycArtifact(logger, permutationId, jprogram, js, sizeBreakdowns,
+              sourceInfoMaps, dependencies, map, obfuscateMap));
 
-      if (sourceInfoMaps != null) {
-        long soycStart = System.currentTimeMillis();
-        System.out.println("Computing SOYC output");
-        // Free up memory.
-        symbolTable = null;
-
-        long start = System.currentTimeMillis();
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        // get method dependencies
-        StoryRecorder.recordStories(logger, baos, sourceInfoMaps, js);
-        SoycArtifact stories = new SoycArtifact("stories" + permutationId
-            + ".xml.gz", baos.toByteArray());
-        // Free up memory.
-        js = null;
-        System.out.println("Record stories: "
-            + (System.currentTimeMillis() - start) + " ms");
-
-        start = System.currentTimeMillis();
-        baos.reset();
-        DependencyRecorder.recordDependencies(logger, baos, jprogram);
-        SoycArtifact dependencies = new SoycArtifact("dependencies"
-            + permutationId + ".xml.gz", baos.toByteArray());
-        System.out.println("Record dependencies: "
-            + (System.currentTimeMillis() - start) + " ms");
-
-        start = System.currentTimeMillis();
-        baos.reset();
-        SplitPointRecorder.recordSplitPoints(jprogram, baos, logger);
-        SoycArtifact splitPoints = new SoycArtifact("splitPoints"
-            + permutationId + ".xml.gz", baos.toByteArray());
-        System.out.println("Record split points: "
-            + (System.currentTimeMillis() - start) + " ms");
-
-        toReturn.getArtifacts().add(
-            new StandardCompilationAnalysis(dependencies, stories, splitPoints));
-        
-        System.out.println("Completed SOYC phase in "
-            + (System.currentTimeMillis() - soycStart) + " ms");
-      }
-      
       System.out.println("Permutation took "
           + (System.currentTimeMillis() - permStart) + " ms");
       return toReturn;
@@ -448,7 +429,7 @@ public class JavaToJavaScriptCompiler {
     checkForErrors(logger, goldenCuds, false);
 
     PerfLogger.start("Build AST");
-    CorrelationFactory correlator = options.isSoycEnabled()
+    CorrelationFactory correlator = options.isSoycExtra()
         ? new RealCorrelationFactory() : new DummyCorrelationFactory();
     JProgram jprogram = new JProgram(correlator);
     JsProgram jsProgram = new JsProgram(correlator);
@@ -508,6 +489,8 @@ public class JavaToJavaScriptCompiler {
       // Fix up GWT.runAsync()
       if (options.isAggressivelyOptimize() && options.isRunAsyncEnabled()) {
         ReplaceRunAsyncs.exec(logger, jprogram);
+        CodeSplitter.pickInitialLoadSequence(logger, jprogram,
+            module.getProperties());
       }
 
       // Resolve entry points, rebinding non-static entry points.
@@ -517,17 +500,31 @@ public class JavaToJavaScriptCompiler {
       JavaScriptObjectNormalizer.exec(jprogram);
 
       /*
-       * (4) Minimally optimize the normalized Java AST for the common AST. By
-       * doing a few optimizations early in the multiple permutation scenario,
-       * we can save some work. However, we don't do full optimizations because
-       * our optimizer is currently superlinear, which can lead to net losses
-       * for big apps. We can't fully optimize because we don't yet know the
-       * deferred binding decisions.
+       * 4) Possibly optimize some.
        * 
-       * Don't bother optimizing early if there's only one permutation.
+       * Don't optimizing early if this is a draft compile, or if there's only
+       * one permutation.
        */
-      if (!singlePermutation) {
-        optimizeLoop(jprogram, false);
+      if (!options.isDraftCompile() && !singlePermutation) {
+        if (options.isOptimizePrecompile()) {
+          /*
+           * Go ahead and optimize early, so that each permutation will run
+           * faster. This code path is used by the Compiler entry point. We
+           * assume that we will not be able to perfectly parallelize the
+           * permutation compiles, so let's optimize as much as possible the
+           * common AST. In some cases, this might also have the side benefit of
+           * reducing the total permutation count.
+           */
+          optimize(options, jprogram);
+        } else {
+          /*
+           * Do only minimal early optimizations. This code path is used by the
+           * Precompile entry point. The external system might be able to
+           * perfectly parallelize the permutation compiles, so let's avoid
+           * doing potentially superlinear optimizations on the unified AST.
+           */
+          optimizeLoop(jprogram, false);
+        }
       }
 
       Set<String> rebindRequests = new HashSet<String>();
@@ -542,6 +539,10 @@ public class JavaToJavaScriptCompiler {
     }
   }
 
+  /**
+   * Perform the minimal amount of optimization to make sure the compile
+   * succeeds.
+   */
   protected static void draftOptimize(JProgram jprogram) {
     /*
      * Record the beginning of optimizations; this turns on certain checks that
@@ -550,14 +551,25 @@ public class JavaToJavaScriptCompiler {
      */
     jprogram.beginOptimizations();
 
-    optimizeLoop(jprogram, false);
+    PerfLogger.start("draft optimize");
 
-    /*
-     * Ensure that references to dead clinits are removed. Otherwise, the
-     * application won't run reliably.
-     */
+    PerfLogger.start("Finalizer");
+    Finalizer.exec(jprogram);
+    PerfLogger.end();
+
+    PerfLogger.start("MakeCallsStatic");
+    MakeCallsStatic.exec(jprogram);
+    PerfLogger.end();
+
+    PerfLogger.start("recomputeAfterOptimizations");
     jprogram.typeOracle.recomputeAfterOptimizations();
+    PerfLogger.end();
+
+    PerfLogger.start("DeadCodeElimination");
     DeadCodeElimination.exec(jprogram);
+    PerfLogger.end();
+
+    PerfLogger.end();
   }
 
   protected static void optimize(JJSOptions options, JProgram jprogram)
@@ -620,41 +632,7 @@ public class JavaToJavaScriptCompiler {
     return didChange;
   }
 
-  private static JavaToJavaScriptMap addStringLiteralMap(
-      final JavaToJavaScriptMap map, final Map<JsName, String> stringLiteralMap) {
-    JavaToJavaScriptMap postStringInterningMap = new JavaToJavaScriptMap() {
-      public JsName nameForMethod(JMethod method) {
-        return map.nameForMethod(method);
-      }
-
-      public JsName nameForType(JReferenceType type) {
-        return map.nameForType(type);
-      }
-
-      public JField nameToField(JsName name) {
-        return map.nameToField(name);
-      }
-
-      public JMethod nameToMethod(JsName name) {
-        return map.nameToMethod(name);
-      }
-
-      public String stringLiteralForName(JsName name) {
-        return stringLiteralMap.get(name);
-      }
-
-      public JReferenceType typeForStatement(JsStatement stat) {
-        return map.typeForStatement(stat);
-      }
-
-      public JMethod vtableInitToMethod(JsStatement stat) {
-        return map.vtableInitToMethod(stat);
-      }
-    };
-    return postStringInterningMap;
-  }
-
-  private static void checkForErrors(TreeLogger logger,
+  static void checkForErrors(TreeLogger logger,
       CompilationUnitDeclaration[] cuds, boolean itemizeErrors)
       throws UnableToCompleteException {
     boolean compilationFailed = false;
@@ -702,6 +680,15 @@ public class JavaToJavaScriptCompiler {
           null);
       throw new UnableToCompleteException();
     }
+  }
+
+  private static MultipleDependencyGraphRecorder chooseDependencyRecorder(
+      boolean soycEnabled, OutputStream out) throws IOException {
+    MultipleDependencyGraphRecorder dependencyRecorder = CodeSplitter.NULL_RECORDER;
+    if (soycEnabled) {
+      dependencyRecorder = new DependencyRecorder(out);
+    }
+    return dependencyRecorder;
   }
 
   private static JMethodCall createReboundModuleLoad(TreeLogger logger,
@@ -807,8 +794,8 @@ public class JavaToJavaScriptCompiler {
       if (resultTypes.size() == 1) {
         block.addStmt(entryCalls.get(0).makeStatement());
       } else {
-        JReboundEntryPoint reboundEntryPoint = new JReboundEntryPoint(null,
-            mainType, resultTypes, entryCalls);
+        JReboundEntryPoint reboundEntryPoint = new JReboundEntryPoint(
+            mainType.getSourceInfo(), mainType, resultTypes, entryCalls);
         block.addStmt(reboundEntryPoint);
       }
     }
@@ -834,6 +821,64 @@ public class JavaToJavaScriptCompiler {
       }
     }
     return null;
+  }
+
+  /**
+   * Generate JavaScript code from the given JavaScript ASTs. Also produces
+   * information about that transformation.
+   * 
+   * @param options The options this compiler instance is running with
+   * @param jsProgram The AST to convert to source code
+   * @param jjsMap A map between the JavaScript AST and the Java AST it came
+   *          from
+   * @param js An array to hold the output JavaScript
+   * @param ranges An array to hold the statement ranges for that JavaScript
+   * @param sizeBreakdowns An array to hold the size breakdowns for that
+   *          JavaScript
+   * @param sourceInfoMaps An array to hold the source info maps for that
+   *          JavaScript
+   * @param splitBlocks true if current permutation is for IE6 or unknown
+   */
+  private static void generateJavaScriptCode(JJSOptions options,
+      JsProgram jsProgram, JavaToJavaScriptMap jjsMap, String[] js,
+      StatementRanges[] ranges, SizeBreakdown[] sizeBreakdowns,
+      List<Map<Range, SourceInfo>> sourceInfoMaps, boolean splitBlocks) {
+    for (int i = 0; i < js.length; i++) {
+      DefaultTextOutput out = new DefaultTextOutput(
+          options.getOutput().shouldMinimize());
+      JsSourceGenerationVisitorWithSizeBreakdown v;
+      if (sourceInfoMaps != null) {
+        v = new JsReportGenerationVisitor(out, jjsMap);
+      } else {
+        v = new JsSourceGenerationVisitorWithSizeBreakdown(out, jjsMap);
+      }
+      v.accept(jsProgram.getFragmentBlock(i));
+      
+      /**
+       * Reorder function decls to improve compression ratios. Also restructures
+       * the top level blocks into sub-blocks if they exceed 32767 statements.
+       */
+      JsFunctionClusterer clusterer = new JsFunctionClusterer(out.toString(),
+          v.getStatementRanges());
+      // only cluster for obfuscated mode
+      if (options.getOutput() == JsOutputOption.OBFUSCATED) {
+        clusterer.exec();
+      }
+      // rewrite top-level blocks to limit the number of statements
+      JsIEBlockTextTransformer ieXformer = new JsIEBlockTextTransformer(
+          clusterer);
+      if (splitBlocks) {
+        ieXformer.exec();
+      }
+      js[i] = ieXformer.getJs();
+      if (sizeBreakdowns != null) {
+        sizeBreakdowns[i] = v.getSizeBreakdown();
+      }
+      if (sourceInfoMaps != null) {
+        sourceInfoMaps.add(((JsReportGenerationVisitor) v).getSourceInfoMap());
+      }
+      ranges[i] = ieXformer.getStatementRanges();
+    }
   }
 
   private static UnableToCompleteException logAndTranslateException(
@@ -877,6 +922,50 @@ public class JavaToJavaScriptCompiler {
       logger.log(TreeLogger.ERROR, "Unexpected internal compiler error", e);
       return new UnableToCompleteException();
     }
+  }
+
+  private static StandardCompilationAnalysis makeSoycArtifact(
+      TreeLogger logger, int permutationId, JProgram jprogram, String[] js,
+      SizeBreakdown[] sizeBreakdowns,
+      List<Map<Range, SourceInfo>> sourceInfoMaps, SoycArtifact dependencies,
+      JavaToJavaScriptMap jjsmap, Map<JsName, String> obfuscateMap)
+      throws IOException {
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+    PerfLogger.start("Recording SOYC output");
+
+    PerfLogger.start("Record split points");
+    SplitPointRecorder.recordSplitPoints(jprogram, baos, logger);
+    SoycArtifact splitPoints = new SoycArtifact("splitPoints" + permutationId
+        + ".xml.gz", baos.toByteArray());
+    PerfLogger.end();
+
+    SoycArtifact sizeMaps = null;
+    SoycArtifact detailedStories = null;
+
+    if (sizeBreakdowns != null) {
+      PerfLogger.start("Record size map");
+      baos.reset();
+      SizeMapRecorder.recordMap(logger, baos, sizeBreakdowns, jjsmap,
+          obfuscateMap);
+      sizeMaps = new SoycArtifact("stories" + permutationId + ".xml.gz",
+          baos.toByteArray());
+      PerfLogger.end();
+    }
+
+    if (sourceInfoMaps != null) {
+      PerfLogger.start("Record detailed stories");
+      baos.reset();
+      StoryRecorder.recordStories(logger, baos, sourceInfoMaps, js);
+      detailedStories = new SoycArtifact("detailedStories" + permutationId
+          + ".xml.gz", baos.toByteArray());
+      PerfLogger.end();
+    }
+
+    PerfLogger.end();
+
+    return new StandardCompilationAnalysis(dependencies, sizeMaps, splitPoints,
+        detailedStories);
   }
 
   /**
@@ -940,5 +1029,28 @@ public class JavaToJavaScriptCompiler {
         e.printStackTrace();
       }
     }
+  }
+
+  /**
+   * Dependency information is normally recorded during code splitting, and it
+   * results in multiple dependency graphs. If the code splitter doesn't run,
+   * then this method can be used instead to record a single dependency graph
+   * for the whole program.
+   */
+  private static void recordNonSplitDependencies(JProgram program,
+      OutputStream out) {
+    DependencyRecorder deps = new DependencyRecorder(out);
+    deps.open();
+    deps.startDependencyGraph("initial", null);
+
+    ControlFlowAnalyzer cfa = new ControlFlowAnalyzer(program);
+    cfa.setDependencyRecorder(deps);
+    for (List<JMethod> entryList : program.entryMethods) {
+      for (JMethod entry : entryList)
+        cfa.traverseFrom(entry);
+    }
+
+    deps.endDependencyGraph();
+    deps.close();
   }
 }

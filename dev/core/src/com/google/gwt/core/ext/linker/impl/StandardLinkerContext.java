@@ -26,13 +26,13 @@ import com.google.gwt.core.ext.linker.LinkerOrder;
 import com.google.gwt.core.ext.linker.PublicResource;
 import com.google.gwt.core.ext.linker.SelectionProperty;
 import com.google.gwt.core.ext.linker.LinkerOrder.Order;
-import com.google.gwt.dev.PermutationResult;
 import com.google.gwt.dev.cfg.BindingProperty;
 import com.google.gwt.dev.cfg.ModuleDef;
 import com.google.gwt.dev.cfg.Property;
 import com.google.gwt.dev.cfg.Script;
 import com.google.gwt.dev.jjs.InternalCompilerException;
 import com.google.gwt.dev.jjs.JJSOptions;
+import com.google.gwt.dev.jjs.PermutationResult;
 import com.google.gwt.dev.jjs.SourceInfo;
 import com.google.gwt.dev.js.JsObfuscateNamer;
 import com.google.gwt.dev.js.JsParser;
@@ -351,7 +351,7 @@ public class StandardLinkerContext extends Linker implements LinkerContext {
     if (result == null) {
       result = new StandardCompilationResult(strongName, js,
           permutationResult.getSerializedSymbolMap(),
-          permutationResult.getStatementRanges());
+          permutationResult.getStatementRanges(), permutationResult.getPermutationId());
       resultsByStrongName.put(result.getStrongName(), result);
       artifacts.add(result);
 
@@ -649,7 +649,7 @@ public class StandardLinkerContext extends Linker implements LinkerContext {
   private void writeArtifactToFile(TreeLogger logger, EmittedArtifact artifact,
       File outFile, Set<String> createdDirs) throws UnableToCompleteException {
     if (!outFile.exists()
-        || (outFile.lastModified() <= artifact.getLastModified())) {
+        || (outFile.lastModified() < artifact.getLastModified())) {
       if (!mkdirs(outFile.getParentFile(), createdDirs)) {
         logger.log(TreeLogger.ERROR, "Unable to create directory for file '"
             + outFile.getAbsolutePath() + "'");

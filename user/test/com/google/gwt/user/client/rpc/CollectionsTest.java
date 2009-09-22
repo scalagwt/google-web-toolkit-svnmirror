@@ -25,6 +25,7 @@ import com.google.gwt.user.client.rpc.TestSetFactory.MarkerTypeLinkedHashMap;
 import com.google.gwt.user.client.rpc.TestSetFactory.MarkerTypeTreeMap;
 import com.google.gwt.user.client.rpc.TestSetFactory.MarkerTypeTreeSet;
 import com.google.gwt.user.client.rpc.TestSetFactory.MarkerTypeVector;
+import com.google.gwt.user.client.rpc.core.java.util.LinkedHashMap_CustomFieldSerializer;
 
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -208,6 +209,24 @@ public class CollectionsTest extends GWTTestCase {
     });
   }
 
+  public void testEnumArray() {
+    delayTestFinish(TEST_DELAY);
+
+    CollectionsTestServiceAsync service = getServiceAsync();
+    final Enum<?>[] expected = TestSetFactory.createEnumArray();
+    service.echo(expected, new AsyncCallback<Enum<?>[]>() {
+      public void onFailure(Throwable caught) {
+        TestSetValidator.rethrowException(caught);
+      }
+
+      public void onSuccess(Enum<?>[] result) {
+        assertNotNull(result);
+        assertTrue(TestSetValidator.equals(expected, result));
+        finishTest();
+      }
+    });
+  }
+
   public void testFloatArray() {
     delayTestFinish(TEST_DELAY);
 
@@ -286,6 +305,7 @@ public class CollectionsTest extends GWTTestCase {
     CollectionsTestServiceAsync service = getServiceAsync();
 
     final LinkedHashMap<String, MarkerTypeLinkedHashMap> expected = TestSetFactory.createLinkedHashMap();
+    assertFalse(LinkedHashMap_CustomFieldSerializer.getAccessOrderNoReflection(expected));
 
     service.echo(expected,
         new AsyncCallback<LinkedHashMap<String, MarkerTypeLinkedHashMap>>() {
@@ -309,6 +329,7 @@ public class CollectionsTest extends GWTTestCase {
     CollectionsTestServiceAsync service = getServiceAsync();
 
     final LinkedHashMap<String, MarkerTypeLinkedHashMap> expected = TestSetFactory.createLRULinkedHashMap();
+    assertTrue(LinkedHashMap_CustomFieldSerializer.getAccessOrderNoReflection(expected));
 
     service.echo(expected,
         new AsyncCallback<LinkedHashMap<String, MarkerTypeLinkedHashMap>>() {
@@ -618,7 +639,7 @@ public class CollectionsTest extends GWTTestCase {
 
   public void testTreeSet() {
     delayTestFinish(TEST_DELAY);
-    
+
     CollectionsTestServiceAsync service = getServiceAsync();
     for (boolean option : new boolean[] {true, false}) {
       final TreeSet<MarkerTypeTreeSet> expected = TestSetFactory.createTreeSet(option);

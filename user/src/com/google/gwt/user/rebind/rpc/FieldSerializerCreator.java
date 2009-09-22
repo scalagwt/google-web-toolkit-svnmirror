@@ -16,6 +16,7 @@
 package com.google.gwt.user.rebind.rpc;
 
 import com.google.gwt.core.client.UnsafeNativeLong;
+import com.google.gwt.core.client.impl.WeakMapping;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.typeinfo.JArrayType;
@@ -46,6 +47,8 @@ import java.io.PrintWriter;
  * fully qualified type names everywhere
  */
 public class FieldSerializerCreator {
+  
+  private static final String WEAK_MAPPING_CLASS_NAME = WeakMapping.class.getName();
 
   private final JClassType serializableClass;
 
@@ -263,6 +266,16 @@ public class FieldSerializerCreator {
   }
 
   private void writeClassDeserializationStatements() {
+    /**
+     * If the type is capable of making a round trip between the client and
+     * server, store additional server-only field data using {@link WeakMapping}.
+     */
+    if (typesSentToBrowser.maybeEnhanced(serializableClass)
+        && typesSentFromBrowser.maybeEnhanced(serializableClass)) {
+      sourceWriter.println(WEAK_MAPPING_CLASS_NAME + ".set(instance, "
+          + "\"server-enhanced-data\", streamReader.readString());");
+    }
+    
     for (JField serializableField : serializableFields) {
       JType fieldType = serializableField.getType();
 
@@ -301,6 +314,17 @@ public class FieldSerializerCreator {
   }
 
   private void writeClassSerializationStatements() {
+    /**
+     * If the type is capable of making a round trip between the client and
+     * server, retrieve the additional server-only field data from {@link WeakMapping}.
+     */
+    
+    if (typesSentToBrowser.maybeEnhanced(serializableClass)
+        && typesSentFromBrowser.maybeEnhanced(serializableClass)) {
+      sourceWriter.println("streamWriter.writeString((String) "
+          + WEAK_MAPPING_CLASS_NAME + ".get(instance, \"server-enhanced-data\"));");
+    }
+    
     for (JField serializableField : serializableFields) {
       JType fieldType = serializableField.getType();
 
@@ -349,6 +373,7 @@ public class FieldSerializerCreator {
     } else {
       writeClassDeserializationStatements();
     }
+      
     sourceWriter.outdent();
     sourceWriter.println("}");
     sourceWriter.println();

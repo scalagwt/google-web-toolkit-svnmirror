@@ -23,9 +23,9 @@ import com.google.gwt.dev.cfg.ModuleDef;
 import com.google.gwt.dev.cfg.ModuleDefLoader;
 import com.google.gwt.dev.jjs.JJSOptionsImpl;
 import com.google.gwt.dev.resource.Resource;
+import com.google.gwt.dev.shell.log.ServletContextTreeLogger;
 import com.google.gwt.dev.util.HttpHeaders;
 import com.google.gwt.dev.util.Util;
-import com.google.gwt.dev.util.log.ServletContextTreeLogger;
 import com.google.gwt.util.tools.Utility;
 
 import org.apache.commons.collections.map.AbstractReferenceMap;
@@ -381,6 +381,12 @@ public class GWTShellServlet extends HttpServlet {
     writer.println("</head><body>");
     writer.println("<iframe src=\"javascript:''\" id='__gwt_historyFrame' "
         + "style='position:absolute;width:0;height:0;border:0'></iframe>");
+    writer.println("<noscript>");
+    writer.println("  <div style=\"width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; border: 1px solid red; padding: 4px; font-family: sans-serif\">");
+    writer.println("    Your web browser must have JavaScript enabled");
+    writer.println("    in order for this application to display correctly.");
+    writer.println("  </div>");
+    writer.println("</noscript>");
     writer.println("</body></html>");
 
     // Done.

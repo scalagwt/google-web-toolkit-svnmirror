@@ -74,7 +74,6 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TabBar;
@@ -230,10 +229,9 @@ public class Showcase implements EntryPoint {
     app.addSelectionHandler(new SelectionHandler<TreeItem>() {
       public void onSelection(SelectionEvent<TreeItem> event) {
         TreeItem item = event.getSelectedItem();
-        String historyToken = ((Hyperlink) item.getWidget()).getTargetHistoryToken();
         ContentWidget content = itemWidgets.get(item);
         if (content != null && !content.equals(app.getContent())) {
-          History.newItem(historyToken);
+          History.newItem(getContentWidgetToken(content));
         }
       }
     });
@@ -411,11 +409,9 @@ public class Showcase implements EntryPoint {
    */
   private void setupMainMenuOption(TreeItem parent, ContentWidget content,
       AbstractImagePrototype image) {
-    
     // Create the TreeItem
-    Hyperlink hl = new Hyperlink(image.getHTML() + " " + content.getName(),true,getContentWidgetToken(content));
-    TreeItem option = parent.addItem(hl);
-    
+    TreeItem option = parent.addItem(image.getHTML() + " " + content.getName());
+
     // Map the item to its history token and content widget
     itemWidgets.put(option, content);
     itemTokens.put(getContentWidgetToken(content), option);
@@ -444,9 +440,7 @@ public class Showcase implements EntryPoint {
     for (String localeName : localeNames) {
       if (!localeName.equals("default")) {
         String nativeName = LocaleInfo.getLocaleNativeDisplayName(localeName);
-        // String hl = "<a href=?locale=" + localeName + ">" + nativeName + "</a>";        
-        // localeBox.addItem(hl, localeName, true);
-        localeBox.addItem(nativeName, localeName);        
+        localeBox.addItem(nativeName, localeName);
         if (localeName.equals(currentLocale)) {
           localeBox.setSelectedIndex(localeBox.getItemCount() - 1);
         }
@@ -459,9 +453,6 @@ public class Showcase implements EntryPoint {
             "");
       }
     });
-        
-    
-    
     HorizontalPanel localeWrapper = new HorizontalPanel();
     localeWrapper.add(images.locale().createImage());
     localeWrapper.add(localeBox);

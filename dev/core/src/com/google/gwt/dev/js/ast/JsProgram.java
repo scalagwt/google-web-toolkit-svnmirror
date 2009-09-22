@@ -44,6 +44,8 @@ public final class JsProgram extends JsNode<JsProgram> {
    */
   private final SourceInfo intrinsic;
 
+  private final Map<String, JsFunction> indexedFunctions = new HashMap<String, JsFunction>();
+
   private final JsNullLiteral nullLiteral;
 
   private final Map<Double, JsNumberLiteral> numberLiteralMap = new HashMap<Double, JsNumberLiteral>();
@@ -151,6 +153,10 @@ public final class JsProgram extends JsNode<JsProgram> {
     return getFragmentBlock(0);
   }
 
+  public JsFunction getIndexedFunction(String name) {
+    return indexedFunctions.get(name);
+  }
+
   public JsNullLiteral getNullLiteral() {
     return nullLiteral;
   }
@@ -209,9 +215,7 @@ public final class JsProgram extends JsNode<JsProgram> {
   }
 
   /**
-   * Note: This is currently assumed not to be called after
-   * GenerateJavaScriptAST has finished. If it ever is, then GWT.runAsync needs
-   * to be updated to account for such string literals.
+   * Creates or retrieves a JsStringLiteral from an interned object pool.
    */
   public JsStringLiteral getStringLiteral(SourceInfo sourceInfo, String value) {
     JsStringLiteral lit = stringLiteralMap.get(value);
@@ -241,6 +245,11 @@ public final class JsProgram extends JsNode<JsProgram> {
       this.fragments[i] = new JsProgramFragment(createSourceInfoSynthetic(
           JsProgram.class, "fragment " + i));
     }
+  }
+
+  public void setIndexedFunctions(Map<String, JsFunction> indexedFunctions) {
+    this.indexedFunctions.clear();
+    this.indexedFunctions.putAll(indexedFunctions);
   }
 
   public void traverse(JsVisitor v, JsContext<JsProgram> ctx) {

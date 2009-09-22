@@ -24,12 +24,13 @@ import com.google.gwt.junit.client.impl.JUnitHost;
 import com.google.gwt.junit.client.impl.JUnitResult;
 import com.google.gwt.junit.client.impl.StackTraceWrapper;
 import com.google.gwt.user.client.rpc.InvocationException;
+import com.google.gwt.user.server.rpc.HybridServiceServlet;
 import com.google.gwt.user.server.rpc.RPCServletUtils;
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.util.HashMap;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -40,7 +41,7 @@ import javax.servlet.http.HttpServletResponse;
  * communication between the unit test code running in a browser and the real
  * test process.
  */
-public class JUnitHostImpl extends RemoteServiceServlet implements JUnitHost {
+public class JUnitHostImpl extends HybridServiceServlet implements JUnitHost {
 
   /**
    * A hook into GWTUnitTestShell, the underlying unit test process.
@@ -49,10 +50,10 @@ public class JUnitHostImpl extends RemoteServiceServlet implements JUnitHost {
 
   /**
    * A maximum timeout to wait for the test system to respond with the next
-   * test. Practically speaking, the test system should respond nearly instantly
-   * if there are further tests to run.
+   * test. The test system should respond nearly instantly if there are further
+   * tests to run, unless the tests have not yet been compiled.
    */
-  private static final int TIME_TO_WAIT_FOR_TESTNAME = 30000;
+  private static final int TIME_TO_WAIT_FOR_TESTNAME = 300000;
 
   /**
    * Tries to grab the GWTUnitTestShell sHost environment to communicate with
@@ -80,20 +81,25 @@ public class JUnitHostImpl extends RemoteServiceServlet implements JUnitHost {
     fld.set(obj, value);
   }
 
-  public TestInfo getFirstMethod() throws TimeoutException {
-    return getHost().getNextTestInfo(getClientId(getThreadLocalRequest()),
-        TIME_TO_WAIT_FOR_TESTNAME);
+  public TestBlock getTestBlock(int blockIndex, String userAgent)
+      throws TimeoutException {
+    return getHost().getTestBlock(getClientId(getThreadLocalRequest()),
+        userAgent, blockIndex, TIME_TO_WAIT_FOR_TESTNAME);
   }
 
-  public TestInfo reportResultsAndGetNextMethod(TestInfo testInfo,
-      JUnitResult result) throws TimeoutException {
-    initResult(getThreadLocalRequest(), result);
-    ExceptionWrapper ew = result.getExceptionWrapper();
-    result.setException(deserialize(ew));
+  public TestBlock reportResultsAndGetTestBlock(
+      HashMap<TestInfo, JUnitResult> results, int testBlock, String userAgent)
+      throws TimeoutException {
+    for (JUnitResult result : results.values()) {
+      initResult(getThreadLocalRequest(), result);
+      ExceptionWrapper ew = result.getExceptionWrapper();
+      result.setException(deserialize(ew));
+    }
     JUnitMessageQueue host = getHost();
     String clientId = getClientId(getThreadLocalRequest());
-    host.reportResults(clientId, testInfo, result);
-    return host.getNextTestInfo(clientId, TIME_TO_WAIT_FOR_TESTNAME);
+    host.reportResults(clientId, userAgent, results);
+    return host.getTestBlock(clientId, userAgent, testBlock,
+        TIME_TO_WAIT_FOR_TESTNAME);
   }
 
   @Override
@@ -105,7 +111,7 @@ public class JUnitHostImpl extends RemoteServiceServlet implements JUnitHost {
       JUnitResult result = new JUnitResult();
       initResult(request, result);
       result.setException(new JUnitFatalLaunchException(requestPayload));
-      getHost().reportResults(getClientId(request), null, result);
+      getHost().reportFatalLaunch(getClientId(request), null, result);
     } else {
       super.service(request, response);
     }

@@ -30,7 +30,6 @@ import com.google.gwt.dev.util.arg.ArgHandlerOutDir;
 import com.google.gwt.util.tools.ArgHandlerExtra;
 
 import java.io.File;
-import java.net.URL;
 import java.util.Set;
 
 import javax.swing.ImageIcon;
@@ -179,21 +178,6 @@ public class GWTShell extends OophmHostedModeBase {
   }
 
   /**
-   * Loads an image from the classpath in this package.
-   */
-  static ImageIcon loadImageIcon(String name) {
-    ClassLoader cl = GWTShell.class.getClassLoader();
-    URL url = cl.getResource(PACKAGE_PATH + name);
-    if (url != null) {
-      ImageIcon image = new ImageIcon(url);
-      return image;
-    } else {
-      // Bad image.
-      return new ImageIcon();
-    }
-  }
-
-  /**
    * Hiding super field because it's actually the same object, just with a
    * stronger type.
    */
@@ -283,7 +267,7 @@ public class GWTShell extends OophmHostedModeBase {
 
   @Override
   protected ImageIcon getWebServerIcon() {
-    return loadImageIcon("tomcat24.png");
+    return null;
   }
 
   @Override

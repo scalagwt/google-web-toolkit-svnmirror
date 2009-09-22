@@ -76,7 +76,8 @@ abstract class SwtHostedModeBase extends HostedModeBase {
     }
 
     public ModuleSpaceHost createModuleSpaceHost(TreeLogger logger,
-        String moduleName, String userAgent, String remoteEndpoint)
+        String moduleName, String userAgent, String url, String tabKey,
+        String sessionKey, String remoteEndpoint)
         throws UnableToCompleteException {
       throw new UnsupportedOperationException();
     }
@@ -284,7 +285,9 @@ abstract class SwtHostedModeBase extends HostedModeBase {
     shell.setImages(ShellMainWindow.getIcons());
 
     mainWnd = new ShellMainWindow(this, shell, getTitleText(),
-        options.isNoServer() ? 0 : getPort());
+        options.isNoServer() ? 0 : getPort(), 
+        options.alsoLogToFile() ? options.getLogFile("hosted.log") : null,
+        options.getLogLevel());
 
     shell.setSize(700, 600);
     if (!isHeadless()) {

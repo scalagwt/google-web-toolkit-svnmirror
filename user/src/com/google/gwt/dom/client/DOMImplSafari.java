@@ -20,6 +20,17 @@ package com.google.gwt.dom.client;
  */
 class DOMImplSafari extends DOMImplStandard {
 
+  /**
+   * The type property on a button element is read-only in safari, so we need to 
+   * set it using setAttribute.
+   */
+  @Override
+  public native ButtonElement createButtonElement(Document doc, String type) /*-{
+    var e = doc.createElement("BUTTON");
+    e.setAttribute('type', type);
+    return e;
+  }-*/;
+
   @Override
   public native NativeEvent createKeyEvent(Document doc, String type, boolean canBubble,
       boolean cancelable, boolean ctrlKey, boolean altKey, boolean shiftKey,
@@ -83,9 +94,14 @@ class DOMImplSafari extends DOMImplStandard {
         curr = curr.parentNode;
       }
     }
-    
+
     while (elem) {
       left += elem.offsetLeft;
+
+      if (doc.defaultView.getComputedStyle(elem, '')['position'] == 'fixed') {
+        left += doc.body.scrollLeft;
+        return left;
+      }
 
       // Safari 3 does not include borders with offsetLeft, so we need to add
       // the borders of the parent manually.
@@ -105,7 +121,7 @@ class DOMImplSafari extends DOMImplStandard {
     }
     return left;
   }-*/;
-  
+
   @Override
   public native int getAbsoluteTop(Element elem) /*-{
     // Unattached elements and elements (or their ancestors) with style
@@ -124,9 +140,14 @@ class DOMImplSafari extends DOMImplStandard {
         curr = curr.parentNode;
       }
     }
-    
+
     while (elem) {
       top += elem.offsetTop;
+
+      if (doc.defaultView.getComputedStyle(elem, '')['position'] == 'fixed') {
+        top += doc.body.scrollTop;
+        return top;
+      }
 
       // Safari 3 does not include borders with offsetTop, so we need to add the
       // borders of the parent manually.

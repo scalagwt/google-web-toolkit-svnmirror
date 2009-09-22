@@ -28,9 +28,10 @@ import com.google.gwt.event.dom.client.ClickHandler;
  * </p>
  * 
  * <h3>CSS Style Rules</h3>
- * <ul class="css">
- * <li>.gwt-Button { }</li>
- * </ul>
+ * <dl>
+ * <dt>.gwt-Button</dt>
+ * <dd>the outer element</dd>
+ * </dl>
  * 
  * <p>
  * <h3>Example</h3>
@@ -61,22 +62,11 @@ public class Button extends ButtonBase {
     return button;
   }
 
-  static native void adjustType(Element button) /*-{
-    // Check before setting this attribute, as not all browsers define it.
-    if (button.type == 'submit') {
-      try { 
-        button.setAttribute("type", "button"); 
-      } catch (e) { 
-      }
-    }
-  }-*/;
-
   /**
    * Creates a button with no caption.
    */
   public Button() {
-    super(Document.get().createButtonElement());
-    adjustType(getElement());
+    super(Document.get().createPushButtonElement());
     setStyleName("gwt-Button");
   }
 
@@ -132,8 +122,12 @@ public class Button extends ButtonBase {
     getButtonElement().click();
   }
 
-  private ButtonElement getButtonElement() {
+  /**
+   * Get the underlying button element.
+   * 
+   * @return the {@link ButtonElement}
+   */
+  protected ButtonElement getButtonElement() {
     return getElement().cast();
   }
 }
-

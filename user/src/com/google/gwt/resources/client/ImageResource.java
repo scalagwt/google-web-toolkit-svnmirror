@@ -15,6 +15,7 @@
  */
 package com.google.gwt.resources.client;
 
+import com.google.gwt.resources.ext.DefaultExtensions;
 import com.google.gwt.resources.ext.ResourceGeneratorType;
 import com.google.gwt.resources.rg.ImageResourceGenerator;
 
@@ -25,6 +26,7 @@ import java.lang.annotation.Target;
 /**
  * Provides access to image resources at runtime.
  */
+@DefaultExtensions(value = {".png", ".jpg", ".gif", ".bmp"})
 @ResourceGeneratorType(ImageResourceGenerator.class)
 public interface ImageResource extends ResourcePrototype {
 
@@ -35,6 +37,14 @@ public interface ImageResource extends ResourcePrototype {
   @Target(ElementType.METHOD)
   public @interface ImageOptions {
     /**
+     * If <code>true</code>, the image will be flipped about the y-axis when
+     * {@link com.google.gwt.i18n.client.LocaleInfo#isRTL()} returns
+     * <code>true</code>. This is intended to be used by graphics that are
+     * sensitive to layout direction, such as arrows and disclosure indicators.
+     */
+    boolean flipRtl() default false;
+
+    /**
      * This option affects the image bundling optimization to allow the image to
      * be used with the {@link CssResource} {@code @sprite} rule where
      * repetition of the image is desired.
@@ -42,14 +52,6 @@ public interface ImageResource extends ResourcePrototype {
      * @see "CssResource documentation"
      */
     RepeatStyle repeatStyle() default RepeatStyle.None;
-
-    /**
-     * If <code>true</code>, the image will be flipped along the y-axis when
-     * {@link com.google.gwt.i18n.client.LocaleInfo#isRTL()} returns
-     * <code>true</code>. This is intended to be used by graphics that are
-     * sensitive to layout direction, such as arrows and disclosure indicators.
-     */
-    boolean flipRtl() default false;
   }
 
   /**
@@ -103,4 +105,9 @@ public interface ImageResource extends ResourcePrototype {
    * Returns the width of the image.
    */
   int getWidth();
+
+  /**
+   * Return <code>true</code> if the image contains multiple frames.
+   */
+  boolean isAnimated();
 }

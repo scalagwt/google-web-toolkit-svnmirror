@@ -39,6 +39,8 @@ public final class BrowserChannelServer extends BrowserChannel
 
   private String userAgent;
 
+  private int protocolVersion = -1;
+
   public BrowserChannelServer(TreeLogger initialLogger, Socket socket,
       SessionHandler handler) throws IOException {
     super(socket);
@@ -65,6 +67,13 @@ public final class BrowserChannelServer extends BrowserChannel
   }
 
   /**
+   * @return the negotiated protocol version, or -1 if not yet negotiated.
+   */
+  public int getProtocolVersion() {
+    return protocolVersion;
+  }
+
+  /**
    * @param ccl
    * @param jsthis
    * @param methodName
@@ -82,8 +91,8 @@ public final class BrowserChannelServer extends BrowserChannel
       vargs[i] = convertFromJsValue(remoteObjects, args[i]);
     }
     try {
-      InvokeMessage invokeMessage = new InvokeMessage(this, methodName, vthis,
-          vargs);
+      InvokeOnClientMessage invokeMessage = new InvokeOnClientMessage(this,
+          methodName, vthis, vargs);
       invokeMessage.send();
       final ReturnMessage msg = reactToMessagesWhileWaitingForReturn(handler);
       Value returnValue = msg.getReturnValue();
@@ -139,21 +148,7 @@ public final class BrowserChannelServer extends BrowserChannel
 
   public void run() {
     try {
-      MessageType type = Message.readMessageType(getStreamFromOtherSide());
-      assert type == MessageType.LoadModule;
-      LoadModuleMessage message = LoadModuleMessage.receive(this);
-      moduleName = message.getModuleName();
-      userAgent = message.getUserAgent();
-      Thread.currentThread().setName(
-          "Hosting " + moduleName + " for " + userAgent);
-      logger = handler.loadModule(logger, this, moduleName, userAgent);
-      try {
-        // send LoadModule response
-        ReturnMessage.send(this, false, new Value());
-        reactToMessages(handler);
-      } finally {
-        handler.unloadModule(this, moduleName);
-      }
+      processConnection();
     } catch (IOException e) {
       logger.log(TreeLogger.WARN, "Client connection lost", e);
     } catch (BrowserChannelException e) {
@@ -264,5 +259,127 @@ public final class BrowserChannelServer extends BrowserChannel
             localObjects.get(val.getJavaObject().getRefid()));
         break;
     }
+  }
+
+  /**
+   * Create the requested transport and return the appropriate information so
+   * the client can connect to the same transport.
+   * 
+   * @param transport transport name to create
+   * @return transport-specific arguments for the client to use in attaching
+   *     to this transport
+   */
+  private String createTransport(String transport) {
+    // TODO(jat): implement support for additional transports
+    throw new UnsupportedOperationException(
+        "No alternate transports supported");
+  }
+
+  private void processConnection() throws IOException, BrowserChannelException {
+    MessageType type = Message.readMessageType(getStreamFromOtherSide());
+    // TODO(jat): add support for getting the a shim plugin downloading the
+    //    real plugin via a GetRealPlugin message before CheckVersions
+    String url = null;
+    String tabKey = null;
+    String sessionKey = null;
+    switch (type) {
+      case OLD_LOAD_MODULE:
+        // v1 client
+        OldLoadModuleMessage oldLoadModule = OldLoadModuleMessage.receive(this);
+        if (oldLoadModule.getProtoVersion() != 1) {
+          // This message type was only used in v1, so something is really
+          // broken here.
+          throw new BrowserChannelException(
+              "Old LoadModule message used, but not v1 protocol");
+        }
+        moduleName = oldLoadModule.getModuleName();
+        userAgent = oldLoadModule.getUserAgent();
+        protocolVersion = 1;
+        logger.log(TreeLogger.WARN, "Connection from old browser plugin -- "
+            + "please upgrade to a later version for full functionality");
+        break;
+      case CHECK_VERSIONS:
+        String connectError = null;
+        CheckVersionsMessage hello = CheckVersionsMessage.receive(this);
+        int minVersion = hello.getMinVersion();
+        int maxVersion = hello.getMaxVersion();
+        String hostedHtmlVersion = hello.getHostedHtmlVersion();
+        if (minVersion > BROWSERCHANNEL_PROTOCOL_VERSION
+            || maxVersion < BROWSERCHANNEL_PROTOCOL_VERSION) {
+          connectError = "No supported protocol version in range " + minVersion
+          + " - " + maxVersion;
+        } else {
+          if (!HostedHtmlVersion.validHostedHtmlVersion(logger,
+              hostedHtmlVersion)) {
+            new FatalErrorMessage(this,
+                "Invalid hosted.html version - check log window").send();
+            return;
+          }
+        }
+        if (connectError != null) {
+          logger.log(TreeLogger.ERROR, "Connection error: " + connectError,
+              null);
+          new FatalErrorMessage(this, connectError).send();
+          return;
+        }
+        protocolVersion = BROWSERCHANNEL_PROTOCOL_VERSION;
+        new ProtocolVersionMessage(this, protocolVersion).send();
+        type = Message.readMessageType(getStreamFromOtherSide());
+        
+        // Optionally allow client to request switch of transports.  Inband is
+        // always supported, so a return of an empty transport string requires
+        // the client to stay in this channel.
+        if (type == MessageType.CHOOSE_TRANSPORT) {
+          ChooseTransportMessage chooseTransport = ChooseTransportMessage.receive(this);
+          String transport = selectTransport(chooseTransport.getTransports());
+          String transportArgs = null;
+          if (transport != null) {
+            transportArgs = createTransport(transport);
+          }
+          new SwitchTransportMessage(this, transport, transportArgs).send();
+          type = Message.readMessageType(getStreamFromOtherSide());
+        }
+        
+        // Now we expect a LoadModule message to load a GWT module.
+        if (type != MessageType.LOAD_MODULE) {
+          logger.log(TreeLogger.ERROR, "Unexpected message type " + type
+              + "; expecting LoadModule");
+          return;
+        }
+        LoadModuleMessage loadModule = LoadModuleMessage.receive(this);
+        url = loadModule.getUrl();
+        tabKey = loadModule.getTabKey();
+        sessionKey = loadModule.getSessionKey();
+        moduleName = loadModule.getModuleName();
+        userAgent = loadModule.getUserAgent();
+        break;
+      default:
+        logger.log(TreeLogger.ERROR, "Unexpected message type " + type
+            + "; expecting CheckVersions");
+        return;
+    }
+    Thread.currentThread().setName(
+        "Hosting " + moduleName + " for " + userAgent + " on " + url + " @ "
+        + sessionKey);
+    logger = handler.loadModule(logger, this, moduleName, userAgent, url,
+        tabKey, sessionKey);
+    try {
+      // send LoadModule response
+      ReturnMessage.send(this, false, new Value());
+      reactToMessages(handler);
+    } finally {
+      handler.unloadModule(this, moduleName);
+    }
+  }
+
+  /**
+   * Select a transport from those provided by the client.
+   * 
+   * @param transports array of supported transports
+   * @return null to continue in-band, or a transport type
+   */
+  private String selectTransport(String[] transports) {
+    // TODO(jat): add support for shared memory, others
+    return null;
   }
 }

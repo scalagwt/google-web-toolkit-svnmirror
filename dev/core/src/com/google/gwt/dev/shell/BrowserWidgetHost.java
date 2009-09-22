@@ -49,9 +49,22 @@ public interface BrowserWidgetHost {
 
   /**
    * For OOPHM.
+   * 
+   * @param logger
+   * @param moduleName
+   * @param userAgent
+   * @param url URL of top-level window, may be null for old browser plugins
+   * @param tabKey opaque key for the tab, may be empty string if the plugin
+   *     can't distinguish tabs or null if using an old browser plugin 
+   * @param sessionKey unique session key, may be null for old browser plugins
+   * @param remoteEndpoint
+   * 
+   * TODO(jat): change remoteEndpoint to be a BrowserChannelServer instance
+   *    when we remove the SWT implementation
    */
   ModuleSpaceHost createModuleSpaceHost(TreeLogger logger, String moduleName,
-      String userAgent, String remoteEndpoint) throws UnableToCompleteException;
+      String userAgent, String url, String tabKey, String sessionKey,
+      String remoteEndpoint) throws UnableToCompleteException;
 
   TreeLogger getLogger();
 

@@ -18,6 +18,7 @@ package com.google.gwt.core.client.impl;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.JsArray;
 import com.google.gwt.core.client.JsArrayString;
 
 /**
@@ -61,6 +62,27 @@ public class StackTraceCreator {
       return toReturn;
     }-*/;
 
+    public void createStackTrace(JavaScriptException e) {
+      JsArrayString stack = inferFrom(e.getException());
+
+      StackTraceElement[] stackTrace = new StackTraceElement[stack.length()];
+      for (int i = 0, j = stackTrace.length; i < j; i++) {
+        stackTrace[i] = new StackTraceElement("Unknown", stack.get(i),
+            "Unknown source", 0);
+      }
+      e.setStackTrace(stackTrace);
+    }
+
+    public void fillInStackTrace(Throwable t) {
+      JsArrayString stack = StackTraceCreator.createStackTrace();
+      StackTraceElement[] stackTrace = new StackTraceElement[stack.length()];
+      for (int i = 0, j = stackTrace.length; i < j; i++) {
+        stackTrace[i] = new StackTraceElement("Unknown", stack.get(i),
+            "Unknown source", 0);
+      }
+      t.setStackTrace(stackTrace);
+    }
+
     /**
      * Attempt to infer the stack from an unknown JavaScriptObject that had been
      * thrown. The default implementation just returns an empty array.
@@ -86,6 +108,72 @@ public class StackTraceCreator {
       } catch (e) {
         return e;
       }
+    }-*/;
+  }
+
+  /**
+   * Collaborates with JsStackEmulator.
+   */
+  static class CollectorEmulated extends Collector {
+
+    @Override
+    public JsArrayString collect() {
+      JsArrayString toReturn = JsArrayString.createArray().cast();
+      JsArray<JavaScriptObject> stack = getStack();
+      for (int i = 0, j = getStackDepth(); i < j; i++) {
+        String name = stack.get(i) == null ? "anonymous"
+            : extractName(stack.get(i).toString());
+        // Reverse the order
+        toReturn.set(j - i - 1, name);
+      }
+
+      return toReturn;
+    }
+
+    @Override
+    public void createStackTrace(JavaScriptException e) {
+      // No-op, relying on initializer call to collect()
+    }
+
+    public void fillInStackTrace(Throwable t) {
+      JsArrayString stack = collect();
+      JsArrayString locations = getLocation();
+      StackTraceElement[] stackTrace = new StackTraceElement[stack.length()];
+      for (int i = 0, j = stackTrace.length; i < j; i++) {
+        // Locations is also backwards
+        String location = locations.get(j - i - 1);
+        String fileName = "Unknown source";
+        int lineNumber = 0;
+        if (location != null) {
+          int idx = location.indexOf(':');
+          if (idx != -1) {
+            fileName = location.substring(0, idx);
+            lineNumber = Integer.parseInt(location.substring(idx + 1));
+          } else {
+            lineNumber = Integer.parseInt(location);
+          }
+        }
+        stackTrace[i] = new StackTraceElement("Unknown", stack.get(i),
+            fileName, lineNumber);
+      }
+      t.setStackTrace(stackTrace);
+    }
+
+    @Override
+    public JsArrayString inferFrom(JavaScriptObject e) {
+      throw new RuntimeException("Should not reach here");
+    }
+
+    private native JsArrayString getLocation()/*-{
+      return $location;
+    }-*/;
+
+    private native JsArray<JavaScriptObject> getStack()/*-{
+      return $stack;
+    }-*/;
+
+    private native int getStackDepth() /*-{
+      return $stackDepth;
     }-*/;
   }
 
@@ -117,6 +205,88 @@ public class StackTraceCreator {
 
     protected int toSplice() {
       return 2;
+    }
+  }
+
+  /**
+   * Chrome uses a slightly different format to Mozilla.
+   * 
+   * See http://code.google.com/p/v8/source/browse/branches/bleeding_edge/src/
+   * messages.js?r=2340#712 for formatting code.
+   * 
+   * Function calls can be of the four following forms:
+   * 
+   * <pre>
+   * at file.js:1:2
+   * at functionName (file.js:1:2)
+   * at Type.functionName (file.js:1:2)
+   * at Type.functionName [as methodName] (file.js:1:2)
+   * </pre>
+   */
+  static class CollectorChrome extends CollectorMoz {
+    @Override
+    public JsArrayString collect() {
+      JsArrayString res = super.collect();
+      if (res.length() == 0) {
+        /*
+         * Ensure Safari falls back to default Collector implementation.
+         * Remember to remove this method call from the stack:
+         */
+        res = splice(new Collector().collect(), 1);
+      }
+      return res;
+    }
+
+    @Override
+    public JsArrayString inferFrom(JavaScriptObject e) {
+      JsArrayString stack = super.inferFrom(e);
+      if (stack.length() == 0) {
+        // Safari should fall back to default Collector:
+        return new Collector().inferFrom(e);
+      } else {
+        // Chrome contains the error itself as the first line of the stack:
+        return splice(stack, 1);
+      }
+    }
+
+    @Override
+    protected String extractName(String fnToString) {
+      if (fnToString.length() == 0) {
+        return "anonymous";
+      }
+
+      String toReturn = fnToString.trim();
+
+      // Strip the "at " prefix:
+      if (toReturn.startsWith("at ")) {
+        toReturn = toReturn.substring(3);
+      }
+
+      // Strip bracketed items from the end:
+      int index = toReturn.indexOf("[");
+      if (index == -1) {
+        index = toReturn.indexOf("(");
+      }
+      if (index == -1) {
+        // No bracketed items found, hence no function name available:
+        return "anonymous";
+      } else {
+        // Bracketed items found: strip them off.
+        toReturn = toReturn.substring(0, index).trim();
+      }
+
+      // Strip the Type off to leave just the functionName:
+      index = toReturn.indexOf('.');
+      if (index != -1) {
+        toReturn = toReturn.substring(index + 1);
+      }
+
+      return toReturn.length() > 0 ? toReturn : "anonymous";
+    }
+
+    @Override
+    protected int toSplice() {
+      return 3;
     }
   }
 
@@ -169,19 +339,6 @@ public class StackTraceCreator {
   }
 
   /**
-   * Create a stack trace based on the current execution stack. This method
-   * should only be called in web mode.
-   */
-  public static JsArrayString createStackTrace() {
-    if (!GWT.isScript()) {
-      throw new RuntimeException(
-          "StackTraceCreator should only be called in web mode");
-    }
-
-    return GWT.<Collector> create(Collector.class).collect();
-  }
-
-  /**
    * Create a stack trace based on a JavaScriptException. This method should
    * only be called in web mode.
    */
@@ -191,15 +348,33 @@ public class StackTraceCreator {
           "StackTraceCreator should only be called in web mode");
     }
 
-    JsArrayString stack = GWT.<Collector> create(Collector.class).inferFrom(
-        e.getException());
+    GWT.<Collector> create(Collector.class).createStackTrace(e);
+  }
 
-    StackTraceElement[] stackTrace = new StackTraceElement[stack.length()];
-    for (int i = 0, j = stackTrace.length; i < j; i++) {
-      stackTrace[i] = new StackTraceElement("Unknown", stack.get(i),
-          "Unknown source", 0);
+  /**
+   * Fill in a stack trace based on the current execution stack. This method
+   * should only be called in web mode.
+   */
+  public static void fillInStackTrace(Throwable t) {
+    if (!GWT.isScript()) {
+      throw new RuntimeException(
+          "StackTraceCreator should only be called in web mode");
     }
-    e.setStackTrace(stackTrace);
+
+    GWT.<Collector> create(Collector.class).fillInStackTrace(t);
+  }
+
+  /**
+   * Create a stack trace based on the current execution stack. This method
+   * should only be called in web mode.
+   */
+  static JsArrayString createStackTrace() {
+    if (!GWT.isScript()) {
+      throw new RuntimeException(
+          "StackTraceCreator should only be called in web mode");
+    }
+
+    return GWT.<Collector> create(Collector.class).collect();
   }
 
   static String extractNameFromToString(String fnToString) {

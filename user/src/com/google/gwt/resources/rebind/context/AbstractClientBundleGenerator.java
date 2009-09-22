@@ -265,11 +265,13 @@ public abstract class AbstractClientBundleGenerator extends Generator {
    * Create fields and assignments for a single ResourceGenerator.
    */
   private boolean createFieldsAndAssignments(TreeLogger logger,
-      ResourceContext resourceContext, ResourceGenerator rg,
+      AbstractResourceContext resourceContext, ResourceGenerator rg,
       List<JMethod> generatorMethods, SourceWriter sw, ClientBundleFields fields) {
 
     // Defer failure until this phase has ended
     boolean fail = false;
+
+    resourceContext.setCurrentResourceGenerator(rg);
 
     // Write all field values
     try {
@@ -322,7 +324,7 @@ public abstract class AbstractClientBundleGenerator extends Generator {
    */
   private void createFieldsAndAssignments(TreeLogger logger, SourceWriter sw,
       Map<ResourceGenerator, List<JMethod>> generators,
-      ResourceContext resourceContext, ClientBundleFields fields)
+      AbstractResourceContext resourceContext, ClientBundleFields fields)
       throws UnableToCompleteException {
     // Try to provide as many errors as possible before failing.
     boolean success = true;
@@ -416,51 +418,30 @@ public abstract class AbstractClientBundleGenerator extends Generator {
   private Class<? extends ResourceGenerator> findResourceGenerator(
       TreeLogger logger, TypeOracle typeOracle, JMethod method)
       throws UnableToCompleteException {
-
     JClassType resourceType = method.getReturnType().isClassOrInterface();
     assert resourceType != null;
 
-    List<JClassType> searchTypes = new ArrayList<JClassType>();
-    searchTypes.add(resourceType);
-
-    ResourceGeneratorType generatorType = null;
-
-    while (!searchTypes.isEmpty()) {
-      JClassType current = searchTypes.remove(0);
-      generatorType = current.getAnnotation(ResourceGeneratorType.class);
-      if (generatorType != null) {
-        break;
-      }
-
-      if (current.getSuperclass() != null) {
-        searchTypes.add(current.getSuperclass());
-      }
-
-      for (JClassType t : current.getImplementedInterfaces()) {
-        searchTypes.add(t);
-      }
-    }
-
-    if (generatorType == null) {
+    ResourceGeneratorType annotation = resourceType.findAnnotationInTypeHierarchy(ResourceGeneratorType.class);
+    if (annotation == null) {
       logger.log(TreeLogger.ERROR, "No @"
-          + ResourceGeneratorType.class.getName()
-          + " was specifed for resource type "
+          + ResourceGeneratorType.class.getName() + " was specifed for type "
           + resourceType.getQualifiedSourceName() + " or its supertypes");
       throw new UnableToCompleteException();
     }
 
-    return generatorType.value();
+    return annotation.value();
   }
 
   /**
    * Call finish() on several ResourceGenerators.
    */
-  private void finish(TreeLogger logger, ResourceContext context,
+  private void finish(TreeLogger logger, AbstractResourceContext context,
       Collection<ResourceGenerator> generators)
       throws UnableToCompleteException {
     boolean fail = false;
     // Finalize the ResourceGenerator
     for (ResourceGenerator rg : generators) {
+      context.setCurrentResourceGenerator(rg);
       try {
         rg.finish(
             logger.branch(TreeLogger.DEBUG, "Finishing ResourceGenerator"),
@@ -505,8 +486,8 @@ public abstract class AbstractClientBundleGenerator extends Generator {
   private Map<ResourceGenerator, List<JMethod>> initAndPrepare(
       TreeLogger logger,
       Map<Class<? extends ResourceGenerator>, List<JMethod>> taskList,
-      ResourceContext resourceContext, ClientBundleRequirements requirements)
-      throws UnableToCompleteException {
+      AbstractResourceContext resourceContext,
+      ClientBundleRequirements requirements) throws UnableToCompleteException {
     // Try to provide as many errors as possible before failing.
     boolean success = true;
     Map<ResourceGenerator, List<JMethod>> toReturn = new IdentityHashMap<ResourceGenerator, List<JMethod>>();
@@ -530,9 +511,10 @@ public abstract class AbstractClientBundleGenerator extends Generator {
   }
 
   private boolean initAndPrepare(TreeLogger logger,
-      ResourceContext resourceContext, ResourceGenerator rg,
+      AbstractResourceContext resourceContext, ResourceGenerator rg,
       List<JMethod> generatorMethods, ClientBundleRequirements requirements) {
     try {
+      resourceContext.setCurrentResourceGenerator(rg);
       rg.init(
           logger.branch(TreeLogger.DEBUG, "Initializing ResourceGenerator"),
           resourceContext);
@@ -601,8 +583,8 @@ public abstract class AbstractClientBundleGenerator extends Generator {
     sw.indent();
     for (List<JMethod> list : taskList.values()) {
       for (JMethod m : list) {
-        sw.println("case '" + m.getName() + "': return this.@"
-            + createdClassName + "::" + (m.getName() + "()()") + ";");
+        sw.println("case '" + m.getName() + "': return this."
+            + m.getJsniSignature() + "();");
       }
     }
     sw.outdent();

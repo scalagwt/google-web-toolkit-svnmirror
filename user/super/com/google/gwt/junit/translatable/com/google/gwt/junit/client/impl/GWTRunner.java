@@ -18,11 +18,16 @@ package com.google.gwt.junit.client.impl;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.junit.client.GWTTestCase;
+import com.google.gwt.junit.client.impl.JUnitHost.TestBlock;
 import com.google.gwt.junit.client.impl.JUnitHost.TestInfo;
+import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
+
+import java.util.HashMap;
 
 /**
  * The entry point class for GWTTestCases.
@@ -37,30 +42,56 @@ public abstract class GWTRunner implements EntryPoint {
    * The RPC callback object for {@link GWTRunner#junitHost}. When
    * {@link #onSuccess(Object)} is called, it's time to run the next test case.
    */
-  private final class JUnitHostListener implements AsyncCallback<TestInfo> {
+  private final class JUnitHostListener implements AsyncCallback<TestBlock> {
+
+    /**
+     * The number of times we've failed to communicate with the server on the
+     * current test batch. 
+     */
+    private int curRetryCount = 0;
 
     /**
      * A call to junitHost failed.
      */
     public void onFailure(Throwable caught) {
-      // Try the call again
-      new Timer() {
-        @Override
-        public void run() {
-          syncToServer();
-        }
-      }.schedule(1000);
+      if (maxRetryCount < 0 || curRetryCount < maxRetryCount) {
+        // Try the call again
+        curRetryCount++;
+        new Timer() {
+          @Override
+          public void run() {
+            syncToServer();
+          }
+        }.schedule(1000);
+      } else {
+        // Give up and mark the test complete on the client side.
+        markComplete();
+      }
     }
 
     /**
      * A call to junitHost succeeded; run the next test case.
      */
-    public void onSuccess(TestInfo nextTest) {
-      currentTest = nextTest;
-      if (currentTest != null) {
+    public void onSuccess(TestBlock nextTestBlock) {
+      curRetryCount = 0;
+      currentBlock = nextTestBlock;
+      currentTestIndex = 0;
+      currentResults.clear();
+      if (currentBlock != null && currentBlock.getTests().length > 0) {
         doRunTest();
+      } else {
+        markComplete();
       }
     }
+
+    /**
+     * Set a global expando so the test infrastructure knows that the test is
+     * complete.
+     */
+    private native void markComplete() /*-{
+      $doc.title = "Completed Tests";
+      $wnd._gwt_test_complete = true;
+    }-*/;
   }
 
   /**
@@ -78,13 +109,40 @@ public abstract class GWTRunner implements EntryPoint {
    */
   private static final String TESTFUNC_QUERY_PARAM = "gwt.junit.testfuncname";
 
+  /**
+   * A query param specifying the number of times to retry if the server fails
+   * to respond.
+   */
+  private static final String RETRYCOUNT_QUERY_PARAM = "gwt.junit.retrycount";
+
+  /**
+   * A query param specifying the block index to start on.
+   */
+  private static final String BLOCKINDEX_QUERY_PARAM = "gwt.junit.blockindex";
+
   public static GWTRunner get() {
     return sInstance;
   }
 
-  private JUnitResult currentResult;
+  /**
+   * The current block of tests to execute.
+   */
+  private TestBlock currentBlock;
 
-  private TestInfo currentTest;
+  /**
+   * Active test within current block of tests.
+   */
+  private int currentTestIndex = 0;
+
+  /**
+   * Results for all test cases in the current block.
+   */
+  private HashMap<TestInfo, JUnitResult> currentResults = new HashMap<TestInfo, JUnitResult>();
+
+  /**
+   * If set, all remaining tests will fail with the failure message.
+   */
+  private String failureMessage;
 
   /**
    * The remote service to communicate with.
@@ -95,6 +153,12 @@ public abstract class GWTRunner implements EntryPoint {
    * Handles all RPC responses.
    */
   private final JUnitHostListener junitHostListener = new JUnitHostListener();
+
+  /**
+   * The maximum number of times to retry communication with the server per
+   * test batch.
+   */
+  private int maxRetryCount = -1;
 
   /**
    * If true, run a single test case with no RPC.
@@ -116,8 +180,9 @@ public abstract class GWTRunner implements EntryPoint {
   }
 
   public void onModuleLoad() {
-    currentTest = checkForQueryParamTestToRun();
-    if (currentTest != null) {
+    maxRetryCount = parseQueryParamInteger(RETRYCOUNT_QUERY_PARAM, -1);
+    currentBlock = checkForQueryParamTestToRun();
+    if (currentBlock != null) {
       /*
        * Just run a single test with no server-side interaction.
        */
@@ -137,8 +202,23 @@ public abstract class GWTRunner implements EntryPoint {
       // That's it, we're done
       return;
     }
-    currentResult = result;
-    syncToServer();
+    if (result != null && failureMessage != null) {
+      RuntimeException ex = new RuntimeException(failureMessage);
+      result.setExceptionWrapper(new ExceptionWrapper(ex));
+    }   
+    TestInfo currentTest = getCurrentTest();
+    currentResults.put(currentTest, result);
+    ++currentTestIndex;
+    if (currentTestIndex < currentBlock.getTests().length) {
+      // Run the next test after a short delay.
+      DeferredCommand.addCommand(new Command() {
+        public void execute() {
+          doRunTest();
+        }
+      });
+    } else {
+      syncToServer();
+    }
   }
 
   /**
@@ -147,19 +227,28 @@ public abstract class GWTRunner implements EntryPoint {
    */
   protected abstract GWTTestCase createNewTestCase(String testClass);
 
-  private TestInfo checkForQueryParamTestToRun() {
+  /**
+   * Implemented by the generated subclass. Get the value of the user agent
+   * property.
+   */
+  protected abstract String getUserAgentProperty();
+
+  private TestBlock checkForQueryParamTestToRun() {
     String testClass = Window.Location.getParameter(TESTCLASS_QUERY_PARAM);
     String testMethod = Window.Location.getParameter(TESTFUNC_QUERY_PARAM);
     if (testClass == null || testMethod == null) {
       return null;
     }
-    return new TestInfo(GWT.getModuleName(), testClass, testMethod);
+    // TODO: support blocks of tests?
+    TestInfo[] tests = new TestInfo[] {new TestInfo(GWT.getModuleName(),
+        testClass, testMethod)};
+    return new TestBlock(tests, 0);
   }
 
   private void doRunTest() {
     // Make sure the module matches.
     String currentModule = GWT.getModuleName();
-    String newModule = currentTest.getTestModule();
+    String newModule = getCurrentTest().getTestModule();
     if (currentModule.equals(newModule)) {
       // The module is correct.
       runTest();
@@ -169,17 +258,62 @@ public abstract class GWTRunner implements EntryPoint {
        * the browser to a new URL which will run that other module.
        */
       String href = Window.Location.getHref();
+      if (href.contains("?")) {
+        href = href.substring(0, href.indexOf("?"));
+      } else if (href.contains("#")) {
+        href = href.substring(0, href.indexOf("#"));
+      }
       String newHref = href.replace(currentModule, newModule);
+      newHref += "?" + BLOCKINDEX_QUERY_PARAM + "=" + currentBlock.getIndex();
+      if (maxRetryCount >= 0) {
+        newHref += "&" + RETRYCOUNT_QUERY_PARAM + "=" + maxRetryCount;
+      }
       Window.Location.replace(newHref);
+      currentBlock = null;
+      currentTestIndex = 0;
     }
   }
 
+  private TestInfo getCurrentTest() {
+    return currentBlock.getTests()[currentTestIndex];
+  }
+
+  /**
+   * Parse an integer from a query parameter, returning the default value if
+   * the parameter cannot be found.
+   * 
+   * @param paramName the parameter name
+   * @param defaultValue the default value
+   * @return the integer value of the parameter
+   */
+  private int parseQueryParamInteger(String paramName, int defaultValue) {
+    String value = Window.Location.getParameter(paramName);
+    if (value != null) {
+      try {
+        return Integer.parseInt(value);
+      } catch (NumberFormatException e) {
+        setFailureMessage("'" + value + "' is not a valid value for " +
+            paramName + ".");
+        return defaultValue;
+      }
+    }
+    return defaultValue;
+  }
+  
+  
   private void runTest() {
     // Dynamically create a new test case.
-    GWTTestCase testCase = createNewTestCase(currentTest.getTestClass());
+    TestInfo currentTest = getCurrentTest();
+    GWTTestCase testCase = null;
+    Throwable caught = null;
+    try {
+      testCase = createNewTestCase(currentTest.getTestClass());
+    } catch (Throwable e) {
+      caught = e;
+    }
     if (testCase == null) {
       RuntimeException ex = new RuntimeException(currentTest
-          + ": could not instantiate the requested class");
+          + ": could not instantiate the requested class", caught);
       JUnitResult result = new JUnitResult();
       result.setExceptionWrapper(new ExceptionWrapper(ex));
       reportResultsAndGetNextMethod(result);
@@ -190,11 +324,21 @@ public abstract class GWTRunner implements EntryPoint {
     testCase.__doRunTest();
   }
 
+  /**
+   * Fail all tests with the specified message.
+   */
+  private void setFailureMessage(String message) {
+    failureMessage = message;
+  }
+
   private void syncToServer() {
-    if (currentTest == null) {
-      junitHost.getFirstMethod(junitHostListener);
+    if (currentBlock == null) {
+      int firstBlockIndex = parseQueryParamInteger(BLOCKINDEX_QUERY_PARAM, 0);
+      junitHost.getTestBlock(firstBlockIndex, getUserAgentProperty(),
+          junitHostListener);
     } else {
-      junitHost.reportResultsAndGetNextMethod(currentTest, currentResult,
+      junitHost.reportResultsAndGetTestBlock(currentResults,
+          currentBlock.getIndex() + 1, getUserAgentProperty(),
           junitHostListener);
     }
   }

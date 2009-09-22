@@ -15,6 +15,8 @@
  */
 package com.google.gwt.user.server.rpc.impl;
 
+import com.google.gwt.user.server.rpc.SerializationPolicy;
+
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -31,7 +33,7 @@ import java.util.zip.CRC32;
 /**
  * Serialization utility class used by the server-side RPC code.
  */
-class SerializabilityUtil {
+public class SerializabilityUtil {
 
   public static final String DEFAULT_ENCODING = "UTF-8";
 
@@ -153,20 +155,21 @@ class SerializabilityUtil {
     };
   }
 
-  public static String encodeSerializedInstanceReference(Class<?> instanceType) {
+  public static String encodeSerializedInstanceReference(Class<?> instanceType, SerializationPolicy policy) {
     return instanceType.getName()
         + SerializedInstanceReference.SERIALIZED_REFERENCE_SEPARATOR
-        + getSerializationSignature(instanceType);
+        + getSerializationSignature(instanceType, policy);
   }
-
-  public static String getSerializationSignature(Class<?> instanceType) {
+  
+  public static String getSerializationSignature(Class<?> instanceType,
+      SerializationPolicy policy) {
     String result;
     synchronized (classCRC32Cache) {
       result = classCRC32Cache.get(instanceType);
       if (result == null) {
         CRC32 crc = new CRC32();
         try {
-          generateSerializationSignature(instanceType, crc);
+          generateSerializationSignature(instanceType, crc, policy);
         } catch (UnsupportedEncodingException e) {
           throw new RuntimeException(
               "Could not compute the serialization signature", e);
@@ -223,7 +226,7 @@ class SerializabilityUtil {
   private static Class<?> computeHasCustomFieldSerializer(Class<?> instanceType) {
     assert (instanceType != null);
     String qualifiedTypeName = instanceType.getName();
-    ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+    ClassLoader classLoader = SerializabilityUtil.class.getClassLoader();
     String simpleSerializerName = qualifiedTypeName + "_CustomFieldSerializer";
     Class<?> customSerializer = getCustomFieldSerializer(classLoader,
         simpleSerializerName);
@@ -269,7 +272,7 @@ class SerializabilityUtil {
   }
 
   private static void generateSerializationSignature(Class<?> instanceType,
-      CRC32 crc) throws UnsupportedEncodingException {
+      CRC32 crc, SerializationPolicy policy) throws UnsupportedEncodingException {
     crc.update(getSerializedTypeName(instanceType).getBytes(DEFAULT_ENCODING));
 
     if (excludeImplementationFromSerializationSignature(instanceType)) {
@@ -278,22 +281,28 @@ class SerializabilityUtil {
 
     Class<?> customSerializer = hasCustomFieldSerializer(instanceType);
     if (customSerializer != null) {
-      generateSerializationSignature(customSerializer, crc);
+      generateSerializationSignature(customSerializer, crc, policy);
     } else if (instanceType.isArray()) {
-      generateSerializationSignature(instanceType.getComponentType(), crc);
+      generateSerializationSignature(instanceType.getComponentType(), crc, policy);
     } else if (!instanceType.isPrimitive()) {
       Field[] fields = applyFieldSerializationPolicy(instanceType);
+      Set<String> clientFieldNames = policy.getClientFieldNamesForEnhancedClass(instanceType);
       for (Field field : fields) {
         assert (field != null);
-
-        crc.update(field.getName().getBytes(DEFAULT_ENCODING));
-        crc.update(getSerializedTypeName(field.getType()).getBytes(
-            DEFAULT_ENCODING));
+        /**
+         * If clientFieldNames is non-null, use only the fields listed there
+         * to generate the signature.  Otherwise, use all known fields.
+         */
+        if ((clientFieldNames == null) || clientFieldNames.contains(field.getName())) {
+          crc.update(field.getName().getBytes(DEFAULT_ENCODING));
+          crc.update(getSerializedTypeName(field.getType()).getBytes(
+              DEFAULT_ENCODING));
+        }
       }
 
       Class<?> superClass = instanceType.getSuperclass();
       if (superClass != null) {
-        generateSerializationSignature(superClass, crc);
+        generateSerializationSignature(superClass, crc, policy);
       }
     }
   }
@@ -311,7 +320,7 @@ class SerializabilityUtil {
 
   private static boolean isNotStaticTransientOrFinal(Field field) {
     /*
-     * Only serialize fields that are not static, transient and final.
+     * Only serialize fields that are not static, transient or final.
      */
     int fieldModifiers = field.getModifiers();
     return !Modifier.isStatic(fieldModifiers)

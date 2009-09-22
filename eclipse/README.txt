@@ -1,4 +1,4 @@
-Eclipse 3.3.X instructions
+Eclipse 3.X instructions
 
 These instructions are intended for contributors to the GWT source
 code repository that want to run the Eclipse IDE. It describes how to
@@ -73,11 +73,39 @@ alphabetically.
 Window->Preferences->Java->Compiler
 Set the compiler compliance level to 1.5.
 
+------- Compiler errors & warnings --------
+Window->Preferences->Java->Compiler->Errors/Warnings
+
+The following warnings are suggested.
+
+Code Style:
+- Method with a constructor name
+
+Potential programming problems:
+- Assignment has no effect
+- Accidental boolean assignment
+- 'finally' does not complete normally
+- Using a char array in string concatentation
+- Hidden catch block
+- Inexact type match for vararg arguments
+
+Name shadowing and conflicts: all except "Local variable" hiding
+
+Deprecated and restricted API: all
+
+Unnecessary code: all except "Unnecessary 'else' statement"
+
+Generic types: all except "Generic type parameter declared with final type bound"
+
+Annotations:
+- Annotation is used as super interface
+- Enable @SuppressWarnings annotations
+
 == Checkstyle ==
 
 Checkstyle is used to enforce good programming style.
 
-1. Install Checkstyle
+1. Install Checkstyle version 4.4.2 (newer versions will not work)
 
 The Eclipse Checkstyle plugin can be found at:
   http://eclipse-cs.sourceforge.net/

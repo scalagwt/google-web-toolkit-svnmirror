@@ -15,14 +15,25 @@
  */
 package com.google.gwt.user.client.ui;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.dom.client.BodyElement;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.junit.DoNotRunWith;
+import com.google.gwt.junit.Platform;
 import com.google.gwt.junit.client.GWTTestCase;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.Element;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Tests standard DOM operations in the {@link DOM} class.
@@ -67,9 +78,49 @@ public class DOMTest extends GWTTestCase {
   }
 
   /**
+   * Tests that {@link DOM#eventGetCurrentEvent()} returns the event to the
+   * {@link UncaughtExceptionHandler}.
+   */
+  public void testEventGetCurrentEventOnException() {
+    Button button = new Button("test", new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        // Intentionally trigger an error
+        throw new IllegalArgumentException();
+      }
+    });
+    RootPanel.get().add(button);
+
+    // Verify the exception is captured
+    final List<String> ret = new ArrayList<String>();
+    GWT.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+      public void onUncaughtException(Throwable e) {
+        Event event = DOM.eventGetCurrentEvent();
+        if (event == null) {
+          ret.add("Event is null");
+          return;
+        }
+        if (event.getTypeInt() != Event.ONCLICK) {
+          ret.add("Event is not a click event");
+          return;
+        }
+        ret.add("Success");
+      }
+    });
+    NativeEvent clickEvent = Document.get().createClickEvent(0, 0, 0, 0, 0,
+        false, false, false, false);
+    button.getElement().dispatchEvent(clickEvent);
+
+    assertEquals(1, ret.size());
+    assertEquals("Success", ret.get(0));
+    RootPanel.get().remove(button);
+    GWT.setUncaughtExceptionHandler(null);
+  }
+
+  /**
    * Tests {@link DOM#getAbsoluteLeft(Element)} and
    * {@link DOM#getAbsoluteTop(Element)}.
    */
+  @DoNotRunWith({Platform.Htmlunit})
   public void testGetAbsolutePosition() {
     final int border = 8;
     final int margin = 9;
@@ -106,6 +157,7 @@ public class DOMTest extends GWTTestCase {
    * contains children and has scrollbars. See issue #1093 for more details.
    * 
    */
+  @DoNotRunWith({Platform.Htmlunit})
   public void testGetAbsolutePositionWhenScrolled() {
     final Element outer = DOM.createDiv();
     final Element inner = DOM.createDiv();
@@ -140,6 +192,7 @@ public class DOMTest extends GWTTestCase {
    * element has a border.
    * 
    */
+  @DoNotRunWith({Platform.Htmlunit})
   public void testGetAbsolutePositionWithPixelBorders() {
     final Element outer = DOM.createDiv();
     final Element inner = DOM.createDiv();
@@ -170,6 +223,7 @@ public class DOMTest extends GWTTestCase {
    * Tests getAbsoluteLeft/Top() for the document.body element. This used to
    * cause exceptions to be thrown on Opera (see issue 1556).
    */
+  @DoNotRunWith({Platform.Htmlunit})
   public void testGetBodyAbsolutePosition() {
     try {
       // The body's absolute left/top depends upon the browser, but we just
@@ -217,6 +271,7 @@ public class DOMTest extends GWTTestCase {
    * Tests that {@link DOM#isOrHasChild(Element, Element)} works consistently
    * across browsers.
    */
+  @DoNotRunWith({Platform.Htmlunit})
   public void testIsOrHasChild() {
     Element div = DOM.createDiv();
     Element childDiv = DOM.createDiv();
@@ -367,7 +422,7 @@ public class DOMTest extends GWTTestCase {
     assertEndsWith("b2.gif", DOM.getImgSrc(images[0]));
     assertEndsWith("a2.gif", DOM.getImgSrc(images[1]));
     assertEndsWith("a2.gif", DOM.getImgSrc(images[2]));
-    delayTestFinish(2000);
+    delayTestFinish(3000);
     new Timer() {
       @Override
       public void run() {
@@ -376,7 +431,7 @@ public class DOMTest extends GWTTestCase {
         assertEndsWith("a2.gif", DOM.getElementProperty(images[2], "src"));
         finishTest();
       }
-    }.schedule(1000);
+    }.schedule(2000);
   }
 
   /**

@@ -22,7 +22,6 @@ import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.dev.GWTShell;
 import com.google.gwt.dev.cfg.BindingProperty;
-import com.google.gwt.dev.cfg.ConfigurationProperty;
 import com.google.gwt.dev.cfg.ModuleDef;
 import com.google.gwt.dev.cfg.ModuleDefLoader;
 import com.google.gwt.dev.cfg.Properties;
@@ -31,8 +30,8 @@ import com.google.gwt.dev.javac.CompilationUnit;
 import com.google.gwt.dev.shell.CheckForUpdates;
 import com.google.gwt.dev.util.arg.ArgHandlerLogLevel;
 import com.google.gwt.dev.util.log.PrintWriterTreeLogger;
+import com.google.gwt.junit.client.GWTTestCase;
 import com.google.gwt.junit.client.TimeoutException;
-import com.google.gwt.junit.client.impl.GWTRunner;
 import com.google.gwt.junit.client.impl.JUnitResult;
 import com.google.gwt.junit.client.impl.JUnitHost.TestInfo;
 import com.google.gwt.util.tools.ArgHandler;
@@ -43,8 +42,12 @@ import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 import junit.framework.TestResult;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -66,10 +69,10 @@ import java.util.regex.Pattern;
  * </p>
  * 
  * <p>
- * The client classes consist of the translatable version of {@link
- * com.google.gwt.junit.client.GWTTestCase}, translatable JUnit classes, and the
- * user's own {@link com.google.gwt.junit.client.GWTTestCase}-derived class.
- * The client communicates to the server via RPC.
+ * The client classes consist of the translatable version of
+ * {@link com.google.gwt.junit.client.GWTTestCase}, translatable JUnit classes,
+ * and the user's own {@link com.google.gwt.junit.client.GWTTestCase}-derived
+ * class. The client communicates to the server via RPC.
  * </p>
  * 
  * <p>
@@ -211,6 +214,37 @@ public class JUnitShell extends GWTShell {
       registerHandler(new ArgHandlerString() {
         @Override
         public String getPurpose() {
+          return "Runs web mode via HTMLUnit given a list of browsers; "
+              + "e.g. " + RunStyleHtmlUnit.getBrowserList();
+        }
+
+        @Override
+        public String getTag() {
+          return "-htmlunit";
+        }
+
+        @Override
+        public String[] getTagArgs() {
+          return new String[] {"browserNames"};
+        }
+
+        @Override
+        public boolean setString(String str) {
+          String[] targets = str.split(",");
+          try {
+            runStyle = new RunStyleHtmlUnit(JUnitShell.this, targets);
+            numClients = ((RunStyleHtmlUnit) runStyle).numBrowsers();
+            return true;
+          } catch (IllegalArgumentException ex) {
+            System.err.println(ex.getMessage());
+            return false;
+          }
+        }
+      });
+
+      registerHandler(new ArgHandlerString() {
+        @Override
+        public String getPurpose() {
           return "Run external browsers in web mode (pass a comma separated list of executables.)";
         }
 
@@ -235,6 +269,43 @@ public class JUnitShell extends GWTShell {
           runStyle = new RunStyleExternalBrowser(JUnitShell.this, paths);
           numClients = paths.length;
           return runStyle != null;
+        }
+      });
+
+      // TODO: currently, only two values but soon may have multiple values.
+      registerHandler(new ArgHandlerString() {
+        @Override
+        public String getPurpose() {
+          return "Configure batch execution of tests";
+        }
+
+        @Override
+        public String getTag() {
+          return "-batch";
+        }
+
+        @Override
+        public String[] getTagArgs() {
+          return new String[] {"none|class|module"};
+        }
+
+        @Override
+        public boolean isUndocumented() {
+          return true;
+        }
+
+        @Override
+        public boolean setString(String str) {
+          if (str.equals("none")) {
+            batchingStrategy = new NoBatchingStrategy();
+          } else if (str.equals("class")) {
+            batchingStrategy = new ClassBatchingStrategy();
+          } else if (str.equals("module")) {
+            batchingStrategy = new ModuleBatchingStrategy();
+          } else {
+            return false;
+          }
+          return true;
         }
       });
 
@@ -301,21 +372,78 @@ public class JUnitShell extends GWTShell {
           return true;
         }
       });
+
+      registerHandler(new ArgHandlerString() {
+        @Override
+        public String getPurpose() {
+          return "Precompile modules as tests are running (speeds up remote tests but requires more memory)";
+        }
+
+        @Override
+        public String getTag() {
+          return "-precompile";
+        }
+
+        @Override
+        public String[] getTagArgs() {
+          return new String[] {"simple|all|parallel"};
+        }
+
+        @Override
+        public boolean isUndocumented() {
+          return true;
+        }
+
+        @Override
+        public boolean setString(String str) {
+          if (str.equals("simple")) {
+            compileStrategy = new SimpleCompileStrategy();
+          } else if (str.equals("all")) {
+            compileStrategy = new PreCompileStrategy();
+          } else if (str.equals("parallel")) {
+            compileStrategy = new ParallelCompileStrategy();
+          } else {
+            return false;
+          }
+          return true;
+        }
+      });
+
+      registerHandler(new ArgHandlerString() {
+        @Override
+        public String getPurpose() {
+          return "Specify the user agents to reduce the number of permutations for remote browser tests;"
+              + " e.g. ie6,ie8,safari,gecko,gecko1_8,opera";
+        }
+
+        @Override
+        public String getTag() {
+          return "-userAgents";
+        }
+
+        @Override
+        public String[] getTagArgs() {
+          return new String[] {"userAgents"};
+        }
+
+        @Override
+        public boolean setString(String str) {
+          remoteUserAgents = str.split(",");
+          for (int i = 0; i < remoteUserAgents.length; i++) {
+            remoteUserAgents[i] = remoteUserAgents[i].trim();
+          }
+          return true;
+        }
+      });
     }
   }
 
-  private static class JUnitStrategy implements Strategy {
-    public String getModuleInherit() {
-      return "com.google.gwt.junit.JUnit";
-    }
-
-    public String getSyntheticModuleExtension() {
-      return "JUnit";
-    }
-
-    public void processResult(TestCase testCase, JUnitResult result) {
-    }
-  }
+  /**
+   * The amount of time to wait for all clients to have contacted the server and
+   * begin running the test. "Contacted" does not necessarily mean "the test has
+   * begun," e.g. for linker errors stopping the test initialization.
+   */
+  static final int TEST_BEGIN_TIMEOUT_MILLIS = 60000;
 
   /**
    * This is a system property that, when set, emulates command line arguments.
@@ -329,18 +457,11 @@ public class JUnitShell extends GWTShell {
   private static final String PROP_JUNIT_HYBRID_MODE = "gwt.hybrid";
 
   /**
-   * The amount of time to wait for all clients to have contacted the server and
-   * begin running the test.  "Contacted" does not necessarily mean "the test
-   * has begun," e.g. for linker errors stopping the test initialization.
-   */
-  private static final int TEST_BEGIN_TIMEOUT_MILLIS = 60000;
-
-  /**
    * The amount of time to wait for all clients to complete a single test
-   * method, in milliseconds, measured from when the <i>last</i> client 
-   * connects (and thus starts the test).  5 minutes.
+   * method, in milliseconds, measured from when the <i>last</i> client connects
+   * (and thus starts the test). 20 minutes.
    */
-  private static final long TEST_METHOD_TIMEOUT_MILLIS = 300000;
+  private static final long TEST_METHOD_TIMEOUT_MILLIS = 4 * 300000;
 
   /**
    * Singleton object for hosting unit tests. All test case instances executed
@@ -364,20 +485,64 @@ public class JUnitShell extends GWTShell {
   }
 
   /**
-   * Entry point for {@link com.google.gwt.junit.client.GWTTestCase}. Gets or
-   * creates the singleton {@link JUnitShell} and invokes its {@link
-   * #runTestImpl(String, TestCase, TestResult, Strategy)}.
+   * Get the list of remote user agents to compile. This method returns null
+   * until all clients have connected.
+   * 
+   * @return the list of remote user agents
    */
-  public static void runTest(String moduleName, TestCase testCase,
-      TestResult testResult) throws UnableToCompleteException {
-    getUnitTestShell().runTestImpl(moduleName, testCase, testResult,
-        new JUnitStrategy());
+  public static String[] getRemoteUserAgents() {
+    return getUnitTestShell().remoteUserAgents;
   }
 
+  /**
+   * Checks if a testCase should not be executed. Currently, a test is either
+   * executed on all clients (mentioned in this test) or on no clients.
+   * 
+   * @param testCase current testCase.
+   * @return true iff the test should not be executed on any of the specified
+   *         clients.
+   */
+  public static boolean mustNotExecuteTest(TestCase testCase) {
+    return getUnitTestShell().mustNotExecuteTest(getBannedPlatforms(testCase));
+  }
+
+  /**
+   * Entry point for {@link com.google.gwt.junit.client.GWTTestCase}. Gets or
+   * creates the singleton {@link JUnitShell} and invokes its
+   * {@link #runTestImpl(GWTTestCase, TestResult)}.
+   */
+  public static void runTest(GWTTestCase testCase, TestResult testResult)
+      throws UnableToCompleteException {
+    getUnitTestShell().runTestImpl(testCase, testResult);
+  }
+
+  /**
+   * Entry point for {@link com.google.gwt.junit.client.GWTTestCase}. Gets or
+   * creates the singleton {@link JUnitShell} and invokes its
+   * {@link #runTestImpl(GWTTestCase, TestResult)}.
+   * 
+   * @deprecated use {@link #runTest(GWTTestCase, TestResult)} instead
+   */
+  @Deprecated
+  public static void runTest(String moduleName, TestCase testCase,
+      TestResult testResult) throws UnableToCompleteException {
+    runTest(moduleName, testCase, testResult,
+        ((GWTTestCase) testCase).getStrategy());
+  }
+
+  /**
+   * @deprecated use {@link #runTest(GWTTestCase, TestResult)} instead
+   */
+  @Deprecated
   public static void runTest(String moduleName, TestCase testCase,
       TestResult testResult, Strategy strategy)
       throws UnableToCompleteException {
-    getUnitTestShell().runTestImpl(moduleName, testCase, testResult, strategy);
+    GWTTestCase gwtTestCase = (GWTTestCase) testCase;
+    assert moduleName != null : "moduleName cannot be null";
+    assert strategy != null : "strategy cannot be null";
+    assert moduleName.equals(gwtTestCase.getModuleName()) : "moduleName does not match GWTTestCase#getModuleName()";
+    assert strategy.equals(gwtTestCase.getStrategy()) : "strategy does not match GWTTestCase#getStrategy()";
+    runTest(gwtTestCase, testResult);
   }
 
   /**
@@ -418,6 +583,31 @@ public class JUnitShell extends GWTShell {
   }
 
   /**
+   * returns the set of banned {@code Platform} for a test method.
+   */
+  private static Set<Platform> getBannedPlatforms(TestCase testCase) {
+    Class<?> testClass = testCase.getClass();
+    Set<Platform> bannedSet = EnumSet.noneOf(Platform.class);
+    if (testClass.isAnnotationPresent(DoNotRunWith.class)) {
+      bannedSet.addAll(Arrays.asList(testClass.getAnnotation(DoNotRunWith.class).value()));
+    }
+    try {
+      Method testMethod = testClass.getMethod(testCase.getName());
+      if (testMethod.isAnnotationPresent(DoNotRunWith.class)) {
+        bannedSet.addAll(Arrays.asList(testMethod.getAnnotation(
+            DoNotRunWith.class).value()));
+      }
+    } catch (SecurityException e) {
+      // should not happen
+      e.printStackTrace();
+    } catch (NoSuchMethodException e) {
+      // should not happen
+      e.printStackTrace();
+    }
+    return bannedSet;
+  }
+
+  /**
    * Retrieves the JUnitShell. This should only be invoked during TestRunner
    * execution of JUnit tests.
    */
@@ -445,6 +635,16 @@ public class JUnitShell extends GWTShell {
   }
 
   /**
+   * Determines how to batch up tests for execution.
+   */
+  private BatchingStrategy batchingStrategy = new NoBatchingStrategy();
+
+  /**
+   * Determines how modules are compiled.
+   */
+  private CompileStrategy compileStrategy = new SimpleCompileStrategy();
+
+  /**
    * When headless, all logging goes to the console.
    */
   private PrintWriterTreeLogger consoleLogger;
@@ -453,6 +653,11 @@ public class JUnitShell extends GWTShell {
    * Name of the module containing the current/last module to run.
    */
   private ModuleDef currentModule;
+
+  /**
+   * The name of the current test case being run.
+   */
+  private TestInfo currentTestInfo;
 
   /**
    * If true, no launches have yet been successful.
@@ -487,6 +692,17 @@ public class JUnitShell extends GWTShell {
   private int numClients = 1;
 
   /**
+   * An exception that should by fired the next time runTestImpl runs.
+   */
+  private UnableToCompleteException pendingException;
+
+  /**
+   * The remote user agents that have connected. Populated after all user agents
+   * have connected so we can limit permutations for remote tests.
+   */
+  private String[] remoteUserAgents;
+
+  /**
    * What type of test we're running; Local hosted, local web, or remote web.
    */
   private RunStyle runStyle = new RunStyleLocalHosted(this);
@@ -503,9 +719,9 @@ public class JUnitShell extends GWTShell {
   private long testBeginTimeout;
 
   /**
-   * Timeout for individual test method.  If System.currentTimeMillis() is later
-   * than this timestamp, then we need to pack up and go home.  Zero for "not
-   * yet set" (at the start of a test).  This interval begins when the
+   * Timeout for individual test method. If System.currentTimeMillis() is later
+   * than this timestamp, then we need to pack up and go home. Zero for "not yet
+   * set" (at the start of a test). This interval begins when the
    * testBeginTimeout interval is done.
    */
   private long testMethodTimeout;
@@ -557,7 +773,7 @@ public class JUnitShell extends GWTShell {
    */
   @Override
   protected boolean notDone() {
-    int activeClients = messageQueue.getNumClientsRetrievedCurrentTest();
+    int activeClients = messageQueue.getNumClientsRetrievedTest(currentTestInfo);
     if (firstLaunch && runStyle instanceof RunStyleManual) {
       String[] newClients = messageQueue.getNewClients();
       int printIndex = activeClients - newClients.length + 1;
@@ -565,17 +781,31 @@ public class JUnitShell extends GWTShell {
         System.out.println(printIndex + " - " + newClient);
         ++printIndex;
       }
-      if (activeClients == this.numClients) {
-        System.out.println("Starting tests");
-      } else {
+      if (activeClients != this.numClients) {
         // Wait forever for first contact; user-driven.
         return true;
       }
     }
 
+    // Limit permutations after all clients have connected.
+    if (remoteUserAgents == null && !runStyle.isLocal()
+        && messageQueue.getNumConnectedClients() == numClients) {
+      remoteUserAgents = messageQueue.getUserAgents();
+      String userAgentList = "";
+      for (int i = 0; i < remoteUserAgents.length; i++) {
+        if (i > 0) {
+          userAgentList += ", ";
+        }
+        userAgentList += remoteUserAgents[i];
+      }
+      System.out.println("All clients connected (Limiting future permutations to: "
+          + userAgentList + ")");
+    }
+
     long currentTimeMillis = System.currentTimeMillis();
     if (activeClients == numClients) {
       firstLaunch = false;
+
       /*
        * It's now safe to release any reference to the last module since all
        * clients have transitioned to the current module.
@@ -586,18 +816,19 @@ public class JUnitShell extends GWTShell {
       } else if (testMethodTimeout < currentTimeMillis) {
         double elapsed = (currentTimeMillis - testBeginTime) / 1000.0;
         throw new TimeoutException(
-            "The browser did not complete the test method " 
-                + messageQueue.getCurrentTestName() + " in "
-                + TEST_METHOD_TIMEOUT_MILLIS + "ms.\n  We have no results from: "
-                + messageQueue.getWorkingClients()
-                + "\n Actual time elapsed: " + elapsed + " seconds.\n");
+            "The browser did not complete the test method "
+                + currentTestInfo.toString() + " in "
+                + TEST_METHOD_TIMEOUT_MILLIS
+                + "ms.\n  We have no results from:\n"
+                + messageQueue.getWorkingClients(currentTestInfo)
+                + "Actual time elapsed: " + elapsed + " seconds.\n");
       }
     } else if (testBeginTimeout < currentTimeMillis) {
       double elapsed = (currentTimeMillis - testBeginTime) / 1000.0;
       throw new TimeoutException(
           "The browser did not contact the server within "
               + TEST_BEGIN_TIMEOUT_MILLIS + "ms.\n"
-              + messageQueue.getUnretrievedClients()
+              + messageQueue.getUnretrievedClients(currentTestInfo)
               + "\n Actual time elapsed: " + elapsed + " seconds.\n");
     }
 
@@ -605,7 +836,17 @@ public class JUnitShell extends GWTShell {
       throw new TimeoutException("A remote browser died a mysterious death.");
     }
 
-    return !messageQueue.hasResult();
+    if (messageQueue.hasResults(currentTestInfo)) {
+      return false;
+    } else if (pendingException == null) {
+      // Instead of waiting around for results, try to compile the next module.
+      try {
+        compileStrategy.maybeCompileAhead();
+      } catch (UnableToCompleteException e) {
+        pendingException = e;
+      }
+    }
+    return true;
   }
 
   @Override
@@ -622,95 +863,36 @@ public class JUnitShell extends GWTShell {
     }
   }
 
-  void compileForWebMode(String moduleName, String userAgentString)
+  void compileForWebMode(String moduleName, String... userAgents)
       throws UnableToCompleteException {
     // Never fresh during JUnit.
     ModuleDef module = ModuleDefLoader.loadFromClassPath(getTopLogger(),
         moduleName, false);
-    if (userAgentString != null) {
+    if (userAgents != null && userAgents.length > 0) {
       Properties props = module.getProperties();
       Property userAgent = props.find("user.agent");
       if (userAgent instanceof BindingProperty) {
-        ((BindingProperty) userAgent).setAllowedValues(userAgentString);
+        BindingProperty bindingProperty = (BindingProperty) userAgent;
+        bindingProperty.setAllowedValues(bindingProperty.getRootCondition(),
+            userAgents);
       }
     }
     super.compile(getTopLogger(), module);
   }
 
-  /**
-   * Runs a particular test case.
-   */
-  private void runTestImpl(String moduleName, TestCase testCase,
-      TestResult testResult, Strategy strategy)
-      throws UnableToCompleteException {
+  private boolean mustNotExecuteTest(Set<Platform> bannedPlatforms) {
+    // TODO (amitmanjhi): Remove this hard-coding. A RunStyle somehow needs to
+    // specify how it interacts with the platforms.
+    return runStyle instanceof RunStyleHtmlUnit
+        && bannedPlatforms.contains(Platform.Htmlunit);
+  }
 
-    if (lastLaunchFailed) {
-      throw new UnableToCompleteException();
-    }
+  private void processTestResult(TestCase testCase, TestResult testResult,
+      Strategy strategy) {
 
-    String syntheticModuleName = moduleName + "."
-        + strategy.getSyntheticModuleExtension();
-    boolean sameTest = (currentModule != null)
-        && syntheticModuleName.equals(currentModule.getName());
-    if (sameTest && lastLaunchFailed) {
-      throw new UnableToCompleteException();
-    }
-
-    if (!sameTest) {
-      /*
-       * Synthesize a synthetic module that derives from the user-specified
-       * module but also includes JUnit support.
-       */
-      currentModule = ModuleDefLoader.createSyntheticModule(getTopLogger(),
-          syntheticModuleName, new String[] {
-              moduleName, strategy.getModuleInherit()}, true);
-      // Replace any user entry points with our test runner.
-      currentModule.clearEntryPoints();
-      currentModule.addEntryPointTypeName(GWTRunner.class.getName());
-      // Squirrel away the name of the active module for GWTRunnerGenerator
-      ConfigurationProperty moduleNameProp
-          = currentModule.getProperties().createConfiguration(
-              "junit.moduleName", false);
-      moduleNameProp.setValue(moduleName);
-      runStyle.maybeCompileModule(syntheticModuleName);
-    }
-
-    JUnitFatalLaunchException launchException = checkTestClassInCurrentModule(
-        getTopLogger(), currentModule, moduleName, testCase);
-    if (launchException != null) {
-      testResult.addError(testCase, launchException);
-      return;
-    }
-
-    messageQueue.setNextTest(new TestInfo(currentModule.getName(),
-        testCase.getClass().getName(), testCase.getName()));
-
-    try {
-      if (firstLaunch) {
-        runStyle.launchModule(currentModule.getName());
-      }
-    } catch (UnableToCompleteException e) {
-      lastLaunchFailed = true;
-      testResult.addError(testCase, new JUnitFatalLaunchException(e));
-      return;
-    }
-
-    // Wait for test to complete
-    try {
-      // Set a timeout period to automatically fail if the servlet hasn't been
-      // contacted; something probably went wrong (the module failed to load?)
-      testBeginTime = System.currentTimeMillis();
-      testBeginTimeout = testBeginTime + TEST_BEGIN_TIMEOUT_MILLIS;
-      testMethodTimeout = 0;  // wait until test execution begins
-      pumpEventLoop();
-    } catch (TimeoutException e) {
-      lastLaunchFailed = true;
-      testResult.addError(testCase, e);
-      return;
-    }
-
-    assert (messageQueue.hasResult());
-    Map<String, JUnitResult> results = messageQueue.getResults();
+    Map<String, JUnitResult> results = messageQueue.getResults(currentTestInfo);
+    assert results != null;
+    assert results.size() == numClients;
 
     boolean parallelTesting = numClients > 1;
 
@@ -734,7 +916,7 @@ public class JUnitShell extends GWTShell {
         }
       }
 
-      // A "successful" failure
+      // A "successful" failure.
       if (exception instanceof AssertionFailedError) {
         testResult.addFailure(testCase, (AssertionFailedError) exception);
       } else if (exception != null) {
@@ -747,6 +929,85 @@ public class JUnitShell extends GWTShell {
 
       strategy.processResult(testCase, result);
     }
+  }
+
+  /**
+   * Runs a particular test case.
+   */
+  private void runTestImpl(GWTTestCase testCase, TestResult testResult)
+      throws UnableToCompleteException {
+
+    if (mustNotExecuteTest(testCase)) {
+      return;
+    }
+
+    if (lastLaunchFailed) {
+      throw new UnableToCompleteException();
+    }
+
+    String moduleName = testCase.getModuleName();
+    String syntheticModuleName = testCase.getSyntheticModuleName();
+    Strategy strategy = testCase.getStrategy();
+    boolean sameTest = (currentModule != null)
+        && syntheticModuleName.equals(currentModule.getName());
+    if (sameTest && lastLaunchFailed) {
+      throw new UnableToCompleteException();
+    }
+
+    // Get the module definition for the current test.
+    if (!sameTest) {
+      currentModule = compileStrategy.maybeCompileModule(moduleName,
+          syntheticModuleName, strategy, runStyle, batchingStrategy,
+          getTopLogger());
+    }
+    assert (currentModule != null);
+
+    JUnitFatalLaunchException launchException = checkTestClassInCurrentModule(
+        getTopLogger(), currentModule, moduleName, testCase);
+    if (launchException != null) {
+      testResult.addError(testCase, launchException);
+      return;
+    }
+
+    currentTestInfo = new TestInfo(currentModule.getName(),
+        testCase.getClass().getName(), testCase.getName());
+    if (messageQueue.hasResults(currentTestInfo)) {
+      // Already have a result.
+      processTestResult(testCase, testResult, strategy);
+      return;
+    }
+
+    try {
+      if (firstLaunch) {
+        runStyle.launchModule(currentModule.getName());
+      }
+    } catch (UnableToCompleteException e) {
+      lastLaunchFailed = true;
+      testResult.addError(testCase, new JUnitFatalLaunchException(e));
+      return;
+    }
+
+    // Wait for test to complete
+    try {
+      // Set a timeout period to automatically fail if the servlet hasn't been
+      // contacted; something probably went wrong (the module failed to load?)
+      testBeginTime = System.currentTimeMillis();
+      testBeginTimeout = testBeginTime + TEST_BEGIN_TIMEOUT_MILLIS;
+      testMethodTimeout = 0; // wait until test execution begins
+      pumpEventLoop();
+      if (pendingException != null) {
+        UnableToCompleteException e = pendingException;
+        pendingException = null;
+        throw e;
+      }
+    } catch (TimeoutException e) {
+      lastLaunchFailed = true;
+      testResult.addError(testCase, e);
+      return;
+    }
+
+    assert (messageQueue.hasResults(currentTestInfo));
+    processTestResult(testCase, testResult, testCase.getStrategy());
   }
 
   /**

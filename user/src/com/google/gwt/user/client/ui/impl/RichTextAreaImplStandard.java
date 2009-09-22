@@ -15,6 +15,7 @@
  */
 package com.google.gwt.user.client.ui.impl;
 
+import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.RichTextArea;
@@ -24,8 +25,17 @@ import com.google.gwt.user.client.ui.RichTextArea.Justification;
 /**
  * Basic rich text platform implementation.
  */
+@SuppressWarnings("deprecation")
 public abstract class RichTextAreaImplStandard extends RichTextAreaImpl implements
-    RichTextArea.BasicFormatter, RichTextArea.ExtendedFormatter {
+    RichTextArea.BasicFormatter, RichTextArea.ExtendedFormatter,
+    RichTextArea.Formatter {
+
+  /**
+   * The message displayed when the formatter is used before the RichTextArea
+   * is initialized.
+   */
+  private static final String INACTIVE_MESSAGE = "RichTextArea formatters " +
+      "cannot be used until the RichTextArea is attached and focused.";
 
   /**
    * Holds a cached copy of any user setHTML/setText actions until the real
@@ -40,6 +50,11 @@ public abstract class RichTextAreaImplStandard extends RichTextAreaImpl implemen
    * false.  See issue 1897 for details.
    */
   protected boolean initializing;
+
+  /**
+   * True when the element has been attached.
+   */
+  private boolean isReady;
 
   @Override
   public native Element createElement() /*-{
@@ -88,6 +103,10 @@ public abstract class RichTextAreaImplStandard extends RichTextAreaImpl implemen
     execCommand("InsertHorizontalRule", null);
   }
 
+  public void insertHTML(String html) {
+    execCommand("InsertHTML", html);
+  }
+
   public void insertImage(String url) {
     execCommand("InsertImage", url);
   }
@@ -100,18 +119,8 @@ public abstract class RichTextAreaImplStandard extends RichTextAreaImpl implemen
     execCommand("InsertUnorderedList", null);
   }
 
-  @Override
-  public boolean isBasicEditingSupported() {
-    return true;
-  }
-
   public boolean isBold() {
     return queryCommandState("Bold");
-  }
-
-  @Override
-  public boolean isExtendedEditingSupported() {
-    return true;
   }
 
   public boolean isItalic() {
@@ -136,6 +145,10 @@ public abstract class RichTextAreaImplStandard extends RichTextAreaImpl implemen
 
   public void leftIndent() {
     execCommand("Outdent", null);
+  }
+
+  public void redo() {
+    execCommand("Redo", "false");
   }
 
   public void removeFormat() {
@@ -191,6 +204,8 @@ public abstract class RichTextAreaImplStandard extends RichTextAreaImpl implemen
   public void setJustification(Justification justification) {
     if (justification == Justification.CENTER) {
       execCommand("JustifyCenter", null);
+    } else if (justification == Justification.FULL) {
+      execCommand("JustifyFull", null);
     } else if (justification == Justification.LEFT) {
       execCommand("JustifyLeft", null);
     } else if (justification == Justification.RIGHT) {
@@ -231,8 +246,14 @@ public abstract class RichTextAreaImplStandard extends RichTextAreaImpl implemen
     execCommand("Underline", "False");
   }
 
+  public void undo() {
+    execCommand("Undo", "false");
+  }
+
   @Override
   public void uninitElement() {
+    isReady = false;
+
     // Issue 1897: initElement uses a timeout, so its possible to call this
     // method after calling initElement, but before the event system is in
     // place.
@@ -311,6 +332,7 @@ public abstract class RichTextAreaImplStandard extends RichTextAreaImpl implemen
       return;
     }
     initializing = false;
+    isReady = true;
 
     super.onElementInitialized();
 
@@ -352,11 +374,17 @@ public abstract class RichTextAreaImplStandard extends RichTextAreaImpl implemen
   }-*/;
 
   void execCommand(String cmd, String param) {
-    if (isRichEditingActive(elem)) {
+    assert isReady : INACTIVE_MESSAGE;
+    if (isReady) {
       // When executing a command, focus the iframe first, since some commands
       // don't take properly when it's not focused.
       setFocus(true);
-      execCommandAssumingFocus(cmd, param);
+      try {
+        execCommandAssumingFocus(cmd, param);
+      } catch (JavaScriptException e) {
+        // In mozilla, editing throws a JS exception if the iframe is
+        // *hidden, but attached*.
+      }
     }
   }
 
@@ -364,19 +392,18 @@ public abstract class RichTextAreaImplStandard extends RichTextAreaImpl implemen
     this.@com.google.gwt.user.client.ui.impl.RichTextAreaImpl::elem.contentWindow.document.execCommand(cmd, false, param);
   }-*/;
 
-  native boolean isRichEditingActive(Element e) /*-{
-    return ((e.contentWindow.document.designMode).toUpperCase()) == 'ON';
-  }-*/;
-
   boolean queryCommandState(String cmd) {
-    if (isRichEditingActive(elem)) {
+    if (isReady) {
       // When executing a command, focus the iframe first, since some commands
       // don't take properly when it's not focused.
       setFocus(true);
-      return queryCommandStateAssumingFocus(cmd);
-    } else {
-      return false;
+      try {
+        return queryCommandStateAssumingFocus(cmd);
+      } catch (JavaScriptException e) { 
+        return false;
+      }
     }
+    return false;
   }
 
   native boolean queryCommandStateAssumingFocus(String cmd) /*-{
@@ -384,10 +411,17 @@ public abstract class RichTextAreaImplStandard extends RichTextAreaImpl implemen
   }-*/;
 
   String queryCommandValue(String cmd) {
-    // When executing a command, focus the iframe first, since some commands
-    // don't take properly when it's not focused.
-    setFocus(true);
-    return queryCommandValueAssumingFocus(cmd);
+    if (isReady) {
+      // When executing a command, focus the iframe first, since some commands
+      // don't take properly when it's not focused.
+      setFocus(true);
+      try {
+        return queryCommandValueAssumingFocus(cmd);
+      } catch (JavaScriptException e) {
+        return "";
+      }
+    }
+    return "";
   }
 
   native String queryCommandValueAssumingFocus(String cmd) /*-{

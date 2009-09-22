@@ -28,9 +28,11 @@ public class JJSOptionsImpl implements JJSOptions, Serializable {
   private boolean disableClassMetadata = false;
   private boolean draftCompile = false;
   private boolean enableAssertions;
+  private boolean optimizePrecompile = false;
   private JsOutputOption output = JsOutputOption.OBFUSCATED;
   private boolean runAsyncEnabled = true;
   private boolean soycEnabled = false;
+  private boolean soycExtra = false;
 
   public JJSOptionsImpl() {
   }
@@ -49,6 +51,7 @@ public class JJSOptionsImpl implements JJSOptions, Serializable {
     setOutput(other.getOutput());
     setRunAsyncEnabled(other.isRunAsyncEnabled());
     setSoycEnabled(other.isSoycEnabled());
+    setSoycExtra(other.isSoycExtra());
   }
 
   public JsOutputOption getOutput() {
@@ -79,12 +82,20 @@ public class JJSOptionsImpl implements JJSOptions, Serializable {
     return enableAssertions;
   }
 
+  public boolean isOptimizePrecompile() {
+    return optimizePrecompile;
+  }
+
   public boolean isRunAsyncEnabled() {
     return runAsyncEnabled;
   }
 
   public boolean isSoycEnabled() {
     return soycEnabled;
+  }
+
+  public boolean isSoycExtra() {
+    return soycExtra;
   }
 
   public void setAggressivelyOptimize(boolean aggressivelyOptimize) {
@@ -111,6 +122,10 @@ public class JJSOptionsImpl implements JJSOptions, Serializable {
     this.enableAssertions = enableAssertions;
   }
 
+  public void setOptimizePrecompile(boolean optimize) {
+    optimizePrecompile = optimize;
+  }
+
   public void setOutput(JsOutputOption output) {
     this.output = output;
   }
@@ -121,5 +136,9 @@ public class JJSOptionsImpl implements JJSOptions, Serializable {
 
   public void setSoycEnabled(boolean enabled) {
     soycEnabled = enabled;
+  }
+
+  public void setSoycExtra(boolean enabled) {
+    soycExtra = enabled;
   }
 }

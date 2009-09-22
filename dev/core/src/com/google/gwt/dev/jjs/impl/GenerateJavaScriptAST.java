@@ -26,6 +26,7 @@ import com.google.gwt.dev.jjs.ast.HasName;
 import com.google.gwt.dev.jjs.ast.JAbsentArrayDimension;
 import com.google.gwt.dev.jjs.ast.JAbstractMethodBody;
 import com.google.gwt.dev.jjs.ast.JArrayRef;
+import com.google.gwt.dev.jjs.ast.JArrayType;
 import com.google.gwt.dev.jjs.ast.JAssertStatement;
 import com.google.gwt.dev.jjs.ast.JBinaryOperation;
 import com.google.gwt.dev.jjs.ast.JBinaryOperator;
@@ -59,6 +60,7 @@ import com.google.gwt.dev.jjs.ast.JMethodCall;
 import com.google.gwt.dev.jjs.ast.JNameOf;
 import com.google.gwt.dev.jjs.ast.JNewArray;
 import com.google.gwt.dev.jjs.ast.JNewInstance;
+import com.google.gwt.dev.jjs.ast.JNode;
 import com.google.gwt.dev.jjs.ast.JParameter;
 import com.google.gwt.dev.jjs.ast.JParameterRef;
 import com.google.gwt.dev.jjs.ast.JPostfixOperation;
@@ -131,7 +133,9 @@ import com.google.gwt.dev.js.ast.JsUnaryOperator;
 import com.google.gwt.dev.js.ast.JsVars;
 import com.google.gwt.dev.js.ast.JsWhile;
 import com.google.gwt.dev.js.ast.JsVars.JsVar;
+import com.google.gwt.dev.util.collect.Maps;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -163,6 +167,13 @@ public class GenerateJavaScriptAST {
     private final Map<String, String> fileNameToUriString = new HashMap<String, String>();
 
     private final Stack<JsScope> scopeStack = new Stack<JsScope>();
+
+    @Override
+    public void endVisit(JArrayType x, Context ctx) {
+      JsName name = topScope.declareName(x.getName());
+      names.put(x, name);
+      recordSymbol(x, name);
+    }
 
     @Override
     public void endVisit(JClassType x, Context ctx) {
@@ -242,6 +253,12 @@ public class GenerateJavaScriptAST {
        */
       nullMethodName = topScope.declareName(nullMethod.getName());
       names.put(nullMethod, nullMethodName);
+
+      /*
+       * Make sure we record all of the program's array types since
+       * JProgram.traverse() doesn't iterate over them.
+       */
+      accept(new ArrayList<JArrayType>(program.getAllArrayTypes()));
     }
 
     @Override
@@ -344,6 +361,11 @@ public class GenerateJavaScriptAST {
       jsFunction.getSourceInfo().addCorrelation(
           program.getCorrelator().by(globalName));
       push(jsFunction.getScope());
+
+      if (program.getIndexedMethods().contains(x)) {
+        indexedFunctions = Maps.put(indexedFunctions,
+            x.getEnclosingType().getShortName() + "." + x.getName(), jsFunction);
+      }
       return true;
     }
 
@@ -404,8 +426,10 @@ public class GenerateJavaScriptAST {
     }
 
     private void recordSymbol(JReferenceType x, JsName jsName) {
+      int typeId = program.getTypeId(x);
       StandardSymbolData symbolData = StandardSymbolData.forClass(x.getName(),
-          makeUriString(x), x.getSourceInfo().getStartLine());
+          x.getSourceInfo().getFileName(), x.getSourceInfo().getStartLine(),
+          typeId);
       assert !symbolTable.containsKey(symbolData);
       symbolTable.put(symbolData, jsName);
     }
@@ -633,6 +657,16 @@ public class GenerateJavaScriptAST {
 
       if (!vars.isEmpty()) {
         globalStmts.add(vars);
+      }
+
+      for (JNode node : x.getArtificialRescues()) {
+        if (node instanceof JMethod) {
+          JsName jsName = names.get(node);
+          if (jsName != null) {
+            JsFunction func = (JsFunction) jsName.getStaticRef();
+            func.setArtificiallyRescued(true);
+          }
+        }
       }
     }
 
@@ -1119,7 +1153,7 @@ public class GenerateJavaScriptAST {
       List<JsFunction> nonInitialEntries = Arrays.asList(entryFunctions).subList(
           x.getEntryCount(0), entryFunctions.length);
       if (!nonInitialEntries.isEmpty()) {
-        JMethod loadedMethod = program.getIndexedMethod("AsyncFragmentLoader.leftoversFragmentHasLoaded");
+        JMethod loadedMethod = program.getIndexedMethod("AsyncFragmentLoader.browserLoaderLeftoversFragmentHasLoaded");
         JsName loadedMethodName = names.get(loadedMethod);
         SourceInfo sourceInfo = jsProgram.getSourceInfo().makeChild(
             GenerateJavaScriptAST.class, "call to leftoversFragmentHasLoaded ");
@@ -1729,6 +1763,7 @@ public class GenerateJavaScriptAST {
       bOpMap.put(JBinaryOperator.DIV, JsBinaryOperator.DIV);
       bOpMap.put(JBinaryOperator.MOD, JsBinaryOperator.MOD);
       bOpMap.put(JBinaryOperator.ADD, JsBinaryOperator.ADD);
+      bOpMap.put(JBinaryOperator.CONCAT, JsBinaryOperator.ADD);
       bOpMap.put(JBinaryOperator.SUB, JsBinaryOperator.SUB);
       bOpMap.put(JBinaryOperator.SHL, JsBinaryOperator.SHL);
       bOpMap.put(JBinaryOperator.SHR, JsBinaryOperator.SHR);
@@ -1746,6 +1781,7 @@ public class GenerateJavaScriptAST {
       bOpMap.put(JBinaryOperator.OR, JsBinaryOperator.OR);
       bOpMap.put(JBinaryOperator.ASG, JsBinaryOperator.ASG);
       bOpMap.put(JBinaryOperator.ASG_ADD, JsBinaryOperator.ASG_ADD);
+      bOpMap.put(JBinaryOperator.ASG_CONCAT, JsBinaryOperator.ASG_ADD);
       bOpMap.put(JBinaryOperator.ASG_SUB, JsBinaryOperator.ASG_SUB);
       bOpMap.put(JBinaryOperator.ASG_MUL, JsBinaryOperator.ASG_MUL);
       bOpMap.put(JBinaryOperator.ASG_DIV, JsBinaryOperator.ASG_DIV);
@@ -1850,6 +1886,8 @@ public class GenerateJavaScriptAST {
    */
   private Set<JMethod> crossClassTargets = new HashSet<JMethod>();
 
+  private Map<String, JsFunction> indexedFunctions = Maps.create();
+
   /**
    * Contains JsNames for all interface methods. A special scope is needed so
    * that independent classes will obfuscate their interface implementation
@@ -1939,6 +1977,7 @@ public class GenerateJavaScriptAST {
     specialObfuscatedIdents.put("finalize", "fZ");
 
     // Object fields
+    specialObfuscatedIdents.put("expando", "eX");
     specialObfuscatedIdents.put("typeId", "tI");
     specialObfuscatedIdents.put("typeMarker", "tM");
 
@@ -2085,6 +2124,8 @@ public class GenerateJavaScriptAST {
       }
     }
 
+    jsProgram.setIndexedFunctions(indexedFunctions);
+
     // TODO(spoon): Instead of gathering the information here, get it via
     // SourceInfo
     return new JavaToJavaScriptMap() {
@@ -2104,12 +2145,8 @@ public class GenerateJavaScriptAST {
         return nameToMethodMap.get(name);
       }
 
-      public String stringLiteralForName(JsName var) {
-        /*
-         * This method will be supplied non-trivially elsewhere.
-         * GenerateJavaScriptAST doesn't have the information to implement it.
-         */
-        return null;
+      public JReferenceType nameToType(JsName name) {
+        return constructorNameToTypeMap.get(name);
       }
 
       public JReferenceType typeForStatement(JsStatement stat) {

@@ -18,10 +18,11 @@ package com.google.gwt.dev;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.dev.CompileTaskRunner.CompileTask;
-import com.google.gwt.dev.jjs.JavaToJavaScriptCompiler;
+import com.google.gwt.dev.jjs.PermutationResult;
 import com.google.gwt.dev.jjs.UnifiedAst;
 import com.google.gwt.dev.util.FileBackedObject;
 import com.google.gwt.dev.util.arg.ArgHandlerLocalWorkers;
+import com.google.gwt.dev.util.arg.OptionLocalWorkers;
 import com.google.gwt.util.tools.ArgHandlerString;
 
 import java.io.File;
@@ -183,7 +184,7 @@ public class CompilePerms {
   public static PermutationResult compile(TreeLogger logger,
       Permutation permutation, UnifiedAst unifiedAst)
       throws UnableToCompleteException {
-    return JavaToJavaScriptCompiler.compilePermutation(logger, unifiedAst,
+    return unifiedAst.compilePermutation(logger,
         permutation.getRebindAnswers(), permutation.getPropertyOracles(),
         permutation.getId());
   }

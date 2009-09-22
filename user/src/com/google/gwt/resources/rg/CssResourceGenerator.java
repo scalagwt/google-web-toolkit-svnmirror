@@ -1,12 +1,12 @@
 /*
  * Copyright 2008 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -71,6 +71,7 @@ import com.google.gwt.resources.css.ast.CssProperty.IdentValue;
 import com.google.gwt.resources.css.ast.CssProperty.ListValue;
 import com.google.gwt.resources.css.ast.CssProperty.NumberValue;
 import com.google.gwt.resources.css.ast.CssProperty.Value;
+import com.google.gwt.resources.ext.AbstractResourceGenerator;
 import com.google.gwt.resources.ext.ClientBundleRequirements;
 import com.google.gwt.resources.ext.ResourceContext;
 import com.google.gwt.resources.ext.ResourceGeneratorUtil;
@@ -102,7 +103,7 @@ import java.util.zip.Adler32;
 /**
  * Provides implementations of CSSResources.
  */
-public class CssResourceGenerator extends AbstractResourceGenerator {
+public final class CssResourceGenerator extends AbstractResourceGenerator {
   static class ClassRenamer extends CssVisitor {
     private final Map<JMethod, String> actualReplacements = new IdentityHashMap<JMethod, String>();
 
@@ -114,7 +115,7 @@ public class CssResourceGenerator extends AbstractResourceGenerator {
      * obfuscated names for the CssResource that is being generated.
      */
     private final Map<String, Map<JMethod, String>> classReplacementsWithPrefix;
-    private final Pattern classSelectorPattern = Pattern.compile("\\.([^ :>+#.]*)");
+    private final Set<String> cssDefs = new HashSet<String>();
     private final Set<String> externalClasses;
     private final TreeLogger logger;
     private final Set<JMethod> missingClasses;
@@ -134,6 +135,11 @@ public class CssResourceGenerator extends AbstractResourceGenerator {
       assert classReplacementsWithPrefix.containsKey("");
       missingClasses = new HashSet<JMethod>(
           classReplacementsWithPrefix.get("").keySet());
+    }
+
+    @Override
+    public void endVisit(CssDef x, Context ctx) {
+      cssDefs.add(x.getKey());
     }
 
     @Override
@@ -177,7 +183,7 @@ public class CssResourceGenerator extends AbstractResourceGenerator {
       sel = sel.trim();
 
       if (strict) {
-        Matcher m = classSelectorPattern.matcher(sel);
+        Matcher m = CssSelector.CLASS_SELECTOR_PATTERN.matcher(sel);
         while (m.find()) {
           String classSelector = m.group(1);
           if (!replacedClasses.contains(classSelector)
@@ -193,6 +199,19 @@ public class CssResourceGenerator extends AbstractResourceGenerator {
     @Override
     public void endVisit(CssStylesheet x, Context ctx) {
       boolean stop = false;
+
+      // Skip names corresponding to @def entries. They too can be declared as
+      // String accessors.
+      List<JMethod> toRemove = new ArrayList<JMethod>();
+      for (JMethod method : missingClasses) {
+        if (cssDefs.contains(method.getName())) {
+          toRemove.add(method);
+        }
+      }
+      for (JMethod method : toRemove) {
+        missingClasses.remove(method);
+      }
+
       if (!missingClasses.isEmpty()) {
         stop = true;
         TreeLogger errorLogger = logger.branch(TreeLogger.INFO,
@@ -228,6 +247,15 @@ public class CssResourceGenerator extends AbstractResourceGenerator {
 
     public Map<JMethod, String> getReplacements() {
       return actualReplacements;
+    }
+  }
+
+  static class DefsCollector extends CssVisitor {
+    private final Set<String> defs = new HashSet<String>();
+
+    @Override
+    public void endVisit(CssDef x, Context ctx) {
+      defs.add(x.getKey());
     }
   }
 
@@ -303,6 +331,7 @@ public class CssResourceGenerator extends AbstractResourceGenerator {
     }
   }
 
+  @SuppressWarnings("serial")
   static class JClassOrderComparator implements Comparator<JClassType>,
       Serializable {
     public int compare(JClassType o1, JClassType o2) {
@@ -918,10 +947,18 @@ public class CssResourceGenerator extends AbstractResourceGenerator {
           String functionName = def.getValues().get(0).isIdentValue().getIdent();
 
           // Find the method
-          JMethod method = context.getClientBundleType().findMethod(
-              functionName, new JType[0]);
+          JMethod methods[] = context.getClientBundleType().getOverridableMethods();
+          boolean foundMethod = false;
+          if (methods != null) {
+            for (JMethod method : methods) {
+              if (method.getName().equals(functionName)) {
+                foundMethod = true;
+                break;
+              }
+            }
+          }
 
-          if (method == null) {
+          if (!foundMethod) {
             logger.log(TreeLogger.ERROR, "Unable to find DataResource method "
                 + functionName + " in "
                 + context.getClientBundleType().getQualifiedSourceName());
@@ -966,7 +1003,14 @@ public class CssResourceGenerator extends AbstractResourceGenerator {
    */
   private static final int CONCAT_EXPRESSION_LIMIT = 20;
 
-  private static final String[] DEFAULT_EXTENSIONS = new String[] {".css"};
+  /**
+   * These constants are used to cache obfuscated class names.
+   */
+  private static final String KEY_BY_CLASS_AND_METHOD = "classAndMethod";
+  private static final String KEY_HAS_CACHED_DATA = "hasCachedData";
+  private static final String KEY_SHARED_METHODS = "sharedMethods";
+  private static final String KEY_CLASS_PREFIX = "prefix";
+  private static final String KEY_CLASS_COUNTER = "counter";
 
   public static void main(String[] args) {
     for (int i = 0; i < 1000; i++) {
@@ -1042,7 +1086,7 @@ public class CssResourceGenerator extends AbstractResourceGenerator {
      * Very large concatenation expressions using '+' cause the GWT compiler to
      * overflow the stack due to deep AST nesting. The workaround for now is to
      * force it to be more balanced using intermediate concatenation groupings.
-     * 
+     *
      * This variable is used to track the number of subexpressions within the
      * current parenthetical expression.
      */
@@ -1115,7 +1159,7 @@ public class CssResourceGenerator extends AbstractResourceGenerator {
   /**
    * Check if number of concat expressions currently exceeds limit and either
    * append '+' if the limit isn't reached or ') + (' if it is.
-   * 
+   *
    * @return numExpressions + 1 or 0 if limit was exceeded.
    */
   private static int concatOp(int numExpressions, StringBuilder b) {
@@ -1198,15 +1242,15 @@ public class CssResourceGenerator extends AbstractResourceGenerator {
     }
   }
 
-  private String classPrefix;
+  private Counter classCounter;
   private JClassType cssResourceType;
   private JClassType elementType;
   private boolean enableMerge;
   private boolean prettyOutput;
   private Map<JClassType, Map<JMethod, String>> replacementsByClassAndMethod;
   private Map<JMethod, String> replacementsForSharedMethods;
-  private Map<JMethod, CssStylesheet> stylesheetMap;
   private JClassType stringType;
+  private Map<JMethod, CssStylesheet> stylesheetMap;
 
   @Override
   public String createAssignment(TreeLogger logger, ResourceContext context,
@@ -1282,6 +1326,7 @@ public class CssResourceGenerator extends AbstractResourceGenerator {
   @Override
   public void init(TreeLogger logger, ResourceContext context)
       throws UnableToCompleteException {
+    String classPrefix;
     try {
       PropertyOracle propertyOracle = context.getGeneratorContext().getPropertyOracle();
       ConfigurationProperty styleProp = propertyOracle.getConfigurationProperty("CssResource.style");
@@ -1295,15 +1340,8 @@ public class CssResourceGenerator extends AbstractResourceGenerator {
       ConfigurationProperty classPrefixProp = propertyOracle.getConfigurationProperty("CssResource.obfuscationPrefix");
       classPrefix = classPrefixProp.getValues().get(0);
     } catch (BadPropertyValueException e) {
-      logger.log(TreeLogger.WARN, "Unable to query module property", e);
+      logger.log(TreeLogger.ERROR, "Unable to query module property", e);
       throw new UnableToCompleteException();
-    }
-
-    if ("default".equals(classPrefix)) {
-      // Compute it later in computeObfuscatedNames();
-      classPrefix = null;
-    } else if ("empty".equals(classPrefix)) {
-      classPrefix = "";
     }
 
     // Find all of the types that we care about in the type system
@@ -1318,11 +1356,9 @@ public class CssResourceGenerator extends AbstractResourceGenerator {
     stringType = typeOracle.findType(String.class.getName());
     assert stringType != null;
 
-    replacementsByClassAndMethod = new IdentityHashMap<JClassType, Map<JMethod, String>>();
-    replacementsForSharedMethods = new IdentityHashMap<JMethod, String>();
     stylesheetMap = new IdentityHashMap<JMethod, CssStylesheet>();
 
-    computeObfuscatedNames(logger);
+    initReplacements(logger, context, classPrefix);
   }
 
   @Override
@@ -1336,7 +1372,7 @@ public class CssResourceGenerator extends AbstractResourceGenerator {
     }
 
     URL[] resources = ResourceGeneratorUtil.findResources(logger, context,
-        method, DEFAULT_EXTENSIONS);
+        method);
 
     if (resources.length == 0) {
       logger.log(TreeLogger.ERROR, "At least one source must be specified");
@@ -1349,17 +1385,19 @@ public class CssResourceGenerator extends AbstractResourceGenerator {
     (new RequirementsCollector(logger, requirements)).accept(sheet);
   }
 
-  /**
-   * Each distinct type of CssResource has a unique collection of values that it
-   * will return, excepting for those methods that are defined within an
-   * interface that is tagged with {@code @Shared}.
-   */
-  private void computeObfuscatedNames(TreeLogger logger) {
-    logger = logger.branch(TreeLogger.DEBUG, "Computing CSS class replacements");
-
-    SortedSet<JClassType> cssResourceSubtypes = computeOperableTypes(logger);
+  private String computeClassPrefix(String classPrefix,
+      SortedSet<JClassType> cssResourceSubtypes) {
+    if ("default".equals(classPrefix)) {
+      classPrefix = null;
+    } else if ("empty".equals(classPrefix)) {
+      classPrefix = "";
+    }
 
     if (classPrefix == null) {
+      /*
+       * Note that the checksum will miss some or all of the subtypes generated
+       * by other generators.
+       */
       Adler32 checksum = new Adler32();
       for (JClassType type : cssResourceSubtypes) {
         checksum.update(Util.getBytes(type.getQualifiedSourceName()));
@@ -1368,8 +1406,23 @@ public class CssResourceGenerator extends AbstractResourceGenerator {
           + Long.toString(checksum.getValue(), Character.MAX_RADIX);
     }
 
-    int count = 0;
+    return classPrefix;
+  }
+
+  /**
+   * Each distinct type of CssResource has a unique collection of values that it
+   * will return, excepting for those methods that are defined within an
+   * interface that is tagged with {@code @Shared}.
+   */
+  private void computeObfuscatedNames(TreeLogger logger, String classPrefix,
+      Set<JClassType> cssResourceSubtypes) {
+    logger = logger.branch(TreeLogger.DEBUG, "Computing CSS class replacements");
+
     for (JClassType type : cssResourceSubtypes) {
+      if (replacementsByClassAndMethod.containsKey(type)) {
+        continue;
+      }
+
       Map<JMethod, String> replacements = new IdentityHashMap<JMethod, String>();
       replacementsByClassAndMethod.put(type, replacements);
 
@@ -1386,13 +1439,11 @@ public class CssResourceGenerator extends AbstractResourceGenerator {
           name = classNameOverride.value();
         }
 
-        String obfuscatedClassName;
+        String obfuscatedClassName = classPrefix + makeIdent(classCounter.next());
         if (prettyOutput) {
-          obfuscatedClassName = classPrefix + "-"
+          obfuscatedClassName += "-"
               + type.getQualifiedSourceName().replaceAll("[.$]", "-") + "-"
               + name;
-        } else {
-          obfuscatedClassName = classPrefix + makeIdent(count++);
         }
 
         replacements.put(method, obfuscatedClassName);
@@ -1506,6 +1557,50 @@ public class CssResourceGenerator extends AbstractResourceGenerator {
     return false;
   }
 
+  /**
+   * This method will initialize the maps that contain the obfuscated class
+   * names.
+   */
+  @SuppressWarnings("unchecked")
+  private void initReplacements(TreeLogger logger, ResourceContext context,
+      String classPrefix) {
+    /*
+     * This code was originally written to take a snapshot of all the
+     * CssResource descendants in the TypeOracle on its first run and calculate
+     * the obfuscated names in one go, to ensure that the same obfuscation would
+     * result regardless of the order in which the generators fired. (It no
+     * longer behaves that way, as that scheme prevented the generation of new
+     * CssResource interfaces, but the complexity lives on.)
+     *
+     * TODO(rjrjr,bobv) These days scottb tells us we're guaranteed that the
+     * recompiling the same code will fire the generators in a consistent order,
+     * so the old gymnastics aren't really justified anyway. It would probably
+     * be be worth the effort to simplify this.
+     */
+
+    SortedSet<JClassType> cssResourceSubtypes = computeOperableTypes(logger);
+
+    if (context.getCachedData(KEY_HAS_CACHED_DATA, Boolean.class) != Boolean.TRUE) {
+      context.putCachedData(KEY_CLASS_COUNTER, new Counter());
+      context.putCachedData(KEY_BY_CLASS_AND_METHOD,
+          new IdentityHashMap<JClassType, Map<JMethod, String>>());
+      context.putCachedData(KEY_SHARED_METHODS,
+          new IdentityHashMap<JMethod, String>());
+      context.putCachedData(KEY_CLASS_PREFIX, computeClassPrefix(classPrefix,
+          cssResourceSubtypes));
+      context.putCachedData(KEY_HAS_CACHED_DATA, Boolean.TRUE);
+    }
+
+    classCounter = context.getCachedData(KEY_CLASS_COUNTER, Counter.class);
+    replacementsByClassAndMethod = context.getCachedData(
+        KEY_BY_CLASS_AND_METHOD, Map.class);
+    replacementsForSharedMethods = context.getCachedData(KEY_SHARED_METHODS,
+        Map.class);
+    classPrefix = context.getCachedData(KEY_CLASS_PREFIX, String.class);
+
+    computeObfuscatedNames(logger, classPrefix, cssResourceSubtypes);
+  }
+
   private boolean isStrict(TreeLogger logger, ResourceContext context,
       JMethod method) {
     Strict strictAnnotation = method.getAnnotation(Strict.class);
@@ -1562,7 +1657,7 @@ public class CssResourceGenerator extends AbstractResourceGenerator {
   /**
    * Create a Java expression that evaluates to the string representation of the
    * stylesheet resource.
-   * 
+   *
    * @param actualReplacements An out parameter that will be populated by the
    *          obfuscated class names that should be used for the particular
    *          instance of the CssResource, based on any substitution
@@ -1634,7 +1729,8 @@ public class CssResourceGenerator extends AbstractResourceGenerator {
       Map<JMethod, String> classReplacements) {
 
     String replacement = classReplacements.get(toImplement);
-    assert replacement != null;
+    assert replacement != null : "Missing replacement for "
+        + toImplement.getName();
 
     sw.println(toImplement.getReadableDeclaration(false, true, true, true, true)
         + "{");
@@ -1668,34 +1764,39 @@ public class CssResourceGenerator extends AbstractResourceGenerator {
 
     NumberValue numberValue = def.getValues().get(0).isNumberValue();
 
-    if (numberValue == null) {
-      logger.log(TreeLogger.ERROR, "The define named " + name
-          + " does not define a numeric value");
-      throw new UnableToCompleteException();
+    String returnExpr = "";
+    JClassType classReturnType = toImplement.getReturnType().isClass();
+    if (classReturnType != null
+        && "java.lang.String".equals(classReturnType.getQualifiedSourceName())) {
+      returnExpr = "\"" + Generator.escape(def.getValues().get(0).toString())
+          + "\"";
+    } else {
+      JPrimitiveType returnType = toImplement.getReturnType().isPrimitive();
+      if (returnType == null) {
+        logger.log(TreeLogger.ERROR, toImplement.getName()
+            + ": Return type must be primitive type or String for "
+            + "@def accessors");
+        throw new UnableToCompleteException();
+      }
+      if (returnType == JPrimitiveType.INT || returnType == JPrimitiveType.LONG) {
+        returnExpr = "" + Math.round(numberValue.getValue());
+      } else if (returnType == JPrimitiveType.FLOAT) {
+        returnExpr = numberValue.getValue() + "F";
+      } else if (returnType == JPrimitiveType.DOUBLE) {
+        returnExpr = "" + numberValue.getValue();
+      } else {
+        logger.log(TreeLogger.ERROR, returnType.getQualifiedSourceName()
+            + " is not a valid primitive return type for @def accessors");
+        throw new UnableToCompleteException();
+      }
     }
-
-    JPrimitiveType returnType = toImplement.getReturnType().isPrimitive();
-    assert returnType != null;
-
     sw.print(toImplement.getReadableDeclaration(false, false, false, false,
         true));
     sw.println(" {");
     sw.indent();
-    if (returnType == JPrimitiveType.INT || returnType == JPrimitiveType.LONG) {
-      sw.println("return " + Math.round(numberValue.getValue()) + ";");
-    } else if (returnType == JPrimitiveType.FLOAT) {
-      sw.println("return " + numberValue.getValue() + "F;");
-    } else if (returnType == JPrimitiveType.DOUBLE) {
-      sw.println("return " + numberValue.getValue() + ";");
-    } else {
-      logger.log(TreeLogger.ERROR, returnType.getQualifiedSourceName()
-          + " is not a valid return type for @def accessors");
-      throw new UnableToCompleteException();
-    }
+    sw.println("return " + returnExpr + ";");
     sw.outdent();
     sw.println("}");
-
-    numberValue.getValue();
   }
 
   /**
@@ -1705,20 +1806,31 @@ public class CssResourceGenerator extends AbstractResourceGenerator {
       CssStylesheet sheet, JMethod[] methods,
       Map<JMethod, String> obfuscatedClassNames)
       throws UnableToCompleteException {
+
+    // Get list of @defs
+    DefsCollector collector = new DefsCollector();
+    collector.accept(sheet);
+
     for (JMethod toImplement : methods) {
       String name = toImplement.getName();
       if ("getName".equals(name) || "getText".equals(name)) {
         continue;
       }
 
-      if (toImplement.getReturnType().equals(stringType)
-          && toImplement.getParameters().length == 0) {
-        writeClassAssignment(sw, toImplement, obfuscatedClassNames);
+      // Bomb out if there is a collision between @def and a style name
+      if (collector.defs.contains(name)
+          && obfuscatedClassNames.containsKey(toImplement)) {
+        logger.log(TreeLogger.ERROR, "@def shadows CSS class name: " + name
+            + ". Fix by renaming the @def name or the CSS class name.");
+        throw new UnableToCompleteException();
+      }
 
-      } else if (toImplement.getReturnType().isPrimitive() != null
+      if (collector.defs.contains(toImplement.getName())
           && toImplement.getParameters().length == 0) {
         writeDefAssignment(logger, sw, toImplement, sheet);
-
+      } else if (toImplement.getReturnType().equals(stringType)
+          && toImplement.getParameters().length == 0) {
+        writeClassAssignment(sw, toImplement, obfuscatedClassNames);
       } else {
         logger.log(TreeLogger.ERROR, "Don't know how to implement method "
             + toImplement.getName());

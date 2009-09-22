@@ -20,13 +20,16 @@ import com.google.gwt.core.ext.BadPropertyValueException;
 import com.google.gwt.core.ext.ConfigurationProperty;
 import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.SelectionProperty;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.junit.client.GWTTestCase;
+import com.google.gwt.junit.client.GWTTestCase.TestModuleInfo;
 import com.google.gwt.junit.client.impl.GWTRunner;
+import com.google.gwt.junit.client.impl.JUnitHost.TestInfo;
 import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.user.rebind.SourceWriter;
 
@@ -38,7 +41,6 @@ import java.util.TreeSet;
  * This class generates a stub class for classes that derive from GWTTestCase.
  * This stub class provides the necessary bridge between our Hosted or Hybrid
  * mode classes and the JUnit system.
- * 
  */
 public class GWTRunnerGenerator extends Generator {
 
@@ -77,9 +79,8 @@ public class GWTRunnerGenerator extends Generator {
 
     String moduleName;
     try {
-      ConfigurationProperty prop
-          = context.getPropertyOracle().getConfigurationProperty(
-              "junit.moduleName");
+      ConfigurationProperty prop = context.getPropertyOracle().getConfigurationProperty(
+          "junit.moduleName");
       moduleName = prop.getValues().get(0);
     } catch (BadPropertyValueException e) {
       logger.log(TreeLogger.ERROR,
@@ -87,9 +88,20 @@ public class GWTRunnerGenerator extends Generator {
       throw new UnableToCompleteException();
     }
 
+    String userAgent;
+    try {
+      SelectionProperty prop = context.getPropertyOracle().getSelectionProperty(
+          logger, "user.agent");
+      userAgent = prop.getCurrentValue();
+    } catch (BadPropertyValueException e) {
+      logger.log(TreeLogger.ERROR, "Could not resolve user.agent property", e);
+      throw new UnableToCompleteException();
+    }
+
     // Get the stub class name, and see if its source file exists.
     //
-    String generatedClass = requestedClass.getName().replace('.', '_') + "Impl";
+    String generatedClass = requestedClass.getName().replace('.', '_') + "Impl"
+        + userAgent;
     String packageName = requestedClass.getPackage().getName();
     String qualifiedStubClassName = packageName + "." + generatedClass;
 
@@ -97,10 +109,23 @@ public class GWTRunnerGenerator extends Generator {
         generatedClass, GWT_RUNNER_NAME);
 
     if (sourceWriter != null) {
-      JClassType[] allTestTypes = getAllPossibleTestTypes(context.getTypeOracle());
-      Set<String> testClasses = getTestTypesForModule(logger, moduleName,
-          allTestTypes);
+      // Check the global set of active tests for this module.
+      TestModuleInfo moduleInfo = GWTTestCase.getTestsForModule(moduleName);
+      Set<TestInfo> moduleTests = (moduleInfo == null) ? null : moduleInfo.getTests();
+      Set<String> testClasses;
+      if (moduleTests == null || moduleTests.isEmpty()) {
+        // Fall back to pulling in all types in the module.
+        JClassType[] allTestTypes = getAllPossibleTestTypes(context.getTypeOracle());
+        testClasses = getTestTypesForModule(logger, moduleName, allTestTypes);
+      } else {
+        // Must use sorted set to prevent nondeterminism.
+        testClasses = new TreeSet<String>();
+        for (TestInfo testInfo : moduleTests) {
+          testClasses.add(testInfo.getTestClass());
+        }
+      }
       writeCreateNewTestCaseMethod(testClasses, sourceWriter);
+      writeGetUserAgentPropertyMethod(userAgent, sourceWriter);
       sourceWriter.commit(logger);
     }
 
@@ -169,8 +194,6 @@ public class GWTRunnerGenerator extends Generator {
     sw.println();
     sw.println("protected final GWTTestCase createNewTestCase(String testClass) {");
     sw.indent();
-    sw.println("try {");
-    sw.indent();
     boolean isFirst = true;
     for (String className : testClasses) {
       if (isFirst) {
@@ -183,12 +206,16 @@ public class GWTRunnerGenerator extends Generator {
       sw.indentln("return GWT.create(" + className + ".class);");
       sw.println("}");
     }
-    sw.outdent();
-    sw.println("} catch (Throwable t) {");
-    sw.indentln("// Crash in a useful manner");
-    sw.indentln("GWT.log(\"Unable to construct TestCase: \" + testClass, t);");
-    sw.println("}");
     sw.println("return null;");
+    sw.outdent();
+    sw.println("}");
+  }
+
+  private void writeGetUserAgentPropertyMethod(String userAgent, SourceWriter sw) {
+    sw.println();
+    sw.println("protected final String getUserAgentProperty() {");
+    sw.indent();
+    sw.println("return \"" + userAgent + "\";");
     sw.outdent();
     sw.println("}");
   }

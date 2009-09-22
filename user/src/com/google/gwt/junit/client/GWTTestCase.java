@@ -16,9 +16,17 @@
 package com.google.gwt.junit.client;
 
 import com.google.gwt.junit.JUnitShell;
+import com.google.gwt.junit.JUnitShell.Strategy;
+import com.google.gwt.junit.client.impl.JUnitResult;
+import com.google.gwt.junit.client.impl.JUnitHost.TestInfo;
 
 import junit.framework.TestCase;
 import junit.framework.TestResult;
+
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Acts as a bridge between the JUnit environment and the GWT environment. We
@@ -36,7 +44,116 @@ import junit.framework.TestResult;
  */
 public abstract class GWTTestCase extends TestCase {
 
-  /*
+  /**
+   * Information about a synthetic module used for testing.
+   */
+  public static final class TestModuleInfo {
+    private String moduleName;
+    private String syntheticModuleName;
+    private Strategy strategy;
+    
+    /**
+     * The ordered tests in this synthetic module.
+     */
+    private Set<TestInfo> tests = new LinkedHashSet<TestInfo>();
+
+    /**
+     * Construct a new {@link TestModuleInfo}.
+     * 
+     * @param moduleName the module name
+     * @param syntheticModuleName the synthetic module name
+     * @param strategy the test {@link Strategy}
+     */
+    public TestModuleInfo(String moduleName, String syntheticModuleName,
+        Strategy strategy) {
+      this.moduleName = moduleName;
+      this.syntheticModuleName = syntheticModuleName;
+      this.strategy = strategy;
+    }
+
+    public String getModuleName() {
+      return moduleName;
+    }
+
+    public Strategy getStrategy() {
+      return strategy;
+    }
+
+    public String getSyntheticModuleName() {
+      return syntheticModuleName;
+    }
+
+    /**
+     * @return the tests that are part of this module
+     */
+    public Set<TestInfo> getTests() {
+      return tests;
+    }
+  }
+
+  /**
+   * Records all live GWTTestCases by synthetic module name so we can optimize
+   * run they are compiled and run.  Ordered so that we can precompile the
+   * modules in the order that they will run.
+   */
+  public static final Map<String, TestModuleInfo> ALL_GWT_TESTS = new LinkedHashMap<String, TestModuleInfo>();
+
+  /**
+   * The lock for ALL_GWT_TESTS.
+   */
+  private static final Object ALL_GWT_TESTS_LOCK = new Object();
+
+  /**
+   * The default strategy to use for tests.
+   */
+  private static final Strategy DEFAULT_STRATEGY = new Strategy() {
+    public String getModuleInherit() {
+      return "com.google.gwt.junit.JUnit";
+    }
+
+    public String getSyntheticModuleExtension() {
+      return "JUnit";
+    }
+
+    public void processResult(TestCase testCase, JUnitResult result) {
+    }
+  };
+
+  /**
+   * Get the names of all test modules.
+   * 
+   * @return all test module names
+   */
+  public static String[] getAllTestModuleNames() {
+    synchronized (ALL_GWT_TESTS_LOCK) {
+      return ALL_GWT_TESTS.keySet().toArray(new String[ALL_GWT_TESTS.size()]);
+    }
+  }
+
+  /**
+   * Get the number of modules.
+   * 
+   * @return the module count.
+   */
+  public static int getModuleCount() {
+    synchronized (ALL_GWT_TESTS_LOCK) {
+      return ALL_GWT_TESTS.size();
+    }
+  }
+  
+  /**
+   * Get the set of all {@link TestInfo} for the specified module.
+   * 
+   * @param syntheticModuleName the synthetic module name
+   * @return all tests for the module
+   */
+  public static TestModuleInfo getTestsForModule(String syntheticModuleName) {
+    synchronized (ALL_GWT_TESTS_LOCK) {
+      return ALL_GWT_TESTS.get(syntheticModuleName);
+    }
+  }
+
+  /**
    * Object that collects the results of this test case execution.
    */
   protected TestResult testResult = null;
@@ -49,7 +166,7 @@ public abstract class GWTTestCase extends TestCase {
    * could go wrong if you run code there, trying to run a JSNI method could
    * generate an {@link UnsatisfiedLinkError}, and trying to call
    * {@link com.google.gwt.core.client.GWT#create(Class)} could throw an
-   * {@link UnsupportedOperationException}.Instead, override
+   * {@link UnsupportedOperationException}. Instead, override
    * {@link #gwtSetUp()} and perform any initialization code there.
    */
   public GWTTestCase() {
@@ -118,9 +235,29 @@ public abstract class GWTTestCase extends TestCase {
    * return the name of a module that will cause the source for that subclass to
    * be included.
    * 
-   * @return the fully qualified name of a module
+   * @return the fully qualified name of a module, or <code>null</code> to run
+   *         as a non-GWT test case
    */
   public abstract String getModuleName();
+
+  /**
+   * Get the {@link Strategy} to use when compiling and running this test.
+   *  
+   * @return the test {@link Strategy}
+   */
+  public Strategy getStrategy() {
+    return DEFAULT_STRATEGY;
+  }
+
+  /**
+   * Get the synthetic module name, which includes the synthetic extension
+   * defined by the {@link Strategy}.
+   * 
+   * @return the synthetic module name
+   */
+  public final String getSyntheticModuleName() {
+    return getModuleName() + "." + getStrategy().getSyntheticModuleExtension();
+  }
 
   /**
    * Stashes <code>result</code> so that it can be accessed during
@@ -130,6 +267,32 @@ public abstract class GWTTestCase extends TestCase {
   public final void run(TestResult result) {
     testResult = result;
     super.run(result);
+  }
+
+  @Override
+  public void setName(String name) {
+    super.setName(name);
+
+    // If we can't run this test, don't add it to the map of all tests to batch.
+    if (JUnitShell.mustNotExecuteTest(this)) {
+      return;
+    }
+
+    synchronized (ALL_GWT_TESTS_LOCK) {
+      // Once the name is set, we can add ourselves to the global set.
+      String syntheticModuleName = getSyntheticModuleName();
+      TestModuleInfo moduleInfo = ALL_GWT_TESTS.get(syntheticModuleName);
+      if (moduleInfo == null) {
+        // It should be safe to assume that tests with the same synthetic module
+        // name have the same test strategy. If they didn't, they would compile
+        // over each other.
+        moduleInfo = new TestModuleInfo(getModuleName(), syntheticModuleName,
+            getStrategy());
+        ALL_GWT_TESTS.put(syntheticModuleName, moduleInfo);
+      }
+      moduleInfo.getTests().add(
+          new TestInfo(syntheticModuleName, getClass().getName(), getName()));
+    }
   }
 
   /**
@@ -217,10 +380,19 @@ public abstract class GWTTestCase extends TestCase {
   @Override
   protected void runTest() throws Throwable {
     if (this.getName() == null) {
-      throw new IllegalArgumentException("GWTTestCases require a name; \"" + this.toString() 
-          + "\" has none.  Perhaps you used TestSuite.addTest() instead of addTestClass()?");
+      throw new IllegalArgumentException(
+          "GWTTestCases require a name; \""
+              + this.toString()
+              + "\" has none.  Perhaps you used TestSuite.addTest() instead of addTestClass()?");
     }
-    JUnitShell.runTest(getModuleName(), this, testResult);
+
+    String moduleName = getModuleName();
+    if (moduleName != null) {
+      JUnitShell.runTest(this, testResult);
+    } else {
+      // Run as a non-GWT test
+      super.runTest();
+    }
   }
 
   /**

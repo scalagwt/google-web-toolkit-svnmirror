@@ -45,12 +45,4 @@ class RunStyleManual extends RunStyleRemote {
     }
     System.out.println(getMyUrl(moduleName));
   }
-
-  @Override
-  public void maybeCompileModule(String moduleName)
-      throws UnableToCompleteException {
-    System.out.print("Compiling " + moduleName + "...");
-    super.maybeCompileModule(moduleName);
-    System.out.println(" success.");
-  }
 }

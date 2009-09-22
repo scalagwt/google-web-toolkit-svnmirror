@@ -40,8 +40,15 @@ public class SoycReportLinker extends Linker {
       ArtifactSet artifacts) throws UnableToCompleteException {
     ArtifactSet results = new ArtifactSet(artifacts);
     for (StandardCompilationAnalysis soycFiles : artifacts.find(StandardCompilationAnalysis.class)) {
-      results.add(soycFiles.getDepFile());
-      results.add(soycFiles.getStoriesFile());
+      if (soycFiles.getDepFile() != null) {
+        results.add(soycFiles.getDepFile());
+      }
+      if (soycFiles.getSizeMapsFile() != null) {
+        results.add(soycFiles.getSizeMapsFile());
+      }
+      if (soycFiles.getDetailedStoriesFile() != null) {
+        results.add(soycFiles.getDetailedStoriesFile());
+      }
       results.add(soycFiles.getSplitPointsFile());
     }
     return results;

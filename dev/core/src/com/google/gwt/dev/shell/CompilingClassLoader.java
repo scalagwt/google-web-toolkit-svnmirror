@@ -16,6 +16,7 @@
 package com.google.gwt.dev.shell;
 
 import com.google.gwt.core.client.GWTBridge;
+import com.google.gwt.core.client.GwtScriptOnly;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.core.ext.TreeLogger.Type;
@@ -31,9 +32,13 @@ import com.google.gwt.dev.javac.CompilationUnit;
 import com.google.gwt.dev.javac.CompiledClass;
 import com.google.gwt.dev.javac.JsniMethod;
 import com.google.gwt.dev.jjs.InternalCompilerException;
+import com.google.gwt.dev.shell.rewrite.HasAnnotation;
 import com.google.gwt.dev.shell.rewrite.HostedModeClassRewriter;
 import com.google.gwt.dev.shell.rewrite.HostedModeClassRewriter.InstanceMethodOracle;
 import com.google.gwt.dev.util.JsniRef;
+import com.google.gwt.dev.util.Name.SourceOrBinaryName;
+import com.google.gwt.dev.util.Name.InternalName;
+import com.google.gwt.dev.util.Util;
 import com.google.gwt.util.tools.Utility;
 
 import org.apache.commons.collections.map.AbstractReferenceMap;
@@ -59,7 +64,6 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.Stack;
 import java.util.TreeMap;
-import java.util.regex.Pattern;
 
 /**
  * An isolated {@link ClassLoader} for running all user code. All user files are
@@ -249,12 +253,12 @@ public final class CompilingClassLoader extends ClassLoader implements
      */
     private Class<?> getClassFromBinaryOrSourceName(String className) {
       // Try the type oracle first
-      JClassType type = typeOracle.findType(className.replace('$', '.'));
+      JClassType type = typeOracle.findType(SourceOrBinaryName.toSourceName(className));
       if (type != null) {
         // Use the type oracle to compute the exact binary name
         String jniSig = type.getJNISignature();
         jniSig = jniSig.substring(1, jniSig.length() - 1);
-        className = jniSig.replace('/', '.');
+        className = InternalName.toBinaryName(jniSig);
       }
       return getClassFromBinaryName(className);
     }
@@ -319,6 +323,31 @@ public final class CompilingClassLoader extends ClassLoader implements
      */
     private int synthesizeDispId(int classId, int memberId) {
       return (classId << 16) | memberId;
+    }
+  }
+
+  /**
+   * A ClassLoader that will delegate to a parent ClassLoader and fall back to
+   * loading bytecode as resources from an alternate parent ClassLoader.
+   */
+  private static class MultiParentClassLoader extends ClassLoader {
+    private final ClassLoader resources;
+
+    public MultiParentClassLoader(ClassLoader parent, ClassLoader resources) {
+      super(parent);
+      this.resources = resources;
+    }
+
+    @Override
+    protected synchronized Class<?> findClass(String name)
+        throws ClassNotFoundException {
+      String resourceName = name.replace('.', '/') + ".class";
+      URL url = resources.getResource(resourceName);
+      if (url == null) {
+        throw new ClassNotFoundException();
+      }
+      byte[] bytes = Util.readURLAsBytes(url);
+      return defineClass(name, bytes, 0, bytes.length);
     }
   }
 
@@ -423,8 +452,6 @@ public final class CompilingClassLoader extends ClassLoader implements
 
   private static EmmaStrategy emmaStrategy;
 
-  private static final Pattern GENERATED_CLASSNAME_PATTERN = Pattern.compile(".+\\$\\d.*");
-
   /**
    * Caches the byte code for {@link JavaScriptHost}.
    */
@@ -449,25 +476,6 @@ public final class CompilingClassLoader extends ClassLoader implements
     } catch (ClassNotFoundException ignored) {
     }
     emmaStrategy = EmmaStrategy.get(emmaAvailable);
-  }
-
-  /**
-   * Checks if the class names is generated. Accepts any classes whose names
-   * match .+$\d.* (handling named classes within anonymous classes and multiple
-   * named classes of the same name in a class, but in different methods).
-   * Checks if the class or any of its enclosing classes are anonymous or
-   * synthetic.
-   * <p>
-   * If new compilers have different conventions for anonymous and synthetic
-   * classes, this code needs to be updated.
-   * </p>
-   * 
-   * @param className name of the class to be checked.
-   * @return true iff class or any of its enclosing classes are anonymous or
-   *         synthetic.
-   */
-  public static boolean isClassnameGenerated(String className) {
-    return GENERATED_CLASSNAME_PATTERN.matcher(className).matches();
   }
 
   private static void classDump(String name, byte[] bytes) {
@@ -574,9 +582,14 @@ public final class CompilingClassLoader extends ClassLoader implements
 
   private final TreeLogger logger;
 
+  private final Set<String> scriptOnlyClasses = new HashSet<String>();
+
+  private ClassLoader scriptOnlyClassLoader;
+
   private ShellJavaScriptHost shellJavaScriptHost;
 
   private final Set<String> singleJsoImplTypes = new HashSet<String>();
+
   /**
    * Used by {@link #findClass(String)} to prevent reentrant JSNI injection.
    */
@@ -719,6 +732,11 @@ public final class CompilingClassLoader extends ClassLoader implements
           new NullPointerException());
     }
 
+    if (scriptOnlyClasses.contains(className)) {
+      // Allow the child ClassLoader to handle this
+      throw new ClassNotFoundException();
+    }
+
     // Check for a bridge class that spans hosted and user space.
     if (BRIDGE_CLASS_NAMES.containsKey(className)) {
       return BRIDGE_CLASS_NAMES.get(className);
@@ -728,6 +746,12 @@ public final class CompilingClassLoader extends ClassLoader implements
     byte[] classBytes = findClassBytes(className);
     if (classBytes == null) {
       throw new ClassNotFoundException(className);
+    }
+
+    if (HasAnnotation.hasAnnotation(classBytes, GwtScriptOnly.class)) {
+      scriptOnlyClasses.add(className);
+      maybeInitializeScriptOnlyClassLoader();
+      return Class.forName(className, true, scriptOnlyClassLoader);
     }
 
     /*
@@ -793,6 +817,8 @@ public final class CompilingClassLoader extends ClassLoader implements
   void clear() {
     // Release our references to the shell.
     shellJavaScriptHost = null;
+    scriptOnlyClasses.clear();
+    scriptOnlyClassLoader = null;
     updateJavaScriptHost();
     weakJsoCache.clear();
     weakJavaWrapperCache.clear();
@@ -978,7 +1004,7 @@ public final class CompilingClassLoader extends ClassLoader implements
        * compiler.
        */
       if (typeHasCompilationUnit(lookupClassName)
-          && isClassnameGenerated(className)) {
+          && CompilationUnit.isClassnameGenerated(className)) {
         /*
          * modification time = 0 ensures that whatever is on the disk is always
          * loaded.
@@ -1051,6 +1077,13 @@ public final class CompilingClassLoader extends ClassLoader implements
       return;
     }
     shellJavaScriptHost.createNativeMethods(logger, unit.getJsniMethods(), this);
+  }
+
+  private void maybeInitializeScriptOnlyClassLoader() {
+    if (scriptOnlyClassLoader == null) {
+      scriptOnlyClassLoader = new MultiParentClassLoader(this,
+          Thread.currentThread().getContextClassLoader());
+    }
   }
 
   private boolean typeHasCompilationUnit(String className) {

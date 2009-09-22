@@ -27,6 +27,7 @@ import com.google.gwt.dev.cfg.ModuleDef;
 import com.google.gwt.dev.cfg.ModuleDefLoader;
 import com.google.gwt.dev.cfg.StaticPropertyOracle;
 import com.google.gwt.dev.jjs.JJSOptions;
+import com.google.gwt.dev.jjs.PermutationResult;
 import com.google.gwt.dev.jjs.impl.CodeSplitter;
 import com.google.gwt.dev.util.FileBackedObject;
 import com.google.gwt.dev.util.Util;
@@ -250,6 +251,12 @@ public class Link {
           /*
            * The view of the Permutation doesn't include properties with defined
            * values.
+           */
+          continue;
+        } else if (key.isDerived()) {
+          /*
+           * The property provider does not need to be invoked, because the
+           * value is determined entirely by other properties.
            */
           continue;
         }

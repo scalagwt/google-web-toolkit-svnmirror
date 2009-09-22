@@ -102,7 +102,7 @@ public class LegacySerializationPolicy extends SerializationPolicy implements
       throws SerializationException {
     throw new SerializationException(ELISION_ERROR);
   }
-
+  
   /**
    * Implemented to fail with a useful error message.
    */
@@ -174,5 +174,4 @@ public class LegacySerializationPolicy extends SerializationPolicy implements
     }
     return SerializabilityUtil.hasCustomFieldSerializer(clazz) != null;
   }
-
 }

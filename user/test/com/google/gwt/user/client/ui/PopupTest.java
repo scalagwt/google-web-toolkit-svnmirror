@@ -17,6 +17,8 @@ package com.google.gwt.user.client.ui;
 
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.junit.DoNotRunWith;
+import com.google.gwt.junit.Platform;
 import com.google.gwt.junit.client.GWTTestCase;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Timer;
@@ -25,6 +27,7 @@ import com.google.gwt.user.client.Window;
 /**
  * Tests for {@link PopupPanel}.
  */
+@DoNotRunWith(Platform.Htmlunit)
 public class PopupTest extends GWTTestCase {
 
   /**
@@ -33,13 +36,13 @@ public class PopupTest extends GWTTestCase {
   private static class TestablePopupPanel extends PopupPanel {
     private int onLoadCount;
 
+    public void assertOnLoadCount(int expected) {
+      assertEquals(expected, onLoadCount);
+    }
+
     @Override
     public Element getContainerElement() {
       return super.getContainerElement();
-    }
-
-    public void assertOnLoadCount(int expected) {
-      assertEquals(expected, onLoadCount);
     }
 
     @Override
@@ -108,6 +111,21 @@ public class PopupTest extends GWTTestCase {
 
     // Remove a partner
     popup.removeAutoHidePartner(partner0);
+  }
+
+  /**
+   * Tests that a large PopupPanel is not positioned off the top or left edges
+   * of the browser window, making part of the panel unreachable.
+   */
+  @DoNotRunWith(Platform.Htmlunit)
+  public void testCenterLargePopup() {
+    PopupPanel popup = new PopupPanel();
+    popup.setHeight("4096px");
+    popup.setWidth("4096px");
+    popup.setWidget(new Label("foo"));
+    popup.center();
+    assertEquals(0, popup.getAbsoluteTop());
+    assertEquals(0, popup.getAbsoluteLeft());
   }
 
   /**
@@ -180,28 +198,7 @@ public class PopupTest extends GWTTestCase {
     }
   }
 
-  /**
-   * Test the showing a popup while it is hiding will not result in an illegal
-   * state.
-   */
-  public void testShowWhileHiding() {
-    PopupPanel popup = createPopupPanel();
-
-    // Show the popup
-    popup.setAnimationEnabled(false);
-    popup.show();
-    assertTrue(popup.isShowing());
-
-    // Start hiding the popup
-    popup.setAnimationEnabled(true);
-    popup.hide();
-    assertFalse(popup.isShowing());
-
-    // Show the popup while its hiding
-    popup.show();
-    assertTrue(popup.isShowing());
-  }
-
+  @DoNotRunWith(Platform.Htmlunit)
   public void testPopup() {
     // Get rid of window margins so we can test absolute position.
     Window.setMargin("0px");
@@ -272,6 +269,28 @@ public class PopupTest extends GWTTestCase {
     popup.show();
     popup.setWidget(new Label("test"));
     popup.hide();
+  }
+
+  /**
+   * Test the showing a popup while it is hiding will not result in an illegal
+   * state.
+   */
+  public void testShowWhileHiding() {
+    PopupPanel popup = createPopupPanel();
+
+    // Show the popup
+    popup.setAnimationEnabled(false);
+    popup.show();
+    assertTrue(popup.isShowing());
+
+    // Start hiding the popup
+    popup.setAnimationEnabled(true);
+    popup.hide();
+    assertFalse(popup.isShowing());
+
+    // Show the popup while its hiding
+    popup.show();
+    assertTrue(popup.isShowing());
   }
 
   /**

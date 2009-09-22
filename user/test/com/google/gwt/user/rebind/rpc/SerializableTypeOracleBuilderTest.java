@@ -1,12 +1,12 @@
 /*
  * Copyright 2008 Google Inc.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -38,6 +38,7 @@ import com.google.gwt.dev.javac.MockCompilationUnit;
 import com.google.gwt.dev.javac.TypeOracleTestingUtils;
 import com.google.gwt.dev.javac.impl.JavaResourceBase;
 import com.google.gwt.dev.javac.impl.SourceFileCompilationUnit;
+import com.google.gwt.dev.resource.Resource;
 import com.google.gwt.dev.util.log.PrintWriterTreeLogger;
 import com.google.gwt.user.rebind.rpc.testcases.client.AbstractSerializableTypes;
 import com.google.gwt.user.rebind.rpc.testcases.client.ClassWithTypeParameterThatErasesToObject;
@@ -105,6 +106,8 @@ public class SerializableTypeOracleBuilderTest extends TestCase {
 
   private static final int EXPOSURE_NONE = TypeParameterExposureComputer.EXPOSURE_NONE;
 
+  private static TypeOracle sTypeOracle;
+
   private static void addGwtTransient(Set<CompilationUnit> units) {
     StringBuffer code = new StringBuffer();
     code.append("package com.google.gwt.user.client.rpc;\n");
@@ -132,10 +135,6 @@ public class SerializableTypeOracleBuilderTest extends TestCase {
         "com.google.gwt.user.client.rpc.IsSerializable", code));
   }
 
-  private static void addJavaIoSerializable(Set<CompilationUnit> units) {
-    units.add(new SourceFileCompilationUnit(JavaResourceBase.SERIALIZABLE));
-  }
-
   private static void addJavaLangException(Set<CompilationUnit> units) {
     StringBuffer code = new StringBuffer();
     code.append("package java.lang;\n");
@@ -143,14 +142,6 @@ public class SerializableTypeOracleBuilderTest extends TestCase {
     code.append("}\n");
 
     units.add(createMockCompilationUnit("java.lang.Exception", code));
-  }
-
-  private static void addJavaLangObject(Set<CompilationUnit> units) {
-    units.add(new SourceFileCompilationUnit(JavaResourceBase.OBJECT));
-  }
-
-  private static void addJavaLangString(Set<CompilationUnit> units) {
-    units.add(new SourceFileCompilationUnit(JavaResourceBase.STRING));
   }
 
   private static void addJavaLangThrowable(Set<CompilationUnit> units) {
@@ -175,10 +166,10 @@ public class SerializableTypeOracleBuilderTest extends TestCase {
   }
 
   private static void addStandardClasses(Set<CompilationUnit> units) {
+    for (Resource resource : JavaResourceBase.getStandardResources()) {
+      units.add(new SourceFileCompilationUnit(resource));
+    }
     addGwtTransient(units);
-    addJavaIoSerializable(units);
-    addJavaLangObject(units);
-    addJavaLangString(units);
     addJavaUtilMap(units);
     addICRSE(units);
     addJavaLangException(units);
@@ -262,6 +253,20 @@ public class SerializableTypeOracleBuilderTest extends TestCase {
     return actual;
   }
 
+  private static TypeOracle getTestTypeOracle()
+      throws UnableToCompleteException {
+    if (sTypeOracle == null) {
+      TreeLogger logger = createLogger();
+      ModuleDef moduleDef = ModuleDefLoader.createSyntheticModule(logger,
+          "com.google.gwt.user.rebind.rpc.testcases.RebindRPCTestCases.JUnit",
+          new String[] {
+              "com.google.gwt.user.rebind.rpc.testcases.RebindRPCTestCases",
+              "com.google.gwt.junit.JUnit"}, true);
+      sTypeOracle = moduleDef.getTypeOracle(logger);
+    }
+    return sTypeOracle;
+  }
+
   private static String makeSourceName(String binaryName) {
     return binaryName.replace('$', '.');
   }
@@ -302,25 +307,10 @@ public class SerializableTypeOracleBuilderTest extends TestCase {
         + toString(actual), Arrays.equals(expected, actual));
   }
 
-  private final ModuleDef moduleDef;
-
-  private final TypeOracle typeOracle;
-
-  public SerializableTypeOracleBuilderTest() throws UnableToCompleteException {
-    TreeLogger logger = createLogger();
-
-    moduleDef = ModuleDefLoader.createSyntheticModule(logger,
-        "com.google.gwt.user.rebind.rpc.testcases.RebindRPCTestCases.JUnit",
-        new String[] {
-            "com.google.gwt.user.rebind.rpc.testcases.RebindRPCTestCases",
-            "com.google.gwt.junit.JUnit"}, true);
-    typeOracle = moduleDef.getTypeOracle(logger);
-  }
-
   /**
    * Test with a generic class whose type parameter is exposed only in certain
    * subclasses.
-   *
+   * 
    * NOTE: This test has been disabled because it requires a better pruner in
    * STOB. See SerializableTypeOracleBuilder.pruneUnreachableTypes().
    */
@@ -381,7 +371,7 @@ public class SerializableTypeOracleBuilderTest extends TestCase {
 
   /**
    * Tests abstract root types that are field serializable.
-   *
+   * 
    * @throws UnableToCompleteException
    * @throws NotFoundException
    */
@@ -682,7 +672,7 @@ public class SerializableTypeOracleBuilderTest extends TestCase {
 
   /**
    * Tests the rules that govern whether a type qualifies for serialization.
-   *
+   * 
    * @throws UnableToCompleteException
    * @throws NotFoundException
    */
@@ -810,20 +800,19 @@ public class SerializableTypeOracleBuilderTest extends TestCase {
     // Local types should not qualify for serialization
     JClassType iFoo = to.getType("AutoSerializable.IFoo");
     problems = new ProblemReport();
-    assertFalse(sob.shouldConsiderFieldsForSerialization(
-        iFoo.getSubtypes()[0],  problems));
+    assertFalse(sob.shouldConsiderFieldsForSerialization(iFoo.getSubtypes()[0],
+        problems));
 
     // Static nested types qualify for serialization
     JClassType staticNested = to.getType("OuterClass.StaticNested");
     problems = new ProblemReport();
-    assertTrue(sob.shouldConsiderFieldsForSerialization(staticNested,
-        problems));
+    assertTrue(sob.shouldConsiderFieldsForSerialization(staticNested, problems));
 
     // Non-static nested types do not qualify for serialization
     JClassType nonStaticNested = to.getType("OuterClass.NonStaticNested");
     problems = new ProblemReport();
-    assertFalse(sob.shouldConsiderFieldsForSerialization(
-        nonStaticNested, problems));
+    assertFalse(sob.shouldConsiderFieldsForSerialization(nonStaticNested,
+        problems));
 
     // Abstract classes that implement Serializable should not qualify
     JClassType abstractSerializableClass = to.getType("AbstractSerializableClass");
@@ -860,8 +849,8 @@ public class SerializableTypeOracleBuilderTest extends TestCase {
     // Enum with subclasses should qualify, but their subtypes should not
     JClassType enumWithSubclasses = to.getType("EnumWithSubclasses");
     problems = new ProblemReport();
-    assertTrue(sob.shouldConsiderFieldsForSerialization(
-        enumWithSubclasses, problems));
+    assertTrue(sob.shouldConsiderFieldsForSerialization(enumWithSubclasses,
+        problems));
 
     problems = new ProblemReport();
     assertFalse(sob.shouldConsiderFieldsForSerialization(
@@ -877,13 +866,14 @@ public class SerializableTypeOracleBuilderTest extends TestCase {
   /**
    * Tests that both the generic and raw forms of type that has a type parameter
    * that erases to object are not serializable.
-   *
+   * 
    * @throws NotFoundException
    */
   public void testClassWithTypeParameterThatErasesToObject()
       throws NotFoundException, UnableToCompleteException {
     TreeLogger logger = createLogger();
 
+    TypeOracle typeOracle = getTestTypeOracle();
     JRawType rawType = typeOracle.getType(
         ClassWithTypeParameterThatErasesToObject.class.getCanonicalName()).isGenericType().getRawType();
 
@@ -902,7 +892,7 @@ public class SerializableTypeOracleBuilderTest extends TestCase {
   /**
    * Test the situation where an abstract class has an unconstrained type
    * parameter but all of its concrete subclasses add helpful constraints to it.
-   *
+   * 
    * @throws NotFoundException
    * @throws UnableToCompleteException
    */
@@ -1038,7 +1028,7 @@ public class SerializableTypeOracleBuilderTest extends TestCase {
   /**
    * If the query type extends a raw type, be sure to pick up the parameters of
    * the raw subertype.
-   *
+   * 
    * @throws UnableToCompleteException
    * @throws NotFoundException
    */
@@ -1111,7 +1101,7 @@ public class SerializableTypeOracleBuilderTest extends TestCase {
    * If a subtype of a root type extends from the raw version of that root type,
    * then when visiting the fields of the raw version, take advantage of
    * information from the original root type.
-   *
+   * 
    * @throws UnableToCompleteException
    * @throws NotFoundException
    */
@@ -1412,6 +1402,7 @@ public class SerializableTypeOracleBuilderTest extends TestCase {
       UnableToCompleteException {
     TreeLogger logger = createLogger();
 
+    TypeOracle typeOracle = getTestTypeOracle();
     SerializableTypeOracleBuilder stob = createSerializableTypeOracleBuilder(
         logger, typeOracle);
     JClassType a = typeOracle.getType(ManualSerialization.A.class.getCanonicalName());
@@ -1430,6 +1421,7 @@ public class SerializableTypeOracleBuilderTest extends TestCase {
       UnableToCompleteException {
     TreeLogger logger = createLogger();
 
+    TypeOracle typeOracle = getTestTypeOracle();
     JClassType rawList = typeOracle.getType(List.class.getName());
     SerializableTypeOracleBuilder stob = createSerializableTypeOracleBuilder(
         logger, typeOracle);
@@ -1574,6 +1566,7 @@ public class SerializableTypeOracleBuilderTest extends TestCase {
       UnableToCompleteException {
     TreeLogger logger = createLogger();
 
+    TypeOracle typeOracle = getTestTypeOracle();
     JClassType a = typeOracle.getType(NoSerializableTypes.A.class.getCanonicalName());
     SerializableTypeOracleBuilder stob = createSerializableTypeOracleBuilder(
         logger, typeOracle);
@@ -1595,6 +1588,7 @@ public class SerializableTypeOracleBuilderTest extends TestCase {
       throws UnableToCompleteException, NotFoundException {
     TreeLogger logger = createLogger();
 
+    TypeOracle typeOracle = getTestTypeOracle();
     JClassType a = typeOracle.getType(NotAllSubtypesAreSerializable.A.class.getCanonicalName());
     SerializableTypeOracleBuilder stob = createSerializableTypeOracleBuilder(
         logger, typeOracle);
@@ -1617,6 +1611,7 @@ public class SerializableTypeOracleBuilderTest extends TestCase {
   public void testObjectArrayNotInstantiable() throws UnableToCompleteException {
     TreeLogger logger = createLogger();
 
+    TypeOracle typeOracle = getTestTypeOracle();
     JArrayType objectArray = typeOracle.getArrayType(typeOracle.getJavaLangObject());
     SerializableTypeOracleBuilder stob = createSerializableTypeOracleBuilder(
         logger, typeOracle);
@@ -1635,6 +1630,7 @@ public class SerializableTypeOracleBuilderTest extends TestCase {
   public void testObjectNotInstantiable() throws UnableToCompleteException {
     TreeLogger logger = createLogger();
 
+    TypeOracle typeOracle = getTestTypeOracle();
     SerializableTypeOracleBuilder stob = createSerializableTypeOracleBuilder(
         logger, typeOracle);
     stob.addRootType(logger, typeOracle.getJavaLangObject());
@@ -1654,6 +1650,7 @@ public class SerializableTypeOracleBuilderTest extends TestCase {
       throws UnableToCompleteException, NotFoundException {
     TreeLogger logger = createLogger();
 
+    TypeOracle typeOracle = getTestTypeOracle();
     SerializableTypeOracleBuilder stob = createSerializableTypeOracleBuilder(
         logger, typeOracle);
     stob.addRootType(
@@ -1672,8 +1669,7 @@ public class SerializableTypeOracleBuilderTest extends TestCase {
   }
 
   /**
-   * Tests a hierarchy blending various serializable and non-serializable
-   * types.
+   * Tests a hierarchy blending various serializable and non-serializable types.
    */
   public void testProblemReporting() throws UnableToCompleteException,
       NotFoundException {
@@ -1757,58 +1753,64 @@ public class SerializableTypeOracleBuilderTest extends TestCase {
     stob.addRootType(logger, topInterface);
 
     ProblemReport problems = new ProblemReport();
-    assertTrue("TopInterface should be (partially) serializable",
-        stob.checkTypeInstantiable(logger, topInterface, null,
-            problems));
+    assertTrue(
+        "TopInterface should be (partially) serializable",
+        stob.computeTypeInstantiability(logger, topInterface, null, problems).hasInstantiableSubtypes());
     assertTrue("TopInterface should be a serializable type",
         problems.getProblemsForType(topInterface).isEmpty());
-    assertTrue("AbstractSerializable should not be reported on",
-        problems.getProblemsForType(
-            to.getType("AbstractSerializable")).isEmpty());
-    assertTrue("PureAbstractSerializable should not be reported on",
-        problems.getProblemsForType(
-            to.getType("PureAbstractSerializable")).isEmpty());
+    assertTrue(
+        "AbstractSerializable should not be reported on",
+        problems.getProblemsForType(to.getType("AbstractSerializable")).isEmpty());
+    assertTrue(
+        "PureAbstractSerializable should not be reported on",
+        problems.getProblemsForType(to.getType("PureAbstractSerializable")).isEmpty());
     assertTrue("PureAbstractClass should not be reported on",
-        problems.getProblemsForType(
-            to.getType("PureAbstractClass")).isEmpty());
+        problems.getProblemsForType(to.getType("PureAbstractClass")).isEmpty());
     assertFalse("ConcreteBadCtor should not be a serializable type",
         problems.getProblemsForType(to.getType("ConcreteBadCtor")).isEmpty());
-    assertFalse("ConcreteNonSerializable should not be a serializable type",
-        problems.getProblemsForType(
-            to.getType("ConcreteNonSerializable")).isEmpty());
-    assertTrue("ConcreteSerializable should be a serializable type",
+    assertFalse(
+        "ConcreteNonSerializable should not be a serializable type",
+        problems.getProblemsForType(to.getType("ConcreteNonSerializable")).isEmpty());
+    assertTrue(
+        "ConcreteSerializable should be a serializable type",
         problems.getProblemsForType(to.getType("ConcreteSerializable")).isEmpty());
     assertTrue("SubSerializable should be a serializable type",
         problems.getProblemsForType(to.getType("SubSerializable")).isEmpty());
 
     problems = new ProblemReport();
-    assertFalse("PureAbstractClass should have no possible concrete implementation",
-        stob.checkTypeInstantiable(logger, to.getType("PureAbstractClass"), null,
-            problems));
-    assertTrue("PureAbstractClass should have a problem entry as the tested class",
+    assertFalse(
+        "PureAbstractClass should have no possible concrete implementation",
+        stob.computeTypeInstantiability(logger, to.getType("PureAbstractClass"),
+            null, problems).hasInstantiableSubtypes());
+    assertTrue(
+        "PureAbstractClass should have a problem entry as the tested class",
         null != problems.getProblemsForType(to.getType("PureAbstractClass")));
 
     problems = new ProblemReport();
-    assertFalse("PureAbstractSerializable should have no possible concrete implementation",
-        stob.checkTypeInstantiable(logger, to.getType("PureAbstractSerializable"), null,
-            problems));
-    assertFalse("PureAbstractSerializable should have a problem entry",
+    assertFalse(
+        "PureAbstractSerializable should have no possible concrete implementation",
+        stob.computeTypeInstantiability(logger,
+            to.getType("PureAbstractSerializable"), null, problems).hasInstantiableSubtypes());
+    assertFalse(
+        "PureAbstractSerializable should have a problem entry",
         problems.getProblemsForType(to.getType("PureAbstractSerializable")).isEmpty());
-    assertTrue("PureAbstractClassTwo should not have a problem entry as the middle class",
+    assertTrue(
+        "PureAbstractClassTwo should not have a problem entry as the middle class",
         problems.getProblemsForType(to.getType("PureAbstractClassTwo")).isEmpty());
-    assertTrue("PureAbstractClassTwo should not have an auxiliary entry as the middle class",
-        problems.getAuxiliaryMessagesForType(to.getType("PureAbstractClassTwo")).
-        isEmpty());
-    assertTrue("PureAbstractClass should not have a problem entry as the child class",
+    assertTrue(
+        "PureAbstractClassTwo should not have an auxiliary entry as the middle class",
+        problems.getAuxiliaryMessagesForType(to.getType("PureAbstractClassTwo")).isEmpty());
+    assertTrue(
+        "PureAbstractClass should not have a problem entry as the child class",
         problems.getProblemsForType(to.getType("PureAbstractClass")).isEmpty());
-    assertTrue("PureAbstractClass should not have an auxiliary entry as the child class",
-        problems.getAuxiliaryMessagesForType(to.getType("PureAbstractClass")).
-        isEmpty());
+    assertTrue(
+        "PureAbstractClass should not have an auxiliary entry as the child class",
+        problems.getAuxiliaryMessagesForType(to.getType("PureAbstractClass")).isEmpty());
   }
 
   /**
    * Tests that adding a raw collection as a root type pulls in the world.
-   *
+   * 
    * @throws UnableToCompleteException
    * @throws NotFoundException
    */
@@ -1866,7 +1868,7 @@ public class SerializableTypeOracleBuilderTest extends TestCase {
   /**
    * Tests that raw type with type parameters that are instantiable are
    * themselves instantiable.
-   *
+   * 
    * @throws UnableToCompleteException
    * @throws NotFoundException
    */
@@ -1912,7 +1914,7 @@ public class SerializableTypeOracleBuilderTest extends TestCase {
   /**
    * Tests that a type paramter that occurs within its bounds will not result in
    * infinite recursion.
-   *
+   * 
    * @throws UnableToCompleteException
    * @throws NotFoundException
    */
@@ -1943,6 +1945,44 @@ public class SerializableTypeOracleBuilderTest extends TestCase {
     SerializableTypeOracle so = sob.build(logger);
 
     assertSerializableTypes(so, rawA);
+  }
+
+  /**
+   * Tests that type String[][] also pulls in String[].
+   */
+  public void testStringArrayArray() throws NotFoundException,
+      UnableToCompleteException {
+    Set<CompilationUnit> units = new HashSet<CompilationUnit>();
+    addStandardClasses(units);
+
+    {
+      StringBuilder code = new StringBuilder();
+      code.append("import java.io.Serializable;\n");
+      code.append("public class Data implements Serializable {\n");
+      code.append("  String justOneString;");
+      code.append("  String[][] stringsGalore;\n");
+      code.append("}\n");
+      units.add(createMockCompilationUnit("Data", code));
+    }
+
+    TreeLogger logger = createLogger();
+    TypeOracle to = TypeOracleTestingUtils.buildTypeOracle(logger, units);
+
+    JClassType data = to.getType("Data");
+    JClassType string = to.getType(String.class.getCanonicalName());
+    JArrayType stringArray = to.getArrayType(string);
+    JArrayType stringArrayArray = to.getArrayType(stringArray);
+
+    SerializableTypeOracleBuilder sob = createSerializableTypeOracleBuilder(
+        logger, to);
+    sob.addRootType(logger, data);
+
+    SerializableTypeOracle so = sob.build(logger);
+
+    assertSerializableTypes(so, data, string, stringArray, stringArrayArray);
+    assertInstantiable(so, data);
+    assertInstantiable(so, stringArrayArray);
+    assertInstantiable(so, stringArray);
   }
 
   /*
@@ -2019,7 +2059,7 @@ public class SerializableTypeOracleBuilderTest extends TestCase {
 
   /**
    * Tests subtypes that introduce new instantiable type parameters.
-   *
+   * 
    * @throws UnableToCompleteException
    * @throws NotFoundException
    */
@@ -2072,7 +2112,7 @@ public class SerializableTypeOracleBuilderTest extends TestCase {
   /**
    * Tests subtypes that introduce new uninstantiable type parameters as
    * compared to an implemented interface, where the root type is the interface.
-   *
+   * 
    * @throws UnableToCompleteException
    * @throws NotFoundException
    */
@@ -2141,7 +2181,7 @@ public class SerializableTypeOracleBuilderTest extends TestCase {
 
   /**
    * Tests subtypes that introduce new uninstantiable type parameters.
-   *
+   * 
    * @throws UnableToCompleteException
    * @throws NotFoundException
    */
@@ -2236,7 +2276,7 @@ public class SerializableTypeOracleBuilderTest extends TestCase {
 
   /**
    * Miscellaneous direct tests of {@link TypeConstrainer}.
-   *
+   * 
    * @throws UnableToCompleteException
    * @throws NotFoundException
    */
@@ -2360,7 +2400,7 @@ public class SerializableTypeOracleBuilderTest extends TestCase {
 
   /**
    * Tests root types that have type parameters.
-   *
+   * 
    * @throws UnableToCompleteException
    * @throws NotFoundException
    */
@@ -2413,7 +2453,7 @@ public class SerializableTypeOracleBuilderTest extends TestCase {
 
   /**
    * Tests root types that <em>are</em> type parameters.
-   *
+   * 
    * @throws UnableToCompleteException
    * @throws NotFoundException
    */

@@ -29,6 +29,7 @@ import junit.framework.TestCase;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.util.Set;
 
 /**
  * Tests for the {@link com.google.gwt.user.server.rpc.RPC RPC} class.
@@ -54,6 +55,7 @@ public class RPCTest extends TestCase {
     C c();
   }
 
+  @SuppressWarnings("rpc-validation")
   private static interface A extends RemoteService {
     void method1() throws SerializableException;
 
@@ -191,7 +193,7 @@ public class RPCTest extends TestCase {
   }
 
   /**
-   * Tests for method {@link RPC#decodeRequest(String)}
+   * Tests for method {@link RPC#decodeRequest(String)}.
    * 
    * <p/>
    * Cases:
@@ -223,7 +225,7 @@ public class RPCTest extends TestCase {
   }
 
   /**
-   * Tests for method {@link RPC#decodeRequest(String, Class)}
+   * Tests for method {@link RPC#decodeRequest(String, Class)}.
    * 
    * <p/>
    * Cases:
@@ -322,6 +324,11 @@ public class RPCTest extends TestCase {
       public void validateSerialize(Class<?> clazz)
           throws SerializationException {
       }
+
+      @Override
+      public Set<String> getClientFieldNamesForEnhancedClass(Class<?> clazz) {
+        return null;
+      }
     }
 
     String rpc = RPC.encodeResponseForSuccess(CC.class.getMethod("c"), new C(),
@@ -351,6 +358,11 @@ public class RPCTest extends TestCase {
       @Override
       public void validateSerialize(Class<?> clazz)
           throws SerializationException {
+      }
+
+      @Override
+      public Set<String> getClientFieldNamesForEnhancedClass(Class<?> clazz) {
+        return null;
       }
     }
 
@@ -411,7 +423,7 @@ public class RPCTest extends TestCase {
   }
 
   /**
-   * Tests for {@link RPC#encodeResponseForSuccess(Method, Object)}
+   * Tests for {@link RPC#encodeResponseForSuccess(Method, Object)}.
    * 
    * Cases:
    * <ol>
@@ -456,7 +468,7 @@ public class RPCTest extends TestCase {
   }
 
   /**
-   * Tests for {@link RPC#invokeAndEncodeResponse(Object, Method, Object[])}
+   * Tests for {@link RPC#invokeAndEncodeResponse(Object, Method, Object[])}.
    * 
    * Cases:
    * <ol>

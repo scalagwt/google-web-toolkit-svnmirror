@@ -22,8 +22,8 @@ import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.dev.cfg.BindingProperty;
 import com.google.gwt.dev.cfg.ConfigurationProperty;
 import com.google.gwt.dev.cfg.StaticPropertyOracle;
+import com.google.gwt.dev.javac.StandardGeneratorContext;
 import com.google.gwt.dev.jdt.FindDeferredBindingSitesVisitor;
-import com.google.gwt.dev.shell.StandardGeneratorContext;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -122,14 +122,14 @@ public class FragmentLoaderCreator {
     srcWriter.println("public static void onLoad() {");
     srcWriter.println("loaded = true;");
     srcWriter.println("instance = new " + getLoaderSimpleName() + "();");
-    srcWriter.println(ASYNC_FRAGMENT_LOADER + ".fragmentHasLoaded("
+    srcWriter.println(ASYNC_FRAGMENT_LOADER + ".BROWSER_LOADER.fragmentHasLoaded("
         + entryNumber + ");");
 
     srcWriter.println(ASYNC_FRAGMENT_LOADER
-        + ".logEventProgress(\"runCallbacks" + entryNumber + "\", \"begin\");");
+        + ".BROWSER_LOADER.logEventProgress(\"runCallbacks" + entryNumber + "\", \"begin\");");
     srcWriter.println("instance.runCallbacks();");
     srcWriter.println(ASYNC_FRAGMENT_LOADER
-        + ".logEventProgress(\"runCallbacks" + entryNumber + "\", \"end\");");
+        + ".BROWSER_LOADER.logEventProgress(\"runCallbacks" + entryNumber + "\", \"end\");");
 
     srcWriter.println("}");
   }
@@ -160,7 +160,7 @@ public class FragmentLoaderCreator {
     srcWriter.println("}");
     srcWriter.println("if (!loading) {");
     srcWriter.println("loading = true;");
-    srcWriter.println("AsyncFragmentLoader.inject(" + entryNumber + ",");
+    srcWriter.println("AsyncFragmentLoader.BROWSER_LOADER.inject(" + entryNumber + ",");
     srcWriter.println("  new AsyncFragmentLoader.LoadErrorHandler() {");
     srcWriter.println("    public void loadFailed(Throwable reason) {");
     srcWriter.println("      loading = false;");

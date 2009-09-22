@@ -17,6 +17,7 @@ package com.google.gwt.dev.util.collect;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.LinkedHashMap;
 
 /**
  * Utility methods for operating on memory-efficient maps. All maps of size 0 or
@@ -108,12 +109,38 @@ public class Maps {
             K key = map.keySet().iterator().next();
             result.put(key, map.get(key));
             result.putAll(toAdd);
-            return normalize(result);
+            return result;
           }
           default:
             map.putAll(toAdd);
             return map;
         }
+    }
+  }
+
+  /**
+   * A variation of the put method which uses a LinkedHashMap.
+   */
+  public static <K, V> Map<K, V> putOrdered(Map<K, V> map, K key, V value) {
+    switch (map.size()) {
+      case 0:
+        // Empty -> Singleton
+        return Collections.singletonMap(key, value);
+      case 1: {
+        if (map.containsKey(key)) {
+          return create(key, value);
+        }
+        // Singleton -> LinkedHashMap
+        Map<K, V> result = new LinkedHashMap<K, V>();
+        result.put(map.keySet().iterator().next(),
+            map.values().iterator().next());
+        result.put(key, value);
+        return result;
+      }
+      default:
+        // LinkedHashMap
+        map.put(key, value);
+        return map;
     }
   }
 

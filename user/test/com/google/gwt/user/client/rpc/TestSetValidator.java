@@ -21,6 +21,11 @@ import com.google.gwt.user.client.rpc.TestSetFactory.SerializableDoublyLinkedNod
 import com.google.gwt.user.client.rpc.TestSetFactory.SerializablePrivateNoArg;
 import com.google.gwt.user.client.rpc.TestSetFactory.SerializableWithTwoArrays;
 
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertSame;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -36,7 +41,10 @@ import java.util.Vector;
 import java.util.Map.Entry;
 
 /**
- * TODO: document me.
+ * Misnamed set of static validation methods used by various
+ * collection class tests.
+ * <p>
+ * TODO: could add generics to require args to be of the same type
  */
 public class TestSetValidator {
 
@@ -148,7 +156,7 @@ public class TestSetValidator {
     return true;
   }
 
-  public static boolean equals(Iterator expected, Iterator actual) {
+  public static boolean equals(Iterator<?> expected, Iterator<?> actual) {
     while (expected.hasNext() && actual.hasNext()) {
       if (!expected.next().equals(actual.next())) {
         return false;
@@ -226,12 +234,12 @@ public class TestSetValidator {
     return true;
   }
 
-  public static boolean isValid(ArrayList list) {
+  public static boolean isValid(ArrayList<?> list) {
     if (list == null) {
       return false;
     }
 
-    ArrayList reference = TestSetFactory.createArrayList();
+    ArrayList<?> reference = TestSetFactory.createArrayList();
     if (reference.size() != list.size()) {
       return false;
     }
@@ -239,7 +247,7 @@ public class TestSetValidator {
     return reference.equals(list);
   }
 
-  public static boolean isValid(HashMap expected, HashMap map) {
+  public static boolean isValid(HashMap<?,?> expected, HashMap<?,?> map) {
     if (map == null) {
       return false;
     }
@@ -248,10 +256,10 @@ public class TestSetValidator {
       return false;
     }
 
-    Set entries = expected.entrySet();
-    Iterator entryIter = entries.iterator();
+    Set<?> entries = expected.entrySet();
+    Iterator<?> entryIter = entries.iterator();
     while (entryIter.hasNext()) {
-      Entry entry = (Entry) entryIter.next();
+      Entry<?,?> entry = (Entry<?,?>) entryIter.next();
 
       Object value = map.get(entry.getKey());
 
@@ -269,7 +277,7 @@ public class TestSetValidator {
     return true;
   }
 
-  public static boolean isValid(HashSet expected, HashSet actual) {
+  public static boolean isValid(HashSet<?> expected, HashSet<?> actual) {
     if (actual == null) {
       return false;
     }
@@ -278,7 +286,7 @@ public class TestSetValidator {
       return false;
     }
 
-    Iterator entryIter = expected.iterator();
+    Iterator<?> entryIter = expected.iterator();
     while (entryIter.hasNext()) {
       Object entry = entryIter.next();
 
@@ -290,19 +298,19 @@ public class TestSetValidator {
     return true;
   }
 
-  public static boolean isValid(LinkedHashMap expected, LinkedHashMap map) {
-    if (isValid((HashMap) expected, (HashMap) map)) {
-      Iterator expectedEntries = expected.entrySet().iterator();
-      Iterator actualEntries = map.entrySet().iterator();
+  public static boolean isValid(LinkedHashMap<?,?> expected, LinkedHashMap<?,?> map) {
+    if (isValid((HashMap<?,?>) expected, (HashMap<?,?>) map)) {
+      Iterator<?> expectedEntries = expected.entrySet().iterator();
+      Iterator<?> actualEntries = map.entrySet().iterator();
       return equals(expectedEntries, actualEntries);
     }
     return false;
   }
 
-  public static boolean isValid(LinkedHashSet expected, LinkedHashSet map) {
-    if (isValid((HashSet) expected, (HashSet) map)) {
-      Iterator expectedEntries = expected.iterator();
-      Iterator actualEntries = map.iterator();
+  public static boolean isValid(LinkedHashSet<?> expected, LinkedHashSet<?> map) {
+    if (isValid((HashSet<?>) expected, (HashSet<?>) map)) {
+      Iterator<?> expectedEntries = expected.iterator();
+      Iterator<?> actualEntries = map.iterator();
       return equals(expectedEntries, actualEntries);
     }
     return false;
@@ -368,7 +376,8 @@ public class TestSetValidator {
     }
     // entrySet returns entries in the sorted order
     List<MarkerTypeTreeSet> actualList = new ArrayList<MarkerTypeTreeSet>(set);
-    List<MarkerTypeTreeSet> expectedList = new ArrayList<MarkerTypeTreeSet>(expected);
+    List<MarkerTypeTreeSet> expectedList = new ArrayList<MarkerTypeTreeSet>(
+        expected);
     for (int index = 0; index < size; index++) {
       if (!equalsWithNullCheck(expectedList.get(index), actualList.get(index))) {
         return false;
@@ -376,8 +385,8 @@ public class TestSetValidator {
     }
     return true;
   }
-  
-  public static boolean isValid(Vector expected, Vector actual) {
+
+  public static boolean isValid(Vector<?> expected, Vector<?> actual) {
     if (actual == null) {
       return false;
     }
@@ -423,12 +432,12 @@ public class TestSetValidator {
     return true;
   }
 
-  public static boolean isValidAsList(List list) {
+  public static boolean isValidAsList(List<?> list) {
     if (list == null) {
       return false;
     }
 
-    List reference = TestSetFactory.createArraysAsList();
+    List<?> reference = TestSetFactory.createArraysAsList();
     if (reference.size() != list.size()) {
       return false;
     }
@@ -439,6 +448,7 @@ public class TestSetValidator {
   public static boolean isValidComplexCyclicGraph(
       SerializableDoublyLinkedNode actual) {
 
+    assertNotNull(actual);
     if (actual == null) {
       return false;
     }
@@ -446,6 +456,7 @@ public class TestSetValidator {
     int i = 0;
     SerializableDoublyLinkedNode currNode = actual;
     for (; i < 5; ++i) {
+      assertEquals("n" + Integer.toString(i), currNode.getData());
       if (!currNode.getData().equals("n" + Integer.toString(i))) {
         return false;
       }
@@ -453,14 +464,18 @@ public class TestSetValidator {
       SerializableDoublyLinkedNode nextNode = currNode.getRightChild();
       SerializableDoublyLinkedNode prevNode = currNode.getLeftChild();
 
+      assertNotNull("next node", nextNode);
+      assertNotNull("prev node", prevNode);
       if (nextNode == null || prevNode == null) {
         return false;
       }
 
+      assertSame("A", currNode, nextNode.getLeftChild());
       if (nextNode.getLeftChild() != currNode) {
         return false;
       }
 
+      assertSame("B", currNode, prevNode.getRightChild());
       if (prevNode.getRightChild() != currNode) {
         return false;
       }
@@ -471,6 +486,7 @@ public class TestSetValidator {
       }
     }
 
+    assertFalse("i = " + i, i >= 4);
     if (i >= 4) {
       return false;
     }
@@ -506,8 +522,8 @@ public class TestSetValidator {
   }
 
   /**
-   * Wrap an exception in RuntimeException if necessary so it doesn't have to be listed in
-   * throws clauses.
+   * Wrap an exception in RuntimeException if necessary so it doesn't have to be
+   * listed in throws clauses.
    * 
    * @param caught exception to wrap
    */
@@ -518,6 +534,7 @@ public class TestSetValidator {
       throw new RuntimeException(caught);
     }
   }
+
   private static boolean equalsWithNullCheck(Object a, Object b) {
     return a == b || (a != null && a.equals(b));
   }

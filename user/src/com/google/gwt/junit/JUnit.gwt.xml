@@ -31,6 +31,16 @@
     <when-type-assignable class="com.google.gwt.junit.client.GWTTestCase"/>
   </generate-with>
 
+  <!-- We want to provide good stack traces on browsers that don't provide good native stack traces. -->
+  <set-configuration-property name="compiler.emulatedStack.recordFileNames" value="true" />
+  <set-property name="compiler.emulatedStack" value="true" >
+    <none>
+      <when-property-is name="user.agent" value="gecko" />
+      <when-property-is name="user.agent" value="gecko1_8" />
+      <when-property-is name="user.agent" value="opera" />
+    </none>
+  </set-property>
+
   <servlet path='/junithost' class='com.google.gwt.junit.server.JUnitHostImpl'/>
 
   <inherits name="com.google.gwt.benchmarks.Benchmarks"/>

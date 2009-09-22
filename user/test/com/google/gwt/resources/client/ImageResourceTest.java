@@ -31,6 +31,9 @@ import com.google.gwt.user.client.ui.RootPanel;
  */
 public class ImageResourceTest extends GWTTestCase {
   static interface Resources extends ClientBundle {
+    @Source("animated.gif")
+    ImageResource animated();
+
     @Source("16x16.png")
     ImageResource i16x16();
 
@@ -74,7 +77,28 @@ public class ImageResourceTest extends GWTTestCase {
     return "com.google.gwt.resources.Resources";
   }
 
-  public void testDedup() {
+  public void testAnimated() {
+    Resources r = GWT.create(Resources.class);
+
+    ImageResource a = r.animated();
+
+    assertTrue(a.isAnimated());
+    assertEquals(16, a.getWidth());
+    assertEquals(16, a.getHeight());
+    assertEquals(0, a.getLeft());
+    assertEquals(0, a.getTop());
+
+    // Make sure the animated image is encoded separately
+    assertFalse(a.getURL().equals(r.i16x16().getURL()));
+  }
+
+  /**
+   * Issue 863: Image.onload event does not fire on Internet Explorer when image
+   * is in cache.
+   * 
+   * TODO(jlabanca): Reenable this test after fixing the issue.
+   */
+  public void disabledTestDedup() {
     Resources r = GWT.create(Resources.class);
 
     ImageResource a = r.i64x64();

@@ -16,13 +16,21 @@
 package com.google.gwt.dev.jjs.impl;
 
 import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.UnableToCompleteException;
+import com.google.gwt.dev.cfg.ConfigurationProperty;
+import com.google.gwt.dev.cfg.Properties;
+import com.google.gwt.dev.cfg.Property;
+import com.google.gwt.dev.jjs.InternalCompilerException;
 import com.google.gwt.dev.jjs.SourceInfo;
 import com.google.gwt.dev.jjs.ast.Context;
+import com.google.gwt.dev.jjs.ast.HasEnclosingType;
+import com.google.gwt.dev.jjs.ast.JArrayType;
 import com.google.gwt.dev.jjs.ast.JClassLiteral;
 import com.google.gwt.dev.jjs.ast.JDeclaredType;
 import com.google.gwt.dev.jjs.ast.JExpression;
 import com.google.gwt.dev.jjs.ast.JField;
 import com.google.gwt.dev.jjs.ast.JMethod;
+import com.google.gwt.dev.jjs.ast.JMethodCall;
 import com.google.gwt.dev.jjs.ast.JNewArray;
 import com.google.gwt.dev.jjs.ast.JNode;
 import com.google.gwt.dev.jjs.ast.JPrimitiveType;
@@ -30,10 +38,12 @@ import com.google.gwt.dev.jjs.ast.JProgram;
 import com.google.gwt.dev.jjs.ast.JReferenceType;
 import com.google.gwt.dev.jjs.ast.JStringLiteral;
 import com.google.gwt.dev.jjs.ast.JVisitor;
+import com.google.gwt.dev.jjs.impl.ControlFlowAnalyzer.DependencyRecorder;
 import com.google.gwt.dev.jjs.impl.FragmentExtractor.CfaLivenessPredicate;
 import com.google.gwt.dev.jjs.impl.FragmentExtractor.LivenessPredicate;
 import com.google.gwt.dev.jjs.impl.FragmentExtractor.NothingAlivePredicate;
 import com.google.gwt.dev.jjs.impl.FragmentExtractor.StatementLogger;
+import com.google.gwt.dev.jjs.impl.ReplaceRunAsyncs.RunAsyncReplacement;
 import com.google.gwt.dev.js.ast.JsBlock;
 import com.google.gwt.dev.js.ast.JsExprStmt;
 import com.google.gwt.dev.js.ast.JsExpression;
@@ -42,6 +52,7 @@ import com.google.gwt.dev.js.ast.JsProgram;
 import com.google.gwt.dev.js.ast.JsStatement;
 import com.google.gwt.dev.js.ast.JsVars;
 import com.google.gwt.dev.js.ast.JsVars.JsVar;
+import com.google.gwt.dev.util.JsniRef;
 import com.google.gwt.dev.util.PerfLogger;
 import com.google.gwt.dev.util.collect.HashMap;
 import com.google.gwt.dev.util.collect.HashSet;
@@ -53,8 +64,6 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * <p>
@@ -90,6 +99,31 @@ import java.util.regex.Pattern;
  */
 public class CodeSplitter {
   /**
+   * A dependency recorder that can record multiple dependency graphs. It has
+   * methods for starting and finishing new dependency graphs.
+   */
+  public interface MultipleDependencyGraphRecorder extends DependencyRecorder {
+    /**
+     * Stop recording dependencies.
+     */
+    void close();
+
+    /**
+     * Stop recording the current dependency graph.
+     */
+    void endDependencyGraph();
+
+    void open();
+
+    /**
+     * Start a new dependency graph. It can be an extension of a previously
+     * recorded dependency graph, in which case the dependencies in the previous
+     * graph will not be repeated.
+     */
+    void startDependencyGraph(String name, String extnds);
+  }
+
+  /**
    * A statement logger that immediately prints out everything live that it
    * sees.
    */
@@ -115,10 +149,6 @@ public class CodeSplitter {
             JField field = map.nameToField(var.getName());
             if (field != null) {
               System.out.println(fullNameString(field));
-            }
-            String string = map.stringLiteralForName(var.getName());
-            if (string != null) {
-              System.out.println("STRING " + var.getName());
             }
           }
         }
@@ -185,33 +215,117 @@ public class CodeSplitter {
     }
   }
 
-  private static final Pattern LOADER_CLASS_PATTERN = Pattern.compile(FragmentLoaderCreator.ASYNC_LOADER_PACKAGE
-      + "." + FragmentLoaderCreator.ASYNC_LOADER_CLASS_PREFIX + "([0-9]+)");
+  /**
+   * A {@link MultipleDependencyGraphRecorder} that does nothing.
+   */
+  public static final MultipleDependencyGraphRecorder NULL_RECORDER = new MultipleDependencyGraphRecorder() {
+    public void close() {
+    }
+
+    public void endDependencyGraph() {
+    }
+
+    public void methodIsLiveBecause(JMethod liveMethod,
+        ArrayList<JMethod> dependencyChain) {
+    }
+
+    public void open() {
+    }
+
+    public void startDependencyGraph(String name, String extnds) {
+    }
+  };
+
+  private static final String PROP_INITIAL_SEQUENCE = "compiler.splitpoint.initial.sequence";
 
   /**
    * A Java property that causes the fragment map to be logged.
    */
   private static String PROP_LOG_FRAGMENT_MAP = "gwt.jjs.logFragmentMap";
 
-  /**
-   * Compute the set of initially live code for this program. Such code must be
-   * included in the initial download of the program.
-   */
   public static ControlFlowAnalyzer computeInitiallyLive(JProgram jprogram) {
-    ControlFlowAnalyzer cfa = new ControlFlowAnalyzer(jprogram);
-    traverseEntry(jprogram, cfa, 0);
-    return cfa;
+    return computeInitiallyLive(jprogram, NULL_RECORDER);
   }
 
   public static void exec(TreeLogger logger, JProgram jprogram,
       JsProgram jsprogram, JavaToJavaScriptMap map,
-      LinkedHashSet<Integer> initialLoadSequence) {
+      MultipleDependencyGraphRecorder dependencyRecorder) {
     if (jprogram.entryMethods.size() == 1) {
       // Don't do anything if there is no call to runAsync
       return;
     }
 
-    new CodeSplitter(logger, jprogram, jsprogram, map, initialLoadSequence).execImpl();
+    dependencyRecorder.open();
+    new CodeSplitter(logger, jprogram, jsprogram, map, dependencyRecorder).execImpl();
+    dependencyRecorder.close();
+  }
+
+  /**
+   * Find a split point as designated in the {@link #PROP_INITIAL_SEQUENCE}
+   * configuration property.
+   */
+  public static int findSplitPoint(String refString, JProgram program,
+      TreeLogger branch) throws UnableToCompleteException {
+    Map<JMethod, List<Integer>> methodToSplitPoint = reverseByEnclosingMethod(program.getRunAsyncReplacements());
+    Map<String, List<Integer>> nameToSplitPoint = reverseByName(program.getRunAsyncReplacements());
+
+    if (refString.startsWith("@")) {
+      JsniRef jsniRef = JsniRef.parse(refString);
+      if (jsniRef == null) {
+        branch.log(TreeLogger.ERROR, "Badly formatted JSNI reference in "
+            + PROP_INITIAL_SEQUENCE + ": " + refString);
+        throw new UnableToCompleteException();
+      }
+      final String lookupErrorHolder[] = new String[1];
+      HasEnclosingType referent = JsniRefLookup.findJsniRefTarget(jsniRef,
+          program, new JsniRefLookup.ErrorReporter() {
+            public void reportError(String error) {
+              lookupErrorHolder[0] = error;
+            }
+          });
+      if (referent == null) {
+        TreeLogger resolveLogger = branch.branch(TreeLogger.ERROR,
+            "Could not resolve JSNI reference: " + jsniRef);
+        resolveLogger.log(TreeLogger.ERROR, lookupErrorHolder[0]);
+        throw new UnableToCompleteException();
+      }
+
+      if (!(referent instanceof JMethod)) {
+        branch.log(TreeLogger.ERROR, "Not a method: " + referent);
+        throw new UnableToCompleteException();
+      }
+
+      JMethod method = (JMethod) referent;
+      List<Integer> splitPoints = methodToSplitPoint.get(method);
+      if (splitPoints == null) {
+        branch.log(TreeLogger.ERROR,
+            "Method does not enclose a runAsync call: " + jsniRef);
+        throw new UnableToCompleteException();
+      }
+      if (splitPoints.size() > 1) {
+        branch.log(TreeLogger.ERROR,
+            "Method includes multiple runAsync calls, "
+                + "so it's ambiguous which one is meant: " + jsniRef);
+        throw new UnableToCompleteException();
+      }
+
+      return splitPoints.get(0);
+    }
+
+    // Assume it's a raw class name
+    List<Integer> splitPoints = nameToSplitPoint.get(refString);
+    if (splitPoints == null || splitPoints.size() == 0) {
+      branch.log(TreeLogger.ERROR, "No runAsync call is labelled with class "
+          + refString);
+      throw new UnableToCompleteException();
+    }
+    if (splitPoints.size() > 1) {
+      branch.log(TreeLogger.ERROR,
+          "More than one runAsync call is labelled with class " + refString);
+      throw new UnableToCompleteException();
+    }
+
+    return splitPoints.get(0);
   }
 
   public static int getExclusiveFragmentNumber(int splitPoint,
@@ -242,37 +356,42 @@ public class CodeSplitter {
    * other split points. As a side effect, modifies
    * {@link com.google.gwt.core.client.impl.AsyncFragmentLoader#initialLoadSequence}
    * in the program being compiled.
+   * 
+   * @throws UnableToCompleteException If the module specifies a bad load order
    */
-  public static LinkedHashSet<Integer> pickInitialLoadSequence(
-      TreeLogger logger, JProgram program) {
+  public static void pickInitialLoadSequence(TreeLogger logger,
+      JProgram program, Properties properties) throws UnableToCompleteException {
+    TreeLogger branch = logger.branch(TreeLogger.TRACE,
+        "Looking up initial load sequence for split points");
     LinkedHashSet<Integer> initialLoadSequence = new LinkedHashSet<Integer>();
-    int numSplitPoints = program.entryMethods.size() - 1;
 
-    if (numSplitPoints != 0) {
-      Map<Integer, JMethod> splitPointToMethod = findRunAsyncMethods(program);
-      assert (splitPointToMethod.size() == numSplitPoints);
-
-      ControlFlowAnalyzer cfa = computeInitiallyLive(program);
-
-      while (true) {
-        Set<Integer> nextSplitPoints = splitPointsReachable(cfa,
-            splitPointToMethod, numSplitPoints);
-        nextSplitPoints.removeAll(initialLoadSequence);
-
-        if (nextSplitPoints.size() != 1) {
-          break;
-        }
-
-        int nextSplitPoint = nextSplitPoints.iterator().next();
-        initialLoadSequence.add(nextSplitPoint);
-        CodeSplitter.traverseEntry(program, cfa, nextSplitPoint);
+    ConfigurationProperty prop;
+    {
+      Property p = properties.find(PROP_INITIAL_SEQUENCE);
+      if (p == null) {
+        throw new InternalCompilerException(
+            "Could not find configuration property " + PROP_INITIAL_SEQUENCE);
       }
-
-      logInitialLoadSequence(logger, initialLoadSequence);
-      installInitialLoadSequenceField(program, initialLoadSequence);
+      if (!(p instanceof ConfigurationProperty)) {
+        throw new InternalCompilerException(PROP_INITIAL_SEQUENCE
+            + " is not a configuration property");
+      }
+      prop = (ConfigurationProperty) p;
     }
 
-    return initialLoadSequence;
+    for (String refString : prop.getValues()) {
+      int splitPoint = findSplitPoint(refString, program, branch);
+      if (initialLoadSequence.contains(splitPoint)) {
+        branch.log(TreeLogger.ERROR, "Split point specified more than once: "
+            + refString);
+      }
+      initialLoadSequence.add(splitPoint);
+    }
+
+    logInitialLoadSequence(logger, initialLoadSequence);
+    installInitialLoadSequenceField(program, initialLoadSequence);
+    program.setSplitPointInitialSequence(new ArrayList<Integer>(
+        initialLoadSequence));
   }
 
   /**
@@ -324,30 +443,19 @@ public class CodeSplitter {
   }
 
   /**
-   * Maps each split point number to its corresponding generated
-   * <code>runAsync</code> method. If that method has been discarded, then map
-   * the split point number to <code>null</code>.
+   * Compute the set of initially live code for this program. Such code must be
+   * included in the initial download of the program.
    */
-  private static Map<Integer, JMethod> findRunAsyncMethods(JProgram program)
-      throws NumberFormatException {
-    Map<Integer, JMethod> splitPointToLoadMethod = new HashMap<Integer, JMethod>();
-    // These methods aren't indexed, so scan the whole program
+  private static ControlFlowAnalyzer computeInitiallyLive(JProgram jprogram,
+      MultipleDependencyGraphRecorder dependencyRecorder) {
+    dependencyRecorder.startDependencyGraph("initial", null);
 
-    for (JDeclaredType type : program.getDeclaredTypes()) {
-      Matcher matcher = LOADER_CLASS_PATTERN.matcher(type.getName());
-      if (matcher.matches()) {
-        int sp = Integer.parseInt(matcher.group(1));
-        JMethod loadMethod = null;
-        for (JMethod meth : type.getMethods()) {
-          if (meth.getName().equals(
-              FragmentLoaderCreator.LOADER_METHOD_RUN_ASYNC)) {
-            loadMethod = meth;
-          }
-        }
-        splitPointToLoadMethod.put(sp, loadMethod);
-      }
-    }
-    return splitPointToLoadMethod;
+    ControlFlowAnalyzer cfa = new ControlFlowAnalyzer(jprogram);
+    cfa.setDependencyRecorder(dependencyRecorder);
+    traverseEntry(jprogram, cfa, 0);
+
+    dependencyRecorder.endDependencyGraph();
+    return cfa;
   }
 
   private static String fullNameString(JField field) {
@@ -364,9 +472,24 @@ public class CodeSplitter {
     return (value == null) ? 0 : value;
   }
 
+  /**
+   * Installs the initial load sequence into the
+   * AsyncFragmentLoader.BROWSER_LOADER. The initializer looks like this:
+   * 
+   * <pre>
+       public static AsyncFragmentLoader BROWSER_LOADER = new AsyncFragmentLoader(1,
+         new int[] {}, new StandardLoadingStrategy(), new StandardLogger());
+     </pre>
+   * 
+   * The second argument (<code>new int[]</code>) gets replaced by an array
+   * corresponding to <code>initialLoadSequence</code>.
+   */
   private static void installInitialLoadSequenceField(JProgram program,
       LinkedHashSet<Integer> initialLoadSequence) {
-    JField initLoadSeqField = program.getIndexedField("AsyncFragmentLoader.initialLoadSequence");
+    JMethodCall constructorCall = ReplaceRunAsyncs.getBrowserLoaderConstructor(program);
+    assert constructorCall.getArgs().get(1).getType() instanceof JArrayType;
+    assert ((JArrayType) constructorCall.getArgs().get(1).getType()).getElementType() == JPrimitiveType.INT;
+
     SourceInfo info = program.createSourceInfoSynthetic(ReplaceRunAsyncs.class,
         "array with initial load sequence");
     List<JExpression> intExprs = new ArrayList<JExpression>();
@@ -377,8 +500,12 @@ public class CodeSplitter {
      * Note: the following field is known to have a manually installed
      * initializer, of new int[0].
      */
-    initLoadSeqField.getDeclarationStatement().initializer = JNewArray.createInitializers(
-        program, info, program.getTypeArray(JPrimitiveType.INT, 1), intExprs);
+    constructorCall.setArg(1, JNewArray.createInitializers(program, info,
+        program.getTypeArray(JPrimitiveType.INT, 1), intExprs));
+  }
+
+  private static <T> T last(T[] array) {
+    return array[array.length - 1];
   }
 
   private static void logInitialLoadSequence(TreeLogger logger,
@@ -403,24 +530,39 @@ public class CodeSplitter {
   }
 
   /**
-   * Find all split points reachable in the specified ControlFlowAnalyzer.
-   * 
-   * @param cfa the control-flow analyzer to search
-   * @param splitPointToMethod a map from split points to methods, computed with
-   *          {@link #findRunAsyncMethods(JProgram)}.
-   * @param numSplitPoints the number of split points in the program
+   * Reverses a runAsync map, returning a map from methods to the split point
+   * numbers invoked from within that method.
    */
-  private static Set<Integer> splitPointsReachable(ControlFlowAnalyzer cfa,
-      Map<Integer, JMethod> splitPointToMethod, int numSplitPoints) {
-    Set<Integer> nextSplitPoints = new HashSet<Integer>();
+  private static Map<JMethod, List<Integer>> reverseByEnclosingMethod(
+      Map<Integer, RunAsyncReplacement> runAsyncMap) {
+    Map<JMethod, List<Integer>> revmap = new HashMap<JMethod, List<Integer>>();
+    for (RunAsyncReplacement replacement : runAsyncMap.values()) {
+      JMethod method = replacement.getEnclosingMethod();
+      List<Integer> list = revmap.get(method);
+      if (list == null) {
+        list = new ArrayList<Integer>();
+        revmap.put(method, list);
+      }
+      list.add(replacement.getNumber());
+    }
+    return revmap;
+  }
 
-    for (int sp = 1; sp <= numSplitPoints; sp++) {
-      if (cfa.getLiveFieldsAndMethods().contains(splitPointToMethod.get(sp))) {
-        nextSplitPoints.add(sp);
+  private static Map<String, List<Integer>> reverseByName(
+      Map<Integer, RunAsyncReplacement> runAsyncReplacements) {
+    Map<String, List<Integer>> revmap = new HashMap<String, List<Integer>>();
+    for (RunAsyncReplacement replacement : runAsyncReplacements.values()) {
+      String name = replacement.getName();
+      if (name != null) {
+        List<Integer> list = revmap.get(name);
+        if (list == null) {
+          list = new ArrayList<Integer>();
+          revmap.put(name, list);
+        }
+        list.add(replacement.getNumber());
       }
     }
-
-    return nextSplitPoints;
+    return revmap;
   }
 
   /**
@@ -431,14 +573,6 @@ public class CodeSplitter {
       int splitPoint) {
     for (JMethod entryMethod : jprogram.entryMethods.get(splitPoint)) {
       cfa.traverseFrom(entryMethod);
-    }
-    if (splitPoint == 0) {
-      /*
-       * Include class literal factories for simplicity. It is possible to move
-       * them out, if they are only needed by one fragment, but they are tiny,
-       * so it does not seem worth the complexity in the compiler.
-       */
-      cfa.traverseFromClassLiteralFactories();
     }
   }
 
@@ -465,6 +599,8 @@ public class CodeSplitter {
     }
   }
 
+  private final MultipleDependencyGraphRecorder dependencyRecorder;
+
   private final Map<JField, JClassLiteral> fieldToLiteralOfClass;
   private final FragmentExtractor fragmentExtractor;
   private final LinkedHashSet<Integer> initialLoadSequence;
@@ -489,20 +625,22 @@ public class CodeSplitter {
 
   private CodeSplitter(TreeLogger logger, JProgram jprogram,
       JsProgram jsprogram, JavaToJavaScriptMap map,
-      LinkedHashSet<Integer> initialLoadSequence) {
+      MultipleDependencyGraphRecorder dependencyRecorder) {
     this.logger = logger.branch(TreeLogger.TRACE,
         "Splitting JavaScript for incremental download");
     this.jprogram = jprogram;
     this.jsprogram = jsprogram;
     this.map = map;
-    this.initialLoadSequence = initialLoadSequence;
+    this.dependencyRecorder = dependencyRecorder;
+    this.initialLoadSequence = new LinkedHashSet<Integer>(
+        jprogram.getSplitPointInitialSequence());
 
     numEntries = jprogram.entryMethods.size();
     logging = Boolean.getBoolean(PROP_LOG_FRAGMENT_MAP);
     fieldToLiteralOfClass = buildFieldToClassLiteralMap(jprogram);
     fragmentExtractor = new FragmentExtractor(jprogram, jsprogram, map);
 
-    initiallyLive = computeInitiallyLive(jprogram);
+    initiallyLive = computeInitiallyLive(jprogram, dependencyRecorder);
 
     methodsInJavaScript = fragmentExtractor.findAllMethodsInJavaScript();
   }
@@ -540,6 +678,8 @@ public class CodeSplitter {
    * initial load sequence, add a <code>null</code> to the list.
    */
   private List<ControlFlowAnalyzer> computeAllButOneCfas() {
+    String dependencyGraphNameAfterInitialSequence = dependencyGraphNameAfterInitialSequence();
+
     List<ControlFlowAnalyzer> allButOnes = new ArrayList<ControlFlowAnalyzer>(
         numEntries - 1);
 
@@ -548,12 +688,16 @@ public class CodeSplitter {
         allButOnes.add(null);
         continue;
       }
+      dependencyRecorder.startDependencyGraph("sp" + entry,
+          dependencyGraphNameAfterInitialSequence);
       ControlFlowAnalyzer cfa = new ControlFlowAnalyzer(
           liveAfterInitialSequence);
+      cfa.setDependencyRecorder(dependencyRecorder);
       traverseAllButEntry(cfa, entry);
       // Traverse leftoversFragmentHasLoaded, because it should not
       // go into any of the exclusive fragments.
       cfa.traverseFromLeftoversFragmentHasLoaded();
+      dependencyRecorder.endDependencyGraph();
       allButOnes.add(cfa);
     }
 
@@ -564,12 +708,27 @@ public class CodeSplitter {
    * Compute a CFA that covers the entire live code of the program.
    */
   private ControlFlowAnalyzer computeCompleteCfa() {
+    dependencyRecorder.startDependencyGraph("total", null);
     ControlFlowAnalyzer everything = new ControlFlowAnalyzer(jprogram);
+    everything.setDependencyRecorder(dependencyRecorder);
     for (int entry = 0; entry < numEntries; entry++) {
       traverseEntry(everything, entry);
     }
     everything.traverseFromLeftoversFragmentHasLoaded();
+    dependencyRecorder.endDependencyGraph();
     return everything;
+  }
+
+  /**
+   * The name of the dependency graph that corresponds to
+   * {@link #liveAfterInitialSequence}.
+   */
+  private String dependencyGraphNameAfterInitialSequence() {
+    if (initialLoadSequence.isEmpty()) {
+      return "initial";
+    } else {
+      return "sp" + last(initialLoadSequence.toArray());
+    }
   }
 
   /**
@@ -606,13 +765,19 @@ public class CodeSplitter {
      * sequence.
      */
     liveAfterInitialSequence = new ControlFlowAnalyzer(initiallyLive);
+    String extendsCfa = "initial";
     for (int sp : initialLoadSequence) {
       LivenessPredicate alreadyLoaded = new CfaLivenessPredicate(
           liveAfterInitialSequence);
+      String depGraphName = "sp" + sp;
+      dependencyRecorder.startDependencyGraph(depGraphName, extendsCfa);
+      extendsCfa = depGraphName;
 
       ControlFlowAnalyzer liveAfterSp = new ControlFlowAnalyzer(
           liveAfterInitialSequence);
       traverseEntry(liveAfterSp, sp);
+      dependencyRecorder.endDependencyGraph();
+
       LivenessPredicate liveNow = new CfaLivenessPredicate(liveAfterSp);
 
       List<JsStatement> statsToAppend = fragmentExtractor.createCallsToEntryMethods(sp);

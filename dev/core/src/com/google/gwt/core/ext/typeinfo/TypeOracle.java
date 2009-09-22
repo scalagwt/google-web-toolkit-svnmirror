@@ -17,7 +17,7 @@ package com.google.gwt.core.ext.typeinfo;
 
 import com.google.gwt.core.ext.typeinfo.JWildcardType.BoundType;
 import com.google.gwt.dev.jjs.InternalCompilerException;
-import com.google.gwt.dev.shell.JsValueGlue;
+import com.google.gwt.dev.util.Name;
 import com.google.gwt.dev.util.collect.HashMap;
 import com.google.gwt.dev.util.collect.IdentityHashMap;
 
@@ -118,8 +118,12 @@ public class TypeOracle {
    * A reserved metadata tag to indicates that a field type, method return type
    * or method parameter type is intended to be parameterized. Note that
    * constructor type parameters are not supported at present.
+   * 
+   * @deprecated gwt.typeArgs is not longer supported
    */
+  @Deprecated
   public static final String TAG_TYPEARGS = "gwt.typeArgs";
+  
   static final int MOD_ABSTRACT = 0x00000001;
   static final int MOD_FINAL = 0x00000002;
   static final int MOD_NATIVE = 0x00000004;
@@ -128,8 +132,8 @@ public class TypeOracle {
   static final int MOD_PUBLIC = 0x00000020;
   static final int MOD_STATIC = 0x00000040;
   static final int MOD_TRANSIENT = 0x00000080;
-
   static final int MOD_VOLATILE = 0x00000100;
+
   static final Annotation[] NO_ANNOTATIONS = new Annotation[0];
   static final JClassType[] NO_JCLASSES = new JClassType[0];
   static final JConstructor[] NO_JCTORS = new JConstructor[0];
@@ -140,6 +144,8 @@ public class TypeOracle {
   static final JType[] NO_JTYPES = new JType[0];
   static final String[][] NO_STRING_ARR_ARR = new String[0][];
   static final String[] NO_STRINGS = new String[0];
+
+  private static final String JSO_CLASS = "com.google.gwt.core.client.JavaScriptObject";
 
   static String[] modifierBitsToNames(int bits) {
     List<String> strings = new ArrayList<String>();
@@ -248,6 +254,7 @@ public class TypeOracle {
    * @return <code>null</code> if the type is not found
    */
   public JClassType findType(String name) {
+    assert Name.isSourceName(name);
     return allTypes.get(name);
   }
 
@@ -259,6 +266,7 @@ public class TypeOracle {
    * @return <code>null</code> if the type is not found
    */
   public JClassType findType(String pkgName, String typeName) {
+    assert Name.isSourceName(typeName);
     JPackage pkg = findPackage(pkgName);
     if (pkg != null) {
       JClassType type = pkg.findType(typeName);
@@ -466,6 +474,7 @@ public class TypeOracle {
    * @return the specified type
    */
   public JClassType getType(String name) throws NotFoundException {
+    assert Name.isSourceName(name);
     JClassType type = findType(name);
     if (type == null) {
       throw new NotFoundException(name);
@@ -482,6 +491,7 @@ public class TypeOracle {
    */
   public JClassType getType(String pkgName, String topLevelTypeSimpleName)
       throws NotFoundException {
+    assert Name.isSourceName(topLevelTypeSimpleName);
     JClassType type = findType(pkgName, topLevelTypeSimpleName);
     if (type == null) {
       throw new NotFoundException(pkgName + "." + topLevelTypeSimpleName);
@@ -649,7 +659,7 @@ public class TypeOracle {
    * Updates the list of jsoSingleImpl types from recently-added types.
    */
   private void computeSingleJsoImplData(JClassType... newTypes) {
-    JClassType jsoType = findType(JsValueGlue.JSO_CLASS);
+    JClassType jsoType = findType(JSO_CLASS);
     if (jsoType == null) {
       return;
     }
@@ -826,7 +836,7 @@ public class TypeOracle {
   }
 
   private void removeSingleJsoImplData(JClassType... types) {
-    JClassType jsoType = findType(JsValueGlue.JSO_CLASS);
+    JClassType jsoType = findType(JSO_CLASS);
     if (jsoType == null) {
       return;
     }

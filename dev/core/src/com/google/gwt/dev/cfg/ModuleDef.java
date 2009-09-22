@@ -23,6 +23,7 @@ import com.google.gwt.core.ext.linker.LinkerOrder.Order;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.dev.javac.CompilationState;
 import com.google.gwt.dev.resource.Resource;
+import com.google.gwt.dev.resource.ResourceOracle;
 import com.google.gwt.dev.resource.impl.DefaultFilters;
 import com.google.gwt.dev.resource.impl.PathPrefix;
 import com.google.gwt.dev.resource.impl.PathPrefixSet;
@@ -48,6 +49,7 @@ import java.util.Map.Entry;
  * Represents a module specification. In principle, this could be built without
  * XML for unit tests.
  */
+@SuppressWarnings("deprecation")
 public class ModuleDef implements PublicOracle {
 
   private static final Comparator<Map.Entry<String, ?>> REV_NAME_CMP = new Comparator<Map.Entry<String, ?>>() {
@@ -70,9 +72,9 @@ public class ModuleDef implements PublicOracle {
     return true;
   }
 
-  private final Set<Class<? extends Linker>> activeLinkers = new LinkedHashSet<Class<? extends Linker>>();
+  private final Set<String> activeLinkers = new LinkedHashSet<String>();
 
-  private Class<? extends Linker> activePrimaryLinker;
+  private String activePrimaryLinker;
 
   private final List<String> entryPointTypeNames = new ArrayList<String>();
 
@@ -81,6 +83,8 @@ public class ModuleDef implements PublicOracle {
   private CompilationState lazyCompilationState;
 
   private ResourceOracleImpl lazyPublicOracle;
+
+  private ResourceOracleImpl lazyResourcesOracle;
 
   private ResourceOracleImpl lazySourceOracle;
 
@@ -130,9 +134,9 @@ public class ModuleDef implements PublicOracle {
 
     LinkerOrder order = clazz.getAnnotation(LinkerOrder.class);
     if (order.value() == Order.PRIMARY) {
-      activePrimaryLinker = clazz;
+      activePrimaryLinker = name;
     } else {
-      activeLinkers.add(clazz);
+      activeLinkers.add(name);
     }
   }
 
@@ -192,7 +196,36 @@ public class ModuleDef implements PublicOracle {
     entryPointTypeNames.clear();
   }
 
-  public void defineLinker(String name, Class<? extends Linker> linker) {
+  /**
+   * Associate a Linker class with a symbolic name. If the name had been
+   * previously assigned, this method will redefine the name. If the redefined
+   * linker had been previously added to the set of active linkers, the old
+   * active linker will be replaced with the new linker.
+   */
+  public void defineLinker(TreeLogger logger, String name,
+      Class<? extends Linker> linker) throws UnableToCompleteException {
+    Class<? extends Linker> old = getLinker(name);
+    if (old != null) {
+      // Redefining an existing name
+      if (activePrimaryLinker.equals(name)) {
+        // Make sure the new one is also a primary linker
+        if (!linker.getAnnotation(LinkerOrder.class).value().equals(
+            Order.PRIMARY)) {
+          logger.log(TreeLogger.ERROR, "Redefining primary linker " + name
+              + " with non-primary implementation " + linker.getName());
+          throw new UnableToCompleteException();
+        }
+
+      } else if (activeLinkers.contains(name)) {
+        // Make sure it's a not a primary linker
+        if (linker.getAnnotation(LinkerOrder.class).value().equals(
+            Order.PRIMARY)) {
+          logger.log(TreeLogger.ERROR, "Redefining non-primary linker " + name
+              + " with primary implementation " + linker.getName());
+          throw new UnableToCompleteException();
+        }
+      }
+    }
     linkerTypesByName.put(name, linker);
   }
 
@@ -221,11 +254,17 @@ public class ModuleDef implements PublicOracle {
   }
 
   public Set<Class<? extends Linker>> getActiveLinkers() {
-    return activeLinkers;
+    Set<Class<? extends Linker>> toReturn = new LinkedHashSet<Class<? extends Linker>>();
+    for (String linker : activeLinkers) {
+      assert linkerTypesByName.containsKey(linker) : linker;
+      toReturn.add(linkerTypesByName.get(linker));
+    }
+    return toReturn;
   }
 
   public Class<? extends Linker> getActivePrimaryLinker() {
-    return activePrimaryLinker;
+    assert linkerTypesByName.containsKey(activePrimaryLinker) : activePrimaryLinker;
+    return linkerTypesByName.get(activePrimaryLinker);
   }
 
   public String[] getAllPublicFiles() {
@@ -275,6 +314,21 @@ public class ModuleDef implements PublicOracle {
    */
   public synchronized Properties getProperties() {
     return properties;
+  }
+
+  public ResourceOracle getResourcesOracle() {
+    if (lazyResourcesOracle == null) {
+      lazyResourcesOracle = new ResourceOracleImpl(TreeLogger.NULL);
+      PathPrefixSet pathPrefixes = lazySourceOracle.getPathPrefixes();
+      PathPrefixSet newPathPrefixes = new PathPrefixSet();
+      for (PathPrefix pathPrefix : pathPrefixes.values()) {
+        newPathPrefixes.add(new PathPrefix(pathPrefix.getPrefix(), null,
+            pathPrefix.shouldReroot()));
+      }
+      lazyResourcesOracle.setPathPrefixes(newPathPrefixes);
+      lazyResourcesOracle.refresh(TreeLogger.NULL);
+    }
+    return lazyResourcesOracle;
   }
 
   /**
@@ -343,6 +397,10 @@ public class ModuleDef implements PublicOracle {
     lazyPublicOracle.refresh(logger);
     lazySourceOracle.refresh(logger);
 
+    if (lazyResourcesOracle != null) {
+      lazyResourcesOracle.refresh(logger);
+    }
+
     // Update the compilation state to reflect the resource oracle changes.
     if (lazyCompilationState != null) {
       lazyCompilationState.refresh(logger);
@@ -391,7 +449,7 @@ public class ModuleDef implements PublicOracle {
          * Create a default property provider for any properties with more than
          * one possible value and no existing provider.
          */
-        if (prop.getProvider() == null && prop.getAllowedValues().length > 1) {
+        if (prop.getProvider() == null && prop.getConstrainedValue() == null) {
           String src = "{";
           src += "return __gwt_getMetaProperty(\"";
           src += prop.getName();

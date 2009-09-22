@@ -28,15 +28,16 @@ import com.google.gwt.dev.cfg.Rules;
 import com.google.gwt.dev.cfg.StaticPropertyOracle;
 import com.google.gwt.dev.javac.CompilationState;
 import com.google.gwt.dev.javac.CompilationUnit;
+import com.google.gwt.dev.javac.StandardGeneratorContext;
 import com.google.gwt.dev.jdt.RebindOracle;
 import com.google.gwt.dev.jdt.RebindPermutationOracle;
+import com.google.gwt.dev.jjs.AbstractCompiler;
 import com.google.gwt.dev.jjs.JJSOptions;
 import com.google.gwt.dev.jjs.JJSOptionsImpl;
-import com.google.gwt.dev.jjs.JavaToJavaScriptCompiler;
+import com.google.gwt.dev.jjs.JavaScriptCompiler;
 import com.google.gwt.dev.jjs.JsOutputOption;
 import com.google.gwt.dev.jjs.UnifiedAst;
 import com.google.gwt.dev.shell.CheckForUpdates;
-import com.google.gwt.dev.shell.StandardGeneratorContext;
 import com.google.gwt.dev.shell.StandardRebindOracle;
 import com.google.gwt.dev.shell.CheckForUpdates.UpdateResult;
 import com.google.gwt.dev.util.Memory;
@@ -54,6 +55,7 @@ import com.google.gwt.dev.util.arg.ArgHandlerGenDir;
 import com.google.gwt.dev.util.arg.ArgHandlerMaxPermsPerPrecompile;
 import com.google.gwt.dev.util.arg.ArgHandlerScriptStyle;
 import com.google.gwt.dev.util.arg.ArgHandlerSoyc;
+import com.google.gwt.dev.util.arg.ArgHandlerSoycDetailed;
 import com.google.gwt.dev.util.arg.ArgHandlerValidateOnlyFlag;
 import com.google.gwt.dev.util.arg.OptionDisableUpdateCheck;
 import com.google.gwt.dev.util.arg.OptionDumpSignatures;
@@ -104,6 +106,7 @@ public class Precompile {
       registerHandler(new ArgHandlerDumpSignatures(options));
       registerHandler(new ArgHandlerMaxPermsPerPrecompile(options));
       registerHandler(new ArgHandlerSoyc(options));
+      registerHandler(new ArgHandlerSoycDetailed(options));
     }
 
     @Override
@@ -180,12 +183,20 @@ public class Precompile {
       return jjsOptions.isEnableAssertions();
     }
 
+    public boolean isOptimizePrecompile() {
+      return jjsOptions.isOptimizePrecompile();
+    }
+
     public boolean isRunAsyncEnabled() {
       return jjsOptions.isRunAsyncEnabled();
     }
 
     public boolean isSoycEnabled() {
       return jjsOptions.isSoycEnabled();
+    }
+
+    public boolean isSoycExtra() {
+      return jjsOptions.isSoycExtra();
     }
 
     public boolean isUpdateCheckDisabled() {
@@ -236,6 +247,10 @@ public class Precompile {
       this.maxPermsPerPrecompile = maxPermsPerPrecompile;
     }
 
+    public void setOptimizePrecompile(boolean optimize) {
+      jjsOptions.setOptimizePrecompile(optimize);
+    }
+
     public void setOutput(JsOutputOption output) {
       jjsOptions.setOutput(output);
     }
@@ -246,6 +261,10 @@ public class Precompile {
 
     public void setSoycEnabled(boolean enabled) {
       jjsOptions.setSoycEnabled(enabled);
+    }
+
+    public void setSoycExtra(boolean soycExtra) {
+      jjsOptions.setSoycExtra(soycExtra);
     }
 
     public void setValidateOnly(boolean validateOnly) {
@@ -384,8 +403,9 @@ public class Precompile {
   public static Precompilation precompile(TreeLogger logger,
       JJSOptions jjsOptions, ModuleDef module, File genDir,
       File generatorResourcesDir, File dumpSignatureFile) {
-    return precompile(logger, jjsOptions, module, 0, 0,
-        module.getProperties().numPermutations(), genDir,
+    PropertyPermutations allPermutations = new PropertyPermutations(
+        module.getProperties());
+    return precompile(logger, jjsOptions, module, 0, allPermutations, genDir,
         generatorResourcesDir, dumpSignatureFile);
   }
 
@@ -427,7 +447,9 @@ public class Precompile {
           module, compilationState, generatorArtifacts,
           new PropertyPermutations(module.getProperties()), genDir,
           generatorResourcesDir);
-      JavaToJavaScriptCompiler.precompile(logger, module, rpo, declEntryPts,
+      // Never optimize on a validation run.
+      jjsOptions.setOptimizePrecompile(false);
+      getCompiler(module).precompile(logger, module, rpo, declEntryPts,
           additionalRootTypes, jjsOptions, true);
       return true;
     } catch (UnableToCompleteException e) {
@@ -436,10 +458,32 @@ public class Precompile {
     }
   }
 
+  private static AbstractCompiler getCompiler(ModuleDef module) {
+    ConfigurationProperty compilerClassProp = module.getProperties().createConfiguration(
+        "x.compiler.class", false);
+    String compilerClassName = compilerClassProp.getValue();
+    if (compilerClassName == null || compilerClassName.length() == 0) {
+      return new JavaScriptCompiler();
+    }
+    Throwable caught;
+    try {
+      Class<?> compilerClass = Class.forName(compilerClassName);
+      return (AbstractCompiler) compilerClass.newInstance();
+    } catch (ClassNotFoundException e) {
+      caught = e;
+    } catch (InstantiationException e) {
+      caught = e;
+    } catch (IllegalAccessException e) {
+      caught = e;
+    }
+    throw new RuntimeException("Unable to instantiate compiler class '"
+        + compilerClassName + "'", caught);
+  }
+
   private static Precompilation precompile(TreeLogger logger,
       JJSOptions jjsOptions, ModuleDef module, int permutationBase,
-      int firstPerm, int numPerms, File genDir, File generatorResourcesDir,
-      File dumpSignatureFile) {
+      PropertyPermutations allPermutations, File genDir,
+      File generatorResourcesDir, File dumpSignatureFile) {
 
     try {
       CompilationState compilationState = module.getCompilationState(logger);
@@ -457,13 +501,10 @@ public class Precompile {
 
       ArtifactSet generatedArtifacts = new ArtifactSet();
       DistillerRebindPermutationOracle rpo = new DistillerRebindPermutationOracle(
-          module,
-          compilationState,
-          generatedArtifacts,
-          new PropertyPermutations(module.getProperties(), firstPerm, numPerms),
+          module, compilationState, generatedArtifacts, allPermutations,
           genDir, generatorResourcesDir);
       PerfLogger.start("Precompile");
-      UnifiedAst unifiedAst = JavaToJavaScriptCompiler.precompile(logger,
+      UnifiedAst unifiedAst = getCompiler(module).precompile(logger,
           module, rpo, declEntryPts, null, jjsOptions,
           rpo.getPermuationCount() == 1);
       PerfLogger.end();
@@ -472,15 +513,18 @@ public class Precompile {
       Permutation[] permutations = rpo.getPermutations();
       // Sort the permutations by an ordered key to ensure determinism.
       SortedMap<String, Permutation> merged = new TreeMap<String, Permutation>();
+      SortedSet<String> liveRebindRequests = unifiedAst.getRebindRequests();
       for (Permutation permutation : permutations) {
-        permutation.reduceRebindAnswers(unifiedAst.getRebindRequests());
-        // Arbitrarily choose as a key the stringified map of rebind answers.
-        String rebindResultsString = permutation.getRebindAnswers().toString();
-        if (merged.containsKey(rebindResultsString)) {
-          Permutation existing = merged.get(rebindResultsString);
-          existing.mergeFrom(permutation);
+        // Construct a key from the stringified map of live rebind answers.
+        SortedMap<String, String> rebindAnswers = new TreeMap<String, String>(
+            permutation.getRebindAnswers());
+        rebindAnswers.keySet().retainAll(liveRebindRequests);
+        String key = rebindAnswers.toString();
+        if (merged.containsKey(key)) {
+          Permutation existing = merged.get(key);
+          existing.mergeFrom(permutation, liveRebindRequests);
         } else {
-          merged.put(rebindResultsString, permutation);
+          merged.put(key, permutation);
         }
       }
       return new Precompilation(unifiedAst, merged.values(), permutationBase,
@@ -500,6 +544,8 @@ public class Precompile {
 
   public boolean run(TreeLogger logger) throws UnableToCompleteException {
     boolean originalCompilationStateRetained = options.isCompilationStateRetained();
+    // Avoid early optimizations since permutation compiles will run separately.
+    options.setOptimizePrecompile(false);
 
     for (String moduleName : options.getModuleNames()) {
       File compilerWorkDir = options.getCompilerWorkDir(moduleName);
@@ -534,7 +580,9 @@ public class Precompile {
       } else {
         TreeLogger branch = logger.branch(TreeLogger.INFO,
             "Precompiling module " + module.getName());
-        int potentialPermutations = module.getProperties().numPermutations();
+        PropertyPermutations allPermutations = new PropertyPermutations(
+            module.getProperties());
+        int potentialPermutations = allPermutations.size();
         int permutationsPerIteration = options.getMaxPermsPerPrecompile();
 
         if (permutationsPerIteration <= 0) {
@@ -572,10 +620,13 @@ public class Precompile {
             options.setCompilationStateRetained(originalCompilationStateRetained);
           }
 
+          // Select only the range of property permutations that we want
+          PropertyPermutations localPermutations = new PropertyPermutations(
+              allPermutations, potentialFirstPerm, numPermsToPrecompile);
+
           Precompilation precompilation = precompile(branch, options, module,
-              actualPermutations, potentialFirstPerm, numPermsToPrecompile,
-              options.getGenDir(), compilerWorkDir,
-              options.getDumpSignatureFile());
+              actualPermutations, localPermutations, options.getGenDir(),
+              compilerWorkDir, options.getDumpSignatureFile());
           if (precompilation == null) {
             branch.log(TreeLogger.ERROR, "Precompilation failed");
             return false;

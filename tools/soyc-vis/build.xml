@@ -7,34 +7,30 @@
   <import file="${gwt.root}/common.ant.xml" />
   
   <!-- Platform shouldn't matter here, just picking one -->
-  <property.ensure name="gwt.dev.jar" location="${gwt.build.lib}/gwt-dev-linux.jar" />
+  <property.ensure name="gwt.dev.jar" location="${gwt.build.lib}/gwt-dev-${build.host.platform}.jar" />
 
   <target name="clean">
     <delete dir="build"/>
   </target>
 
   <target name="compile">
-    <mkdir dir="${javac.out}"/>
-    <javac srcdir="src" destdir="${javac.out}">
-      <classpath>
-        <pathelement location="${gwt.dev.jar}" />
-      </classpath>
-    </javac>
-    <mkdir dir="${javac.out}/images"/>
-    <copy todir="${javac.out}/images">
+    <mkdir dir="${javac.out}/com/google/gwt/soyc/resources/images"/>
+    <copy todir="${javac.out}/com/google/gwt/soyc/resources/images">
       <fileset dir="images"/>
     </copy>
-    <copy file="classLevel.css" tofile="${javac.out}/classLevel.css"/>
-    <copy file="roundedCorners.css" tofile="${javac.out}/roundedCorners.css"/>
+    <copy file="classLevel.css" tofile="${javac.out}/com/google/gwt/soyc/resources/classLevel.css"/>
+    <copy file="roundedCorners.css" tofile="${javac.out}/com/google/gwt/soyc/resources/roundedCorners.css"/>
+    <copy file="common.css" tofile="${javac.out}/com/google/gwt/soyc/resources/common.css"/>
   </target>
 
   <target name="build" depends="compile">
-    <gwt.jar>
+    <!-- Build a transitional jar that is good enough for
+         passing as -resources to SoycDashboard.  This jar
+         is being phased out in favor of gwt-dev-platform.jar
+         holding all the SOYC bits.  -->
+    <jar destfile="${project.lib}">
       <fileset dir="${javac.out}" />
-      <manifest>
-        <attribute name="Main-Class" value="com.google.gwt.soyc.SoycDashboard" />
-      </manifest>
-    </gwt.jar>
+    </jar>
   </target>
 
   <target name="test"/>

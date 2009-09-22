@@ -24,6 +24,7 @@ import com.google.gwt.dev.Precompile.PrecompileOptionsImpl;
 import com.google.gwt.dev.cfg.ModuleDef;
 import com.google.gwt.dev.cfg.ModuleDefLoader;
 import com.google.gwt.dev.jjs.JJSOptions;
+import com.google.gwt.dev.jjs.PermutationResult;
 import com.google.gwt.dev.shell.CheckForUpdates;
 import com.google.gwt.dev.shell.CheckForUpdates.UpdateResult;
 import com.google.gwt.dev.util.FileBackedObject;
@@ -188,6 +189,8 @@ public class Compiler {
           TreeLogger branch = logger.branch(TreeLogger.INFO,
               "Compiling module " + moduleName);
 
+          // Optimize early since permutation compiles will run in process.
+          options.setOptimizePrecompile(true);
           Precompilation precompilation = Precompile.precompile(branch,
               options, module, options.getGenDir(), compilerWorkDir,
               options.getDumpSignatureFile());

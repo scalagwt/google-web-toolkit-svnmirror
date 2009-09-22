@@ -39,22 +39,30 @@ abstract class DOMImplStandard extends DOMImpl {
   private static JavaScriptObject dispatchEvent;
 
   @Override
-  public native Element eventGetFromElement(Event evt) /*-{
-    if (evt.type == "mouseover")
-      return evt.relatedTarget;
-    if (evt.type == "mouseout")
-      return evt.target;
+  public Element eventGetFromElement(Event evt) {
+    if (evt.getType().equals("mouseover")) {
+      return evt.getRelatedTarget().cast();
+    }
+
+    if (evt.getType().equals("mouseout")) {
+      return evt.getTarget().cast();
+    }
+
     return null;  
-  }-*/;
+  }
  
   @Override
-  public native Element eventGetToElement(Event evt) /*-{
-    if (evt.type == "mouseover")
-      return evt.target;
-    if (evt.type == "mouseout")
-      return evt.relatedTarget;
+  public Element eventGetToElement(Event evt) {
+    if (evt.getType().equals("mouseover")) {
+      return evt.getTarget().cast();
+    }
+
+    if (evt.getType().equals("mouseout")) {
+      return evt.getRelatedTarget().cast();
+    }
+
     return null;
-  }-*/;
+  }
   
   @Override
   public native Element getChild(Element elem, int index) /*-{
@@ -229,6 +237,8 @@ abstract class DOMImplStandard extends DOMImpl {
     if (chMask & 0x20000) elem.onmousewheel  = (bits & 0x20000) ? 
         @com.google.gwt.user.client.impl.DOMImplStandard::dispatchEvent : null;
     if (chMask & 0x40000) elem.oncontextmenu = (bits & 0x40000) ? 
+        @com.google.gwt.user.client.impl.DOMImplStandard::dispatchEvent : null;
+    if (chMask & 0x80000) elem.onpaste       = (bits & 0x80000) ? 
         @com.google.gwt.user.client.impl.DOMImplStandard::dispatchEvent : null;
   }-*/;
 

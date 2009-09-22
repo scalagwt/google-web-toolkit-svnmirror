@@ -24,6 +24,10 @@ import com.google.gwt.dev.jjs.ast.JField.Disposition;
 import com.google.gwt.dev.jjs.ast.js.JClassSeed;
 import com.google.gwt.dev.jjs.ast.js.JsniMethodBody;
 import com.google.gwt.dev.jjs.ast.js.JsonObject;
+import com.google.gwt.dev.jjs.impl.CodeSplitter;
+import com.google.gwt.dev.jjs.impl.ReplaceRunAsyncs.RunAsyncReplacement;
+import com.google.gwt.dev.util.collect.Lists;
+import com.google.gwt.dev.util.collect.Maps;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -32,6 +36,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -41,7 +46,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
 
 /**
@@ -75,6 +79,7 @@ public class JProgram extends JNode {
           "com.google.gwt.lang.ClassLiteralHolder",
           "com.google.gwt.core.client.RunAsyncCallback",
           "com.google.gwt.core.client.impl.AsyncFragmentLoader",
+          "com.google.gwt.core.client.impl.Impl",
           "com.google.gwt.lang.EntryMethodHolder",}));
 
   static final Map<String, Set<String>> traceMethods = new HashMap<String, Set<String>>();
@@ -146,6 +151,26 @@ public class JProgram extends JNode {
     return traceMethods.size() > 0;
   }
 
+  /**
+   * The same as {@link #lastFragmentLoadingBefore(int, int...)}, except that
+   * all of the parameters must be passed explicitly. The instance method should
+   * be preferred whenever a JProgram instance is available.
+   * 
+   * @param initialSeq The initial split point sequence of the program
+   * @param numSps The number of split points in the program
+   * @param firstFragment The first fragment to consider
+   * @param restFragments The rest of the fragments to consider
+   */
+  public static int lastFragmentLoadingBefore(List<Integer> initialSeq,
+      int numSps, int firstFragment, int... restFragments) {
+    int latest = firstFragment;
+    for (int frag : restFragments) {
+      latest = pairwiseLastFragmentLoadingBefore(initialSeq, numSps, latest,
+          frag);
+    }
+    return latest;
+  }
+
   private static String dotify(char[][] name) {
     StringBuffer result = new StringBuffer();
     for (int i = 0; i < name.length; ++i) {
@@ -156,6 +181,51 @@ public class JProgram extends JNode {
       result.append(name[i]);
     }
     return result.toString();
+  }
+
+  /**
+   * The main logic behind {@link #lastFragmentLoadingBefore(int, int...)} and
+   * {@link #lastFragmentLoadingBefore(List, int, int, int...)}.
+   */
+  private static int pairwiseLastFragmentLoadingBefore(
+      List<Integer> initialSeq, int numSps, int frag1, int frag2) {
+    if (frag1 == frag2) {
+      return frag1;
+    }
+
+    if (frag1 == 0) {
+      return 0;
+    }
+
+    if (frag2 == 0) {
+      return 0;
+    }
+
+    // See if either is in the initial sequence
+    int initPos1 = initialSeq.indexOf(frag1);
+    int initPos2 = initialSeq.indexOf(frag2);
+
+    // If both are in the initial sequence, then pick the earlier
+    if (initPos1 >= 0 && initPos2 >= 0) {
+      if (initPos1 < initPos2) {
+        return frag1;
+      }
+      return frag2;
+    }
+
+    // If exactly one is in the initial sequence, then it's the earlier one
+    if (initPos1 >= 0) {
+      return frag1;
+    }
+    if (initPos2 >= 0) {
+      return frag2;
+    }
+
+    assert (initPos1 < 0 && initPos2 < 0);
+    assert (frag1 != frag2);
+
+    // They are both leftovers or exclusive. Leftovers goes first in all cases.
+    return CodeSplitter.getLeftoversFragmentNumber(numSps);
   }
 
   public final List<JClassType> codeGenTypes = new ArrayList<JClassType>();
@@ -223,7 +293,12 @@ public class JProgram extends JNode {
 
   private Map<JReferenceType, Integer> queryIds;
 
-  private Map<Integer, String> splitPointMap = new TreeMap<Integer, String>();
+  /**
+   * Filled in by ReplaceRunAsync, once the numbers are known.
+   */
+  private Map<Integer, RunAsyncReplacement> runAsyncReplacements = Maps.create();
+
+  private List<Integer> splitPointInitialSequence = Lists.create();
 
   private final Map<JMethod, JMethod> staticToInstanceMap = new IdentityHashMap<JMethod, JMethod>();
 
@@ -685,6 +760,10 @@ public class JProgram extends JNode {
     return method;
   }
 
+  public Collection<JMethod> getIndexedMethods() {
+    return Collections.unmodifiableCollection(indexedMethods.values());
+  }
+
   public JDeclaredType getIndexedType(String string) {
     JDeclaredType type = indexedTypes.get(string);
     if (type == null) {
@@ -838,8 +917,12 @@ public class JProgram extends JNode {
     return integer.intValue();
   }
 
-  public Map<Integer, String> getSplitPointMap() {
-    return splitPointMap;
+  public Map<Integer, RunAsyncReplacement> getRunAsyncReplacements() {
+    return runAsyncReplacements;
+  }
+
+  public List<Integer> getSplitPointInitialSequence() {
+    return splitPointInitialSequence;
   }
 
   public JMethod getStaticImpl(JMethod method) {
@@ -1014,6 +1097,16 @@ public class JProgram extends JNode {
     return staticToInstanceMap.containsKey(method);
   }
 
+  /**
+   * Given a sequence of fragment numbers, return the latest fragment number
+   * possible that does not load later than any of these. It might be one of the
+   * supplied fragments, or it might be a common predecessor.
+   */
+  public int lastFragmentLoadingBefore(int firstFragment, int... restFragments) {
+    return lastFragmentLoadingBefore(splitPointInitialSequence,
+        entryMethods.size() - 1, firstFragment, restFragments);
+  }
+
   public void putIntoTypeMap(String qualifiedBinaryName, JDeclaredType type) {
     // Make it into a source type name.
     String srcTypeName = qualifiedBinaryName.replace('$', '.');
@@ -1032,14 +1125,20 @@ public class JProgram extends JNode {
     this.queryIds = queryIds;
   }
 
-  public void setSplitPointMap(Map<Integer, String> splitPointMap) {
-    this.splitPointMap = splitPointMap;
+  public void setRunAsyncReplacements(Map<Integer, RunAsyncReplacement> map) {
+    assert runAsyncReplacements.isEmpty();
+    runAsyncReplacements = map;
+  }
+
+  public void setSplitPointInitialSequence(List<Integer> list) {
+    assert splitPointInitialSequence.isEmpty();
+    splitPointInitialSequence = new ArrayList<Integer>(list);
   }
 
   /**
-   * If <code>method</code> is a static impl method, returns the instance
-   * method that <code>method</code> is the implementation of. Otherwise,
-   * returns <code>null</code>.
+   * If <code>method</code> is a static impl method, returns the instance method
+   * that <code>method</code> is the implementation of. Otherwise, returns
+   * <code>null</code>.
    */
   public JMethod staticImplFor(JMethod method) {
     return staticToInstanceMap.get(method);

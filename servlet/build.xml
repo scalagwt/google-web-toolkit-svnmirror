@@ -9,20 +9,6 @@
 
   <target name="build" description="Packages this project into a jar">
     <mkdir dir="${gwt.build.lib}" />
-
-    <!-- build gwt-crawl.jar - don't need to do this here, because user is built before and does it -->
-<!--    <mkdir dir="${gwt.build.lib}/crawldeps" /> -->
-    <!-- unjar each jar, rejar into one jar -->
-<!--    <unzip dest="${gwt.build.lib}/crawldeps">
-      <patternset>
-        <include name="**/*.class"/>
-	<exclude name="META-INF/**"/>
-      </patternset>
-      <zipfileset dir="${gwt.tools}/crawl" includes="*.jar"/>
-    </unzip> -->
-
-
-    <!-- build gwt-servlet.jar -->
     <gwt.jar>
       <fileset dir="${gwt.user.bin}">
         <exclude name="**/rebind/**" />
@@ -33,67 +19,11 @@
         <exclude name="com/google/gwt/junit/remote/**" />
         <exclude name="com/google/gwt/junit/server/**" />
         <exclude name="com/google/gwt/benchmarks/*" />
-      </fileset> 
-<!--      <fileset dir="${gwt.build.lib}/crawldeps" includes="**/*.class"/> -->
+      </fileset>
     </gwt.jar>
-
-
-    <!-- apply jarjar replacement rules where necessary, rejar -->
- <!--   <jarjar destfile="${gwt.build.lib}/gwt-crawl.jar">
-      <patternset>
-	<exclude name="META-INF/**"/>
-      </patternset>
-      <fileset dir="${gwt.build.lib}/crawldeps"/> 
-      <rule pattern="com.**" result="com.google.gwt.crawl.@1.@2" />
-      <rule pattern="net.**" result="com.google.gwt.crawl.@1.@2" />
-      <rule pattern="org.**" result="com.google.gwt.crawl.@1.@2" />
-      <rule pattern="java_cup.**" result="com.google.gwt.crawl.@1.@2" />
-      <rule pattern="javax.**" result="com.google.gwt.crawl.@1.@2" />
-    </jarjar> -->
-
-<!-- build gwt-crawl.jar -->
-<!--   <gwt.jar destfile="${gwt.build.lib}/gwt-crawl.jar">
-      <patternset>
-	<exclude name="META-INF/**"/>
-      </patternset>
-      <fileset dir="${gwt.build.lib}/crawldeps"/> 
-    </gwt.jar> -->
-
-
-
   </target>
 
   <target name="clean" description="Cleans this project's intermediate and output files">
     <delete file="${project.lib}" />
   </target>
-
-
-  <target name="crawljar">
-
-
-    <mkdir dir="${gwt.build.lib}/crawldeps" /> 
-    <!-- unjar each jar, rejar into one jar -->
-    <unzip dest="${gwt.build.lib}/crawldeps">
-      <patternset>
-	<exclude name="META-INF/**"/>
-      </patternset>
-      <zipfileset dir="${gwt.tools}/crawl" includes="*.jar"/>
-    </unzip> 
-
-    <jarjar destfile="${gwt.build.lib}/gwt-crawl.jar">
-      <patternset>
-	<exclude name="META-INF/**"/>
-      </patternset>
-      <fileset dir="${gwt.build.lib}/crawldeps"/> 
-      <rule pattern="com.**" result="com.google.gwt.crawl.com.@1" />
-      <rule pattern="net.**" result="com.google.gwt.crawl.net.@1" />
-      <rule pattern="org.**" result="com.google.gwt.crawl.org.@1" />
-      <rule pattern="java_cup.**" result="com.google.gwt.crawl.java_cup.@1" />
-      <rule pattern="javax.**" result="com.google.gwt.crawl.javax.@1" />
-    </jarjar> 
-  </target>
-
 </project>
-
-
-

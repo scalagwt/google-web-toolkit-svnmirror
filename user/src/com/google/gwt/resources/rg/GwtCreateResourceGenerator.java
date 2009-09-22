@@ -22,12 +22,13 @@ import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.JMethod;
 import com.google.gwt.core.ext.typeinfo.JParameterizedType;
 import com.google.gwt.resources.client.GwtCreateResource.ClassType;
+import com.google.gwt.resources.ext.AbstractResourceGenerator;
 import com.google.gwt.resources.ext.ResourceContext;
 
 /**
  * Provides implementations of GwtCreateResource.
  */
-public class GwtCreateResourceGenerator extends AbstractResourceGenerator {
+public final class GwtCreateResourceGenerator extends AbstractResourceGenerator {
 
   @Override
   public String createAssignment(TreeLogger logger, ResourceContext context,

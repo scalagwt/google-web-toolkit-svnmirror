@@ -18,6 +18,8 @@ package com.google.gwt.dom.client;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.junit.DoNotRunWith;
+import com.google.gwt.junit.Platform;
 import com.google.gwt.junit.client.GWTTestCase;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
@@ -73,7 +75,7 @@ public class ElementTest extends GWTTestCase {
    * Test round-trip of the 'disabled' property.
    */
   public void testDisabled() {
-    ButtonElement button = Document.get().createButtonElement();
+    ButtonElement button = Document.get().createPushButtonElement();
     assertFalse(button.isDisabled());
     button.setDisabled(true);
     assertTrue(button.isDisabled());
@@ -198,7 +200,7 @@ public class ElementTest extends GWTTestCase {
         assertEquals(absLeft, elem.getAbsoluteLeft());
         assertEquals(absTop, elem.getAbsoluteTop());
 
-        if (isIE() && !doc.isCSS1Compat()) {
+        if (isIE6or7() && !doc.isCSS1Compat()) {
           // In IE/quirk, the interior decorations are considered part of the
           // width/height, so there's no need to account for them here.
           assertEquals(absLeft + width, elem.getAbsoluteRight());
@@ -216,6 +218,7 @@ public class ElementTest extends GWTTestCase {
   /**
    * scroll[Left|Top], getAbsolute[Left|Top].
    */
+  @DoNotRunWith({Platform.Htmlunit})
   public void testGetAbsolutePositionWhenBodyScrolled() {
     Document doc = Document.get();
     BodyElement body = doc.getBody();
@@ -227,6 +230,11 @@ public class ElementTest extends GWTTestCase {
     div.getStyle().setPosition(Position.ABSOLUTE);
     div.getStyle().setLeft(1000, Unit.PX);
     div.getStyle().setTop(1000, Unit.PX);
+
+    DivElement fixedDiv = doc.createDivElement();
+    body.appendChild(fixedDiv);
+    fixedDiv.setInnerText("foo");
+    fixedDiv.getStyle().setPosition(Position.FIXED);
 
     // Get the absolute position of the element when the body is unscrolled.
     int absLeft = div.getAbsoluteLeft();
@@ -245,6 +253,15 @@ public class ElementTest extends GWTTestCase {
     // getAbsoluteLeft/Top() yet again for FF2.
     assertTrue(Math.abs(absLeft - div.getAbsoluteLeft()) <= 1);
     assertTrue(Math.abs(absTop - div.getAbsoluteTop()) <= 1);
+
+    // Ensure that the 'position:fixed' div's absolute position includes the
+    // body's scroll position.
+    //
+    // Don't do this on IE6/7 or old Gecko, which don't support position:fixed.
+    if (!isIE6or7() && !isOldGecko()) {
+      assertTrue(fixedDiv.getAbsoluteLeft() >= body.getScrollLeft());
+      assertTrue(fixedDiv.getAbsoluteTop() >= body.getScrollTop());
+    }
   }
 
   /**
@@ -358,6 +375,7 @@ public class ElementTest extends GWTTestCase {
   /**
    * offset[Left|Top|Width|Height], offsetParent.
    */
+  @DoNotRunWith({Platform.Htmlunit})
   public void testOffsets() {
     DivElement outer = Document.get().createDivElement();
     DivElement middle = Document.get().createDivElement();
@@ -444,6 +462,7 @@ public class ElementTest extends GWTTestCase {
   /**
    * Tests that scrollLeft behaves as expected in RTL mode.
    */
+  @DoNotRunWith({Platform.Htmlunit})
   public void testScrollLeftInRtl() {
     final DivElement outer = Document.get().createDivElement();
     final DivElement inner = Document.get().createDivElement();
@@ -532,6 +551,7 @@ public class ElementTest extends GWTTestCase {
   /**
    * style.
    */
+  @DoNotRunWith({Platform.Htmlunit})
   public void testStyle() {
     DivElement div = Document.get().createDivElement();
 
@@ -545,6 +565,7 @@ public class ElementTest extends GWTTestCase {
   /**
    * Test that styles only allow camelCase.
    */
+  @DoNotRunWith({Platform.Htmlunit})
   public void testStyleCamelCase() {
     DivElement div = Document.get().createDivElement();
 
@@ -581,8 +602,34 @@ public class ElementTest extends GWTTestCase {
     return {};
   }-*/;
 
-  private native boolean isIE() /*-{
+  // Stolen from UserAgent.gwt.xml.
+  private native boolean isIE6or7() /*-{
     var ua = navigator.userAgent.toLowerCase();
-    return ua.indexOf("msie") != -1;
+    if (ua.indexOf("msie") != -1) {
+      if (document.documentMode >= 8) {
+        return false;
+      }
+      return true;
+    }
+    return false;
+  }-*/;
+
+  // Stolen from UserAgent.gwt.xml.
+  private native boolean isOldGecko() /*-{
+    var makeVersion = function(result) {
+      return (parseInt(result[1]) * 1000) + parseInt(result[2]);
+    };
+
+    var ua = navigator.userAgent.toLowerCase();
+    if (ua.indexOf("gecko") != -1) {
+      var result = /rv:([0-9]+)\.([0-9]+)/.exec(ua);
+      if (result && result.length == 3) {
+        if (makeVersion(result) >= 1008) {
+          return false;
+        }
+      }
+      return true;
+    }
+    return false;
   }-*/;
 }

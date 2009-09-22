@@ -15,6 +15,7 @@
  */
 package com.google.gwt.dev.jjs.impl;
 
+import com.google.gwt.core.client.impl.ArtificialRescue;
 import com.google.gwt.dev.jjs.HasSourceInfo;
 import com.google.gwt.dev.jjs.InternalCompilerException;
 import com.google.gwt.dev.jjs.JJSOptions;
@@ -32,7 +33,6 @@ import com.google.gwt.dev.jjs.ast.JBreakStatement;
 import com.google.gwt.dev.jjs.ast.JCaseStatement;
 import com.google.gwt.dev.jjs.ast.JCastOperation;
 import com.google.gwt.dev.jjs.ast.JCharLiteral;
-import com.google.gwt.dev.jjs.ast.JClassLiteral;
 import com.google.gwt.dev.jjs.ast.JClassType;
 import com.google.gwt.dev.jjs.ast.JConditional;
 import com.google.gwt.dev.jjs.ast.JContinueStatement;
@@ -94,14 +94,17 @@ import com.google.gwt.dev.js.ast.JsExpression;
 import com.google.gwt.dev.js.ast.JsModVisitor;
 import com.google.gwt.dev.js.ast.JsNameRef;
 import com.google.gwt.dev.js.ast.JsProgram;
+import com.google.gwt.dev.util.Empty;
 import com.google.gwt.dev.util.JsniRef;
 
+import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.CompilationResult;
 import org.eclipse.jdt.internal.compiler.ast.AND_AND_Expression;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.AllocationExpression;
+import org.eclipse.jdt.internal.compiler.ast.Annotation;
 import org.eclipse.jdt.internal.compiler.ast.ArrayAllocationExpression;
 import org.eclipse.jdt.internal.compiler.ast.ArrayInitializer;
 import org.eclipse.jdt.internal.compiler.ast.ArrayReference;
@@ -132,6 +135,7 @@ import org.eclipse.jdt.internal.compiler.ast.Initializer;
 import org.eclipse.jdt.internal.compiler.ast.InstanceOfExpression;
 import org.eclipse.jdt.internal.compiler.ast.LabeledStatement;
 import org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.MemberValuePair;
 import org.eclipse.jdt.internal.compiler.ast.MessageSend;
 import org.eclipse.jdt.internal.compiler.ast.NullLiteral;
 import org.eclipse.jdt.internal.compiler.ast.OR_OR_Expression;
@@ -142,8 +146,10 @@ import org.eclipse.jdt.internal.compiler.ast.QualifiedNameReference;
 import org.eclipse.jdt.internal.compiler.ast.QualifiedSuperReference;
 import org.eclipse.jdt.internal.compiler.ast.QualifiedThisReference;
 import org.eclipse.jdt.internal.compiler.ast.ReturnStatement;
+import org.eclipse.jdt.internal.compiler.ast.SingleMemberAnnotation;
 import org.eclipse.jdt.internal.compiler.ast.SingleNameReference;
 import org.eclipse.jdt.internal.compiler.ast.Statement;
+import org.eclipse.jdt.internal.compiler.ast.StringLiteral;
 import org.eclipse.jdt.internal.compiler.ast.SuperReference;
 import org.eclipse.jdt.internal.compiler.ast.SwitchStatement;
 import org.eclipse.jdt.internal.compiler.ast.SynchronizedStatement;
@@ -193,8 +199,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
-import java.util.TreeSet;
 
 /**
  * This is the big kahuna where most of the nitty gritty of creating our AST
@@ -474,6 +478,8 @@ public class GenerateJavaAST {
           processEnumType((JEnumType) currentClass);
         }
 
+        processArtificialRescues(x);
+
         currentClassScope = null;
         currentClass = null;
         currentSeparatorPositions = null;
@@ -731,15 +737,7 @@ public class GenerateJavaAST {
         }
 
         // user code (finally!)
-        if (x.statements != null) {
-          for (int i = 0, n = x.statements.length; i < n; ++i) {
-            Statement origStmt = x.statements[i];
-            JStatement jstmt = dispProcessStatement(origStmt);
-            if (jstmt != null) {
-              block.addStmt(jstmt);
-            }
-          }
-        }
+        block.addStmts(processStatements(x.statements));
 
         currentMethodScope = null;
         currentMethod = null;
@@ -909,7 +907,11 @@ public class GenerateJavaAST {
           op = JBinaryOperator.SHRU;
           break;
         case BinaryExpression.PLUS:
-          op = JBinaryOperator.ADD;
+          if (typeMap.get(x.resolvedType) == program.getTypeJavaLangString()) {
+            op = JBinaryOperator.CONCAT;
+          } else {
+            op = JBinaryOperator.ADD;
+          }
           break;
         case BinaryExpression.MINUS:
           op = JBinaryOperator.SUB;
@@ -976,7 +978,11 @@ public class GenerateJavaAST {
 
       switch (x.operator) {
         case CompoundAssignment.PLUS:
-          op = JBinaryOperator.ASG_ADD;
+          if (typeMap.get(x.resolvedType) == program.getTypeJavaLangString()) {
+            op = JBinaryOperator.ASG_CONCAT;
+          } else {
+            op = JBinaryOperator.ASG_ADD;
+          }
           break;
         case CompoundAssignment.MINUS:
           op = JBinaryOperator.ASG_SUB;
@@ -1476,14 +1482,8 @@ public class GenerateJavaAST {
         currentMethodBody = (JMethodBody) method.getBody();
         currentMethodScope = x.scope;
 
-        if (x.statements != null) {
-          for (int i = 0, n = x.statements.length; i < n; ++i) {
-            Statement origStmt = x.statements[i];
-            JStatement jstmt = dispProcessStatement(origStmt);
-            if (jstmt != null) {
-              currentMethodBody.getBlock().addStmt(jstmt);
-            }
-          }
+        if (currentMethodBody != null) {
+          currentMethodBody.getBlock().addStmts(processStatements(x.statements));
         }
         currentMethodScope = null;
         currentMethodBody = null;
@@ -1513,14 +1513,7 @@ public class GenerateJavaAST {
 
       SourceInfo info = makeSourceInfo(x);
       JBlock block = new JBlock(info);
-      if (x.statements != null) {
-        for (int i = 0, n = x.statements.length; i < n; ++i) {
-          JStatement jstmt = dispProcessStatement(x.statements[i]);
-          if (jstmt != null) {
-            block.addStmt(jstmt);
-          }
-        }
-      }
+      block.addStmts(processStatements(x.statements));
       return block;
     }
 
@@ -1770,7 +1763,15 @@ public class GenerateJavaAST {
             program.getIndexedMethod("Enum.ordinal"));
       }
       JBlock block = new JBlock(info);
-      block.addStmts(processStatements(x.statements));
+      // Don't use processStatements here, because it stops at control breaks
+      if (x.statements != null) {
+        for (Statement stmt : x.statements) {
+          JStatement jstmt = dispProcessStatement(stmt);
+          if (jstmt != null) {
+            block.addStmt(jstmt);
+          }
+        }
+      }
       return new JSwitchStatement(info, expression, block);
     }
 
@@ -1827,13 +1828,22 @@ public class GenerateJavaAST {
     List<JStatement> processStatements(Statement[] statements) {
       List<JStatement> jstatements = new ArrayList<JStatement>();
       if (statements != null) {
-        for (int i = 0, n = statements.length; i < n; ++i) {
-          JStatement jstmt = dispProcessStatement(statements[i]);
+        for (Statement stmt : statements) {
+          JStatement jstmt = dispProcessStatement(stmt);
           if (jstmt != null) {
             jstatements.add(jstmt);
+            if (jstmt.unconditionalControlBreak()) {
+              /*
+               * Stop processing statements, because the remaining ones are
+               * unreachable. The JDT compiler might not have fully fleshed out
+               * the unreachable statements.
+               */
+              break;
+            }
           }
         }
       }
+
       return jstatements;
     }
 
@@ -2436,6 +2446,122 @@ public class GenerateJavaAST {
       return variable;
     }
 
+    private void processArtificialRescue(Annotation rescue) {
+      assert rescue != null;
+
+      JReferenceType classType = null;
+      String[] fields = Empty.STRINGS;
+      boolean instantiable = false;
+      String[] methods = Empty.STRINGS;
+      String typeName = null;
+
+      for (MemberValuePair pair : rescue.memberValuePairs()) {
+        String name = String.valueOf(pair.name);
+        Expression value = pair.value;
+
+        if ("className".equals(name)) {
+          typeName = value.constant.stringValue();
+
+          // Invalid references should be caught in ArtificialRescueChecker
+          classType = (JReferenceType) program.getTypeFromJsniRef(typeName);
+
+        } else if ("fields".equals(name)) {
+          if (value instanceof StringLiteral) {
+            fields = new String[] {value.constant.stringValue()};
+          } else if (value instanceof ArrayInitializer) {
+            ArrayInitializer init = (ArrayInitializer) value;
+            fields = new String[init.expressions == null ? 0
+                : init.expressions.length];
+            for (int i = 0, j = fields.length; i < j; i++) {
+              fields[i] = init.expressions[i].constant.stringValue();
+            }
+          }
+
+        } else if ("instantiable".equals(name)) {
+          instantiable = value.constant.booleanValue();
+
+        } else if ("methods".equals(name)) {
+          if (value instanceof StringLiteral) {
+            methods = new String[] {value.constant.stringValue()};
+          } else if (value instanceof ArrayInitializer) {
+            ArrayInitializer init = (ArrayInitializer) value;
+            methods = new String[init.expressions == null ? 0
+                : init.expressions.length];
+            for (int i = 0, j = methods.length; i < j; i++) {
+              methods[i] = init.expressions[i].constant.stringValue();
+            }
+          }
+        } else {
+          throw new InternalCompilerException(
+              "Unknown Rescue annotation member " + name);
+        }
+      }
+
+      assert classType != null : "classType " + typeName;
+      assert fields != null : "fields";
+      assert methods != null : "methods";
+
+      if (instantiable) {
+        currentClass.addArtificialRescue(classType);
+
+        // Make sure that a class literal for the type has been allocated
+        program.getLiteralClass(classType);
+      }
+
+      if (classType instanceof JDeclaredType) {
+        List<String> toRescue = new ArrayList<String>();
+        Collections.addAll(toRescue, fields);
+        Collections.addAll(toRescue, methods);
+
+        for (String name : toRescue) {
+          JsniRef ref = JsniRef.parse("@" + classType.getName() + "::" + name);
+          final String[] errors = {null};
+          HasEnclosingType node = JsniRefLookup.findJsniRefTarget(ref, program,
+              new JsniRefLookup.ErrorReporter() {
+                public void reportError(String error) {
+                  errors[0] = error;
+                }
+              });
+          if (errors[0] != null) {
+            // Should have been caught by ArtificialRescueChecker
+            throw new InternalCompilerException(
+                "Unable to artificially rescue " + name + ": " + errors[0]);
+          }
+
+          currentClass.addArtificialRescue((JNode) node);
+        }
+      }
+    }
+
+    private void processArtificialRescues(TypeDeclaration x) {
+      if (x.annotations == null) {
+        return;
+      }
+
+      for (Annotation a : x.annotations) {
+        if (!ArtificialRescue.class.getName().equals(
+            CharOperation.toString(((ReferenceBinding) a.resolvedType).compoundName))) {
+          continue;
+        }
+
+        Expression value = ((SingleMemberAnnotation) a).memberValue;
+        assert value != null;
+        if (value instanceof ArrayInitializer) {
+          for (Expression e : ((ArrayInitializer) value).expressions) {
+            processArtificialRescue((Annotation) e);
+          }
+        } else if (value instanceof Annotation) {
+          processArtificialRescue((Annotation) value);
+        } else {
+          throw new InternalCompilerException(
+              "Unable to process annotation with value of type "
+                  + value.getClass().getName());
+        }
+
+        return;
+      }
+    }
+
     /**
      * Helper for creating all JBinaryOperation. Several different JDT nodes can
      * result in binary operations: AND_AND_Expression, Assignment,
@@ -2680,7 +2806,8 @@ public class GenerateJavaAST {
         }
       }
 
-      private HasEnclosingType parseJsniRef(SourceInfo info, String ident) {
+      private HasEnclosingType findJsniRefTarget(final SourceInfo info,
+          String ident) {
         JsniRef parsed = JsniRef.parse(ident);
         if (parsed == null) {
           reportJsniError(info, methodDecl,
@@ -2688,109 +2815,14 @@ public class GenerateJavaAST {
           return null;
         }
 
-        String className = parsed.className();
-        JType type = null;
-        if (!className.equals("null")) {
-          type = program.getTypeFromJsniRef(className);
-          if (type == null) {
-            reportJsniError(info, methodDecl,
-                "Unresolvable native reference to type '" + className + "'");
-            return null;
-          }
-        }
+        JProgram prog = program;
 
-        if (!parsed.isMethod()) {
-          // look for a field
-          String fieldName = parsed.memberName();
-          if (type == null) {
-            if (fieldName.equals("nullField")) {
-              return program.getNullField();
-            }
-
-          } else if (fieldName.equals("class")) {
-            JClassLiteral lit = program.getLiteralClass(type);
-            return lit.getField();
-
-          } else if (type instanceof JPrimitiveType) {
-            reportJsniError(info, methodDecl,
-                "May not refer to fields on primitive types");
-            return null;
-
-          } else if (type instanceof JArrayType) {
-            reportJsniError(info, methodDecl,
-                "May not refer to fields on array types");
-            return null;
-
-          } else {
-            for (JField field : ((JDeclaredType) type).getFields()) {
-              if (field.getName().equals(fieldName)) {
-                return field;
+        return JsniRefLookup.findJsniRefTarget(parsed, prog,
+            new JsniRefLookup.ErrorReporter() {
+              public void reportError(String error) {
+                reportJsniError(info, methodDecl, error);
               }
-            }
-          }
-
-          reportJsniError(info, methodDecl,
-              "Unresolvable native reference to field '" + fieldName
-                  + "' in type '" + className + "'");
-          return null;
-
-        } else if (type instanceof JPrimitiveType) {
-          reportJsniError(info, methodDecl,
-              "May not refer to methods on primitive types");
-          return null;
-
-        } else {
-          // look for a method
-          TreeSet<String> almostMatches = new TreeSet<String>();
-          String methodName = parsed.memberName();
-          String jsniSig = parsed.memberSignature();
-          if (type == null) {
-            if (jsniSig.equals("nullMethod()")) {
-              return program.getNullMethod();
-            }
-          } else {
-            Queue<JDeclaredType> workList = new LinkedList<JDeclaredType>();
-            workList.add((JDeclaredType) type);
-            while (!workList.isEmpty()) {
-              JDeclaredType cur = workList.poll();
-              for (JMethod method : cur.getMethods()) {
-                if (method.getName().equals(methodName)) {
-                  String sig = JProgram.getJsniSig(method);
-                  if (sig.equals(jsniSig)) {
-                    return method;
-                  } else if (sig.startsWith(jsniSig) && jsniSig.endsWith(")")) {
-                    return method;
-                  } else {
-                    almostMatches.add(sig);
-                  }
-                }
-              }
-              if (cur.getSuperClass() != null) {
-                workList.add(cur.getSuperClass());
-              }
-              workList.addAll(cur.getImplements());
-            }
-          }
-
-          if (almostMatches.isEmpty()) {
-            reportJsniError(info, methodDecl,
-                "Unresolvable native reference to method '" + methodName
-                    + "' in type '" + className + "'");
-            return null;
-          } else {
-            StringBuilder suggestList = new StringBuilder();
-            String comma = "";
-            for (String almost : almostMatches) {
-              suggestList.append(comma + "'" + almost + "'");
-              comma = ", ";
-            }
-            reportJsniError(info, methodDecl,
-                "Unresolvable native reference to method '" + methodName
-                    + "' in type '" + className + "' (did you mean "
-                    + suggestList.toString() + "?)");
-            return null;
-          }
-        }
+            });
       }
 
       private void processField(JsNameRef nameRef, SourceInfo info,
@@ -2887,7 +2919,7 @@ public class GenerateJavaAST {
         String ident = nameRef.getIdent();
         HasEnclosingType node = program.jsniMap.get(ident);
         if (node == null) {
-          node = parseJsniRef(info, ident);
+          node = findJsniRefTarget(info, ident);
           if (node == null) {
             return; // already reported error
           }
@@ -3004,5 +3036,4 @@ public class GenerateJavaAST {
     }
     return false;
   }
-
 }

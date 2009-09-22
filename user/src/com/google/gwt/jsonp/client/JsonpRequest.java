@@ -52,9 +52,9 @@ public class JsonpRequest<T> {
     return $wnd[name] = new Object();
   }-*/;
   
-  private static native Node getDocumentElement() /*-{
-    return $doc.documentElement;
-  }-*/;
+  private static Node getHeadElement() {
+    return Document.get().getElementsByTagName("head").getItem(0);
+  }
   
   private static String nextCallbackId() {
     return "I" + (callbackCounter++);
@@ -67,7 +67,7 @@ public class JsonpRequest<T> {
   private final AsyncCallback<T> callback;
 
   /**
-   * Whether the result is expected to be an integer or not
+   * Whether the result is expected to be an integer or not.
    */
   @SuppressWarnings("unused") // used by JSNI
   private final boolean expectInteger;
@@ -142,7 +142,6 @@ public class JsonpRequest<T> {
     script.setType("text/javascript");
     script.setId(callbackId);
     script.setSrc(uri.toString());
-    getDocumentElement().getFirstChild().appendChild(script);
     timer = new Timer() {
       @Override
       public void run() {
@@ -150,6 +149,7 @@ public class JsonpRequest<T> {
       }
     };
     timer.schedule(timeout);
+    getHeadElement().appendChild(script);
   }
 
   @SuppressWarnings("unused") // used by JSNI
@@ -225,7 +225,7 @@ public class JsonpRequest<T> {
       public void execute() {
         unregisterCallbacks(CALLBACKS);
         Node script = Document.get().getElementById(callbackId);
-        getDocumentElement().getFirstChild().removeChild(script);
+        getHeadElement().removeChild(script);
       }
     });
   }

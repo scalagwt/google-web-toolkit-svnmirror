@@ -1,4 +1,10 @@
 <project name="common">
+  <!-- it's okay for this not to exist, but it gives a place to store
+       "your" property settings, if any, persistently.  For example, you
+       might use it to set gwt.junit.testcase.includes to a narrower subset
+       of test cases to exercise. -->
+  <property file="local.ant.properties" />
+
   <!-- gwt.build.iscasesensitivefs is true if the filesystem of the
     build machine is case-sensitive, false otherwise.  Update with
     new lines for any supported platforms with case-insensitive
@@ -43,6 +49,7 @@
   <property name="project.jni" location="${gwt.build}/${project.tail}" />
   <property name="javac.out" location="${project.build}/bin" />
   <property name="javac.junit.out" location="${project.build}/bin-test" />
+  <property name="javac.emma.out" location="${project.build}/bin-emma" />
   <property name="javac.debug" value="true" />
   <property name="javac.debuglevel" value="lines,vars,source" />
   <property name="javac.encoding" value="utf-8" />
@@ -50,6 +57,8 @@
   <property name="javac.target" value="1.5" />
   <property name="javac.nowarn" value="true" />
   <property name="junit.out" location="${project.build}/test" />
+  <property name="emma.dir" value="${gwt.tools.redist}/emma" />
+  <property name="emma.filter.exclude" value="" />
   
   <!-- Sanity check -->
   <available file="${gwt.tools}" type="dir" property="gwt.tools.exists" />
@@ -113,17 +122,20 @@
     </not>
   </condition>
 
+  <!-- Shared class paths -->
+  <path id="project.classpath.class">
+    <pathelement location="${javac.out}" />
+  </path>
+  <path id="project.classpath.src">
+    <pathelement location="${gwt.root}/${project.tail}/src" />
+  </path>
+
   <!-- Pulls in tasks defined in ant-contrib, i.e. foreach -->
   <taskdef resource="net/sf/antcontrib/antlib.xml">
     <classpath>
       <pathelement location="${gwt.tools.antlib}/ant-contrib-1.0b3.jar" />
     </classpath>
   </taskdef>
-
-  <!-- jarjar is used to re-package HtmlUnit -->
-  <taskdef name="jarjar"   
-	classname="com.tonicsystems.jarjar.JarJarTask" classpath="${gwt.tools.lib}/tonicsystems/jarjar-1.0rc8.jar"/>  
-
 
   <!-- Global Custom Tasks -->
   <presetdef name="gwt.ant">
@@ -132,6 +144,8 @@
         <propertyref name="gwt.version" />
         <propertyref name="gwt.junit.port" />
         <propertyref name="gwt.remote.browsers" />
+        <propertyref name="emma.enabled" />
+        <propertyref name="emma.compiled" />
       </propertyset>
     </ant>
   </presetdef>
@@ -140,16 +154,31 @@
     <javac srcdir="src" destdir="${javac.out}" debug="${javac.debug}" debuglevel="${javac.debuglevel}" source="${javac.source}" target="${javac.target}" nowarn="${javac.nowarn}" encoding="${javac.encoding}" />
   </presetdef>
 
-  <presetdef name="gwt.jar">
-    <jar destfile="${project.lib}" update="true" duplicate="preserve" index="true" />
-  </presetdef>
+  <macrodef name="gwt.jar">
+    <attribute name="destfile" default="${project.lib}"/>
+    <attribute name="duplicate" default="fail"/>
+    <attribute name="update" default="true"/>
+    <element name="jarcontents" implicit="true"/>
+    <sequential>
+      <taskdef name="jar.bydate"
+          classname="com.google.gwt.ant.taskdefs.LatestTimeJar"
+          classpath="${gwt.build.lib}/ant-gwt.jar" />
+
+      <jar.bydate destfile="@{destfile}" duplicate="@{duplicate}" filesonly="false"
+          index="true" update="@{update}">
+        <jarcontents/>
+      </jar.bydate>
+    </sequential>
+  </macrodef>
 
   <macrodef name="gwt.junit">
     <!-- TODO: make this more generic / refactor so it can be used from dev/core -->
     <attribute name="test.args" default="" />
     <attribute name="test.out" default="" />
     <attribute name="test.reports" default="@{test.out}/reports" />
+    <attribute name="test.emma.coverage" default="@{test.out}/emma-coverage" />
     <attribute name="test.cases" default="" />
+    <attribute name="haltonfailure" default="true" />
     <element name="extraclasspaths" optional="true" />
     <sequential>
       <taskdef name="junit" classname="org.apache.tools.ant.taskdefs.optional.junit.JUnitTask">
@@ -163,19 +192,32 @@
       <echo message="Writing test results to @{test.reports} for @{test.cases}" />
       <mkdir dir="@{test.reports}" />
 
+      <antcall target="-create.emma.coverage">
+    	  <param name="test.emma.coverage" value="@{test.emma.coverage}"/>
+      </antcall>
+      <condition property="emma.lib" value="${emma.dir}/emma-2.0.5312-patched.jar" else="">
+        <isset property="emma.enabled" />
+      </condition>
+
       <echo message="${javac.out} ${javac.junit.out}" />
-      <junit dir="@{test.out}" fork="yes" printsummary="yes" failureproperty="junit.failure" >
+      <junit dir="@{test.out}" fork="yes" printsummary="yes"
+             failureproperty="junit.failure" tempdir="@{test.out}">
         <jvmarg line="${junit.platform.args}" />
         <jvmarg line="-Xmx768m" />
+        <jvmarg value="-Demma.coverage.out.file=@{test.emma.coverage}/coverage.emma" />
+        <jvmarg value="-Demma.coverage.out.merge=true" />
         <sysproperty key="gwt.args" value="${junit.notheadless.arg} @{test.args}" />
         <sysproperty key="java.awt.headless" value="${junit.headless}" />
         <sysproperty key="gwt.devjar" value="${gwt.dev.staging.jar}" />
         <classpath>
-          <pathelement location="${gwt.root}/${project.tail}/src" />
+          <path refid="project.classpath.src" />
           <pathelement location="${gwt.root}/${project.tail}/super" />
           <pathelement location="${gwt.root}/${project.tail}/test" />
           <pathelement location="${javac.junit.out}" />
-          <pathelement location="${javac.out}" />
+          <!-- javac.emma.out is empty unless emma is enabled. -->
+          <pathelement location="${javac.emma.out}" />
+          <path refid="project.classpath.class" />
+          <pathelement location="${emma.lib}" />
           <pathelement location="${gwt.dev.staging.jar}" />
           <pathelement location="${gwt.tools.lib}/junit/junit-3.8.1.jar" />
           <pathelement location="${gwt.tools.lib}/selenium/selenium-java-client-driver.jar" />
@@ -191,7 +233,26 @@
           <fileset refid="@{test.cases}" />
         </batchtest>
       </junit>
-      <fail message="One or more junit tests failed" if="junit.failure" />
+
+      <emma enabled="${emma.enabled}">
+        <report sourcepath="${project.classpath.src}">
+          <fileset file="${javac.emma.out}/metadata.emma" />
+          <fileset dir="@{test.emma.coverage}">
+            <include name="*.emma" />
+          </fileset>
+          <txt outfile="@{test.emma.coverage}/coverage.txt" />
+          <html outfile="@{test.emma.coverage}/coverage.html" />
+          <xml outfile="@{test.emma.coverage}/coverage.xml" />
+        </report>
+      </emma>
+
+      <condition property="junit.stop.build" value="true"> 
+        <and>
+          <istrue value="@{haltonfailure}"/>
+          <isset property="${junit.failure}"/>
+        </and>
+      </condition>
+      <fail message="One or more junit tests failed" if="junit.stop.build" />
     </sequential>
   </macrodef>
 
@@ -257,15 +318,17 @@
   </macrodef>
 
   <macrodef name="gwt.checkstyle">
+    <attribute name="outputdirectory" default="${project.build}"/>
     <element name="sourcepath" implicit="yes" optional="true" />
     <sequential>
       <taskdef resource="checkstyletask.properties" classpath="${gwt.tools.antlib}/checkstyle-all-4.2.jar;${gwt.build.lib}/gwt-customchecks.jar" />
-      <checkstyle config="${gwt.root}/eclipse/settings/code-style/gwt-checkstyle.xml" maxErrors="0">
-      	<formatter type="xml" toFile="${project.build}/checkstyle_log.xml"/>
+      <mkdir dir="@{outputdirectory}"/>
+      <checkstyle config="${gwt.root}/eclipse/settings/code-style/gwt-checkstyle.xml" maxErrors="0" failOnViolation="false" failureProperty="gwt.checkstyle.failed">
+      	<formatter type="xml" toFile="@{outputdirectory}/checkstyle_log.xml"/>
         <property key="checkstyle.header.file" file="${gwt.root}/eclipse/settings/code-style/google.header" />
         <sourcepath />
       </checkstyle>
-     <echo message="Checkstyle messages are reported in checkstyle_log.xml located at ${project.build}" />
+      <fail message="Checkstyle errors exist, and are reported in checkstyle_log.xml located at @{outputdirectory}" if="gwt.checkstyle.failed" />
     </sequential>
   </macrodef>
 
@@ -286,15 +349,48 @@
     </sequential>
   </macrodef>
 
+  <!-- Targets for emma support.  To run tests with emma enabled, use 
+       ant <test-target> -Demma.enabled=true -->
+  <path id="emma.taskdef.lib">
+    <pathelement location="${emma.dir}/emma-2.0.5312-patched.jar" />
+    <pathelement location="${emma.dir}/emma_ant-2.0.5312.jar" />
+  </path>
+
+  <taskdef resource="emma_ant.properties" classpathref="emma.taskdef.lib" />
+
+  <target name="compile.emma" description="Instruments emma classes" unless="emma.compiled">
+    <delete dir="${javac.emma.out}" />
+    <property name="emma.compiled" value="true" />
+    <antcall target="-compile.emma.if.enabled" />
+  </target>
+
+  <target name="-compile.emma.if.enabled" description="Instruments emma classes" if="emma.enabled">
+    <mkdir dir="${javac.emma.out}" />
+    <path id="emma.classpath">
+      <pathelement location="${javac.out}" />
+    </path>
+    <emma enabled="${emma.enabled}" >
+      <instr instrpathref="emma.classpath" destdir="${javac.emma.out}" metadatafile="${javac.emma.out}/metadata.emma" merge="false">
+        <filter includes="com.google.*" />
+        <filter excludes="${emma.filter.exclude}" />
+      </instr>
+    </emma>
+  </target>
+
+  <target name="-create.emma.coverage" description="Create the emma coverage directory" if="emma.enabled">
+    <delete dir="${test.emma.coverage}" />
+    <mkdir dir="${test.emma.coverage}" />
+  </target>
+
   <!-- Default implementations of the required targets; projects should
   override the ones that matter -->
   <target name="all" depends="verify" />
-  <target name="verify" depends="checkstyle, test" description="Verify this project" />
-  <target name="checkstyle" description="Static analysis of source" />
-  <target name="test" depends="build" description="Test this project" />
-  <target name="build" description="Build and (maybe) package this project" />
+  <target name="verify" depends="checkstyle, test" description="Runs tests and checkstyle static analysis" />
+  <target name="checkstyle" />
+  <target name="test" depends="build" />
+  <target name="build" />
 
-  <target name="clean" description="Cleans this project's intermediate and output files">
+  <target name="clean">
     <delete dir="${project.build}" />
   </target>
 

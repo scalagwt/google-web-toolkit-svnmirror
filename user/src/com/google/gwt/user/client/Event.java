@@ -72,13 +72,27 @@ public class Event extends NativeEvent {
      */
     private static boolean fire(HandlerManager handlers, NativeEvent nativeEvent) {
       if (TYPE != null && handlers != null && handlers.isEventHandled(TYPE)) {
+        // Cache the current values in the singleton in case we are in the
+        // middle of handling another event.
+        boolean lastIsCanceled = singleton.isCanceled;
+        boolean lastIsConsumed = singleton.isConsumed;
+        boolean lastIsFirstHandler = singleton.isFirstHandler;
+        NativeEvent lastNativeEvent = singleton.nativeEvent;
+
         // Revive the event
         singleton.revive();
         singleton.setNativeEvent(nativeEvent);
 
         // Fire the event
         handlers.fireEvent(singleton);
-        return !(singleton.isCanceled() && !singleton.isConsumed());
+        boolean ret = !(singleton.isCanceled() && !singleton.isConsumed());
+
+        // Restore the state of the singleton.
+        singleton.isCanceled = lastIsCanceled;
+        singleton.isConsumed = lastIsConsumed;
+        singleton.isFirstHandler = lastIsFirstHandler;
+        singleton.nativeEvent = lastNativeEvent;
+        return ret;
       }
       return true;
     }
@@ -300,6 +314,17 @@ public class Event extends NativeEvent {
   public static final int ONMOUSEWHEEL = 0x20000;
 
   /**
+   * Fired when the user pastes text into an input element.
+   * 
+   * <p>
+   * Note: This event is <em>not</em> supported on Firefox 2 and earlier, or
+   * Opera 10 and earlier. Be aware that it will not fire on these browser
+   * versions.
+   * </p>
+   */
+  public static final int ONPASTE = 0x80000;
+
+  /**
    * Fired when a scrollable element's scroll offset changes.
    */
   public static final int ONSCROLL = 0x04000;
@@ -376,6 +401,13 @@ public class Event extends NativeEvent {
    * {@link NativePreviewEvent} that was added is the first to be fired.
    * </p>
    * 
+   * <p>
+   * Please note that nondeterministic behavior will result if more than one GWT
+   * application registers preview handlers. See <a href=
+   * 'http://code.google.com/p/google-web-toolkit/issues/detail?id=3892'>issue
+   * 3892</a> for details.
+   * </p>
+   *
    * @param handler the {@link NativePreviewHandler}
    * @return {@link HandlerRegistration} used to remove this handler
    */

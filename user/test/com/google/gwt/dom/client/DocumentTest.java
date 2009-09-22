@@ -37,7 +37,6 @@ public class DocumentTest extends GWTTestCase {
     assertEquals("blockquote",
         doc.createBlockQuoteElement().getTagName().toLowerCase());
     assertEquals("br", doc.createBRElement().getTagName().toLowerCase());
-    assertEquals("button", doc.createButtonElement().getTagName().toLowerCase());
     assertEquals("caption",
         doc.createCaptionElement().getTagName().toLowerCase());
     assertEquals("col", doc.createColElement().getTagName().toLowerCase());
@@ -91,6 +90,20 @@ public class DocumentTest extends GWTTestCase {
     assertEquals("tr", doc.createTRElement().getTagName().toLowerCase());
     assertEquals("ul", doc.createULElement().getTagName().toLowerCase());
 
+    assertEquals("button",
+        doc.createPushButtonElement().getTagName().toLowerCase());
+    assertEquals("button",
+        doc.createResetButtonElement().getTagName().toLowerCase());
+    assertEquals("button",
+        doc.createSubmitButtonElement().getTagName().toLowerCase());
+
+    assertEquals("button",
+        doc.createPushButtonElement().getType().toLowerCase());
+    assertEquals("reset",
+        doc.createResetButtonElement().getType().toLowerCase());
+    assertEquals("submit",
+        doc.createSubmitButtonElement().getType().toLowerCase());
+
     assertEquals("input",
         doc.createCheckInputElement().getTagName().toLowerCase());
     assertEquals("input",
@@ -106,6 +119,8 @@ public class DocumentTest extends GWTTestCase {
     assertEquals("input",
         doc.createTextInputElement().getTagName().toLowerCase());
 
+    assertEquals("button",
+        doc.createButtonInputElement().getType().toLowerCase());
     assertEquals("checkbox",
         doc.createCheckInputElement().getType().toLowerCase());
     assertEquals("file", doc.createFileInputElement().getType().toLowerCase());
@@ -116,11 +131,14 @@ public class DocumentTest extends GWTTestCase {
         doc.createPasswordInputElement().getType().toLowerCase());
     assertEquals("radio",
         doc.createRadioInputElement("foo").getType().toLowerCase());
+    assertEquals("reset", doc.createResetInputElement().getType().toLowerCase());
+    assertEquals("submit",
+        doc.createSubmitInputElement().getType().toLowerCase());
     assertEquals("text", doc.createTextInputElement().getType().toLowerCase());
   }
 
   /**
-   * getElementById, getElementsByTagName
+   * getElementById, getElementsByTagName.
    */
   public void testGetElements() {
     Document doc = Document.get();
@@ -140,7 +158,7 @@ public class DocumentTest extends GWTTestCase {
   }
 
   /**
-   * domain, referrer, title, url
+   * domain, referrer, title, url.
    */
   public void testProperties() {
     Document doc = Document.get();

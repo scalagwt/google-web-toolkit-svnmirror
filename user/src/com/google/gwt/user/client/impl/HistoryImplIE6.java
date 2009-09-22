@@ -167,7 +167,7 @@ class HistoryImplIE6 extends HistoryImpl {
           // if someone entered or linked to a bad url.
           historyImplRef.@com.google.gwt.user.client.impl.HistoryImplIE6::reloadWindow()();
         }
-  
+
         var historyToken = @com.google.gwt.user.client.impl.HistoryImpl::getToken()();
         if (historyToken && (token != historyToken)) {
           historyImplRef.@com.google.gwt.user.client.impl.HistoryImplIE6::reloadWindow()();

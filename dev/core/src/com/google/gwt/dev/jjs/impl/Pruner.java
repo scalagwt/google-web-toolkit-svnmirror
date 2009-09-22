@@ -15,6 +15,7 @@
  */
 package com.google.gwt.dev.jjs.impl;
 
+import com.google.gwt.dev.jjs.InternalCompilerException;
 import com.google.gwt.dev.jjs.SourceInfo;
 import com.google.gwt.dev.jjs.ast.CanBeStatic;
 import com.google.gwt.dev.jjs.ast.Context;
@@ -143,12 +144,18 @@ public class Pruner {
     @Override
     public void endVisit(JNameOf x, Context ctx) {
       HasName node = x.getNode();
-      JReferenceType isType = node instanceof JReferenceType
-          ? (JReferenceType) node : null;
-      if (isType == null && !referencedNonTypes.contains(node)) {
-        ctx.replaceMe(program.getLiteralNull());
-      } else if (isType != null
-          && !program.typeOracle.isInstantiatedType(isType)) {
+      boolean pruned;
+      if (node instanceof JField) {
+        pruned = isPruned((JField) node);
+      } else if (node instanceof JMethod) {
+        pruned = isPruned((JMethod) node);
+      } else if (node instanceof JReferenceType) {
+        pruned = !program.typeOracle.isInstantiatedType((JReferenceType) node);
+      } else {
+        throw new InternalCompilerException("Unhandled JNameOf node: " + node);
+      }
+
+      if (pruned) {
         ctx.replaceMe(program.getLiteralNull());
       }
     }
@@ -182,12 +189,7 @@ public class Pruner {
         // This must be a static method
         assert method.isStatic();
 
-        JMethodCall newCall = new JMethodCall(x.getSourceInfo(),
-            x.getInstance(), method);
-        if (!x.canBePolymorphic()) {
-          newCall.setCannotBePolymorphic();
-        }
-
+        JMethodCall newCall = new JMethodCall(x, x.getInstance());
         List<JParameter> originalParams = methodToOriginalParamsMap.get(method);
         JMultiExpression currentMulti = null;
         for (int i = 0, c = x.getArgs().size(); i < c; ++i) {

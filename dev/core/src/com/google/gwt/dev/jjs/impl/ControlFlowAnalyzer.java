@@ -33,7 +33,6 @@ import com.google.gwt.dev.jjs.ast.JLocal;
 import com.google.gwt.dev.jjs.ast.JLocalRef;
 import com.google.gwt.dev.jjs.ast.JMethod;
 import com.google.gwt.dev.jjs.ast.JMethodCall;
-import com.google.gwt.dev.jjs.ast.JModVisitor;
 import com.google.gwt.dev.jjs.ast.JNewArray;
 import com.google.gwt.dev.jjs.ast.JNewInstance;
 import com.google.gwt.dev.jjs.ast.JNode;
@@ -74,7 +73,6 @@ public class ControlFlowAnalyzer {
    * See {@link ControlFlowAnalyzer#setDependencyRecorder(DependencyRecorder)}.
    */
   public interface DependencyRecorder {
-
     /**
      * Used to record the dependencies of a specific method.
      */
@@ -130,8 +128,7 @@ public class ControlFlowAnalyzer {
       }
 
       // special string concat handling
-      if ((x.getOp() == JBinaryOperator.ADD || x.getOp() == JBinaryOperator.ASG_ADD)
-          && x.getType() == program.getTypeJavaLangString()) {
+      if ((x.getOp() == JBinaryOperator.CONCAT || x.getOp() == JBinaryOperator.ASG_CONCAT)) {
         rescueByConcat(x.getLhs().getType());
         rescueByConcat(x.getRhs().getType());
       } else if (x.getOp() == JBinaryOperator.ASG) {
@@ -175,21 +172,6 @@ public class ControlFlowAnalyzer {
       JType targetType = x.getCastType();
       if (program.isJavaScriptObject(targetType)) {
         rescue((JReferenceType) targetType, true, true);
-      } else {
-        /*
-         * If there's a cast to a SingleJso interface, rescue the implementing
-         * JSO type. If the JSO type isn't rescued (and there's no other regular
-         * Java type implementing the interface), then the cast operation will
-         * be replaced with a throwCCEUnlessNull() call, since there's no type
-         * left in the type system that implements the interface. If there is an
-         * implementing Java type, then a dynamicCast() will be emitted which
-         * will throw a CCE if it hits a JSO type.
-         */
-        JClassType maybeSingleJso = program.typeOracle.getSingleJsoImpls().get(
-            targetType);
-        if (maybeSingleJso != null) {
-          rescue(maybeSingleJso, true, true);
-        }
       }
 
       return true;
@@ -547,6 +529,19 @@ public class ControlFlowAnalyzer {
 
         if (doVisit) {
           accept(type);
+
+          if (type instanceof JDeclaredType) {
+            for (JNode artificial : ((JDeclaredType) type).getArtificialRescues()) {
+              if (artificial instanceof JReferenceType) {
+                rescue((JReferenceType) artificial, true, true);
+                rescue(program.getLiteralClass((JReferenceType) artificial).getField());
+              } else if (artificial instanceof JVariable) {
+                rescue((JVariable) artificial);
+              } else if (artificial instanceof JMethod) {
+                rescue((JMethod) artificial);
+              }
+            }
+          }
         }
       }
     }
@@ -775,37 +770,9 @@ public class ControlFlowAnalyzer {
     rescuer.rescue(method);
   }
 
-  /**
-   * Trace all code needed by class literal constructor expressions except for
-   * the string literals they include. At the time of writing, these would
-   * include the factory methods for class literals.
-   */
-  public void traverseFromClassLiteralFactories() {
-    class ReplaceStringLiterals extends JModVisitor {
-      @Override
-      public void endVisit(JStringLiteral stringLiteral, Context ctx) {
-        ctx.replaceMe(program.getLiteralNull());
-      }
-    }
-
-    final JModVisitor stringLiteralReplacer = new ReplaceStringLiterals();
-    final CloneExpressionVisitor cloner = new CloneExpressionVisitor(program);
-
-    class ClassLitTraverser extends JVisitor {
-      @Override
-      public void endVisit(JClassLiteral classLiteral, Context ctx) {
-        JExpression initializer = classLiteral.getField().getInitializer();
-        JExpression initializerWithoutStrings = stringLiteralReplacer.accept(cloner.cloneExpression(initializer));
-        rescuer.accept(initializerWithoutStrings);
-      }
-    }
-
-    (new ClassLitTraverser()).accept(program);
-  }
-
   public void traverseFromLeftoversFragmentHasLoaded() {
     if (program.entryMethods.size() > 1) {
-      traverseFrom(program.getIndexedMethod("AsyncFragmentLoader.leftoversFragmentHasLoaded"));
+      traverseFrom(program.getIndexedMethod("AsyncFragmentLoader.browserLoaderLeftoversFragmentHasLoaded"));
     }
   }
 
