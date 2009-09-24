@@ -17,8 +17,12 @@
         <target name="soyc-vis" depends="" description="Compile SOYC dashboard">
                 <gwt.ant dir="soyc-vis" />
         </target>
+
+        <target name="simple-crawler" depends="" description="Compile simple crawler">
+                <gwt.ant dir="simple-crawler" />
+        </target>
      
-  <target name="-do" depends="benchmark-viewer,api-checker,soyc-vis" description="Run all subfolders" /> 
+  <target name="-do" depends="benchmark-viewer,api-checker,soyc-vis,simple-crawler" description="Run all subfolders" /> 
 
   <target name="build" description="Build each subfolder">
     <antcall target="-do">
