@@ -74,6 +74,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TabBar;
@@ -218,7 +219,10 @@ public class Showcase implements EntryPoint {
         // Select the associated TreeItem
         app.getMainMenu().setSelectedItem(item, false);
         app.getMainMenu().ensureSelectedItemVisible();
+        Window.setTitle(item.getText());
 
+        
+        
         // Show the associated ContentWidget
         displayContentWidget(itemWidgets.get(item));
       }
@@ -229,9 +233,10 @@ public class Showcase implements EntryPoint {
     app.addSelectionHandler(new SelectionHandler<TreeItem>() {
       public void onSelection(SelectionEvent<TreeItem> event) {
         TreeItem item = event.getSelectedItem();
+        String historyToken = ((Hyperlink) item.getWidget()).getTargetHistoryToken();
         ContentWidget content = itemWidgets.get(item);
         if (content != null && !content.equals(app.getContent())) {
-          History.newItem(getContentWidgetToken(content));
+          History.newItem(historyToken);
         }
       }
     });
@@ -409,9 +414,11 @@ public class Showcase implements EntryPoint {
    */
   private void setupMainMenuOption(TreeItem parent, ContentWidget content,
       AbstractImagePrototype image) {
+    
     // Create the TreeItem
-    TreeItem option = parent.addItem(image.getHTML() + " " + content.getName());
-
+    Hyperlink hl = new Hyperlink(image.getHTML() + " " + content.getName(),true,getContentWidgetToken(content));
+    TreeItem option = parent.addItem(hl);
+    
     // Map the item to its history token and content widget
     itemWidgets.put(option, content);
     itemTokens.put(getContentWidgetToken(content), option);

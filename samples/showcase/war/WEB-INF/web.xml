@@ -6,4 +6,13 @@
     <welcome-file>Showcase.html</welcome-file>
   </welcome-file-list>
 
+ <!-- Crawling servlet filter -->
+    <filter>
+        <filter-name>Showcase</filter-name>
+        <filter-class>com.google.gwt.sample.showcase.server.CrawlServlet</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>Showcase</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
 </web-app>
