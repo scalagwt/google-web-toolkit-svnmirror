@@ -80,6 +80,12 @@ public class HistoryImpl implements HasValueChangeHandlers<String>,
    * Fires the {@link ValueChangeEvent} to all handlers with the given tokens.
    */
   public void fireHistoryChangedImpl(String newToken) {
+    if ((newToken.length() > 0) && (newToken.startsWith("!"))) {
+      newToken = newToken.substring(1);
+    }
+    if (newToken.compareTo("home") == 0) {
+      newToken = "";
+    }
     ValueChangeEvent.fire(this, newToken);
   }
 

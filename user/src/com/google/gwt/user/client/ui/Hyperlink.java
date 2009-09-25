@@ -189,8 +189,8 @@ public class Hyperlink extends Widget implements HasHTML, SourcesClickEvents,
   public void setTargetHistoryToken(String targetHistoryToken) {
     assert targetHistoryToken != null
       : "targetHistoryToken must not be null, consider using Anchor instead";
-    this.targetHistoryToken = targetHistoryToken;
-    DOM.setElementProperty(anchorElem, "href", "#" + targetHistoryToken);
+    this.targetHistoryToken = "!" + targetHistoryToken;
+    DOM.setElementProperty(anchorElem, "href", "#!" + targetHistoryToken);
   }
 
   public void setText(String text) {
