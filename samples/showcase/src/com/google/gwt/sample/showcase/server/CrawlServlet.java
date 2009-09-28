@@ -21,6 +21,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 
 import javax.servlet.Filter;
@@ -33,48 +34,41 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Servlet that makes this application crawlable
+ * Servlet that makes this application crawlable.
  */
 public final class CrawlServlet implements Filter {
 
-  private static String rewriteQueryString(String queryString) {
+  private static String rewriteQueryString(String queryString)
+      throws UnsupportedEncodingException {
     StringBuilder queryStringSb = new StringBuilder(queryString);
-    int i = queryStringSb.indexOf("&_escaped_fragment_");
+    int i = queryStringSb.indexOf("&_escaped_fragment_=");
+    if (i == -1) {
+      i = queryStringSb.indexOf("?_escaped_fragment_=");
+    }
     if (i != -1) {
-      StringBuilder tmpSb = new StringBuilder(queryStringSb.substring(0, i));
+      StringBuilder tmpSb = new StringBuilder(queryStringSb.substring(0, i - 1));
+      System.out.println("|" + tmpSb + "|");
       tmpSb.append("#!");
-      tmpSb.append(URLDecoder.decode(queryStringSb.substring(i + 20, queryStringSb.length()),"UTF-8"));
+      System.out.println("|" + tmpSb + "|");
+      tmpSb.append(URLDecoder.decode(queryStringSb.substring(i + 20,
+          queryStringSb.length()), "UTF-8"));
+      System.out.println("|" + tmpSb + "|");
       queryStringSb = tmpSb;
     }
-
-    i = queryStringSb.indexOf("_escaped_fragment_");
-    if (i != -1) {
-      StringBuilder tmpSb = new StringBuilder(queryStringSb.substring(0, i));
-      tmpSb.append("#!");
-      tmpSb.append(URLDecoder.decode(queryStringSb.substring(i + 19, queryStringSb.length()), "UTF-8"));
-      queryStringSb = tmpSb;
-    }
-    if (queryStringSb.indexOf("#!") != 0) {
-      queryStringSb.insert(0, '?');
-    }
-    queryString = queryStringSb.toString();
-    
-
-    
-    return queryString;
+    return queryStringSb.toString();
   }
 
   private FilterConfig filterConfig = null;
 
   /**
-   * Destroys the filter configuration
+   * Destroys the filter configuration.
    */
   public void destroy() {
     this.filterConfig = null;
   }
 
   /**
-   * Filters all requests and invokes headless browser if necessary
+   * Filters all requests and invokes headless browser if necessary.
    */
   public void doFilter(ServletRequest request, ServletResponse response,
       FilterChain chain) throws IOException {
@@ -106,8 +100,11 @@ public final class CrawlServlet implements Filter {
       res.setContentType("text/html;charset=UTF-8");
       PrintWriter out = res.getWriter();
       out.println("<hr>");
-      out.println("<center><h3>You are viewing a non-interactive page that is intended for the crawler.  You probably want to see this page: <a href=\""
-          + pageName + "\">" + pageName + "</a></h3></center>");
+      out.println("<center><h3>You are viewing a non-interactive page that is intended for the crawler.  "
+          + "You probably want to see this page: <a href=\""
+          + pageName
+          + "\">"
+          + pageName + "</a></h3></center>");
       out.println("<hr>");
 
       out.println(page.asXml());
@@ -124,10 +121,9 @@ public final class CrawlServlet implements Filter {
   }
 
   /**
-   * Initializes the filter configuration
+   * Initializes the filter configuration.
    */
   public void init(FilterConfig filterConfig) {
     this.filterConfig = filterConfig;
   }
-
 }

@@ -21,6 +21,7 @@ Window->Preferences->Java->Build Path->Classpath Variables
 Create a variable named "GWT_TOOLS" pointing to your "tools" folder.
 Create a variable named "JDK_HOME" pointing to the root of your JDK install
   (for example, C:\Program Files\jdk1.5.0_05 or /usr/lib/j2sdk1.5-sun)
+Create a variable named "GWT_ROOT" pointing to your "trunk" folder.
 
 ---------------- Spelling -----------------
 
