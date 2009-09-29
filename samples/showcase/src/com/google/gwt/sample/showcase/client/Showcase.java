@@ -75,6 +75,7 @@ import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
+import com.google.gwt.user.client.ui.IndexableHyperlink;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TabBar;
@@ -416,7 +417,7 @@ public class Showcase implements EntryPoint {
       AbstractImagePrototype image) {
     
     // Create the TreeItem
-    Hyperlink hl = new Hyperlink(image.getHTML() + " " + content.getName(),true,getContentWidgetToken(content));
+    Hyperlink hl = new IndexableHyperlink(image.getHTML() + " " + content.getName(),true,getContentWidgetToken(content));
     TreeItem option = parent.addItem(hl);
     
     // Map the item to its history token and content widget
