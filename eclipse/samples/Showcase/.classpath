@@ -5,6 +5,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/gwt-user"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/gwt-dev-windows"/>
-	<classpathentry kind="var" path="GWT_ROOT/build/staging/gwt-linux-0.0.0/gwt-servlet.jar"/>
+	<classpathentry kind="var" path="GWT_ROOT/build/staging/gwt-windows-0.0.0/gwt-servlet.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
