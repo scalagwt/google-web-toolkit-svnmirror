@@ -1,0 +1,4 @@
+Created as a straight copy of branches/farewellSwt@6272
+========================
+svn cp https://google-web-toolkit.googlecode.com/svn/branches/farewellSwt \
+  https://google-web-toolkit.googlecode.com/svn/releases/2.0
