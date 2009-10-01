@@ -7,4 +7,5 @@ Copies:
 
 Merges:
 /trunk/@6234:6235 was merged (r6236) into this branch
-/trunk/@6264:6265 was merged (r????) into this branch
+/trunk/@6264:6265 was merged (r6266) into this branch
+/trunk/@6278:6279 was merged (r????) into this branch
