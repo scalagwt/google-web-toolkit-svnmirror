@@ -15,43 +15,55 @@
  */
 package com.google.gwt.user.client.ui;
 
-import com.google.gwt.user.client.Element;
-
 /**
- * Indexable version of Hyperlink class.  
- * This class will produce hyperlinks that contain the special
- * "indexable" token.
- *
+ * Indexable version of Hyperlink class. This class will produce hyperlinks that
+ * contain the special "indexable" token.
  */
 public class IndexableHyperlink extends Hyperlink {
 
+  /**
+   * Creates an empty hyperlink.
+   */
   public IndexableHyperlink() {
-    // TODO Auto-generated constructor stub
+    super();
   }
 
+  /**
+   * Creates an indexable hyperlink with its text and target history token
+   * specified. The target history token will be preceded by a special "!" token
+   * to indicate that this state should be indexed.
+   * 
+   * @param text the hyperlink's text
+   * @param asHTML <code>true</code> to treat the specified text as html
+   * @param targetHistoryToken the history token to which it will link
+   * @see #setTargetHistoryToken
+   */
   public IndexableHyperlink(String text, boolean asHTML,
       String targetHistoryToken) {
-    super(text, asHTML, targetHistoryToken);
-    // TODO Auto-generated constructor stub
+    super(text, asHTML, "!" + targetHistoryToken);
   }
 
+  /**
+   * Creates an indexable hyperlink with its text and target history token
+   * specified. specified. The target history token will be preceded by a
+   * special "!" token to indicate that this state should be indexed.
+   * 
+   * @param text the hyperlink's text
+   * @param targetHistoryToken the history token to which it will link, which
+   *          may not be null (use {@link Anchor} instead if you don't need
+   *          history processing)
+   */
   public IndexableHyperlink(String text, String targetHistoryToken) {
-    super(text, targetHistoryToken);
-    // TODO Auto-generated constructor stub
+    super(text, "!" + targetHistoryToken);
   }
 
-  public IndexableHyperlink(Element elem) {
-    super(elem);
-    // TODO Auto-generated constructor stub
-  }
-  
   /**
    * Sets the history token referenced by this hyperlink. This is the history
    * token that will be passed to {@link History#newItem} when this link is
    * clicked.
    * 
    * @param targetHistoryToken the new history token, which may not be null (use
-   *        {@link Anchor} instead if you don't need history processing)
+   *          {@link Anchor} instead if you don't need history processing)
    */
   @Override
   public void setTargetHistoryToken(String targetHistoryToken) {

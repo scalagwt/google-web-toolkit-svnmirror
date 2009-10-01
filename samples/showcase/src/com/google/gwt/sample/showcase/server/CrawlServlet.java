@@ -38,26 +38,54 @@ import javax.servlet.http.HttpServletResponse;
  */
 public final class CrawlServlet implements Filter {
 
+  /**
+   * Special URL token that gets passed from the crawler to the servlet filter.
+   * This token is used in case there are already existing query parameters.
+   */
+  private static final String ESCAPED_FRAGMENT_FORMAT1 = "&_escaped_fragment_=";
+  /**
+   * Special URL token that gets passed from the crawler to the servlet filter.
+   * This token is used in case there are not already existing query parameters.
+   */
+  private static final String ESCAPED_FRAGMENT_FORMAT2 = "?_escaped_fragment_=";
+  /**
+   * Length of the special URL tokens.
+   */
+  private static final int ESCAPED_FRAGMENT_LENGTH = ESCAPED_FRAGMENT_FORMAT1.length();
+
+  /**
+   * Maps from the query string that contains _escaped_fragment_ to one that
+   * doesn't, but is instead followed by a hash fragment. It also unescapes any
+   * characters that were escaped by the crawler. If the query string does not
+   * contain _escaped_fragment_, it is not modified.
+   * 
+   * @param queryString
+   * @return A modified query string followed by a hash fragment if applicable.
+   *         The non-modified query string otherwise.
+   * @throws UnsupportedEncodingException
+   */
   private static String rewriteQueryString(String queryString)
       throws UnsupportedEncodingException {
-    StringBuilder queryStringSb = new StringBuilder(queryString);
-    int i = queryStringSb.indexOf("&_escaped_fragment_=");
-    if (i == -1) {
-      i = queryStringSb.indexOf("?_escaped_fragment_=");
+    int index = queryString.indexOf(ESCAPED_FRAGMENT_FORMAT1);
+    if (index == -1) {
+      index = queryString.indexOf(ESCAPED_FRAGMENT_FORMAT2);
     }
-    if (i != -1) {
-      StringBuilder tmpSb = new StringBuilder(queryStringSb.substring(0, i - 1));
-      System.out.println("|" + tmpSb + "|");
-      tmpSb.append("#!");
-      System.out.println("|" + tmpSb + "|");
-      tmpSb.append(URLDecoder.decode(queryStringSb.substring(i + 20,
-          queryStringSb.length()), "UTF-8"));
-      System.out.println("|" + tmpSb + "|");
-      queryStringSb = tmpSb;
+    if (index != -1) {
+      StringBuilder queryStringSb = new StringBuilder();
+      if (index > 0) {
+        queryStringSb.append(queryString.substring(0, index - 1));
+      }
+      queryStringSb.append("#!");
+      queryStringSb.append(URLDecoder.decode(queryStringSb.substring(index
+          + ESCAPED_FRAGMENT_LENGTH, queryStringSb.length()), "UTF-8"));
+      return queryStringSb.toString();
     }
-    return queryStringSb.toString();
+    return queryString;
   }
 
+  /**
+   * The configuration for the servlet filter.
+   */
   private FilterConfig filterConfig = null;
 
   /**
@@ -110,11 +138,11 @@ public final class CrawlServlet implements Filter {
       out.println(page.asXml());
       webClient.closeAllWindows();
       out.close();
-
     } else {
       try {
         chain.doFilter(request, response);
       } catch (ServletException e) {
+        System.err.println("Servlet exception caught: " + e);
         e.printStackTrace();
       }
     }

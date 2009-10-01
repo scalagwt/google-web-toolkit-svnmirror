@@ -240,6 +240,39 @@ following instructions help you do just that.
 4) Now you should be able to run the 'Hello' project from the
   Run dialog!
 
+== Launching 'Showcase' ==
+
+1) Import the 'Showcase' project if you haven't already.
+
+  File->Import->General->Existing Projects into Workspace->Next
+  Browse to the 'trunk/eclipse' folder and select it
+  Deselect All
+  Select 'Showcase'
+
+2) Non-windows users: Replace the windows project dependency.
+
+  Right-click on the Showcase project and select 'Properties'.
+  Select 'Java Build Path', the 'Libraries'.
+  Click on GWT_ROOT/build/staging/gwt-windows-0.0.0/gwt-servlet.jar and
+    'Edit'.  Change gwt-windows-0.0.0 to "gwt-linux-0.0.0" or "gwt-mac-0.0.0". 
+
+3) Non-windows users: Replace the gwt-dev-windows project dependency and paths.
+
+  Run->Open Run Dialog...->Java Application->Showcase
+  Select the 'Classpath' tab
+  Remove gwt-dev-windows paths
+  Select 'User Entries'
+  Advanced->Add Folder-> Add gwt-dev-<platform>/core/super
+  Select the (default classpath) item and use the 'Down' button
+    to make it the last item in the list.
+  You could also just edit Showcase.launch and search/replace "windows" with
+    "linux" or "mac".
+
+4) Repeat step 2 for the 'Showcase compile' project.
+
+5) Now you should be able to run the 'Showcase' project from the
+  Run dialog!
+
 
 == Creating a Launch config for a new project ==
 

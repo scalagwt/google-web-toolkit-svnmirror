@@ -222,8 +222,6 @@ public class Showcase implements EntryPoint {
         app.getMainMenu().ensureSelectedItemVisible();
         Window.setTitle(item.getText());
 
-        
-        
         // Show the associated ContentWidget
         displayContentWidget(itemWidgets.get(item));
       }
@@ -234,9 +232,9 @@ public class Showcase implements EntryPoint {
     app.addSelectionHandler(new SelectionHandler<TreeItem>() {
       public void onSelection(SelectionEvent<TreeItem> event) {
         TreeItem item = event.getSelectedItem();
-        String historyToken = ((Hyperlink) item.getWidget()).getTargetHistoryToken();
         ContentWidget content = itemWidgets.get(item);
         if (content != null && !content.equals(app.getContent())) {
+          String historyToken = ((Hyperlink) item.getWidget()).getTargetHistoryToken();
           History.newItem(historyToken);
         }
       }
@@ -415,11 +413,11 @@ public class Showcase implements EntryPoint {
    */
   private void setupMainMenuOption(TreeItem parent, ContentWidget content,
       AbstractImagePrototype image) {
-    
     // Create the TreeItem
-    Hyperlink hl = new IndexableHyperlink(image.getHTML() + " " + content.getName(),true,getContentWidgetToken(content));
+    Hyperlink hl = new IndexableHyperlink(image.getHTML() + " "
+        + content.getName(), true, getContentWidgetToken(content));
     TreeItem option = parent.addItem(hl);
-    
+
     // Map the item to its history token and content widget
     itemWidgets.put(option, content);
     itemTokens.put(getContentWidgetToken(content), option);

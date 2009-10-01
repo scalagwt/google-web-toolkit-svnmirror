@@ -138,7 +138,7 @@ public class History {
   public static String getToken() {
     return impl != null ? HistoryImpl.getToken() : "";
   }
-  
+
   /**
    * Adds a new browser history entry. In hosted mode, the 'back' and 'forward'
    * actions are accessible via the standard Alt-Left and Alt-Right keystrokes.
