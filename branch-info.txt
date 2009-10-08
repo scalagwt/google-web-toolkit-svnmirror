@@ -7,4 +7,6 @@ This branch was created as a straight copy from /trunk/@6307
 
 
 Merges:
-(none)
+/trunk/@6323 was merged (r6324) into this branch
+  $ svn merge -c 6323  https://google-web-toolkit.googlecode.com/svn/trunk
+
