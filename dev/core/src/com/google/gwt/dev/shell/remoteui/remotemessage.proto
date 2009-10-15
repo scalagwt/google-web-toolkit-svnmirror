@@ -1,22 +1,47 @@
-package com.google.gwt.dev.shell.log;
+/*
+ * Copyright 2009 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package com.google.gwt.dev.shell.remoteui;
 
 option java_outer_classname = "RemoteMessageProto";
 
+// Outer envelope for all messages
 message Message {
   
+  // Two types of messages - either a request, or a response
   enum MessageType {
     REQUEST = 0;
     RESPONSE = 1;
   }
     
+  // A request message. This is the root type for all request messages
   message Request {
   
+    // Every request must be addressed to a service. The two types of 
+    // services are the ViewerService, and the DevModeService. The ViewerService
+    // accepts commands for a Viewer. The DevModeService accepts requests for
+    // the Development Mode Server.
     enum ServiceType {
       VIEWER = 0;
       DEV_MODE = 1;
     }
           
+    // The root type for all requests for the ViewerService
     message ViewerRequest {
+    
+      // The different types of requests for a ViewerService
       enum RequestType {
         ADD_LOG = 0;
         ADD_LOG_BRANCH = 1;
@@ -24,14 +49,19 @@ message Message {
         DISCONNECT_LOG = 3;        
       }
       
+      // Add a log message to the view
       message AddLog {
+
+        // The type of log - either a server log, a module log, or 
+        // the main log      
         enum LogType {    
           BROWSER = 0;
-          SERVER = 1;
+          MODULE = 1;
           MAIN = 2;
         }
     
-        message BrowserLog {
+        // Information needed for creating a Module Log
+        message ModuleLog {
           required string name = 1;   
           optional bytes icon = 2;
           required string sessionKey = 3;
@@ -41,44 +71,54 @@ message Message {
           required string remoteHost = 7;                
         }
         
+        // Information needed for creating a Server Log
         message ServerLog {
           required string name = 1;   
           optional bytes icon = 2;
         }
         
+        // Information needed for creating the Main Log. At this time, no
+        // additional information is needed.
         message MainLog {
         }
         
         required LogType type = 1;
-        optional BrowserLog browserLog = 2;
+        optional ModuleLog moduleLog = 2;
         optional ServerLog serverLog = 3;
         optional MainLog mainLog = 4;
       }
       
-      message LogData {  
+      // The data for a log entry
+      message LogData {
+      
+        // The HelpInfo portion of the log entry       
         message HelpInfo {
           optional string url = 1;
           optional string text = 2;
         }
   
        required string summary = 1;
-       optional string level = 2;  
+       optional string level = 2;  // TODO: Maybe use an enum here
        optional string details = 3;
        optional HelpInfo helpInfo = 4;
       }
       
+      // Add a new log branch to an existing log
       message AddLogBranch {
         required uint32 parentLogHandle = 1;
         required uint32 indexInParent = 2;
         required LogData logData = 3;
       }
       
+      // Add a log entry to a log
       message AddLogEntry {
         required uint32 logHandle = 1;
         required uint32 indexInLog = 2;
         required LogData logData = 3;
       }
       
+      // Disconnect the given log (i.e. process for which information was
+      // being logged is dead)
       message DisconnectLog {
         required uint32 logHandle = 1;
       }
@@ -90,11 +130,15 @@ message Message {
       optional DisconnectLog disconnectLog = 5;                 
     }
   
+    // The root type for all requests for the DevModeService
     message DevModeRequest {
+      
+      // The different types of requests for the DevModeService
       enum RequestType {
         RESTART_SERVER = 0;
       }
       
+      // Restart the server. No additional information is needed at this time.
       message RestartServer {
       }
                
@@ -108,18 +152,26 @@ message Message {
     optional DevModeRequest devModeRequest = 4;
   }
 
+  // A response message for a request. This is the root type for all response 
+  // messages. 
   message Response {
  
+    // The root type for all response messages from the ViewerService
     message ViewerResponse {
+    
+      // The different types of response messages that can come from the
+      // ViewerService
       enum ResponseType {
         ADD_LOG = 0;
         ADD_LOG_BRANCH = 1;        
       }
       
+      // Response to an AddLog request
       message AddLog {
         required uint32 logHandle = 1;
       }
       
+      // Response to an AddLogBranch request
       message AddLogBranch {
         required uint32 logHandle = 1;
       }
@@ -129,11 +181,16 @@ message Message {
       optional AddLogBranch addLogBranch = 3;      
     }
   
+    // The root type for all response messages from the DevModeService
     message DevModeResponse {
+      
+      // The different types of response messages from the DevModeService
       enum ResponseType {
         RESTART_SERVER = 0;
       }
       
+      // Response to a RestartServer request. Right now, there is no information
+      // that needs to be passed back (TODO: Provide a success code?)
       message RestartServer {
       }
       
