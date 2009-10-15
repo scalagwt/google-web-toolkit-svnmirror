@@ -1,0 +1,153 @@
+package com.google.gwt.dev.shell.log;
+
+option java_outer_classname = "RemoteMessageProto";
+
+message Message {
+  
+  enum MessageType {
+    REQUEST = 0;
+    RESPONSE = 1;
+  }
+    
+  message Request {
+  
+    enum ServiceType {
+      VIEWER = 0;
+      DEV_MODE = 1;
+    }
+          
+    message ViewerRequest {
+      enum RequestType {
+        ADD_LOG = 0;
+        ADD_LOG_BRANCH = 1;
+        ADD_LOG_ENTRY = 2;
+        DISCONNECT_LOG = 3;        
+      }
+      
+      message AddLog {
+        enum LogType {    
+          BROWSER = 0;
+          SERVER = 1;
+          MAIN = 2;
+        }
+    
+        message BrowserLog {
+          required string name = 1;   
+          optional bytes icon = 2;
+          required string sessionKey = 3;
+          required string userAgent = 4;
+          required string url = 5;
+          required string tabKey = 6;
+          required string remoteHost = 7;                
+        }
+        
+        message ServerLog {
+          required string name = 1;   
+          optional bytes icon = 2;
+        }
+        
+        message MainLog {
+        }
+        
+        required LogType type = 1;
+        optional BrowserLog browserLog = 2;
+        optional ServerLog serverLog = 3;
+        optional MainLog mainLog = 4;
+      }
+      
+      message LogData {  
+        message HelpInfo {
+          optional string url = 1;
+          optional string text = 2;
+        }
+  
+       required string summary = 1;
+       optional string level = 2;  
+       optional string details = 3;
+       optional HelpInfo helpInfo = 4;
+      }
+      
+      message AddLogBranch {
+        required uint32 parentLogHandle = 1;
+        required uint32 indexInParent = 2;
+        required LogData logData = 3;
+      }
+      
+      message AddLogEntry {
+        required uint32 logHandle = 1;
+        required uint32 indexInLog = 2;
+        required LogData logData = 3;
+      }
+      
+      message DisconnectLog {
+        required uint32 logHandle = 1;
+      }
+      
+      required RequestType requestType = 1;
+      optional AddLog addLog = 2;
+      optional AddLogBranch addLogBranch = 3;
+      optional AddLogEntry addLogEntry = 4;
+      optional DisconnectLog disconnectLog = 5;                 
+    }
+  
+    message DevModeRequest {
+      enum RequestType {
+        RESTART_SERVER = 0;
+      }
+      
+      message RestartServer {
+      }
+               
+      required RequestType requestType = 1;
+      optional RestartServer restartServer = 2;      
+    }
+    
+    required ServiceType serviceType = 1;
+    optional uint32 requestId = 2;
+    optional ViewerRequest viewerRequest = 3;
+    optional DevModeRequest devModeRequest = 4;
+  }
+
+  message Response {
+ 
+    message ViewerResponse {
+      enum ResponseType {
+        ADD_LOG = 0;
+        ADD_LOG_BRANCH = 1;        
+      }
+      
+      message AddLog {
+        required uint32 logHandle = 1;
+      }
+      
+      message AddLogBranch {
+        required uint32 logHandle = 1;
+      }
+      
+      required ResponseType responseType = 1;
+      optional AddLog addLog = 2;
+      optional AddLogBranch addLogBranch = 3;      
+    }
+  
+    message DevModeResponse {
+      enum ResponseType {
+        RESTART_SERVER = 0;
+      }
+      
+      message RestartServer {
+      }
+      
+      required ResponseType responseType = 1;
+      optional RestartServer restartServer = 2;     
+    }
+ 
+    required uint32 requestId = 1;
+    optional ViewerResponse viewerResponse = 2;
+    optional DevModeResponse devModeResponse = 3;
+  }
+  
+  required MessageType messageType = 1;
+  optional Request request = 2;
+  optional Response response = 3;
+ 
+}
