@@ -1,0 +1,22 @@
+This is version 2.2.0 of the Java Protocol Buffer Library. We use protocol buffers
+communication protocol between the Development Mode Server and Remote Viewers.
+
+To build this library:
+
+1) Download http://protobuf.googlecode.com/files/protobuf-2.2.0.tar.gz
+2) Unzip the archive
+
+3) Follow the "Installation - With Maven" instructions located in java/README.txt.
+Note that Maven is not required; one can altenatively follow the
+"Installation - Without Maven" instructions.
+
+NOTE: If you decide to use Maven, be sure to add:  
+
+<properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+</properties>
+
+as a child of the <project> tag in the java/pom.xml file. This will prevent 
+platform-dependent encoding warnings during the packaging step. See
+http://maven.apache.org/general.html#encoding-warning for more information.
+
