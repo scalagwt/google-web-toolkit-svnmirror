@@ -43,10 +43,16 @@ message Message {
     
       // The different types of requests for a ViewerService
       enum RequestType {
-        ADD_LOG = 0;
-        ADD_LOG_BRANCH = 1;
-        ADD_LOG_ENTRY = 2;
-        DISCONNECT_LOG = 3;        
+        CAPABILITY_EXCHANGE = 0;
+        ADD_LOG = 1;
+        ADD_LOG_BRANCH = 2;
+        ADD_LOG_ENTRY = 3;
+        DISCONNECT_LOG = 4;        
+      }
+      
+      // Request the capabilities of the ViewerService. No additional
+      // information is needed at this time.
+      message CapabilityExchange {
       }
       
       // Add a log message to the view
@@ -124,10 +130,11 @@ message Message {
       }
       
       required RequestType requestType = 1;
-      optional AddLog addLog = 2;
-      optional AddLogBranch addLogBranch = 3;
-      optional AddLogEntry addLogEntry = 4;
-      optional DisconnectLog disconnectLog = 5;                 
+      optional CapabilityExchange capabilityExchange = 2;
+      optional AddLog addLog = 3;
+      optional AddLogBranch addLogBranch = 4;
+      optional AddLogEntry addLogEntry = 5;
+      optional DisconnectLog disconnectLog = 6;                 
     }
   
     // The root type for all requests for the DevModeService
@@ -135,15 +142,22 @@ message Message {
       
       // The different types of requests for the DevModeService
       enum RequestType {
-        RESTART_SERVER = 0;
+        CAPABILITY_EXCHANGE = 0;
+        RESTART_WEB_SERVER = 1;
       }
       
-      // Restart the server. No additional information is needed at this time.
-      message RestartServer {
+      // Request the capabilities of the DevModeService. No additional
+      // information is needed at this time.
+      message CapabilityExchange {
+      }
+      
+      // Restart the web server. No additional information is needed at this time.
+      message RestartWebServer {
       }
                
       required RequestType requestType = 1;
-      optional RestartServer restartServer = 2;      
+      optional CapabilityExchange capabilityExchange = 2;
+      optional RestartWebServer restartWebServer = 3;      
     }
     
     required ServiceType serviceType = 1;
@@ -162,8 +176,16 @@ message Message {
       // The different types of response messages that can come from the
       // ViewerService
       enum ResponseType {
-        ADD_LOG = 0;
-        ADD_LOG_BRANCH = 1;        
+        CAPABILITY_EXCHANGE = 0;
+        ADD_LOG = 1;
+        ADD_LOG_BRANCH = 2;        
+      }
+      
+      // Response for the capabilities of the ViewerService
+      // TODO: Can we expose ViewerRequest.RequestType, and change
+      // the field type to that (instead of an array of unsigned ints)?
+      message CapabilityExchange {
+        repeated uint32 capability = 1; 
       }
       
       // Response to an AddLog request
@@ -177,8 +199,9 @@ message Message {
       }
       
       required ResponseType responseType = 1;
-      optional AddLog addLog = 2;
-      optional AddLogBranch addLogBranch = 3;      
+      optional CapabilityExchange capabilityExchange = 2;
+      optional AddLog addLog = 3;
+      optional AddLogBranch addLogBranch = 4;      
     }
   
     // The root type for all response messages from the DevModeService
@@ -186,16 +209,25 @@ message Message {
       
       // The different types of response messages from the DevModeService
       enum ResponseType {
-        RESTART_SERVER = 0;
+        CAPABILITY_EXCHANGE = 0;
+        RESTART_WEB_SERVER = 1;
       }
       
-      // Response to a RestartServer request. Right now, there is no information
+      // Response for the capabilities of the DevModeService
+      // TODO: Can we expose DevModeRequest.RequstType, and change
+      // the field type to that (instead of an array of unsigned ints)?
+      message CapabilityExchange {
+        repeated uint32 capability = 1; 
+      }
+      
+      // Response to a RestartWebServer request. Right now, there is no information
       // that needs to be passed back (TODO: Provide a success code?)
-      message RestartServer {
+      message RestartWebServer {
       }
       
       required ResponseType responseType = 1;
-      optional RestartServer restartServer = 2;     
+      optional CapabilityExchange capabilityExchange = 2;      
+      optional RestartWebServer restartWebServer = 3;     
     }
  
     required uint32 requestId = 1;

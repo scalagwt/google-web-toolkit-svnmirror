@@ -211,10 +211,11 @@ public final class RemoteMessageProto {
         
         public enum RequestType
             implements com.google.protobuf.ProtocolMessageEnum {
-          ADD_LOG(0, 0),
-          ADD_LOG_BRANCH(1, 1),
-          ADD_LOG_ENTRY(2, 2),
-          DISCONNECT_LOG(3, 3),
+          CAPABILITY_EXCHANGE(0, 0),
+          ADD_LOG(1, 1),
+          ADD_LOG_BRANCH(2, 2),
+          ADD_LOG_ENTRY(3, 3),
+          DISCONNECT_LOG(4, 4),
           ;
           
           
@@ -222,10 +223,11 @@ public final class RemoteMessageProto {
           
           public static RequestType valueOf(int value) {
             switch (value) {
-              case 0: return ADD_LOG;
-              case 1: return ADD_LOG_BRANCH;
-              case 2: return ADD_LOG_ENTRY;
-              case 3: return DISCONNECT_LOG;
+              case 0: return CAPABILITY_EXCHANGE;
+              case 1: return ADD_LOG;
+              case 2: return ADD_LOG_BRANCH;
+              case 3: return ADD_LOG_ENTRY;
+              case 4: return DISCONNECT_LOG;
               default: return null;
             }
           }
@@ -256,7 +258,7 @@ public final class RemoteMessageProto {
           }
           
           private static final RequestType[] VALUES = {
-            ADD_LOG, ADD_LOG_BRANCH, ADD_LOG_ENTRY, DISCONNECT_LOG, 
+            CAPABILITY_EXCHANGE, ADD_LOG, ADD_LOG_BRANCH, ADD_LOG_ENTRY, DISCONNECT_LOG, 
           };
           public static RequestType valueOf(
               com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
@@ -275,6 +277,234 @@ public final class RemoteMessageProto {
           
           static {
             com.google.gwt.dev.shell.remoteui.RemoteMessageProto.getDescriptor();
+          }
+        }
+        
+        public static final class CapabilityExchange extends
+            com.google.protobuf.GeneratedMessage {
+          // Use CapabilityExchange.newBuilder() to construct.
+          private CapabilityExchange() {}
+          
+          private static final CapabilityExchange defaultInstance = new CapabilityExchange();
+          public static CapabilityExchange getDefaultInstance() {
+            return defaultInstance;
+          }
+          
+          public CapabilityExchange getDefaultInstanceForType() {
+            return defaultInstance;
+          }
+          
+          public static final com.google.protobuf.Descriptors.Descriptor
+              getDescriptor() {
+            return com.google.gwt.dev.shell.remoteui.RemoteMessageProto.internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_ViewerRequest_CapabilityExchange_descriptor;
+          }
+          
+          protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+              internalGetFieldAccessorTable() {
+            return com.google.gwt.dev.shell.remoteui.RemoteMessageProto.internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_ViewerRequest_CapabilityExchange_fieldAccessorTable;
+          }
+          
+          public final boolean isInitialized() {
+            return true;
+          }
+          
+          public void writeTo(com.google.protobuf.CodedOutputStream output)
+                              throws java.io.IOException {
+            getUnknownFields().writeTo(output);
+          }
+          
+          private int memoizedSerializedSize = -1;
+          public int getSerializedSize() {
+            int size = memoizedSerializedSize;
+            if (size != -1) return size;
+          
+            size = 0;
+            size += getUnknownFields().getSerializedSize();
+            memoizedSerializedSize = size;
+            return size;
+          }
+          
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.CapabilityExchange parseFrom(
+              com.google.protobuf.ByteString data)
+              throws com.google.protobuf.InvalidProtocolBufferException {
+            return newBuilder().mergeFrom(data).buildParsed();
+          }
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.CapabilityExchange parseFrom(
+              com.google.protobuf.ByteString data,
+              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+              throws com.google.protobuf.InvalidProtocolBufferException {
+            return newBuilder().mergeFrom(data, extensionRegistry)
+                     .buildParsed();
+          }
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.CapabilityExchange parseFrom(byte[] data)
+              throws com.google.protobuf.InvalidProtocolBufferException {
+            return newBuilder().mergeFrom(data).buildParsed();
+          }
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.CapabilityExchange parseFrom(
+              byte[] data,
+              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+              throws com.google.protobuf.InvalidProtocolBufferException {
+            return newBuilder().mergeFrom(data, extensionRegistry)
+                     .buildParsed();
+          }
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.CapabilityExchange parseFrom(java.io.InputStream input)
+              throws java.io.IOException {
+            return newBuilder().mergeFrom(input).buildParsed();
+          }
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.CapabilityExchange parseFrom(
+              java.io.InputStream input,
+              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+              throws java.io.IOException {
+            return newBuilder().mergeFrom(input, extensionRegistry)
+                     .buildParsed();
+          }
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.CapabilityExchange parseDelimitedFrom(java.io.InputStream input)
+              throws java.io.IOException {
+            return newBuilder().mergeDelimitedFrom(input).buildParsed();
+          }
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.CapabilityExchange parseDelimitedFrom(
+              java.io.InputStream input,
+              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+              throws java.io.IOException {
+            return newBuilder().mergeDelimitedFrom(input, extensionRegistry)
+                     .buildParsed();
+          }
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.CapabilityExchange parseFrom(
+              com.google.protobuf.CodedInputStream input)
+              throws java.io.IOException {
+            return newBuilder().mergeFrom(input).buildParsed();
+          }
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.CapabilityExchange parseFrom(
+              com.google.protobuf.CodedInputStream input,
+              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+              throws java.io.IOException {
+            return newBuilder().mergeFrom(input, extensionRegistry)
+                     .buildParsed();
+          }
+          
+          public static Builder newBuilder() { return Builder.create(); }
+          public Builder newBuilderForType() { return newBuilder(); }
+          public static Builder newBuilder(com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.CapabilityExchange prototype) {
+            return newBuilder().mergeFrom(prototype);
+          }
+          public Builder toBuilder() { return newBuilder(this); }
+          
+          public static final class Builder extends
+              com.google.protobuf.GeneratedMessage.Builder<Builder> {
+            private com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.CapabilityExchange result;
+            
+            // Construct using com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.CapabilityExchange.newBuilder()
+            private Builder() {}
+            
+            private static Builder create() {
+              Builder builder = new Builder();
+              builder.result = new com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.CapabilityExchange();
+              return builder;
+            }
+            
+            protected com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.CapabilityExchange internalGetResult() {
+              return result;
+            }
+            
+            public Builder clear() {
+              if (result == null) {
+                throw new IllegalStateException(
+                  "Cannot call clear() after build().");
+              }
+              result = new com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.CapabilityExchange();
+              return this;
+            }
+            
+            public Builder clone() {
+              return create().mergeFrom(result);
+            }
+            
+            public com.google.protobuf.Descriptors.Descriptor
+                getDescriptorForType() {
+              return com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.CapabilityExchange.getDescriptor();
+            }
+            
+            public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.CapabilityExchange getDefaultInstanceForType() {
+              return com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.CapabilityExchange.getDefaultInstance();
+            }
+            
+            public boolean isInitialized() {
+              return result.isInitialized();
+            }
+            public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.CapabilityExchange build() {
+              if (result != null && !isInitialized()) {
+                throw newUninitializedMessageException(result);
+              }
+              return buildPartial();
+            }
+            
+            private com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.CapabilityExchange buildParsed()
+                throws com.google.protobuf.InvalidProtocolBufferException {
+              if (!isInitialized()) {
+                throw newUninitializedMessageException(
+                  result).asInvalidProtocolBufferException();
+              }
+              return buildPartial();
+            }
+            
+            public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.CapabilityExchange buildPartial() {
+              if (result == null) {
+                throw new IllegalStateException(
+                  "build() has already been called on this Builder.");
+              }
+              com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.CapabilityExchange returnMe = result;
+              result = null;
+              return returnMe;
+            }
+            
+            public Builder mergeFrom(com.google.protobuf.Message other) {
+              if (other instanceof com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.CapabilityExchange) {
+                return mergeFrom((com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.CapabilityExchange)other);
+              } else {
+                super.mergeFrom(other);
+                return this;
+              }
+            }
+            
+            public Builder mergeFrom(com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.CapabilityExchange other) {
+              if (other == com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.CapabilityExchange.getDefaultInstance()) return this;
+              this.mergeUnknownFields(other.getUnknownFields());
+              return this;
+            }
+            
+            public Builder mergeFrom(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+              com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+                com.google.protobuf.UnknownFieldSet.newBuilder(
+                  this.getUnknownFields());
+              while (true) {
+                int tag = input.readTag();
+                switch (tag) {
+                  case 0:
+                    this.setUnknownFields(unknownFields.build());
+                    return this;
+                  default: {
+                    if (!parseUnknownField(input, unknownFields,
+                                           extensionRegistry, tag)) {
+                      this.setUnknownFields(unknownFields.build());
+                      return this;
+                    }
+                    break;
+                  }
+                }
+              }
+            }
+            
+          }
+          
+          static {
+            com.google.gwt.dev.shell.remoteui.RemoteMessageProto.getDescriptor();
+          }
+          
+          static {
+            com.google.gwt.dev.shell.remoteui.RemoteMessageProto.internalForceInit();
           }
         }
         
@@ -3633,33 +3863,40 @@ public final class RemoteMessageProto {
         // required .com.google.gwt.dev.shell.remoteui.Message.Request.ViewerRequest.RequestType requestType = 1;
         public static final int REQUESTTYPE_FIELD_NUMBER = 1;
         private boolean hasRequestType;
-        private com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.RequestType requestType_ = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.RequestType.ADD_LOG;
+        private com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.RequestType requestType_ = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.RequestType.CAPABILITY_EXCHANGE;
         public boolean hasRequestType() { return hasRequestType; }
         public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.RequestType getRequestType() { return requestType_; }
         
-        // optional .com.google.gwt.dev.shell.remoteui.Message.Request.ViewerRequest.AddLog addLog = 2;
-        public static final int ADDLOG_FIELD_NUMBER = 2;
+        // optional .com.google.gwt.dev.shell.remoteui.Message.Request.ViewerRequest.CapabilityExchange capabilityExchange = 2;
+        public static final int CAPABILITYEXCHANGE_FIELD_NUMBER = 2;
+        private boolean hasCapabilityExchange;
+        private com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.CapabilityExchange capabilityExchange_ = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.CapabilityExchange.getDefaultInstance();
+        public boolean hasCapabilityExchange() { return hasCapabilityExchange; }
+        public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.CapabilityExchange getCapabilityExchange() { return capabilityExchange_; }
+        
+        // optional .com.google.gwt.dev.shell.remoteui.Message.Request.ViewerRequest.AddLog addLog = 3;
+        public static final int ADDLOG_FIELD_NUMBER = 3;
         private boolean hasAddLog;
         private com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.AddLog addLog_ = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.AddLog.getDefaultInstance();
         public boolean hasAddLog() { return hasAddLog; }
         public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.AddLog getAddLog() { return addLog_; }
         
-        // optional .com.google.gwt.dev.shell.remoteui.Message.Request.ViewerRequest.AddLogBranch addLogBranch = 3;
-        public static final int ADDLOGBRANCH_FIELD_NUMBER = 3;
+        // optional .com.google.gwt.dev.shell.remoteui.Message.Request.ViewerRequest.AddLogBranch addLogBranch = 4;
+        public static final int ADDLOGBRANCH_FIELD_NUMBER = 4;
         private boolean hasAddLogBranch;
         private com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.AddLogBranch addLogBranch_ = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.AddLogBranch.getDefaultInstance();
         public boolean hasAddLogBranch() { return hasAddLogBranch; }
         public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.AddLogBranch getAddLogBranch() { return addLogBranch_; }
         
-        // optional .com.google.gwt.dev.shell.remoteui.Message.Request.ViewerRequest.AddLogEntry addLogEntry = 4;
-        public static final int ADDLOGENTRY_FIELD_NUMBER = 4;
+        // optional .com.google.gwt.dev.shell.remoteui.Message.Request.ViewerRequest.AddLogEntry addLogEntry = 5;
+        public static final int ADDLOGENTRY_FIELD_NUMBER = 5;
         private boolean hasAddLogEntry;
         private com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.AddLogEntry addLogEntry_ = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.AddLogEntry.getDefaultInstance();
         public boolean hasAddLogEntry() { return hasAddLogEntry; }
         public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.AddLogEntry getAddLogEntry() { return addLogEntry_; }
         
-        // optional .com.google.gwt.dev.shell.remoteui.Message.Request.ViewerRequest.DisconnectLog disconnectLog = 5;
-        public static final int DISCONNECTLOG_FIELD_NUMBER = 5;
+        // optional .com.google.gwt.dev.shell.remoteui.Message.Request.ViewerRequest.DisconnectLog disconnectLog = 6;
+        public static final int DISCONNECTLOG_FIELD_NUMBER = 6;
         private boolean hasDisconnectLog;
         private com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.DisconnectLog disconnectLog_ = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.DisconnectLog.getDefaultInstance();
         public boolean hasDisconnectLog() { return hasDisconnectLog; }
@@ -3687,17 +3924,20 @@ public final class RemoteMessageProto {
           if (hasRequestType()) {
             output.writeEnum(1, getRequestType().getNumber());
           }
+          if (hasCapabilityExchange()) {
+            output.writeMessage(2, getCapabilityExchange());
+          }
           if (hasAddLog()) {
-            output.writeMessage(2, getAddLog());
+            output.writeMessage(3, getAddLog());
           }
           if (hasAddLogBranch()) {
-            output.writeMessage(3, getAddLogBranch());
+            output.writeMessage(4, getAddLogBranch());
           }
           if (hasAddLogEntry()) {
-            output.writeMessage(4, getAddLogEntry());
+            output.writeMessage(5, getAddLogEntry());
           }
           if (hasDisconnectLog()) {
-            output.writeMessage(5, getDisconnectLog());
+            output.writeMessage(6, getDisconnectLog());
           }
           getUnknownFields().writeTo(output);
         }
@@ -3712,21 +3952,25 @@ public final class RemoteMessageProto {
             size += com.google.protobuf.CodedOutputStream
               .computeEnumSize(1, getRequestType().getNumber());
           }
+          if (hasCapabilityExchange()) {
+            size += com.google.protobuf.CodedOutputStream
+              .computeMessageSize(2, getCapabilityExchange());
+          }
           if (hasAddLog()) {
             size += com.google.protobuf.CodedOutputStream
-              .computeMessageSize(2, getAddLog());
+              .computeMessageSize(3, getAddLog());
           }
           if (hasAddLogBranch()) {
             size += com.google.protobuf.CodedOutputStream
-              .computeMessageSize(3, getAddLogBranch());
+              .computeMessageSize(4, getAddLogBranch());
           }
           if (hasAddLogEntry()) {
             size += com.google.protobuf.CodedOutputStream
-              .computeMessageSize(4, getAddLogEntry());
+              .computeMessageSize(5, getAddLogEntry());
           }
           if (hasDisconnectLog()) {
             size += com.google.protobuf.CodedOutputStream
-              .computeMessageSize(5, getDisconnectLog());
+              .computeMessageSize(6, getDisconnectLog());
           }
           size += getUnknownFields().getSerializedSize();
           memoizedSerializedSize = size;
@@ -3880,6 +4124,9 @@ public final class RemoteMessageProto {
             if (other.hasRequestType()) {
               setRequestType(other.getRequestType());
             }
+            if (other.hasCapabilityExchange()) {
+              mergeCapabilityExchange(other.getCapabilityExchange());
+            }
             if (other.hasAddLog()) {
               mergeAddLog(other.getAddLog());
             }
@@ -3928,6 +4175,15 @@ public final class RemoteMessageProto {
                   break;
                 }
                 case 18: {
+                  com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.CapabilityExchange.Builder subBuilder = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.CapabilityExchange.newBuilder();
+                  if (hasCapabilityExchange()) {
+                    subBuilder.mergeFrom(getCapabilityExchange());
+                  }
+                  input.readMessage(subBuilder, extensionRegistry);
+                  setCapabilityExchange(subBuilder.buildPartial());
+                  break;
+                }
+                case 26: {
                   com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.AddLog.Builder subBuilder = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.AddLog.newBuilder();
                   if (hasAddLog()) {
                     subBuilder.mergeFrom(getAddLog());
@@ -3936,7 +4192,7 @@ public final class RemoteMessageProto {
                   setAddLog(subBuilder.buildPartial());
                   break;
                 }
-                case 26: {
+                case 34: {
                   com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.AddLogBranch.Builder subBuilder = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.AddLogBranch.newBuilder();
                   if (hasAddLogBranch()) {
                     subBuilder.mergeFrom(getAddLogBranch());
@@ -3945,7 +4201,7 @@ public final class RemoteMessageProto {
                   setAddLogBranch(subBuilder.buildPartial());
                   break;
                 }
-                case 34: {
+                case 42: {
                   com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.AddLogEntry.Builder subBuilder = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.AddLogEntry.newBuilder();
                   if (hasAddLogEntry()) {
                     subBuilder.mergeFrom(getAddLogEntry());
@@ -3954,7 +4210,7 @@ public final class RemoteMessageProto {
                   setAddLogEntry(subBuilder.buildPartial());
                   break;
                 }
-                case 42: {
+                case 50: {
                   com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.DisconnectLog.Builder subBuilder = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.DisconnectLog.newBuilder();
                   if (hasDisconnectLog()) {
                     subBuilder.mergeFrom(getDisconnectLog());
@@ -3985,11 +4241,48 @@ public final class RemoteMessageProto {
           }
           public Builder clearRequestType() {
             result.hasRequestType = false;
-            result.requestType_ = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.RequestType.ADD_LOG;
+            result.requestType_ = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.RequestType.CAPABILITY_EXCHANGE;
             return this;
           }
           
-          // optional .com.google.gwt.dev.shell.remoteui.Message.Request.ViewerRequest.AddLog addLog = 2;
+          // optional .com.google.gwt.dev.shell.remoteui.Message.Request.ViewerRequest.CapabilityExchange capabilityExchange = 2;
+          public boolean hasCapabilityExchange() {
+            return result.hasCapabilityExchange();
+          }
+          public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.CapabilityExchange getCapabilityExchange() {
+            return result.getCapabilityExchange();
+          }
+          public Builder setCapabilityExchange(com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.CapabilityExchange value) {
+            if (value == null) {
+              throw new NullPointerException();
+            }
+            result.hasCapabilityExchange = true;
+            result.capabilityExchange_ = value;
+            return this;
+          }
+          public Builder setCapabilityExchange(com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.CapabilityExchange.Builder builderForValue) {
+            result.hasCapabilityExchange = true;
+            result.capabilityExchange_ = builderForValue.build();
+            return this;
+          }
+          public Builder mergeCapabilityExchange(com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.CapabilityExchange value) {
+            if (result.hasCapabilityExchange() &&
+                result.capabilityExchange_ != com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.CapabilityExchange.getDefaultInstance()) {
+              result.capabilityExchange_ =
+                com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.CapabilityExchange.newBuilder(result.capabilityExchange_).mergeFrom(value).buildPartial();
+            } else {
+              result.capabilityExchange_ = value;
+            }
+            result.hasCapabilityExchange = true;
+            return this;
+          }
+          public Builder clearCapabilityExchange() {
+            result.hasCapabilityExchange = false;
+            result.capabilityExchange_ = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.CapabilityExchange.getDefaultInstance();
+            return this;
+          }
+          
+          // optional .com.google.gwt.dev.shell.remoteui.Message.Request.ViewerRequest.AddLog addLog = 3;
           public boolean hasAddLog() {
             return result.hasAddLog();
           }
@@ -4026,7 +4319,7 @@ public final class RemoteMessageProto {
             return this;
           }
           
-          // optional .com.google.gwt.dev.shell.remoteui.Message.Request.ViewerRequest.AddLogBranch addLogBranch = 3;
+          // optional .com.google.gwt.dev.shell.remoteui.Message.Request.ViewerRequest.AddLogBranch addLogBranch = 4;
           public boolean hasAddLogBranch() {
             return result.hasAddLogBranch();
           }
@@ -4063,7 +4356,7 @@ public final class RemoteMessageProto {
             return this;
           }
           
-          // optional .com.google.gwt.dev.shell.remoteui.Message.Request.ViewerRequest.AddLogEntry addLogEntry = 4;
+          // optional .com.google.gwt.dev.shell.remoteui.Message.Request.ViewerRequest.AddLogEntry addLogEntry = 5;
           public boolean hasAddLogEntry() {
             return result.hasAddLogEntry();
           }
@@ -4100,7 +4393,7 @@ public final class RemoteMessageProto {
             return this;
           }
           
-          // optional .com.google.gwt.dev.shell.remoteui.Message.Request.ViewerRequest.DisconnectLog disconnectLog = 5;
+          // optional .com.google.gwt.dev.shell.remoteui.Message.Request.ViewerRequest.DisconnectLog disconnectLog = 6;
           public boolean hasDisconnectLog() {
             return result.hasDisconnectLog();
           }
@@ -4173,7 +4466,8 @@ public final class RemoteMessageProto {
         
         public enum RequestType
             implements com.google.protobuf.ProtocolMessageEnum {
-          RESTART_SERVER(0, 0),
+          CAPABILITY_EXCHANGE(0, 0),
+          RESTART_WEB_SERVER(1, 1),
           ;
           
           
@@ -4181,7 +4475,8 @@ public final class RemoteMessageProto {
           
           public static RequestType valueOf(int value) {
             switch (value) {
-              case 0: return RESTART_SERVER;
+              case 0: return CAPABILITY_EXCHANGE;
+              case 1: return RESTART_WEB_SERVER;
               default: return null;
             }
           }
@@ -4212,7 +4507,7 @@ public final class RemoteMessageProto {
           }
           
           private static final RequestType[] VALUES = {
-            RESTART_SERVER, 
+            CAPABILITY_EXCHANGE, RESTART_WEB_SERVER, 
           };
           public static RequestType valueOf(
               com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
@@ -4234,28 +4529,28 @@ public final class RemoteMessageProto {
           }
         }
         
-        public static final class RestartServer extends
+        public static final class CapabilityExchange extends
             com.google.protobuf.GeneratedMessage {
-          // Use RestartServer.newBuilder() to construct.
-          private RestartServer() {}
+          // Use CapabilityExchange.newBuilder() to construct.
+          private CapabilityExchange() {}
           
-          private static final RestartServer defaultInstance = new RestartServer();
-          public static RestartServer getDefaultInstance() {
+          private static final CapabilityExchange defaultInstance = new CapabilityExchange();
+          public static CapabilityExchange getDefaultInstance() {
             return defaultInstance;
           }
           
-          public RestartServer getDefaultInstanceForType() {
+          public CapabilityExchange getDefaultInstanceForType() {
             return defaultInstance;
           }
           
           public static final com.google.protobuf.Descriptors.Descriptor
               getDescriptor() {
-            return com.google.gwt.dev.shell.remoteui.RemoteMessageProto.internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_DevModeRequest_RestartServer_descriptor;
+            return com.google.gwt.dev.shell.remoteui.RemoteMessageProto.internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_DevModeRequest_CapabilityExchange_descriptor;
           }
           
           protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
               internalGetFieldAccessorTable() {
-            return com.google.gwt.dev.shell.remoteui.RemoteMessageProto.internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_DevModeRequest_RestartServer_fieldAccessorTable;
+            return com.google.gwt.dev.shell.remoteui.RemoteMessageProto.internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_DevModeRequest_CapabilityExchange_fieldAccessorTable;
           }
           
           public final boolean isInitialized() {
@@ -4278,57 +4573,57 @@ public final class RemoteMessageProto {
             return size;
           }
           
-          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartServer parseFrom(
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.CapabilityExchange parseFrom(
               com.google.protobuf.ByteString data)
               throws com.google.protobuf.InvalidProtocolBufferException {
             return newBuilder().mergeFrom(data).buildParsed();
           }
-          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartServer parseFrom(
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.CapabilityExchange parseFrom(
               com.google.protobuf.ByteString data,
               com.google.protobuf.ExtensionRegistryLite extensionRegistry)
               throws com.google.protobuf.InvalidProtocolBufferException {
             return newBuilder().mergeFrom(data, extensionRegistry)
                      .buildParsed();
           }
-          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartServer parseFrom(byte[] data)
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.CapabilityExchange parseFrom(byte[] data)
               throws com.google.protobuf.InvalidProtocolBufferException {
             return newBuilder().mergeFrom(data).buildParsed();
           }
-          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartServer parseFrom(
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.CapabilityExchange parseFrom(
               byte[] data,
               com.google.protobuf.ExtensionRegistryLite extensionRegistry)
               throws com.google.protobuf.InvalidProtocolBufferException {
             return newBuilder().mergeFrom(data, extensionRegistry)
                      .buildParsed();
           }
-          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartServer parseFrom(java.io.InputStream input)
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.CapabilityExchange parseFrom(java.io.InputStream input)
               throws java.io.IOException {
             return newBuilder().mergeFrom(input).buildParsed();
           }
-          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartServer parseFrom(
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.CapabilityExchange parseFrom(
               java.io.InputStream input,
               com.google.protobuf.ExtensionRegistryLite extensionRegistry)
               throws java.io.IOException {
             return newBuilder().mergeFrom(input, extensionRegistry)
                      .buildParsed();
           }
-          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartServer parseDelimitedFrom(java.io.InputStream input)
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.CapabilityExchange parseDelimitedFrom(java.io.InputStream input)
               throws java.io.IOException {
             return newBuilder().mergeDelimitedFrom(input).buildParsed();
           }
-          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartServer parseDelimitedFrom(
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.CapabilityExchange parseDelimitedFrom(
               java.io.InputStream input,
               com.google.protobuf.ExtensionRegistryLite extensionRegistry)
               throws java.io.IOException {
             return newBuilder().mergeDelimitedFrom(input, extensionRegistry)
                      .buildParsed();
           }
-          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartServer parseFrom(
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.CapabilityExchange parseFrom(
               com.google.protobuf.CodedInputStream input)
               throws java.io.IOException {
             return newBuilder().mergeFrom(input).buildParsed();
           }
-          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartServer parseFrom(
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.CapabilityExchange parseFrom(
               com.google.protobuf.CodedInputStream input,
               com.google.protobuf.ExtensionRegistryLite extensionRegistry)
               throws java.io.IOException {
@@ -4338,25 +4633,25 @@ public final class RemoteMessageProto {
           
           public static Builder newBuilder() { return Builder.create(); }
           public Builder newBuilderForType() { return newBuilder(); }
-          public static Builder newBuilder(com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartServer prototype) {
+          public static Builder newBuilder(com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.CapabilityExchange prototype) {
             return newBuilder().mergeFrom(prototype);
           }
           public Builder toBuilder() { return newBuilder(this); }
           
           public static final class Builder extends
               com.google.protobuf.GeneratedMessage.Builder<Builder> {
-            private com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartServer result;
+            private com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.CapabilityExchange result;
             
-            // Construct using com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartServer.newBuilder()
+            // Construct using com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.CapabilityExchange.newBuilder()
             private Builder() {}
             
             private static Builder create() {
               Builder builder = new Builder();
-              builder.result = new com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartServer();
+              builder.result = new com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.CapabilityExchange();
               return builder;
             }
             
-            protected com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartServer internalGetResult() {
+            protected com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.CapabilityExchange internalGetResult() {
               return result;
             }
             
@@ -4365,7 +4660,7 @@ public final class RemoteMessageProto {
                 throw new IllegalStateException(
                   "Cannot call clear() after build().");
               }
-              result = new com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartServer();
+              result = new com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.CapabilityExchange();
               return this;
             }
             
@@ -4375,24 +4670,24 @@ public final class RemoteMessageProto {
             
             public com.google.protobuf.Descriptors.Descriptor
                 getDescriptorForType() {
-              return com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartServer.getDescriptor();
+              return com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.CapabilityExchange.getDescriptor();
             }
             
-            public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartServer getDefaultInstanceForType() {
-              return com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartServer.getDefaultInstance();
+            public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.CapabilityExchange getDefaultInstanceForType() {
+              return com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.CapabilityExchange.getDefaultInstance();
             }
             
             public boolean isInitialized() {
               return result.isInitialized();
             }
-            public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartServer build() {
+            public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.CapabilityExchange build() {
               if (result != null && !isInitialized()) {
                 throw newUninitializedMessageException(result);
               }
               return buildPartial();
             }
             
-            private com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartServer buildParsed()
+            private com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.CapabilityExchange buildParsed()
                 throws com.google.protobuf.InvalidProtocolBufferException {
               if (!isInitialized()) {
                 throw newUninitializedMessageException(
@@ -4401,27 +4696,255 @@ public final class RemoteMessageProto {
               return buildPartial();
             }
             
-            public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartServer buildPartial() {
+            public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.CapabilityExchange buildPartial() {
               if (result == null) {
                 throw new IllegalStateException(
                   "build() has already been called on this Builder.");
               }
-              com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartServer returnMe = result;
+              com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.CapabilityExchange returnMe = result;
               result = null;
               return returnMe;
             }
             
             public Builder mergeFrom(com.google.protobuf.Message other) {
-              if (other instanceof com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartServer) {
-                return mergeFrom((com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartServer)other);
+              if (other instanceof com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.CapabilityExchange) {
+                return mergeFrom((com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.CapabilityExchange)other);
               } else {
                 super.mergeFrom(other);
                 return this;
               }
             }
             
-            public Builder mergeFrom(com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartServer other) {
-              if (other == com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartServer.getDefaultInstance()) return this;
+            public Builder mergeFrom(com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.CapabilityExchange other) {
+              if (other == com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.CapabilityExchange.getDefaultInstance()) return this;
+              this.mergeUnknownFields(other.getUnknownFields());
+              return this;
+            }
+            
+            public Builder mergeFrom(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+              com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+                com.google.protobuf.UnknownFieldSet.newBuilder(
+                  this.getUnknownFields());
+              while (true) {
+                int tag = input.readTag();
+                switch (tag) {
+                  case 0:
+                    this.setUnknownFields(unknownFields.build());
+                    return this;
+                  default: {
+                    if (!parseUnknownField(input, unknownFields,
+                                           extensionRegistry, tag)) {
+                      this.setUnknownFields(unknownFields.build());
+                      return this;
+                    }
+                    break;
+                  }
+                }
+              }
+            }
+            
+          }
+          
+          static {
+            com.google.gwt.dev.shell.remoteui.RemoteMessageProto.getDescriptor();
+          }
+          
+          static {
+            com.google.gwt.dev.shell.remoteui.RemoteMessageProto.internalForceInit();
+          }
+        }
+        
+        public static final class RestartWebServer extends
+            com.google.protobuf.GeneratedMessage {
+          // Use RestartWebServer.newBuilder() to construct.
+          private RestartWebServer() {}
+          
+          private static final RestartWebServer defaultInstance = new RestartWebServer();
+          public static RestartWebServer getDefaultInstance() {
+            return defaultInstance;
+          }
+          
+          public RestartWebServer getDefaultInstanceForType() {
+            return defaultInstance;
+          }
+          
+          public static final com.google.protobuf.Descriptors.Descriptor
+              getDescriptor() {
+            return com.google.gwt.dev.shell.remoteui.RemoteMessageProto.internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_DevModeRequest_RestartWebServer_descriptor;
+          }
+          
+          protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+              internalGetFieldAccessorTable() {
+            return com.google.gwt.dev.shell.remoteui.RemoteMessageProto.internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_DevModeRequest_RestartWebServer_fieldAccessorTable;
+          }
+          
+          public final boolean isInitialized() {
+            return true;
+          }
+          
+          public void writeTo(com.google.protobuf.CodedOutputStream output)
+                              throws java.io.IOException {
+            getUnknownFields().writeTo(output);
+          }
+          
+          private int memoizedSerializedSize = -1;
+          public int getSerializedSize() {
+            int size = memoizedSerializedSize;
+            if (size != -1) return size;
+          
+            size = 0;
+            size += getUnknownFields().getSerializedSize();
+            memoizedSerializedSize = size;
+            return size;
+          }
+          
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartWebServer parseFrom(
+              com.google.protobuf.ByteString data)
+              throws com.google.protobuf.InvalidProtocolBufferException {
+            return newBuilder().mergeFrom(data).buildParsed();
+          }
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartWebServer parseFrom(
+              com.google.protobuf.ByteString data,
+              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+              throws com.google.protobuf.InvalidProtocolBufferException {
+            return newBuilder().mergeFrom(data, extensionRegistry)
+                     .buildParsed();
+          }
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartWebServer parseFrom(byte[] data)
+              throws com.google.protobuf.InvalidProtocolBufferException {
+            return newBuilder().mergeFrom(data).buildParsed();
+          }
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartWebServer parseFrom(
+              byte[] data,
+              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+              throws com.google.protobuf.InvalidProtocolBufferException {
+            return newBuilder().mergeFrom(data, extensionRegistry)
+                     .buildParsed();
+          }
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartWebServer parseFrom(java.io.InputStream input)
+              throws java.io.IOException {
+            return newBuilder().mergeFrom(input).buildParsed();
+          }
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartWebServer parseFrom(
+              java.io.InputStream input,
+              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+              throws java.io.IOException {
+            return newBuilder().mergeFrom(input, extensionRegistry)
+                     .buildParsed();
+          }
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartWebServer parseDelimitedFrom(java.io.InputStream input)
+              throws java.io.IOException {
+            return newBuilder().mergeDelimitedFrom(input).buildParsed();
+          }
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartWebServer parseDelimitedFrom(
+              java.io.InputStream input,
+              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+              throws java.io.IOException {
+            return newBuilder().mergeDelimitedFrom(input, extensionRegistry)
+                     .buildParsed();
+          }
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartWebServer parseFrom(
+              com.google.protobuf.CodedInputStream input)
+              throws java.io.IOException {
+            return newBuilder().mergeFrom(input).buildParsed();
+          }
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartWebServer parseFrom(
+              com.google.protobuf.CodedInputStream input,
+              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+              throws java.io.IOException {
+            return newBuilder().mergeFrom(input, extensionRegistry)
+                     .buildParsed();
+          }
+          
+          public static Builder newBuilder() { return Builder.create(); }
+          public Builder newBuilderForType() { return newBuilder(); }
+          public static Builder newBuilder(com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartWebServer prototype) {
+            return newBuilder().mergeFrom(prototype);
+          }
+          public Builder toBuilder() { return newBuilder(this); }
+          
+          public static final class Builder extends
+              com.google.protobuf.GeneratedMessage.Builder<Builder> {
+            private com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartWebServer result;
+            
+            // Construct using com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartWebServer.newBuilder()
+            private Builder() {}
+            
+            private static Builder create() {
+              Builder builder = new Builder();
+              builder.result = new com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartWebServer();
+              return builder;
+            }
+            
+            protected com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartWebServer internalGetResult() {
+              return result;
+            }
+            
+            public Builder clear() {
+              if (result == null) {
+                throw new IllegalStateException(
+                  "Cannot call clear() after build().");
+              }
+              result = new com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartWebServer();
+              return this;
+            }
+            
+            public Builder clone() {
+              return create().mergeFrom(result);
+            }
+            
+            public com.google.protobuf.Descriptors.Descriptor
+                getDescriptorForType() {
+              return com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartWebServer.getDescriptor();
+            }
+            
+            public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartWebServer getDefaultInstanceForType() {
+              return com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartWebServer.getDefaultInstance();
+            }
+            
+            public boolean isInitialized() {
+              return result.isInitialized();
+            }
+            public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartWebServer build() {
+              if (result != null && !isInitialized()) {
+                throw newUninitializedMessageException(result);
+              }
+              return buildPartial();
+            }
+            
+            private com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartWebServer buildParsed()
+                throws com.google.protobuf.InvalidProtocolBufferException {
+              if (!isInitialized()) {
+                throw newUninitializedMessageException(
+                  result).asInvalidProtocolBufferException();
+              }
+              return buildPartial();
+            }
+            
+            public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartWebServer buildPartial() {
+              if (result == null) {
+                throw new IllegalStateException(
+                  "build() has already been called on this Builder.");
+              }
+              com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartWebServer returnMe = result;
+              result = null;
+              return returnMe;
+            }
+            
+            public Builder mergeFrom(com.google.protobuf.Message other) {
+              if (other instanceof com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartWebServer) {
+                return mergeFrom((com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartWebServer)other);
+              } else {
+                super.mergeFrom(other);
+                return this;
+              }
+            }
+            
+            public Builder mergeFrom(com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartWebServer other) {
+              if (other == com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartWebServer.getDefaultInstance()) return this;
               this.mergeUnknownFields(other.getUnknownFields());
               return this;
             }
@@ -4465,16 +4988,23 @@ public final class RemoteMessageProto {
         // required .com.google.gwt.dev.shell.remoteui.Message.Request.DevModeRequest.RequestType requestType = 1;
         public static final int REQUESTTYPE_FIELD_NUMBER = 1;
         private boolean hasRequestType;
-        private com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RequestType requestType_ = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RequestType.RESTART_SERVER;
+        private com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RequestType requestType_ = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RequestType.CAPABILITY_EXCHANGE;
         public boolean hasRequestType() { return hasRequestType; }
         public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RequestType getRequestType() { return requestType_; }
         
-        // optional .com.google.gwt.dev.shell.remoteui.Message.Request.DevModeRequest.RestartServer restartServer = 2;
-        public static final int RESTARTSERVER_FIELD_NUMBER = 2;
-        private boolean hasRestartServer;
-        private com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartServer restartServer_ = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartServer.getDefaultInstance();
-        public boolean hasRestartServer() { return hasRestartServer; }
-        public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartServer getRestartServer() { return restartServer_; }
+        // optional .com.google.gwt.dev.shell.remoteui.Message.Request.DevModeRequest.CapabilityExchange capabilityExchange = 2;
+        public static final int CAPABILITYEXCHANGE_FIELD_NUMBER = 2;
+        private boolean hasCapabilityExchange;
+        private com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.CapabilityExchange capabilityExchange_ = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.CapabilityExchange.getDefaultInstance();
+        public boolean hasCapabilityExchange() { return hasCapabilityExchange; }
+        public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.CapabilityExchange getCapabilityExchange() { return capabilityExchange_; }
+        
+        // optional .com.google.gwt.dev.shell.remoteui.Message.Request.DevModeRequest.RestartWebServer restartWebServer = 3;
+        public static final int RESTARTWEBSERVER_FIELD_NUMBER = 3;
+        private boolean hasRestartWebServer;
+        private com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartWebServer restartWebServer_ = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartWebServer.getDefaultInstance();
+        public boolean hasRestartWebServer() { return hasRestartWebServer; }
+        public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartWebServer getRestartWebServer() { return restartWebServer_; }
         
         public final boolean isInitialized() {
           if (!hasRequestType) return false;
@@ -4486,8 +5016,11 @@ public final class RemoteMessageProto {
           if (hasRequestType()) {
             output.writeEnum(1, getRequestType().getNumber());
           }
-          if (hasRestartServer()) {
-            output.writeMessage(2, getRestartServer());
+          if (hasCapabilityExchange()) {
+            output.writeMessage(2, getCapabilityExchange());
+          }
+          if (hasRestartWebServer()) {
+            output.writeMessage(3, getRestartWebServer());
           }
           getUnknownFields().writeTo(output);
         }
@@ -4502,9 +5035,13 @@ public final class RemoteMessageProto {
             size += com.google.protobuf.CodedOutputStream
               .computeEnumSize(1, getRequestType().getNumber());
           }
-          if (hasRestartServer()) {
+          if (hasCapabilityExchange()) {
             size += com.google.protobuf.CodedOutputStream
-              .computeMessageSize(2, getRestartServer());
+              .computeMessageSize(2, getCapabilityExchange());
+          }
+          if (hasRestartWebServer()) {
+            size += com.google.protobuf.CodedOutputStream
+              .computeMessageSize(3, getRestartWebServer());
           }
           size += getUnknownFields().getSerializedSize();
           memoizedSerializedSize = size;
@@ -4658,8 +5195,11 @@ public final class RemoteMessageProto {
             if (other.hasRequestType()) {
               setRequestType(other.getRequestType());
             }
-            if (other.hasRestartServer()) {
-              mergeRestartServer(other.getRestartServer());
+            if (other.hasCapabilityExchange()) {
+              mergeCapabilityExchange(other.getCapabilityExchange());
+            }
+            if (other.hasRestartWebServer()) {
+              mergeRestartWebServer(other.getRestartWebServer());
             }
             this.mergeUnknownFields(other.getUnknownFields());
             return this;
@@ -4697,12 +5237,21 @@ public final class RemoteMessageProto {
                   break;
                 }
                 case 18: {
-                  com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartServer.Builder subBuilder = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartServer.newBuilder();
-                  if (hasRestartServer()) {
-                    subBuilder.mergeFrom(getRestartServer());
+                  com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.CapabilityExchange.Builder subBuilder = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.CapabilityExchange.newBuilder();
+                  if (hasCapabilityExchange()) {
+                    subBuilder.mergeFrom(getCapabilityExchange());
                   }
                   input.readMessage(subBuilder, extensionRegistry);
-                  setRestartServer(subBuilder.buildPartial());
+                  setCapabilityExchange(subBuilder.buildPartial());
+                  break;
+                }
+                case 26: {
+                  com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartWebServer.Builder subBuilder = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartWebServer.newBuilder();
+                  if (hasRestartWebServer()) {
+                    subBuilder.mergeFrom(getRestartWebServer());
+                  }
+                  input.readMessage(subBuilder, extensionRegistry);
+                  setRestartWebServer(subBuilder.buildPartial());
                   break;
                 }
               }
@@ -4727,44 +5276,81 @@ public final class RemoteMessageProto {
           }
           public Builder clearRequestType() {
             result.hasRequestType = false;
-            result.requestType_ = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RequestType.RESTART_SERVER;
+            result.requestType_ = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RequestType.CAPABILITY_EXCHANGE;
             return this;
           }
           
-          // optional .com.google.gwt.dev.shell.remoteui.Message.Request.DevModeRequest.RestartServer restartServer = 2;
-          public boolean hasRestartServer() {
-            return result.hasRestartServer();
+          // optional .com.google.gwt.dev.shell.remoteui.Message.Request.DevModeRequest.CapabilityExchange capabilityExchange = 2;
+          public boolean hasCapabilityExchange() {
+            return result.hasCapabilityExchange();
           }
-          public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartServer getRestartServer() {
-            return result.getRestartServer();
+          public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.CapabilityExchange getCapabilityExchange() {
+            return result.getCapabilityExchange();
           }
-          public Builder setRestartServer(com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartServer value) {
+          public Builder setCapabilityExchange(com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.CapabilityExchange value) {
             if (value == null) {
               throw new NullPointerException();
             }
-            result.hasRestartServer = true;
-            result.restartServer_ = value;
+            result.hasCapabilityExchange = true;
+            result.capabilityExchange_ = value;
             return this;
           }
-          public Builder setRestartServer(com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartServer.Builder builderForValue) {
-            result.hasRestartServer = true;
-            result.restartServer_ = builderForValue.build();
+          public Builder setCapabilityExchange(com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.CapabilityExchange.Builder builderForValue) {
+            result.hasCapabilityExchange = true;
+            result.capabilityExchange_ = builderForValue.build();
             return this;
           }
-          public Builder mergeRestartServer(com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartServer value) {
-            if (result.hasRestartServer() &&
-                result.restartServer_ != com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartServer.getDefaultInstance()) {
-              result.restartServer_ =
-                com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartServer.newBuilder(result.restartServer_).mergeFrom(value).buildPartial();
+          public Builder mergeCapabilityExchange(com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.CapabilityExchange value) {
+            if (result.hasCapabilityExchange() &&
+                result.capabilityExchange_ != com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.CapabilityExchange.getDefaultInstance()) {
+              result.capabilityExchange_ =
+                com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.CapabilityExchange.newBuilder(result.capabilityExchange_).mergeFrom(value).buildPartial();
             } else {
-              result.restartServer_ = value;
+              result.capabilityExchange_ = value;
             }
-            result.hasRestartServer = true;
+            result.hasCapabilityExchange = true;
             return this;
           }
-          public Builder clearRestartServer() {
-            result.hasRestartServer = false;
-            result.restartServer_ = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartServer.getDefaultInstance();
+          public Builder clearCapabilityExchange() {
+            result.hasCapabilityExchange = false;
+            result.capabilityExchange_ = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.CapabilityExchange.getDefaultInstance();
+            return this;
+          }
+          
+          // optional .com.google.gwt.dev.shell.remoteui.Message.Request.DevModeRequest.RestartWebServer restartWebServer = 3;
+          public boolean hasRestartWebServer() {
+            return result.hasRestartWebServer();
+          }
+          public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartWebServer getRestartWebServer() {
+            return result.getRestartWebServer();
+          }
+          public Builder setRestartWebServer(com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartWebServer value) {
+            if (value == null) {
+              throw new NullPointerException();
+            }
+            result.hasRestartWebServer = true;
+            result.restartWebServer_ = value;
+            return this;
+          }
+          public Builder setRestartWebServer(com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartWebServer.Builder builderForValue) {
+            result.hasRestartWebServer = true;
+            result.restartWebServer_ = builderForValue.build();
+            return this;
+          }
+          public Builder mergeRestartWebServer(com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartWebServer value) {
+            if (result.hasRestartWebServer() &&
+                result.restartWebServer_ != com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartWebServer.getDefaultInstance()) {
+              result.restartWebServer_ =
+                com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartWebServer.newBuilder(result.restartWebServer_).mergeFrom(value).buildPartial();
+            } else {
+              result.restartWebServer_ = value;
+            }
+            result.hasRestartWebServer = true;
+            return this;
+          }
+          public Builder clearRestartWebServer() {
+            result.hasRestartWebServer = false;
+            result.restartWebServer_ = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartWebServer.getDefaultInstance();
             return this;
           }
         }
@@ -5252,8 +5838,9 @@ public final class RemoteMessageProto {
         
         public enum ResponseType
             implements com.google.protobuf.ProtocolMessageEnum {
-          ADD_LOG(0, 0),
-          ADD_LOG_BRANCH(1, 1),
+          CAPABILITY_EXCHANGE(0, 0),
+          ADD_LOG(1, 1),
+          ADD_LOG_BRANCH(2, 2),
           ;
           
           
@@ -5261,8 +5848,9 @@ public final class RemoteMessageProto {
           
           public static ResponseType valueOf(int value) {
             switch (value) {
-              case 0: return ADD_LOG;
-              case 1: return ADD_LOG_BRANCH;
+              case 0: return CAPABILITY_EXCHANGE;
+              case 1: return ADD_LOG;
+              case 2: return ADD_LOG_BRANCH;
               default: return null;
             }
           }
@@ -5293,7 +5881,7 @@ public final class RemoteMessageProto {
           }
           
           private static final ResponseType[] VALUES = {
-            ADD_LOG, ADD_LOG_BRANCH, 
+            CAPABILITY_EXCHANGE, ADD_LOG, ADD_LOG_BRANCH, 
           };
           public static ResponseType valueOf(
               com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
@@ -5312,6 +5900,306 @@ public final class RemoteMessageProto {
           
           static {
             com.google.gwt.dev.shell.remoteui.RemoteMessageProto.getDescriptor();
+          }
+        }
+        
+        public static final class CapabilityExchange extends
+            com.google.protobuf.GeneratedMessage {
+          // Use CapabilityExchange.newBuilder() to construct.
+          private CapabilityExchange() {}
+          
+          private static final CapabilityExchange defaultInstance = new CapabilityExchange();
+          public static CapabilityExchange getDefaultInstance() {
+            return defaultInstance;
+          }
+          
+          public CapabilityExchange getDefaultInstanceForType() {
+            return defaultInstance;
+          }
+          
+          public static final com.google.protobuf.Descriptors.Descriptor
+              getDescriptor() {
+            return com.google.gwt.dev.shell.remoteui.RemoteMessageProto.internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_ViewerResponse_CapabilityExchange_descriptor;
+          }
+          
+          protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+              internalGetFieldAccessorTable() {
+            return com.google.gwt.dev.shell.remoteui.RemoteMessageProto.internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_ViewerResponse_CapabilityExchange_fieldAccessorTable;
+          }
+          
+          // repeated uint32 capability = 1;
+          public static final int CAPABILITY_FIELD_NUMBER = 1;
+          private java.util.List<java.lang.Integer> capability_ =
+            java.util.Collections.emptyList();
+          public java.util.List<java.lang.Integer> getCapabilityList() {
+            return capability_;
+          }
+          public int getCapabilityCount() { return capability_.size(); }
+          public int getCapability(int index) {
+            return capability_.get(index);
+          }
+          
+          public final boolean isInitialized() {
+            return true;
+          }
+          
+          public void writeTo(com.google.protobuf.CodedOutputStream output)
+                              throws java.io.IOException {
+            for (int element : getCapabilityList()) {
+              output.writeUInt32(1, element);
+            }
+            getUnknownFields().writeTo(output);
+          }
+          
+          private int memoizedSerializedSize = -1;
+          public int getSerializedSize() {
+            int size = memoizedSerializedSize;
+            if (size != -1) return size;
+          
+            size = 0;
+            {
+              int dataSize = 0;
+              for (int element : getCapabilityList()) {
+                dataSize += com.google.protobuf.CodedOutputStream
+                  .computeUInt32SizeNoTag(element);
+              }
+              size += dataSize;
+              size += 1 * getCapabilityList().size();
+            }
+            size += getUnknownFields().getSerializedSize();
+            memoizedSerializedSize = size;
+            return size;
+          }
+          
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.CapabilityExchange parseFrom(
+              com.google.protobuf.ByteString data)
+              throws com.google.protobuf.InvalidProtocolBufferException {
+            return newBuilder().mergeFrom(data).buildParsed();
+          }
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.CapabilityExchange parseFrom(
+              com.google.protobuf.ByteString data,
+              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+              throws com.google.protobuf.InvalidProtocolBufferException {
+            return newBuilder().mergeFrom(data, extensionRegistry)
+                     .buildParsed();
+          }
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.CapabilityExchange parseFrom(byte[] data)
+              throws com.google.protobuf.InvalidProtocolBufferException {
+            return newBuilder().mergeFrom(data).buildParsed();
+          }
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.CapabilityExchange parseFrom(
+              byte[] data,
+              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+              throws com.google.protobuf.InvalidProtocolBufferException {
+            return newBuilder().mergeFrom(data, extensionRegistry)
+                     .buildParsed();
+          }
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.CapabilityExchange parseFrom(java.io.InputStream input)
+              throws java.io.IOException {
+            return newBuilder().mergeFrom(input).buildParsed();
+          }
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.CapabilityExchange parseFrom(
+              java.io.InputStream input,
+              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+              throws java.io.IOException {
+            return newBuilder().mergeFrom(input, extensionRegistry)
+                     .buildParsed();
+          }
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.CapabilityExchange parseDelimitedFrom(java.io.InputStream input)
+              throws java.io.IOException {
+            return newBuilder().mergeDelimitedFrom(input).buildParsed();
+          }
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.CapabilityExchange parseDelimitedFrom(
+              java.io.InputStream input,
+              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+              throws java.io.IOException {
+            return newBuilder().mergeDelimitedFrom(input, extensionRegistry)
+                     .buildParsed();
+          }
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.CapabilityExchange parseFrom(
+              com.google.protobuf.CodedInputStream input)
+              throws java.io.IOException {
+            return newBuilder().mergeFrom(input).buildParsed();
+          }
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.CapabilityExchange parseFrom(
+              com.google.protobuf.CodedInputStream input,
+              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+              throws java.io.IOException {
+            return newBuilder().mergeFrom(input, extensionRegistry)
+                     .buildParsed();
+          }
+          
+          public static Builder newBuilder() { return Builder.create(); }
+          public Builder newBuilderForType() { return newBuilder(); }
+          public static Builder newBuilder(com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.CapabilityExchange prototype) {
+            return newBuilder().mergeFrom(prototype);
+          }
+          public Builder toBuilder() { return newBuilder(this); }
+          
+          public static final class Builder extends
+              com.google.protobuf.GeneratedMessage.Builder<Builder> {
+            private com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.CapabilityExchange result;
+            
+            // Construct using com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.CapabilityExchange.newBuilder()
+            private Builder() {}
+            
+            private static Builder create() {
+              Builder builder = new Builder();
+              builder.result = new com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.CapabilityExchange();
+              return builder;
+            }
+            
+            protected com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.CapabilityExchange internalGetResult() {
+              return result;
+            }
+            
+            public Builder clear() {
+              if (result == null) {
+                throw new IllegalStateException(
+                  "Cannot call clear() after build().");
+              }
+              result = new com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.CapabilityExchange();
+              return this;
+            }
+            
+            public Builder clone() {
+              return create().mergeFrom(result);
+            }
+            
+            public com.google.protobuf.Descriptors.Descriptor
+                getDescriptorForType() {
+              return com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.CapabilityExchange.getDescriptor();
+            }
+            
+            public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.CapabilityExchange getDefaultInstanceForType() {
+              return com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.CapabilityExchange.getDefaultInstance();
+            }
+            
+            public boolean isInitialized() {
+              return result.isInitialized();
+            }
+            public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.CapabilityExchange build() {
+              if (result != null && !isInitialized()) {
+                throw newUninitializedMessageException(result);
+              }
+              return buildPartial();
+            }
+            
+            private com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.CapabilityExchange buildParsed()
+                throws com.google.protobuf.InvalidProtocolBufferException {
+              if (!isInitialized()) {
+                throw newUninitializedMessageException(
+                  result).asInvalidProtocolBufferException();
+              }
+              return buildPartial();
+            }
+            
+            public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.CapabilityExchange buildPartial() {
+              if (result == null) {
+                throw new IllegalStateException(
+                  "build() has already been called on this Builder.");
+              }
+              if (result.capability_ != java.util.Collections.EMPTY_LIST) {
+                result.capability_ =
+                  java.util.Collections.unmodifiableList(result.capability_);
+              }
+              com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.CapabilityExchange returnMe = result;
+              result = null;
+              return returnMe;
+            }
+            
+            public Builder mergeFrom(com.google.protobuf.Message other) {
+              if (other instanceof com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.CapabilityExchange) {
+                return mergeFrom((com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.CapabilityExchange)other);
+              } else {
+                super.mergeFrom(other);
+                return this;
+              }
+            }
+            
+            public Builder mergeFrom(com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.CapabilityExchange other) {
+              if (other == com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.CapabilityExchange.getDefaultInstance()) return this;
+              if (!other.capability_.isEmpty()) {
+                if (result.capability_.isEmpty()) {
+                  result.capability_ = new java.util.ArrayList<java.lang.Integer>();
+                }
+                result.capability_.addAll(other.capability_);
+              }
+              this.mergeUnknownFields(other.getUnknownFields());
+              return this;
+            }
+            
+            public Builder mergeFrom(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+              com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+                com.google.protobuf.UnknownFieldSet.newBuilder(
+                  this.getUnknownFields());
+              while (true) {
+                int tag = input.readTag();
+                switch (tag) {
+                  case 0:
+                    this.setUnknownFields(unknownFields.build());
+                    return this;
+                  default: {
+                    if (!parseUnknownField(input, unknownFields,
+                                           extensionRegistry, tag)) {
+                      this.setUnknownFields(unknownFields.build());
+                      return this;
+                    }
+                    break;
+                  }
+                  case 8: {
+                    addCapability(input.readUInt32());
+                    break;
+                  }
+                }
+              }
+            }
+            
+            
+            // repeated uint32 capability = 1;
+            public java.util.List<java.lang.Integer> getCapabilityList() {
+              return java.util.Collections.unmodifiableList(result.capability_);
+            }
+            public int getCapabilityCount() {
+              return result.getCapabilityCount();
+            }
+            public int getCapability(int index) {
+              return result.getCapability(index);
+            }
+            public Builder setCapability(int index, int value) {
+              result.capability_.set(index, value);
+              return this;
+            }
+            public Builder addCapability(int value) {
+              if (result.capability_.isEmpty()) {
+                result.capability_ = new java.util.ArrayList<java.lang.Integer>();
+              }
+              result.capability_.add(value);
+              return this;
+            }
+            public Builder addAllCapability(
+                java.lang.Iterable<? extends java.lang.Integer> values) {
+              if (result.capability_.isEmpty()) {
+                result.capability_ = new java.util.ArrayList<java.lang.Integer>();
+              }
+              super.addAll(values, result.capability_);
+              return this;
+            }
+            public Builder clearCapability() {
+              result.capability_ = java.util.Collections.emptyList();
+              return this;
+            }
+          }
+          
+          static {
+            com.google.gwt.dev.shell.remoteui.RemoteMessageProto.getDescriptor();
+          }
+          
+          static {
+            com.google.gwt.dev.shell.remoteui.RemoteMessageProto.internalForceInit();
           }
         }
         
@@ -5854,19 +6742,26 @@ public final class RemoteMessageProto {
         // required .com.google.gwt.dev.shell.remoteui.Message.Response.ViewerResponse.ResponseType responseType = 1;
         public static final int RESPONSETYPE_FIELD_NUMBER = 1;
         private boolean hasResponseType;
-        private com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.ResponseType responseType_ = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.ResponseType.ADD_LOG;
+        private com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.ResponseType responseType_ = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.ResponseType.CAPABILITY_EXCHANGE;
         public boolean hasResponseType() { return hasResponseType; }
         public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.ResponseType getResponseType() { return responseType_; }
         
-        // optional .com.google.gwt.dev.shell.remoteui.Message.Response.ViewerResponse.AddLog addLog = 2;
-        public static final int ADDLOG_FIELD_NUMBER = 2;
+        // optional .com.google.gwt.dev.shell.remoteui.Message.Response.ViewerResponse.CapabilityExchange capabilityExchange = 2;
+        public static final int CAPABILITYEXCHANGE_FIELD_NUMBER = 2;
+        private boolean hasCapabilityExchange;
+        private com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.CapabilityExchange capabilityExchange_ = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.CapabilityExchange.getDefaultInstance();
+        public boolean hasCapabilityExchange() { return hasCapabilityExchange; }
+        public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.CapabilityExchange getCapabilityExchange() { return capabilityExchange_; }
+        
+        // optional .com.google.gwt.dev.shell.remoteui.Message.Response.ViewerResponse.AddLog addLog = 3;
+        public static final int ADDLOG_FIELD_NUMBER = 3;
         private boolean hasAddLog;
         private com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.AddLog addLog_ = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.AddLog.getDefaultInstance();
         public boolean hasAddLog() { return hasAddLog; }
         public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.AddLog getAddLog() { return addLog_; }
         
-        // optional .com.google.gwt.dev.shell.remoteui.Message.Response.ViewerResponse.AddLogBranch addLogBranch = 3;
-        public static final int ADDLOGBRANCH_FIELD_NUMBER = 3;
+        // optional .com.google.gwt.dev.shell.remoteui.Message.Response.ViewerResponse.AddLogBranch addLogBranch = 4;
+        public static final int ADDLOGBRANCH_FIELD_NUMBER = 4;
         private boolean hasAddLogBranch;
         private com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.AddLogBranch addLogBranch_ = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.AddLogBranch.getDefaultInstance();
         public boolean hasAddLogBranch() { return hasAddLogBranch; }
@@ -5888,11 +6783,14 @@ public final class RemoteMessageProto {
           if (hasResponseType()) {
             output.writeEnum(1, getResponseType().getNumber());
           }
+          if (hasCapabilityExchange()) {
+            output.writeMessage(2, getCapabilityExchange());
+          }
           if (hasAddLog()) {
-            output.writeMessage(2, getAddLog());
+            output.writeMessage(3, getAddLog());
           }
           if (hasAddLogBranch()) {
-            output.writeMessage(3, getAddLogBranch());
+            output.writeMessage(4, getAddLogBranch());
           }
           getUnknownFields().writeTo(output);
         }
@@ -5907,13 +6805,17 @@ public final class RemoteMessageProto {
             size += com.google.protobuf.CodedOutputStream
               .computeEnumSize(1, getResponseType().getNumber());
           }
+          if (hasCapabilityExchange()) {
+            size += com.google.protobuf.CodedOutputStream
+              .computeMessageSize(2, getCapabilityExchange());
+          }
           if (hasAddLog()) {
             size += com.google.protobuf.CodedOutputStream
-              .computeMessageSize(2, getAddLog());
+              .computeMessageSize(3, getAddLog());
           }
           if (hasAddLogBranch()) {
             size += com.google.protobuf.CodedOutputStream
-              .computeMessageSize(3, getAddLogBranch());
+              .computeMessageSize(4, getAddLogBranch());
           }
           size += getUnknownFields().getSerializedSize();
           memoizedSerializedSize = size;
@@ -6067,6 +6969,9 @@ public final class RemoteMessageProto {
             if (other.hasResponseType()) {
               setResponseType(other.getResponseType());
             }
+            if (other.hasCapabilityExchange()) {
+              mergeCapabilityExchange(other.getCapabilityExchange());
+            }
             if (other.hasAddLog()) {
               mergeAddLog(other.getAddLog());
             }
@@ -6109,6 +7014,15 @@ public final class RemoteMessageProto {
                   break;
                 }
                 case 18: {
+                  com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.CapabilityExchange.Builder subBuilder = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.CapabilityExchange.newBuilder();
+                  if (hasCapabilityExchange()) {
+                    subBuilder.mergeFrom(getCapabilityExchange());
+                  }
+                  input.readMessage(subBuilder, extensionRegistry);
+                  setCapabilityExchange(subBuilder.buildPartial());
+                  break;
+                }
+                case 26: {
                   com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.AddLog.Builder subBuilder = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.AddLog.newBuilder();
                   if (hasAddLog()) {
                     subBuilder.mergeFrom(getAddLog());
@@ -6117,7 +7031,7 @@ public final class RemoteMessageProto {
                   setAddLog(subBuilder.buildPartial());
                   break;
                 }
-                case 26: {
+                case 34: {
                   com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.AddLogBranch.Builder subBuilder = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.AddLogBranch.newBuilder();
                   if (hasAddLogBranch()) {
                     subBuilder.mergeFrom(getAddLogBranch());
@@ -6148,11 +7062,48 @@ public final class RemoteMessageProto {
           }
           public Builder clearResponseType() {
             result.hasResponseType = false;
-            result.responseType_ = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.ResponseType.ADD_LOG;
+            result.responseType_ = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.ResponseType.CAPABILITY_EXCHANGE;
             return this;
           }
           
-          // optional .com.google.gwt.dev.shell.remoteui.Message.Response.ViewerResponse.AddLog addLog = 2;
+          // optional .com.google.gwt.dev.shell.remoteui.Message.Response.ViewerResponse.CapabilityExchange capabilityExchange = 2;
+          public boolean hasCapabilityExchange() {
+            return result.hasCapabilityExchange();
+          }
+          public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.CapabilityExchange getCapabilityExchange() {
+            return result.getCapabilityExchange();
+          }
+          public Builder setCapabilityExchange(com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.CapabilityExchange value) {
+            if (value == null) {
+              throw new NullPointerException();
+            }
+            result.hasCapabilityExchange = true;
+            result.capabilityExchange_ = value;
+            return this;
+          }
+          public Builder setCapabilityExchange(com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.CapabilityExchange.Builder builderForValue) {
+            result.hasCapabilityExchange = true;
+            result.capabilityExchange_ = builderForValue.build();
+            return this;
+          }
+          public Builder mergeCapabilityExchange(com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.CapabilityExchange value) {
+            if (result.hasCapabilityExchange() &&
+                result.capabilityExchange_ != com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.CapabilityExchange.getDefaultInstance()) {
+              result.capabilityExchange_ =
+                com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.CapabilityExchange.newBuilder(result.capabilityExchange_).mergeFrom(value).buildPartial();
+            } else {
+              result.capabilityExchange_ = value;
+            }
+            result.hasCapabilityExchange = true;
+            return this;
+          }
+          public Builder clearCapabilityExchange() {
+            result.hasCapabilityExchange = false;
+            result.capabilityExchange_ = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.CapabilityExchange.getDefaultInstance();
+            return this;
+          }
+          
+          // optional .com.google.gwt.dev.shell.remoteui.Message.Response.ViewerResponse.AddLog addLog = 3;
           public boolean hasAddLog() {
             return result.hasAddLog();
           }
@@ -6189,7 +7140,7 @@ public final class RemoteMessageProto {
             return this;
           }
           
-          // optional .com.google.gwt.dev.shell.remoteui.Message.Response.ViewerResponse.AddLogBranch addLogBranch = 3;
+          // optional .com.google.gwt.dev.shell.remoteui.Message.Response.ViewerResponse.AddLogBranch addLogBranch = 4;
           public boolean hasAddLogBranch() {
             return result.hasAddLogBranch();
           }
@@ -6262,7 +7213,8 @@ public final class RemoteMessageProto {
         
         public enum ResponseType
             implements com.google.protobuf.ProtocolMessageEnum {
-          RESTART_SERVER(0, 0),
+          CAPABILITY_EXCHANGE(0, 0),
+          RESTART_WEB_SERVER(1, 1),
           ;
           
           
@@ -6270,7 +7222,8 @@ public final class RemoteMessageProto {
           
           public static ResponseType valueOf(int value) {
             switch (value) {
-              case 0: return RESTART_SERVER;
+              case 0: return CAPABILITY_EXCHANGE;
+              case 1: return RESTART_WEB_SERVER;
               default: return null;
             }
           }
@@ -6301,7 +7254,7 @@ public final class RemoteMessageProto {
           }
           
           private static final ResponseType[] VALUES = {
-            RESTART_SERVER, 
+            CAPABILITY_EXCHANGE, RESTART_WEB_SERVER, 
           };
           public static ResponseType valueOf(
               com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
@@ -6323,28 +7276,328 @@ public final class RemoteMessageProto {
           }
         }
         
-        public static final class RestartServer extends
+        public static final class CapabilityExchange extends
             com.google.protobuf.GeneratedMessage {
-          // Use RestartServer.newBuilder() to construct.
-          private RestartServer() {}
+          // Use CapabilityExchange.newBuilder() to construct.
+          private CapabilityExchange() {}
           
-          private static final RestartServer defaultInstance = new RestartServer();
-          public static RestartServer getDefaultInstance() {
+          private static final CapabilityExchange defaultInstance = new CapabilityExchange();
+          public static CapabilityExchange getDefaultInstance() {
             return defaultInstance;
           }
           
-          public RestartServer getDefaultInstanceForType() {
+          public CapabilityExchange getDefaultInstanceForType() {
             return defaultInstance;
           }
           
           public static final com.google.protobuf.Descriptors.Descriptor
               getDescriptor() {
-            return com.google.gwt.dev.shell.remoteui.RemoteMessageProto.internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_DevModeResponse_RestartServer_descriptor;
+            return com.google.gwt.dev.shell.remoteui.RemoteMessageProto.internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_DevModeResponse_CapabilityExchange_descriptor;
           }
           
           protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
               internalGetFieldAccessorTable() {
-            return com.google.gwt.dev.shell.remoteui.RemoteMessageProto.internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_DevModeResponse_RestartServer_fieldAccessorTable;
+            return com.google.gwt.dev.shell.remoteui.RemoteMessageProto.internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_DevModeResponse_CapabilityExchange_fieldAccessorTable;
+          }
+          
+          // repeated uint32 capability = 1;
+          public static final int CAPABILITY_FIELD_NUMBER = 1;
+          private java.util.List<java.lang.Integer> capability_ =
+            java.util.Collections.emptyList();
+          public java.util.List<java.lang.Integer> getCapabilityList() {
+            return capability_;
+          }
+          public int getCapabilityCount() { return capability_.size(); }
+          public int getCapability(int index) {
+            return capability_.get(index);
+          }
+          
+          public final boolean isInitialized() {
+            return true;
+          }
+          
+          public void writeTo(com.google.protobuf.CodedOutputStream output)
+                              throws java.io.IOException {
+            for (int element : getCapabilityList()) {
+              output.writeUInt32(1, element);
+            }
+            getUnknownFields().writeTo(output);
+          }
+          
+          private int memoizedSerializedSize = -1;
+          public int getSerializedSize() {
+            int size = memoizedSerializedSize;
+            if (size != -1) return size;
+          
+            size = 0;
+            {
+              int dataSize = 0;
+              for (int element : getCapabilityList()) {
+                dataSize += com.google.protobuf.CodedOutputStream
+                  .computeUInt32SizeNoTag(element);
+              }
+              size += dataSize;
+              size += 1 * getCapabilityList().size();
+            }
+            size += getUnknownFields().getSerializedSize();
+            memoizedSerializedSize = size;
+            return size;
+          }
+          
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.CapabilityExchange parseFrom(
+              com.google.protobuf.ByteString data)
+              throws com.google.protobuf.InvalidProtocolBufferException {
+            return newBuilder().mergeFrom(data).buildParsed();
+          }
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.CapabilityExchange parseFrom(
+              com.google.protobuf.ByteString data,
+              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+              throws com.google.protobuf.InvalidProtocolBufferException {
+            return newBuilder().mergeFrom(data, extensionRegistry)
+                     .buildParsed();
+          }
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.CapabilityExchange parseFrom(byte[] data)
+              throws com.google.protobuf.InvalidProtocolBufferException {
+            return newBuilder().mergeFrom(data).buildParsed();
+          }
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.CapabilityExchange parseFrom(
+              byte[] data,
+              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+              throws com.google.protobuf.InvalidProtocolBufferException {
+            return newBuilder().mergeFrom(data, extensionRegistry)
+                     .buildParsed();
+          }
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.CapabilityExchange parseFrom(java.io.InputStream input)
+              throws java.io.IOException {
+            return newBuilder().mergeFrom(input).buildParsed();
+          }
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.CapabilityExchange parseFrom(
+              java.io.InputStream input,
+              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+              throws java.io.IOException {
+            return newBuilder().mergeFrom(input, extensionRegistry)
+                     .buildParsed();
+          }
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.CapabilityExchange parseDelimitedFrom(java.io.InputStream input)
+              throws java.io.IOException {
+            return newBuilder().mergeDelimitedFrom(input).buildParsed();
+          }
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.CapabilityExchange parseDelimitedFrom(
+              java.io.InputStream input,
+              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+              throws java.io.IOException {
+            return newBuilder().mergeDelimitedFrom(input, extensionRegistry)
+                     .buildParsed();
+          }
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.CapabilityExchange parseFrom(
+              com.google.protobuf.CodedInputStream input)
+              throws java.io.IOException {
+            return newBuilder().mergeFrom(input).buildParsed();
+          }
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.CapabilityExchange parseFrom(
+              com.google.protobuf.CodedInputStream input,
+              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+              throws java.io.IOException {
+            return newBuilder().mergeFrom(input, extensionRegistry)
+                     .buildParsed();
+          }
+          
+          public static Builder newBuilder() { return Builder.create(); }
+          public Builder newBuilderForType() { return newBuilder(); }
+          public static Builder newBuilder(com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.CapabilityExchange prototype) {
+            return newBuilder().mergeFrom(prototype);
+          }
+          public Builder toBuilder() { return newBuilder(this); }
+          
+          public static final class Builder extends
+              com.google.protobuf.GeneratedMessage.Builder<Builder> {
+            private com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.CapabilityExchange result;
+            
+            // Construct using com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.CapabilityExchange.newBuilder()
+            private Builder() {}
+            
+            private static Builder create() {
+              Builder builder = new Builder();
+              builder.result = new com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.CapabilityExchange();
+              return builder;
+            }
+            
+            protected com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.CapabilityExchange internalGetResult() {
+              return result;
+            }
+            
+            public Builder clear() {
+              if (result == null) {
+                throw new IllegalStateException(
+                  "Cannot call clear() after build().");
+              }
+              result = new com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.CapabilityExchange();
+              return this;
+            }
+            
+            public Builder clone() {
+              return create().mergeFrom(result);
+            }
+            
+            public com.google.protobuf.Descriptors.Descriptor
+                getDescriptorForType() {
+              return com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.CapabilityExchange.getDescriptor();
+            }
+            
+            public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.CapabilityExchange getDefaultInstanceForType() {
+              return com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.CapabilityExchange.getDefaultInstance();
+            }
+            
+            public boolean isInitialized() {
+              return result.isInitialized();
+            }
+            public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.CapabilityExchange build() {
+              if (result != null && !isInitialized()) {
+                throw newUninitializedMessageException(result);
+              }
+              return buildPartial();
+            }
+            
+            private com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.CapabilityExchange buildParsed()
+                throws com.google.protobuf.InvalidProtocolBufferException {
+              if (!isInitialized()) {
+                throw newUninitializedMessageException(
+                  result).asInvalidProtocolBufferException();
+              }
+              return buildPartial();
+            }
+            
+            public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.CapabilityExchange buildPartial() {
+              if (result == null) {
+                throw new IllegalStateException(
+                  "build() has already been called on this Builder.");
+              }
+              if (result.capability_ != java.util.Collections.EMPTY_LIST) {
+                result.capability_ =
+                  java.util.Collections.unmodifiableList(result.capability_);
+              }
+              com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.CapabilityExchange returnMe = result;
+              result = null;
+              return returnMe;
+            }
+            
+            public Builder mergeFrom(com.google.protobuf.Message other) {
+              if (other instanceof com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.CapabilityExchange) {
+                return mergeFrom((com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.CapabilityExchange)other);
+              } else {
+                super.mergeFrom(other);
+                return this;
+              }
+            }
+            
+            public Builder mergeFrom(com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.CapabilityExchange other) {
+              if (other == com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.CapabilityExchange.getDefaultInstance()) return this;
+              if (!other.capability_.isEmpty()) {
+                if (result.capability_.isEmpty()) {
+                  result.capability_ = new java.util.ArrayList<java.lang.Integer>();
+                }
+                result.capability_.addAll(other.capability_);
+              }
+              this.mergeUnknownFields(other.getUnknownFields());
+              return this;
+            }
+            
+            public Builder mergeFrom(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+              com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+                com.google.protobuf.UnknownFieldSet.newBuilder(
+                  this.getUnknownFields());
+              while (true) {
+                int tag = input.readTag();
+                switch (tag) {
+                  case 0:
+                    this.setUnknownFields(unknownFields.build());
+                    return this;
+                  default: {
+                    if (!parseUnknownField(input, unknownFields,
+                                           extensionRegistry, tag)) {
+                      this.setUnknownFields(unknownFields.build());
+                      return this;
+                    }
+                    break;
+                  }
+                  case 8: {
+                    addCapability(input.readUInt32());
+                    break;
+                  }
+                }
+              }
+            }
+            
+            
+            // repeated uint32 capability = 1;
+            public java.util.List<java.lang.Integer> getCapabilityList() {
+              return java.util.Collections.unmodifiableList(result.capability_);
+            }
+            public int getCapabilityCount() {
+              return result.getCapabilityCount();
+            }
+            public int getCapability(int index) {
+              return result.getCapability(index);
+            }
+            public Builder setCapability(int index, int value) {
+              result.capability_.set(index, value);
+              return this;
+            }
+            public Builder addCapability(int value) {
+              if (result.capability_.isEmpty()) {
+                result.capability_ = new java.util.ArrayList<java.lang.Integer>();
+              }
+              result.capability_.add(value);
+              return this;
+            }
+            public Builder addAllCapability(
+                java.lang.Iterable<? extends java.lang.Integer> values) {
+              if (result.capability_.isEmpty()) {
+                result.capability_ = new java.util.ArrayList<java.lang.Integer>();
+              }
+              super.addAll(values, result.capability_);
+              return this;
+            }
+            public Builder clearCapability() {
+              result.capability_ = java.util.Collections.emptyList();
+              return this;
+            }
+          }
+          
+          static {
+            com.google.gwt.dev.shell.remoteui.RemoteMessageProto.getDescriptor();
+          }
+          
+          static {
+            com.google.gwt.dev.shell.remoteui.RemoteMessageProto.internalForceInit();
+          }
+        }
+        
+        public static final class RestartWebServer extends
+            com.google.protobuf.GeneratedMessage {
+          // Use RestartWebServer.newBuilder() to construct.
+          private RestartWebServer() {}
+          
+          private static final RestartWebServer defaultInstance = new RestartWebServer();
+          public static RestartWebServer getDefaultInstance() {
+            return defaultInstance;
+          }
+          
+          public RestartWebServer getDefaultInstanceForType() {
+            return defaultInstance;
+          }
+          
+          public static final com.google.protobuf.Descriptors.Descriptor
+              getDescriptor() {
+            return com.google.gwt.dev.shell.remoteui.RemoteMessageProto.internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_DevModeResponse_RestartWebServer_descriptor;
+          }
+          
+          protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+              internalGetFieldAccessorTable() {
+            return com.google.gwt.dev.shell.remoteui.RemoteMessageProto.internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_DevModeResponse_RestartWebServer_fieldAccessorTable;
           }
           
           public final boolean isInitialized() {
@@ -6367,57 +7620,57 @@ public final class RemoteMessageProto {
             return size;
           }
           
-          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartServer parseFrom(
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartWebServer parseFrom(
               com.google.protobuf.ByteString data)
               throws com.google.protobuf.InvalidProtocolBufferException {
             return newBuilder().mergeFrom(data).buildParsed();
           }
-          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartServer parseFrom(
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartWebServer parseFrom(
               com.google.protobuf.ByteString data,
               com.google.protobuf.ExtensionRegistryLite extensionRegistry)
               throws com.google.protobuf.InvalidProtocolBufferException {
             return newBuilder().mergeFrom(data, extensionRegistry)
                      .buildParsed();
           }
-          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartServer parseFrom(byte[] data)
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartWebServer parseFrom(byte[] data)
               throws com.google.protobuf.InvalidProtocolBufferException {
             return newBuilder().mergeFrom(data).buildParsed();
           }
-          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartServer parseFrom(
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartWebServer parseFrom(
               byte[] data,
               com.google.protobuf.ExtensionRegistryLite extensionRegistry)
               throws com.google.protobuf.InvalidProtocolBufferException {
             return newBuilder().mergeFrom(data, extensionRegistry)
                      .buildParsed();
           }
-          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartServer parseFrom(java.io.InputStream input)
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartWebServer parseFrom(java.io.InputStream input)
               throws java.io.IOException {
             return newBuilder().mergeFrom(input).buildParsed();
           }
-          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartServer parseFrom(
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartWebServer parseFrom(
               java.io.InputStream input,
               com.google.protobuf.ExtensionRegistryLite extensionRegistry)
               throws java.io.IOException {
             return newBuilder().mergeFrom(input, extensionRegistry)
                      .buildParsed();
           }
-          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartServer parseDelimitedFrom(java.io.InputStream input)
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartWebServer parseDelimitedFrom(java.io.InputStream input)
               throws java.io.IOException {
             return newBuilder().mergeDelimitedFrom(input).buildParsed();
           }
-          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartServer parseDelimitedFrom(
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartWebServer parseDelimitedFrom(
               java.io.InputStream input,
               com.google.protobuf.ExtensionRegistryLite extensionRegistry)
               throws java.io.IOException {
             return newBuilder().mergeDelimitedFrom(input, extensionRegistry)
                      .buildParsed();
           }
-          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartServer parseFrom(
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartWebServer parseFrom(
               com.google.protobuf.CodedInputStream input)
               throws java.io.IOException {
             return newBuilder().mergeFrom(input).buildParsed();
           }
-          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartServer parseFrom(
+          public static com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartWebServer parseFrom(
               com.google.protobuf.CodedInputStream input,
               com.google.protobuf.ExtensionRegistryLite extensionRegistry)
               throws java.io.IOException {
@@ -6427,25 +7680,25 @@ public final class RemoteMessageProto {
           
           public static Builder newBuilder() { return Builder.create(); }
           public Builder newBuilderForType() { return newBuilder(); }
-          public static Builder newBuilder(com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartServer prototype) {
+          public static Builder newBuilder(com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartWebServer prototype) {
             return newBuilder().mergeFrom(prototype);
           }
           public Builder toBuilder() { return newBuilder(this); }
           
           public static final class Builder extends
               com.google.protobuf.GeneratedMessage.Builder<Builder> {
-            private com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartServer result;
+            private com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartWebServer result;
             
-            // Construct using com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartServer.newBuilder()
+            // Construct using com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartWebServer.newBuilder()
             private Builder() {}
             
             private static Builder create() {
               Builder builder = new Builder();
-              builder.result = new com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartServer();
+              builder.result = new com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartWebServer();
               return builder;
             }
             
-            protected com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartServer internalGetResult() {
+            protected com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartWebServer internalGetResult() {
               return result;
             }
             
@@ -6454,7 +7707,7 @@ public final class RemoteMessageProto {
                 throw new IllegalStateException(
                   "Cannot call clear() after build().");
               }
-              result = new com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartServer();
+              result = new com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartWebServer();
               return this;
             }
             
@@ -6464,24 +7717,24 @@ public final class RemoteMessageProto {
             
             public com.google.protobuf.Descriptors.Descriptor
                 getDescriptorForType() {
-              return com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartServer.getDescriptor();
+              return com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartWebServer.getDescriptor();
             }
             
-            public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartServer getDefaultInstanceForType() {
-              return com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartServer.getDefaultInstance();
+            public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartWebServer getDefaultInstanceForType() {
+              return com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartWebServer.getDefaultInstance();
             }
             
             public boolean isInitialized() {
               return result.isInitialized();
             }
-            public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartServer build() {
+            public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartWebServer build() {
               if (result != null && !isInitialized()) {
                 throw newUninitializedMessageException(result);
               }
               return buildPartial();
             }
             
-            private com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartServer buildParsed()
+            private com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartWebServer buildParsed()
                 throws com.google.protobuf.InvalidProtocolBufferException {
               if (!isInitialized()) {
                 throw newUninitializedMessageException(
@@ -6490,27 +7743,27 @@ public final class RemoteMessageProto {
               return buildPartial();
             }
             
-            public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartServer buildPartial() {
+            public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartWebServer buildPartial() {
               if (result == null) {
                 throw new IllegalStateException(
                   "build() has already been called on this Builder.");
               }
-              com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartServer returnMe = result;
+              com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartWebServer returnMe = result;
               result = null;
               return returnMe;
             }
             
             public Builder mergeFrom(com.google.protobuf.Message other) {
-              if (other instanceof com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartServer) {
-                return mergeFrom((com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartServer)other);
+              if (other instanceof com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartWebServer) {
+                return mergeFrom((com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartWebServer)other);
               } else {
                 super.mergeFrom(other);
                 return this;
               }
             }
             
-            public Builder mergeFrom(com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartServer other) {
-              if (other == com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartServer.getDefaultInstance()) return this;
+            public Builder mergeFrom(com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartWebServer other) {
+              if (other == com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartWebServer.getDefaultInstance()) return this;
               this.mergeUnknownFields(other.getUnknownFields());
               return this;
             }
@@ -6554,16 +7807,23 @@ public final class RemoteMessageProto {
         // required .com.google.gwt.dev.shell.remoteui.Message.Response.DevModeResponse.ResponseType responseType = 1;
         public static final int RESPONSETYPE_FIELD_NUMBER = 1;
         private boolean hasResponseType;
-        private com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.ResponseType responseType_ = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.ResponseType.RESTART_SERVER;
+        private com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.ResponseType responseType_ = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.ResponseType.CAPABILITY_EXCHANGE;
         public boolean hasResponseType() { return hasResponseType; }
         public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.ResponseType getResponseType() { return responseType_; }
         
-        // optional .com.google.gwt.dev.shell.remoteui.Message.Response.DevModeResponse.RestartServer restartServer = 2;
-        public static final int RESTARTSERVER_FIELD_NUMBER = 2;
-        private boolean hasRestartServer;
-        private com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartServer restartServer_ = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartServer.getDefaultInstance();
-        public boolean hasRestartServer() { return hasRestartServer; }
-        public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartServer getRestartServer() { return restartServer_; }
+        // optional .com.google.gwt.dev.shell.remoteui.Message.Response.DevModeResponse.CapabilityExchange capabilityExchange = 2;
+        public static final int CAPABILITYEXCHANGE_FIELD_NUMBER = 2;
+        private boolean hasCapabilityExchange;
+        private com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.CapabilityExchange capabilityExchange_ = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.CapabilityExchange.getDefaultInstance();
+        public boolean hasCapabilityExchange() { return hasCapabilityExchange; }
+        public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.CapabilityExchange getCapabilityExchange() { return capabilityExchange_; }
+        
+        // optional .com.google.gwt.dev.shell.remoteui.Message.Response.DevModeResponse.RestartWebServer restartWebServer = 3;
+        public static final int RESTARTWEBSERVER_FIELD_NUMBER = 3;
+        private boolean hasRestartWebServer;
+        private com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartWebServer restartWebServer_ = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartWebServer.getDefaultInstance();
+        public boolean hasRestartWebServer() { return hasRestartWebServer; }
+        public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartWebServer getRestartWebServer() { return restartWebServer_; }
         
         public final boolean isInitialized() {
           if (!hasResponseType) return false;
@@ -6575,8 +7835,11 @@ public final class RemoteMessageProto {
           if (hasResponseType()) {
             output.writeEnum(1, getResponseType().getNumber());
           }
-          if (hasRestartServer()) {
-            output.writeMessage(2, getRestartServer());
+          if (hasCapabilityExchange()) {
+            output.writeMessage(2, getCapabilityExchange());
+          }
+          if (hasRestartWebServer()) {
+            output.writeMessage(3, getRestartWebServer());
           }
           getUnknownFields().writeTo(output);
         }
@@ -6591,9 +7854,13 @@ public final class RemoteMessageProto {
             size += com.google.protobuf.CodedOutputStream
               .computeEnumSize(1, getResponseType().getNumber());
           }
-          if (hasRestartServer()) {
+          if (hasCapabilityExchange()) {
             size += com.google.protobuf.CodedOutputStream
-              .computeMessageSize(2, getRestartServer());
+              .computeMessageSize(2, getCapabilityExchange());
+          }
+          if (hasRestartWebServer()) {
+            size += com.google.protobuf.CodedOutputStream
+              .computeMessageSize(3, getRestartWebServer());
           }
           size += getUnknownFields().getSerializedSize();
           memoizedSerializedSize = size;
@@ -6747,8 +8014,11 @@ public final class RemoteMessageProto {
             if (other.hasResponseType()) {
               setResponseType(other.getResponseType());
             }
-            if (other.hasRestartServer()) {
-              mergeRestartServer(other.getRestartServer());
+            if (other.hasCapabilityExchange()) {
+              mergeCapabilityExchange(other.getCapabilityExchange());
+            }
+            if (other.hasRestartWebServer()) {
+              mergeRestartWebServer(other.getRestartWebServer());
             }
             this.mergeUnknownFields(other.getUnknownFields());
             return this;
@@ -6786,12 +8056,21 @@ public final class RemoteMessageProto {
                   break;
                 }
                 case 18: {
-                  com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartServer.Builder subBuilder = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartServer.newBuilder();
-                  if (hasRestartServer()) {
-                    subBuilder.mergeFrom(getRestartServer());
+                  com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.CapabilityExchange.Builder subBuilder = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.CapabilityExchange.newBuilder();
+                  if (hasCapabilityExchange()) {
+                    subBuilder.mergeFrom(getCapabilityExchange());
                   }
                   input.readMessage(subBuilder, extensionRegistry);
-                  setRestartServer(subBuilder.buildPartial());
+                  setCapabilityExchange(subBuilder.buildPartial());
+                  break;
+                }
+                case 26: {
+                  com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartWebServer.Builder subBuilder = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartWebServer.newBuilder();
+                  if (hasRestartWebServer()) {
+                    subBuilder.mergeFrom(getRestartWebServer());
+                  }
+                  input.readMessage(subBuilder, extensionRegistry);
+                  setRestartWebServer(subBuilder.buildPartial());
                   break;
                 }
               }
@@ -6816,44 +8095,81 @@ public final class RemoteMessageProto {
           }
           public Builder clearResponseType() {
             result.hasResponseType = false;
-            result.responseType_ = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.ResponseType.RESTART_SERVER;
+            result.responseType_ = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.ResponseType.CAPABILITY_EXCHANGE;
             return this;
           }
           
-          // optional .com.google.gwt.dev.shell.remoteui.Message.Response.DevModeResponse.RestartServer restartServer = 2;
-          public boolean hasRestartServer() {
-            return result.hasRestartServer();
+          // optional .com.google.gwt.dev.shell.remoteui.Message.Response.DevModeResponse.CapabilityExchange capabilityExchange = 2;
+          public boolean hasCapabilityExchange() {
+            return result.hasCapabilityExchange();
           }
-          public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartServer getRestartServer() {
-            return result.getRestartServer();
+          public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.CapabilityExchange getCapabilityExchange() {
+            return result.getCapabilityExchange();
           }
-          public Builder setRestartServer(com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartServer value) {
+          public Builder setCapabilityExchange(com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.CapabilityExchange value) {
             if (value == null) {
               throw new NullPointerException();
             }
-            result.hasRestartServer = true;
-            result.restartServer_ = value;
+            result.hasCapabilityExchange = true;
+            result.capabilityExchange_ = value;
             return this;
           }
-          public Builder setRestartServer(com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartServer.Builder builderForValue) {
-            result.hasRestartServer = true;
-            result.restartServer_ = builderForValue.build();
+          public Builder setCapabilityExchange(com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.CapabilityExchange.Builder builderForValue) {
+            result.hasCapabilityExchange = true;
+            result.capabilityExchange_ = builderForValue.build();
             return this;
           }
-          public Builder mergeRestartServer(com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartServer value) {
-            if (result.hasRestartServer() &&
-                result.restartServer_ != com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartServer.getDefaultInstance()) {
-              result.restartServer_ =
-                com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartServer.newBuilder(result.restartServer_).mergeFrom(value).buildPartial();
+          public Builder mergeCapabilityExchange(com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.CapabilityExchange value) {
+            if (result.hasCapabilityExchange() &&
+                result.capabilityExchange_ != com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.CapabilityExchange.getDefaultInstance()) {
+              result.capabilityExchange_ =
+                com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.CapabilityExchange.newBuilder(result.capabilityExchange_).mergeFrom(value).buildPartial();
             } else {
-              result.restartServer_ = value;
+              result.capabilityExchange_ = value;
             }
-            result.hasRestartServer = true;
+            result.hasCapabilityExchange = true;
             return this;
           }
-          public Builder clearRestartServer() {
-            result.hasRestartServer = false;
-            result.restartServer_ = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartServer.getDefaultInstance();
+          public Builder clearCapabilityExchange() {
+            result.hasCapabilityExchange = false;
+            result.capabilityExchange_ = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.CapabilityExchange.getDefaultInstance();
+            return this;
+          }
+          
+          // optional .com.google.gwt.dev.shell.remoteui.Message.Response.DevModeResponse.RestartWebServer restartWebServer = 3;
+          public boolean hasRestartWebServer() {
+            return result.hasRestartWebServer();
+          }
+          public com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartWebServer getRestartWebServer() {
+            return result.getRestartWebServer();
+          }
+          public Builder setRestartWebServer(com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartWebServer value) {
+            if (value == null) {
+              throw new NullPointerException();
+            }
+            result.hasRestartWebServer = true;
+            result.restartWebServer_ = value;
+            return this;
+          }
+          public Builder setRestartWebServer(com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartWebServer.Builder builderForValue) {
+            result.hasRestartWebServer = true;
+            result.restartWebServer_ = builderForValue.build();
+            return this;
+          }
+          public Builder mergeRestartWebServer(com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartWebServer value) {
+            if (result.hasRestartWebServer() &&
+                result.restartWebServer_ != com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartWebServer.getDefaultInstance()) {
+              result.restartWebServer_ =
+                com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartWebServer.newBuilder(result.restartWebServer_).mergeFrom(value).buildPartial();
+            } else {
+              result.restartWebServer_ = value;
+            }
+            result.hasRestartWebServer = true;
+            return this;
+          }
+          public Builder clearRestartWebServer() {
+            result.hasRestartWebServer = false;
+            result.restartWebServer_ = com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartWebServer.getDefaultInstance();
             return this;
           }
         }
@@ -7644,6 +8960,11 @@ public final class RemoteMessageProto {
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_ViewerRequest_fieldAccessorTable;
   private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_ViewerRequest_CapabilityExchange_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_ViewerRequest_CapabilityExchange_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
     internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_ViewerRequest_AddLog_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
@@ -7694,10 +9015,15 @@ public final class RemoteMessageProto {
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_DevModeRequest_fieldAccessorTable;
   private static com.google.protobuf.Descriptors.Descriptor
-    internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_DevModeRequest_RestartServer_descriptor;
+    internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_DevModeRequest_CapabilityExchange_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_DevModeRequest_RestartServer_fieldAccessorTable;
+      internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_DevModeRequest_CapabilityExchange_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_DevModeRequest_RestartWebServer_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_DevModeRequest_RestartWebServer_fieldAccessorTable;
   private static com.google.protobuf.Descriptors.Descriptor
     internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_descriptor;
   private static
@@ -7708,6 +9034,11 @@ public final class RemoteMessageProto {
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_ViewerResponse_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_ViewerResponse_CapabilityExchange_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_ViewerResponse_CapabilityExchange_fieldAccessorTable;
   private static com.google.protobuf.Descriptors.Descriptor
     internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_ViewerResponse_AddLog_descriptor;
   private static
@@ -7724,10 +9055,15 @@ public final class RemoteMessageProto {
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_DevModeResponse_fieldAccessorTable;
   private static com.google.protobuf.Descriptors.Descriptor
-    internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_DevModeResponse_RestartServer_descriptor;
+    internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_DevModeResponse_CapabilityExchange_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_DevModeResponse_RestartServer_fieldAccessorTable;
+      internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_DevModeResponse_CapabilityExchange_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_DevModeResponse_RestartWebServer_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_DevModeResponse_RestartWebServer_fieldAccessorTable;
   
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -7739,97 +9075,115 @@ public final class RemoteMessageProto {
     java.lang.String[] descriptorData = {
       "\n5com/google/gwt/dev/shell/remoteui/remo" +
       "temessage.proto\022!com.google.gwt.dev.shel" +
-      "l.remoteui\"\374\033\n\007Message\022K\n\013messageType\030\001 " +
+      "l.remoteui\"\304!\n\007Message\022K\n\013messageType\030\001 " +
       "\002(\01626.com.google.gwt.dev.shell.remoteui." +
       "Message.MessageType\022C\n\007request\030\002 \001(\01322.c" +
       "om.google.gwt.dev.shell.remoteui.Message" +
       ".Request\022E\n\010response\030\003 \001(\01323.com.google." +
       "gwt.dev.shell.remoteui.Message.Response\032" +
-      "\313\022\n\007Request\022S\n\013serviceType\030\001 \002(\0162>.com.g" +
+      "\231\025\n\007Request\022S\n\013serviceType\030\001 \002(\0162>.com.g" +
       "oogle.gwt.dev.shell.remoteui.Message.Req",
       "uest.ServiceType\022\021\n\trequestId\030\002 \001(\r\022W\n\rv" +
       "iewerRequest\030\003 \001(\0132@.com.google.gwt.dev." +
       "shell.remoteui.Message.Request.ViewerReq" +
       "uest\022Y\n\016devModeRequest\030\004 \001(\0132A.com.googl" +
       "e.gwt.dev.shell.remoteui.Message.Request" +
-      ".DevModeRequest\032\347\r\n\rViewerRequest\022a\n\013req" +
+      ".DevModeRequest\032\207\017\n\rViewerRequest\022a\n\013req" +
       "uestType\030\001 \002(\0162L.com.google.gwt.dev.shel" +
       "l.remoteui.Message.Request.ViewerRequest" +
-      ".RequestType\022W\n\006addLog\030\002 \001(\0132G.com.googl" +
-      "e.gwt.dev.shell.remoteui.Message.Request",
-      ".ViewerRequest.AddLog\022c\n\014addLogBranch\030\003 " +
-      "\001(\0132M.com.google.gwt.dev.shell.remoteui." +
-      "Message.Request.ViewerRequest.AddLogBran" +
-      "ch\022a\n\013addLogEntry\030\004 \001(\0132L.com.google.gwt" +
-      ".dev.shell.remoteui.Message.Request.View" +
-      "erRequest.AddLogEntry\022e\n\rdisconnectLog\030\005" +
-      " \001(\0132N.com.google.gwt.dev.shell.remoteui" +
-      ".Message.Request.ViewerRequest.Disconnec" +
-      "tLog\032\370\004\n\006AddLog\022]\n\004type\030\001 \002(\0162O.com.goog" +
-      "le.gwt.dev.shell.remoteui.Message.Reques",
-      "t.ViewerRequest.AddLog.LogType\022d\n\tmodule" +
-      "Log\030\002 \001(\0132Q.com.google.gwt.dev.shell.rem" +
-      "oteui.Message.Request.ViewerRequest.AddL" +
-      "og.ModuleLog\022d\n\tserverLog\030\003 \001(\0132Q.com.go" +
-      "ogle.gwt.dev.shell.remoteui.Message.Requ" +
-      "est.ViewerRequest.AddLog.ServerLog\022`\n\007ma" +
-      "inLog\030\004 \001(\0132O.com.google.gwt.dev.shell.r" +
-      "emoteui.Message.Request.ViewerRequest.Ad" +
-      "dLog.MainLog\032\177\n\tModuleLog\022\014\n\004name\030\001 \002(\t\022" +
-      "\014\n\004icon\030\002 \001(\014\022\022\n\nsessionKey\030\003 \002(\t\022\021\n\tuse",
-      "rAgent\030\004 \002(\t\022\013\n\003url\030\005 \002(\t\022\016\n\006tabKey\030\006 \002(" +
-      "\t\022\022\n\nremoteHost\030\007 \002(\t\032\'\n\tServerLog\022\014\n\004na" +
-      "me\030\001 \002(\t\022\014\n\004icon\030\002 \001(\014\032\t\n\007MainLog\",\n\007Log" +
-      "Type\022\013\n\007BROWSER\020\000\022\n\n\006MODULE\020\001\022\010\n\004MAIN\020\002\032" +
-      "\306\001\n\007LogData\022\017\n\007summary\030\001 \002(\t\022\r\n\005level\030\002 " +
-      "\001(\t\022\017\n\007details\030\003 \001(\t\022c\n\010helpInfo\030\004 \001(\0132Q" +
-      ".com.google.gwt.dev.shell.remoteui.Messa" +
-      "ge.Request.ViewerRequest.LogData.HelpInf" +
-      "o\032%\n\010HelpInfo\022\013\n\003url\030\001 \001(\t\022\014\n\004text\030\002 \001(\t" +
-      "\032\231\001\n\014AddLogBranch\022\027\n\017parentLogHandle\030\001 \002",
-      "(\r\022\025\n\rindexInParent\030\002 \002(\r\022Y\n\007logData\030\003 \002" +
-      "(\0132H.com.google.gwt.dev.shell.remoteui.M" +
-      "essage.Request.ViewerRequest.LogData\032\217\001\n" +
-      "\013AddLogEntry\022\021\n\tlogHandle\030\001 \002(\r\022\022\n\nindex" +
-      "InLog\030\002 \002(\r\022Y\n\007logData\030\003 \002(\0132H.com.googl" +
-      "e.gwt.dev.shell.remoteui.Message.Request" +
-      ".ViewerRequest.LogData\032\"\n\rDisconnectLog\022" +
-      "\021\n\tlogHandle\030\001 \002(\r\"U\n\013RequestType\022\013\n\007ADD" +
-      "_LOG\020\000\022\022\n\016ADD_LOG_BRANCH\020\001\022\021\n\rADD_LOG_EN" +
-      "TRY\020\002\022\022\n\016DISCONNECT_LOG\020\003\032\220\002\n\016DevModeReq",
+      ".RequestType\022o\n\022capabilityExchange\030\002 \001(\013" +
+      "2S.com.google.gwt.dev.shell.remoteui.Mes",
+      "sage.Request.ViewerRequest.CapabilityExc" +
+      "hange\022W\n\006addLog\030\003 \001(\0132G.com.google.gwt.d" +
+      "ev.shell.remoteui.Message.Request.Viewer" +
+      "Request.AddLog\022c\n\014addLogBranch\030\004 \001(\0132M.c" +
+      "om.google.gwt.dev.shell.remoteui.Message" +
+      ".Request.ViewerRequest.AddLogBranch\022a\n\013a" +
+      "ddLogEntry\030\005 \001(\0132L.com.google.gwt.dev.sh" +
+      "ell.remoteui.Message.Request.ViewerReque" +
+      "st.AddLogEntry\022e\n\rdisconnectLog\030\006 \001(\0132N." +
+      "com.google.gwt.dev.shell.remoteui.Messag",
+      "e.Request.ViewerRequest.DisconnectLog\032\024\n" +
+      "\022CapabilityExchange\032\370\004\n\006AddLog\022]\n\004type\030\001" +
+      " \002(\0162O.com.google.gwt.dev.shell.remoteui" +
+      ".Message.Request.ViewerRequest.AddLog.Lo" +
+      "gType\022d\n\tmoduleLog\030\002 \001(\0132Q.com.google.gw" +
+      "t.dev.shell.remoteui.Message.Request.Vie" +
+      "werRequest.AddLog.ModuleLog\022d\n\tserverLog" +
+      "\030\003 \001(\0132Q.com.google.gwt.dev.shell.remote" +
+      "ui.Message.Request.ViewerRequest.AddLog." +
+      "ServerLog\022`\n\007mainLog\030\004 \001(\0132O.com.google.",
+      "gwt.dev.shell.remoteui.Message.Request.V" +
+      "iewerRequest.AddLog.MainLog\032\177\n\tModuleLog" +
+      "\022\014\n\004name\030\001 \002(\t\022\014\n\004icon\030\002 \001(\014\022\022\n\nsessionK" +
+      "ey\030\003 \002(\t\022\021\n\tuserAgent\030\004 \002(\t\022\013\n\003url\030\005 \002(\t" +
+      "\022\016\n\006tabKey\030\006 \002(\t\022\022\n\nremoteHost\030\007 \002(\t\032\'\n\t" +
+      "ServerLog\022\014\n\004name\030\001 \002(\t\022\014\n\004icon\030\002 \001(\014\032\t\n" +
+      "\007MainLog\",\n\007LogType\022\013\n\007BROWSER\020\000\022\n\n\006MODU" +
+      "LE\020\001\022\010\n\004MAIN\020\002\032\306\001\n\007LogData\022\017\n\007summary\030\001 " +
+      "\002(\t\022\r\n\005level\030\002 \001(\t\022\017\n\007details\030\003 \001(\t\022c\n\010h" +
+      "elpInfo\030\004 \001(\0132Q.com.google.gwt.dev.shell",
+      ".remoteui.Message.Request.ViewerRequest." +
+      "LogData.HelpInfo\032%\n\010HelpInfo\022\013\n\003url\030\001 \001(" +
+      "\t\022\014\n\004text\030\002 \001(\t\032\231\001\n\014AddLogBranch\022\027\n\017pare" +
+      "ntLogHandle\030\001 \002(\r\022\025\n\rindexInParent\030\002 \002(\r" +
+      "\022Y\n\007logData\030\003 \002(\0132H.com.google.gwt.dev.s" +
+      "hell.remoteui.Message.Request.ViewerRequ" +
+      "est.LogData\032\217\001\n\013AddLogEntry\022\021\n\tlogHandle" +
+      "\030\001 \002(\r\022\022\n\nindexInLog\030\002 \002(\r\022Y\n\007logData\030\003 " +
+      "\002(\0132H.com.google.gwt.dev.shell.remoteui." +
+      "Message.Request.ViewerRequest.LogData\032\"\n",
+      "\rDisconnectLog\022\021\n\tlogHandle\030\001 \002(\r\"n\n\013Req" +
+      "uestType\022\027\n\023CAPABILITY_EXCHANGE\020\000\022\013\n\007ADD" +
+      "_LOG\020\001\022\022\n\016ADD_LOG_BRANCH\020\002\022\021\n\rADD_LOG_EN" +
+      "TRY\020\003\022\022\n\016DISCONNECT_LOG\020\004\032\276\003\n\016DevModeReq" +
       "uest\022b\n\013requestType\030\001 \002(\0162M.com.google.g" +
       "wt.dev.shell.remoteui.Message.Request.De" +
-      "vModeRequest.RequestType\022f\n\rrestartServe" +
-      "r\030\002 \001(\0132O.com.google.gwt.dev.shell.remot" +
-      "eui.Message.Request.DevModeRequest.Resta" +
-      "rtServer\032\017\n\rRestartServer\"!\n\013RequestType" +
-      "\022\022\n\016RESTART_SERVER\020\000\"\'\n\013ServiceType\022\n\n\006V" +
-      "IEWER\020\000\022\014\n\010DEV_MODE\020\001\032\237\007\n\010Response\022\021\n\tre" +
-      "questId\030\001 \002(\r\022Z\n\016viewerResponse\030\002 \001(\0132B." +
-      "com.google.gwt.dev.shell.remoteui.Messag",
-      "e.Response.ViewerResponse\022\\\n\017devModeResp" +
-      "onse\030\003 \001(\0132C.com.google.gwt.dev.shell.re" +
-      "moteui.Message.Response.DevModeResponse\032" +
-      "\252\003\n\016ViewerResponse\022e\n\014responseType\030\001 \002(\016" +
-      "2O.com.google.gwt.dev.shell.remoteui.Mes" +
-      "sage.Response.ViewerResponse.ResponseTyp" +
-      "e\022Y\n\006addLog\030\002 \001(\0132I.com.google.gwt.dev.s" +
-      "hell.remoteui.Message.Response.ViewerRes" +
-      "ponse.AddLog\022e\n\014addLogBranch\030\003 \001(\0132O.com" +
-      ".google.gwt.dev.shell.remoteui.Message.R",
-      "esponse.ViewerResponse.AddLogBranch\032\033\n\006A" +
-      "ddLog\022\021\n\tlogHandle\030\001 \002(\r\032!\n\014AddLogBranch" +
-      "\022\021\n\tlogHandle\030\001 \002(\r\"/\n\014ResponseType\022\013\n\007A" +
-      "DD_LOG\020\000\022\022\n\016ADD_LOG_BRANCH\020\001\032\230\002\n\017DevMode" +
-      "Response\022f\n\014responseType\030\001 \002(\0162P.com.goo" +
-      "gle.gwt.dev.shell.remoteui.Message.Respo" +
-      "nse.DevModeResponse.ResponseType\022h\n\rrest" +
-      "artServer\030\002 \001(\0132Q.com.google.gwt.dev.she" +
-      "ll.remoteui.Message.Response.DevModeResp" +
-      "onse.RestartServer\032\017\n\rRestartServer\"\"\n\014R",
-      "esponseType\022\022\n\016RESTART_SERVER\020\000\"(\n\013Messa" +
-      "geType\022\013\n\007REQUEST\020\000\022\014\n\010RESPONSE\020\001B\024B\022Rem" +
-      "oteMessageProto"
+      "vModeRequest.RequestType\022p\n\022capabilityEx" +
+      "change\030\002 \001(\0132T.com.google.gwt.dev.shell." +
+      "remoteui.Message.Request.DevModeRequest." +
+      "CapabilityExchange\022l\n\020restartWebServer\030\003",
+      " \001(\0132R.com.google.gwt.dev.shell.remoteui" +
+      ".Message.Request.DevModeRequest.RestartW" +
+      "ebServer\032\024\n\022CapabilityExchange\032\022\n\020Restar" +
+      "tWebServer\">\n\013RequestType\022\027\n\023CAPABILITY_" +
+      "EXCHANGE\020\000\022\026\n\022RESTART_WEB_SERVER\020\001\"\'\n\013Se" +
+      "rviceType\022\n\n\006VIEWER\020\000\022\014\n\010DEV_MODE\020\001\032\231\n\n\010" +
+      "Response\022\021\n\trequestId\030\001 \002(\r\022Z\n\016viewerRes" +
+      "ponse\030\002 \001(\0132B.com.google.gwt.dev.shell.r" +
+      "emoteui.Message.Response.ViewerResponse\022" +
+      "\\\n\017devModeResponse\030\003 \001(\0132C.com.google.gw",
+      "t.dev.shell.remoteui.Message.Response.De" +
+      "vModeResponse\032\340\004\n\016ViewerResponse\022e\n\014resp" +
+      "onseType\030\001 \002(\0162O.com.google.gwt.dev.shel" +
+      "l.remoteui.Message.Response.ViewerRespon" +
+      "se.ResponseType\022q\n\022capabilityExchange\030\002 " +
+      "\001(\0132U.com.google.gwt.dev.shell.remoteui." +
+      "Message.Response.ViewerResponse.Capabili" +
+      "tyExchange\022Y\n\006addLog\030\003 \001(\0132I.com.google." +
+      "gwt.dev.shell.remoteui.Message.Response." +
+      "ViewerResponse.AddLog\022e\n\014addLogBranch\030\004 ",
+      "\001(\0132O.com.google.gwt.dev.shell.remoteui." +
+      "Message.Response.ViewerResponse.AddLogBr" +
+      "anch\032(\n\022CapabilityExchange\022\022\n\ncapability" +
+      "\030\001 \003(\r\032\033\n\006AddLog\022\021\n\tlogHandle\030\001 \002(\r\032!\n\014A" +
+      "ddLogBranch\022\021\n\tlogHandle\030\001 \002(\r\"H\n\014Respon" +
+      "seType\022\027\n\023CAPABILITY_EXCHANGE\020\000\022\013\n\007ADD_L" +
+      "OG\020\001\022\022\n\016ADD_LOG_BRANCH\020\002\032\334\003\n\017DevModeResp" +
+      "onse\022f\n\014responseType\030\001 \002(\0162P.com.google." +
+      "gwt.dev.shell.remoteui.Message.Response." +
+      "DevModeResponse.ResponseType\022r\n\022capabili",
+      "tyExchange\030\002 \001(\0132V.com.google.gwt.dev.sh" +
+      "ell.remoteui.Message.Response.DevModeRes" +
+      "ponse.CapabilityExchange\022n\n\020restartWebSe" +
+      "rver\030\003 \001(\0132T.com.google.gwt.dev.shell.re" +
+      "moteui.Message.Response.DevModeResponse." +
+      "RestartWebServer\032(\n\022CapabilityExchange\022\022" +
+      "\n\ncapability\030\001 \003(\r\032\022\n\020RestartWebServer\"?" +
+      "\n\014ResponseType\022\027\n\023CAPABILITY_EXCHANGE\020\000\022" +
+      "\026\n\022RESTART_WEB_SERVER\020\001\"(\n\013MessageType\022\013" +
+      "\n\007REQUEST\020\000\022\014\n\010RESPONSE\020\001B\024B\022RemoteMessa",
+      "geProto"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -7857,11 +9211,19 @@ public final class RemoteMessageProto {
           internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_ViewerRequest_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_ViewerRequest_descriptor,
-              new java.lang.String[] { "RequestType", "AddLog", "AddLogBranch", "AddLogEntry", "DisconnectLog", },
+              new java.lang.String[] { "RequestType", "CapabilityExchange", "AddLog", "AddLogBranch", "AddLogEntry", "DisconnectLog", },
               com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.class,
               com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.Builder.class);
-          internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_ViewerRequest_AddLog_descriptor =
+          internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_ViewerRequest_CapabilityExchange_descriptor =
             internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_ViewerRequest_descriptor.getNestedTypes().get(0);
+          internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_ViewerRequest_CapabilityExchange_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_ViewerRequest_CapabilityExchange_descriptor,
+              new java.lang.String[] { },
+              com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.CapabilityExchange.class,
+              com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.CapabilityExchange.Builder.class);
+          internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_ViewerRequest_AddLog_descriptor =
+            internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_ViewerRequest_descriptor.getNestedTypes().get(1);
           internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_ViewerRequest_AddLog_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_ViewerRequest_AddLog_descriptor,
@@ -7893,7 +9255,7 @@ public final class RemoteMessageProto {
               com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.AddLog.MainLog.class,
               com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.AddLog.MainLog.Builder.class);
           internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_ViewerRequest_LogData_descriptor =
-            internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_ViewerRequest_descriptor.getNestedTypes().get(1);
+            internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_ViewerRequest_descriptor.getNestedTypes().get(2);
           internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_ViewerRequest_LogData_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_ViewerRequest_LogData_descriptor,
@@ -7909,7 +9271,7 @@ public final class RemoteMessageProto {
               com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.LogData.HelpInfo.class,
               com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.LogData.HelpInfo.Builder.class);
           internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_ViewerRequest_AddLogBranch_descriptor =
-            internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_ViewerRequest_descriptor.getNestedTypes().get(2);
+            internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_ViewerRequest_descriptor.getNestedTypes().get(3);
           internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_ViewerRequest_AddLogBranch_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_ViewerRequest_AddLogBranch_descriptor,
@@ -7917,7 +9279,7 @@ public final class RemoteMessageProto {
               com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.AddLogBranch.class,
               com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.AddLogBranch.Builder.class);
           internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_ViewerRequest_AddLogEntry_descriptor =
-            internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_ViewerRequest_descriptor.getNestedTypes().get(3);
+            internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_ViewerRequest_descriptor.getNestedTypes().get(4);
           internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_ViewerRequest_AddLogEntry_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_ViewerRequest_AddLogEntry_descriptor,
@@ -7925,7 +9287,7 @@ public final class RemoteMessageProto {
               com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.AddLogEntry.class,
               com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.ViewerRequest.AddLogEntry.Builder.class);
           internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_ViewerRequest_DisconnectLog_descriptor =
-            internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_ViewerRequest_descriptor.getNestedTypes().get(4);
+            internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_ViewerRequest_descriptor.getNestedTypes().get(5);
           internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_ViewerRequest_DisconnectLog_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_ViewerRequest_DisconnectLog_descriptor,
@@ -7937,17 +9299,25 @@ public final class RemoteMessageProto {
           internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_DevModeRequest_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_DevModeRequest_descriptor,
-              new java.lang.String[] { "RequestType", "RestartServer", },
+              new java.lang.String[] { "RequestType", "CapabilityExchange", "RestartWebServer", },
               com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.class,
               com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.Builder.class);
-          internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_DevModeRequest_RestartServer_descriptor =
+          internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_DevModeRequest_CapabilityExchange_descriptor =
             internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_DevModeRequest_descriptor.getNestedTypes().get(0);
-          internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_DevModeRequest_RestartServer_fieldAccessorTable = new
+          internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_DevModeRequest_CapabilityExchange_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_DevModeRequest_RestartServer_descriptor,
+              internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_DevModeRequest_CapabilityExchange_descriptor,
               new java.lang.String[] { },
-              com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartServer.class,
-              com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartServer.Builder.class);
+              com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.CapabilityExchange.class,
+              com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.CapabilityExchange.Builder.class);
+          internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_DevModeRequest_RestartWebServer_descriptor =
+            internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_DevModeRequest_descriptor.getNestedTypes().get(1);
+          internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_DevModeRequest_RestartWebServer_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_com_google_gwt_dev_shell_remoteui_Message_Request_DevModeRequest_RestartWebServer_descriptor,
+              new java.lang.String[] { },
+              com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartWebServer.class,
+              com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest.RestartWebServer.Builder.class);
           internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_descriptor =
             internal_static_com_google_gwt_dev_shell_remoteui_Message_descriptor.getNestedTypes().get(1);
           internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_fieldAccessorTable = new
@@ -7961,11 +9331,19 @@ public final class RemoteMessageProto {
           internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_ViewerResponse_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_ViewerResponse_descriptor,
-              new java.lang.String[] { "ResponseType", "AddLog", "AddLogBranch", },
+              new java.lang.String[] { "ResponseType", "CapabilityExchange", "AddLog", "AddLogBranch", },
               com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.class,
               com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.Builder.class);
-          internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_ViewerResponse_AddLog_descriptor =
+          internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_ViewerResponse_CapabilityExchange_descriptor =
             internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_ViewerResponse_descriptor.getNestedTypes().get(0);
+          internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_ViewerResponse_CapabilityExchange_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_ViewerResponse_CapabilityExchange_descriptor,
+              new java.lang.String[] { "Capability", },
+              com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.CapabilityExchange.class,
+              com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.CapabilityExchange.Builder.class);
+          internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_ViewerResponse_AddLog_descriptor =
+            internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_ViewerResponse_descriptor.getNestedTypes().get(1);
           internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_ViewerResponse_AddLog_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_ViewerResponse_AddLog_descriptor,
@@ -7973,7 +9351,7 @@ public final class RemoteMessageProto {
               com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.AddLog.class,
               com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.ViewerResponse.AddLog.Builder.class);
           internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_ViewerResponse_AddLogBranch_descriptor =
-            internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_ViewerResponse_descriptor.getNestedTypes().get(1);
+            internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_ViewerResponse_descriptor.getNestedTypes().get(2);
           internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_ViewerResponse_AddLogBranch_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_ViewerResponse_AddLogBranch_descriptor,
@@ -7985,17 +9363,25 @@ public final class RemoteMessageProto {
           internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_DevModeResponse_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_DevModeResponse_descriptor,
-              new java.lang.String[] { "ResponseType", "RestartServer", },
+              new java.lang.String[] { "ResponseType", "CapabilityExchange", "RestartWebServer", },
               com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.class,
               com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.Builder.class);
-          internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_DevModeResponse_RestartServer_descriptor =
+          internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_DevModeResponse_CapabilityExchange_descriptor =
             internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_DevModeResponse_descriptor.getNestedTypes().get(0);
-          internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_DevModeResponse_RestartServer_fieldAccessorTable = new
+          internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_DevModeResponse_CapabilityExchange_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_DevModeResponse_RestartServer_descriptor,
+              internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_DevModeResponse_CapabilityExchange_descriptor,
+              new java.lang.String[] { "Capability", },
+              com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.CapabilityExchange.class,
+              com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.CapabilityExchange.Builder.class);
+          internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_DevModeResponse_RestartWebServer_descriptor =
+            internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_DevModeResponse_descriptor.getNestedTypes().get(1);
+          internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_DevModeResponse_RestartWebServer_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_com_google_gwt_dev_shell_remoteui_Message_Response_DevModeResponse_RestartWebServer_descriptor,
               new java.lang.String[] { },
-              com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartServer.class,
-              com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartServer.Builder.class);
+              com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartWebServer.class,
+              com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.RestartWebServer.Builder.class);
           return null;
         }
       };
