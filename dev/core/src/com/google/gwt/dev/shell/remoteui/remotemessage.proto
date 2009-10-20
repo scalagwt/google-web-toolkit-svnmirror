@@ -58,23 +58,23 @@ message Message {
       // Add a log message to the view
       message AddLog {
 
-        // The type of log - either a server log, a module log, or 
+        // The type of log - either a web server log, a module log, or 
         // the main log      
         enum LogType {    
-          BROWSER = 0;
+          MAIN = 0;
           MODULE = 1;
-          MAIN = 2;
+          WEB_SERVER = 2;
         }
     
         // Information needed for creating a Module Log
         message ModuleLog {
           required string name = 1;   
           optional bytes icon = 2;
-          required string sessionKey = 3;
-          required string userAgent = 4;
-          required string url = 5;
-          required string tabKey = 6;
-          required string remoteHost = 7;                
+          optional string sessionKey = 3;
+          optional string userAgent = 4;
+          optional string url = 5;
+          optional string tabKey = 6;
+          optional string remoteHost = 7;                
         }
         
         // Information needed for creating a Server Log
@@ -182,10 +182,12 @@ message Message {
       }
       
       // Response for the capabilities of the ViewerService
-      // TODO: Can we expose ViewerRequest.RequestType, and change
-      // the field type to that (instead of an array of unsigned ints)?
       message CapabilityExchange {
-        repeated uint32 capability = 1; 
+        message Capability {
+          required Message.Request.ViewerRequest.RequestType capability = 1;
+        }
+        
+        repeated Capability capabilities = 2; 
       }
       
       // Response to an AddLog request
@@ -214,10 +216,12 @@ message Message {
       }
       
       // Response for the capabilities of the DevModeService
-      // TODO: Can we expose DevModeRequest.RequstType, and change
-      // the field type to that (instead of an array of unsigned ints)?
       message CapabilityExchange {
-        repeated uint32 capability = 1; 
+        message Capability {
+          required Message.Request.DevModeRequest.RequestType capability = 1;
+        }
+        
+        repeated Capability capabilities = 2;  
       }
       
       // Response to a RestartWebServer request. Right now, there is no information

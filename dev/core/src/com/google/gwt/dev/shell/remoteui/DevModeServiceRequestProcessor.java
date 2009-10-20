@@ -19,6 +19,7 @@ import com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request;
 import com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response;
 import com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Request.DevModeRequest;
 import com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse;
+import com.google.gwt.dev.shell.remoteui.RemoteMessageProto.Message.Response.DevModeResponse.CapabilityExchange;
 
 /**
  * A request processor that handles DevModeService requests. There should only
@@ -66,12 +67,16 @@ public class DevModeServiceRequestProcessor implements RequestProcessor {
   }
 
   private Response processCapabilityExchange(int requestId) {
-    DevModeResponse.CapabilityExchange.Builder capabilityExchangeBuilder = DevModeResponse.CapabilityExchange.newBuilder();
+    CapabilityExchange.Builder capabilityExchangeBuilder = CapabilityExchange.newBuilder();
 
-    DevModeRequest.RequestType[] requestTypes = DevModeRequest.RequestType.values();
-    for (int i = 0; i < requestTypes.length; i++) {
-      capabilityExchangeBuilder = capabilityExchangeBuilder.setCapability(i,
-          requestTypes[i].getNumber());
+    CapabilityExchange.Capability.Builder c1Builder = CapabilityExchange.Capability.newBuilder();
+    c1Builder.setCapability(DevModeRequest.RequestType.CAPABILITY_EXCHANGE);
+    capabilityExchangeBuilder.addCapabilities(c1Builder);
+
+    if (remoteUI.supportsRestartWebServer()) {
+      CapabilityExchange.Capability.Builder c2Builder = CapabilityExchange.Capability.newBuilder();
+      c2Builder.setCapability(DevModeRequest.RequestType.CAPABILITY_EXCHANGE);
+      capabilityExchangeBuilder.addCapabilities(c2Builder);
     }
 
     DevModeResponse.Builder devModeResponseBuilder = DevModeResponse.newBuilder();
