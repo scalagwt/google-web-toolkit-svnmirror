@@ -8,4 +8,5 @@ Copies:
 Merges:
 Cherrypicked c6451 with:
   svn merge -c6451 https://google-web-toolkit.googlecode.com/svn/trunk .
+  svn merge -c6851 https://google-web-toolkit.googlecode.com/svn/trunk .
 
