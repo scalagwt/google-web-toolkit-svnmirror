@@ -231,7 +231,7 @@ public class UiBinderTest extends GWTTestCase {
   }
 
   interface Bundle extends ClientBundle {
-    @Source({"WidgetBasedUi.css", "Menu.css"})
+    @Source("WidgetBasedUi.css")
     @NotStrict
     WidgetBasedUi.Style style();
   }
