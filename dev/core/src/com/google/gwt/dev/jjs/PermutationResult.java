@@ -15,15 +15,24 @@
  */
 package com.google.gwt.dev.jjs;
 
+import com.google.gwt.core.ext.linker.Artifact;
 import com.google.gwt.core.ext.linker.ArtifactSet;
 import com.google.gwt.core.ext.linker.StatementRanges;
+import com.google.gwt.dev.Permutation;
 
 import java.io.Serializable;
+import java.util.Collection;
 
 /**
  * An extensible return type for the results of compiling a single permutation.
  */
 public interface PermutationResult extends Serializable {
+
+  /**
+   * Adds additional artifacts to this permutation result.
+   */
+  void addArtifacts(Collection<? extends Artifact<?>> newArtifacts);
+
   /**
    * Returns any Artifacts that may have been created as a result of compiling
    * the permutation.
@@ -36,10 +45,10 @@ public interface PermutationResult extends Serializable {
   byte[][] getJs();
 
   /**
-   * The ID of the permutation.
+   * Returns the associated permutation.
    */
-  int getPermutationId();
-  
+  Permutation getPermutation();
+
   /**
    * The symbol map for the permutation.
    */

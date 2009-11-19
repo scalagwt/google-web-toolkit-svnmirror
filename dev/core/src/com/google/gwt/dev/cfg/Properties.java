@@ -74,13 +74,13 @@ public class Properties implements Iterable<Property> {
     return map.values().iterator();
   }
 
-  private <T extends Property> T create(String name, Class<T> clazz) {
-    return create(name, false, false, clazz);
-  }
-
-  private <T extends Property> T create(String name, boolean flag,
-      Class<T> clazz) {
-    return create(name, flag, true, clazz);
+  /**
+   * Count the total number of permutations that this property set supports.
+   * This method can be expensive because it always recalculates the answer
+   * based on the current set of properties and values.
+   */
+  public int numPermutations() {
+    return new PropertyPermutations(this).size();
   }
 
   private <T extends Property> T create(String name, boolean flag,
@@ -124,5 +124,14 @@ public class Properties implements Iterable<Property> {
     }
 
     throw new RuntimeException("Unable to create Property instance", ex);
+  }
+
+  private <T extends Property> T create(String name, boolean flag,
+      Class<T> clazz) {
+    return create(name, flag, true, clazz);
+  }
+
+  private <T extends Property> T create(String name, Class<T> clazz) {
+    return create(name, false, false, clazz);
   }
 }
