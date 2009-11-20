@@ -11,4 +11,8 @@ Cherrypicked c6451 with:
   svn merge -c6851 https://google-web-toolkit.googlecode.com/svn/trunk .
   svn merge -c6488.6492,6494,6497,6498,6499,6500,6501,6511,6535,7014 \
       --ignore-ancestry https://google-web-toolkit.googlecode.com/svn/trunk .
-  svn merge --ignore-ancestry -c7026 http://google-web-toolkit.googlecode.com/svn/trunk .
+  svn merge --ignore-ancestry -c7026 \
+      http://google-web-toolkit.googlecode.com/svn/trunk .
+  svn merge --ignore-ancestry -c6916 \
+      https://google-web-toolkit.googlecode.com/svn/trunk .
+
