@@ -15,4 +15,5 @@ Cherrypicked c6451 with:
       http://google-web-toolkit.googlecode.com/svn/trunk .
   svn merge --ignore-ancestry -c6916 \
       https://google-web-toolkit.googlecode.com/svn/trunk .
-
+  svn merge --ignore-ancestry -c7061 \
+      https://google-web-toolkit.googlecode.com/svn/trunk .  # ignore SoycTest
