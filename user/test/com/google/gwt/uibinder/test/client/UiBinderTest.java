@@ -177,6 +177,10 @@ public class UiBinderTest extends GWTTestCase {
     WidgetBasedUiExternalResources resources = GWT.create(WidgetBasedUiExternalResources.class);
     assertEquals(resources.style().tmText(), widgetUi.tmElement.getClassName());
   }
+  
+  public void testCustomButtonBody() {
+    assertEquals("Hi mom", widgetUi.toggle.getText());
+  }
 
   public void testDomAccessAndComputedAttributeOnPlaceholderedElement() {
     WidgetBasedUiExternalResources resources = GWT.create(WidgetBasedUiExternalResources.class);
@@ -218,6 +222,10 @@ public class UiBinderTest extends GWTTestCase {
     String t = widgetUi.funnyCharsMessageParagraph.getInnerText();
     assertEquals("They might show up in body text that has been marked for "
         + "translation: funny characters \" \" ' ' & < > > { }", t);
+  }
+  
+  public void testEmptyAttributesOkay() {
+    assertEquals("", widgetUi.styleLess.getStyleName());
   }
 
   public void testMixOfWidgetsAndElementsInUiMsg() {
