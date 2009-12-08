@@ -16,8 +16,6 @@
 package com.google.gwt.core.client.impl;
 
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.xhr.client.ReadyStateChangeHandler;
-import com.google.gwt.xhr.client.XMLHttpRequest;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -153,16 +151,27 @@ public class AsyncFragmentLoader {
   /**
    * An exception indicating than at HTTP download failed.
    */
-  private static class HttpDownloadFailure extends RuntimeException {
+  static class HttpDownloadFailure extends RuntimeException {
     private final int statusCode;
 
-    public HttpDownloadFailure(int statusCode) {
-      super("HTTP download failed with status " + statusCode);
+    public HttpDownloadFailure(String url, int statusCode, String statusText) {
+      super("Download of " + url + " failed with status " + statusCode + "("
+          + statusText + ")");
       this.statusCode = statusCode;
     }
 
     public int getStatusCode() {
       return statusCode;
+    }
+  }
+
+  /**
+   * An exception indicating than at HTTP download succeeded, but installing
+   * its body failed.
+   */
+  static class HttpInstallFailure extends RuntimeException {
+    public HttpInstallFailure(String url, String text, Throwable rootCause) {
+      super("Install of " + url + " failed with text " + text, rootCause);
     }
   }
 
@@ -263,88 +272,13 @@ public class AsyncFragmentLoader {
   }
 
   /**
-   * The standard loading strategy used in a web browser.
-   */
-  private static class XhrLoadingStrategy implements LoadingStrategy {
-    public void startLoadingFragment(int fragment,
-        final LoadErrorHandler loadErrorHandler) {
-      String fragmentUrl = gwtStartLoadingFragment(fragment, loadErrorHandler);
-
-      if (fragmentUrl == null) {
-        // The download has already started; nothing more to do
-        return;
-      }
-
-      // use XHR to download it
-
-      final XMLHttpRequest xhr = XMLHttpRequest.create();
-
-      xhr.open(HTTP_GET, fragmentUrl);
-
-      xhr.setOnReadyStateChange(new ReadyStateChangeHandler() {
-        public void onReadyStateChange(XMLHttpRequest ignored) {
-          if (xhr.getReadyState() == XMLHttpRequest.DONE) {
-            xhr.clearOnReadyStateChange();
-            if ((xhr.getStatus() == HTTP_STATUS_OK || xhr.getStatus() == HTTP_STATUS_NON_HTTP)
-                && xhr.getResponseText() != null
-                && xhr.getResponseText().length() != 0) {
-              try {
-                gwtInstallCode(xhr.getResponseText());
-              } catch (RuntimeException e) {
-                loadErrorHandler.loadFailed(e);
-              }
-            } else {
-              loadErrorHandler.loadFailed(new HttpDownloadFailure(
-                  xhr.getStatus()));
-            }
-          }
-        }
-      });
-
-      xhr.send();
-    }
-
-    /**
-     * Call the linker-supplied <code>__gwtInstallCode</code> method. See the
-     * {@link AsyncFragmentLoader class comment} for more details.
-     */
-    private native void gwtInstallCode(String text) /*-{
-      __gwtInstallCode(text);
-    }-*/;
- 
-    /**
-     * Call the linker-supplied __gwtStartLoadingFragment function. It should
-     * either start the download and return null or undefined, or it should return
-     * a URL that should be downloaded to get the code. If it starts the download
-     * itself, it can synchronously load it, e.g. from cache, if that makes sense.
-     */
-    private native String gwtStartLoadingFragment(int fragment,
-        LoadErrorHandler loadErrorHandler) /*-{
-      function loadFailed(e) {
-        loadErrorHandler.@com.google.gwt.core.client.impl.AsyncFragmentLoader$LoadErrorHandler::loadFailed(Ljava/lang/Throwable;)(e);
-      }
-      return __gwtStartLoadingFragment(fragment, loadFailed);
-    }-*/;
-  }
-
-  /**
    * The standard instance of AsyncFragmentLoader used in a web browser. The
    * parameters to this call are filled in by
    * {@link com.google.gwt.dev.jjs.impl.ReplaceRunAsyncs}.
    */
-  public static AsyncFragmentLoader BROWSER_LOADER = new AsyncFragmentLoader(1,
-      new int[] {}, new XhrLoadingStrategy(), new StandardLogger());
-
-  private static final String HTTP_GET = "GET";
-
-  /**
-   * Some UA's like Safari will have a "0" status code when loading from file:
-   * URLs. Additionally, the "0" status code is used sometimes if the server
-   * does not respond, e.g. if there is a connection refused.
-   */
-  private static final int HTTP_STATUS_NON_HTTP = 0;
-
-  private static final int HTTP_STATUS_OK = 200;
+  public static AsyncFragmentLoader BROWSER_LOADER =
+      new AsyncFragmentLoader(1, new int[] {}, // compiler replaces these two
+          new XhrLoadingStrategy(), new StandardLogger());
 
   /**
    * A helper static method that invokes
