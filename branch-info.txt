@@ -1,0 +1,8 @@
+Create branch for 1/5 snapshot from trunk r7362
+
+svn copy https://google-web-toolkit.googlecode.com/svn/trunk@7362 \
+https://google-web-toolkit.googlecode.com/svn/branches/snapshot-2010.01.05-r7362
+
+
+Merges into this branch
+=======================
