@@ -11,3 +11,6 @@ svn merge --ignore-ancestry -c7378 \
 
 svn merge --ignore-ancestry -c7382 \
     https://google-web-toolkit.googlecode.com/svn/trunk
+
+svn merge --ignore-ancestry -c7385 \
+    https://google-web-toolkit.googlecode.com/svn/trunk
