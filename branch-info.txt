@@ -6,3 +6,8 @@ https://google-web-toolkit.googlecode.com/svn/branches/snapshot-2010.01.05-r7362
 
 Merges into this branch
 =======================
+svn merge --ignore-ancestry -c7378 \
+    https://google-web-toolkit.googlecode.com/svn/trunk
+
+svn merge --ignore-ancestry -c7382 \
+    https://google-web-toolkit.googlecode.com/svn/trunk
