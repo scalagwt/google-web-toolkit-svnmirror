@@ -1,0 +1,9 @@
+Create branch for 1/19 snapshot from trunk r7432
+
+svn copy https://google-web-toolkit.googlecode.com/svn/trunk@7432 \
+https://google-web-toolkit.googlecode.com/svn/branches/snapshot-2010.01.19-r7432
+
+
+Merges into this branch
+=======================
+
