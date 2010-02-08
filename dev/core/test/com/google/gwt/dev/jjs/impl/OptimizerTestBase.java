@@ -183,10 +183,29 @@ public abstract class OptimizerTestBase extends TestCase {
         return code;
       }
     });
+    addBuiltinClasses(sourceOracle);
     CompilationState state = CompilationStateBuilder.buildFrom(logger,
         sourceOracle.getResources());
     JProgram program = JavaAstConstructor.construct(logger, state,
-        "test.EntryPoint");
+        "test.EntryPoint", "com.google.gwt.lang.Exceptions");
     return program;
   }
+
+  protected void addBuiltinClasses(MockResourceOracle sourceOracle) {
+    sourceOracle.addOrReplace(new MockJavaResource("java.lang.RuntimeException") {
+      @Override
+      protected CharSequence getContent() {
+        return "package java.lang;" +
+          "public class RuntimeException extends Exception { }";
+      }
+    });
+
+    sourceOracle.addOrReplace(new MockJavaResource("com.google.gwt.lang.Exceptions") {
+      @Override
+      protected CharSequence getContent() {
+        return "package com.google.gwt.lang;" +
+          "public class Exceptions { static boolean throwAssertionError() { throw new RuntimeException(); } }";
+      }
+    });
+}
 }

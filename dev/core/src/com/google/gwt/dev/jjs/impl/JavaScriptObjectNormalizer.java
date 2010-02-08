@@ -223,7 +223,7 @@ public class JavaScriptObjectNormalizer {
 
     private JExpression maybeMakeTempAssignment(JMultiExpression multi,
         JExpression instance) {
-      if (instance.hasSideEffects()) {
+      if (instance.hasSideEffects(program.methodOracle)) {
         /*
          * It may be necessary to save off the instance expression into a local
          * variable if its evaluation would produce side-effects. The

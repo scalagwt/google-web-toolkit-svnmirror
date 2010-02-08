@@ -16,6 +16,7 @@
 package com.google.gwt.dev.jjs.ast;
 
 import com.google.gwt.dev.jjs.SourceInfo;
+import com.google.gwt.dev.jjs.impl.gflow.call.MethodOracle;
 
 /**
  * Java field reference expression.
@@ -92,7 +93,7 @@ public class JFieldRef extends JVariableRef implements HasEnclosingType {
   }
 
   @Override
-  public boolean hasSideEffects() {
+  public boolean hasSideEffects(MethodOracle oracle) {
     if (hasClinit()) {
       return true;
     }
@@ -100,7 +101,7 @@ public class JFieldRef extends JVariableRef implements HasEnclosingType {
     if (expr == null) {
       return false;
     }
-    return expr.hasSideEffects();
+    return expr.hasSideEffects(oracle);
   }
 
   public void traverse(JVisitor visitor, Context ctx) {

@@ -16,6 +16,7 @@
 package com.google.gwt.dev.jjs.ast;
 
 import com.google.gwt.dev.jjs.SourceInfo;
+import com.google.gwt.dev.jjs.impl.gflow.call.MethodOracle;
 
 /**
  * Base class for any Java literal expression.
@@ -26,7 +27,7 @@ public abstract class JLiteral extends JExpression {
     super(sourceInfo);
   }
 
-  public boolean hasSideEffects() {
+  public boolean hasSideEffects(MethodOracle oracle) {
     return false;
   }
 

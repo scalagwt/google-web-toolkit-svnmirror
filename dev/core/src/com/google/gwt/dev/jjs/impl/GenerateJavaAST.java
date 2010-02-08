@@ -2017,7 +2017,16 @@ public class GenerateJavaAST {
       }
     }
 
-    /**
+    private void addThrownExceptions(MethodBinding methodBinding,
+        JMethod method) {
+      for (ReferenceBinding exceptionReference : 
+        methodBinding.thrownExceptions) {
+        method.addThrownException((JClassType) 
+            typeMap.get(exceptionReference.erasure()));
+      }
+    }
+
+   /**
      * Create a bridge method. It calls a same-named method with the same
      * arguments, but with a different type signature.
      * 
@@ -2045,6 +2054,7 @@ public class GenerateJavaAST {
             paramType, true, false, bridgeMethod);
         bridgeMethod.addParam(newParam);
       }
+      addThrownExceptions(jdtBridgeMethod, bridgeMethod);
       bridgeMethod.freezeParamTypes();
 
       // create a call

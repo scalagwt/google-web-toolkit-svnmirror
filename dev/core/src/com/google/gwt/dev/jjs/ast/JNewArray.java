@@ -16,6 +16,7 @@
 package com.google.gwt.dev.jjs.ast;
 
 import com.google.gwt.dev.jjs.SourceInfo;
+import com.google.gwt.dev.jjs.impl.gflow.call.MethodOracle;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -104,17 +105,17 @@ public class JNewArray extends JExpression {
   }
 
   @Override
-  public boolean hasSideEffects() {
+  public boolean hasSideEffects(MethodOracle oracle) {
     if (initializers != null) {
       for (int i = 0, c = initializers.size(); i < c; ++i) {
-        if (initializers.get(i).hasSideEffects()) {
+        if (initializers.get(i).hasSideEffects(oracle)) {
           return true;
         }
       }
     }
     if (dims != null) {
       for (int i = 0, c = dims.size(); i < c; ++i) {
-        if (dims.get(i).hasSideEffects()) {
+        if (dims.get(i).hasSideEffects(oracle)) {
           return true;
         }
       }

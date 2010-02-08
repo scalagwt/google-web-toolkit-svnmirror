@@ -16,6 +16,7 @@
 package com.google.gwt.dev.jjs.ast;
 
 import com.google.gwt.dev.jjs.SourceInfo;
+import com.google.gwt.dev.jjs.impl.gflow.call.MethodOracle;
 
 /**
  * Java cast expression.
@@ -43,7 +44,7 @@ public class JCastOperation extends JExpression {
     return castType;
   }
 
-  public boolean hasSideEffects() {
+  public boolean hasSideEffects(MethodOracle oracle) {
     // Any live cast operations might throw a ClassCastException
     //
     // TODO: revisit this when we support the concept of whether something

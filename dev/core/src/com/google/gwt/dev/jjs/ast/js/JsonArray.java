@@ -21,6 +21,7 @@ import com.google.gwt.dev.jjs.ast.JClassType;
 import com.google.gwt.dev.jjs.ast.JExpression;
 import com.google.gwt.dev.jjs.ast.JType;
 import com.google.gwt.dev.jjs.ast.JVisitor;
+import com.google.gwt.dev.jjs.impl.gflow.call.MethodOracle;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,9 +44,9 @@ public class JsonArray extends JExpression {
     return jsoType;
   }
 
-  public boolean hasSideEffects() {
+  public boolean hasSideEffects(MethodOracle oracle) {
     for (int i = 0, c = exprs.size(); i < c; ++i) {
-      if (exprs.get(i).hasSideEffects()) {
+      if (exprs.get(i).hasSideEffects(oracle)) {
         return true;
       }
     }

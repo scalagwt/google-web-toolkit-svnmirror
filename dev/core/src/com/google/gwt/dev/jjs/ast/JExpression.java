@@ -16,6 +16,7 @@
 package com.google.gwt.dev.jjs.ast;
 
 import com.google.gwt.dev.jjs.SourceInfo;
+import com.google.gwt.dev.jjs.impl.gflow.call.MethodOracle;
 
 /**
  * Base class for all Java expressions.
@@ -26,7 +27,7 @@ public abstract class JExpression extends JNode implements HasType {
     super(info);
   }
 
-  public abstract boolean hasSideEffects();
+  public abstract boolean hasSideEffects(MethodOracle oracle);
 
   public JExpressionStatement makeStatement() {
     return new JExpressionStatement(getSourceInfo(), this);

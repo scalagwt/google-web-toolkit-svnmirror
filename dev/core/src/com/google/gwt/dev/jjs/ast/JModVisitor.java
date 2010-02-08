@@ -195,15 +195,15 @@ public class JModVisitor extends JVisitor {
     }
 
     public void insertAfter(JNode node) {
-      throw new UnsupportedOperationException();
+      throw new UnsupportedOperationException("Can't insert after " + node);
     }
 
     public void insertBefore(JNode node) {
-      throw new UnsupportedOperationException();
+      throw new UnsupportedOperationException("Can't insert before " + node);
     }
 
     public void removeMe() {
-      throw new UnsupportedOperationException();
+      throw new UnsupportedOperationException("Can't remove " + node);
     }
 
     public void replaceMe(JNode node) {
@@ -232,7 +232,7 @@ public class JModVisitor extends JVisitor {
     NodeContext ctx = new NodeContext();
     try {
       ctx.node = node;
-      node.traverse(this, ctx);
+      traverse(node, ctx);
       didChange |= ctx.didChange;
       return ctx.node;
     } catch (Throwable e) {
@@ -245,7 +245,8 @@ public class JModVisitor extends JVisitor {
     NodeContext ctx = new NodeContext();
     try {
       for (int i = 0, c = list.size(); i < c; ++i) {
-        (ctx.node = list.get(i)).traverse(this, ctx);
+        ctx.node = list.get(i);
+        traverse(ctx.node, ctx);
         if (ctx.replaced) {
           list.set(i, (T) ctx.node);
           ctx.replaced = false;
@@ -263,7 +264,8 @@ public class JModVisitor extends JVisitor {
     NodeContext ctx = new NodeContext();
     try {
       for (int i = 0, c = list.size(); i < c; ++i) {
-        (ctx.node = list.get(i)).traverse(this, ctx);
+        ctx.node = list.get(i);
+        traverse(ctx.node, ctx);
         if (ctx.replaced) {
           list = Lists.set(list, i, (T) ctx.node);
           ctx.replaced = false;
@@ -288,4 +290,7 @@ public class JModVisitor extends JVisitor {
     return didChange;
   }
 
+  protected void traverse(JNode node, Context context) {
+    node.traverse(this, context);
+  }
 }

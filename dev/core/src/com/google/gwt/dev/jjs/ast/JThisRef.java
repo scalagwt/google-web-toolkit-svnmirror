@@ -16,6 +16,7 @@
 package com.google.gwt.dev.jjs.ast;
 
 import com.google.gwt.dev.jjs.SourceInfo;
+import com.google.gwt.dev.jjs.impl.gflow.call.MethodOracle;
 
 /**
  * Java method this expression.
@@ -38,7 +39,7 @@ public class JThisRef extends JExpression {
     return type;
   }
 
-  public boolean hasSideEffects() {
+  public boolean hasSideEffects(MethodOracle oracle) {
     return false;
   }
 

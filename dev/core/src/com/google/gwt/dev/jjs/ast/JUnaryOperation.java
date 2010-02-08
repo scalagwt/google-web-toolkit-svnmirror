@@ -16,6 +16,7 @@
 package com.google.gwt.dev.jjs.ast;
 
 import com.google.gwt.dev.jjs.SourceInfo;
+import com.google.gwt.dev.jjs.impl.gflow.call.MethodOracle;
 
 /**
  * Java prefix or postfix operation expression.
@@ -44,8 +45,8 @@ public abstract class JUnaryOperation extends JExpression {
     return arg.getType();
   }
 
-  public boolean hasSideEffects() {
-    return getOp().isModifying() || arg.hasSideEffects();
+  public boolean hasSideEffects(MethodOracle oracle) {
+    return getOp().isModifying() || arg.hasSideEffects(oracle);
   }
 
   public void traverse(JVisitor visitor, Context ctx) {

@@ -16,6 +16,7 @@
 package com.google.gwt.dev.jjs.ast;
 
 import com.google.gwt.dev.jjs.SourceInfo;
+import com.google.gwt.dev.jjs.impl.gflow.call.MethodOracle;
 
 /**
  * Conditional expression.
@@ -52,9 +53,9 @@ public class JConditional extends JExpression {
     return type;
   }
 
-  public boolean hasSideEffects() {
-    return ifTest.hasSideEffects() || thenExpr.hasSideEffects()
-        || elseExpr.hasSideEffects();
+  public boolean hasSideEffects(MethodOracle oracle) {
+    return ifTest.hasSideEffects(oracle) || thenExpr.hasSideEffects(oracle)
+        || elseExpr.hasSideEffects(oracle);
   }
 
   public void setType(JType newType) {

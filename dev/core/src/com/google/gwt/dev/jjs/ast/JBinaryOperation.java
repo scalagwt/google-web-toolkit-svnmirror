@@ -16,6 +16,7 @@
 package com.google.gwt.dev.jjs.ast;
 
 import com.google.gwt.dev.jjs.SourceInfo;
+import com.google.gwt.dev.jjs.impl.gflow.call.MethodOracle;
 
 /**
  * Binary operator expression.
@@ -58,9 +59,9 @@ public class JBinaryOperation extends JExpression {
     }
   }
 
-  public boolean hasSideEffects() {
-    return op.isAssignment() || getLhs().hasSideEffects()
-        || getRhs().hasSideEffects();
+  public boolean hasSideEffects(MethodOracle oracle) {
+    return op.isAssignment() || getLhs().hasSideEffects(oracle)
+        || getRhs().hasSideEffects(oracle);
   }
 
   public boolean isAssignment() {

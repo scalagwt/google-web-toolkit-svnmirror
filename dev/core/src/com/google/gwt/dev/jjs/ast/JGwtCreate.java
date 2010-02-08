@@ -16,6 +16,7 @@
 package com.google.gwt.dev.jjs.ast;
 
 import com.google.gwt.dev.jjs.SourceInfo;
+import com.google.gwt.dev.jjs.impl.gflow.call.MethodOracle;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -110,9 +111,9 @@ public class JGwtCreate extends JExpression {
     return type;
   }
 
-  public boolean hasSideEffects() {
+  public boolean hasSideEffects(MethodOracle oracle) {
     for (JExpression expr : instantiationExpressions) {
-      if (expr.hasSideEffects()) {
+      if (expr.hasSideEffects(oracle)) {
         return true;
       }
     }

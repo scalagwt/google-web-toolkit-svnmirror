@@ -220,7 +220,7 @@ public class MethodInliner {
           JReturnStatement returnStatement = (JReturnStatement) stmt;
           JExpression expr = returnStatement.getExpr();
           if (expr != null) {
-            if (!ignoringReturnValue || expr.hasSideEffects()) {
+            if (!ignoringReturnValue || expr.hasSideEffects(program.methodOracle)) {
               JExpression clone = cloner.cloneExpression(expr);
               clone = maybeCast(clone, body.getMethod().getType());
               multi.exprs.add(clone);
