@@ -14,3 +14,5 @@ svn merge --ignore-ancestry -c7382 \
 
 svn merge --ignore-ancestry -c7385 \
     https://google-web-toolkit.googlecode.com/svn/trunk
+
+Merged Lex's fix for switch(enum) (not yet mirrored to trunk)
