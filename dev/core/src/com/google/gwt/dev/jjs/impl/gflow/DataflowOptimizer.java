@@ -84,7 +84,7 @@ public class DataflowOptimizer {
       CombinedIntegratedAnalysis<CfgNode<?>, CfgEdge, CfgTransformer, Cfg> bkwAnalysis = 
         new CombinedIntegratedAnalysis<CfgNode<?>, CfgEdge, CfgTransformer, Cfg>();
       
-      bkwAnalysis.addAnalysis(new LivenessAnalysis(program));
+      bkwAnalysis.addAnalysis(new LivenessAnalysis());
       
       madeChanges = AnalysisSolver.solveIntegrated(cfgGraph, bkwAnalysis, false) || madeChanges; 
 

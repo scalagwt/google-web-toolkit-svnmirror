@@ -25,7 +25,9 @@ import com.google.gwt.dev.jjs.impl.gflow.cfg.CfgNode;
 import com.google.gwt.dev.jjs.impl.gflow.cfg.CfgTransformer;
 
 /**  
- * Detects situation when variable value is constant and replaces variable
+ * Constant propagation optimization.
+ * 
+ * Detects a situation when variable value is constant and replaces variable
  * access with constant value.
  * As of now supports only locals & parameters.
  */

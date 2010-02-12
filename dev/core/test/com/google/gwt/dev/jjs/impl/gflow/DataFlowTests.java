@@ -22,8 +22,6 @@ import com.google.gwt.dev.jjs.impl.gflow.constants.ConstantsAnalysisTest;
 import com.google.gwt.dev.jjs.impl.gflow.constants.ConstantsAnalysisTransformationTest;
 import com.google.gwt.dev.jjs.impl.gflow.copy.CopyAnalysisTest;
 import com.google.gwt.dev.jjs.impl.gflow.copy.CopyAnalysisTransformationTest;
-import com.google.gwt.dev.jjs.impl.gflow.inlinevar.InlineVarAnalysisTest;
-import com.google.gwt.dev.jjs.impl.gflow.inlinevar.InlineVarTransformationTest;
 import com.google.gwt.dev.jjs.impl.gflow.liveness.LivenessAnalysisTest;
 import com.google.gwt.dev.jjs.impl.gflow.liveness.LivenessTransformationTest;
 
@@ -45,8 +43,6 @@ public class DataFlowTests {
     suite.addTestSuite(LivenessTransformationTest.class);
     suite.addTestSuite(CopyAnalysisTest.class);
     suite.addTestSuite(CopyAnalysisTransformationTest.class);
-    suite.addTestSuite(InlineVarAnalysisTest.class);
-    suite.addTestSuite(InlineVarTransformationTest.class);
     suite.addTestSuite(DataflowOptimizerTest.class);
     return suite;
   }

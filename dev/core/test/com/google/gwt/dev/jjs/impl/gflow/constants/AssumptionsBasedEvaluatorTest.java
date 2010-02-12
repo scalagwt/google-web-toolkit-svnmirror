@@ -87,15 +87,18 @@ public class AssumptionsBasedEvaluatorTest extends OptimizerTestBase {
     JBlock block = ((JMethodBody) mainMethod.getBody()).getBlock();
     List<JStatement> statements = block.getStatements();
 
-    ConstantsAssumption assumptions = new ConstantsAssumption();
+    ConstantsAssumption.Updater updater = 
+      new ConstantsAssumption.Updater(new ConstantsAssumption());
 
-    // TODO: clean this mess up.
+    // TODO: not a pretty assumption detection.
     for (int i = 0; i < statements.size() - 1; ++i) {
       JDeclarationStatement decl = (JDeclarationStatement) statements.get(i);
-      assumptions.set(decl.getVariableRef().getTarget(), assumption);
+      updater.set(decl.getVariableRef().getTarget(), assumption);
     }
 
-    JReturnStatement stmt = (JReturnStatement) statements.get(statements.size() - 1);
-    return new Result(ExpressionEvaluator.evaluate(stmt.getExpr(), assumptions));
+    JReturnStatement stmt = 
+      (JReturnStatement) statements.get(statements.size() - 1);
+    return new Result(ExpressionEvaluator.evaluate(stmt.getExpr(), 
+        updater.unwrapToNotNull()));
   }
 }

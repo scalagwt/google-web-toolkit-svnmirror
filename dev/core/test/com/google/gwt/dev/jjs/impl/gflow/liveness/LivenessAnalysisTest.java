@@ -75,8 +75,8 @@ public class LivenessAnalysisTest extends CfgAnalysisTestBase<LivenessAssumption
   }
 
   @Override
-  protected Analysis<CfgNode<?>, CfgEdge, Cfg, LivenessAssumption> createAnalysis(
-      JProgram program) {
-    return new LivenessAnalysis(program);
+  protected Analysis<CfgNode<?>, CfgEdge, Cfg, LivenessAssumption> 
+  createAnalysis(JProgram program) {
+    return new LivenessAnalysis();
   }
 }

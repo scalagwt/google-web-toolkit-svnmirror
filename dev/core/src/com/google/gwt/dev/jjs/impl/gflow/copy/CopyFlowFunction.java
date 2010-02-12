@@ -28,7 +28,7 @@ import com.google.gwt.dev.jjs.impl.gflow.cfg.CfgNode;
 import com.google.gwt.dev.jjs.impl.gflow.cfg.CfgReadWriteNode;
 import com.google.gwt.dev.jjs.impl.gflow.cfg.CfgVisitor;
 import com.google.gwt.dev.jjs.impl.gflow.cfg.CfgWriteNode;
-import com.google.gwt.dev.jjs.impl.gflow.copy.CopyAssumption.CopyOnWrite;
+import com.google.gwt.dev.jjs.impl.gflow.copy.CopyAssumption.Updater;
 
 /**  
  * Flow function for CopyAnalysis.
@@ -38,7 +38,7 @@ public class CopyFlowFunction implements
   public void interpret(CfgNode<?> node,
       Cfg g, AssumptionMap<CfgEdge, CopyAssumption> assumptionMap) {
     CopyAssumption in = AssumptionUtil.join(g.getInEdges(node), assumptionMap);
-    final CopyOnWrite result = new CopyOnWrite(in);
+    final Updater result = new Updater(in);
 
     node.accept(new CfgVisitor() {
       @Override

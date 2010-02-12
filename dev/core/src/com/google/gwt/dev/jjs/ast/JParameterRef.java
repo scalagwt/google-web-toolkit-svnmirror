@@ -16,7 +16,6 @@
 package com.google.gwt.dev.jjs.ast;
 
 import com.google.gwt.dev.jjs.SourceInfo;
-import com.google.gwt.dev.jjs.impl.gflow.call.MethodOracle;
 
 /**
  * Java method parameter reference expression.
@@ -37,7 +36,8 @@ public class JParameterRef extends JVariableRef {
     return param;
   }
 
-  public boolean hasSideEffects(MethodOracle oracle) {
+  @Override
+  public boolean hasSideEffects() {
     return false;
   }
 

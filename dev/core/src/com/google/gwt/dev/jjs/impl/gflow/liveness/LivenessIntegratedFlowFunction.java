@@ -17,7 +17,6 @@ package com.google.gwt.dev.jjs.impl.gflow.liveness;
 
 import com.google.gwt.dev.jjs.ast.JLocal;
 import com.google.gwt.dev.jjs.ast.JParameter;
-import com.google.gwt.dev.jjs.ast.JProgram;
 import com.google.gwt.dev.jjs.ast.JVariable;
 import com.google.gwt.dev.jjs.impl.gflow.AssumptionMap;
 import com.google.gwt.dev.jjs.impl.gflow.AssumptionUtil;
@@ -36,12 +35,7 @@ public class LivenessIntegratedFlowFunction implements
     IntegratedFlowFunction<CfgNode<?>, CfgEdge, CfgTransformer, Cfg, 
     LivenessAssumption> {
   private final LivenessFlowFunction flowFunction = new LivenessFlowFunction();
-  private final JProgram program;
   
-  public LivenessIntegratedFlowFunction(JProgram program) {
-    this.program = program;
-  }
-
   public Transformation<CfgTransformer, Cfg> 
   interpretOrReplace(CfgNode<?> node, Cfg graph,
       AssumptionMap<CfgEdge, LivenessAssumption> assumptionMap) {
@@ -53,7 +47,7 @@ public class LivenessIntegratedFlowFunction implements
       JVariable variable = write.getTargetVariable();
       if ((variable instanceof JLocal || variable instanceof JParameter) && 
           !isLive(assumptions, variable) && write.getValue() != null) {
-        return new LivenessTransformation(program, graph, write);
+        return new LivenessTransformation(graph, write);
       }
     }
 

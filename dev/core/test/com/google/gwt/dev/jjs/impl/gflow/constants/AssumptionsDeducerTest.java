@@ -26,7 +26,7 @@ import com.google.gwt.dev.jjs.ast.JStatement;
 import com.google.gwt.dev.jjs.impl.OptimizerTestBase;
 import com.google.gwt.dev.jjs.impl.gflow.constants.AssumptionDeducer;
 import com.google.gwt.dev.jjs.impl.gflow.constants.ConstantsAssumption;
-import com.google.gwt.dev.jjs.impl.gflow.constants.ConstantsAssumption.CopyOnWrite;
+import com.google.gwt.dev.jjs.impl.gflow.constants.ConstantsAssumption.Updater;
 
 import java.util.List;
 
@@ -108,7 +108,7 @@ public class AssumptionsDeducerTest extends OptimizerTestBase {
     List<JStatement> statements = block.getStatements();
     JIfStatement ifStatement = (JIfStatement) statements.get(statements.size() - 1);
     
-    CopyOnWrite assumptions = new CopyOnWrite(null);
+    Updater assumptions = new Updater(null);
     AssumptionDeducer.deduceAssumption(ifStatement.getIfExpr(), 
         JBooleanLiteral.get(b), assumptions);
     return new Result(assumptions.unwrapToNotNull());

@@ -40,10 +40,10 @@ final class AssumptionDeducer extends JVisitor {
    */
   static void deduceAssumption(
       JExpression expression, final JValueLiteral value, 
-      final ConstantsAssumption.CopyOnWrite assumption) {
+      final ConstantsAssumption.Updater assumption) {
     new AssumptionDeducer(value, assumption).accept(expression);
   }
-  private final ConstantsAssumption.CopyOnWrite assumption;
+  private final ConstantsAssumption.Updater assumption;
   
   /**
    * Contains the value of evaluating expression we're currently visiting.
@@ -51,7 +51,7 @@ final class AssumptionDeducer extends JVisitor {
    */
   private JValueLiteral currentValue;
 
-  AssumptionDeducer(JValueLiteral value, ConstantsAssumption.CopyOnWrite assumption) {
+  AssumptionDeducer(JValueLiteral value, ConstantsAssumption.Updater assumption) {
     this.assumption = assumption;
     currentValue = value;
   }
@@ -63,12 +63,12 @@ final class AssumptionDeducer extends JVisitor {
       case EQ:
         if (isTrue(currentValue)) {
           if (x.getRhs() instanceof JValueLiteral &&
-              isDeduciveEqValue(x.getRhs())) {
+              isSubstitutableIfEquals(x.getRhs())) {
             currentValue = (JValueLiteral) x.getRhs();
             accept(x.getLhs());
             return false;
           } else if (x.getLhs() instanceof JValueLiteral &&
-              isDeduciveEqValue(x.getLhs())) {
+              isSubstitutableIfEquals(x.getLhs())) {
             currentValue = (JValueLiteral) x.getLhs();
             accept(x.getRhs());
             return false;
@@ -79,12 +79,12 @@ final class AssumptionDeducer extends JVisitor {
       case NEQ:
         if (isFalse(currentValue)) {
           if (x.getRhs() instanceof JValueLiteral &&
-              isDeduciveEqValue(x.getRhs())) {
+              isSubstitutableIfEquals(x.getRhs())) {
             currentValue = (JValueLiteral) x.getRhs();
             accept(x.getLhs());
             return false;
           } else if (x.getLhs() instanceof JValueLiteral &&
-              isDeduciveEqValue(x.getLhs())) {
+              isSubstitutableIfEquals(x.getLhs())) {
             currentValue = (JValueLiteral) x.getLhs();
             accept(x.getRhs());
             return false;
@@ -132,7 +132,8 @@ final class AssumptionDeducer extends JVisitor {
 
   @Override
   public boolean visit(JMultiExpression x, Context ctx) {
-    // Only last expression can be reverse engineered.
+    // Knowing the value multi expression, we know the value of its last 
+    // expression only.
     accept(x.exprs.get(x.exprs.size() - 1));
     return false;
   }
@@ -147,11 +148,16 @@ final class AssumptionDeducer extends JVisitor {
     return false;
   }
 
+  private boolean isFalse(JValueLiteral value) {
+    return value instanceof JBooleanLiteral &&
+        !((JBooleanLiteral) value).getValue();
+  }
+
   /**
-   * Checks if we can deduce something from the fact that something is == to
-   * passed expression. 
+   * Checks that if some expression equals <code>e</code>, then we can freely
+   * substitute it by e. 
    */
-  private boolean isDeduciveEqValue(JExpression e) {
+  private boolean isSubstitutableIfEquals(JExpression e) {
     if (!(e instanceof JValueLiteral)) {
       return false;
     }
@@ -171,11 +177,6 @@ final class AssumptionDeducer extends JVisitor {
     }
 
     return true;
-  }
-
-  private boolean isFalse(JValueLiteral value) {
-    return value instanceof JBooleanLiteral &&
-        !((JBooleanLiteral) value).getValue();
   }
 
   private boolean isTrue(JValueLiteral value) {

@@ -23,7 +23,6 @@ import com.google.gwt.dev.jjs.ast.JMethodCall;
 import com.google.gwt.dev.jjs.ast.JNullLiteral;
 import com.google.gwt.dev.jjs.ast.JType;
 import com.google.gwt.dev.jjs.ast.JVisitor;
-import com.google.gwt.dev.jjs.impl.gflow.call.MethodOracle;
 
 /**
  * A call to a JSNI method.
@@ -51,7 +50,7 @@ public class JsniMethodRef extends JMethodCall {
   }
 
   @Override
-  public boolean hasSideEffects(MethodOracle oracle) {
+  public boolean hasSideEffects() {
     return false;
   }
 

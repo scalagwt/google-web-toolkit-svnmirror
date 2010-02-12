@@ -30,13 +30,13 @@ import java.util.Map;
  */
 public class CopyAssumption implements Assumption<CopyAssumption> {
   /**
-   * 
+   * Updates the assumption by copying it on first write.
    */
-  public static class CopyOnWrite {
+  public static class Updater {
     private CopyAssumption assumption;
     private boolean copied = false;
     
-    public CopyOnWrite(CopyAssumption assumption) {
+    public Updater(CopyAssumption assumption) {
       this.assumption = assumption;
     }
 
@@ -80,10 +80,6 @@ public class CopyAssumption implements Assumption<CopyAssumption> {
     } else {
       copyToOriginal = new IdentityHashMap<JVariable, JVariable>();
     }
-  }
-
-  public void addCopy(JVariable original, JVariable copy) {
-    copyToOriginal.put(copy, original);
   }
 
   @Override
@@ -133,17 +129,6 @@ public class CopyAssumption implements Assumption<CopyAssumption> {
     return result;
   }
 
-  public void kill(JVariable variable) {
-    copyToOriginal.put(variable, null);
-    
-    for (JVariable v : Lists.create(copyToOriginal.keySet())) {
-      JVariable original = copyToOriginal.get(v);
-      if (original == variable) {
-        copyToOriginal.put(v, null);
-      }
-    }
-  }
-
   @Override
   public String toString() {
     StringBuffer result = new StringBuffer();
@@ -167,5 +152,20 @@ public class CopyAssumption implements Assumption<CopyAssumption> {
     result.append("}");
     
     return result.toString();  
+  }
+
+  private void addCopy(JVariable original, JVariable copy) {
+    copyToOriginal.put(copy, original);
+  }
+
+  private void kill(JVariable variable) {
+    copyToOriginal.put(variable, null);
+    
+    for (JVariable v : Lists.create(copyToOriginal.keySet())) {
+      JVariable original = copyToOriginal.get(v);
+      if (original == variable) {
+        copyToOriginal.put(v, null);
+      }
+    }
   }
 }

@@ -26,7 +26,6 @@ import com.google.gwt.dev.jjs.ast.js.JsniMethodBody;
 import com.google.gwt.dev.jjs.ast.js.JsonObject;
 import com.google.gwt.dev.jjs.impl.CodeSplitter;
 import com.google.gwt.dev.jjs.impl.ReplaceRunAsyncs.RunAsyncReplacement;
-import com.google.gwt.dev.jjs.impl.gflow.call.MethodOracle;
 import com.google.gwt.dev.util.collect.Lists;
 import com.google.gwt.dev.util.collect.Maps;
 
@@ -247,8 +246,6 @@ public class JProgram extends JNode {
   public final List<List<JMethod>> entryMethods = new ArrayList<List<JMethod>>();
 
   public final Map<String, HasEnclosingType> jsniMap = new HashMap<String, HasEnclosingType>();
-
-  public MethodOracle methodOracle = new MethodOracle();
 
   public final JTypeOracle typeOracle = new JTypeOracle(this);
 

@@ -16,7 +16,6 @@
 package com.google.gwt.dev.jjs.ast;
 
 import com.google.gwt.dev.jjs.SourceInfo;
-import com.google.gwt.dev.jjs.impl.gflow.call.MethodOracle;
 
 /**
  * A new instance expression. This differs from a standard Java new operation in
@@ -42,7 +41,7 @@ public class JNewInstance extends JExpression {
   }
 
   @Override
-  public boolean hasSideEffects(MethodOracle oracle) {
+  public boolean hasSideEffects() {
     // The actual new operation itself has no side effects (see class comment).
     return false;
   }

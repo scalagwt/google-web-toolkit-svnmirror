@@ -31,13 +31,13 @@ import java.util.Set;
  */
 public class LivenessAssumption implements Assumption<LivenessAssumption> {
   /**
-   * Copy-on-write helper to minimize copy creation.
+   * Updates the assumption by copying it on first write.
    */
-  public static class CopyOnWrite {
+  public static class Updater {
     private LivenessAssumption assumption;
     private boolean copied = false;
     
-    public CopyOnWrite(LivenessAssumption assumption) {
+    public Updater(LivenessAssumption assumption) {
       this.assumption = assumption;
     }
 
@@ -123,10 +123,6 @@ public class LivenessAssumption implements Assumption<LivenessAssumption> {
     return result;
   }
 
-  public void kill(JVariable variable) {
-    liveVariables.remove(variable);
-  }
-
   public String toDebugString() {
     StringBuffer result = new StringBuffer();
     
@@ -153,7 +149,11 @@ public class LivenessAssumption implements Assumption<LivenessAssumption> {
     return toDebugString();
   }
 
-  public void use(JVariable variable) {
+  private void kill(JVariable variable) {
+    liveVariables.remove(variable);
+  }
+
+  private void use(JVariable variable) {
     liveVariables.add(variable);
   }
 }

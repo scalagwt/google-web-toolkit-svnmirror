@@ -31,7 +31,7 @@ import com.google.gwt.dev.jjs.impl.gflow.cfg.CfgNode;
 import com.google.gwt.dev.jjs.impl.gflow.cfg.CfgReadWriteNode;
 import com.google.gwt.dev.jjs.impl.gflow.cfg.CfgVisitor;
 import com.google.gwt.dev.jjs.impl.gflow.cfg.CfgWriteNode;
-import com.google.gwt.dev.jjs.impl.gflow.constants.ConstantsAssumption.CopyOnWrite;
+import com.google.gwt.dev.jjs.impl.gflow.constants.ConstantsAssumption.Updater;
 import com.google.gwt.dev.util.Preconditions;
 
 import java.util.ArrayList;
@@ -49,14 +49,14 @@ public class ConstantsFlowFunction implements
     final ArrayList<ConstantsAssumption> result = 
       new ArrayList<ConstantsAssumption>(outSize);
     
-    final CopyOnWrite assumption = new CopyOnWrite(in);
+    final Updater assumption = new Updater(in);
     node.accept(new CfgVisitor() {
       @Override
       public void visitConditionalNode(CfgConditionalNode<?> x) {
         JExpression condition = x.getCondition();
 
-        CopyOnWrite thenAssumptions = assumption.copy();
-        CopyOnWrite elseAssumptions = assumption.copy(); 
+        Updater thenAssumptions = assumption.copy();
+        Updater elseAssumptions = assumption.copy(); 
           
         Preconditions.checkNotNull(condition, "Null condition in %s", x);
         AssumptionDeducer.deduceAssumption(condition, JBooleanLiteral.TRUE, 
@@ -96,7 +96,7 @@ public class ConstantsFlowFunction implements
         super.visitWriteNode(node);
       }
 
-      private void processWrite(final CopyOnWrite assumption,
+      private void processWrite(final Updater assumption,
           JVariable var, JExpression expression) {
         if (var == null) {
           return;

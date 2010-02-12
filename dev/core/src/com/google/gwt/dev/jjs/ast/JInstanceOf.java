@@ -16,7 +16,6 @@
 package com.google.gwt.dev.jjs.ast;
 
 import com.google.gwt.dev.jjs.SourceInfo;
-import com.google.gwt.dev.jjs.impl.gflow.call.MethodOracle;
 
 /**
  * Java instance of expression.
@@ -45,7 +44,8 @@ public class JInstanceOf extends JExpression {
     return JPrimitiveType.BOOLEAN;
   }
 
-  public boolean hasSideEffects(MethodOracle oracle) {
+  @Override
+  public boolean hasSideEffects() {
     return false;
   }
 

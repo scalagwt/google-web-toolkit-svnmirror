@@ -107,7 +107,7 @@ public class TypeTightener {
       if (isStatic && instance != null) {
         // this doesn't really belong here, but while we're here let's remove
         // non-side-effect qualifiers to statics
-        if (!instance.hasSideEffects(program.methodOracle)) {
+        if (!instance.hasSideEffects()) {
           JFieldRef fieldRef = new JFieldRef(x.getSourceInfo(), null,
               x.getField(), x.getEnclosingType());
           ctx.replaceMe(fieldRef);
@@ -128,7 +128,7 @@ public class TypeTightener {
       if (isStatic && !isStaticImpl && instance != null) {
         // this doesn't really belong here, but while we're here let's remove
         // non-side-effect qualifiers to statics
-        if (!instance.hasSideEffects(program.methodOracle)) {
+        if (!instance.hasSideEffects()) {
           JMethodCall newCall = new JMethodCall(x.getSourceInfo(), null,
               x.getTarget());
           newCall.addArgs(x.getArgs());

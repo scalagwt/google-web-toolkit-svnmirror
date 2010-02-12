@@ -16,6 +16,8 @@
 package com.google.gwt.dev.jjs.impl.gflow.constants;
 
 import com.google.gwt.dev.jjs.ast.HasName;
+import com.google.gwt.dev.jjs.ast.JDoubleLiteral;
+import com.google.gwt.dev.jjs.ast.JFloatLiteral;
 import com.google.gwt.dev.jjs.ast.JValueLiteral;
 import com.google.gwt.dev.jjs.ast.JVariable;
 import com.google.gwt.dev.jjs.impl.gflow.Assumption;
@@ -30,18 +32,18 @@ import java.util.Map;
  */
 public class ConstantsAssumption implements Assumption<ConstantsAssumption> {
   /**
-   * 
+   * Updates the assumption by copying it on first write.
    */
-  public static class CopyOnWrite {
+  public static class Updater {
     private ConstantsAssumption assumption;
     private boolean copied = false;
     
-    public CopyOnWrite(ConstantsAssumption assumption) {
+    public Updater(ConstantsAssumption assumption) {
       this.assumption = assumption;
     }
 
-    public CopyOnWrite copy() {
-      return new CopyOnWrite(assumption);
+    public Updater copy() {
+      return new Updater(assumption);
     }
 
     public boolean hasAssumption(JVariable target) {
@@ -150,10 +152,6 @@ public class ConstantsAssumption implements Assumption<ConstantsAssumption> {
     return result;
   }
   
-  public void set(JVariable variable, JValueLiteral literal) {
-    values.put(variable, literal);
-  }
-
   public String toDebugString() {
     StringBuffer result = new StringBuffer();
     
@@ -181,12 +179,40 @@ public class ConstantsAssumption implements Assumption<ConstantsAssumption> {
   public String toString() {
     return toDebugString();
   }
-  
-  private boolean equal(Object o1, Object o2) {
-    if (o1 == null || o2 == null) {
-      return o1 == o2;
+
+  private boolean equal(JValueLiteral literal1, JValueLiteral literal2) {
+    if (literal1 == null || literal2 == null) {
+      return literal1 == literal2;
     } 
-    return o1.equals(o2);
+
+    if (literal1.getClass() != literal2.getClass()) {
+      // these are different literal types. 
+      return false;
+    }
+    
+    if (literal1 instanceof JFloatLiteral) {
+      int bits1 = Float.floatToRawIntBits(
+          ((JFloatLiteral) literal1).getValue());
+      int bits2 = Float.floatToRawIntBits(
+          ((JFloatLiteral) literal2).getValue());
+      return bits1 == bits2;
+    }
+    
+    if (literal1 instanceof JDoubleLiteral) {
+      long bits1 = Double.doubleToRawLongBits(
+          ((JDoubleLiteral) literal1).getValue());
+      long bits2 = Double.doubleToRawLongBits(
+          ((JDoubleLiteral) literal2).getValue());
+      return bits1 == bits2;
+    }
+
+    Object valueObj1 = literal1.getValueObj();
+    Object valueObj2 = literal2.getValueObj();
+    if (valueObj1 == null || valueObj2 == null) {
+      return valueObj1 == valueObj2;
+    }
+    
+    return valueObj1.equals(valueObj2);
   }
   
   private JValueLiteral join(JValueLiteral value1, JValueLiteral value2) {
@@ -195,5 +221,9 @@ public class ConstantsAssumption implements Assumption<ConstantsAssumption> {
     }
     
     return value1;
+  }
+  
+  private void set(JVariable variable, JValueLiteral literal) {
+    values.put(variable, literal);
   }
 }

@@ -22,7 +22,6 @@ import com.google.gwt.dev.jjs.ast.JExpression;
 import com.google.gwt.dev.jjs.ast.JNode;
 import com.google.gwt.dev.jjs.ast.JType;
 import com.google.gwt.dev.jjs.ast.JVisitor;
-import com.google.gwt.dev.jjs.impl.gflow.call.MethodOracle;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,10 +67,11 @@ public class JsonObject extends JExpression {
     return jsoType;
   }
 
-  public boolean hasSideEffects(MethodOracle oracle) {
+  @Override
+  public boolean hasSideEffects() {
     for (JsonPropInit propInit : propInits) {
-      if (propInit.labelExpr.hasSideEffects(oracle)
-          || propInit.valueExpr.hasSideEffects(oracle)) {
+      if (propInit.labelExpr.hasSideEffects()
+          || propInit.valueExpr.hasSideEffects()) {
         return true;
       }
     }

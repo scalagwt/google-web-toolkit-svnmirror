@@ -16,7 +16,6 @@
 package com.google.gwt.dev.jjs.ast;
 
 import com.google.gwt.dev.jjs.SourceInfo;
-import com.google.gwt.dev.jjs.impl.gflow.call.MethodOracle;
 import com.google.gwt.dev.util.collect.Lists;
 
 import java.util.Collections;
@@ -136,9 +135,9 @@ public class JMethodCall extends JExpression {
   }
 
   @Override
-  public boolean hasSideEffects(MethodOracle oracle) {
+  public boolean hasSideEffects() {
     // TODO(later): optimize? Be sure to check for clinit when we do.
-    return oracle.hasSideEffects(this);
+    return true;
   }
 
   public boolean isStaticDispatchOnly() {

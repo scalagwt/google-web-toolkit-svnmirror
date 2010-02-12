@@ -208,7 +208,7 @@ public class Pruner {
             } else {
               newCall.addArg(arg);
             }
-          } else if (arg.hasSideEffects(program.methodOracle)) {
+          } else if (arg.hasSideEffects()) {
             // The argument is only needed for side effects, add it to a multi.
             if (currentMulti == null) {
               currentMulti = new JMultiExpression(x.getSourceInfo());
@@ -541,7 +541,7 @@ public class Pruner {
     }
 
     assert instance != null;
-    if (!instance.hasSideEffects(program.methodOracle)) {
+    if (!instance.hasSideEffects()) {
       instance = program.getLiteralNull();
     }
 
@@ -583,7 +583,7 @@ public class Pruner {
       }
     }
     assert (instance != null);
-    if (!instance.hasSideEffects(program.methodOracle)) {
+    if (!instance.hasSideEffects()) {
       instance = program.getLiteralNull();
     }
 

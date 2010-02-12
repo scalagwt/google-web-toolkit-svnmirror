@@ -15,7 +15,6 @@
  */
 package com.google.gwt.dev.jjs.impl.gflow.liveness;
 
-import com.google.gwt.dev.jjs.ast.JProgram;
 import com.google.gwt.dev.jjs.impl.gflow.Analysis;
 import com.google.gwt.dev.jjs.impl.gflow.AssumptionMap;
 import com.google.gwt.dev.jjs.impl.gflow.FlowFunction;
@@ -35,11 +34,8 @@ public class LivenessAnalysis implements Analysis<CfgNode<?>, CfgEdge, Cfg,
     Cfg, LivenessAssumption> {
   private static final LivenessFlowFunction FLOW_FUNCTION = 
     new LivenessFlowFunction();
-  LivenessIntegratedFlowFunction integratedFlowFunction;
-
-  public LivenessAnalysis(JProgram program) {
-    integratedFlowFunction = new LivenessIntegratedFlowFunction(program);
-  }
+  private static final LivenessIntegratedFlowFunction INTEGRATED_FLOW_FUNCTION = 
+    new LivenessIntegratedFlowFunction();
   
   public FlowFunction<CfgNode<?>, CfgEdge, Cfg, LivenessAssumption> getFlowFunction() {
     return FLOW_FUNCTION;
@@ -48,7 +44,7 @@ public class LivenessAnalysis implements Analysis<CfgNode<?>, CfgEdge, Cfg,
   public IntegratedFlowFunction<CfgNode<?>, CfgEdge, CfgTransformer, Cfg, 
                                 LivenessAssumption> 
   getIntegratedFlowFunction() {
-    return integratedFlowFunction;
+    return INTEGRATED_FLOW_FUNCTION;
   }
 
   public void setInitialGraphAssumptions(Cfg graph,

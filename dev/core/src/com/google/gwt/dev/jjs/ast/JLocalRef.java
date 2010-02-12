@@ -16,7 +16,6 @@
 package com.google.gwt.dev.jjs.ast;
 
 import com.google.gwt.dev.jjs.SourceInfo;
-import com.google.gwt.dev.jjs.impl.gflow.call.MethodOracle;
 
 /**
  * Java local variable reference.
@@ -37,7 +36,8 @@ public class JLocalRef extends JVariableRef {
     return local;
   }
 
-  public boolean hasSideEffects(MethodOracle oracle) {
+  @Override
+  public boolean hasSideEffects() {
     return false;
   }
 

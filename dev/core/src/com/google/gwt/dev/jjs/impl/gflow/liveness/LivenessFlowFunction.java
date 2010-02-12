@@ -28,7 +28,7 @@ import com.google.gwt.dev.jjs.impl.gflow.cfg.CfgReadNode;
 import com.google.gwt.dev.jjs.impl.gflow.cfg.CfgReadWriteNode;
 import com.google.gwt.dev.jjs.impl.gflow.cfg.CfgVisitor;
 import com.google.gwt.dev.jjs.impl.gflow.cfg.CfgWriteNode;
-import com.google.gwt.dev.jjs.impl.gflow.liveness.LivenessAssumption.CopyOnWrite;
+import com.google.gwt.dev.jjs.impl.gflow.liveness.LivenessAssumption.Updater;
 
 /**
  * Flow function for Liveness Analysis.
@@ -37,7 +37,7 @@ public class LivenessFlowFunction implements FlowFunction<CfgNode<?>, CfgEdge,
     Cfg, LivenessAssumption> {
   public void interpret(CfgNode<?> node, Cfg g,
       AssumptionMap<CfgEdge, LivenessAssumption> assumptionMap) {
-    final CopyOnWrite result = new CopyOnWrite(
+    final Updater result = new Updater(
         AssumptionUtil.join(g.getOutEdges(node), assumptionMap));
     
     node.accept(new CfgVisitor() {

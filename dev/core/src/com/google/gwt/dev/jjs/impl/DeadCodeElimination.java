@@ -61,7 +61,6 @@ import com.google.gwt.dev.jjs.ast.JVariableRef;
 import com.google.gwt.dev.jjs.ast.JVisitor;
 import com.google.gwt.dev.jjs.ast.JWhileStatement;
 import com.google.gwt.dev.jjs.ast.js.JMultiExpression;
-import com.google.gwt.dev.jjs.impl.gflow.call.MethodOracle;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -140,7 +139,7 @@ public class DeadCodeElimination {
         case EQ:
           // simplify: null == null -> true
           if (lhs.getType() == program.getTypeNull()
-              && rhs.getType() == program.getTypeNull() && !x.hasSideEffects(methodOracle)) {
+              && rhs.getType() == program.getTypeNull() && !x.hasSideEffects()) {
             ctx.replaceMe(program.getLiteralBoolean(true));
             return;
           }
@@ -149,7 +148,7 @@ public class DeadCodeElimination {
         case NEQ:
           // simplify: null != null -> false
           if (lhs.getType() == program.getTypeNull()
-              && rhs.getType() == program.getTypeNull() && !x.hasSideEffects(methodOracle)) {
+              && rhs.getType() == program.getTypeNull() && !x.hasSideEffects()) {
             ctx.replaceMe(program.getLiteralBoolean(false));
             return;
           }
@@ -300,7 +299,7 @@ public class DeadCodeElimination {
     @Override
     public void endVisit(JExpressionStatement x, Context ctx) {
       ignoringExpressionOutput.remove(x.getExpr());
-      if (!x.getExpr().hasSideEffects(methodOracle)) {
+      if (!x.getExpr().hasSideEffects()) {
         removeMe(x, ctx);
       }
     }
@@ -371,7 +370,7 @@ public class DeadCodeElimination {
     public void endVisit(JLocalRef x, Context ctx) {
       JLiteral literal = tryGetConstant(x);
       if (literal != null) {
-        assert (!x.hasSideEffects(methodOracle));
+        assert (!x.hasSideEffects());
         ctx.replaceMe(literal);
       }
     }
@@ -396,7 +395,7 @@ public class DeadCodeElimination {
       for (int i = paramCount; i < x.getArgs().size(); ++i) {
         JExpression arg = x.getArgs().get(i);
         ignoringExpressionOutput.remove(arg);
-        if (!arg.hasSideEffects(methodOracle)) {
+        if (!arg.hasSideEffects()) {
           x.removeArg(i--);
           didChange = true;
         }
@@ -428,7 +427,7 @@ public class DeadCodeElimination {
 
       for (int i = 0; i < numRemovableExpressions(x); ++i) {
         JExpression expr = x.exprs.get(i);
-        if (!expr.hasSideEffects(methodOracle)) {
+        if (!expr.hasSideEffects()) {
           x.exprs.remove(i);
           --i;
           didChange = true;
@@ -454,7 +453,7 @@ public class DeadCodeElimination {
     public void endVisit(JParameterRef x, Context ctx) {
       JLiteral literal = tryGetConstant(x);
       if (literal != null) {
-        assert (!x.hasSideEffects(methodOracle));
+        assert (!x.hasSideEffects());
         ctx.replaceMe(literal);
       }
     }
@@ -1292,7 +1291,7 @@ public class DeadCodeElimination {
         JBooleanLiteral booleanLiteral = (JBooleanLiteral) rhs;
         if (booleanLiteral.getValue()) {
           ctx.replaceMe(lhs);
-        } else if (!lhs.hasSideEffects(methodOracle)) {
+        } else if (!lhs.hasSideEffects()) {
           ctx.replaceMe(rhs);
         }
       }
@@ -1322,7 +1321,7 @@ public class DeadCodeElimination {
         JBooleanLiteral booleanLiteral = (JBooleanLiteral) rhs;
         if (!booleanLiteral.getValue()) {
           ctx.replaceMe(lhs);
-        } else if (!lhs.hasSideEffects(methodOracle)) {
+        } else if (!lhs.hasSideEffects()) {
           ctx.replaceMe(rhs);
         }
       }
@@ -1420,11 +1419,11 @@ public class DeadCodeElimination {
         ctx.replaceMe(simplifyNegate(simplifier.cast(type, rhs)));
         return true;
       }
-      if (isLiteralZero(rhs) && !lhs.hasSideEffects(methodOracle)) {
+      if (isLiteralZero(rhs) && !lhs.hasSideEffects()) {
         ctx.replaceMe(simplifier.cast(type, rhs));
         return true;
       }
-      if (isLiteralZero(lhs) && !rhs.hasSideEffects(methodOracle)) {
+      if (isLiteralZero(lhs) && !rhs.hasSideEffects()) {
         ctx.replaceMe(simplifier.cast(type, lhs));
         return true;
       }
@@ -1767,14 +1766,12 @@ public class DeadCodeElimination {
   }
 
   private final JProgram program;
-  private final MethodOracle methodOracle;
   private final Simplifier simplifier;
 
   private final Map<JType, Class<?>> typeClassMap = new IdentityHashMap<JType, Class<?>>();
 
   public DeadCodeElimination(JProgram program) {
     this.program = program;
-    this.methodOracle = program.methodOracle;
     simplifier = new Simplifier(program);
     typeClassMap.put(program.getTypeJavaLangObject(), Object.class);
     typeClassMap.put(program.getTypeJavaLangString(), String.class);

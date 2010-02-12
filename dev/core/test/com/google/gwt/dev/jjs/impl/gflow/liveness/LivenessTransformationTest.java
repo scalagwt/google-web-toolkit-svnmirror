@@ -82,6 +82,6 @@ public class LivenessTransformationTest extends CfgIntegratedAnalysisTestBase<Li
   @Override
   protected IntegratedAnalysis<CfgNode<?>, CfgEdge, CfgTransformer, Cfg, LivenessAssumption> createIntegratedAnalysis(
       JProgram program) {
-    return new LivenessAnalysis(program);
+    return new LivenessAnalysis();
   }
 }

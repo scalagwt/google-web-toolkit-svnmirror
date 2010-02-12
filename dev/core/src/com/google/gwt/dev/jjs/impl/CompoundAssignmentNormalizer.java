@@ -34,7 +34,6 @@ import com.google.gwt.dev.jjs.ast.JThisRef;
 import com.google.gwt.dev.jjs.ast.JType;
 import com.google.gwt.dev.jjs.ast.JUnaryOperator;
 import com.google.gwt.dev.jjs.ast.js.JMultiExpression;
-import com.google.gwt.dev.jjs.impl.gflow.call.MethodOracle;
 
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
@@ -274,7 +273,7 @@ public abstract class CompoundAssignmentNormalizer {
     }
 
     private JExpression possiblyReplace(JExpression x) {
-      if (!x.hasSideEffects(methodOracle)) {
+      if (!x.hasSideEffects()) {
         return x;
       }
 
@@ -372,12 +371,10 @@ public abstract class CompoundAssignmentNormalizer {
    * consumption of the output.
    */
   private final boolean reuseTemps;
-  private final MethodOracle methodOracle;
 
   protected CompoundAssignmentNormalizer(JProgram program, 
       boolean reuseTemps) {
     this.program = program;
-    this.methodOracle = program.methodOracle;
     this.reuseTemps = reuseTemps;
     cloner = new CloneExpressionVisitor(program);
     clearLocals();

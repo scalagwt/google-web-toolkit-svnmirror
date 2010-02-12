@@ -16,7 +16,6 @@
 package com.google.gwt.dev.jjs.ast;
 
 import com.google.gwt.dev.jjs.SourceInfo;
-import com.google.gwt.dev.jjs.impl.gflow.call.MethodOracle;
 
 /**
  * Java array reference expression.
@@ -54,9 +53,10 @@ public class JArrayRef extends JExpression {
         : arrayType.getElementType();
   }
 
-  public boolean hasSideEffects(MethodOracle oracle) {
+  @Override
+  public boolean hasSideEffects() {
     // TODO: make the last test better when we have null tracking.
-    return instance.hasSideEffects(oracle) || indexExpr.hasSideEffects(oracle)
+    return instance.hasSideEffects() || indexExpr.hasSideEffects()
         || instance.getType() == JNullType.INSTANCE;
   }
 

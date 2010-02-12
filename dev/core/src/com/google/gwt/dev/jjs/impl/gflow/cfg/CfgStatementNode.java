@@ -19,6 +19,8 @@ import com.google.gwt.dev.jjs.ast.JStatement;
 
 /**
  * Node corresponding to if statement.
+ * 
+ * @param <JNodeType> node type
  */
 public class CfgStatementNode<JNodeType extends JStatement> extends
     CfgSimpleNode<JNodeType> {

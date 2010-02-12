@@ -21,7 +21,6 @@ import com.google.gwt.dev.jjs.ast.JExpression;
 import com.google.gwt.dev.jjs.ast.JPrimitiveType;
 import com.google.gwt.dev.jjs.ast.JType;
 import com.google.gwt.dev.jjs.ast.JVisitor;
-import com.google.gwt.dev.jjs.impl.gflow.call.MethodOracle;
 
 import java.util.ArrayList;
 
@@ -46,10 +45,10 @@ public class JMultiExpression extends JExpression {
   }
 
   @Override
-  public boolean hasSideEffects(MethodOracle oracle) {
+  public boolean hasSideEffects() {
     for (int i = 0; i < exprs.size(); ++i) {
       JExpression expr = exprs.get(i);
-      if (expr.hasSideEffects(oracle)) {
+      if (expr.hasSideEffects()) {
         return true;
       }
     }

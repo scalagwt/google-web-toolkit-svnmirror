@@ -22,13 +22,12 @@ import com.google.gwt.dev.jjs.ast.JExpression;
 import com.google.gwt.dev.jjs.ast.JExpressionStatement;
 import com.google.gwt.dev.jjs.ast.JModVisitor;
 import com.google.gwt.dev.jjs.ast.JNode;
-import com.google.gwt.dev.jjs.ast.JProgram;
 import com.google.gwt.dev.jjs.impl.gflow.TransformationFunction.Transformation;
-import com.google.gwt.dev.jjs.impl.gflow.cfg.CfgTransformer;
 import com.google.gwt.dev.jjs.impl.gflow.cfg.Cfg;
-import com.google.gwt.dev.jjs.impl.gflow.cfg.CfgUtil;
 import com.google.gwt.dev.jjs.impl.gflow.cfg.CfgNode;
 import com.google.gwt.dev.jjs.impl.gflow.cfg.CfgNopNode;
+import com.google.gwt.dev.jjs.impl.gflow.cfg.CfgTransformer;
+import com.google.gwt.dev.jjs.impl.gflow.cfg.CfgUtil;
 import com.google.gwt.dev.jjs.impl.gflow.cfg.CfgWriteNode;
 import com.google.gwt.dev.util.Preconditions;
 
@@ -39,12 +38,9 @@ public class LivenessTransformation implements
     Transformation<CfgTransformer, Cfg> {
   private final Cfg graph;
   private final CfgWriteNode writeToKill;
-  private final JProgram program;
 
-  public LivenessTransformation(JProgram program, Cfg graph, 
-      CfgWriteNode writeToKill) {
-    this.program = program;
-    this.graph = graph;
+  public LivenessTransformation(Cfg cfg, CfgWriteNode writeToKill) {
+    this.graph = cfg;
     this.writeToKill = writeToKill;
   }
 
@@ -68,7 +64,7 @@ public class LivenessTransformation implements
               return;
             }
 
-            if (x.getInitializer().hasSideEffects(program.methodOracle)) {
+            if (x.getInitializer().hasSideEffects()) {
               ctx.insertBefore(x.getInitializer().makeStatement());
             }
             
@@ -82,7 +78,7 @@ public class LivenessTransformation implements
             if (expr instanceof JBinaryOperation) {
               JBinaryOperation binop = (JBinaryOperation) expr;
               if (shouldKill(binop) && 
-                  !binop.getRhs().hasSideEffects(program.methodOracle)) {
+                  !binop.getRhs().hasSideEffects()) {
                 ctx.removeMe();
                 return false;
               }

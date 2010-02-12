@@ -49,7 +49,6 @@ import com.google.gwt.dev.jjs.ast.JVisitor;
 import com.google.gwt.dev.jjs.ast.js.JsniFieldRef;
 import com.google.gwt.dev.jjs.ast.js.JsniMethodBody;
 import com.google.gwt.dev.jjs.ast.js.JsniMethodRef;
-import com.google.gwt.dev.jjs.impl.gflow.call.MethodOracle;
 import com.google.gwt.dev.js.ast.JsContext;
 import com.google.gwt.dev.js.ast.JsExpression;
 import com.google.gwt.dev.js.ast.JsFunction;
@@ -136,7 +135,7 @@ public class ControlFlowAnalyzer {
         // Don't rescue variables that are merely assigned to and never read
         boolean doSkip = false;
         JExpression lhs = x.getLhs();
-        if (lhs.hasSideEffects(methodOracle) || isVolatileField(lhs)) {
+        if (lhs.hasSideEffects() || isVolatileField(lhs)) {
           /*
            * If the lhs has side effects, skipping it would lose the side
            * effect. If the lhs is volatile, also keep it. This behavior
@@ -710,7 +709,6 @@ public class ControlFlowAnalyzer {
   private Map<JMethod, List<JMethod>> methodsThatOverrideMe;
 
   private final JProgram program;
-  private final MethodOracle methodOracle;
 
   private Set<JReferenceType> referencedTypes = new HashSet<JReferenceType>();
   private final RescueVisitor rescuer = new RescueVisitor();
@@ -718,7 +716,6 @@ public class ControlFlowAnalyzer {
 
   public ControlFlowAnalyzer(ControlFlowAnalyzer cfa) {
     program = cfa.program;
-    methodOracle = cfa.methodOracle;
     fieldsWritten = new HashSet<JField>(cfa.fieldsWritten);
     instantiatedTypes = new HashSet<JReferenceType>(cfa.instantiatedTypes);
     liveFieldsAndMethods = new HashSet<JNode>(cfa.liveFieldsAndMethods);
@@ -732,7 +729,6 @@ public class ControlFlowAnalyzer {
 
   public ControlFlowAnalyzer(JProgram program) {
     this.program = program;
-    this.methodOracle = program.methodOracle;
     buildMethodsOverriding();
   }
 
