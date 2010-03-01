@@ -16,6 +16,7 @@
 package com.google.gwt.dev.jjs.impl.gflow.unreachable;
 
 import com.google.gwt.dev.jjs.ast.Context;
+import com.google.gwt.dev.jjs.ast.JLabeledStatement;
 import com.google.gwt.dev.jjs.ast.JModVisitor;
 import com.google.gwt.dev.jjs.ast.JNode;
 
@@ -30,6 +31,21 @@ final class DeleteNodeVisitor extends JModVisitor {
 
   public DeleteNodeVisitor(JNode node) {
     this.node = node;
+  }
+
+  @Override
+  public boolean visit(JLabeledStatement x, Context ctx) {
+    if (!super.visit(x, ctx)) {
+      return false;
+    }
+
+    if (x.getBody() == node) {
+      // Remove node with its label.
+      ctx.removeMe();
+      return false;
+    }
+
+    return true;
   }
 
   @Override

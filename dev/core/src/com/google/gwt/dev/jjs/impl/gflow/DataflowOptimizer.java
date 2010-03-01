@@ -58,16 +58,16 @@ public class DataflowOptimizer {
   private class DataflowOptimizerVisitor extends JModVisitor {
     @Override
     public boolean visit(JMethodBody methodBody, Context ctx) {
-      Cfg cfgGraph = CfgBuilder.build(program, methodBody.getBlock());
+      Cfg cfg = CfgBuilder.build(program, methodBody.getBlock());
 
       JMethod method = methodBody.getMethod();
       JDeclaredType enclosingType = method.getEnclosingType();
       String methodName = enclosingType.getName() + "." + method.getName();
 
-      Preconditions.checkNotNull(cfgGraph, "Can't build flow for %s", methodName);
+      Preconditions.checkNotNull(cfg, "Can't build flow for %s", methodName);
       
-      CombinedIntegratedAnalysis<CfgNode<?>, CfgEdge, CfgTransformer, Cfg> fwdAnalysis = 
-        new CombinedIntegratedAnalysis<CfgNode<?>, CfgEdge, CfgTransformer, Cfg>();
+      CombinedIntegratedAnalysis<CfgNode<?>, CfgEdge, CfgTransformer, Cfg> 
+      fwdAnalysis = CombinedIntegratedAnalysis.createAnalysis();
       
       fwdAnalysis.addAnalysis(new UnreachableAnalysis());
       fwdAnalysis.addAnalysis(new ConstantsAnalysis(program));
@@ -76,17 +76,19 @@ public class DataflowOptimizer {
     
       boolean madeChanges = false;
       
-      madeChanges = AnalysisSolver.solveIntegrated(cfgGraph, fwdAnalysis, true) || madeChanges; 
+      madeChanges = AnalysisSolver.solveIntegrated(cfg, fwdAnalysis, true) 
+          || madeChanges; 
       
-      cfgGraph = CfgBuilder.build(program, methodBody.getBlock());
-      Preconditions.checkNotNull(cfgGraph);
+      cfg = CfgBuilder.build(program, methodBody.getBlock());
+      Preconditions.checkNotNull(cfg);
       
-      CombinedIntegratedAnalysis<CfgNode<?>, CfgEdge, CfgTransformer, Cfg> bkwAnalysis = 
-        new CombinedIntegratedAnalysis<CfgNode<?>, CfgEdge, CfgTransformer, Cfg>();
+      CombinedIntegratedAnalysis<CfgNode<?>, CfgEdge, CfgTransformer, Cfg> 
+      bkwAnalysis = CombinedIntegratedAnalysis.createAnalysis();
       
       bkwAnalysis.addAnalysis(new LivenessAnalysis());
       
-      madeChanges = AnalysisSolver.solveIntegrated(cfgGraph, bkwAnalysis, false) || madeChanges; 
+      madeChanges = AnalysisSolver.solveIntegrated(cfg, bkwAnalysis, false) 
+          || madeChanges; 
 
       if (madeChanges) {
         didChange = true;

@@ -36,11 +36,13 @@ import com.google.gwt.dev.jjs.ast.JIfStatement;
 import com.google.gwt.dev.jjs.ast.JLabeledStatement;
 import com.google.gwt.dev.jjs.ast.JMethodCall;
 import com.google.gwt.dev.jjs.ast.JProgram;
+import com.google.gwt.dev.jjs.ast.JReboundEntryPoint;
 import com.google.gwt.dev.jjs.ast.JReturnStatement;
 import com.google.gwt.dev.jjs.ast.JStatement;
 import com.google.gwt.dev.jjs.ast.JSwitchStatement;
 import com.google.gwt.dev.jjs.ast.JThrowStatement;
 import com.google.gwt.dev.jjs.ast.JTryStatement;
+import com.google.gwt.dev.jjs.ast.JType;
 import com.google.gwt.dev.jjs.ast.JTypeOracle;
 import com.google.gwt.dev.jjs.ast.JUnaryOperation;
 import com.google.gwt.dev.jjs.ast.JVariableRef;
@@ -144,14 +146,14 @@ public class CfgBuilder {
       }
 
       private static Exit createThrow(CfgNode<?> node,
-          JClassType exceptionType, String role) {
+          JType exceptionType, String role) {
         return new Exit(Reason.THROW, node, exceptionType, null, role);
       }
 
       /**
        * Exception type for <code>THROW</code> exit.
        */
-      private final JClassType exceptionType;
+      private final JType exceptionType;
       /**
        * Break/continue target label. Null if label wasn't set.
        */
@@ -169,8 +171,8 @@ public class CfgBuilder {
        */
       private final String role;
 
-      private Exit(Reason reason, CfgNode<?> source, JClassType exceptionType,
-          String label, String role) {
+      private Exit(Reason reason, CfgNode<?> source, 
+          JType exceptionType, String label, String role) {
         if (source == null) {
           throw new IllegalArgumentException();
         }
@@ -181,7 +183,7 @@ public class CfgBuilder {
         this.role = role;
       }
 
-      public JClassType getExceptionType() {
+      public JType getExceptionType() {
         if (!isThrow()) {
           throw new IllegalArgumentException();
         }
@@ -254,9 +256,9 @@ public class CfgBuilder {
     private CfgNode<?> parent = null;
 
     private final JProgram program;
-    
-    private JSwitchStatement switchStatement;
 
+    private JSwitchStatement switchStatement;
+    
     private final JTypeOracle typeOracle;
 
     public BuilderVisitor(JProgram program) {
@@ -441,9 +443,13 @@ public class CfgBuilder {
       pushNode(new CfgStatementNode<JStatement>(parent, x));
       int pos = nodes.size();
 
-      accept(x.getBody());
+      if (x.getBody() != null) {
+        accept(x.getBody());
+      }
 
-      accept(x.getTestExpr());
+      if (x.getTestExpr() != null) {
+        accept(x.getTestExpr());
+      }
 
       CfgDoNode node = addNode(new CfgDoNode(parent, x));
 
@@ -472,7 +478,7 @@ public class CfgBuilder {
       accept(x.getInitializers());
 
       CfgForNode cond = null;
-      int pos = nodes.size();
+      int testPos = nodes.size();
       
       if (x.getTestExpr() != null) {
         accept(x.getTestExpr());
@@ -483,15 +489,18 @@ public class CfgBuilder {
       if (x.getBody() != null) {
         accept(x.getBody());
       }
+      int incrementsPos = nodes.size();
       accept(x.getIncrements());
 
       List<Exit> thenExits = removeNormalExits();
       for (Exit e : thenExits) {
-        addEdge(e, nodes.get(pos));
+        addEdge(e, nodes.get(testPos));
       }
 
       String label = labels.get(x);
-      addContinueEdges(nodes.get(pos), label);
+      // If there's no increments, continue goes straight to test.
+      int continuePos = incrementsPos != nodes.size() ? incrementsPos : testPos;
+      addContinueEdges(nodes.get(continuePos), label);
       addBreakExits(label);
       if (cond != null) {
         addNormalExit(cond, CfgConditionalNode.ELSE);
@@ -509,7 +518,9 @@ public class CfgBuilder {
       CfgIfNode node = addNode(new CfgIfNode(parent, x));
 
       addNormalExit(node, CfgConditionalNode.THEN);
-      accept(x.getThenStmt());
+      if (x.getThenStmt() != null) {
+        accept(x.getThenStmt());
+      }
       List<Exit> thenExits = removeNormalExits();
 
       addNormalExit(node, CfgConditionalNode.ELSE);
@@ -550,8 +561,14 @@ public class CfgBuilder {
       JDeclaredType runtimeExceptionType = 
         program.getFromTypeMap("java.lang.RuntimeException");
       if (runtimeExceptionType != null) {
-        addExit(Exit.createThrow(node, (JClassType) runtimeExceptionType,
+        addExit(Exit.createThrow(node, runtimeExceptionType,
             CfgOptionalThrowNode.RUNTIME_EXCEPTION));
+      }
+      JDeclaredType errorExceptionType = 
+        program.getFromTypeMap("java.lang.Error");
+      if (errorExceptionType != null) {
+        addExit(Exit.createThrow(node, errorExceptionType,
+            CfgOptionalThrowNode.ERROR));
       }
 
       addNode(new CfgMethodCallNode(parent, x));
@@ -560,9 +577,17 @@ public class CfgBuilder {
     }
 
     @Override
+    public boolean visit(JReboundEntryPoint x, Context ctx) {
+      pushNode(new CfgStatementNode<JReboundEntryPoint>(parent, x));
+      accept(x.getEntryCalls());
+      popNode();
+      return false;
+    }
+
+    @Override
     public boolean visit(JReturnStatement x, Context ctx) {
       pushNode(new CfgStatementNode<JStatement>(parent, x));
-     if (x.getExpr() != null) {
+      if (x.getExpr() != null) {
         accept(x.getExpr());
       }
 
@@ -644,10 +669,7 @@ public class CfgBuilder {
       pushNode(new CfgStatementNode<JStatement>(parent, x));
       accept(x.getExpr());
       CfgThrowNode node = addNode(new CfgThrowNode(parent, x));
-      Preconditions.checkArgument(x.getExpr().getType() instanceof JClassType,
-          "Unexpected exception type: %s",  x.getExpr().getType());
-      JClassType exceptionType = (JClassType) x.getExpr().getType();
-      addExit(Exit.createThrow(node, exceptionType, null));
+      addExit(Exit.createThrow(node, x.getExpr().getType(), null));
       popNode();
       return false;
     }
@@ -700,20 +722,18 @@ public class CfgBuilder {
               // the first (leftmost) such catch clause is selected.
               JClassType catchType = 
                 (JClassType) x.getCatchArgs().get(i).getType();
-              JClassType exceptionType = e.getExceptionType();
+              JType exceptionType = e.getExceptionType();
 
               boolean canCatch = false;
               boolean fullCatch = false;
 
               // It's not that simple in static analysis though.
-              if (catchType.equals(e.getExceptionType())
-                  || typeOracle.isSubClass(catchType, exceptionType)) {
+              if (typeOracle.canTriviallyCast(exceptionType, catchType)) {
                 // Catch clause fully covers exception type. We'll land
                 // here for sure.
                 canCatch = true;
                 fullCatch = true;
-              }
-              if (typeOracle.isSubClass(exceptionType, catchType)) {
+              } else if (typeOracle.canTriviallyCast(catchType, exceptionType)) {
                 // We can land here if we throw some subclass of
                 // exceptionType
                 canCatch = true;
@@ -776,20 +796,18 @@ public class CfgBuilder {
               // (leftmost) such catch clause is selected.
               JClassType catchType = 
                 (JClassType) x.getCatchArgs().get(i).getType();
-              JClassType exceptionType = e.getExceptionType();
+              JType exceptionType = e.getExceptionType();
 
               boolean canCatch = false;
               boolean fullCatch = false;
 
               // It's not that simple in static analysis though.
-              if (catchType.equals(e.getExceptionType())
-                  || typeOracle.isSubClass(catchType, exceptionType)) {
+              if (typeOracle.canTriviallyCast(exceptionType, catchType)) {
                 // Catch clause fully covers exception type. We'll land
                 // here for sure.
                 canCatch = true;
                 fullCatch = true;
-              }
-              if (typeOracle.isSubClass(exceptionType, catchType)) {
+              } else if (typeOracle.canTriviallyCast(catchType, exceptionType)) {
                 // We can land here if we throw some subclass of
                 // exceptionType
                 canCatch = true;
@@ -911,7 +929,9 @@ public class CfgBuilder {
       CfgWhileNode node = addNode(new CfgWhileNode(parent, x));
 
       addNormalExit(node, CfgConditionalNode.THEN);
-      accept(x.getBody());
+      if (x.getBody() != null) {
+        accept(x.getBody());
+      }
 
       List<Exit> thenExits = removeNormalExits();
       for (Exit e : thenExits) {

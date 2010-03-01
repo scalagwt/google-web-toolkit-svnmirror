@@ -280,6 +280,23 @@ public class AnalysisSolver<N, E, T, G extends Graph<N, E, T>,
     solveImpl(graph, analysis);
   }
 
+  private void resetEdgeData(G graph) {
+    for (N node : graph.getNodes()) {
+      for (E e : graph.getInEdges(node)) {
+        graph.setEdgeData(e, null);
+      }
+      for (E e : graph.getOutEdges(node)) {
+        graph.setEdgeData(e, null);
+      }
+    }
+    for (E e : graph.getGraphOutEdges()) {
+      graph.setEdgeData(e, null);
+    }
+    for (E e : graph.getGraphInEdges()) {
+      graph.setEdgeData(e, null);
+    }
+  }
+
   private void setEdgeAssumption(G graph, E edge, A assumption) {
     graph.setEdgeData(edge, assumption);
   }
@@ -317,6 +334,7 @@ public class AnalysisSolver<N, E, T, G extends Graph<N, E, T>,
     FlowFunction<N, E, G, A> flowFunction = analysis.getFlowFunction();
 
     final LinkedHashSet<N> worklist = buildInitialWorklist(graph);
+    resetEdgeData(graph);
     initGraphAssumptions(analysis, graph);
 
     while (!worklist.isEmpty()) {

@@ -92,15 +92,15 @@ public class CombinedIntegratedAnalysis<N, E, T, G extends Graph<N, E, T>>
       this.assumptions = new ArrayList<Assumption<?>>(assumption.assumptions);
     }
 
-    public CombinedAssumption(List<Assumption<?>> assumptions) {
-      this.assumptions = assumptions;
-    }
-
     public CombinedAssumption(int size) {
       this.assumptions = new ArrayList<Assumption<?>>(size);
       for (int i = 0; i < size; ++i) {
         this.assumptions.add(null);
       }
+    }
+
+    public CombinedAssumption(List<Assumption<?>> assumptions) {
+      this.assumptions = assumptions;
     }
 
     @Override
@@ -240,10 +240,18 @@ public class CombinedIntegratedAnalysis<N, E, T, G extends Graph<N, E, T>>
   }
 
   /**
+   * Factory method. 
+   */
+  public static <N, E, T, G extends Graph<N, E, T>> 
+  CombinedIntegratedAnalysis<N, E, T, G> createAnalysis() {
+    return new CombinedIntegratedAnalysis<N, E, T, G>();
+  }
+  /**
    * Individual analyses.
    */
   List<IntegratedAnalysis<N, E, T, G, ?>> analyses = 
     new ArrayList<IntegratedAnalysis<N, E, T, G, ?>>();
+
   /**
    * Their flow functions.
    */
@@ -262,7 +270,7 @@ public class CombinedIntegratedAnalysis<N, E, T, G extends Graph<N, E, T>>
   getIntegratedFlowFunction() {
     return new CombinedIntegratedFlowFunction();
   }
-
+  
   @SuppressWarnings("unchecked")
   public void setInitialGraphAssumptions(G graph,
       final AssumptionMap<E, CombinedAssumption> assumptionMap) {

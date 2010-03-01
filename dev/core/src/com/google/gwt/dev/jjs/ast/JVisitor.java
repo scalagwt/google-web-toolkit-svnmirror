@@ -82,6 +82,10 @@ public class JVisitor {
   }
 
   public JNode accept(JNode node) {
+    return accept(node, false);
+  }
+  
+  public JNode accept(JNode node, boolean allowRemove) {
     try {
       node.traverse(this, UNMODIFIABLE_CONTEXT);
       return node;
@@ -91,7 +95,11 @@ public class JVisitor {
   }
 
   public final JStatement accept(JStatement node) {
-    return (JStatement) accept((JNode) node);
+    return accept(node, false);
+  }
+
+  public final JStatement accept(JStatement node, boolean allowRemove) {
+    return (JStatement) accept((JNode) node, allowRemove);
   }
 
   public <T extends JNode> void accept(List<T> list) {

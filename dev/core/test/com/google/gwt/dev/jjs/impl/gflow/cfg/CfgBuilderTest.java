@@ -558,19 +558,19 @@ public class CfgBuilderTest extends OptimizerTestBase {
             "STMT -> [*]",
             "WRITE(i, 0) -> [*]",
             "1: READ(i) -> [*]",
-            "COND (i < 10) -> [THEN=*, ELSE=3]",
+            "COND (i < 10) -> [THEN=*, ELSE=4]",
             "BLOCK -> [*]",
             "STMT -> [*]",
             "READ(b2) -> [*]",
             "COND (EntryPoint.b2) -> [THEN=*, ELSE=2]",
             "BLOCK -> [*]",
             "STMT -> [*]",
-            "GOTO -> [1]",
+            "GOTO -> [3]",
             "2: STMT -> [*]",
             "READWRITE(i, null) -> [*]",
-            "STMT -> [*]",
+            "3: STMT -> [*]",
             "READWRITE(i, null) -> [1]",
-            "3: END");
+            "4: END");
   }
   
   public void testCatchThrowException1() throws Exception {

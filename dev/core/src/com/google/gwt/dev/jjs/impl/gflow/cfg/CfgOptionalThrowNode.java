@@ -29,6 +29,10 @@ public class CfgOptionalThrowNode extends CfgNode<JMethodCall> {
    * Edge role for throwing RuntimeException.
    */
   public static final String RUNTIME_EXCEPTION = "RE";
+  /**
+   * Edge role for throwing generic Error.
+   */
+  public static final String ERROR = "E";
   
   public CfgOptionalThrowNode(CfgNode<?> parent, JMethodCall node) {
     super(parent, node);

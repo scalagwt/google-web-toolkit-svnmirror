@@ -18,9 +18,9 @@ package com.google.gwt.dev.jjs.impl.gflow.cfg;
 import com.google.gwt.dev.jjs.ast.JStatement;
 
 /**
- * Node corresponding to if statement.
+ * A statement wrapper node.
  * 
- * @param <JNodeType> node type
+ * @param <JNodeType> underlying jnode type
  */
 public class CfgStatementNode<JNodeType extends JStatement> extends
     CfgSimpleNode<JNodeType> {

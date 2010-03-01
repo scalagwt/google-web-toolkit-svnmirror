@@ -21,6 +21,7 @@ import com.google.gwt.dev.jjs.ast.JExpression;
 import com.google.gwt.dev.jjs.ast.JModVisitor;
 import com.google.gwt.dev.jjs.ast.JNode;
 import com.google.gwt.dev.jjs.impl.gflow.TransformationFunction.Transformation;
+import com.google.gwt.dev.jjs.impl.gflow.cfg.CfgCaseNode;
 import com.google.gwt.dev.jjs.impl.gflow.cfg.CfgTransformer;
 import com.google.gwt.dev.jjs.impl.gflow.cfg.CfgConditionalNode;
 import com.google.gwt.dev.jjs.impl.gflow.cfg.CfgEdge;
@@ -55,6 +56,10 @@ final class ConstantConditionTransformation implements
     return new CfgTransformer() {
       public boolean transform(CfgNode<?> cfgNode, Cfg cfgGraph) {
         Preconditions.checkArgument(cfgNode == node);
+        if (cfgNode instanceof CfgCaseNode) {
+          // TODO: support case node optimization
+          return false;
+        }
         
         final JExpression oldCondition = node.getCondition();
         final JExpression newCondition = JBooleanLiteral.get(conditionValue);

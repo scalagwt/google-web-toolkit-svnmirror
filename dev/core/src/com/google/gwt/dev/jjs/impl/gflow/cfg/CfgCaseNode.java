@@ -21,7 +21,6 @@ import com.google.gwt.dev.jjs.ast.JExpression;
 /**
  * Node corresponding to if statement.
  */
-
 public class CfgCaseNode extends CfgConditionalNode<JCaseStatement> {
   private final JExpression condition;
 

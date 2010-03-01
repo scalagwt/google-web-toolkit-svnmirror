@@ -91,9 +91,7 @@ public class ExpressionEvaluator {
 
     @Override
     public boolean visit(JVariableRef x, Context ctx) {
-      if (assumptions != null) {
-        result = assumptions.get(x.getTarget());
-      }
+      result = assumptions != null ? assumptions.get(x.getTarget()) : null;
       return false;
     }
   }
