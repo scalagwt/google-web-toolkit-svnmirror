@@ -16,9 +16,10 @@
 package com.google.gwt.sample.expenses.gwt.ui.report;
 
 import com.google.gwt.app.place.AbstractActivity;
+import com.google.gwt.app.util.IsWidget;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
 import com.google.gwt.sample.expenses.gwt.request.ReportRecord;
-import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.TakesValue;
 import com.google.gwt.user.client.ui.TakesValueList;
 import com.google.gwt.valuestore.shared.Value;
 
@@ -31,36 +32,42 @@ import java.util.List;
 public class ReportDetailsActivity extends AbstractActivity {
   class RequestCallBack implements TakesValueList<ReportRecord> {
     public void setValueList(List<ReportRecord> listOfOne) {
-      ReportRecord record = listOfOne.get(0);
-
-      StringBuilder list = new StringBuilder("<h3>Employee " + record.getId()
-          + "</h3>");
-
-      String purpose = record.getPurpose();
-      list.append("<div>");
-      list.append("<label>").append("Purpose: ").append("</label>");
-      list.append("<span>").append(purpose).append("</span>");
-      list.append("</div>");
-
-      list.append("<div>");
-      String created = record.getCreated().toString();
-      list.append("<label>").append("Created: ").append("</label>");
-      list.append("<span>").append(created).append("</span>");
-      list.append("</div>");
-
-      callback.onStarted(new HTML(list.toString()));
+      view.setValue(listOfOne.get(0));
+      callback.onStarted(view.asWidget());
     }
   }
 
+  interface View extends TakesValue<ReportRecord>, IsWidget {
+  }
+
+  private static ReportDetailsView defaultView;
+
+  private static ReportDetailsView getDefaultView() {
+    if (defaultView == null) {
+      defaultView = new ReportDetailsView();
+    }
+    return defaultView;
+  }
+
   private final ExpensesRequestFactory requests;
-
+  private final View view;
   private String id;
-
   private Callback callback;
 
+  /**
+   * Creates an activity that uses the default singleton view instance.
+   */
   public ReportDetailsActivity(String id, ExpensesRequestFactory requests) {
-    this.requests = requests;
+    this(id, requests, getDefaultView());
+  }
+
+  /**
+   * Creates an activity that uses its own view instance.
+   */
+  public ReportDetailsActivity(String id, ExpensesRequestFactory requests, View view) {
     this.id = id;
+    this.requests = requests;
+    this.view = view;
   }
 
   public void start(Callback callback) {

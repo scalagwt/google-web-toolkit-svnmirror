@@ -47,7 +47,6 @@ public class ReportListView extends AbstractRecordListView<ReportRecord> {
     init(BINDER.createAndBindUi(this), table, getColumns());
   }
 
-
   protected List<PropertyColumn<ReportRecord, ?>> getColumns() {
     // TODO These should be <g:col> elements in a <g:table> in the ui.xml file
 

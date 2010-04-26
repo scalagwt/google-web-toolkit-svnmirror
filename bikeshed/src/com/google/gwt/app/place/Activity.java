@@ -37,19 +37,19 @@ public interface Activity {
    * Called when {@link #start} has not yet replied to its callback, but the
    * user has lost interest.
    */
-  public void onCancel();
+  void onCancel();
 
   /**
    * Called when the Activity's widget has been removed from view.
    */
-  public void onStop();
+  void onStop();
 
   /**
    * Called when the Activity should prepare its {@link Widget} to the user.
    * 
    * @param callback allows the widget to be presented asynchronously
    */
-  public void start(Callback callback);
+  void start(Callback callback);
 
-  public boolean willStop();
+  boolean willStop();
 }

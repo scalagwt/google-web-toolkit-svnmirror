@@ -18,22 +18,92 @@ package com.google.gwt.sample.expenses.gwt.ui.report;
 import com.google.gwt.app.place.AbstractActivity;
 import com.google.gwt.app.place.PlaceController;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
+import com.google.gwt.sample.expenses.gwt.request.ReportRecord;
+import com.google.gwt.sample.expenses.gwt.scaffold.place.ListScaffoldPlace;
 import com.google.gwt.sample.expenses.gwt.scaffold.place.ScaffoldPlace;
-import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.TakesValueList;
+import com.google.gwt.valuestore.shared.DeltaValueStore;
+import com.google.gwt.valuestore.shared.Value;
+import com.google.gwt.valuestore.ui.RecordEditView;
+
+import java.util.List;
 
 /**
  * An activity that requests all info on a report, allows the user to edit it,
  * and persists the results.
  */
-public class ReportEditActivity extends AbstractActivity {
+public class ReportEditActivity extends AbstractActivity implements
+    RecordEditView.Delegate {
+  class RequestCallBack implements TakesValueList<ReportRecord> {
+    public void setValueList(List<ReportRecord> listOfOne) {
+      view.setEnabled(true);
+      ReportRecord record = listOfOne.get(0);
+      view.setValue(record);
+      callback.onStarted(view.asWidget());
+    }
+  }
 
+  private static RecordEditView<ReportRecord> defaultView;
+
+  private static RecordEditView<ReportRecord> getDefaultView() {
+    if (defaultView == null) {
+      defaultView = new ReportEditView();
+    }
+    return defaultView;
+  }
+
+  private final ExpensesRequestFactory requests;
+  private final RecordEditView<ReportRecord> view;
+  private final String id;
+  private final PlaceController<ScaffoldPlace> placeController;
+
+  private DeltaValueStore deltas;
+  private Callback callback;
+
+  /**
+   * Creates an activity that uses the default singleton view instance.
+   */
   public ReportEditActivity(String id, ExpensesRequestFactory requests,
       PlaceController<ScaffoldPlace> placeController) {
-    // TODO Auto-generated constructor stub
+    this(id, getDefaultView(), requests, placeController);
+  }
+
+  /**
+   * Creates an activity that uses its own view instance.
+   */
+  public ReportEditActivity(String id, RecordEditView<ReportRecord> view,
+      ExpensesRequestFactory requests,
+      PlaceController<ScaffoldPlace> placeController) {
+    this.requests = requests;
+    this.id = id;
+    this.view = view;
+    this.deltas = requests.getValueStore().spawnDeltaView();
+    this.placeController = placeController;
+    view.setDelegate(this);
+    view.setDeltaValueStore(deltas);
+  }
+
+  public void saveClicked() {
+    if (deltas.isChanged()) {
+      view.setEnabled(false);
+      DeltaValueStore toCommit = deltas;
+      deltas = null;
+      requests.syncRequest(toCommit).fire(); // TODO Need callback, idiot
+      placeController.goTo(new ListScaffoldPlace(ReportRecord.class));
+    }
   }
 
   public void start(Callback callback) {
-    callback.onStarted(new Label("tbd"));
+    this.callback = callback;
+    requests.reportRequest().findReport(Value.of(id)).to(
+        new RequestCallBack()).fire();
+  }
+
+  @Override
+  public boolean willStop() {
+    return deltas == null || !deltas.isChanged()
+        || Window.confirm("Dude! Really drop your edits?");
   }
 
 }
