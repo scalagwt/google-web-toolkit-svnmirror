@@ -8,4 +8,5 @@
   <source path="misc"/>
   <source path="place"/>
   <source path="client"/>
+  <source path="util"/>
 </module>
