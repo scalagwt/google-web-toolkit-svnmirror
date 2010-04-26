@@ -279,7 +279,7 @@ public class JavaToJavaScriptCompiler {
       EvalFunctionsAtTopScope.exec(jsProgram, map);
 
       // (9) Optimize the JS AST.
-      if (options.isAggressivelyOptimize()) {
+      if (!options.isDraftCompile()) {
         boolean didChange;
         do {
           if (Thread.interrupted()) {
@@ -303,7 +303,7 @@ public class JavaToJavaScriptCompiler {
 
       // (10) Split up the program into fragments
       SyntheticArtifact dependencies = null;
-      if (options.isAggressivelyOptimize() && options.isRunAsyncEnabled()) {
+      if (options.isRunAsyncEnabled()) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         CodeSplitter.exec(logger, jprogram, jsProgram, map,
             chooseDependencyRecorder(options.isSoycEnabled(), baos));
@@ -322,16 +322,18 @@ public class JavaToJavaScriptCompiler {
         case OBFUSCATED:
           obfuscateMap = JsStringInterner.exec(jprogram, jsProgram);
           JsObfuscateNamer.exec(jsProgram);
-          if (JsStackEmulator.getStackMode(propertyOracles) ==
-              JsStackEmulator.StackMode.STRIP) {
-            boolean changed = false;
-            for (int i = 0; i < jsProgram.getFragmentCount(); i++) {
-              JsBlock fragment = jsProgram.getFragmentBlock(i);
-              changed = JsDuplicateFunctionRemover.exec(jsProgram, fragment)
-                        || changed;
-            }
-            if (changed) {
-              JsUnusedFunctionRemover.exec(jsProgram);
+          if (options.isAggressivelyOptimize()) {
+            if (JsStackEmulator.getStackMode(propertyOracles) ==
+                JsStackEmulator.StackMode.STRIP) {
+              boolean changed = false;
+              for (int i = 0; i < jsProgram.getFragmentCount(); i++) {
+                JsBlock fragment = jsProgram.getFragmentBlock(i);
+                changed = JsDuplicateFunctionRemover.exec(jsProgram, fragment)
+                          || changed;
+              }
+              if (changed) {
+                JsUnusedFunctionRemover.exec(jsProgram);
+              }
             }
           }
           break;
@@ -529,7 +531,7 @@ public class JavaToJavaScriptCompiler {
       ReplaceRebinds.exec(logger, jprogram, rpo);
 
       // Fix up GWT.runAsync()
-      if (options.isAggressivelyOptimize() && options.isRunAsyncEnabled()) {
+      if (options.isRunAsyncEnabled()) {
         ReplaceRunAsyncs.exec(logger, jprogram);
         CodeSplitter.pickInitialLoadSequence(logger, jprogram,
             module.getProperties());
@@ -670,10 +672,10 @@ public class JavaToJavaScriptCompiler {
     // dead code removal??
     didChange = DeadCodeElimination.exec(jprogram) || didChange;
 
+    // inlining
+    didChange = MethodInliner.exec(jprogram) || didChange;
+
     if (isAggressivelyOptimize) {
-      // inlining
-      didChange = MethodInliner.exec(jprogram) || didChange;
-      
       // remove same parameters value
       didChange = SameParameterValueOptimizer.exec(jprogram) || didChange;
     }
@@ -920,7 +922,8 @@ public class JavaToJavaScriptCompiler {
       JsFunctionClusterer clusterer = new JsFunctionClusterer(out.toString(),
           v.getStatementRanges());
       // only cluster for obfuscated mode
-      if (options.getOutput() == JsOutputOption.OBFUSCATED) {
+      if (options.isAggressivelyOptimize()
+          && options.getOutput() == JsOutputOption.OBFUSCATED) {
         clusterer.exec();
       }
       // rewrite top-level blocks to limit the number of statements
