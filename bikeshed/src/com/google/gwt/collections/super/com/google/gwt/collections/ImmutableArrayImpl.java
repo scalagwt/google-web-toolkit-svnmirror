@@ -15,13 +15,35 @@
  */
 package com.google.gwt.collections;
 
+import com.google.gwt.core.client.JsArray;
+
 /**
- * Re-run {@link MutableArrayTest} tests under GWT.
+ * The standard JSNI implementation of an immutable array.
+ * 
+ * @param <E> The type stored in the array elements
  */
-public class ClientMutableArrayTest extends MutableArrayTest {
-  @Override
-  public String getModuleName() {
-    return "com.google.gwt.collections.Collections";
+public class ImmutableArrayImpl<E> extends ImmutableArray<E> {
+
+  final JsArray elems;
+
+  ImmutableArrayImpl(JsArray elems) {
+    Assertions.assertNotNull(elems);
+    this.elems = elems;
   }
-  
+
+  @Override
+  public E get(int index) {
+    Assertions.assertIndexInRange(index, 0, size());
+    return jsniGet(index);
+  }
+
+  @Override
+  public int size() {
+    return elems.length();
+  }
+
+  private native E jsniGet(int index) /*-{
+    return this.@com.google.gwt.collections.ImmutableArrayImpl::elems[index];
+  }-*/;
+
 }
