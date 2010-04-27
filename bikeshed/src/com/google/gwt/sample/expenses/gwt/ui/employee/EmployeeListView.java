@@ -15,7 +15,7 @@
  */
 package com.google.gwt.sample.expenses.gwt.ui.employee;
 
-import com.google.gwt.bikeshed.list.client.PagingTableListView;
+import com.google.gwt.bikeshed.list.client.CellTable;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.sample.expenses.gwt.request.EmployeeRecord;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -36,7 +36,7 @@ public class EmployeeListView extends AbstractRecordListView<EmployeeRecord> {
 
   private static final Binder BINDER = GWT.create(Binder.class);
 
-  @UiField PagingTableListView<EmployeeRecord> table;
+  @UiField CellTable<EmployeeRecord> table;
 
   public EmployeeListView() {
     init(BINDER.createAndBindUi(this), table, getColumns());

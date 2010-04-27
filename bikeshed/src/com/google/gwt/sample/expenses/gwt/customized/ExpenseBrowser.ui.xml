@@ -12,8 +12,8 @@
     }
   </ui:style>
 
-  <t:SideBySideTreeView
+  <t:CellBrowser
     styleName='{style.cellBrowser}'
-    ui:field='cellBrowser'></t:SideBySideTreeView>
+    ui:field='browser'></t:CellBrowser>
 
 </ui:UiBinder> 

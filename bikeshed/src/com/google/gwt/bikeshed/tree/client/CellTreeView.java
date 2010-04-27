@@ -1,12 +1,12 @@
 /*
  * Copyright 2010 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -25,7 +25,7 @@ import com.google.gwt.user.client.ui.Widget;
 /**
  * A view of a tree.
  */
-public abstract class TreeView extends Composite {
+public abstract class CellTreeView extends Composite {
 
   /**
    * A ClientBundle that provides images for this widget.
@@ -51,32 +51,32 @@ public abstract class TreeView extends Composite {
   private Resources resources = DEFAULT_RESOURCES;
 
   /**
-   * The {@link TreeViewModel} that backs the tree.
+   * The {@link CellTreeViewModel} that backs the tree.
    */
-  private TreeViewModel viewModel;
+  private CellTreeViewModel viewModel;
 
   /**
-   * Construct a new {@link TreeView}.
-   * 
-   * @param viewModel the {@link TreeViewModel} that backs the tree
+   * Construct a new {@link CellTreeView}.
+   *
+   * @param viewModel the {@link CellTreeViewModel} that backs the tree
    */
   // TODO(jlabanca): Should we nuke this class?
-  public TreeView(TreeViewModel viewModel) {
+  public CellTreeView(CellTreeViewModel viewModel) {
     this(viewModel, new SimplePanel());
   }
 
-  protected TreeView(TreeViewModel viewModel, Widget widget) {
+  protected CellTreeView(CellTreeViewModel viewModel, Widget widget) {
     this.viewModel = viewModel;
     initWidget(widget);
   }
 
-  public TreeViewModel getTreeViewModel() {
+  public CellTreeViewModel getTreeViewModel() {
     return viewModel;
   }
 
   /**
    * Get the width required for the images.
-   * 
+   *
    * @return the maximum width required for images.
    */
   protected int getImageWidth() {
@@ -86,7 +86,7 @@ public abstract class TreeView extends Composite {
 
   /**
    * Get the {@link Resources} used in the tree.
-   * 
+   *
    * @return the resources
    */
   protected Resources getResources() {

@@ -18,19 +18,19 @@ package com.google.gwt.sample.bikeshed.cookbook.client;
 import com.google.gwt.bikeshed.list.shared.MultiSelectionModel;
 import com.google.gwt.bikeshed.list.shared.SelectionModel;
 import com.google.gwt.bikeshed.list.shared.SelectionModel.SelectionChangeEvent;
-import com.google.gwt.bikeshed.tree.client.SideBySideTreeView;
+import com.google.gwt.bikeshed.tree.client.CellBrowser;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * SideBySideTree Recipe.
+ * {@link CellBrowser} Recipe.
  */
-public class SideBySideTreeRecipe extends Recipe {
+public class CellBrowserRecipe extends Recipe {
 
-  public SideBySideTreeRecipe() {
-    super("Side-by-side Tree");
+  public CellBrowserRecipe() {
+    super("Cell Browser");
   }
 
   @Override
@@ -45,12 +45,12 @@ public class SideBySideTreeRecipe extends Recipe {
       }
     });
 
-    SideBySideTreeView sstree = new SideBySideTreeView(new MyTreeViewModel(
+    CellBrowser browser = new CellBrowser(new MyTreeViewModel(
         selectionModel), "...");
-    sstree.setAnimationEnabled(true);
-    sstree.setHeight("200px");
+    browser.setAnimationEnabled(true);
+    browser.setHeight("200px");
 
-    p.add(sstree);
+    p.add(browser);
     p.add(new HTML("<hr>"));
     p.add(label);
 

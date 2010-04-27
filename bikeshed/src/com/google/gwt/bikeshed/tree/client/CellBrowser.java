@@ -21,12 +21,12 @@ import com.google.gwt.bikeshed.cells.client.ValueUpdater;
 import com.google.gwt.bikeshed.list.client.ListView;
 import com.google.gwt.bikeshed.list.client.PageSizePager;
 import com.google.gwt.bikeshed.list.client.PagingListView;
-import com.google.gwt.bikeshed.list.client.SimpleCellList;
+import com.google.gwt.bikeshed.list.client.CellList;
 import com.google.gwt.bikeshed.list.client.PagingListView.Pager;
 import com.google.gwt.bikeshed.list.shared.ProvidesKey;
 import com.google.gwt.bikeshed.list.shared.Range;
 import com.google.gwt.bikeshed.list.shared.SelectionModel;
-import com.google.gwt.bikeshed.tree.client.TreeViewModel.NodeInfo;
+import com.google.gwt.bikeshed.tree.client.CellTreeViewModel.NodeInfo;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
@@ -49,9 +49,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A view of a tree.
+ * A "browsable" view of a tree in which only a single node per level may be
+ * open at one time.
  */
-public class SideBySideTreeView extends TreeView implements ProvidesResize,
+public class CellBrowser extends CellTreeView implements ProvidesResize,
     RequiresResize, HasAnimation {
 
   /**
@@ -62,22 +63,22 @@ public class SideBySideTreeView extends TreeView implements ProvidesResize,
   /**
    * The style name assigned to each column.
    */
-  private static final String STYLENAME_COLUMN = "gwt-sstree-column";
+  private static final String STYLENAME_COLUMN = "gwt-cellBrowser-column";
 
   /**
    * The style name assigned to the first column.
    */
-  private static final String STYLENAME_FIRST_COLUMN = "gwt-sstree-firstColumn";
+  private static final String STYLENAME_FIRST_COLUMN = "gwt-cellBrowser-firstColumn";
 
   /**
    * The style name assigned to each column.
    */
-  private static final String STYLENAME_OPEN = "gwt-sstree-openItem";
+  private static final String STYLENAME_OPEN = "gwt-cellBrowser-openItem";
 
   /**
    * The prefix of the ID assigned to open cells.
    */
-  private static final String ID_PREFIX_OPEN = "__gwt-sstree-open-";
+  private static final String ID_PREFIX_OPEN = "__gwt-cellBrowser-open-";
 
   /**
    * The animation used to scroll to the newly added list view.
@@ -122,7 +123,7 @@ public class SideBySideTreeView extends TreeView implements ProvidesResize,
 
   /**
    * A wrapper around a cell that adds an open button.
-   * 
+   *
    * @param <C> the data type of the cell
    */
   private class CellDecorator<C> extends Cell<C> {
@@ -149,7 +150,7 @@ public class SideBySideTreeView extends TreeView implements ProvidesResize,
 
     /**
      * Construct a new {@link CellDecorator}.
-     * 
+     *
      * @param nodeInfo the {@link NodeInfo} associated with the cell
      * @param level the level of items rendered by this decorator
      */
@@ -167,10 +168,6 @@ public class SideBySideTreeView extends TreeView implements ProvidesResize,
     @Override
     public boolean dependsOnSelection() {
       return cell.dependsOnSelection();
-    }
-
-    public Object getOpenKey() {
-      return openKey;
     }
 
     @Override
@@ -233,7 +230,7 @@ public class SideBySideTreeView extends TreeView implements ProvidesResize,
 
     /**
      * Get the parent element of the decorated cell.
-     * 
+     *
      * @param parent the parent of this cell
      * @return the decorated cell's parent
      */
@@ -243,7 +240,7 @@ public class SideBySideTreeView extends TreeView implements ProvidesResize,
 
     /**
      * Get the image element of the decorated cell.
-     * 
+     *
      * @param parent the parent of this cell
      * @return the image element
      */
@@ -253,7 +250,7 @@ public class SideBySideTreeView extends TreeView implements ProvidesResize,
 
     /**
      * Get the ID of the open element.
-     * 
+     *
      * @return the ID
      */
     private String getOpenId() {
@@ -262,7 +259,7 @@ public class SideBySideTreeView extends TreeView implements ProvidesResize,
 
     /**
      * Replace the image element of a cell.
-     * 
+     *
      * @param parent the parent element of the cell
      * @param open true if open, false if closed
      */
@@ -289,7 +286,7 @@ public class SideBySideTreeView extends TreeView implements ProvidesResize,
 
   /**
    * A node in the tree.
-   * 
+   *
    * @param <C> the data type of the children of the node
    */
   private class TreeNode<C> {
@@ -300,7 +297,7 @@ public class SideBySideTreeView extends TreeView implements ProvidesResize,
 
     /**
      * Construct a new {@link TreeNode}.
-     * 
+     *
      * @param nodeInfo the nodeInfo for the children nodes
      * @param listView the list view assocated with the node
      * @param widget the widget that represents the list view
@@ -315,20 +312,11 @@ public class SideBySideTreeView extends TreeView implements ProvidesResize,
 
     /**
      * Get the {@link CellDecorator} used to render the node.
-     * 
+     *
      * @return the cell decorator
      */
     public CellDecorator<C> getCell() {
       return cell;
-    }
-
-    /**
-     * Get the widget that represents this {@link TreeNode}.
-     * 
-     * @return the widget
-     */
-    public Widget getWidget() {
-      return widget;
     }
 
     /**
@@ -392,13 +380,13 @@ public class SideBySideTreeView extends TreeView implements ProvidesResize,
   private List<TreeNode<?>> treeNodes = new ArrayList<TreeNode<?>>();
 
   /**
-   * Construct a new {@link TreeView}.
-   * 
+   * Construct a new {@link CellTreeView}.
+   *
    * @param <T> the type of data in the root node
-   * @param viewModel the {@link TreeViewModel} that backs the tree
+   * @param viewModel the {@link CellTreeViewModel} that backs the tree
    * @param rootValue the hidden root value of the tree
    */
-  public <T> SideBySideTreeView(TreeViewModel viewModel, T rootValue) {
+  public <T> CellBrowser(CellTreeViewModel viewModel, T rootValue) {
     super(viewModel, new SplitLayoutPanel());
     getElement().getStyle().setOverflow(Overflow.AUTO);
     setStyleName("gwt-SideBySideTreeView");
@@ -424,7 +412,7 @@ public class SideBySideTreeView extends TreeView implements ProvidesResize,
 
   /**
    * Get the default width of new columns.
-   * 
+   *
    * @return the default width in pixels
    */
   public int getDefaultColumnWidth() {
@@ -433,7 +421,7 @@ public class SideBySideTreeView extends TreeView implements ProvidesResize,
 
   /**
    * Get the minimum width of columns.
-   * 
+   *
    * @return the minimum width in pixels
    */
   public int getMinimumColumnWidth() {
@@ -465,7 +453,7 @@ public class SideBySideTreeView extends TreeView implements ProvidesResize,
 
   /**
    * Set the default width of new columns.
-   * 
+   *
    * @param width the default width in pixels
    */
   public void setDefaultColumnWidth(int width) {
@@ -474,7 +462,7 @@ public class SideBySideTreeView extends TreeView implements ProvidesResize,
 
   /**
    * Set the minimum width of columns.
-   * 
+   *
    * @param minWidth the minimum width in pixels
    */
   public void setMinimumColumnWidth(int minWidth) {
@@ -482,31 +470,31 @@ public class SideBySideTreeView extends TreeView implements ProvidesResize,
   }
 
   /**
-   * Create a {@link ListView} that will display items. The {@link ListView}
-   * must extend {@link Widget}.
-   * 
-   * @param <C> the item type in the list view
-   * @param nodeInfo the node info with child data
-   * @param cell the cell to use in the list view
-   * @return the {@link ListView}
-   */
-  protected <C> PagingListView<C> createListView(NodeInfo<C> nodeInfo,
-      Cell<C> cell) {
-    SimpleCellList<C> listView = new SimpleCellList<C>(cell);
-    listView.setValueUpdater(nodeInfo.getValueUpdater());
-    return listView;
-  }
-
-  /**
    * Create a Pager to control the list view. The {@link ListView} must extend
    * {@link Widget}.
-   * 
+   *
    * @param <C> the item type in the list view
    * @param listView the list view to add paging too
    * @return the {@link Pager}
    */
   protected <C> Pager<C> createPager(PagingListView<C> listView) {
     return new PageSizePager<C>(listView, listView.getPageSize());
+  }
+
+  /**
+   * Create a {@link PagingListView} that will display items. The
+   * {@link PagingListView} must extend {@link Widget}.
+   *
+   * @param <C> the item type in the list view
+   * @param nodeInfo the node info with child data
+   * @param cell the cell to use in the list view
+   * @return the {@link ListView}
+   */
+  protected <C> PagingListView<C> createPagingListView(NodeInfo<C> nodeInfo,
+      Cell<C> cell) {
+    CellList<C> pagingListView = new CellList<C>(cell);
+    pagingListView.setValueUpdater(nodeInfo.getValueUpdater());
+    return pagingListView;
   }
 
   /**
@@ -525,7 +513,7 @@ public class SideBySideTreeView extends TreeView implements ProvidesResize,
 
   /**
    * Create a new {@link TreeNode} and append it to the end of the LayoutPanel.
-   * 
+   *
    * @param <C> the data type of the children
    * @param nodeInfo the info about the node
    */
@@ -533,8 +521,8 @@ public class SideBySideTreeView extends TreeView implements ProvidesResize,
     // Create the list view.
     final int level = treeNodes.size();
     CellDecorator<C> cell = new CellDecorator<C>(nodeInfo, level);
-    final PagingListView<C> listView = createListView(nodeInfo, cell);
-    assert (listView instanceof Widget) : "createListView() must return a widget";
+    final PagingListView<C> listView = createPagingListView(nodeInfo, cell);
+    assert (listView instanceof Widget) : "createPagingListView() must return a widget";
 
     // Create a pager and wrap the components in a scrollable container.
     ScrollPanel scrollable = new ScrollPanel();
@@ -639,7 +627,7 @@ public class SideBySideTreeView extends TreeView implements ProvidesResize,
 
   /**
    * Get the {@link SplitLayoutPanel} used to lay out the views.
-   * 
+   *
    * @return the {@link SplitLayoutPanel}
    */
   private SplitLayoutPanel getSplitLayoutPanel() {
@@ -647,8 +635,8 @@ public class SideBySideTreeView extends TreeView implements ProvidesResize,
   }
 
   /**
-   * Reduce the number of {@link ListView} down to the specified level.
-   * 
+   * Reduce the number of {@link ListView}s down to the specified level.
+   *
    * @param level the level to trim to
    */
   private void trimToLevel(int level) {

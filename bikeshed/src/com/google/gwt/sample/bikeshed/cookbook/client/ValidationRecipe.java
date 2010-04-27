@@ -17,7 +17,7 @@ package com.google.gwt.sample.bikeshed.cookbook.client;
 
 import com.google.gwt.bikeshed.cells.client.FieldUpdater;
 import com.google.gwt.bikeshed.list.client.Column;
-import com.google.gwt.bikeshed.list.client.PagingTableListView;
+import com.google.gwt.bikeshed.list.client.CellTable;
 import com.google.gwt.bikeshed.list.client.TextColumn;
 import com.google.gwt.bikeshed.list.shared.ListViewAdapter;
 import com.google.gwt.user.client.Timer;
@@ -84,7 +84,7 @@ public class ValidationRecipe extends Recipe {
       list.add(new Address("GA", zip));
     }
 
-    PagingTableListView<Address> table = new PagingTableListView<Address>(10);
+    CellTable<Address> table = new CellTable<Address>(10);
     adapter.addView(table);
     TextColumn<Address> stateColumn = new TextColumn<Address>() {
       @Override

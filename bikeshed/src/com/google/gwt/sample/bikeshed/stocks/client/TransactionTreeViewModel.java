@@ -25,7 +25,7 @@ import com.google.gwt.bikeshed.list.shared.AsyncListViewAdapter;
 import com.google.gwt.bikeshed.list.shared.ListViewAdapter;
 import com.google.gwt.bikeshed.list.shared.ProvidesKey;
 import com.google.gwt.bikeshed.list.shared.SingleSelectionModel;
-import com.google.gwt.bikeshed.tree.client.TreeViewModel;
+import com.google.gwt.bikeshed.tree.client.CellTreeViewModel;
 import com.google.gwt.sample.bikeshed.stocks.shared.StockQuote;
 import com.google.gwt.sample.bikeshed.stocks.shared.Transaction;
 
@@ -37,7 +37,7 @@ import java.util.Map;
  * A TreeViewModel for a tree with a hidden root node of null, a first level
  * containing ticker symbol Strings, and a second level containing Transactions.
  */
-class TransactionTreeViewModel implements TreeViewModel {
+class TransactionTreeViewModel implements CellTreeViewModel {
 
   class SectorListViewAdapter extends AsyncListViewAdapter<StockQuote> {
 
@@ -124,11 +124,11 @@ class TransactionTreeViewModel implements TreeViewModel {
   public <T> NodeInfo<?> getNodeInfo(T value) {
     if (value == null) {
       // Return list of sectors.
-      return new TreeViewModel.DefaultNodeInfo<String>(topLevelListViewAdapter,
+      return new CellTreeViewModel.DefaultNodeInfo<String>(topLevelListViewAdapter,
           TextCell.getInstance(), selectionModel, null);
     } else if ("Favorites".equals(value)) {
       // Return favorites. 
-      return new TreeViewModel.DefaultNodeInfo<StockQuote>(
+      return new CellTreeViewModel.DefaultNodeInfo<StockQuote>(
           stockQuoteListViewAdapter, STOCK_QUOTE_CELL, selectionModel, null);
     } else if ("History".equals(value)) {
       // Return history of the current stock quote.
@@ -138,7 +138,7 @@ class TransactionTreeViewModel implements TreeViewModel {
         adapter = new ListViewAdapter<Transaction>();
         transactionListViewAdaptersByTicker.put(ticker, adapter);
       }
-      return new TreeViewModel.DefaultNodeInfo<Transaction>(adapter,
+      return new CellTreeViewModel.DefaultNodeInfo<Transaction>(adapter,
           TRANSACTION_CELL, selectionModel, null);
     } else if ("Actions".equals(value)) {
       // Return the actions for the current stock quote.
@@ -146,7 +146,7 @@ class TransactionTreeViewModel implements TreeViewModel {
       List<String> list = adapter.getList();
       list.add("Buy");
       list.add("Sell");
-      return new TreeViewModel.DefaultNodeInfo<String>(adapter,
+      return new CellTreeViewModel.DefaultNodeInfo<String>(adapter,
           ButtonCell.getInstance(), selectionModel,
           new ValueUpdater<String>() {
             public void update(String value) {
@@ -162,7 +162,7 @@ class TransactionTreeViewModel implements TreeViewModel {
       lastSector = (String) value;
       SectorListViewAdapter adapter = new SectorListViewAdapter(lastSector);
       sectorListViewAdapters.put(lastSector, adapter);
-      return new TreeViewModel.DefaultNodeInfo<StockQuote>(adapter,
+      return new CellTreeViewModel.DefaultNodeInfo<StockQuote>(adapter,
           STOCK_QUOTE_CELL, selectionModel, null);
     } else if (value instanceof StockQuote) {
       // Return the submenu for a stock quote.
@@ -171,7 +171,7 @@ class TransactionTreeViewModel implements TreeViewModel {
       List<String> list = adapter.getList();
       list.add("Actions");
       list.add("History");
-      return new TreeViewModel.DefaultNodeInfo<String>(adapter,
+      return new CellTreeViewModel.DefaultNodeInfo<String>(adapter,
           TextCell.getInstance(), selectionModel, null);
     }
 

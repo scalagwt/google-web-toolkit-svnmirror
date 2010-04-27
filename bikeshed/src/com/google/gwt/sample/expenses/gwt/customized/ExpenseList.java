@@ -1,10 +1,25 @@
+/*
+ * Copyright 2010 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.google.gwt.sample.expenses.gwt.customized;
 
 import com.google.gwt.bikeshed.cells.client.DateCell;
 import com.google.gwt.bikeshed.cells.client.TextCell;
+import com.google.gwt.bikeshed.list.client.CellTable;
 import com.google.gwt.bikeshed.list.client.Column;
 import com.google.gwt.bikeshed.list.client.Header;
-import com.google.gwt.bikeshed.list.client.PagingTableListView;
 import com.google.gwt.bikeshed.list.shared.ListViewAdapter;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -44,7 +59,7 @@ public class ExpenseList extends Composite {
   }
 
   @UiField
-  PagingTableListView<ExpenseReport> listView;
+  CellTable<ExpenseReport> table;
 
   /**
    * The adapter that provides reports.
@@ -63,16 +78,16 @@ public class ExpenseList extends Composite {
     reportsList.add(new ExpenseReport("ATL", new Date(2005, 3, 1), "Long trip"));
 
     // Add the view to the adapter.
-    reports.addView(listView);
+    reports.addView(table);
   }
 
   @UiFactory
-  PagingTableListView<ExpenseReport> createListView() {
-    PagingTableListView<ExpenseReport> table = new PagingTableListView<ExpenseReport>(
+  CellTable<ExpenseReport> createTable() {
+    CellTable<ExpenseReport> view = new CellTable<ExpenseReport>(
         25);
 
     // Name column.
-    table.addColumn(new Column<ExpenseReport, String>(TextCell.getInstance()) {
+    view.addColumn(new Column<ExpenseReport, String>(TextCell.getInstance()) {
       @Override
       public String getValue(ExpenseReport object) {
         return object.name;
@@ -85,7 +100,7 @@ public class ExpenseList extends Composite {
     });
 
     // Date column.
-    table.addColumn(new Column<ExpenseReport, Date>(new DateCell()) {
+    view.addColumn(new Column<ExpenseReport, Date>(new DateCell()) {
       @Override
       public Date getValue(ExpenseReport object) {
         return object.date;
@@ -98,7 +113,7 @@ public class ExpenseList extends Composite {
     });
 
     // Notes column.
-    table.addColumn(new Column<ExpenseReport, String>(TextCell.getInstance()) {
+    view.addColumn(new Column<ExpenseReport, String>(TextCell.getInstance()) {
       @Override
       public String getValue(ExpenseReport object) {
         return object.notes;
@@ -110,6 +125,6 @@ public class ExpenseList extends Composite {
       }
     });
 
-    return table;
+    return view;
   }
 }

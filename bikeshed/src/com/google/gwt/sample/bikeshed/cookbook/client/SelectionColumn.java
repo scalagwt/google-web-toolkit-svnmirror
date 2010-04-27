@@ -47,6 +47,6 @@ public class SelectionColumn<T> extends SimpleColumn<T, Boolean> {
   
   @Override
   public Boolean getValue(T object) {
-    return selectionModel.isSelected(object);
+    return object != null && selectionModel.isSelected(object);
   }
 }

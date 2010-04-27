@@ -25,7 +25,7 @@ import com.google.gwt.bikeshed.cells.client.TextCell;
 import com.google.gwt.bikeshed.cells.client.ValueUpdater;
 import com.google.gwt.bikeshed.list.client.Column;
 import com.google.gwt.bikeshed.list.client.Header;
-import com.google.gwt.bikeshed.list.client.PagingTableListView;
+import com.google.gwt.bikeshed.list.client.CellTable;
 import com.google.gwt.bikeshed.list.client.SimpleColumn;
 import com.google.gwt.bikeshed.list.shared.DefaultSelectionModel;
 import com.google.gwt.bikeshed.list.shared.ListViewAdapter;
@@ -282,7 +282,7 @@ public class MailRecipe extends Recipe implements ClickHandler {
 
   private MailSelectionModel selectionModel = new MailSelectionModel();
 
-  private PagingTableListView<Message> table;
+  private CellTable<Message> table;
 
   public MailRecipe() {
     super("Mail");
@@ -314,7 +314,7 @@ public class MailRecipe extends Recipe implements ClickHandler {
 
     addMessages(10);
 
-    table = new PagingTableListView<Message>(10);
+    table = new CellTable<Message>(10);
     table.setSelectionModel(selectionModel);
     adapter.addView(table);
 
@@ -435,7 +435,7 @@ public class MailRecipe extends Recipe implements ClickHandler {
   }
 
   private <C extends Comparable<C>> Column<Message, C> addColumn(
-      PagingTableListView<Message> table, final String text,
+      CellTable<Message> table, final String text,
       final Cell<C> cell, final GetValue<Message, C> getter,
       final Comparator<Message> comparator) {
     Column<Message, C> column = new Column<Message, C>(cell) {
@@ -471,7 +471,7 @@ public class MailRecipe extends Recipe implements ClickHandler {
   }
 
   private Column<Message, String> addColumn(
-      PagingTableListView<Message> table, final String text,
+      CellTable<Message> table, final String text,
       final GetValue<Message, String> getter) {
     return addColumn(table, text, TextCell.getInstance(), getter, null);
   }

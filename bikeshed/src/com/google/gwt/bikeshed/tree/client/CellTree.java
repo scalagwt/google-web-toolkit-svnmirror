@@ -29,7 +29,7 @@ import java.util.ArrayList;
 /**
  * A view of a tree.
  */
-public class StandardTreeView extends TreeView implements HasAnimation {
+public class CellTree extends CellTreeView implements HasAnimation {
 
   /**
    * A node animation.
@@ -51,11 +51,11 @@ public class StandardTreeView extends TreeView implements HasAnimation {
 
     /**
      * Animate a tree node into its new state.
-     * 
+     *
      * @param node the node to animate
      * @param isAnimationEnabled true to animate
      */
-    abstract void animate(StandardTreeNodeView<?> node,
+    abstract void animate(CellTreeNodeView<?> node,
         boolean isAnimationEnabled);
 
     public int getDuration() {
@@ -113,13 +113,13 @@ public class StandardTreeView extends TreeView implements HasAnimation {
     }
 
     /**
-     * Animate a {@link StandardTreeNodeView} into its new state.
+     * Animate a {@link CellTreeNodeView} into its new state.
      * 
-     * @param node the {@link StandardTreeNodeView} to animate
+     * @param node the {@link CellTreeNodeView} to animate
      * @param isAnimationEnabled true to animate
      */
     @Override
-    void animate(StandardTreeNodeView<?> node, boolean isAnimationEnabled) {
+    void animate(CellTreeNodeView<?> node, boolean isAnimationEnabled) {
       // Cancel any pending animations.
       cancel();
 
@@ -195,7 +195,7 @@ public class StandardTreeView extends TreeView implements HasAnimation {
   public static class SlideAnimation extends RevealAnimation {
     /**
      * Create a new {@link RevealAnimation}.
-     * 
+     *
      * @return the new animation
      */
     public static SlideAnimation create() {
@@ -269,16 +269,16 @@ public class StandardTreeView extends TreeView implements HasAnimation {
   /**
    * The hidden root node in the tree.
    */
-  private StandardTreeNodeView<?> rootNode;
+  private CellTreeNodeView<?> rootNode;
 
   /**
-   * Construct a new {@link TreeView}.
-   * 
+   * Construct a new {@link CellTreeView}.
+   *
    * @param <T> the type of data in the root node
-   * @param viewModel the {@link TreeViewModel} that backs the tree
+   * @param viewModel the {@link CellTreeViewModel} that backs the tree
    * @param rootValue the hidden root value of the tree
    */
-  public <T> StandardTreeView(TreeViewModel viewModel, T rootValue) {
+  public <T> CellTree(CellTreeViewModel viewModel, T rootValue) {
     super(viewModel);
     setStyleName("gwt-StandardTreeView");
 
@@ -289,7 +289,7 @@ public class StandardTreeView extends TreeView implements HasAnimation {
     sinkEvents(Event.ONCLICK | Event.ONCHANGE | Event.MOUSEEVENTS);
 
     // Associate a view with the item.
-    StandardTreeNodeView<T> root = new StandardTreeNodeView<T>(this, null,
+    CellTreeNodeView<T> root = new CellTreeNodeView<T>(this, null,
         null, getElement(), rootValue);
     rootNode = root;
     root.setOpen(true);
@@ -298,7 +298,7 @@ public class StandardTreeView extends TreeView implements HasAnimation {
   /**
    * Get the animation used to open and close nodes in this tree if animations
    * are enabled.
-   * 
+   *
    * @return the animation
    * @see #isAnimationEnabled()
    */
@@ -309,7 +309,7 @@ public class StandardTreeView extends TreeView implements HasAnimation {
   /**
    * Get the HTML string that is displayed while nodes wait for their children
    * to load.
-   * 
+   *
    * @return the loading HTML string
    */
   public String getLoadingHtml() {
@@ -329,7 +329,7 @@ public class StandardTreeView extends TreeView implements HasAnimation {
     ArrayList<Element> chain = new ArrayList<Element>();
     collectElementChain(chain, getElement(), target);
 
-    StandardTreeNodeView<?> nodeView = findItemByChain(chain, 0, rootNode);
+    CellTreeNodeView<?> nodeView = findItemByChain(chain, 0, rootNode);
     if (nodeView != null && nodeView != rootNode) {
       if ("click".equals(event.getType())) {
         // Open the node when the open image is clicked.
@@ -360,7 +360,7 @@ public class StandardTreeView extends TreeView implements HasAnimation {
   /**
    * Set the animation used to open and close nodes in this tree. You must call
    * {@link #setAnimationEnabled(boolean)} to enable or disable animation.
-   * 
+   *
    * @param animation a {@link NodeAnimation}
    * @see #setAnimationEnabled(boolean)
    */
@@ -379,7 +379,7 @@ public class StandardTreeView extends TreeView implements HasAnimation {
   /**
    * Set the HTML string that will be displayed when a node is waiting for its
    * child nodes to load.
-   * 
+   *
    * @param loadingHtml the HTML string
    */
   public void setLoadingHtml(String loadingHtml) {
@@ -411,11 +411,11 @@ public class StandardTreeView extends TreeView implements HasAnimation {
   }
 
   /**
-   * Animate the current state of a {@link StandardTreeNodeView} in this tree.
-   * 
+   * Animate the current state of a {@link CellTreeNodeView} in this tree.
+   *
    * @param node the node to animate
    */
-  void maybeAnimateTreeNode(StandardTreeNodeView<?> node) {
+  void maybeAnimateTreeNode(CellTreeNodeView<?> node) {
     if (animation != null) {
       animation.animate(node, node.consumeAnimate() && isAnimationEnabled());
     }
@@ -434,17 +434,17 @@ public class StandardTreeView extends TreeView implements HasAnimation {
     chain.add(hElem);
   }
 
-  private StandardTreeNodeView<?> findItemByChain(ArrayList<Element> chain,
-      int idx, StandardTreeNodeView<?> parent) {
+  private CellTreeNodeView<?> findItemByChain(ArrayList<Element> chain,
+      int idx, CellTreeNodeView<?> parent) {
     if (idx == chain.size()) {
       return parent;
     }
 
     Element hCurElem = chain.get(idx);
     for (int i = 0, n = parent.getChildCount(); i < n; ++i) {
-      StandardTreeNodeView<?> child = parent.getChildNode(i);
+      CellTreeNodeView<?> child = parent.getChildNode(i);
       if (child.getElement() == hCurElem) {
-        StandardTreeNodeView<?> retItem = findItemByChain(chain, idx + 1, child);
+        CellTreeNodeView<?> retItem = findItemByChain(chain, idx + 1, child);
         if (retItem == null) {
           return child;
         }

@@ -72,6 +72,4 @@ public class ListScaffoldPlace extends ScaffoldPlace {
     result = prime * result + ((type == null) ? 0 : type.hashCode());
     return result;
   }
-  
-  
 }

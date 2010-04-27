@@ -16,7 +16,7 @@
 package com.google.gwt.sample.bikeshed.stocks.client;
 
 import com.google.gwt.bikeshed.cells.client.Cell;
-import com.google.gwt.bikeshed.list.client.SimpleCellList;
+import com.google.gwt.bikeshed.list.client.CellList;
 import com.google.gwt.bikeshed.list.shared.AbstractListViewAdapter;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.sample.bikeshed.stocks.shared.PlayerInfo;
@@ -64,7 +64,7 @@ public class PlayerScoresWidget extends Composite {
   }
 
   @UiField
-  SimpleCellList<PlayerInfo> listView;
+  CellList<PlayerInfo> cellList;
 
   private final AbstractListViewAdapter<PlayerInfo> adapter;
 
@@ -74,8 +74,8 @@ public class PlayerScoresWidget extends Composite {
   }
 
   @UiFactory
-  SimpleCellList<PlayerInfo> createListView() {
-    SimpleCellList<PlayerInfo> view = new SimpleCellList<PlayerInfo>(new PlayerInfoCell());
+  CellList<PlayerInfo> createCellList() {
+    CellList<PlayerInfo> view = new CellList<PlayerInfo>(new PlayerInfoCell());
     adapter.addView(view);
     return view;
   }

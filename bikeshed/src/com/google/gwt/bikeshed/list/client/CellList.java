@@ -17,7 +17,7 @@ package com.google.gwt.bikeshed.list.client;
 
 import com.google.gwt.bikeshed.cells.client.Cell;
 import com.google.gwt.bikeshed.cells.client.ValueUpdater;
-import com.google.gwt.bikeshed.list.client.impl.SimpleCellListImpl;
+import com.google.gwt.bikeshed.list.client.impl.CellListImpl;
 import com.google.gwt.bikeshed.list.shared.Range;
 import com.google.gwt.bikeshed.list.shared.SelectionModel;
 import com.google.gwt.dom.client.DivElement;
@@ -31,10 +31,10 @@ import java.util.List;
 
 /**
  * A single column list of cells.
- * 
+ *
  * @param <T> the data type of list items
  */
-public class SimpleCellList<T> extends Widget implements PagingListView<T> {
+public class CellList<T> extends Widget implements PagingListView<T> {
 
   /**
    * The default page size.
@@ -58,16 +58,16 @@ public class SimpleCellList<T> extends Widget implements PagingListView<T> {
 
   private final Cell<T> cell;
   private final Element emptyMessageElem;
-  private final SimpleCellListImpl<T> impl;
+  private final CellListImpl<T> impl;
   private ValueUpdater<T> valueUpdater;
 
   /**
-   * Construct a new {@link SimpleCellList}.
-   * 
+   * Construct a new {@link CellList}.
+   *
    * @param cell the cell used to render each item
    */
   // TODO(jlabanca): Should cell support ViewData?
-  public SimpleCellList(final Cell<T> cell) {
+  public CellList(final Cell<T> cell) {
     this.cell = cell;
 
     // Create the DOM hierarchy.
@@ -85,7 +85,7 @@ public class SimpleCellList<T> extends Widget implements PagingListView<T> {
     sinkEvents(Event.ONCLICK | Event.ONCHANGE | Event.MOUSEEVENTS);
 
     // Create the implementation.
-    impl = new SimpleCellListImpl<T>(this, DEFAULT_PAGE_SIZE, childContainer) {
+    impl = new CellListImpl<T>(this, DEFAULT_PAGE_SIZE, childContainer) {
 
       @Override
       protected boolean dependsOnSelection() {
@@ -178,6 +178,10 @@ public class SimpleCellList<T> extends Widget implements PagingListView<T> {
     impl.setDelegate(delegate);
   }
 
+  public void setPager(Pager<T> pager) {
+    impl.setPager(pager);
+  }
+
   public void setPageSize(int pageSize) {
     impl.setPageSize(pageSize);
   }
@@ -186,17 +190,13 @@ public class SimpleCellList<T> extends Widget implements PagingListView<T> {
     impl.setPageStart(pageStart);
   }
 
-  public void setPager(Pager<T> pager) {
-    impl.setPager(pager);
-  }
-
   public void setSelectionModel(final SelectionModel<? super T> selectionModel) {
     impl.setSelectionModel(selectionModel, true);
   }
 
   /**
    * Set the value updater to use when cells modify items.
-   * 
+   *
    * @param valueUpdater the {@link ValueUpdater}
    */
   public void setValueUpdater(ValueUpdater<T> valueUpdater) {
@@ -205,7 +205,7 @@ public class SimpleCellList<T> extends Widget implements PagingListView<T> {
 
   /**
    * Show or hide an element.
-   * 
+   *
    * @param element the element
    * @param show true to show, false to hide
    */

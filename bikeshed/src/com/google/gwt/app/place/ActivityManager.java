@@ -31,7 +31,7 @@ public class ActivityManager<P extends Place> implements
     PlaceChangeEvent.Handler<P>, PlaceChangeRequestedEvent.Handler<P> {
 
   /**
-   * Implemented by the view of an ActivityManager,
+   * Implemented by the view of an ActivityManager.
    */
   public interface View {
     /**

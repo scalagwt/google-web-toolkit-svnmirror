@@ -28,9 +28,9 @@
       class='{style.label}'>Notes:</span>
     <g:TextBox
       ui:field='notesBox'></g:TextBox>
-    <l:PagingTableListView
+    <l:CellTable
       width='100%'
-      ui:field='listView' />
+      ui:field='table' />
   </g:HTMLPanel>
 
 </ui:UiBinder> 

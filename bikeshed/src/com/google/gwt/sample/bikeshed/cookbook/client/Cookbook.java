@@ -20,8 +20,8 @@ import com.google.gwt.bikeshed.list.shared.ListViewAdapter;
 import com.google.gwt.bikeshed.list.shared.SelectionModel;
 import com.google.gwt.bikeshed.list.shared.SingleSelectionModel;
 import com.google.gwt.bikeshed.list.shared.SelectionModel.SelectionChangeEvent;
-import com.google.gwt.bikeshed.tree.client.StandardTreeView;
-import com.google.gwt.bikeshed.tree.client.TreeViewModel;
+import com.google.gwt.bikeshed.tree.client.CellTree;
+import com.google.gwt.bikeshed.tree.client.CellTreeViewModel;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -56,7 +56,7 @@ public class Cookbook implements EntryPoint {
     }
   }
 
-  private static final class RecipeTreeModel implements TreeViewModel {
+  private static final class RecipeTreeModel implements CellTreeViewModel {
     private ListViewAdapter<Category> adapter = new ListViewAdapter<Category>();
     private SelectionModel<Object> selectionModel;
 
@@ -92,11 +92,11 @@ public class Cookbook implements EntryPoint {
   private static final Binder binder = GWT.create(Binder.class);
 
   @UiField DockLayoutPanel dock;
-  @UiField StandardTreeView recipeTree;
+  @UiField CellTree recipeTree;
   @UiField LayoutPanel container;
 
   private RecipeTreeModel recipeTreeModel;
-  private SimpleCellListRecipe defaultRecipe;
+  private CellListRecipe defaultRecipe;
   private Recipe curRecipe;
 
   public void onModuleLoad() {
@@ -120,18 +120,18 @@ public class Cookbook implements EntryPoint {
   }
 
   @UiFactory
-  StandardTreeView createTreeView() {
-    return new StandardTreeView(recipeTreeModel, null);
+  CellTree createTreeView() {
+    return new CellTree(recipeTreeModel, null);
   }
 
   private void createRecipes(List<Category> cats) {
-    defaultRecipe = new SimpleCellListRecipe();
+    defaultRecipe = new CellListRecipe();
 
     cats.add(new Category("Lists", new Recipe[] {defaultRecipe}));
     cats.add(new Category("Tables", new Recipe[] {
         new BasicTableRecipe(), new EditableTableRecipe(),}));
     cats.add(new Category("Trees", new Recipe[] {
-        new BasicTreeRecipe(), new SideBySideTreeRecipe(),}));
+        new CellTreeRecipe(), new CellBrowserRecipe(),}));
     cats.add(new Category("Other", new Recipe[] {
         new ValidationRecipe(), new MailRecipe(),}));
   }

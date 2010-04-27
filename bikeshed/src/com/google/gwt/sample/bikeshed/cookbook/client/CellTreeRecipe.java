@@ -18,19 +18,19 @@ package com.google.gwt.sample.bikeshed.cookbook.client;
 import com.google.gwt.bikeshed.list.shared.MultiSelectionModel;
 import com.google.gwt.bikeshed.list.shared.SelectionModel;
 import com.google.gwt.bikeshed.list.shared.SelectionModel.SelectionChangeEvent;
-import com.google.gwt.bikeshed.tree.client.StandardTreeView;
+import com.google.gwt.bikeshed.tree.client.CellTree;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * Basic tree recipe.
+ * {@link CellTree} recipe.
  */
-public class BasicTreeRecipe extends Recipe {
+public class CellTreeRecipe extends Recipe {
 
-  public BasicTreeRecipe() {
-    super("Basic Tree");
+  public CellTreeRecipe() {
+    super("Cell Tree");
   }
 
   @Override
@@ -45,11 +45,11 @@ public class BasicTreeRecipe extends Recipe {
       }
     });
 
-    StandardTreeView stree = new StandardTreeView(new MyTreeViewModel(
+    CellTree tree = new CellTree(new MyTreeViewModel(
         selectionModel), "...");
-    stree.setAnimationEnabled(true);
+    tree.setAnimationEnabled(true);
 
-    p.add(stree);
+    p.add(tree);
     p.add(new HTML("<hr>"));
     p.add(label);
 

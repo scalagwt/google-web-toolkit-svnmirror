@@ -16,7 +16,7 @@
 package com.google.gwt.sample.bikeshed.cookbook.client;
 
 import com.google.gwt.bikeshed.cells.client.TextCell;
-import com.google.gwt.bikeshed.list.client.SimpleCellList;
+import com.google.gwt.bikeshed.list.client.CellList;
 import com.google.gwt.bikeshed.list.shared.ListViewAdapter;
 import com.google.gwt.bikeshed.list.shared.SelectionModel;
 import com.google.gwt.bikeshed.list.shared.SingleSelectionModel;
@@ -27,12 +27,12 @@ import com.google.gwt.user.client.ui.Widget;
 import java.util.List;
 
 /**
- * SimpleCellList Recipe.
+ * {@link CellList} Recipe.
  */
-public class SimpleCellListRecipe extends Recipe {
+public class CellListRecipe extends Recipe {
 
-  public SimpleCellListRecipe() {
-    super("Simple Cell List");
+  public CellListRecipe() {
+    super("Cell List");
   }
 
   @Override
@@ -43,19 +43,19 @@ public class SimpleCellListRecipe extends Recipe {
       list.add("" + ((i + 10) * 1000));
     }
 
-    final SimpleCellList<String> simpleCellList = new SimpleCellList<String>(
+    final CellList<String> cellList = new CellList<String>(
         TextCell.getInstance());
-    simpleCellList.setPageSize(10);
+    cellList.setPageSize(10);
     final SelectionModel<String> selectionModel = new SingleSelectionModel<String>();
-    simpleCellList.setSelectionModel(selectionModel);
-    adapter.addView(simpleCellList);
+    cellList.setSelectionModel(selectionModel);
+    adapter.addView(cellList);
 
     new Timer() {
       int index = 0;
 
       @Override
       public void run() {
-        if (simpleCellList.isAttached()) {
+        if (cellList.isAttached()) {
           incrementValue(index);
           incrementValue(index + 15);
           index = (index + 1) % 10;
@@ -78,10 +78,10 @@ public class SimpleCellListRecipe extends Recipe {
     }.schedule(100);
 
     // Add a Pager to control the table.
-    SimplePager<String> pager = new SimplePager<String>(simpleCellList);
+    SimplePager<String> pager = new SimplePager<String>(cellList);
 
     FlowPanel fp = new FlowPanel();
-    fp.add(simpleCellList);
+    fp.add(cellList);
     fp.add(pager);
     return fp;
   }

@@ -1,12 +1,27 @@
+/*
+ * Copyright 2010 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.google.gwt.sample.expenses.gwt.customized;
 
 import com.google.gwt.bikeshed.cells.client.CheckboxCell;
 import com.google.gwt.bikeshed.cells.client.CurrencyCell;
 import com.google.gwt.bikeshed.cells.client.DateCell;
 import com.google.gwt.bikeshed.cells.client.TextCell;
+import com.google.gwt.bikeshed.list.client.CellTable;
 import com.google.gwt.bikeshed.list.client.Column;
 import com.google.gwt.bikeshed.list.client.Header;
-import com.google.gwt.bikeshed.list.client.PagingTableListView;
 import com.google.gwt.bikeshed.list.shared.ListViewAdapter;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -59,7 +74,7 @@ public class ExpenseDetails extends Composite {
   private ListViewAdapter<ExpenseItem> items = new ListViewAdapter<ExpenseItem>();
 
   @UiField
-  PagingTableListView<ExpenseItem> listView;
+  CellTable<ExpenseItem> table;
 
   @UiField
   TextBox notesBox;
@@ -81,16 +96,15 @@ public class ExpenseDetails extends Composite {
         false));
 
     // Add the view to the adapter.
-    items.addView(listView);
+    items.addView(table);
   }
 
   @UiFactory
-  PagingTableListView<ExpenseItem> createListView() {
-    PagingTableListView<ExpenseItem> table = new PagingTableListView<ExpenseItem>(
-        15);
+  CellTable<ExpenseItem> createTable() {
+    CellTable<ExpenseItem> view = new CellTable<ExpenseItem>(15);
 
     // Name column.
-    table.addColumn(new Column<ExpenseItem, String>(TextCell.getInstance()) {
+    view.addColumn(new Column<ExpenseItem, String>(TextCell.getInstance()) {
       @Override
       public String getValue(ExpenseItem object) {
         return object.name;
@@ -103,7 +117,7 @@ public class ExpenseDetails extends Composite {
     });
 
     // Date column.
-    table.addColumn(new Column<ExpenseItem, Date>(new DateCell()) {
+    view.addColumn(new Column<ExpenseItem, Date>(new DateCell()) {
       @Override
       public Date getValue(ExpenseItem object) {
         return object.date;
@@ -116,7 +130,7 @@ public class ExpenseDetails extends Composite {
     });
 
     // Category column.
-    table.addColumn(new Column<ExpenseItem, String>(TextCell.getInstance()) {
+    view.addColumn(new Column<ExpenseItem, String>(TextCell.getInstance()) {
       @Override
       public String getValue(ExpenseItem object) {
         return object.category;
@@ -129,7 +143,7 @@ public class ExpenseDetails extends Composite {
     });
 
     // Price column.
-    table.addColumn(new Column<ExpenseItem, Integer>(new CurrencyCell()) {
+    view.addColumn(new Column<ExpenseItem, Integer>(new CurrencyCell()) {
       @Override
       public Integer getValue(ExpenseItem object) {
         return object.price;
@@ -142,7 +156,7 @@ public class ExpenseDetails extends Composite {
     });
 
     // Approved column.
-    table.addColumn(new Column<ExpenseItem, Boolean>(new CheckboxCell()) {
+    view.addColumn(new Column<ExpenseItem, Boolean>(new CheckboxCell()) {
       @Override
       public Boolean getValue(ExpenseItem object) {
         return object.approved;
@@ -154,6 +168,6 @@ public class ExpenseDetails extends Composite {
       }
     });
 
-    return table;
+    return view;
   }
 }

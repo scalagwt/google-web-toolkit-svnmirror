@@ -17,7 +17,7 @@ package com.google.gwt.valuestore.ui;
 
 import com.google.gwt.bikeshed.cells.client.ActionCell;
 import com.google.gwt.bikeshed.list.client.IdentityColumn;
-import com.google.gwt.bikeshed.list.client.PagingTableListView;
+import com.google.gwt.bikeshed.list.client.CellTable;
 import com.google.gwt.bikeshed.list.shared.Range;
 import com.google.gwt.bikeshed.list.shared.SelectionModel;
 import com.google.gwt.user.client.ui.Composite;
@@ -31,7 +31,7 @@ import java.util.Set;
 
 /**
  * Abstract implementation of RecordListView. Subclasses must call {@link #init}
- * with the root widget, its {@link PagingTableListView}, and a list of
+ * with the root widget, its {@link CellTable}, and a list of
  * {@link PropertyColumn}.
  * 
  * @param <R> the type of the records
@@ -39,7 +39,7 @@ import java.util.Set;
 public abstract class AbstractRecordListView<R extends Record> extends
     Composite implements RecordListView<R> {
 
-  private PagingTableListView<R> table;
+  private CellTable<R> table;
   private Delegate<R> delegate;
   private Set<Property<?>> properties = new HashSet<Property<?>>();
 
@@ -78,7 +78,7 @@ public abstract class AbstractRecordListView<R extends Record> extends
     table.setSelectionModel(selectionModel);
   }
 
-  protected void init(Widget root, PagingTableListView<R> table,
+  protected void init(Widget root, CellTable<R> table,
       List<PropertyColumn<R, ?>> columns) {
     super.initWidget(root);
     this.table = table;
@@ -107,6 +107,6 @@ public abstract class AbstractRecordListView<R extends Record> extends
   protected void initWidget(Widget widget) {
     throw new UnsupportedOperationException(
         "AbstractRecordListView must be initialized via "
-            + "init(Widget PagingTableListView<R> List<PropertyColumn<R, ?>> ) ");
+            + "init(Widget CellTable<R> List<PropertyColumn<R, ?>> ) ");
   }
 }

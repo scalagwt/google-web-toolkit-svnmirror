@@ -16,7 +16,7 @@
 package com.google.gwt.sample.expenses.gwt.ui.report;
 
 import com.google.gwt.app.util.DateTimeFormatRenderer;
-import com.google.gwt.bikeshed.list.client.PagingTableListView;
+import com.google.gwt.bikeshed.list.client.CellTable;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.sample.expenses.gwt.request.ReportRecord;
@@ -41,7 +41,7 @@ public class ReportListView extends AbstractRecordListView<ReportRecord> {
 
   private static final Binder BINDER = GWT.create(Binder.class);
 
-  @UiField PagingTableListView<ReportRecord> table;
+  @UiField CellTable<ReportRecord> table;
 
   public ReportListView() {
     init(BINDER.createAndBindUi(this), table, getColumns());

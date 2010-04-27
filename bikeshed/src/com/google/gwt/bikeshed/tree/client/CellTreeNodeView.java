@@ -16,13 +16,12 @@
 package com.google.gwt.bikeshed.tree.client;
 
 import com.google.gwt.bikeshed.cells.client.Cell;
-import com.google.gwt.bikeshed.list.client.ListView;
 import com.google.gwt.bikeshed.list.client.PagingListView;
-import com.google.gwt.bikeshed.list.client.impl.SimpleCellListImpl;
+import com.google.gwt.bikeshed.list.client.impl.CellListImpl;
 import com.google.gwt.bikeshed.list.shared.ProvidesKey;
 import com.google.gwt.bikeshed.list.shared.Range;
 import com.google.gwt.bikeshed.list.shared.SelectionModel;
-import com.google.gwt.bikeshed.tree.client.TreeViewModel.NodeInfo;
+import com.google.gwt.bikeshed.tree.client.CellTreeViewModel.NodeInfo;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
@@ -38,10 +37,10 @@ import java.util.Map;
 
 /**
  * A view of a tree node.
- * 
+ *
  * @param <T> the type that this view contains
  */
-class StandardTreeNodeView<T> extends UIObject {
+class CellTreeNodeView<T> extends UIObject {
 
   /**
    * The default number of children to show under a tree node.
@@ -56,11 +55,11 @@ class StandardTreeNodeView<T> extends UIObject {
   /**
    * Style name applied to selected rows.
    */
-  private static final String STYLENNAME_SELECTED = "gwt-tree-selectedItem";
+  private static final String STYLENNAME_SELECTED = "gwt-cellTree-selectedItem";
 
   /**
    * Returns the element that parents the cell contents of the node.
-   * 
+   *
    * @param nodeElem the element that represents the node
    * @return the cell parent within the node
    */
@@ -70,7 +69,7 @@ class StandardTreeNodeView<T> extends UIObject {
 
   /**
    * Show or hide an element.
-   * 
+   *
    * @param element the element to show or hide
    * @param show true to show, false to hide
    */
@@ -83,22 +82,23 @@ class StandardTreeNodeView<T> extends UIObject {
   }
 
   /**
-   * The {@link ListView} used to show children.
-   * 
+   * The {@link com.google.gwt.bikeshed.list.client.ListView ListView} used to
+   * show children.
+   *
    * @param <C> the child item type
    */
   private static class NodeListView<C> implements PagingListView<C> {
 
-    private final SimpleCellListImpl<C> impl;
-    private StandardTreeNodeView<?> nodeView;
-    private Map<Object, StandardTreeNodeView<?>> savedViews;
+    private final CellListImpl<C> impl;
+    private CellTreeNodeView<?> nodeView;
+    private Map<Object, CellTreeNodeView<?>> savedViews;
 
     public NodeListView(final NodeInfo<C> nodeInfo,
-        final StandardTreeNodeView<?> nodeView) {
+        final CellTreeNodeView<?> nodeView) {
       this.nodeView = nodeView;
 
       final Cell<C> cell = nodeInfo.getCell();
-      impl = new SimpleCellListImpl<C>(this, DEFAULT_LIST_SIZE,
+      impl = new CellListImpl<C>(this, DEFAULT_LIST_SIZE,
           nodeView.ensureChildContainer()) {
 
         @Override
@@ -107,16 +107,16 @@ class StandardTreeNodeView<T> extends UIObject {
 
           // Ensure that we have a children array.
           if (nodeView.children == null) {
-            nodeView.children = new ArrayList<StandardTreeNodeView<?>>();
+            nodeView.children = new ArrayList<CellTreeNodeView<?>>();
           }
 
           // Construct a map of former child views based on their value keys.
           int len = values.size();
           int end = start + len;
           int childCount = nodeView.getChildCount();
-          Map<Object, StandardTreeNodeView<?>> openNodes = new HashMap<Object, StandardTreeNodeView<?>>();
+          Map<Object, CellTreeNodeView<?>> openNodes = new HashMap<Object, CellTreeNodeView<?>>();
           for (int i = start; i < end && i < childCount; i++) {
-            StandardTreeNodeView<?> child = nodeView.getChildNode(i);
+            CellTreeNodeView<?> child = nodeView.getChildNode(i);
             // Ignore child nodes that are closed.
             if (child.isOpen()) {
               openNodes.put(child.getValueKey(), child);
@@ -130,12 +130,12 @@ class StandardTreeNodeView<T> extends UIObject {
 
           // Trim the saved views down to the children that still exists.
           ProvidesKey<C> providesKey = nodeInfo.getProvidesKey();
-          savedViews = new HashMap<Object, StandardTreeNodeView<?>>();
+          savedViews = new HashMap<Object, CellTreeNodeView<?>>();
           for (C childValue : values) {
             // Remove any child elements that correspond to prior children
             // so the call to setInnerHtml will not destroy them
             Object key = providesKey.getKey(childValue);
-            StandardTreeNodeView<?> savedView = openNodes.remove(key);
+            CellTreeNodeView<?> savedView = openNodes.remove(key);
             if (savedView != null) {
               savedView.ensureAnimationFrame().removeFromParent();
               savedViews.put(key, savedView);
@@ -149,9 +149,9 @@ class StandardTreeNodeView<T> extends UIObject {
           Element childElem = nodeView.ensureChildContainer().getFirstChildElement();
           for (int i = start; i < end; i++) {
             C childValue = values.get(i - start);
-            StandardTreeNodeView<C> child = nodeView.createTreeNodeView(
+            CellTreeNodeView<C> child = nodeView.createTreeNodeView(
                 nodeInfo, childElem, childValue, null);
-            StandardTreeNodeView<?> savedChild = savedViews.remove(providesKey.getKey(childValue));
+            CellTreeNodeView<?> savedChild = savedViews.remove(providesKey.getKey(childValue));
             // Copy the saved child's state into the new child
             if (savedChild != null) {
               child.animationFrame = savedChild.animationFrame;
@@ -204,7 +204,7 @@ class StandardTreeNodeView<T> extends UIObject {
         protected void emitHtml(StringBuilder sb, List<C> values, int start,
             SelectionModel<? super C> selectionModel) {
           ProvidesKey<C> providesKey = nodeInfo.getProvidesKey();
-          TreeViewModel model = nodeView.tree.getTreeViewModel();
+          CellTreeViewModel model = nodeView.tree.getTreeViewModel();
           int imageWidth = nodeView.tree.getImageWidth();
           for (C value : values) {
             Object key = providesKey.getKey(value);
@@ -230,7 +230,7 @@ class StandardTreeNodeView<T> extends UIObject {
 
         @Override
         protected void removeLastItem() {
-          StandardTreeNodeView<?> child = nodeView.children.remove(nodeView.children.size() - 1);
+          CellTreeNodeView<?> child = nodeView.children.remove(nodeView.children.size() - 1);
           child.cleanup();
           super.removeLastItem();
         }
@@ -289,6 +289,10 @@ class StandardTreeNodeView<T> extends UIObject {
       impl.setDelegate(delegate);
     }
 
+    public void setPager(Pager<C> pager) {
+      impl.setPager(pager);
+    }
+
     public void setPageSize(int pageSize) {
       impl.setPageSize(pageSize);
     }
@@ -297,20 +301,16 @@ class StandardTreeNodeView<T> extends UIObject {
       impl.setPageStart(pageStart);
     }
 
-    public void setPager(Pager<C> pager) {
-      impl.setPager(pager);
-    }
-
     public void setSelectionModel(final SelectionModel<? super C> selectionModel) {
       impl.setSelectionModel(selectionModel, true);
     }
 
     /**
-     * Assign this {@link ListView} to a new {@link StandardTreeNodeView}.
-     * 
+     * Assign this {@link ListView} to a new {@link CellTreeNodeView}.
+     *
      * @param nodeView the new node view
      */
-    private void setNodeView(StandardTreeNodeView<?> nodeView) {
+    private void setNodeView(CellTreeNodeView<?> nodeView) {
       this.nodeView.listView = null;
       this.nodeView = nodeView;
       nodeView.listView = this;
@@ -337,7 +337,7 @@ class StandardTreeNodeView<T> extends UIObject {
   /**
    * A list of child views.
    */
-  private List<StandardTreeNodeView<?>> children;
+  private List<CellTreeNodeView<?>> children;
 
   /**
    * A reference to the element that contains all content. Parent of the
@@ -376,9 +376,9 @@ class StandardTreeNodeView<T> extends UIObject {
   private boolean open;
 
   /**
-   * The parent {@link StandardTreeNodeView}.
+   * The parent {@link CellTreeNodeView}.
    */
-  private final StandardTreeNodeView<?> parentNode;
+  private final CellTreeNodeView<?> parentNode;
 
   /**
    * The {@link NodeInfo} of the parent node.
@@ -396,9 +396,9 @@ class StandardTreeNodeView<T> extends UIObject {
   private Element showMoreElem;
 
   /**
-   * The {@link TreeView} that this node belongs to.
+   * The {@link CellTreeView} that this node belongs to.
    */
-  private final StandardTreeView tree;
+  private final CellTree tree;
 
   /**
    * This node's value.
@@ -406,16 +406,16 @@ class StandardTreeNodeView<T> extends UIObject {
   private T value;
 
   /**
-   * Construct a {@link StandardTreeNodeView}.
-   * 
-   * @param tree the parent {@link StandardTreeNodeView}
-   * @param parent the parent {@link StandardTreeNodeView}
+   * Construct a {@link CellTreeNodeView}.
+   *
+   * @param tree the parent {@link CellTreeNodeView}
+   * @param parent the parent {@link CellTreeNodeView}
    * @param parentNodeInfo the {@link NodeInfo} of the parent
-   * @param elem the outer element of this {@link StandardTreeNodeView}
+   * @param elem the outer element of this {@link CellTreeNodeView}
    * @param value the value of this node
    */
-  StandardTreeNodeView(final StandardTreeView tree,
-      final StandardTreeNodeView<?> parent, NodeInfo<T> parentNodeInfo,
+  CellTreeNodeView(final CellTree tree,
+      final CellTreeNodeView<?> parent, NodeInfo<T> parentNodeInfo,
       Element elem, T value) {
     this.tree = tree;
     this.parentNode = parent;
@@ -428,13 +428,13 @@ class StandardTreeNodeView<T> extends UIObject {
     return children == null ? 0 : children.size();
   }
 
-  public StandardTreeNodeView<?> getChildNode(int childIndex) {
+  public CellTreeNodeView<?> getChildNode(int childIndex) {
     return children.get(childIndex);
   }
 
   /**
    * Check whether or not this node is open.
-   * 
+   *
    * @return true if open, false if closed
    */
   public boolean isOpen() {
@@ -453,7 +453,7 @@ class StandardTreeNodeView<T> extends UIObject {
 
   /**
    * Sets whether this item's children are displayed.
-   * 
+   *
    * @param open whether the item is open
    */
   public void setOpen(boolean open) {
@@ -503,7 +503,7 @@ class StandardTreeNodeView<T> extends UIObject {
 
     // Recursively kill children.
     if (children != null) {
-      for (StandardTreeNodeView<?> child : children) {
+      for (CellTreeNodeView<?> child : children) {
         child.cleanup();
       }
       children = null;
@@ -519,7 +519,7 @@ class StandardTreeNodeView<T> extends UIObject {
   /**
    * Returns an instance of TreeNodeView of the same subclass as the calling
    * object.
-   * 
+   *
    * @param <C> the data type of the node's children
    * @param nodeInfo a NodeInfo object describing the child nodes
    * @param childElem the DOM element used to parent the new TreeNodeView
@@ -527,15 +527,15 @@ class StandardTreeNodeView<T> extends UIObject {
    * @param viewData view data associated with the node
    * @return a TreeNodeView of suitable type
    */
-  protected <C> StandardTreeNodeView<C> createTreeNodeView(
+  protected <C> CellTreeNodeView<C> createTreeNodeView(
       NodeInfo<C> nodeInfo, Element childElem, C childValue, Object viewData) {
-    return new StandardTreeNodeView<C>(tree, this, nodeInfo, childElem,
+    return new CellTreeNodeView<C>(tree, this, nodeInfo, childElem,
         childValue);
   }
 
   /**
    * Fire an event to the {@link com.google.gwt.bikeshed.cells.client.Cell}.
-   * 
+   *
    * @param event the native event
    * @return true if the cell consumes the event, false if not
    */
@@ -559,7 +559,7 @@ class StandardTreeNodeView<T> extends UIObject {
 
   /**
    * Returns the element corresponding to the open/close image.
-   * 
+   *
    * @return the open/close image element
    */
   protected Element getImageElement() {
@@ -576,7 +576,7 @@ class StandardTreeNodeView<T> extends UIObject {
 
   /**
    * Set up the node when it is opened.
-   * 
+   *
    * @param nodeInfo the {@link NodeInfo} that provides information about the
    *          child values
    * @param <C> the child data type of the node
@@ -612,7 +612,7 @@ class StandardTreeNodeView<T> extends UIObject {
 
   /**
    * Ensure that the animation frame exists and return it.
-   * 
+   *
    * @return the animation frame
    */
   Element ensureAnimationFrame() {
@@ -628,7 +628,7 @@ class StandardTreeNodeView<T> extends UIObject {
 
   /**
    * Ensure that the child container exists and return it.
-   * 
+   *
    * @return the child container
    */
   Element ensureChildContainer() {
@@ -641,7 +641,7 @@ class StandardTreeNodeView<T> extends UIObject {
 
   /**
    * Ensure that the content container exists and return it.
-   * 
+   *
    * @return the content container
    */
   Element ensureContentContainer() {

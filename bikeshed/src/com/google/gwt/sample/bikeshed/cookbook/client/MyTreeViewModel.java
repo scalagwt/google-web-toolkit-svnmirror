@@ -25,7 +25,7 @@ import com.google.gwt.bikeshed.list.client.HasCell;
 import com.google.gwt.bikeshed.list.client.ListView;
 import com.google.gwt.bikeshed.list.shared.AbstractListViewAdapter;
 import com.google.gwt.bikeshed.list.shared.SelectionModel;
-import com.google.gwt.bikeshed.tree.client.TreeViewModel;
+import com.google.gwt.bikeshed.tree.client.CellTreeViewModel;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
@@ -37,7 +37,7 @@ import java.util.List;
 /**
  * A demo TreeModel.
  */
-public class MyTreeViewModel implements TreeViewModel {
+public class MyTreeViewModel implements CellTreeViewModel {
 
   private static class IntegerListViewAdapter extends
       AbstractListViewAdapter<Integer> {
@@ -140,7 +140,7 @@ public class MyTreeViewModel implements TreeViewModel {
       public FieldUpdater<String, String> getFieldUpdater() {
         return new FieldUpdater<String, String>() {
           public void update(int index, String object, String value) {
-            Window.alert("Clicked " + object);
+            Window.alert("You clicked " + object);
           }
         };
       }

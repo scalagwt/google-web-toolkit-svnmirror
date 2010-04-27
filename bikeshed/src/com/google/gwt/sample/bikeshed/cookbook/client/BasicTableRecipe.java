@@ -21,7 +21,7 @@ import com.google.gwt.bikeshed.cells.client.FieldUpdater;
 import com.google.gwt.bikeshed.cells.client.TextCell;
 import com.google.gwt.bikeshed.list.client.Column;
 import com.google.gwt.bikeshed.list.client.IdentityColumn;
-import com.google.gwt.bikeshed.list.client.PagingTableListView;
+import com.google.gwt.bikeshed.list.client.CellTable;
 import com.google.gwt.bikeshed.list.shared.ListViewAdapter;
 import com.google.gwt.bikeshed.list.shared.MultiSelectionModel;
 import com.google.gwt.bikeshed.list.shared.SelectionModel;
@@ -46,7 +46,7 @@ public class BasicTableRecipe extends Recipe {
   @Override
   protected Widget createWidget() {
     final ListViewAdapter<String> adapter = new ListViewAdapter<String>();
-    final PagingTableListView<String> table = new PagingTableListView<String>();
+    final CellTable<String> table = new CellTable<String>();
     adapter.addView(table);
 
     // Add a selection model.

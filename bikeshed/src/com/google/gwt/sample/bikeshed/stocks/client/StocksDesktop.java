@@ -20,7 +20,7 @@ import com.google.gwt.bikeshed.list.client.ListView;
 import com.google.gwt.bikeshed.list.shared.AsyncListViewAdapter;
 import com.google.gwt.bikeshed.list.shared.ListViewAdapter;
 import com.google.gwt.bikeshed.list.shared.Range;
-import com.google.gwt.bikeshed.tree.client.SideBySideTreeView;
+import com.google.gwt.bikeshed.tree.client.CellBrowser;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.CloseEvent;
@@ -79,7 +79,7 @@ public class StocksDesktop implements EntryPoint, Updater {
   @UiField
   StockQueryWidget queryWidget;
   @UiField
-  SideBySideTreeView transactionTree;
+  CellBrowser transactionTree;
 
   /**
    * The popup used to purchase stock.
@@ -339,8 +339,8 @@ public class StocksDesktop implements EntryPoint, Updater {
   }
 
   @UiFactory
-  SideBySideTreeView createTransactionTree() {
-    SideBySideTreeView treeView = new SideBySideTreeView(treeModel, null);
+  CellBrowser createTransactionTree() {
+    CellBrowser treeView = new CellBrowser(treeModel, null);
     treeView.setAnimationEnabled(true);
     return treeView;
   }

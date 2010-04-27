@@ -51,7 +51,6 @@ public class DatePickerCell extends Cell<Date> {
   private int offsetY = 10;
   private PopupPanel panel;
   private ValueUpdater<Date> valueUpdater;
-  private Object viewData;
 
   /**
    * Constructs a new DatePickerCell that uses the date/time format
@@ -93,7 +92,6 @@ public class DatePickerCell extends Cell<Date> {
   public Object onBrowserEvent(final Element parent, Date value, Object viewData,
       NativeEvent event, ValueUpdater<Date> valueUpdater) {
     if (event.getType().equals("click")) {
-      this.viewData = viewData;
       this.valueUpdater = valueUpdater;
 
       datePicker.setCurrentMonth(value);

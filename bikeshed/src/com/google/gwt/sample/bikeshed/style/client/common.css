@@ -71,39 +71,39 @@ body, table {
   background-color: rgb(56, 117, 215);
 }
 
-/** Applies to PagingTableListView **/
-.gwt-pagingTableListView-evenRow {
+/** Applies to CellTable **/
+.gwt-cellTable-evenRow {
   background-color: rgb(255, 255, 255);
 }
 
-.gwt-pagingTableListView-oddRow {
+.gwt-cellTable-oddRow {
   background-color: rgb(220, 220, 220);
 }
 
-.gwt-pagingTableListView-selectedRow {
+.gwt-cellTable-selectedRow {
   background-color: rgb(56, 117, 215);
 }
 
-/** Applies to StandardTreeView **/
-.gwt-tree-selectedItem {
+/** Applies to CellTree **/
+.gwt-cellTree-selectedItem {
   background-color: rgb(56, 117, 215);
 }
 
 
-/** Applies to SideBySideTreeView **/
-.gwt-SideBySideTreeView {
+/** Applies to CellBrowser **/
+.gwt-CellBrowser {
 }
 
-.gwt-sstree-column {
+.gwt-cellBrowser-column {
   border-right: 1px solid #aaa;
   border-left: 1px solid #aaa;
 }
 
-.gwt-sstree-firstColumn {
+.gwt-cellBrowser-firstColumn {
   border-left: 0px;
 }
 
-.gwt-sstree-openItem {
+.gwt-cellBrowser-openItem {
   background-color: rgb(200, 200, 255);
 }
 

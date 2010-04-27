@@ -15,7 +15,7 @@
  */
 package com.google.gwt.bikeshed.list.client;
 
-import com.google.gwt.bikeshed.list.client.impl.SimpleCellListImpl;
+import com.google.gwt.bikeshed.list.client.impl.CellListImpl;
 import com.google.gwt.bikeshed.list.shared.ProvidesKey;
 import com.google.gwt.bikeshed.list.shared.Range;
 import com.google.gwt.bikeshed.list.shared.SelectionModel;
@@ -34,25 +34,25 @@ import java.util.List;
 
 /**
  * A list view that supports paging and columns.
- * 
+ *
  * @param <T> the data type of each row
  */
-public class PagingTableListView<T> extends Widget implements PagingListView<T> {
+public class CellTable<T> extends Widget implements PagingListView<T> {
 
   /**
    * Style name applied to even rows.
    */
-  private static final String STYLENAME_EVEN = "gwt-pagingTableListView-evenRow";
+  private static final String STYLENAME_EVEN = "gwt-cellTable-evenRow";
 
   /**
    * Style name applied to odd rows.
    */
-  private static final String STYLENAME_ODD = "gwt-pagingTableListView-oddRow";
+  private static final String STYLENAME_ODD = "gwt-cellTable-oddRow";
 
   /**
    * The style name applied to selected rows.
    */
-  private static final String STYLENAME_SELECTED = "gwt-pagingTableListView-selectedRow";
+  private static final String STYLENAME_SELECTED = "gwt-cellTable-selectedRow";
 
   private static final int DEFAULT_SIZE = 10;
 
@@ -60,7 +60,7 @@ public class PagingTableListView<T> extends Widget implements PagingListView<T> 
   private List<Header<?>> footers = new ArrayList<Header<?>>();
   private List<Header<?>> headers = new ArrayList<Header<?>>();
   private TableRowElement hoveringRow;
-  private final SimpleCellListImpl<T> impl;
+  private final CellListImpl<T> impl;
 
   /**
    * If null, each T will be used as its own key.
@@ -81,16 +81,16 @@ public class PagingTableListView<T> extends Widget implements PagingListView<T> 
   /**
    * Constructs a table with a default page size of 10.
    */
-  public PagingTableListView() {
+  public CellTable() {
     this(DEFAULT_SIZE);
   }
 
   /**
    * Constructs a table with the given page size.
-   * 
+   *
    * @param pageSize the page size
    */
-  public PagingTableListView(final int pageSize) {
+  public CellTable(final int pageSize) {
     setElement(table = Document.get().createTableElement());
     table.setCellSpacing(0);
     thead = table.createTHead();
@@ -98,7 +98,7 @@ public class PagingTableListView<T> extends Widget implements PagingListView<T> 
     tfoot = table.createTFoot();
 
     // Create the implementation.
-    this.impl = new SimpleCellListImpl<T>(this, pageSize, tbody) {
+    this.impl = new CellListImpl<T>(this, pageSize, tbody) {
 
       private final TableElement tmpElem = Document.get().createTableElement();
 
@@ -131,7 +131,7 @@ public class PagingTableListView<T> extends Widget implements PagingListView<T> 
         int end = start + length;
         for (int i = start; i < end; i++) {
           T value = values.get(i - start);
-          boolean isSelected = selectionModel == null ? false
+          boolean isSelected = (selectionModel == null || value == null) ? false
               : selectionModel.isSelected(value);
           sb.append("<tr __idx='").append(i).append("'");
           sb.append(" class='");
@@ -143,7 +143,9 @@ public class PagingTableListView<T> extends Widget implements PagingListView<T> 
           for (Column<T, ?> column : columns) {
             // TODO(jlabanca): How do we sink ONFOCUS and ONBLUR?
             sb.append("<td>");
-            column.render(value, sb);
+            if (value != null) {
+              column.render(value, sb);
+            }
             sb.append("</td>");
           }
           sb.append("</tr>");
@@ -270,7 +272,7 @@ public class PagingTableListView<T> extends Widget implements PagingListView<T> 
 
   /**
    * Check whether or not mouse selection is enabled.
-   * 
+   *
    * @return true if enabled, false if disabled
    */
   public boolean isSelectionEnabled() {
@@ -359,9 +361,9 @@ public class PagingTableListView<T> extends Widget implements PagingListView<T> 
 
   /**
    * Set the number of rows per page and refresh the table.
-   * 
+   *
    * @param pageSize the page size
-   * 
+   *
    * @throw {@link IllegalArgumentException} if pageSize is negative or 0
    */
   public void setPageSize(int pageSize) {
@@ -371,7 +373,7 @@ public class PagingTableListView<T> extends Widget implements PagingListView<T> 
   /**
    * Set the starting index of the current visible page. The actual page start
    * will be clamped in the range [0, getSize() - 1].
-   * 
+   *
    * @param pageStart the index of the row that should appear at the start of
    *          the page
    */
@@ -382,7 +384,7 @@ public class PagingTableListView<T> extends Widget implements PagingListView<T> 
   /**
    * Sets the {@link ProvidesKey} instance that will be used to generate keys
    * for each record object as needed.
-   * 
+   *
    * @param providesKey an instance of {@link ProvidesKey} used to generate keys
    *          for record objects.
    */
@@ -393,7 +395,7 @@ public class PagingTableListView<T> extends Widget implements PagingListView<T> 
 
   /**
    * Enable mouse and keyboard selection.
-   * 
+   *
    * @param isSelectionEnabled true to enable, false to disable
    */
   public void setSelectionEnabled(boolean isSelectionEnabled) {

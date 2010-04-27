@@ -1,12 +1,12 @@
 /*
  * Copyright 2010 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -26,7 +26,7 @@ import com.google.gwt.bikeshed.list.shared.SingleSelectionModel;
 /**
  * A model of a tree.
  */
-public interface TreeViewModel {
+public interface CellTreeViewModel {
 
   /**
    * Default implementation of {@link NodeInfo}.
@@ -41,7 +41,7 @@ public interface TreeViewModel {
 
     /**
      * Construct a new {@link DefaultNodeInfo}.
-     * 
+     *
      * @param adapter the {@link AbstractListViewAdapter} that provides the
      *          child values
      * @param cell the {@link Cell} used to render the child values
@@ -53,7 +53,7 @@ public interface TreeViewModel {
 
     /**
      * Construct a new {@link DefaultNodeInfo}.
-     * 
+     *
      * @param adapter the {@link AbstractListViewAdapter} that provides the
      *          child values
      * @param cell the {@link Cell} used to render the child values update when
@@ -102,14 +102,14 @@ public interface TreeViewModel {
 
     /**
      * Get the {@link Cell} used to render the children of this node.
-     * 
+     *
      * @return the {@link Cell}
      */
     Cell<T> getCell();
 
     /**
      * Return the key provider for children of this node.
-     * 
+     *
      * @return the {@link ProvidesKey}
      */
     ProvidesKey<T> getProvidesKey();
@@ -119,14 +119,14 @@ public interface TreeViewModel {
      * unify selection across all items of the same type, or across the entire
      * tree, return the same instance of {@link SelectionModel} from all
      * {@link NodeInfo}.
-     * 
+     *
      * @return the {@link SelectionModel}
      */
     SelectionModel<? super T> getSelectionModel();
 
     /**
      * Get the value updater associated with the cell.
-     * 
+     *
      * @return the value updater
      */
     ValueUpdater<T> getValueUpdater();
@@ -134,7 +134,7 @@ public interface TreeViewModel {
     /**
      * Set the view that is listening to this {@link NodeInfo}. The
      * implementation should attach the view to the source of data.
-     * 
+     *
      * @param view the {@link ListView}
      */
     void setView(ListView<T> view);
@@ -150,7 +150,7 @@ public interface TreeViewModel {
    * Get the {@link NodeInfo} that will provide the {@link ProvidesKey},
    * {@link Cell}, and {@link ListView}s to retrieve and display the children of
    * the specified value.
-   * 
+   *
    * @param value the value in the parent node
    * @return the {@link NodeInfo}
    */
@@ -158,9 +158,9 @@ public interface TreeViewModel {
 
   /**
    * Check if the value is known to be a leaf node.
-   * 
+   *
    * @param value the value at the node
-   * 
+   *
    * @return true if the node is known to be a leaf node, false otherwise
    */
   boolean isLeaf(Object value);

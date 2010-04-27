@@ -36,6 +36,7 @@ public class ValidatableInputCell extends Cell<String> {
    * @param key the key identifying this item
    * @param value the new, invalid value
    */
+  @SuppressWarnings("unchecked") // cast to ValidatableField<String>
   public static void invalidate(HasViewData container, Object key, String value) {
     ValidatableField<String> vf = (ValidatableField<String>) container.getViewData(key);
     if (vf == null) {
@@ -62,6 +63,7 @@ public class ValidatableInputCell extends Cell<String> {
   }
 
   @Override
+  @SuppressWarnings("unchecked") // cast to ValidatableField<String>
   public Object onBrowserEvent(Element parent, String value,
       Object viewData, NativeEvent event,
       ValueUpdater<String> valueUpdater) {
@@ -85,6 +87,7 @@ public class ValidatableInputCell extends Cell<String> {
   }
 
   @Override
+  @SuppressWarnings("unchecked") // cast to ValidatableField<String>
   public void render(String value, Object viewData, StringBuilder sb) {
     ValidatableField<String> vf = (ValidatableField<String>) viewData;
 

@@ -20,7 +20,7 @@ import com.google.gwt.bikeshed.cells.client.EditTextCell;
 import com.google.gwt.bikeshed.cells.client.FieldUpdater;
 import com.google.gwt.bikeshed.cells.client.TextCell;
 import com.google.gwt.bikeshed.list.client.Column;
-import com.google.gwt.bikeshed.list.client.PagingTableListView;
+import com.google.gwt.bikeshed.list.client.CellTable;
 import com.google.gwt.bikeshed.list.shared.ListViewAdapter;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.sample.expenses.gwt.request.ReportRecord;
@@ -62,7 +62,7 @@ public class CustomizedShell extends Composite implements
   HTMLPanel westPanel;
 
   // TODO(jlabanca): Remove this when the app is done.
-  PagingTableListView<ReportRecord> listView;
+  CellTable<ReportRecord> table;
 
   // TODO(jlabanca): Remove this when the app is done.
   ListBox users = new ListBox();
@@ -97,14 +97,14 @@ public class CustomizedShell extends Composite implements
 
   public CustomizedShell() {
     adapter = new ListViewAdapter<ReportRecord>();
-    listView = createListView();
+    table = createTable();
     initWidget(uiBinder.createAndBindUi(this));
     splitLayout.setWidgetMinSize(northPanel, 150);
     splitLayout.setWidgetMinSize(westPanel, 150);
 
-    listView.addColumn(createdCol, "Created");
-    listView.addColumn(statusCol, "Status (tbd)");
-    listView.addColumn(purposeCol, "Purpose");
+    table.addColumn(createdCol, "Created");
+    table.addColumn(statusCol, "Status (tbd)");
+    table.addColumn(purposeCol, "Purpose");
 
     purposeCol.setFieldUpdater(new FieldUpdater<ReportRecord, String>() {
       public void update(int index, ReportRecord object, String value) {
@@ -132,11 +132,10 @@ public class CustomizedShell extends Composite implements
   }
 
   @UiFactory
-  PagingTableListView<ReportRecord> createListView() {
-    PagingTableListView<ReportRecord> table = new PagingTableListView<ReportRecord>(
-        10);
-    adapter.addView(table);
-    return table;
+  CellTable<ReportRecord> createTable() {
+    CellTable<ReportRecord> view = new CellTable<ReportRecord>(10);
+    adapter.addView(view);
+    return view;
   }
 
   private void refresh() {
