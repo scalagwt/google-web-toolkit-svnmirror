@@ -15,17 +15,17 @@
  */
 package com.google.gwt.bikeshed.list.client.impl;
 
-import com.google.gwt.bikeshed.cells.client.Cell;
-import com.google.gwt.bikeshed.list.client.ListView;
+import com.google.gwt.bikeshed.list.client.PagingListView;
 import com.google.gwt.bikeshed.list.client.ListView.Delegate;
+import com.google.gwt.bikeshed.list.client.PagingListView.Pager;
 import com.google.gwt.bikeshed.list.shared.Range;
 import com.google.gwt.bikeshed.list.shared.SelectionModel;
 import com.google.gwt.bikeshed.list.shared.AbstractListViewAdapter.DefaultRange;
 import com.google.gwt.bikeshed.list.shared.SelectionModel.SelectionChangeEvent;
 import com.google.gwt.bikeshed.list.shared.SelectionModel.SelectionChangeHandler;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.event.shared.HandlerRegistration;
 
 import java.util.ArrayList;
@@ -41,120 +41,228 @@ import java.util.Set;
  */
 public abstract class SimpleCellListImpl<T> {
 
-  private final Cell<T, Void> cell;
+  /**
+   * The Element that holds the rendered child items.
+   */
   private final Element childContainer;
+
+  /**
+   * The local cache of data in the view. The 0th index in the list corresponds
+   * to the data at pageStart.
+   */
   private final List<T> data = new ArrayList<T>();
-  private final Set<Object> selectedKeys = new HashSet<Object>();
+
+  private int dataSize;
   private Delegate<T> delegate;
-  private final Element emptyMessageElem;
-  private final int increment;
-  private final int initialMaxSize;
-  private final ListView<T> listView;
-  private int maxSize;
+  private final PagingListView<T> listView;
+  private Pager<T> pager;
+
+  /**
+   * The number of elements to show on the page.
+   */
+  private int pageSize;
+
+  /**
+   * The start index of the current page.
+   */
+  private int pageStart = 0;
+
+  /**
+   * Set to true when the page start changes, and we need to do a full refresh.
+   */
+  private boolean pageStartChanged;
+
+  /**
+   * The command used to refresh the page.
+   */
+  private final Scheduler.ScheduledCommand refreshCommand = new Scheduler.ScheduledCommand() {
+    public void execute() {
+      refreshScheduled = false;
+      delegate.onRangeChanged(listView);
+    }
+  };
+
+  /**
+   * Indicates whether or not a refresh is scheduled.
+   */
+  private boolean refreshScheduled;
+
   private HandlerRegistration selectionHandler;
+
+  /**
+   * A local cache of the currently selected rows. We cannot track selected keys
+   * instead because we might end up in an inconsistent state where we render a
+   * subset of a list with duplicate values, styling a value in the subset but
+   * not styling the duplicate value outside of the subset.
+   */
+  private final Set<Integer> selectedRows = new HashSet<Integer>();
+
   private SelectionModel<? super T> selectionModel;
-  private final Element showFewerElem;
-  private final Element showMoreElem;
-  private int size;
+
+  /**
+   * The temporary element use to convert HTML to DOM.
+   */
   private final Element tmpElem;
 
-  public SimpleCellListImpl(ListView<T> listView, Cell<T, Void> cell,
-      int maxSize, int increment, Element childContainer,
-      Element emptyMessageElem, Element showMoreElem, Element showFewerElem) {
-    this.cell = cell;
+  public SimpleCellListImpl(PagingListView<T> listView, int pageSize,
+      Element childContainer) {
     this.childContainer = childContainer;
-    this.emptyMessageElem = emptyMessageElem;
-    this.increment = increment;
-    this.initialMaxSize = maxSize;
     this.listView = listView;
-    this.maxSize = maxSize;
-    this.showFewerElem = showFewerElem;
-    this.showMoreElem = showMoreElem;
+    this.pageSize = pageSize;
     tmpElem = Document.get().createDivElement();
-
-    showOrHide(showMoreElem, false);
-    showOrHide(showFewerElem, false);
-    showOrHide(emptyMessageElem, false);
   }
 
+  /**
+   * Get the list of data within the current range. The data may not be
+   * complete.
+   * 
+   * @return the list of data
+   */
+  public List<T> getData() {
+    return data;
+  }
+
+  /**
+   * Get the overall data size.
+   * 
+   * @return the data size
+   */
+  public int getDataSize() {
+    return dataSize;
+  }
+
+  /**
+   * Get the number of items that are within the current page and data range.
+   * 
+   * @return the number of displayed items
+   */
+  public int getDisplayedItemCount() {
+    return Math.min(pageSize, dataSize - pageStart);
+  }
+
+  /**
+   * @return the page size
+   */
+  public int getPageSize() {
+    return pageSize;
+  }
+
+  /**
+   * @return the start index of the current page (inclusive)
+   */
+  public int getPageStart() {
+    return pageStart;
+  }
+
+  /**
+   * @return the range of data being displayed
+   */
   public Range getRange() {
-    return new DefaultRange(0, maxSize);
+    return new DefaultRange(pageStart, pageSize);
   }
 
   public SelectionModel<? super T> getSelectionModel() {
     return selectionModel;
   }
 
-  public Element getShowFewerElem() {
-    return showFewerElem;
-  }
-
-  public Element getShowMoreElem() {
-    return showMoreElem;
-  }
-
-  public T getValue(int i) {
-    return data.get(i);
+  /**
+   * Request data from the delegate.
+   */
+  public void refresh() {
+    if (delegate != null) {
+      if (!refreshScheduled) {
+        refreshScheduled = true;
+        Scheduler.get().scheduleFinally(refreshCommand);
+      }
+    }
   }
 
   /**
    * Set the data in the list.
    * 
    * @param values the new data
-   * @param start the start index
+   * @param valuesStart the start index of the values
    */
-  public void setData(List<T> values, int start) {
-    int oldSize = size;
-    int len = values.size();
-    int end = start + len;
+  public void setData(List<T> values, int valuesStart) {
+    int valuesLength = values.size();
+    int valuesEnd = valuesStart + valuesLength;
 
-    // The size must be at least as large as the data.
-    if (end > oldSize) {
-      size = end;
-      sizeChanged();
+    // Calculate the bounded start (inclusive) and end index (exclusive).
+    int pageEnd = pageStart + pageSize;
+    int boundedStart = Math.max(valuesStart, pageStart);
+    int boundedEnd = Math.min(valuesEnd, pageEnd);
+    if (boundedStart >= boundedEnd) {
+      // The data is out of range for the current page.
+      return;
+    }
+
+    // The data size must be at least as large as the data.
+    if (valuesEnd > dataSize) {
+      dataSize = valuesEnd;
+      onSizeChanged();
     }
 
     // Create placeholders up to the specified index.
-    while (data.size() < start) {
+    int lastCacheIndex = pageStart + data.size();
+    while (lastCacheIndex < boundedStart) {
       data.add(null);
+      lastCacheIndex++;
     }
 
     // Insert the new values into the data array.
-    for (int i = start; i < end; i++) {
-      T value = values.get(i - start);
-      if (i < data.size()) {
-        data.set(i, value);
+    for (int i = boundedStart; i < boundedEnd; i++) {
+      T value = values.get(i - valuesStart);
+      int dataIndex = i - pageStart;
+      if (dataIndex < data.size()) {
+        data.set(dataIndex, value);
       } else {
         data.add(value);
+      }
 
-        // Update our local cache of selected values. We only need to consider
-        // new values at this point. If any existing value changes its selection
-        // state, we'll find out from the selection model.
-        if (selectionModel != null && selectionModel.isSelected(value)) {
-          selectedKeys.add(getKey(value));
+      // Update our local cache of selected rows.
+      if (selectionModel != null) {
+        if (selectionModel.isSelected(value)) {
+          selectedRows.add(i);
+        } else {
+          selectedRows.remove(i);
         }
       }
     }
 
-    // Construct a run of element from start (inclusive) to start + len
-    // (exclusive)
+    // Construct a run of elements within the range of the data and the page.
+    boundedStart = pageStartChanged ? pageStart : boundedStart;
+    List<T> boundedValues = data.subList(boundedStart - pageStart, boundedEnd
+        - pageStart);
+    int boundedSize = boundedValues.size();
     StringBuilder sb = new StringBuilder();
-    emitHtml(sb, values, start, cell, selectionModel);
+    emitHtml(sb, boundedValues, boundedStart, selectionModel);
 
     // Replace the DOM elements with the new rendered cells.
-    if (oldSize == 0 || (start == 0 && len >= oldSize)) {
+    int childCount = childContainer.getChildCount();
+    if (boundedStart == pageStart
+        && (boundedSize >= childCount || boundedSize >= getDisplayedItemCount())) {
       childContainer.setInnerHTML(sb.toString());
     } else {
-      makeElements();
-      tmpElem.setInnerHTML(sb.toString());
-      Element toReplace = childContainer.getChild(start).cast();
-      for (int i = start; i < end; i++) {
-        // The child will be removed from tmpElem, so always use index 0.
-        Element nextSibling = toReplace.getNextSiblingElement();
-        childContainer.replaceChild(tmpElem.getChild(0), toReplace);
-        toReplace = nextSibling;
+      Element container = convertToElements(sb.toString());
+      Element toReplace = null;
+      int realStart = boundedStart - pageStart;
+      if (realStart < childCount) {
+        toReplace = childContainer.getChild(realStart).cast();
+      }
+      for (int i = boundedStart; i < boundedEnd; i++) {
+        if (toReplace == null) {
+          // The child will be removed from tmpElem, so always use index 0.
+          childContainer.appendChild(container.getChild(0));
+        } else {
+          Element nextSibling = toReplace.getNextSiblingElement();
+          childContainer.replaceChild(container.getChild(0), toReplace);
+          toReplace = nextSibling;
+        }
       }
     }
+
+    // Reset the pageStartChanged boolean.
+    pageStartChanged = false;
   }
 
   /**
@@ -163,19 +271,88 @@ public abstract class SimpleCellListImpl<T> {
    * @param size the overall size
    */
   public void setDataSize(int size) {
-    this.size = size;
-    int toRemove = data.size() - size;
-    for (int i = 0; i < toRemove; i++) {
-      removeLastItem();
+    if (size == this.dataSize) {
+      return;
     }
-    sizeChanged();
+    this.dataSize = size;
+    updateDataAndView();
+    onSizeChanged();
   }
 
   public void setDelegate(Delegate<T> delegate) {
     this.delegate = delegate;
   }
 
-  public void setSelectionModel(final SelectionModel<? super T> selectionModel) {
+  public void setPager(PagingListView.Pager<T> pager) {
+    this.pager = pager;
+  }
+
+  /**
+   * Set the number of items to show on each page.
+   * 
+   * @param pageSize the page size
+   */
+  public void setPageSize(int pageSize) {
+    if (pageSize == this.pageSize) {
+      return;
+    }
+    this.pageSize = pageSize;
+    updateDataAndView();
+    onSizeChanged();
+    refresh();
+  }
+
+  /**
+   * Set the start index of the range.
+   * 
+   * @param pageStart the start index
+   */
+  public void setPageStart(int pageStart) {
+    if (pageStart == this.pageStart) {
+      return;
+    } else if (pageStart > this.pageStart) {
+      if (data.size() > pageStart - this.pageStart) {
+        // Remove the data we no longer need.
+        for (int i = this.pageStart; i < pageStart; i++) {
+          data.remove(0);
+        }
+      } else {
+        // We have no overlapping data, so just clear it.
+        data.clear();
+      }
+    } else {
+      if ((data.size() > 0) && (this.pageStart - pageStart < pageSize)) {
+        // Insert null data at the beginning.
+        for (int i = pageStart; i < this.pageStart; i++) {
+          data.add(0, null);
+        }
+      } else {
+        // We have no overlapping data, so just clear it.
+        data.clear();
+      }
+    }
+
+    // Update the start index.
+    this.pageStart = pageStart;
+    this.pageStartChanged = true;
+    updateDataAndView();
+    onSizeChanged();
+
+    // Refresh the view with the data that is currently available.
+    setData(data, pageStart);
+
+    // Send a request for new data in the range.
+    refresh();
+  }
+
+  /**
+   * Set the {@link SelectionModel}, optionally triggering an update.
+   * 
+   * @param selectionModel the new {@link SelectionModel}
+   * @param updateSelection true to update selection
+   */
+  public void setSelectionModel(final SelectionModel<? super T> selectionModel,
+      boolean updateSelection) {
     // Remove the old selection model.
     if (selectionHandler != null) {
       selectionHandler.removeHandler();
@@ -187,59 +364,35 @@ public abstract class SimpleCellListImpl<T> {
     if (selectionModel != null) {
       selectionHandler = selectionModel.addSelectionChangeHandler(new SelectionChangeHandler() {
         public void onSelectionChange(SelectionChangeEvent event) {
-          // Determine if our selection states are stale.
-          boolean dependsOnSelection = cell.dependsOnSelection();
-          boolean refreshRequired = false;
-          Element cellElem = childContainer.getFirstChildElement();
-          for (T value : data) {
-            boolean selected = selectionModel.isSelected(value);
-            Object key = getKey(value);
-            if (selected != selectedKeys.contains(key)) {
-              refreshRequired = true;
-              if (selected) {
-                selectedKeys.add(key);
-              } else {
-                selectedKeys.remove(key);
-              }
-              if (!dependsOnSelection) {
-                // The cell doesn't depend on Selection, so we only need to
-                // update the style.
-                setSelected(cellElem, selected);
-              }
-            }
-            cellElem = cellElem.getNextSiblingElement();
-          }
-
-          // Refresh the entire list if needed.
-          if (refreshRequired && dependsOnSelection) {
-            setData(data, 0);
-          }
+          updateSelection();
         }
       });
     }
-  }
 
-  /**
-   * Show fewer items.
-   */
-  public void showFewer() {
-    this.maxSize = Math.max(initialMaxSize, maxSize - increment);
-    sizeChanged();
-    if (delegate != null) {
-      delegate.onRangeChanged(listView);
+    // Update the current selection state based on the new model.
+    if (updateSelection) {
+      updateSelection();
     }
   }
 
   /**
-   * Show more items.
+   * Convert the specified HTML into DOM elements and return the parent of the
+   * DOM elements.
+   * 
+   * @param html the HTML to convert
+   * @return the parent element
    */
-  public void showMore() {
-    this.maxSize += increment;
-    sizeChanged();
-    if (delegate != null) {
-      delegate.onRangeChanged(listView);
-    }
+  protected Element convertToElements(String html) {
+    tmpElem.setInnerHTML(html);
+    return tmpElem;
   }
+
+  /**
+   * Check whether or not the cells in the list depend on the selection state.
+   * 
+   * @return true if cells depend on selection, false if not
+   */
+  protected abstract boolean dependsOnSelection();
 
   /**
    * Construct the HTML that represents the list of items.
@@ -247,17 +400,25 @@ public abstract class SimpleCellListImpl<T> {
    * @param sb the {@link StringBuilder} to build into
    * @param values the values to render
    * @param start the start index
-   * @param cell the cell to use as a renderer
    * @param selectionModel the {@link SelectionModel}
    */
   protected abstract void emitHtml(StringBuilder sb, List<T> values, int start,
-      Cell<T, Void> cell, SelectionModel<? super T> selectionModel);
+      SelectionModel<? super T> selectionModel);
+
+  /**
+   * Called when pageStart, pageSize, or data size changes.
+   */
+  protected void onSizeChanged() {
+    // Inform the pager about a change in page start, page size, or data size
+    if (pager != null) {
+      pager.onRangeOrSizeChanged(listView);
+    }
+  }
 
   /**
    * Remove the last element from the list.
    */
   protected void removeLastItem() {
-    data.remove(data.size() - 1);
     childContainer.getLastChild().removeFromParent();
   }
 
@@ -271,70 +432,60 @@ public abstract class SimpleCellListImpl<T> {
   protected abstract void setSelected(Element elem, boolean selected);
 
   /**
-   * Get the key for a given item.
-   * 
-   * @param value the item
-   * @return the key, or null if there is no selection model
+   * Update the table based on the current selection.
    */
-  private Object getKey(T value) {
-    return selectionModel == null ? null
-        : selectionModel.getKeyProvider().getKey(value);
-  }
-
-  /**
-   * Create placeholder elements that will be replaced with data. This is used s
-   * when replacing a subset of the list.
-   */
-  private void makeElements() {
-    int childCount = childContainer.getChildCount();
-    int actualSize = Math.min(data.size(), maxSize);
-    if (actualSize > childCount) {
-      // Create new elements with a "loading..." message
-      StringBuilder sb = new StringBuilder();
-      int newElements = actualSize - childCount;
-      for (int i = 0; i < newElements; i++) {
-        // TODO(jlabanca): Make this I18N friendly.
-        sb.append("<div __idx='" + (childCount + i)
-            + "'><i>loading...</i></div>");
-      }
-
-      if (childCount == 0) {
-        childContainer.setInnerHTML(sb.toString());
-      } else {
-        tmpElem.setInnerHTML(sb.toString());
-        for (int i = 0; i < newElements; i++) {
-          childContainer.appendChild(tmpElem.getChild(0));
+  protected void updateSelection() {
+    // Determine if our selection states are stale.
+    boolean dependsOnSelection = dependsOnSelection();
+    boolean refreshRequired = false;
+    Element cellElem = childContainer.getFirstChildElement();
+    int row = pageStart;
+    for (T value : data) {
+      boolean selected = selectionModel == null ? false
+          : selectionModel.isSelected(value);
+      if (selected != selectedRows.contains(row)) {
+        refreshRequired = true;
+        if (selected) {
+          selectedRows.add(row);
+        } else {
+          selectedRows.remove(row);
+        }
+        if (!dependsOnSelection) {
+          // The cell doesn't depend on selection, so we only need to update the
+          // style.
+          setSelected(cellElem, selected);
         }
       }
-    } else if (actualSize < childCount) {
-      // Remove excess elements
-      while (actualSize < childCount) {
-        removeLastItem();
-        childCount--;
-      }
+      cellElem = cellElem.getNextSiblingElement();
+      row++;
+    }
+
+    // Refresh the entire list if needed.
+    if (refreshRequired && dependsOnSelection) {
+      setData(data, pageStart);
     }
   }
 
   /**
-   * Show or hide an element.
-   * 
-   * @param element the element
-   * @param show true to show, false to hide
+   * Ensure that the data and the view are in a consistent state.
    */
-  private void showOrHide(Element element, boolean show) {
-    if (show) {
-      element.getStyle().clearDisplay();
-    } else {
-      element.getStyle().setDisplay(Display.NONE);
+  private void updateDataAndView() {
+    // Update the data size.
+    int expectedLastIndex = Math.max(0,
+        Math.min(pageSize, dataSize - pageStart));
+    int lastIndex = data.size() - 1;
+    while (lastIndex >= expectedLastIndex) {
+      data.remove(lastIndex);
+      selectedRows.remove(lastIndex + pageStart);
+      lastIndex--;
     }
-  }
 
-  /**
-   * Called when the size of the list changes.
-   */
-  private void sizeChanged() {
-    showOrHide(showMoreElem, size > maxSize);
-    showOrHide(showFewerElem, maxSize > initialMaxSize);
-    showOrHide(emptyMessageElem, size == 0);
+    // Update the DOM.
+    int expectedChildCount = data.size();
+    int childCount = childContainer.getChildCount();
+    while (childCount > expectedChildCount) {
+      removeLastItem();
+      childCount--;
+    }
   }
 }

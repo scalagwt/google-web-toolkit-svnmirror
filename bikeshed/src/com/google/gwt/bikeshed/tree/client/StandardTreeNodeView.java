@@ -17,6 +17,7 @@ package com.google.gwt.bikeshed.tree.client;
 
 import com.google.gwt.bikeshed.cells.client.Cell;
 import com.google.gwt.bikeshed.list.client.ListView;
+import com.google.gwt.bikeshed.list.client.PagingListView;
 import com.google.gwt.bikeshed.list.client.impl.SimpleCellListImpl;
 import com.google.gwt.bikeshed.list.shared.ProvidesKey;
 import com.google.gwt.bikeshed.list.shared.Range;
@@ -41,6 +42,11 @@ import java.util.Map;
  * @param <T> the type that this view contains
  */
 class StandardTreeNodeView<T> extends UIObject {
+
+  /**
+   * The default number of children to show under a tree node.
+   */
+  private static final int DEFAULT_LIST_SIZE = 100;
 
   /**
    * The element used in place of an image when a node has no children.
@@ -81,7 +87,7 @@ class StandardTreeNodeView<T> extends UIObject {
    * 
    * @param <C> the child item type
    */
-  private static class NodeListView<C> implements ListView<C> {
+  private static class NodeListView<C> implements PagingListView<C> {
 
     private final SimpleCellListImpl<C> impl;
     private StandardTreeNodeView<?> nodeView;
@@ -91,12 +97,14 @@ class StandardTreeNodeView<T> extends UIObject {
         final StandardTreeNodeView<?> nodeView) {
       this.nodeView = nodeView;
 
-      impl = new SimpleCellListImpl<C>(this, nodeInfo.getCell(), 100, 50,
-          nodeView.ensureChildContainer(), nodeView.emptyMessageElem,
-          nodeView.showMoreElem, nodeView.showFewerElem) {
+      final Cell<C, Void> cell = nodeInfo.getCell();
+      impl = new SimpleCellListImpl<C>(this, DEFAULT_LIST_SIZE,
+          nodeView.ensureChildContainer()) {
 
         @Override
         public void setData(List<C> values, int start) {
+          showOrHide(nodeView.loadingMessageElem, false);
+
           // Ensure that we have a children array.
           if (nodeView.children == null) {
             nodeView.children = new ArrayList<StandardTreeNodeView<?>>();
@@ -188,8 +196,13 @@ class StandardTreeNodeView<T> extends UIObject {
         }
 
         @Override
+        protected boolean dependsOnSelection() {
+          return cell.dependsOnSelection();
+        }
+
+        @Override
         protected void emitHtml(StringBuilder sb, List<C> values, int start,
-            Cell<C, Void> cell, SelectionModel<? super C> selectionModel) {
+            SelectionModel<? super C> selectionModel) {
           ProvidesKey<C> providesKey = nodeInfo.getProvidesKey();
           TreeViewModel model = nodeView.tree.getTreeViewModel();
           int imageWidth = nodeView.tree.getImageWidth();
@@ -227,13 +240,37 @@ class StandardTreeNodeView<T> extends UIObject {
           setStyleName(getCellParent(elem), STYLENNAME_SELECTED, selected);
         }
       };
+
+      // Use a pager to update buttons.
+      impl.setPager(new Pager<C>() {
+        public void onRangeOrSizeChanged(PagingListView<C> listView) {
+          // Assumes a page start of 0.
+          showOrHide(nodeView.showMoreElem,
+              impl.getDataSize() > impl.getPageSize());
+          showOrHide(nodeView.showFewerElem,
+              impl.getPageSize() > DEFAULT_LIST_SIZE);
+          showOrHide(nodeView.emptyMessageElem, impl.getDataSize() == 0);
+        }
+      });
     }
 
     /**
      * Cleanup this node view.
      */
     public void cleanup() {
-      impl.setSelectionModel(null);
+      impl.setSelectionModel(null, false);
+    }
+
+    public int getDataSize() {
+      return impl.getDataSize();
+    }
+
+    public int getPageSize() {
+      return impl.getPageSize();
+    }
+
+    public int getPageStart() {
+      return impl.getPageStart();
     }
 
     public Range getRange() {
@@ -252,8 +289,20 @@ class StandardTreeNodeView<T> extends UIObject {
       impl.setDelegate(delegate);
     }
 
+    public void setPageSize(int pageSize) {
+      impl.setPageSize(pageSize);
+    }
+
+    public void setPageStart(int pageStart) {
+      impl.setPageStart(pageStart);
+    }
+
+    public void setPager(Pager<C> pager) {
+      impl.setPager(pager);
+    }
+
     public void setSelectionModel(final SelectionModel<? super C> selectionModel) {
-      impl.setSelectionModel(selectionModel);
+      impl.setSelectionModel(selectionModel, true);
     }
 
     /**
@@ -305,6 +354,11 @@ class StandardTreeNodeView<T> extends UIObject {
    * The list view used to display the nodes.
    */
   private NodeListView<?> listView;
+
+  /**
+   * The element used when the children are loading.
+   */
+  private Element loadingMessageElem;
 
   /**
    * The info about children of this node.
@@ -419,7 +473,8 @@ class StandardTreeNodeView<T> extends UIObject {
       // If we don't have any nodeInfo, we must be a leaf node.
       if (nodeInfo != null) {
         // Add a loading message.
-        ensureChildContainer().setInnerHTML(tree.getLoadingHtml());
+        ensureChildContainer();
+        showOrHide(loadingMessageElem, true);
         showOrHide(showFewerElem, false);
         showOrHide(showMoreElem, false);
         showOrHide(emptyMessageElem, false);
@@ -594,6 +649,12 @@ class StandardTreeNodeView<T> extends UIObject {
       contentContainer = Document.get().createDivElement();
       ensureAnimationFrame().appendChild(contentContainer);
 
+      loadingMessageElem = Document.get().createDivElement();
+      loadingMessageElem.setInnerHTML(tree.getLoadingHtml());
+      showOrHide(loadingMessageElem, false);
+      contentContainer.appendChild(loadingMessageElem);
+
+      // TODO(jlabanca): I18N no data string.
       emptyMessageElem = Document.get().createDivElement();
       emptyMessageElem.setInnerHTML("<i>no data</i>");
       showOrHide(emptyMessageElem, false);
@@ -621,10 +682,12 @@ class StandardTreeNodeView<T> extends UIObject {
   }
 
   void showFewer() {
-    listView.impl.showFewer();
+    int maxSize = Math.max(DEFAULT_LIST_SIZE, listView.impl.getPageSize()
+        - DEFAULT_LIST_SIZE);
+    listView.impl.setPageSize(maxSize);
   }
 
   void showMore() {
-    listView.impl.showMore();
+    listView.impl.setPageSize(listView.impl.getPageSize() + DEFAULT_LIST_SIZE);
   }
 }

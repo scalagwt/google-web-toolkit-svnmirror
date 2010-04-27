@@ -1,12 +1,12 @@
 /*
  * Copyright 2010 Google Inc.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -24,18 +24,15 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 
 /**
- * A pager for controlling a PagingListView that uses a series of buttons
- * for demo purposes.
- *
+ * A pager for controlling a PagingListView that uses a series of buttons for
+ * demo purposes.
+ * 
  * @param <T> the type of the PagingListView being controlled
  */
-public class SimplePager<T> extends Composite implements PagingListView.Pager<T>,
-    ClickHandler {
+public class SimplePager<T> extends Composite implements
+    PagingListView.Pager<T>, ClickHandler {
 
-  private int dataSize;
   private Button nextPageButton;
-  private int pageSize;
-  private int pageStart;
   private Button prevPageButton;
   private Button remove1Button;
   private Button remove5Button;
@@ -62,24 +59,24 @@ public class SimplePager<T> extends Composite implements PagingListView.Pager<T>
    * additional rows to be displayed.
    */
   public boolean canAddRows(int rows) {
-    return dataSize - pageSize >= rows;
+    return view.getDataSize() - view.getPageSize() >= rows;
   }
 
   /**
-   * Returns true if the page size is sufficient to allow a given number of
-   * rows to be removed.
+   * Returns true if the page size is sufficient to allow a given number of rows
+   * to be removed.
    */
   public boolean canRemoveRows(int rows) {
-    return pageSize > rows;
+    return view.getPageSize() > rows;
   }
 
   /**
    * Returns true if there is enough data such that a call to
-   * {@link #nextPage()} will succeed in moving the starting point of the
-   * table forward.
+   * {@link #nextPage()} will succeed in moving the starting point of the table
+   * forward.
    */
   public boolean hasNextPage() {
-    return pageStart + pageSize < dataSize;
+    return view.getPageStart() + view.getPageSize() < view.getDataSize();
   }
 
   /**
@@ -88,19 +85,19 @@ public class SimplePager<T> extends Composite implements PagingListView.Pager<T>
    * table backward.
    */
   public boolean hasPreviousPage() {
-    return pageStart > 0 && dataSize > 0;
+    return view.getPageStart() > 0 && view.getDataSize() > 0;
   }
 
   /**
    * Advance the starting row by 'pageSize' rows.
    */
   public void nextPage() {
-    view.setPageStart(pageStart + pageSize);
+    view.setPageStart(view.getPageStart() + view.getPageSize());
   }
 
   public void onClick(ClickEvent event) {
     String id = ((Button) event.getSource()).getElement().getId();
-    
+
     if ("NEXT".equals(id)) {
       nextPage();
     } else if ("PREV".equals(id)) {
@@ -114,9 +111,6 @@ public class SimplePager<T> extends Composite implements PagingListView.Pager<T>
   }
 
   public void onRangeOrSizeChanged(PagingListView<T> listView) {
-    this.pageSize = listView.getPageSize();
-    this.pageStart = listView.getPageStart();
-    this.dataSize = listView.getDataSize();
     updateButtons();
   }
 
@@ -124,11 +118,11 @@ public class SimplePager<T> extends Composite implements PagingListView.Pager<T>
    * Move the starting row back by 'pageSize' rows.
    */
   public void previousPage() {
-    view.setPageStart(pageStart - pageSize);
+    view.setPageStart(view.getPageStart() - view.getPageSize());
   }
 
   private void addRows(int rows) {
-    view.setPageSize(pageSize + rows);
+    view.setPageSize(view.getPageSize() + rows);
   }
 
   private Button makeButton(String label, String id) {
@@ -139,7 +133,7 @@ public class SimplePager<T> extends Composite implements PagingListView.Pager<T>
   }
 
   private void removeRows(int rows) {
-    view.setPageSize(pageSize - rows);
+    view.setPageSize(view.getPageSize() - rows);
   }
 
   private void updateButtons() {
@@ -148,9 +142,11 @@ public class SimplePager<T> extends Composite implements PagingListView.Pager<T>
     prevPageButton.setEnabled(hasPreviousPage());
     nextPageButton.setEnabled(hasNextPage());
 
-    int page = (pageStart / pageSize) + 1;
-    int numPages = (dataSize + pageSize - 1) / pageSize;
-    infoLabel.setText("Page " + page + " of " + numPages + ": Page Start = " + pageStart + ", Page Size = " +
-        pageSize + ", Data Size = " + dataSize);
+    int page = (view.getPageStart() / view.getPageSize()) + 1;
+    int numPages = (view.getDataSize() + view.getPageSize() - 1)
+        / view.getPageSize();
+    infoLabel.setText("Page " + page + " of " + numPages + ": Page Start = "
+        + view.getPageStart() + ", Page Size = " + view.getPageSize()
+        + ", Data Size = " + view.getDataSize());
   }
 }

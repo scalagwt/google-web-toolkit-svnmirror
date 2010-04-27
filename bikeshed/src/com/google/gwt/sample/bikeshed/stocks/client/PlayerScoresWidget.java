@@ -75,7 +75,7 @@ public class PlayerScoresWidget extends Composite {
 
   @UiFactory
   SimpleCellList<PlayerInfo> createListView() {
-    SimpleCellList<PlayerInfo> view = new SimpleCellList<PlayerInfo>(new PlayerInfoCell(), 1, 1);
+    SimpleCellList<PlayerInfo> view = new SimpleCellList<PlayerInfo>(new PlayerInfoCell());
     adapter.addView(view);
     return view;
   }

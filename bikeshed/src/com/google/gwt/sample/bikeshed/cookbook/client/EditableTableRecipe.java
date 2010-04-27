@@ -1,12 +1,12 @@
 /*
  * Copyright 2010 Google Inc.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -53,7 +53,8 @@ public class EditableTableRecipe extends Recipe {
   @Override
   protected Widget createWidget() {
     final ListViewAdapter<String> adapter = new ListViewAdapter<String>();
-    final PagingTableListView<String> table = new PagingTableListView<String>(10);
+    final PagingTableListView<String> table = new PagingTableListView<String>(
+        10);
     adapter.addView(table);
 
     for (int i = 0; i < 25; ++i) {
@@ -75,14 +76,17 @@ public class EditableTableRecipe extends Recipe {
       }
     });
 
-    FlowPanel plusMinusPanel = new FlowPanel();
-    Button addBtn = new Button("+", new ClickHandler() {
+    // Add a Pager to control the table.
+    SimplePager<String> pager = new SimplePager<String>(table);
+
+    // Add buttons to increase the size of the table.
+    Button addBtn = new Button("Add Data Row", new ClickHandler() {
       public void onClick(ClickEvent event) {
         List<String> list = adapter.getList();
         list.add("" + list.size());
       }
     });
-    Button removeBtn = new Button("-", new ClickHandler() {
+    Button removeBtn = new Button("Remove Data Row", new ClickHandler() {
       public void onClick(ClickEvent event) {
         int size = adapter.getList().size();
         if (size > 0) {
@@ -90,27 +94,12 @@ public class EditableTableRecipe extends Recipe {
         }
       }
     });
-    plusMinusPanel.add(addBtn);
-    plusMinusPanel.add(removeBtn);
-
-    FlowPanel nextPrevPanel = new FlowPanel();
-    Button prevBtn = new Button("<", new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        table.setPageStart(table.getPageStart() - table.getPageSize());
-      }
-    });
-    Button nextBtn = new Button(">", new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        table.setPageStart(table.getPageStart() + table.getPageSize());
-      }
-    });
-    nextPrevPanel.add(prevBtn);
-    nextPrevPanel.add(nextBtn);
 
     FlowPanel fp = new FlowPanel();
     fp.add(table);
-    fp.add(nextPrevPanel);
-    fp.add(plusMinusPanel);
+    fp.add(pager);
+    fp.add(addBtn);
+    fp.add(removeBtn);
     return fp;
   }
 }

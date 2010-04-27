@@ -1,12 +1,12 @@
 /*
  * Copyright 2010 Google Inc.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -15,8 +15,24 @@
  */
 package com.google.gwt.sample.bikeshed.cookbook.client;
 
-import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.bikeshed.cells.client.ButtonCell;
+import com.google.gwt.bikeshed.cells.client.CheckboxCell;
+import com.google.gwt.bikeshed.cells.client.FieldUpdater;
+import com.google.gwt.bikeshed.cells.client.TextCell;
+import com.google.gwt.bikeshed.list.client.Column;
+import com.google.gwt.bikeshed.list.client.IdentityColumn;
+import com.google.gwt.bikeshed.list.client.PagingTableListView;
+import com.google.gwt.bikeshed.list.shared.ListViewAdapter;
+import com.google.gwt.bikeshed.list.shared.MultiSelectionModel;
+import com.google.gwt.bikeshed.list.shared.SelectionModel;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
+
+import java.util.List;
 
 /**
  * Basic table recipe.
@@ -29,7 +45,93 @@ public class BasicTableRecipe extends Recipe {
 
   @Override
   protected Widget createWidget() {
-    // TODO
-    return new Label("Basic table demo...");
+    final ListViewAdapter<String> adapter = new ListViewAdapter<String>();
+    final PagingTableListView<String> table = new PagingTableListView<String>();
+    adapter.addView(table);
+
+    // Add a selection model.
+    final SelectionModel<String> selectionModel = new MultiSelectionModel<String>();
+    table.setSelectionModel(selectionModel);
+
+    // Add some data to the table
+    for (int i = 0; i < 25; ++i) {
+      adapter.getList().add("Item " + i);
+    }
+
+    // Checkbox column tied to selection.
+    Column<String, Boolean, Void> checkboxCol = new Column<String, Boolean, Void>(
+        new CheckboxCell()) {
+      @Override
+      public boolean dependsOnSelection() {
+        return true;
+      }
+
+      @Override
+      public Boolean getValue(String object) {
+        return selectionModel.isSelected(object);
+      }
+    };
+    table.addColumn(checkboxCol);
+    checkboxCol.setFieldUpdater(new FieldUpdater<String, Boolean, Void>() {
+      public void update(int index, String object, Boolean value, Void viewData) {
+        selectionModel.setSelected(object, value);
+      }
+    });
+
+    // String column.
+    table.addColumn(new IdentityColumn<String>(TextCell.getInstance()),
+        "TextCell");
+
+    // Button column tied to selection.
+    Column<String, String, Void> buttonCol = new Column<String, String, Void>(
+        ButtonCell.getInstance()) {
+
+      @Override
+      public boolean dependsOnSelection() {
+        return true;
+      }
+
+      @Override
+      public String getValue(String object) {
+        if (selectionModel.isSelected(object)) {
+          return "Unselect";
+        } else {
+          return "Select";
+        }
+      }
+    };
+    buttonCol.setFieldUpdater(new FieldUpdater<String, String, Void>() {
+      public void update(int index, String object, String value, Void viewData) {
+        selectionModel.setSelected(object, !selectionModel.isSelected(object));
+        Window.alert("You clicked: " + object);
+      }
+    });
+    table.addColumn(buttonCol, "ButtonCell");
+
+    // Add a Pager to control the table.
+    SimplePager<String> pager = new SimplePager<String>(table);
+
+    // Add buttons to increase the size of the table.
+    Button addBtn = new Button("Add Data Row", new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        List<String> list = adapter.getList();
+        list.add("item " + list.size());
+      }
+    });
+    Button removeBtn = new Button("Remove Data Row", new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        int size = adapter.getList().size();
+        if (size > 0) {
+          adapter.getList().remove(size - 1);
+        }
+      }
+    });
+
+    FlowPanel fp = new FlowPanel();
+    fp.add(table);
+    fp.add(pager);
+    fp.add(addBtn);
+    fp.add(removeBtn);
+    return fp;
   }
 }

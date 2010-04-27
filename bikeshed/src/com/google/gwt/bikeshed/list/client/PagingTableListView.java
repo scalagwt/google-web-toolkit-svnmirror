@@ -15,24 +15,17 @@
  */
 package com.google.gwt.bikeshed.list.client;
 
+import com.google.gwt.bikeshed.list.client.impl.SimpleCellListImpl;
 import com.google.gwt.bikeshed.list.shared.ProvidesKey;
 import com.google.gwt.bikeshed.list.shared.Range;
 import com.google.gwt.bikeshed.list.shared.SelectionModel;
-import com.google.gwt.bikeshed.list.shared.AbstractListViewAdapter.DefaultRange;
-import com.google.gwt.bikeshed.list.shared.SelectionModel.SelectionChangeEvent;
-import com.google.gwt.bikeshed.list.shared.SelectionModel.SelectionChangeHandler;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.EventTarget;
-import com.google.gwt.dom.client.Node;
-import com.google.gwt.dom.client.NodeList;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.TableCellElement;
 import com.google.gwt.dom.client.TableElement;
 import com.google.gwt.dom.client.TableRowElement;
 import com.google.gwt.dom.client.TableSectionElement;
-import com.google.gwt.dom.client.Style.Display;
-import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -46,34 +39,39 @@ import java.util.List;
  */
 public class PagingTableListView<T> extends Widget implements PagingListView<T> {
 
-  private class TableSelectionHandler implements SelectionChangeHandler {
-    public void onSelectionChange(SelectionChangeEvent event) {
-      refreshSelection();
-    }
-  }
+  /**
+   * Style name applied to even rows.
+   */
+  private static final String STYLENAME_EVEN = "gwt-pagingTableListView-evenRow";
+
+  /**
+   * Style name applied to odd rows.
+   */
+  private static final String STYLENAME_ODD = "gwt-pagingTableListView-oddRow";
+
+  /**
+   * The style name applied to selected rows.
+   */
+  private static final String STYLENAME_SELECTED = "gwt-pagingTableListView-selectedRow";
 
   private static final int DEFAULT_SIZE = 10;
 
   private List<Column<T, ?, ?>> columns = new ArrayList<Column<T, ?, ?>>();
-  private ArrayList<Boolean> dataSelected = new ArrayList<Boolean>();
-  private ArrayList<T> dataValues = new ArrayList<T>();
-  private Delegate<T> delegate;
   private List<Header<?>> footers = new ArrayList<Header<?>>();
   private List<Header<?>> headers = new ArrayList<Header<?>>();
   private TableRowElement hoveringRow;
-  private Pager<T> pager;
-  private int pageSize = -1;
-
-  private int pageStart = 0;
+  private final SimpleCellListImpl<T> impl;
 
   /**
    * If null, each T will be used as its own key.
    */
   private ProvidesKey<T> providesKey;
-  private HandlerRegistration selectionHandler;
 
-  private SelectionModel<? super T> selectionModel;
-  private int size = 0;
+  /**
+   * If true, enable selection via the mouse.
+   */
+  private boolean isSelectionEnabled;
+
   private TableElement table;
   private TableSectionElement tbody;
   private TableSectionElement tfoot;
@@ -98,6 +96,87 @@ public class PagingTableListView<T> extends Widget implements PagingListView<T> 
     thead = table.createTHead();
     table.appendChild(tbody = Document.get().createTBodyElement());
     tfoot = table.createTFoot();
+
+    // Create the implementation.
+    this.impl = new SimpleCellListImpl<T>(this, pageSize, tbody) {
+
+      private final TableElement tmpElem = Document.get().createTableElement();
+
+      @Override
+      public void setData(List<T> values, int start) {
+        createHeadersAndFooters();
+        super.setData(values, start);
+      }
+
+      @Override
+      protected Element convertToElements(String html) {
+        tmpElem.setInnerHTML(html);
+        return tmpElem.getTBodies().getItem(0);
+      }
+
+      @Override
+      protected boolean dependsOnSelection() {
+        for (Column<T, ?, ?> column : columns) {
+          if (column.dependsOnSelection()) {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      @Override
+      protected void emitHtml(StringBuilder sb, List<T> values, int start,
+          SelectionModel<? super T> selectionModel) {
+        int length = values.size();
+        int end = start + length;
+        for (int i = start; i < end; i++) {
+          T value = values.get(i - start);
+          boolean isSelected = selectionModel == null ? false
+              : selectionModel.isSelected(value);
+          sb.append("<tr __idx='").append(i).append("'");
+          sb.append(" class='");
+          sb.append(i % 2 == 0 ? STYLENAME_EVEN : STYLENAME_ODD);
+          if (isSelected) {
+            sb.append(" ").append(STYLENAME_SELECTED);
+          }
+          sb.append("'>");
+          for (Column<T, ?, ?> column : columns) {
+            // TODO(jlabanca): How do we sink ONFOCUS and ONBLUR?
+            sb.append("<td>");
+            column.render(value, sb);
+            sb.append("</td>");
+          }
+          sb.append("</tr>");
+        }
+      }
+
+      @Override
+      protected void setSelected(Element elem, boolean selected) {
+        setStyleName(elem, STYLENAME_SELECTED, selected);
+      }
+
+      @Override
+      protected void updateSelection() {
+        // Refresh headers.
+        for (Header<?> header : headers) {
+          if (header != null && header.dependsOnSelection()) {
+            createHeaders(headers, thead);
+            break;
+          }
+        }
+
+        // Refresh footers.
+        for (Header<?> footer : footers) {
+          if (footer != null && footer.dependsOnSelection()) {
+            createHeaders(footers, tfoot);
+            break;
+          }
+        }
+
+        // Update data.
+        super.updateSelection();
+      }
+    };
 
     setPageSize(pageSize);
 
@@ -127,10 +206,7 @@ public class PagingTableListView<T> extends Widget implements PagingListView<T> 
   public void addColumn(Column<T, ?, ?> col, Header<?> header, Header<?> footer) {
     headers.add(header);
     footers.add(footer);
-    createHeadersAndFooters(); // TODO: defer header recreation
     columns.add(col);
-    createRows();
-
     refresh();
   }
 
@@ -143,24 +219,19 @@ public class PagingTableListView<T> extends Widget implements PagingListView<T> 
 
   // TODO: remove(Column)
 
-  public int getBodyHeight() {
-    int height = getClientHeight(tbody);
-    return height;
-  }
-
   public int getDataSize() {
-    return size;
+    return impl.getDataSize();
   }
 
   public T getDisplayedItem(int indexOnPage) {
     if (indexOnPage < 0 || indexOnPage >= getNumDisplayedItems()) {
       throw new IndexOutOfBoundsException("indexOnPage = " + indexOnPage);
     }
-    return dataValues.get(indexOnPage);
+    return impl.getData().get(indexOnPage);
   }
 
   public List<T> getDisplayedItems() {
-    return new ArrayList<T>(dataValues);
+    return new ArrayList<T>(impl.getData());
   }
 
   public int getHeaderHeight() {
@@ -169,15 +240,15 @@ public class PagingTableListView<T> extends Widget implements PagingListView<T> 
   }
 
   public int getNumDisplayedItems() {
-    return Math.min(getPageSize(), size - pageStart);
+    return impl.getDisplayedItemCount();
   }
 
   public int getPageSize() {
-    return pageSize;
+    return impl.getPageSize();
   }
 
   public int getPageStart() {
-    return pageStart;
+    return impl.getPageStart();
   }
 
   public ProvidesKey<T> getProvidesKey() {
@@ -185,22 +256,37 @@ public class PagingTableListView<T> extends Widget implements PagingListView<T> 
   }
 
   public Range getRange() {
-    return new DefaultRange(pageStart, pageSize);
+    return impl.getRange();
   }
 
   public int getSize() {
-    return size;
+    return impl.getDataSize();
+  }
+
+  /**
+   * Check whether or not mouse selection is enabled.
+   * 
+   * @return true if enabled, false if disabled
+   */
+  public boolean isSelectionEnabled() {
+    return isSelectionEnabled;
   }
 
   @Override
   public void onBrowserEvent(Event event) {
-    EventTarget target = event.getEventTarget();
-    Node node = Node.as(target);
-    TableCellElement cell = findNearestParentCell(node);
+    super.onBrowserEvent(event);
+
+    // Find the cell where the event occurred.
+    EventTarget eventTarget = event.getEventTarget();
+    TableCellElement cell = null;
+    if (eventTarget != null && Element.is(eventTarget)) {
+      cell = findNearestParentCell(Element.as(eventTarget));
+    }
     if (cell == null) {
       return;
     }
 
+    // Forward the event to the associated header, footer, or column.
     TableRowElement tr = TableRowElement.as(cell.getParentElement());
     TableSectionElement section = TableSectionElement.as(tr.getParentElement());
     int col = cell.getCellIndex();
@@ -228,10 +314,18 @@ public class PagingTableListView<T> extends Widget implements PagingListView<T> 
         tr.removeClassName("hover");
       }
 
-      T value = dataValues.get(row);
+      T value = impl.getData().get(row);
       Column<T, ?, ?> column = columns.get(col);
+      column.onBrowserEvent(cell, impl.getPageStart() + row, value, event,
+          providesKey);
 
-      column.onBrowserEvent(cell, pageStart + row, value, event, providesKey);
+      // Update selection.
+      if (isSelectionEnabled && event.getTypeInt() == Event.ONMOUSEDOWN) {
+        SelectionModel<? super T> selectionModel = impl.getSelectionModel();
+        if (selectionModel != null) {
+          selectionModel.setSelected(value, true);
+        }
+      }
     }
   }
 
@@ -239,115 +333,23 @@ public class PagingTableListView<T> extends Widget implements PagingListView<T> 
    * Redraw the table, requesting data from the delegate.
    */
   public void refresh() {
-    if (delegate != null) {
-      delegate.onRangeChanged(this);
-    }
-    updateRowVisibility();
-  }
-
-  /**
-   * Refresh those portions of the table that depend on the state of the
-   * {@link SelectionModel}.
-   */
-  public void refreshSelection() {
-    // Refresh headers
-    Element th = thead.getFirstChild().getFirstChild().cast();
-    for (Header<?> header : headers) {
-      if (header.dependsOnSelection()) {
-        StringBuilder sb = new StringBuilder();
-        header.render(sb);
-        th.setInnerHTML(sb.toString());
-      }
-      th = th.getNextSibling().cast();
-    }
-
-    int numCols = columns.size();
-
-    // Refresh body
-    NodeList<TableRowElement> rows = tbody.getRows();
-    for (int indexOnPage = 0; indexOnPage < pageSize; indexOnPage++) {
-      TableRowElement row = rows.getItem(indexOnPage);
-
-      T q = dataValues.get(indexOnPage);
-      boolean qSelected = dataSelected.get(indexOnPage);
-      boolean selected = q != null && selectionModel.isSelected(q);
-
-      // Process the row only if the selection has changed
-      if (qSelected != selected) {
-        dataSelected.set(indexOnPage, selected);
-
-        if (selected) {
-          // item became selected
-          row.setClassName("pagingTableListView selected");
-        } else {
-          // item became unselected
-          row.setClassName("pagingTableListView "
-              + ((indexOnPage & 0x1) == 0 ? "evenRow" : "oddRow"));
-        }
-
-        for (int c = 0; c < numCols; ++c) {
-          Column<T, ?, ?> column = columns.get(c);
-          if (column.dependsOnSelection()) {
-            TableCellElement cell = row.getCells().getItem(c);
-            StringBuilder sb = new StringBuilder();
-            columns.get(c).render(q, sb);
-            cell.setInnerHTML(sb.toString());
-          }
-        }
-      }
-    }
+    impl.refresh();
   }
 
   public void setData(int start, int length, List<T> values) {
-    int numCols = columns.size();
-
-    NodeList<TableRowElement> rows = tbody.getRows();
-    for (int r = start; r < start + length; ++r) {
-      int indexOnPage = r - pageStart;
-      TableRowElement row = rows.getItem(indexOnPage);
-      T q = values.get(r - start);
-      if (selectionModel != null && selectionModel.isSelected(q)) {
-        row.setClassName("pagingTableListView selected");
-      } else {
-        row.setClassName("pagingTableListView "
-            + ((indexOnPage & 0x1) == 0 ? "evenRow" : "oddRow"));
-      }
-
-      dataValues.set(indexOnPage, q);
-      for (int c = 0; c < numCols; ++c) {
-        TableCellElement cell = row.getCells().getItem(c);
-        StringBuilder sb = new StringBuilder();
-        columns.get(c).render(q, sb);
-        // TODO(jlabanca): Render as one HTML string instead of embedding HTML
-        // in each cell.
-        cell.setInnerHTML(sb.toString());
-
-        // TODO: Really total hack! There's gotta be a better way...
-        Element child = cell.getFirstChildElement();
-        if (child != null) {
-          Event.sinkEvents(child, Event.ONFOCUS | Event.ONBLUR);
-        }
-      }
-    }
+    impl.setData(values, start);
   }
 
   public void setDataSize(int size, boolean isExact) {
-    this.size = size;
-    if (size == 0) {
-      pageStart = 0;
-    } else if (pageStart > size - 1) {
-      pageStart = size - 1;
-    }
-    refresh();
-    updatePager();
+    impl.setDataSize(size);
   }
 
   public void setDelegate(Delegate<T> delegate) {
-    this.delegate = delegate;
+    impl.setDelegate(delegate);
   }
 
   public void setPager(PagingListView.Pager<T> pager) {
-    this.pager = pager;
+    impl.setPager(pager);
   }
 
   /**
@@ -358,23 +360,7 @@ public class PagingTableListView<T> extends Widget implements PagingListView<T> 
    * @throw {@link IllegalArgumentException} if pageSize is negative or 0
    */
   public void setPageSize(int pageSize) {
-    if (pageSize <= 0) {
-      throw new IllegalArgumentException("pageSize = " + pageSize);
-    }
-    if (this.pageSize == pageSize) {
-      return;
-    }
-    this.pageSize = pageSize;
-
-    // If on last page and page size increases, move the page start upwards
-    if (pageStart + pageSize > size) {
-      pageStart = Math.max(0, size - pageSize);
-    }
-    updatePager();
-
-    // TODO - avoid requesting data if the page size has decreased
-    createRows();
-    refresh();
+    impl.setPageSize(pageSize);
   }
 
   /**
@@ -385,9 +371,7 @@ public class PagingTableListView<T> extends Widget implements PagingListView<T> 
    *          the page
    */
   public void setPageStart(int pageStart) {
-    this.pageStart = Math.max(Math.min(pageStart, size - 1), 0);
-    updatePager();
-    refresh();
+    impl.setPageStart(pageStart);
   }
 
   /**
@@ -402,34 +386,17 @@ public class PagingTableListView<T> extends Widget implements PagingListView<T> 
     this.providesKey = providesKey;
   }
 
+  /**
+   * Enable mouse and keyboard selection.
+   * 
+   * @param isSelectionEnabled true to enable, false to disable
+   */
+  public void setSelectionEnabled(boolean isSelectionEnabled) {
+    this.isSelectionEnabled = isSelectionEnabled;
+  }
+
   public void setSelectionModel(SelectionModel<? super T> selectionModel) {
-    if (selectionHandler != null) {
-      selectionHandler.removeHandler();
-      selectionHandler = null;
-    }
-    this.selectionModel = selectionModel;
-    if (selectionModel != null && isAttached()) {
-      selectionHandler = selectionModel.addSelectionChangeHandler(new TableSelectionHandler());
-    }
-
-    refreshSelection();
-  }
-
-  @Override
-  protected void onLoad() {
-    // Attach a selection handler.
-    if (selectionModel != null) {
-      selectionHandler = selectionModel.addSelectionChangeHandler(new TableSelectionHandler());
-    }
-  }
-
-  @Override
-  protected void onUnload() {
-    // Detach the selection handler.
-    if (selectionHandler != null) {
-      selectionHandler.removeHandler();
-      selectionHandler = null;
-    }
+    impl.setSelectionModel(selectionModel, true);
   }
 
   private void createHeaders(List<Header<?>> headers,
@@ -453,48 +420,15 @@ public class PagingTableListView<T> extends Widget implements PagingListView<T> 
     createHeaders(footers, tfoot);
   }
 
-  private void createRows() {
-    int numCols = columns.size();
-
-    // TODO - only delete as needed
-    int numRows = tbody.getRows().getLength();
-    while (numRows-- > 0) {
-      tbody.deleteRow(0);
-    }
-
-    for (int r = 0; r < pageSize; ++r) {
-      TableRowElement row = tbody.insertRow(0);
-      row.setClassName("pagingTableListView "
-          + ((r & 0x1) == 0 ? "evenRow" : "oddRow"));
-
-      // TODO: use cloneNode() to make this even faster.
-      for (int c = 0; c < numCols; ++c) {
-        row.insertCell(c);
+  private TableCellElement findNearestParentCell(Element elem) {
+    while ((elem != null) && (elem != table)) {
+      // TODO: We need is() implementations in all Element subclasses.
+      // This would allow us to use TableCellElement.is() -- much cleaner.
+      String tagName = elem.getTagName();
+      if ("td".equalsIgnoreCase(tagName) || "th".equalsIgnoreCase(tagName)) {
+        return elem.cast();
       }
-    }
-
-    // Make room for the data cache
-    dataValues.ensureCapacity(pageSize);
-    dataSelected.ensureCapacity(pageSize);
-    while (dataValues.size() < pageSize) {
-      dataValues.add(null);
-      dataSelected.add(Boolean.FALSE);
-    }
-  }
-
-  private TableCellElement findNearestParentCell(Node node) {
-    while ((node != null) && (node != table)) {
-      if (Element.is(node)) {
-        Element elem = Element.as(node);
-
-        // TODO: We need is() implementations in all Element subclasses.
-        // This would allow us to use TableCellElement.is() -- much cleaner.
-        String tagName = elem.getTagName();
-        if ("td".equalsIgnoreCase(tagName) || "th".equalsIgnoreCase(tagName)) {
-          return elem.cast();
-        }
-      }
-      node = node.getParentNode();
+      elem = elem.getParentElement();
     }
     return null;
   }
@@ -502,24 +436,4 @@ public class PagingTableListView<T> extends Widget implements PagingListView<T> 
   private native int getClientHeight(Element element) /*-{
     return element.clientHeight;
   }-*/;
-
-  private void updatePager() {
-    // Inform the pager about a change in page start, page size, or data size
-    if (pager != null) {
-      pager.onRangeOrSizeChanged(this);
-    }
-  }
-  
-  private void updateRowVisibility() {
-    int visible = Math.min(pageSize, size - pageStart);
-
-    for (int r = 0; r < pageSize; ++r) {
-      Style rowStyle = tbody.getRows().getItem(r).getStyle();
-      if (r < visible) {
-        rowStyle.clearDisplay();
-      } else {
-        rowStyle.setDisplay(Display.NONE);
-      }
-    }
-  }
 }

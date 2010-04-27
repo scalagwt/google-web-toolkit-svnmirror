@@ -23,6 +23,7 @@ import com.google.gwt.bikeshed.list.shared.SelectionModel;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -33,61 +34,67 @@ import java.util.List;
  * 
  * @param <T> the data type of list items
  */
-public class SimpleCellList<T> extends Widget implements ListView<T> {
+public class SimpleCellList<T> extends Widget implements PagingListView<T> {
+
+  /**
+   * The default page size.
+   */
+  private static final int DEFAULT_PAGE_SIZE = 25;
 
   /**
    * Style name applied to even rows.
-   * TODO(jlabanca): These style names only apply to SideBySideTreeView.
    */
-  private static final String STYLENNAME_EVEN = "gwt-sstree-evenRow";
+  private static final String STYLENAME_EVEN = "gwt-cellList-evenRow";
 
   /**
    * Style name applied to odd rows.
-   * TODO(jlabanca): These style names only apply to SideBySideTreeView.
    */
-  private static final String STYLENNAME_ODD = "gwt-sstree-oddRow";
+  private static final String STYLENAME_ODD = "gwt-cellList-oddRow";
 
   /**
    * Style name applied to selected rows.
-   * TODO(jlabanca): These style names only apply to SideBySideTreeView.
    */
-  private static final String STYLENNAME_SELECTED = "gwt-sstree-selectedItem";
+  private static final String STYLENAME_SELECTED = "gwt-cellList-selectedItem";
 
   private final Cell<T, Void> cell;
+  private final Element emptyMessageElem;
   private final SimpleCellListImpl<T> impl;
   private ValueUpdater<T, Void> valueUpdater;
 
-  public SimpleCellList(Cell<T, Void> cell, int maxSize, int increment) {
+  /**
+   * Construct a new {@link SimpleCellList}.
+   * 
+   * @param cell the cell used to render each item
+   */
+  // TODO(jlabanca): Should cell support ViewData?
+  public SimpleCellList(final Cell<T, Void> cell) {
     this.cell = cell;
 
     // Create the DOM hierarchy.
     Element childContainer = Document.get().createDivElement();
 
-    Element showMoreElem = Document.get().createPushButtonElement();
-    showMoreElem.setInnerText("Show more");
-
-    Element showFewerElem = Document.get().createPushButtonElement();
-    showFewerElem.setInnerText("Show fewer");
-
-    Element emptyMessageElem = Document.get().createDivElement();
+    emptyMessageElem = Document.get().createDivElement();
     emptyMessageElem.setInnerHTML("<i>no data</i>");
+    showOrHide(emptyMessageElem, false);
 
     // TODO: find some way for cells to communicate what they're interested in.
     DivElement outerDiv = Document.get().createDivElement();
     outerDiv.appendChild(childContainer);
     outerDiv.appendChild(emptyMessageElem);
-    outerDiv.appendChild(showFewerElem);
-    outerDiv.appendChild(showMoreElem);
     setElement(outerDiv);
     sinkEvents(Event.ONCLICK | Event.ONCHANGE | Event.MOUSEEVENTS);
 
     // Create the implementation.
-    impl = new SimpleCellListImpl<T>(this, cell, maxSize, increment,
-        childContainer, emptyMessageElem, showMoreElem, showFewerElem) {
+    impl = new SimpleCellListImpl<T>(this, DEFAULT_PAGE_SIZE, childContainer) {
+
+      @Override
+      protected boolean dependsOnSelection() {
+        return cell.dependsOnSelection();
+      }
 
       @Override
       protected void emitHtml(StringBuilder sb, List<T> values, int start,
-          Cell<T, Void> cell, SelectionModel<? super T> selectionModel) {
+          SelectionModel<? super T> selectionModel) {
         int length = values.size();
         int end = start + length;
         for (int i = start; i < end; i++) {
@@ -96,9 +103,9 @@ public class SimpleCellList<T> extends Widget implements ListView<T> {
               : selectionModel.isSelected(value);
           sb.append("<div __idx='").append(i).append("'");
           sb.append(" class='");
-          sb.append(i % 2 == 0 ? STYLENNAME_EVEN : STYLENNAME_ODD);
+          sb.append(i % 2 == 0 ? STYLENAME_EVEN : STYLENAME_ODD);
           if (isSelected) {
-            sb.append(" ").append(STYLENNAME_SELECTED);
+            sb.append(" ").append(STYLENAME_SELECTED);
           }
           sb.append("'>");
           cell.render(value, null, sb);
@@ -107,10 +114,28 @@ public class SimpleCellList<T> extends Widget implements ListView<T> {
       }
 
       @Override
+      protected void onSizeChanged() {
+        super.onSizeChanged();
+        showOrHide(emptyMessageElem, impl.getDataSize() == 0);
+      }
+
+      @Override
       protected void setSelected(Element elem, boolean selected) {
-        setStyleName(elem, STYLENNAME_SELECTED, selected);
+        setStyleName(elem, STYLENAME_SELECTED, selected);
       }
     };
+  }
+
+  public int getDataSize() {
+    return impl.getDataSize();
+  }
+
+  public int getPageSize() {
+    return impl.getPageSize();
+  }
+
+  public int getPageStart() {
+    return impl.getPageStart();
   }
 
   public Range getRange() {
@@ -121,22 +146,8 @@ public class SimpleCellList<T> extends Widget implements ListView<T> {
   public void onBrowserEvent(Event event) {
     super.onBrowserEvent(event);
 
-    Element target = event.getEventTarget().cast();
-    int type = event.getTypeInt();
-    if (type == Event.ONCLICK) {
-      // Open the node when the open image is clicked.
-      Element showFewerElem = impl.getShowFewerElem();
-      Element showMoreElem = impl.getShowMoreElem();
-      if (showFewerElem != null && showFewerElem.isOrHasChild(target)) {
-        impl.showFewer();
-        return;
-      } else if (showMoreElem != null && showMoreElem.isOrHasChild(target)) {
-        impl.showMore();
-        return;
-      }
-    }
-
     // Forward the event to the cell.
+    Element target = event.getEventTarget().cast();
     String idxString = "";
     while ((target != null)
         && ((idxString = target.getAttribute("__idx")).length() == 0)) {
@@ -144,9 +155,9 @@ public class SimpleCellList<T> extends Widget implements ListView<T> {
     }
     if (idxString.length() > 0) {
       int idx = Integer.parseInt(idxString);
-      T value = impl.getValue(idx);
+      T value = impl.getData().get(idx - impl.getPageStart());
       cell.onBrowserEvent(target, value, null, event, valueUpdater);
-      if (!cell.consumesEvents() && type == Event.ONMOUSEDOWN) {
+      if (event.getTypeInt() == Event.ONMOUSEDOWN && !cell.consumesEvents()) {
         SelectionModel<? super T> selectionModel = impl.getSelectionModel();
         if (selectionModel != null) {
           selectionModel.setSelected(value, true);
@@ -167,8 +178,20 @@ public class SimpleCellList<T> extends Widget implements ListView<T> {
     impl.setDelegate(delegate);
   }
 
+  public void setPageSize(int pageSize) {
+    impl.setPageSize(pageSize);
+  }
+
+  public void setPageStart(int pageStart) {
+    impl.setPageStart(pageStart);
+  }
+
+  public void setPager(Pager<T> pager) {
+    impl.setPager(pager);
+  }
+
   public void setSelectionModel(final SelectionModel<? super T> selectionModel) {
-    impl.setSelectionModel(selectionModel);
+    impl.setSelectionModel(selectionModel, true);
   }
 
   /**
@@ -178,5 +201,19 @@ public class SimpleCellList<T> extends Widget implements ListView<T> {
    */
   public void setValueUpdater(ValueUpdater<T, Void> valueUpdater) {
     this.valueUpdater = valueUpdater;
+  }
+
+  /**
+   * Show or hide an element.
+   * 
+   * @param element the element
+   * @param show true to show, false to hide
+   */
+  private void showOrHide(Element element, boolean show) {
+    if (show) {
+      element.getStyle().clearDisplay();
+    } else {
+      element.getStyle().setDisplay(Display.NONE);
+    }
   }
 }

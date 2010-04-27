@@ -38,7 +38,7 @@ import java.util.Map;
 // TODO - when can we get rid of a view data object?
 // TODO - should viewData implement some interface? (e.g., with commit/rollback/dispose)
 // TODO - have a ViewDataColumn superclass / SimpleColumn subclass
-public abstract class Column<T, C, V> {
+public abstract class Column<T, C, V> implements HasCell<T, C, V> {
 
   protected final Cell<C, V> cell;
 

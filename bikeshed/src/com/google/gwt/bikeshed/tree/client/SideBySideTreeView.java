@@ -19,7 +19,10 @@ import com.google.gwt.animation.client.Animation;
 import com.google.gwt.bikeshed.cells.client.Cell;
 import com.google.gwt.bikeshed.cells.client.ValueUpdater;
 import com.google.gwt.bikeshed.list.client.ListView;
+import com.google.gwt.bikeshed.list.client.PageSizePager;
+import com.google.gwt.bikeshed.list.client.PagingListView;
 import com.google.gwt.bikeshed.list.client.SimpleCellList;
+import com.google.gwt.bikeshed.list.client.PagingListView.Pager;
 import com.google.gwt.bikeshed.list.shared.ProvidesKey;
 import com.google.gwt.bikeshed.list.shared.Range;
 import com.google.gwt.bikeshed.list.shared.SelectionModel;
@@ -34,6 +37,7 @@ import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasAnimation;
 import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
@@ -59,6 +63,11 @@ public class SideBySideTreeView extends TreeView implements ProvidesResize,
    * The style name assigned to each column.
    */
   private static final String STYLENAME_COLUMN = "gwt-sstree-column";
+
+  /**
+   * The style name assigned to the first column.
+   */
+  private static final String STYLENAME_FIRST_COLUMN = "gwt-sstree-firstColumn";
 
   /**
    * The style name assigned to each column.
@@ -474,18 +483,30 @@ public class SideBySideTreeView extends TreeView implements ProvidesResize,
 
   /**
    * Create a {@link ListView} that will display items. The {@link ListView}
-   * must extend {@link com.google.gwt.user.client.ui.Widget}.
+   * must extend {@link Widget}.
    * 
    * @param <C> the item type in the list view
    * @param nodeInfo the node info with child data
    * @param cell the cell to use in the list view
    * @return the {@link ListView}
    */
-  protected <C> ListView<C> createListView(NodeInfo<C> nodeInfo,
+  protected <C> PagingListView<C> createListView(NodeInfo<C> nodeInfo,
       Cell<C, Void> cell) {
-    SimpleCellList<C> listView = new SimpleCellList<C>(cell, 100, 100);
+    SimpleCellList<C> listView = new SimpleCellList<C>(cell);
     listView.setValueUpdater(nodeInfo.getValueUpdater());
     return listView;
+  }
+
+  /**
+   * Create a Pager to control the list view. The {@link ListView} must extend
+   * {@link Widget}.
+   * 
+   * @param <C> the item type in the list view
+   * @param listView the list view to add paging too
+   * @return the {@link Pager}
+   */
+  protected <C> Pager<C> createPager(PagingListView<C> listView) {
+    return new PageSizePager<C>(listView, listView.getPageSize());
   }
 
   /**
@@ -509,12 +530,28 @@ public class SideBySideTreeView extends TreeView implements ProvidesResize,
    * @param nodeInfo the info about the node
    */
   private <C> void appendTreeNode(final NodeInfo<C> nodeInfo) {
-    // Create the list view and its scrollable container.
+    // Create the list view.
     final int level = treeNodes.size();
     CellDecorator<C> cell = new CellDecorator<C>(nodeInfo, level);
-    final ListView<C> listView = createListView(nodeInfo, cell);
-    ScrollPanel scrollable = new ScrollPanel((Widget) listView);
+    final PagingListView<C> listView = createListView(nodeInfo, cell);
+    assert (listView instanceof Widget) : "createListView() must return a widget";
+
+    // Create a pager and wrap the components in a scrollable container.
+    ScrollPanel scrollable = new ScrollPanel();
+    final Pager<C> pager = createPager(listView);
+    if (pager != null) {
+      assert (pager instanceof Widget) : "createPager() must return a widget";
+      FlowPanel flowPanel = new FlowPanel();
+      flowPanel.add((Widget) listView);
+      flowPanel.add((Widget) pager);
+      scrollable.setWidget(flowPanel);
+    } else {
+      scrollable.setWidget((Widget) listView);
+    }
     scrollable.setStyleName(STYLENAME_COLUMN);
+    if (level == 0) {
+      scrollable.addStyleName(STYLENAME_FIRST_COLUMN);
+    }
 
     // Create a delegate list view so we can trap data changes.
     ListView<C> listViewDelegate = new ListView<C>() {
