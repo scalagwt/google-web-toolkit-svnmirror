@@ -23,14 +23,16 @@ import com.google.gwt.bikeshed.list.client.Column;
 import com.google.gwt.bikeshed.list.client.PagingTableListView;
 import com.google.gwt.bikeshed.list.shared.ListViewAdapter;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.sample.expenses.gwt.request.ReportRecord;
 import com.google.gwt.sample.expenses.gwt.request.ReportRecordChanged;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiFactory;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.TakesValueList;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -52,9 +54,18 @@ public class CustomizedShell extends Composite implements
 
   private static ShellUiBinder uiBinder = GWT.create(ShellUiBinder.class);
 
-  @UiField Element error;
-  @UiField PagingTableListView<ReportRecord> listView;
-  @UiField ListBox users;
+  @UiField
+  DockLayoutPanel northPanel;
+  @UiField
+  SplitLayoutPanel splitLayout;
+  @UiField
+  HTMLPanel westPanel;
+
+  // TODO(jlabanca): Remove this when the app is done.
+  PagingTableListView<ReportRecord> listView;
+
+  // TODO(jlabanca): Remove this when the app is done.
+  ListBox users = new ListBox();
 
   private Column<ReportRecord, Date> createdCol = new Column<ReportRecord, Date>(
       new DateCell()) {
@@ -86,7 +97,10 @@ public class CustomizedShell extends Composite implements
 
   public CustomizedShell() {
     adapter = new ListViewAdapter<ReportRecord>();
+    listView = createListView();
     initWidget(uiBinder.createAndBindUi(this));
+    splitLayout.setWidgetMinSize(northPanel, 150);
+    splitLayout.setWidgetMinSize(westPanel, 150);
 
     listView.addColumn(createdCol, "Created");
     listView.addColumn(statusCol, "Status (tbd)");
@@ -119,7 +133,8 @@ public class CustomizedShell extends Composite implements
 
   @UiFactory
   PagingTableListView<ReportRecord> createListView() {
-    PagingTableListView<ReportRecord> table = new PagingTableListView<ReportRecord>(10);
+    PagingTableListView<ReportRecord> table = new PagingTableListView<ReportRecord>(
+        10);
     adapter.addView(table);
     return table;
   }

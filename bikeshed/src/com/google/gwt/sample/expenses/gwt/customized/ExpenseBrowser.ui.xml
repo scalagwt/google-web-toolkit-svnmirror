@@ -1,0 +1,19 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder
+  xmlns:ui="urn:ui:com.google.gwt.uibinder"
+  xmlns:g="urn:import:com.google.gwt.user.client.ui"
+  xmlns:l='urn:import:com.google.gwt.bikeshed.list.client'
+  xmlns:t='urn:import:com.google.gwt.bikeshed.tree.client'>
+
+  <ui:style>
+    .cellBrowser {
+      height: 100%;
+      width: 100%;
+    }
+  </ui:style>
+
+  <t:SideBySideTreeView
+    styleName='{style.cellBrowser}'
+    ui:field='cellBrowser'></t:SideBySideTreeView>
+
+</ui:UiBinder> 

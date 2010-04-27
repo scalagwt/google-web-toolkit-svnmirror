@@ -103,6 +103,10 @@ body, table {
   border-left: 0px;
 }
 
+.gwt-sstree-openItem {
+  background-color: rgb(200, 200, 255);
+}
+
 .gwt-cellList-evenRow {
   background-color: rgb(255, 255, 255);
 }
