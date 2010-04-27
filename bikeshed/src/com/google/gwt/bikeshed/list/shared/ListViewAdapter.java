@@ -1,12 +1,12 @@
 /*
  * Copyright 2010 Google Inc.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -29,7 +29,7 @@ import java.util.NoSuchElementException;
 /**
  * A concrete subclass of {@link AbstractListViewAdapter} that is backed by an
  * in-memory list.
- *
+ * 
  * @param <T> the data type of the list
  */
 public class ListViewAdapter<T> extends AbstractListViewAdapter<T> {
@@ -52,7 +52,8 @@ public class ListViewAdapter<T> extends AbstractListViewAdapter<T> {
       private WrappedListIterator(int start) {
         int size = ListWrapper.this.size();
         if (start < 0 || start > size) {
-          throw new IndexOutOfBoundsException("Index: " + start + ", Size: " + size);
+          throw new IndexOutOfBoundsException("Index: " + start + ", Size: "
+              + size);
         }
         i = start;
       }
@@ -342,7 +343,7 @@ public class ListViewAdapter<T> extends AbstractListViewAdapter<T> {
 
     /**
      * Flush the data to the model and return the boolean.
-     *
+     * 
      * @param toRet the boolean to return
      */
     private boolean flush(boolean toRet) {
@@ -375,7 +376,7 @@ public class ListViewAdapter<T> extends AbstractListViewAdapter<T> {
   /**
    * Get the list that backs this model. Changes to the list will be reflected
    * in the model.
-   *
+   * 
    * @return the list
    */
   public List<T> getList() {
@@ -383,8 +384,15 @@ public class ListViewAdapter<T> extends AbstractListViewAdapter<T> {
   }
 
   /**
+   * Refresh all of the views listening to this adapter.
+   */
+  public void refresh() {
+    updateViewData(0, listWrapper.size(), listWrapper);
+  }
+
+  /**
    * Replaces this model's list.
-   *
+   * 
    * @param wrappee the model's new list
    */
   public void setList(List<T> wrappee) {

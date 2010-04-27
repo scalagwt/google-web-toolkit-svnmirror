@@ -24,9 +24,11 @@ import com.google.gwt.bikeshed.list.client.Column;
 import com.google.gwt.bikeshed.list.client.Header;
 import com.google.gwt.bikeshed.list.shared.ListViewAdapter;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.sample.expenses.gwt.request.ReportRecord;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiFactory;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
@@ -99,6 +101,11 @@ public class ExpenseDetails extends Composite {
     items.addView(table);
   }
 
+  public void setReportRecord(ReportRecord report) {
+    // TODO(rice): implement this
+    Window.alert("Selected Report: " + report.getPurpose());
+  }
+  
   @UiFactory
   CellTable<ExpenseItem> createTable() {
     CellTable<ExpenseItem> view = new CellTable<ExpenseItem>(15);

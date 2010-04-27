@@ -34,15 +34,25 @@ import java.util.List;
 
 /**
  * A list view that supports paging and columns.
- *
+ * 
  * @param <T> the data type of each row
  */
 public class CellTable<T> extends Widget implements PagingListView<T> {
 
   /**
+   * Style name applied to the entire table.
+   */
+  private static final String STYLENAME_DEFAULT = "gwt-CellTable";
+
+  /**
    * Style name applied to even rows.
    */
   private static final String STYLENAME_EVEN = "gwt-cellTable-evenRow";
+
+  /**
+   * Style name applied to the first column.
+   */
+  private static final String STYLENAME_FIRST = "gwt-cellTable-firstColumn";
 
   /**
    * Style name applied to odd rows.
@@ -59,6 +69,12 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
   private List<Column<T, ?>> columns = new ArrayList<Column<T, ?>>();
   private List<Header<?>> footers = new ArrayList<Header<?>>();
   private List<Header<?>> headers = new ArrayList<Header<?>>();
+
+  /**
+   * Set to true when the footer is stale.
+   */
+  private boolean headersStale;
+
   private TableRowElement hoveringRow;
   private final CellListImpl<T> impl;
 
@@ -87,7 +103,7 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
 
   /**
    * Constructs a table with the given page size.
-   *
+   * 
    * @param pageSize the page size
    */
   public CellTable(final int pageSize) {
@@ -96,6 +112,7 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
     thead = table.createTHead();
     table.appendChild(tbody = Document.get().createTBodyElement());
     tfoot = table.createTFoot();
+    setStyleName(STYLENAME_DEFAULT);
 
     // Create the implementation.
     this.impl = new CellListImpl<T>(this, pageSize, tbody) {
@@ -131,8 +148,8 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
         int end = start + length;
         for (int i = start; i < end; i++) {
           T value = values.get(i - start);
-          boolean isSelected = (selectionModel == null || value == null) ? false
-              : selectionModel.isSelected(value);
+          boolean isSelected = (selectionModel == null || value == null)
+              ? false : selectionModel.isSelected(value);
           sb.append("<tr __idx='").append(i).append("'");
           sb.append(" class='");
           sb.append(i % 2 == 0 ? STYLENAME_EVEN : STYLENAME_ODD);
@@ -140,9 +157,15 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
             sb.append(" ").append(STYLENAME_SELECTED);
           }
           sb.append("'>");
+          boolean first = true;
           for (Column<T, ?> column : columns) {
             // TODO(jlabanca): How do we sink ONFOCUS and ONBLUR?
-            sb.append("<td>");
+            if (first) {
+              first = false;
+              sb.append("<td class='").append(STYLENAME_FIRST).append("'>");
+            } else {
+              sb.append("<td>");
+            }
             if (value != null) {
               column.render(value, sb);
             }
@@ -209,6 +232,7 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
     headers.add(header);
     footers.add(footer);
     columns.add(col);
+    headersStale = true;
     refresh();
   }
 
@@ -272,7 +296,7 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
 
   /**
    * Check whether or not mouse selection is enabled.
-   *
+   * 
    * @return true if enabled, false if disabled
    */
   public boolean isSelectionEnabled() {
@@ -361,9 +385,9 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
 
   /**
    * Set the number of rows per page and refresh the table.
-   *
+   * 
    * @param pageSize the page size
-   *
+   * 
    * @throw {@link IllegalArgumentException} if pageSize is negative or 0
    */
   public void setPageSize(int pageSize) {
@@ -373,7 +397,7 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
   /**
    * Set the starting index of the current visible page. The actual page start
    * will be clamped in the range [0, getSize() - 1].
-   *
+   * 
    * @param pageStart the index of the row that should appear at the start of
    *          the page
    */
@@ -384,7 +408,7 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
   /**
    * Sets the {@link ProvidesKey} instance that will be used to generate keys
    * for each record object as needed.
-   *
+   * 
    * @param providesKey an instance of {@link ProvidesKey} used to generate keys
    *          for record objects.
    */
@@ -395,7 +419,7 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
 
   /**
    * Enable mouse and keyboard selection.
-   *
+   * 
    * @param isSelectionEnabled true to enable, false to disable
    */
   public void setSelectionEnabled(boolean isSelectionEnabled) {
@@ -408,11 +432,19 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
 
   private void createHeaders(List<Header<?>> headers,
       TableSectionElement section) {
+    boolean hasHeader = false;
     StringBuilder sb = new StringBuilder();
     sb.append("<tr>");
+    boolean first = true;
     for (Header<?> header : headers) {
-      sb.append("<th>");
+      if (first) {
+        first = false;
+        sb.append("<th class='").append(STYLENAME_FIRST).append("'>");
+      } else {
+        sb.append("<th>");
+      }
       if (header != null) {
+        hasHeader = true;
         header.render(sb);
       }
       sb.append("</th>");
@@ -420,11 +452,17 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
     sb.append("</tr>");
 
     section.setInnerHTML(sb.toString());
+
+    // If the section isn't used, hide it.
+    setVisible(section, hasHeader);
   }
 
   private void createHeadersAndFooters() {
-    createHeaders(headers, thead);
-    createHeaders(footers, tfoot);
+    if (headersStale) {
+      headersStale = false;
+      createHeaders(headers, thead);
+      createHeaders(footers, tfoot);
+    }
   }
 
   private TableCellElement findNearestParentCell(Element elem) {

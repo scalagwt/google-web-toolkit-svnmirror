@@ -55,6 +55,10 @@ public class CustomizedShell extends Composite implements
   private static ShellUiBinder uiBinder = GWT.create(ShellUiBinder.class);
 
   @UiField
+  ExpenseDetails expenseDetails;
+  @UiField
+  ExpenseList expenseList;
+  @UiField
   DockLayoutPanel northPanel;
   @UiField
   SplitLayoutPanel splitLayout;
@@ -112,6 +116,14 @@ public class CustomizedShell extends Composite implements
         listener.setPurpose(object, value);
       }
     });
+  }
+
+  public ExpenseDetails getExpenseDetails() {
+    return expenseDetails;
+  }
+
+  public ExpenseList getExpenseList() {
+    return expenseList;
   }
 
   public List<ReportRecord> getValues() {

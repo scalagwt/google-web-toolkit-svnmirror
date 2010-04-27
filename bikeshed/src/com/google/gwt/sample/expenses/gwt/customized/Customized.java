@@ -54,6 +54,22 @@ public class Customized implements EntryPoint {
 
     root.add(shell);
 
+    // Listen for requests from the ExpenseList.
+    final ExpenseList expenseList = shell.getExpenseList();
+    expenseList.setListener(new ExpenseList.Listener() {
+
+      public void onReportSelected(ReportRecord report) {
+        shell.getExpenseDetails().setReportRecord(report);
+      }
+
+      public void onSearch(String startWith) {
+        // TODO(jlabanca): Limit search using a query.
+        requestFactory.reportRequest().findAllReports().forProperties(
+            getReportColumns()).to(expenseList).fire();
+      }
+    });
+    eventBus.addHandler(ReportRecordChanged.TYPE, expenseList);
+
     shell.setListener(new CustomizedShell.Listener() {
       public void setPurpose(ReportRecord report, String purpose) {
         DeltaValueStore deltaValueStore = requestFactory.getValueStore().spawnDeltaView();

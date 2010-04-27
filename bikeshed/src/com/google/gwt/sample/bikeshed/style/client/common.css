@@ -51,8 +51,9 @@ body, table {
   border-collapse: collapse;
 }
 
-.table th {
+th {
   border-bottom: 1px solid #ccc;
+  background-color: #c0d7f9
 }
 
 .table td {
@@ -72,16 +73,30 @@ body, table {
 }
 
 /** Applies to CellTable **/
+.gwt-CellTable {
+  border: 1px solid #5478af;
+}
+
+.gwt-CellTable th {
+  border-bottom: 1px solid #5478af;
+  border-left: 1px solid #5478af;
+}
+
+th.gwt-cellTable-firstColumn {
+  border-left: 0px;
+}
+
 .gwt-cellTable-evenRow {
-  background-color: rgb(255, 255, 255);
+  background-color: #ffffff;
 }
 
 .gwt-cellTable-oddRow {
-  background-color: rgb(220, 220, 220);
+  background-color: #eef4fb;
 }
 
 .gwt-cellTable-selectedRow {
-  background-color: rgb(56, 117, 215);
+  background-color: #9fbd46;
+  color: #ffffff;
 }
 
 /** Applies to CellTree **/
