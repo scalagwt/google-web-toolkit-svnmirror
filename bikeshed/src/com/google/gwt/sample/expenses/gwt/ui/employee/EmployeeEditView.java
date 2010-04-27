@@ -47,11 +47,17 @@ public class EmployeeEditView extends Composite implements
   @UiField
   TextBox displayName;
   @UiField
+  TextBox password;
+  @UiField
+  TextBox supervisorKey;
+  @UiField
   TextBox userName;
   @UiField
   Button save;
   @UiField
   SpanElement idSpan;
+  @UiField
+  SpanElement version;
 
   private Delegate delegate;
   private DeltaValueStore deltas;
@@ -70,6 +76,8 @@ public class EmployeeEditView extends Composite implements
     Set<Property<?>> rtn = new HashSet<Property<?>>();
     rtn.add(EmployeeRecord.userName);
     rtn.add(EmployeeRecord.displayName);
+    rtn.add(EmployeeRecord.password);
+    rtn.add(EmployeeRecord.supervisorKey);
     return rtn;
   }
 
@@ -84,6 +92,8 @@ public class EmployeeEditView extends Composite implements
   public void setEnabled(boolean enabled) {
     displayName.setEnabled(enabled);
     userName.setEnabled(enabled);
+    password.setEnabled(enabled);
+    supervisorKey.setEnabled(enabled);
     save.setEnabled(enabled);
   }
 
@@ -92,6 +102,9 @@ public class EmployeeEditView extends Composite implements
     displayName.setValue(record.getDisplayName());
     userName.setValue(record.getUserName());
     idSpan.setInnerText(record.getId());
+    version.setInnerText(record.getVersion());
+    password.setText(record.getPassword());
+    supervisorKey.setText(record.getSupervisorKey());
   }
 
   @UiHandler("displayName")
@@ -99,9 +112,19 @@ public class EmployeeEditView extends Composite implements
     deltas.set(EmployeeRecord.displayName, record, event.getValue());
   }
 
+  @UiHandler("password")
+  void onPasswordChange(ValueChangeEvent<String> event) {
+    deltas.set(EmployeeRecord.password, record, event.getValue());
+  }
+
   @UiHandler("save")
   void onSave(@SuppressWarnings("unused") ClickEvent event) {
     delegate.saveClicked();
+  }
+
+  @UiHandler("supervisorKey")
+  void onSupervisorKeyChange(ValueChangeEvent<String> event) {
+    deltas.set(EmployeeRecord.supervisorKey, record, event.getValue());
   }
 
   @UiHandler("userName")

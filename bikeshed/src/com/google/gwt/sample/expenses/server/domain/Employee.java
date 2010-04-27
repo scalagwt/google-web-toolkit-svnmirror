@@ -120,7 +120,7 @@ public class Employee {
     return this.password;
   }
 
-  public String getSupervisor() {
+  public String getSupervisorKey() {
     return supervisorKey;
   }
 

@@ -158,13 +158,22 @@ public class RecordJsoImpl extends JavaScriptObject implements Record {
    * @return returned string.
    */
   public final native String toJson() /*-{
-    var replacer = function(key, value) {
-      if (key == '__key') {
-        return;
-      }
-      return value;
-    }
-    return JSON.stringify(this, replacer);
+    // Safari 4.0.5 appears not to honor the replacer argument, so we can't do this:
+
+    //    var replacer = function(key, value) {
+    //      if (key == '__key') {
+    //        return;
+    //      }
+    //      return value;
+    //    }
+    // return JSON.stringify(this, replacer);
+    
+    var key = this.__key;
+    delete this.__key;
+    // TODO verify that the stringify() from json2.js works on IE
+    var rtn = JSON.stringify(this);
+    this.__key = key;
+    return rtn;
   }-*/;
 
   /**
@@ -174,13 +183,16 @@ public class RecordJsoImpl extends JavaScriptObject implements Record {
    * @return returned string.
    */
   public final native String toJsonIdVersion() /*-{
-    var replacer = function(key, value) {
-      if (key == 'id' || key == 'version') {
-        return value;
-      }
-      return;
-    }
-    return JSON.stringify(this, replacer);
+    // Safari 4.0.5 appears not to honor the replacer argument, so we can't do this:
+//    var replacer = function(key, value) {
+//      if (key == 'id' || key == 'version') {
+//        return value;
+//      }
+//      return;
+//    }
+//    return JSON.stringify(this, replacer);
+    var object = { id: this.id, version: this.version };
+    return JSON.stringify(object);
   }-*/;
 
   private native boolean copyPropertyIfDifferent(String name, RecordJsoImpl from) /*-{

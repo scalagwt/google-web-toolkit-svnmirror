@@ -55,6 +55,8 @@ public class ReportListView extends AbstractRecordListView<ReportRecord> {
     columns.add(new PropertyColumn<ReportRecord, Date>(ReportRecord.created,
         new DateTimeFormatRenderer(DateTimeFormat.getShortDateFormat())));
     columns.add(PropertyColumn.<ReportRecord> getStringPropertyColumn(ReportRecord.purpose));
+    columns.add(PropertyColumn.<ReportRecord> getStringPropertyColumn(ReportRecord.reporterKey));
+    columns.add(PropertyColumn.<ReportRecord> getStringPropertyColumn(ReportRecord.approvedSupervisorKey));
 
     return columns;
   }

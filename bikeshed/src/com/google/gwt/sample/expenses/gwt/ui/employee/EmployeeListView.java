@@ -49,6 +49,8 @@ public class EmployeeListView extends AbstractRecordListView<EmployeeRecord> {
 
     columns.add(PropertyColumn.<EmployeeRecord> getStringPropertyColumn(EmployeeRecord.userName));
     columns.add(PropertyColumn.<EmployeeRecord> getStringPropertyColumn(EmployeeRecord.displayName));
+    columns.add(PropertyColumn.<EmployeeRecord> getStringPropertyColumn(EmployeeRecord.password));
+    columns.add(PropertyColumn.<EmployeeRecord> getStringPropertyColumn(EmployeeRecord.supervisorKey));
 
     return columns;
   }

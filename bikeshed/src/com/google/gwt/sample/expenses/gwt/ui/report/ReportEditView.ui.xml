@@ -2,10 +2,12 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
   xmlns:g='urn:import:com.google.gwt.user.client.ui' >
   <g:HTMLPanel>
-    <h3><ui:msg>Edit Report<span ui:field='idSpan' /></ui:msg></h3>
+    <h3><ui:msg>Edit Report <span ui:field='idSpan' /> (v<span ui:field='version'/>)</ui:msg></h3>
 
-    <span>Purpose:</span> <g:TextBox ui:field='purpose'></g:TextBox>
-    <span>Created:</span> <span ui:field='created'></span>
+    <div><span>Purpose:</span> <g:TextBox ui:field='purpose'></g:TextBox></div>
+    <div><span>Created:</span> <span ui:field='created'></span></div>
+    <div><span>Reporter Key:</span> <g:TextBox ui:field='reporterKey'></g:TextBox></div>
+    <div><span>Approved Supervisor Key:</span> <g:TextBox ui:field='approvedSupervisorKey'></g:TextBox></div>
 
     <g:Button ui:field='save'>Save</g:Button>
   </g:HTMLPanel>

@@ -29,14 +29,18 @@ import java.util.Date;
 @ServerType(type = com.google.gwt.sample.expenses.server.domain.Report.class)
 public interface ReportRecord extends Record {
 
+  Property<String> approvedSupervisorKey = new Property<String>("approvedSupervisorKey",
+      String.class);
   Property<Date> created = new Property<Date>("created", Date.class);
   Property<String> purpose = new Property<String>("purpose", String.class);
-  Property<EmployeeRecord> reporter = new Property<EmployeeRecord>("reporter",
-      EmployeeRecord.class);
+  Property<String> reporterKey = new Property<String>("reporterKey",
+      String.class);
+
+  String getApprovedSupervisorKey();
 
   Date getCreated();
 
   String getPurpose();
-
-  EmployeeRecord getReporter();
+  
+  String getReporterKey();
 }

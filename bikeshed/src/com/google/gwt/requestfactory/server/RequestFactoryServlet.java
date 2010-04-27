@@ -1,12 +1,12 @@
 /*
  * Copyright 2010 Google Inc.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -36,6 +36,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -54,7 +55,7 @@ import javax.servlet.http.HttpServletResponse;
  * com.google.gwt.requestfactory.shared.RequestFactory.Config.
  * <p>
  * e.g.
- *
+ * 
  * <pre>  &lt;context-param>
     &lt;param-name>servlet.serverOperation&lt;/param-name>
     &lt;param-value>com.myco.myapp.MyAppServerSideOperations&lt;/param-value>
@@ -79,15 +80,16 @@ public class RequestFactoryServlet extends HttpServlet {
     }
   }
 
-  private static final String SERVER_OPERATION_CONTEXT_PARAM = "servlet.serverOperation";
-  // TODO: Remove this hack
-  private static final Set<String> PROPERTY_SET = new HashSet<String>();
+  private static final Set<String> BLACK_LIST = initBlackList();
 
-  static {
-    for (String str : new String[] {
-        "id", "version", "displayName", "userName", "purpose", "created"}) {
-      PROPERTY_SET.add(str);
+  private static final String SERVER_OPERATION_CONTEXT_PARAM = "servlet.serverOperation";
+
+  private static Set<String> initBlackList() {
+    Set<String> blackList = new HashSet<String>();
+    for (String str : new String[] {"password"}) {
+      blackList.add(str);
     }
+    return Collections.unmodifiableSet(blackList);
   }
 
   private Config config = null;
@@ -319,7 +321,7 @@ public class RequestFactoryServlet extends HttpServlet {
 
   /**
    * Converts the returnValue of a 'get' method to a JSONArray.
-   *
+   * 
    * @param resultObject object returned by a 'get' method, must be of type
    *          List<?>
    * @return the JSONArray
@@ -351,7 +353,7 @@ public class RequestFactoryServlet extends HttpServlet {
   /**
    * Returns methodName corresponding to the propertyName that can be invoked on
    * an entity.
-   *
+   * 
    * Example: "userName" returns prefix + "UserName". "version" returns prefix +
    * "Version"
    */
@@ -451,13 +453,14 @@ public class RequestFactoryServlet extends HttpServlet {
   }
 
   /**
-   * returns true if the property has been requested. TODO: fix this hack.
-   *
+   * returns true if the property has been requested. TODO: use the properties
+   * that should be coming with the request.
+   * 
    * @param p the field of entity ref
    * @return has the property value been requested
    */
   private boolean requestedProperty(Property<?> p) {
-    return PROPERTY_SET.contains(p.getName());
+    return !BLACK_LIST.contains(p.getName());
   }
 
   private void sync(String content, PrintWriter writer)

@@ -49,11 +49,17 @@ public class ReportEditView extends Composite implements
   @UiField
   TextBox purpose;
   @UiField
+  TextBox reporterKey;
+  @UiField
+  TextBox approvedSupervisorKey;
+  @UiField
   SpanElement created; //TODO: use a DatePicker
   @UiField
   Button save;
   @UiField
   SpanElement idSpan;
+  @UiField
+  SpanElement version;
 
   private Delegate delegate;
   private DeltaValueStore deltas;
@@ -72,6 +78,8 @@ public class ReportEditView extends Composite implements
     Set<Property<?>> rtn = new HashSet<Property<?>>();
     rtn.add(ReportRecord.purpose);
     rtn.add(ReportRecord.created);
+    rtn.add(ReportRecord.reporterKey);
+    rtn.add(ReportRecord.approvedSupervisorKey);
     return rtn;
   }
 
@@ -91,14 +99,25 @@ public class ReportEditView extends Composite implements
   public void setValue(ReportRecord value) {
     this.record = value;
     purpose.setValue(record.getPurpose());
+    reporterKey.setValue(record.getReporterKey());
+    approvedSupervisorKey.setValue(record.getApprovedSupervisorKey());
     created.setInnerText(new DateTimeFormatRenderer(
         DateTimeFormat.getShortDateFormat()).render(record.getCreated()));
     idSpan.setInnerText(record.getId());
+    version.setInnerText(record.getVersion());
   }
-
+  
+  @UiHandler("approvedSupervisorKey")
+  void onApprovedSupervisorKeyChange(ValueChangeEvent<String> event) {
+    deltas.set(ReportRecord.approvedSupervisorKey, record, event.getValue());
+  }
   @UiHandler("purpose")
   void onPurposeChange(ValueChangeEvent<String> event) {
     deltas.set(ReportRecord.purpose, record, event.getValue());
+  }
+  @UiHandler("reporterKey")
+  void onReporterKeyChange(ValueChangeEvent<String> event) {
+    deltas.set(ReportRecord.reporterKey, record, event.getValue());
   }
 
   @UiHandler("save")

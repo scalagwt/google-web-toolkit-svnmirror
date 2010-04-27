@@ -15,7 +15,6 @@
  */
 package com.google.gwt.sample.expenses.gwt.ui.report;
 
-import com.google.gwt.app.util.DateTimeFormatRenderer;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -36,11 +35,17 @@ public class ReportDetailsView extends Composite implements ReportDetailsActivit
   private static final Binder BINDER = GWT.create(Binder.class);
 
   @UiField
+  SpanElement idSpan;
+  @UiField
+  SpanElement versionSpan;
+  @UiField
   SpanElement purpose;
   @UiField
   SpanElement created;
   @UiField
-  SpanElement idSpan;
+  SpanElement reporterKey;
+  @UiField
+  SpanElement approvedSupervisorKey;
 
   public ReportDetailsView() {
     initWidget(BINDER.createAndBindUi(this));
@@ -52,9 +57,11 @@ public class ReportDetailsView extends Composite implements ReportDetailsActivit
 
   public void setValue(ReportRecord record) {
     purpose.setInnerText(record.getPurpose());
-    created.setInnerText(new DateTimeFormatRenderer(
-        DateTimeFormat.getShortDateFormat()).render(record.getCreated()));
+    created.setInnerText(DateTimeFormat.getShortDateFormat().format(record.getCreated()));
     idSpan.setInnerText(record.getId());
+    versionSpan.setInnerText(record.getVersion());
+    reporterKey.setInnerText(record.getReporterKey());
+    approvedSupervisorKey.setInnerText(record.getApprovedSupervisorKey());
   }
 
 }

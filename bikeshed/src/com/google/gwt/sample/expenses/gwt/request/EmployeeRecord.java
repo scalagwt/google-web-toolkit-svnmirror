@@ -29,12 +29,15 @@ public interface EmployeeRecord extends Record {
   Property<String> userName = new Property<String>("userName", String.class);
   Property<String> displayName = new Property<String>("displayName",
       String.class);
-  Property<EmployeeRecord> supervisor = new Property<EmployeeRecord>(
-      "supervisor", EmployeeRecord.class);
+  Property<String> password = new Property<String>("password", String.class);
+  Property<String> supervisorKey = new Property<String>("supervisorKey",
+      String.class);
 
   String getDisplayName();
 
-  EmployeeRecord getSupervisor();
+  String getPassword();
+
+  String getSupervisorKey();
 
   String getUserName();
 }
