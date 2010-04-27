@@ -15,13 +15,20 @@
  */
 package com.google.gwt.collections;
 
+import com.google.gwt.junit.tools.GWTTestSuite;
+
+import junit.framework.Test;
+
 /**
- * Re-run {@link MutableArrayTest} tests under GWT.
+ * This suite collects all client-side Lightweight collections tests.
  */
-public class ClientMutableArrayTest extends MutableArrayTest {
-  @Override
-  public String getModuleName() {
-    return "com.google.gwt.collections.Collections";
+public class CollectionsTestSuite extends GWTTestSuite {
+  public static Test suite() {
+    GWTTestSuite suite = new GWTTestSuite("All Gwt Lightwight collections unit tests");
+    
+    suite.addTestSuite(ClientMutableArrayTest.class);
+    suite.addTestSuite(GwtImmutableArrayTest.class);
+    
+    return suite;
   }
-  
 }

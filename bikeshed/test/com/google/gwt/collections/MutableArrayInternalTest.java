@@ -15,13 +15,26 @@
  */
 package com.google.gwt.collections;
 
+import com.google.gwt.junit.client.GWTTestCase;
+
 /**
- * Re-run {@link MutableArrayTest} tests under GWT.
+ * Tests mutable array implementation internal details.
  */
-public class ClientMutableArrayTest extends MutableArrayTest {
+public class MutableArrayInternalTest extends GWTTestCase {
+
   @Override
   public String getModuleName() {
-    return "com.google.gwt.collections.Collections";
+    return null;
   }
-  
+
+  public void testSetSizeNullElems() {
+    MutableArray<String> b = CollectionFactory.createMutableArray();
+
+    b.setSize(1, "fillValue");
+    assertNotNull(b.elems);
+
+    b.setSize(0, null);
+    assertEquals(null, b.elems);
+  }
+
 }
