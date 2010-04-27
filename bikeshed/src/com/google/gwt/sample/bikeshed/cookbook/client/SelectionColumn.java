@@ -32,8 +32,8 @@ public class SelectionColumn<T> extends SimpleColumn<T, Boolean> {
 
   public SelectionColumn(final SelectionModel<T> selectionModel) {
     super(new CheckboxCell());
-    setFieldUpdater(new FieldUpdater<T, Boolean, Void>() {
-      public void update(int index, T object, Boolean value, Void viewData) {
+    setFieldUpdater(new FieldUpdater<T, Boolean>() {
+      public void update(int index, T object, Boolean value) {
         selectionModel.setSelected(object, value);
       }
     });

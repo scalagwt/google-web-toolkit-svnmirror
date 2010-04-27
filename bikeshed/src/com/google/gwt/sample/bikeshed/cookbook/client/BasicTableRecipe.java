@@ -59,7 +59,7 @@ public class BasicTableRecipe extends Recipe {
     }
 
     // Checkbox column tied to selection.
-    Column<String, Boolean, Void> checkboxCol = new Column<String, Boolean, Void>(
+    Column<String, Boolean> checkboxCol = new Column<String, Boolean>(
         new CheckboxCell()) {
       @Override
       public boolean dependsOnSelection() {
@@ -72,8 +72,8 @@ public class BasicTableRecipe extends Recipe {
       }
     };
     table.addColumn(checkboxCol);
-    checkboxCol.setFieldUpdater(new FieldUpdater<String, Boolean, Void>() {
-      public void update(int index, String object, Boolean value, Void viewData) {
+    checkboxCol.setFieldUpdater(new FieldUpdater<String, Boolean>() {
+      public void update(int index, String object, Boolean value) {
         selectionModel.setSelected(object, value);
       }
     });
@@ -83,7 +83,7 @@ public class BasicTableRecipe extends Recipe {
         "TextCell");
 
     // Button column tied to selection.
-    Column<String, String, Void> buttonCol = new Column<String, String, Void>(
+    Column<String, String> buttonCol = new Column<String, String>(
         ButtonCell.getInstance()) {
 
       @Override
@@ -100,8 +100,8 @@ public class BasicTableRecipe extends Recipe {
         }
       }
     };
-    buttonCol.setFieldUpdater(new FieldUpdater<String, String, Void>() {
-      public void update(int index, String object, String value, Void viewData) {
+    buttonCol.setFieldUpdater(new FieldUpdater<String, String>() {
+      public void update(int index, String object, String value) {
         selectionModel.setSelected(object, !selectionModel.isSelected(object));
         Window.alert("You clicked: " + object);
       }

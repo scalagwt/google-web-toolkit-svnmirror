@@ -19,14 +19,13 @@ package com.google.gwt.bikeshed.cells.client;
  * A {@link ValueUpdater} may be added to a Cell to provide updated data.
  *
  * @param <C> the data type of the cell
- * @param <V> the data type of view data associated with the cell
  */
-public interface ValueUpdater<C, V> {
+public interface ValueUpdater<C> {
 
   /**
    * Announces a new value.
    *
    * @param value the updated value
    */
-  void update(C value, V viewData);
+  void update(C value);
 }

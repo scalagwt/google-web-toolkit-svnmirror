@@ -125,12 +125,12 @@ public class SideBySideTreeView extends TreeView implements ProvidesResize,
    * 
    * @param <C> the data type of the cell
    */
-  private class CellDecorator<C> extends Cell<C, Void> {
+  private class CellDecorator<C> extends Cell<C> {
 
     /**
      * The cell used to render the inner contents.
      */
-    private final Cell<C, Void> cell;
+    private final Cell<C> cell;
 
     /**
      * The level of this list view.
@@ -174,8 +174,8 @@ public class SideBySideTreeView extends TreeView implements ProvidesResize,
     }
 
     @Override
-    public Void onBrowserEvent(Element parent, C value, Void viewData,
-        NativeEvent event, ValueUpdater<C, Void> valueUpdater) {
+    public Object onBrowserEvent(Element parent, C value, Object viewData,
+        NativeEvent event, ValueUpdater<C> valueUpdater) {
       Element target = event.getEventTarget().cast();
       if (getImageElement(parent).isOrHasChild(target)) {
         if (Event.getTypeInt(event.getType()) == Event.ONMOUSEDOWN) {
@@ -202,7 +202,7 @@ public class SideBySideTreeView extends TreeView implements ProvidesResize,
     }
 
     @Override
-    public void render(C value, Void viewData, StringBuilder sb) {
+    public void render(C value, Object viewData, StringBuilder sb) {
       boolean isOpen = (openKey == null) ? false
           : openKey.equals(providesKey.getKey(value));
       int imageWidth = getImageWidth();
@@ -227,7 +227,7 @@ public class SideBySideTreeView extends TreeView implements ProvidesResize,
     }
 
     @Override
-    public void setValue(Element parent, C value, Void viewData) {
+    public void setValue(Element parent, C value, Object viewData) {
       cell.setValue(getCellParent(parent), value, viewData);
     }
 
@@ -491,7 +491,7 @@ public class SideBySideTreeView extends TreeView implements ProvidesResize,
    * @return the {@link ListView}
    */
   protected <C> PagingListView<C> createListView(NodeInfo<C> nodeInfo,
-      Cell<C, Void> cell) {
+      Cell<C> cell) {
     SimpleCellList<C> listView = new SimpleCellList<C>(cell);
     listView.setValueUpdater(nodeInfo.getValueUpdater());
     return listView;

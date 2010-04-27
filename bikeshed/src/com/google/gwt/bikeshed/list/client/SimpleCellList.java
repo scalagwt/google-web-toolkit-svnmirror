@@ -56,10 +56,10 @@ public class SimpleCellList<T> extends Widget implements PagingListView<T> {
    */
   private static final String STYLENAME_SELECTED = "gwt-cellList-selectedItem";
 
-  private final Cell<T, Void> cell;
+  private final Cell<T> cell;
   private final Element emptyMessageElem;
   private final SimpleCellListImpl<T> impl;
-  private ValueUpdater<T, Void> valueUpdater;
+  private ValueUpdater<T> valueUpdater;
 
   /**
    * Construct a new {@link SimpleCellList}.
@@ -67,7 +67,7 @@ public class SimpleCellList<T> extends Widget implements PagingListView<T> {
    * @param cell the cell used to render each item
    */
   // TODO(jlabanca): Should cell support ViewData?
-  public SimpleCellList(final Cell<T, Void> cell) {
+  public SimpleCellList(final Cell<T> cell) {
     this.cell = cell;
 
     // Create the DOM hierarchy.
@@ -199,7 +199,7 @@ public class SimpleCellList<T> extends Widget implements PagingListView<T> {
    * 
    * @param valueUpdater the {@link ValueUpdater}
    */
-  public void setValueUpdater(ValueUpdater<T, Void> valueUpdater) {
+  public void setValueUpdater(ValueUpdater<T> valueUpdater) {
     this.valueUpdater = valueUpdater;
   }
 

@@ -23,9 +23,9 @@ import com.google.gwt.bikeshed.cells.client.Cell;
  * @param <T> the row type
  * @param <C> the column type
  */
-public abstract class SimpleColumn<T, C> extends Column<T, C, Void> {
+public abstract class SimpleColumn<T, C> extends Column<T, C> {
 
-  public SimpleColumn(Cell<C, Void> cell) {
+  public SimpleColumn(Cell<C> cell) {
     super(cell);
   }
 }

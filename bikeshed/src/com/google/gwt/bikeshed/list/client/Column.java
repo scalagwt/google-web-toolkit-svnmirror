@@ -33,20 +33,19 @@ import java.util.Map;
  *
  * @param <T> the row type
  * @param <C> the column type
- * @param <V> the view data type
  */
 // TODO - when can we get rid of a view data object?
 // TODO - should viewData implement some interface? (e.g., with commit/rollback/dispose)
 // TODO - have a ViewDataColumn superclass / SimpleColumn subclass
-public abstract class Column<T, C, V> implements HasCell<T, C, V> {
+public abstract class Column<T, C> implements HasViewData, HasCell<T, C> {
 
-  protected final Cell<C, V> cell;
+  protected final Cell<C> cell;
 
-  protected FieldUpdater<T, C, V> fieldUpdater;
+  protected FieldUpdater<T, C> fieldUpdater;
 
-  protected Map<Object, V> viewDataMap = new HashMap<Object, V>();
+  protected Map<Object, Object> viewDataMap = new HashMap<Object, Object>();
 
-  public Column(Cell<C, V> cell) {
+  public Column(Cell<C> cell) {
     this.cell = cell;
   }
 
@@ -63,15 +62,19 @@ public abstract class Column<T, C, V> implements HasCell<T, C, V> {
     return false;
   }
 
-  public Cell<C, V> getCell() {
+  public Cell<C> getCell() {
     return cell;
   }
 
-  public FieldUpdater<T, C, V> getFieldUpdater() {
+  public FieldUpdater<T, C> getFieldUpdater() {
     return fieldUpdater;
   }
 
   public abstract C getValue(T object);
+
+  public Object getViewData(Object key) {
+    return viewDataMap.get(key);
+  }
 
   /**
    * @param providesKey an instance of ProvidesKey<T>, or null if the record
@@ -80,12 +83,12 @@ public abstract class Column<T, C, V> implements HasCell<T, C, V> {
   public void onBrowserEvent(Element elem, final int index, final T object,
       NativeEvent event, ProvidesKey<T> providesKey) {
     Object key = providesKey == null ? object : providesKey.getKey(object);
-    V viewData = viewDataMap.get(key);
-    V newViewData = cell.onBrowserEvent(elem,
+    Object viewData = viewDataMap.get(key);
+    Object newViewData = cell.onBrowserEvent(elem,
         getValue(object), viewData, event, fieldUpdater == null ? null
-            : new ValueUpdater<C, V>() {
-              public void update(C value, V viewData) {
-                fieldUpdater.update(index, object, value, viewData);
+            : new ValueUpdater<C>() {
+              public void update(C value) {
+                fieldUpdater.update(index, object, value);
               }
             });
     if (newViewData != viewData) {
@@ -97,7 +100,11 @@ public abstract class Column<T, C, V> implements HasCell<T, C, V> {
     cell.render(getValue(object), viewDataMap.get(object), sb);
   }
 
-  public void setFieldUpdater(FieldUpdater<T, C, V> fieldUpdater) {
+  public void setFieldUpdater(FieldUpdater<T, C> fieldUpdater) {
     this.fieldUpdater = fieldUpdater;
+  }
+
+  public void setViewData(Object key, Object viewData) {
+    viewDataMap.put(key, viewData);
   }
 }

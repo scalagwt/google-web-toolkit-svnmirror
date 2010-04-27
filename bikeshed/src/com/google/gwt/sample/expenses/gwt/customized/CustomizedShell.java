@@ -56,7 +56,7 @@ public class CustomizedShell extends Composite implements
   @UiField PagingTableListView<ReportRecord> listView;
   @UiField ListBox users;
 
-  private Column<ReportRecord, Date, Void> createdCol = new Column<ReportRecord, Date, Void>(
+  private Column<ReportRecord, Date> createdCol = new Column<ReportRecord, Date>(
       new DateCell()) {
     @Override
     public Date getValue(ReportRecord object) {
@@ -66,7 +66,7 @@ public class CustomizedShell extends Composite implements
   private Listener listener;
   private final ListViewAdapter<ReportRecord> adapter;
 
-  private Column<ReportRecord, String, String> purposeCol = new Column<ReportRecord, String, String>(
+  private Column<ReportRecord, String> purposeCol = new Column<ReportRecord, String>(
       new EditTextCell()) {
     @Override
     public String getValue(ReportRecord object) {
@@ -74,7 +74,7 @@ public class CustomizedShell extends Composite implements
     }
   };
 
-  private Column<ReportRecord, String, Void> statusCol = new Column<ReportRecord, String, Void>(
+  private Column<ReportRecord, String> statusCol = new Column<ReportRecord, String>(
       TextCell.getInstance()) {
     @Override
     public String getValue(ReportRecord object) {
@@ -92,9 +92,8 @@ public class CustomizedShell extends Composite implements
     listView.addColumn(statusCol, "Status (tbd)");
     listView.addColumn(purposeCol, "Purpose");
 
-    purposeCol.setFieldUpdater(new FieldUpdater<ReportRecord, String, String>() {
-      public void update(int index, ReportRecord object, String value,
-          String viewData) {
+    purposeCol.setFieldUpdater(new FieldUpdater<ReportRecord, String>() {
+      public void update(int index, ReportRecord object, String value) {
         adapter.getList().set(index, object);
         listener.setPurpose(object, value);
       }

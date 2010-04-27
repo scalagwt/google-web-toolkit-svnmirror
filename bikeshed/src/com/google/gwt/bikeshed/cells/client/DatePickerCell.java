@@ -40,10 +40,8 @@ import java.util.Date;
  * Each DatePickerCell has a unique DatePicker popup associated with it; thus,
  * if a single DatePickerCell is used as the cell for a column in a table, only
  * one entry in that column will be editable at a given time.
- *
- * @param <V> the view data type
  */
-public class DatePickerCell<V> extends Cell<Date, V> {
+public class DatePickerCell extends Cell<Date> {
 
   private static final int ESCAPE = 27;
 
@@ -52,8 +50,8 @@ public class DatePickerCell<V> extends Cell<Date, V> {
   private int offsetX = 10;
   private int offsetY = 10;
   private PopupPanel panel;
-  private ValueUpdater<Date, V> valueUpdater;
-  private V viewData;
+  private ValueUpdater<Date> valueUpdater;
+  private Object viewData;
 
   /**
    * Constructs a new DatePickerCell that uses the date/time format
@@ -86,14 +84,14 @@ public class DatePickerCell<V> extends Cell<Date, V> {
     datePicker.addValueChangeHandler(new ValueChangeHandler<Date>() {
       public void onValueChange(ValueChangeEvent<Date> event) {
         panel.hide();
-        valueUpdater.update(event.getValue(), viewData);
+        valueUpdater.update(event.getValue());
       }
     });
   }
 
   @Override
-  public V onBrowserEvent(final Element parent, Date value, V viewData,
-      NativeEvent event, ValueUpdater<Date, V> valueUpdater) {
+  public Object onBrowserEvent(final Element parent, Date value, Object viewData,
+      NativeEvent event, ValueUpdater<Date> valueUpdater) {
     if (event.getType().equals("click")) {
       this.viewData = viewData;
       this.valueUpdater = valueUpdater;
@@ -111,7 +109,7 @@ public class DatePickerCell<V> extends Cell<Date, V> {
   }
 
   @Override
-  public void render(Date value, V viewData, StringBuilder sb) {
+  public void render(Date value, Object viewData, StringBuilder sb) {
     if (value != null) {
       sb.append(format.format(value));
     }

@@ -35,7 +35,7 @@ import java.util.List;
  */
 public class EditableTableRecipe extends Recipe {
 
-  private static class EditTextColumn extends Column<String, String, String> {
+  private static class EditTextColumn extends Column<String, String> {
     public EditTextColumn() {
       super(new EditTextCell());
     }
@@ -70,8 +70,8 @@ public class EditableTableRecipe extends Recipe {
     };
     table.addColumn(column, header);
 
-    column.setFieldUpdater(new FieldUpdater<String, String, String>() {
-      public void update(int index, String object, String value, String viewData) {
+    column.setFieldUpdater(new FieldUpdater<String, String>() {
+      public void update(int index, String object, String value) {
         adapter.getList().set(index, value);
       }
     });

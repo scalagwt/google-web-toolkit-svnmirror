@@ -28,7 +28,7 @@ public class IdentityColumn<T> extends SimpleColumn<T, T> {
   /**
    * @param cell
    */
-  public IdentityColumn(Cell<T, Void> cell) {
+  public IdentityColumn(Cell<T> cell) {
     super(cell);
   }
 

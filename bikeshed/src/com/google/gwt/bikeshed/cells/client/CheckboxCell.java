@@ -22,7 +22,7 @@ import com.google.gwt.dom.client.NativeEvent;
 /**
  * A {@link Cell} used to render a checkbox.
  */
-public class CheckboxCell extends Cell<Boolean, Void> {
+public class CheckboxCell extends Cell<Boolean> {
 
   @Override
   public boolean consumesEvents() {
@@ -30,19 +30,19 @@ public class CheckboxCell extends Cell<Boolean, Void> {
   }
 
   @Override
-  public Void onBrowserEvent(Element parent, Boolean value, Void viewData,
-      NativeEvent event, ValueUpdater<Boolean, Void> valueUpdater) {
+  public Object onBrowserEvent(Element parent, Boolean value, Object viewData,
+      NativeEvent event, ValueUpdater<Boolean> valueUpdater) {
     String type = event.getType();
     if (valueUpdater != null && "change".equals(type)) {
       InputElement input = parent.getFirstChild().cast();
-      valueUpdater.update(input.isChecked(), viewData);
+      valueUpdater.update(input.isChecked());
     }
 
     return viewData;
   }
 
   @Override
-  public void render(Boolean data, Void viewData, StringBuilder sb) {
+  public void render(Boolean data, Object viewData, StringBuilder sb) {
     sb.append("<input type=\"checkbox\"");
     if ((data != null) && (data == true)) {
       sb.append(" checked");

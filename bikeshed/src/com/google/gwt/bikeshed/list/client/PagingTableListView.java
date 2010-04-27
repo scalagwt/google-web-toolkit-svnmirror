@@ -56,7 +56,7 @@ public class PagingTableListView<T> extends Widget implements PagingListView<T> 
 
   private static final int DEFAULT_SIZE = 10;
 
-  private List<Column<T, ?, ?>> columns = new ArrayList<Column<T, ?, ?>>();
+  private List<Column<T, ?>> columns = new ArrayList<Column<T, ?>>();
   private List<Header<?>> footers = new ArrayList<Header<?>>();
   private List<Header<?>> headers = new ArrayList<Header<?>>();
   private TableRowElement hoveringRow;
@@ -116,7 +116,7 @@ public class PagingTableListView<T> extends Widget implements PagingListView<T> 
 
       @Override
       protected boolean dependsOnSelection() {
-        for (Column<T, ?, ?> column : columns) {
+        for (Column<T, ?> column : columns) {
           if (column.dependsOnSelection()) {
             return true;
           }
@@ -140,7 +140,7 @@ public class PagingTableListView<T> extends Widget implements PagingListView<T> 
             sb.append(" ").append(STYLENAME_SELECTED);
           }
           sb.append("'>");
-          for (Column<T, ?, ?> column : columns) {
+          for (Column<T, ?> column : columns) {
             // TODO(jlabanca): How do we sink ONFOCUS and ONBLUR?
             sb.append("<td>");
             column.render(value, sb);
@@ -189,21 +189,21 @@ public class PagingTableListView<T> extends Widget implements PagingListView<T> 
   /**
    * Adds a column to the table.
    */
-  public void addColumn(Column<T, ?, ?> col) {
+  public void addColumn(Column<T, ?> col) {
     addColumn(col, null, null);
   }
 
   /**
    * Adds a column to the table with an associated header.
    */
-  public void addColumn(Column<T, ?, ?> col, Header<?> header) {
+  public void addColumn(Column<T, ?> col, Header<?> header) {
     addColumn(col, header, null);
   }
 
   /**
    * Adds a column to the table with an associated header and footer.
    */
-  public void addColumn(Column<T, ?, ?> col, Header<?> header, Header<?> footer) {
+  public void addColumn(Column<T, ?> col, Header<?> header, Header<?> footer) {
     headers.add(header);
     footers.add(footer);
     columns.add(col);
@@ -213,11 +213,16 @@ public class PagingTableListView<T> extends Widget implements PagingListView<T> 
   /**
    * Adds a column to the table with an associated String header.
    */
-  public void addColumn(Column<T, ?, ?> col, String headerString) {
+  public void addColumn(Column<T, ?> col, String headerString) {
     addColumn(col, new TextHeader(headerString), null);
   }
 
   // TODO: remove(Column)
+
+  public int getBodyHeight() {
+    int height = getClientHeight(tbody);
+    return height;
+  }
 
   public int getDataSize() {
     return impl.getDataSize();
@@ -315,7 +320,7 @@ public class PagingTableListView<T> extends Widget implements PagingListView<T> 
       }
 
       T value = impl.getData().get(row);
-      Column<T, ?, ?> column = columns.get(col);
+      Column<T, ?> column = columns.get(col);
       column.onBrowserEvent(cell, impl.getPageStart() + row, value, event,
           providesKey);
 

@@ -23,7 +23,7 @@ import com.google.gwt.bikeshed.cells.client.TextCell;
  *
  * @param <T> the row type
  */
-public abstract class TextColumn<T> extends Column<T, String, Void> {
+public abstract class TextColumn<T> extends Column<T, String> {
 
   public TextColumn() {
     super(TextCell.getInstance());

@@ -22,7 +22,7 @@ import com.google.gwt.dom.client.NativeEvent;
  * A {@link Cell} used to render text.  Clicking on the call causes its
  * @{link ValueUpdater} to be called.
  */
-public class ClickableTextCell extends Cell<String, Void> {
+public class ClickableTextCell extends Cell<String> {
 
   private static ClickableTextCell instance;
 
@@ -37,17 +37,17 @@ public class ClickableTextCell extends Cell<String, Void> {
   }
 
   @Override
-  public Void onBrowserEvent(Element parent, String value, Void viewData,
-      NativeEvent event, ValueUpdater<String, Void> valueUpdater) {
+  public Object onBrowserEvent(Element parent, String value, Object viewData,
+      NativeEvent event, ValueUpdater<String> valueUpdater) {
     String type = event.getType();
     if (type.equals("click")) {
-      valueUpdater.update(value, null);
+      valueUpdater.update(value);
     }
     return null;
   }
 
   @Override
-  public void render(String value, Void viewData, StringBuilder sb) {
+  public void render(String value, Object viewData, StringBuilder sb) {
     if (value != null) {
       sb.append(value);
     }

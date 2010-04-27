@@ -33,28 +33,27 @@ import java.util.List;
  * </p>
  * 
  * @param <C> the type that this Cell represents
- * @param <V> the type of view data that this cell consumes
  */
-public class CompositeCell<C, V> extends Cell<C, V> {
+public class CompositeCell<C> extends Cell<C> {
 
   /**
    * The cells that compose this {@link Cell}.
    */
-  private List<HasCell<C, ?, V>> hasCells = new ArrayList<HasCell<C, ?, V>>();
+  private List<HasCell<C, ?>> hasCells = new ArrayList<HasCell<C, ?>>();
 
   /**
    * Add a {@link HasCell} to the composite.
    * 
    * @param hasCell the {@link HasCell} to add
    */
-  public void addHasCell(HasCell<C, ?, V> hasCell) {
+  public void addHasCell(HasCell<C, ?> hasCell) {
     hasCells.add(hasCell);
   }
 
   @Override
   public boolean consumesEvents() {
     // TODO(jlabanca): Should we cache this value? Can it change?
-    for (HasCell<C, ?, V> hasCell : hasCells) {
+    for (HasCell<C, ?> hasCell : hasCells) {
       if (hasCell.getCell().consumesEvents()) {
         return true;
       }
@@ -65,7 +64,7 @@ public class CompositeCell<C, V> extends Cell<C, V> {
   @Override
   public boolean dependsOnSelection() {
     // TODO(jlabanca): Should we cache this value? Can it change?
-    for (HasCell<C, ?, V> hasCell : hasCells) {
+    for (HasCell<C, ?> hasCell : hasCells) {
       if (hasCell.getCell().dependsOnSelection()) {
         return true;
       }
@@ -79,13 +78,13 @@ public class CompositeCell<C, V> extends Cell<C, V> {
    * @param index the index to insert into
    * @param hasCell the {@link HasCell} to insert
    */
-  public void insertHasCell(int index, HasCell<C, ?, V> hasCell) {
+  public void insertHasCell(int index, HasCell<C, ?> hasCell) {
     hasCells.add(index, hasCell);
   }
 
   @Override
-  public V onBrowserEvent(Element parent, C value, V viewData,
-      NativeEvent event, ValueUpdater<C, V> valueUpdater) {
+  public Object onBrowserEvent(Element parent, C value, Object viewData,
+      NativeEvent event, ValueUpdater<C> valueUpdater) {
     int index = 0;
     Element target = event.getEventTarget().cast();
     Element wrapper = parent.getFirstChildElement();
@@ -106,54 +105,54 @@ public class CompositeCell<C, V> extends Cell<C, V> {
    * 
    * @param hasCell the {@link HasCell} to remove
    */
-  public void removeHasCell(HasCell<C, ?, V> hasCell) {
+  public void removeHasCell(HasCell<C, ?> hasCell) {
     hasCells.remove(hasCell);
   }
 
   @Override
-  public void render(C value, V viewData, StringBuilder sb) {
-    for (HasCell<C, ?, V> hasCell : hasCells) {
+  public void render(C value, Object viewData, StringBuilder sb) {
+    for (HasCell<C, ?> hasCell : hasCells) {
       render(value, viewData, sb, hasCell);
     }
   }
 
   @Override
-  public void setValue(Element parent, C object, V viewData) {
-    for (HasCell<C, ?, V> hasCell : hasCells) {
+  public void setValue(Element parent, C object, Object viewData) {
+    for (HasCell<C, ?> hasCell : hasCells) {
       setValueImpl(parent, object, viewData, hasCell);
     }
   }
 
-  protected <X> void render(C value, V viewData, StringBuilder sb,
-      HasCell<C, X, V> hasCell) {
-    Cell<X, V> cell = hasCell.getCell();
+  protected <X> void render(C value, Object viewData, StringBuilder sb,
+      HasCell<C, X> hasCell) {
+    Cell<X> cell = hasCell.getCell();
     sb.append("<span>");
     cell.render(hasCell.getValue(value), viewData, sb);
     sb.append("</span>");
   }
 
-  private <X> V onBrowserEventImpl(Element parent, final C object, V viewData,
-      NativeEvent event, final ValueUpdater<C, V> valueUpdater,
-      final HasCell<C, X, V> hasCell) {
-    ValueUpdater<X, V> tempUpdater = null;
-    final FieldUpdater<C, X, V> fieldUpdater = hasCell.getFieldUpdater();
+  private <X> Object onBrowserEventImpl(Element parent, final C object, Object viewData,
+      NativeEvent event, final ValueUpdater<C> valueUpdater,
+      final HasCell<C, X> hasCell) {
+    ValueUpdater<X> tempUpdater = null;
+    final FieldUpdater<C, X> fieldUpdater = hasCell.getFieldUpdater();
     if (fieldUpdater != null) {
-      tempUpdater = new ValueUpdater<X, V>() {
-        public void update(X value, V viewData) {
-          fieldUpdater.update(-1, object, value, viewData);
+      tempUpdater = new ValueUpdater<X>() {
+        public void update(X value) {
+          fieldUpdater.update(-1, object, value);
           if (valueUpdater != null) {
-            valueUpdater.update(object, viewData);
+            valueUpdater.update(object);
           }
         }
       };
     }
-    Cell<X, V> cell = hasCell.getCell();
+    Cell<X> cell = hasCell.getCell();
     return cell.onBrowserEvent(parent, hasCell.getValue(object), viewData,
         event, tempUpdater);
   }
 
-  private <X> void setValueImpl(Element parent, C object, V viewData,
-      HasCell<C, X, V> hasCell) {
+  private <X> void setValueImpl(Element parent, C object, Object viewData,
+      HasCell<C, X> hasCell) {
     hasCell.getCell().setValue(parent, hasCell.getValue(object), viewData);
   }
 }

@@ -13,28 +13,28 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.gwt.sample.bikeshed.stocks.client;
+package com.google.gwt.bikeshed.list.client;
 
 import com.google.gwt.bikeshed.cells.client.Cell;
 
 /**
- * A cell that represents a
- * {@link com.google.gwt.sample.bikeshed.stocks.shared.StockQuote StockQuote}.
+ * Interface that must be implemented by {@link Cell} containers.
  */
-public class ChangeCell extends Cell<String> {
+public interface HasViewData {
 
-  @Override
-  public void render(String value, Object viewData, StringBuilder sb) {
-    if (value == null || value.length() == 0) {
-      return;
-    }
-    sb.append("<span style=\"color:");
-    if (value.charAt(0) == '-') {
-      sb.append("red\">");
-    } else {
-      sb.append("green\">");
-    }
-    sb.append(value);
-    sb.append("</span>");
-  }
+  /**
+   * Gets the view data associated with the given item.
+   * 
+   * @param key the key of the item whose view data is desired
+   * @return the view data
+   */
+  Object getViewData(Object key);
+
+  /**
+   * Sets the view data associated with the given item.
+   * 
+   * @param key the key of the item whose view data will be set
+   * @param viewData the view data
+   */
+  void setViewData(Object key, Object viewData);
 }

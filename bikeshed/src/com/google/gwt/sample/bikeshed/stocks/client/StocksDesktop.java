@@ -149,23 +149,20 @@ public class StocksDesktop implements EntryPoint, Updater {
     RootLayoutPanel.get().add(binder.createAndBindUi(this));
 
     // Hook up handlers to columns and the buy/sell popup.
-    Columns.favoriteColumn.setFieldUpdater(new FieldUpdater<StockQuote, Boolean, Void>() {
-      public void update(int index, StockQuote object, Boolean value,
-          Void viewData) {
+    Columns.favoriteColumn.setFieldUpdater(new FieldUpdater<StockQuote, Boolean>() {
+      public void update(int index, StockQuote object, Boolean value) {
         setFavorite(object.getTicker(), value);
       }
     });
 
-    Columns.buyColumn.setFieldUpdater(new FieldUpdater<StockQuote, String, Void>() {
-      public void update(int index, StockQuote quote, String value,
-          Void viewData) {
+    Columns.buyColumn.setFieldUpdater(new FieldUpdater<StockQuote, String>() {
+      public void update(int index, StockQuote quote, String value) {
         buy(quote);
       }
     });
 
-    Columns.sellColumn.setFieldUpdater(new FieldUpdater<StockQuote, String, Void>() {
-      public void update(int index, StockQuote quote, String value,
-          Void viewData) {
+    Columns.sellColumn.setFieldUpdater(new FieldUpdater<StockQuote, String>() {
+      public void update(int index, StockQuote quote, String value) {
         sell(quote);
       }
     });

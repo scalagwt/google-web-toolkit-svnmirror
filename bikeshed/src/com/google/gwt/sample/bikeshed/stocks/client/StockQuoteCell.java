@@ -21,10 +21,10 @@ import com.google.gwt.sample.bikeshed.stocks.shared.StockQuote;
 /**
  * A cell that represents a {@link StockQuote}.
  */
-public class StockQuoteCell extends Cell<StockQuote, Void> {
+public class StockQuoteCell extends Cell<StockQuote> {
 
   @Override
-  public void render(StockQuote value, Void viewData, StringBuilder sb) {
+  public void render(StockQuote value, Object viewData, StringBuilder sb) {
     sb.append(value.getTicker() + " (" + value.getName() + "): "
         + value.getDisplayPrice());
   }

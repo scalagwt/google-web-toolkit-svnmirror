@@ -42,16 +42,16 @@ public class Cookbook implements EntryPoint {
   interface Binder extends UiBinder<Widget, Cookbook> {
   }
 
-  static class CategoryCell extends Cell<Category, Void> {
+  static class CategoryCell extends Cell<Category> {
     @Override
-    public void render(Category value, Void viewData, StringBuilder sb) {
+    public void render(Category value, Object viewData, StringBuilder sb) {
       sb.append(value.getTitle());
     }
   }
 
-  static class RecipeCell extends Cell<Recipe, Void> {
+  static class RecipeCell extends Cell<Recipe> {
     @Override
-    public void render(Recipe value, Void viewData, StringBuilder sb) {
+    public void render(Recipe value, Object viewData, StringBuilder sb) {
       sb.append(value.getTitle());
     }
   }

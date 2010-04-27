@@ -97,7 +97,7 @@ class StandardTreeNodeView<T> extends UIObject {
         final StandardTreeNodeView<?> nodeView) {
       this.nodeView = nodeView;
 
-      final Cell<C, Void> cell = nodeInfo.getCell();
+      final Cell<C> cell = nodeInfo.getCell();
       impl = new SimpleCellListImpl<C>(this, DEFAULT_LIST_SIZE,
           nodeView.ensureChildContainer()) {
 
@@ -528,7 +528,7 @@ class StandardTreeNodeView<T> extends UIObject {
    * @return a TreeNodeView of suitable type
    */
   protected <C> StandardTreeNodeView<C> createTreeNodeView(
-      NodeInfo<C> nodeInfo, Element childElem, C childValue, Void viewData) {
+      NodeInfo<C> nodeInfo, Element childElem, C childValue, Object viewData) {
     return new StandardTreeNodeView<C>(tree, this, nodeInfo, childElem,
         childValue);
   }
@@ -542,7 +542,7 @@ class StandardTreeNodeView<T> extends UIObject {
   protected boolean fireEventToCell(NativeEvent event) {
     if (parentNodeInfo != null) {
       Element cellParent = getCellParent();
-      Cell<T, Void> parentCell = parentNodeInfo.getCell();
+      Cell<T> parentCell = parentNodeInfo.getCell();
       parentCell.onBrowserEvent(cellParent, value, null, event,
           parentNodeInfo.getValueUpdater());
       return parentCell.consumesEvents();

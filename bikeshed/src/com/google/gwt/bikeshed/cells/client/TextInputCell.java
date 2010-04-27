@@ -22,7 +22,7 @@ import com.google.gwt.dom.client.NativeEvent;
 /**
  * A {@link Cell} used to render a text input.
  */
-public class TextInputCell extends Cell<String, Void> {
+public class TextInputCell extends Cell<String> {
 
   @Override
   public boolean consumesEvents() {
@@ -30,18 +30,18 @@ public class TextInputCell extends Cell<String, Void> {
   }
 
   @Override
-  public Void onBrowserEvent(Element parent, String value, Void viewData,
-      NativeEvent event, ValueUpdater<String, Void> valueUpdater) {
+  public Object onBrowserEvent(Element parent, String value, Object viewData,
+      NativeEvent event, ValueUpdater<String> valueUpdater) {
     if (valueUpdater != null && "change".equals(event.getType())) {
       InputElement input = parent.getFirstChild().cast();
-      valueUpdater.update(input.getValue(), viewData);
+      valueUpdater.update(input.getValue());
     }
 
     return viewData;
   }
 
   @Override
-  public void render(String data, Void viewData, StringBuilder sb) {
+  public void render(String data, Object viewData, StringBuilder sb) {
     sb.append("<input type='text'");
     if (data != null) {
       sb.append(" value='" + data + "'");

@@ -23,19 +23,19 @@ import com.google.gwt.event.dom.client.KeyCodes;
 /**
  * An editable text cell. Click to edit, escape to cancel, return to commit.
  */
-public class EditTextCell extends Cell<String, String> {
+public class EditTextCell extends Cell<String> {
 
   @Override
-  public String onBrowserEvent(Element parent, String value, String viewData,
-      NativeEvent event, ValueUpdater<String, String> valueUpdater) {
+  public String onBrowserEvent(Element parent, String value, Object viewData,
+      NativeEvent event, ValueUpdater<String> valueUpdater) {
     if (viewData != null) {
-      return editEvent(parent, value, viewData, event, valueUpdater);
+      return editEvent(parent, value, (String) viewData, event, valueUpdater);
     }
     return nonEditEvent(parent, value, event);
   }
 
   @Override
-  public void render(String value, String viewData, StringBuilder sb) {
+  public void render(String value, Object viewData, StringBuilder sb) {
     if (viewData != null) {
       sb.append("<input type='text' value='" + viewData + "'></input>");
     } else {
@@ -56,17 +56,16 @@ public class EditTextCell extends Cell<String, String> {
     return null;
   }
 
-  private String commit(Element parent,
-      ValueUpdater<String, String> valueUpdater) {
+  private String commit(Element parent, ValueUpdater<String> valueUpdater) {
     String value;
     InputElement input = (InputElement) parent.getFirstChild();
     value = input.getValue();
-    valueUpdater.update(value, null);
+    valueUpdater.update(value);
     return cancel(parent, value);
   }
 
   private String editEvent(Element parent, String value, String viewData,
-      NativeEvent event, ValueUpdater<String, String> valueUpdater) {
+      NativeEvent event, ValueUpdater<String> valueUpdater) {
     if ("keydown".equals(event.getType())) {
       if (event.getKeyCode() == KeyCodes.KEY_ENTER) {
         return commit(parent, valueUpdater);

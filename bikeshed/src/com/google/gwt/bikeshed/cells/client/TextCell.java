@@ -18,7 +18,7 @@ package com.google.gwt.bikeshed.cells.client;
 /**
  * A {@link Cell} used to render text.
  */
-public class TextCell extends Cell<String, Void> {
+public class TextCell extends Cell<String> {
 
   private static TextCell instance;
 
@@ -33,7 +33,7 @@ public class TextCell extends Cell<String, Void> {
   }
 
   @Override
-  public void render(String value, Void viewData, StringBuilder sb) {
+  public void render(String value, Object viewData, StringBuilder sb) {
     if (value != null) {
       sb.append(value);
     }

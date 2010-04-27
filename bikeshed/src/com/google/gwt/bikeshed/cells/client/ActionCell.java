@@ -24,7 +24,7 @@ import com.google.gwt.dom.client.NativeEvent;
  *
  * @param <C> the type that this Cell represents
  */
-public class ActionCell<C> extends Cell<C, Void> {
+public class ActionCell<C> extends Cell<C> {
   /**
    * @param <T> the type that this delegate acts on
    */
@@ -45,8 +45,8 @@ public class ActionCell<C> extends Cell<C, Void> {
   }
 
   @Override
-  public Void onBrowserEvent(Element parent, C value, Void viewData,
-      NativeEvent event, ValueUpdater<C, Void> valueUpdater) {
+  public Void onBrowserEvent(Element parent, C value, Object viewData,
+      NativeEvent event, ValueUpdater<C> valueUpdater) {
     if ("mouseup".equals(event.getType())) {
       delegate.execute(value);
     }
@@ -54,7 +54,7 @@ public class ActionCell<C> extends Cell<C, Void> {
   }
 
   @Override
-  public void render(C value, Void viewData, StringBuilder sb) {
+  public void render(C value, Object viewData, StringBuilder sb) {
     sb.append("<button>" + message + "</button>");
   }
 }

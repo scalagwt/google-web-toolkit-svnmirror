@@ -22,7 +22,7 @@ import java.util.Date;
 /**
  * A {@link Cell} used to render {@link Date}s.
  */
-public class DateCell extends Cell<Date, Void> {
+public class DateCell extends Cell<Date> {
 
   private final DateTimeFormat format;
 
@@ -35,7 +35,7 @@ public class DateCell extends Cell<Date, Void> {
   }
 
   @Override
-  public void render(Date value, Void viewData, StringBuilder sb) {
+  public void render(Date value, Object viewData, StringBuilder sb) {
     if (value != null) {
       sb.append(format.format(value));
     }

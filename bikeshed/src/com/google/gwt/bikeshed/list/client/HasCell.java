@@ -25,13 +25,12 @@ import com.google.gwt.bikeshed.cells.client.FieldUpdater;
  * 
  * @param <T> the underlying data type
  * @param <C> the cell data type
- * @param <V> the view data type
  */
-public interface HasCell<T, C, V> {
+public interface HasCell<T, C> {
 
-  Cell<C, V> getCell();
+  Cell<C> getCell();
 
-  FieldUpdater<T, C, V> getFieldUpdater();
+  FieldUpdater<T, C> getFieldUpdater();
 
   C getValue(T object);
 }

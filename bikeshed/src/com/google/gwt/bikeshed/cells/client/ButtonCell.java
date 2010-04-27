@@ -21,7 +21,7 @@ import com.google.gwt.dom.client.NativeEvent;
 /**
  * A {@link Cell} used to render a button.
  */
-public class ButtonCell extends Cell<String, Void> {
+public class ButtonCell extends Cell<String> {
 
   private static ButtonCell instance;
 
@@ -41,17 +41,17 @@ public class ButtonCell extends Cell<String, Void> {
   }
 
   @Override
-  public Void onBrowserEvent(Element parent, String value, Void viewData,
-      NativeEvent event, ValueUpdater<String, Void> valueUpdater) {
+  public Object onBrowserEvent(Element parent, String value, Object viewData,
+      NativeEvent event, ValueUpdater<String> valueUpdater) {
     if (valueUpdater != null && "mouseup".equals(event.getType())) {
-      valueUpdater.update(value, viewData);
+      valueUpdater.update(value);
     }
 
     return viewData;
   }
 
   @Override
-  public void render(String data, Void viewData, StringBuilder sb) {
+  public void render(String data, Object viewData, StringBuilder sb) {
     sb.append("<button>");
     if (data != null) {
       sb.append(data);

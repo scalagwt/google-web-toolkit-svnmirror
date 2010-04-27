@@ -33,10 +33,10 @@ public interface TreeViewModel {
    */
   class DefaultNodeInfo<T> implements NodeInfo<T> {
 
-    private Cell<T, Void> cell;
+    private Cell<T> cell;
     private AbstractListViewAdapter<T> listViewAdapter;
     private SelectionModel<? super T> selectionModel;
-    private ValueUpdater<T, Void> valueUpdater;
+    private ValueUpdater<T> valueUpdater;
     private ListView<T> view;
 
     /**
@@ -47,7 +47,7 @@ public interface TreeViewModel {
      * @param cell the {@link Cell} used to render the child values
      */
     public DefaultNodeInfo(AbstractListViewAdapter<T> adapter,
-        Cell<T, Void> cell) {
+        Cell<T> cell) {
       this(adapter, cell, new SingleSelectionModel<T>(), null);
     }
 
@@ -61,15 +61,15 @@ public interface TreeViewModel {
      * @param valueUpdater the {@link ValueUpdater}
      */
     public DefaultNodeInfo(AbstractListViewAdapter<T> adapter,
-        final Cell<T, Void> cell, SelectionModel<? super T> selectionModel,
-        final ValueUpdater<T, Void> valueUpdater) {
+        final Cell<T> cell, SelectionModel<? super T> selectionModel,
+        final ValueUpdater<T> valueUpdater) {
       this.listViewAdapter = adapter;
       this.cell = cell;
       this.selectionModel = selectionModel;
       this.valueUpdater = valueUpdater;
     }
 
-    public Cell<T, Void> getCell() {
+    public Cell<T> getCell() {
       return cell;
     }
 
@@ -81,7 +81,7 @@ public interface TreeViewModel {
       return selectionModel;
     }
 
-    public ValueUpdater<T, Void> getValueUpdater() {
+    public ValueUpdater<T> getValueUpdater() {
       return valueUpdater;
     }
 
@@ -105,7 +105,7 @@ public interface TreeViewModel {
      * 
      * @return the {@link Cell}
      */
-    Cell<T, Void> getCell();
+    Cell<T> getCell();
 
     /**
      * Return the key provider for children of this node.
@@ -129,7 +129,7 @@ public interface TreeViewModel {
      * 
      * @return the value updater
      */
-    ValueUpdater<T, Void> getValueUpdater();
+    ValueUpdater<T> getValueUpdater();
 
     /**
      * Set the view that is listening to this {@link NodeInfo}. The

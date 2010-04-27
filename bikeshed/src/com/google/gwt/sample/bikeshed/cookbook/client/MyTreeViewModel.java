@@ -98,20 +98,20 @@ public class MyTreeViewModel implements TreeViewModel {
   /**
    * The cell used to render integers.
    */
-  private static final Cell<Integer, Void> INTEGER_CELL = new Cell<Integer, Void>() {
+  private static final Cell<Integer> INTEGER_CELL = new Cell<Integer>() {
     @Override
-    public void render(Integer value, Void viewData, StringBuilder sb) {
+    public void render(Integer value, Object viewData, StringBuilder sb) {
       sb.append(value);
     }
   };
 
-  private CompositeCell<String, Void> compositeCell = new CompositeCell<String, Void>();
+  private CompositeCell<String> compositeCell = new CompositeCell<String>();
   private SelectionModel<String> selectionModel;
 
   public MyTreeViewModel(final SelectionModel<String> selectionModel) {
     this.selectionModel = selectionModel;
-    compositeCell.addHasCell(new HasCell<String, Boolean, Void>() {
-      public Cell<Boolean, Void> getCell() {
+    compositeCell.addHasCell(new HasCell<String, Boolean>() {
+      public Cell<Boolean> getCell() {
         return new CheckboxCell() {
           @Override
           public boolean dependsOnSelection() {
@@ -120,10 +120,9 @@ public class MyTreeViewModel implements TreeViewModel {
         };
       }
 
-      public FieldUpdater<String, Boolean, Void> getFieldUpdater() {
-        return new FieldUpdater<String, Boolean, Void>() {
-          public void update(int index, String object, Boolean value,
-              Void viewData) {
+      public FieldUpdater<String, Boolean> getFieldUpdater() {
+        return new FieldUpdater<String, Boolean>() {
+          public void update(int index, String object, Boolean value) {
             selectionModel.setSelected(object, value);
           }
         };
@@ -133,15 +132,14 @@ public class MyTreeViewModel implements TreeViewModel {
         return selectionModel.isSelected(object);
       }
     });
-    compositeCell.addHasCell(new HasCell<String, String, Void>() {
-      public Cell<String, Void> getCell() {
+    compositeCell.addHasCell(new HasCell<String, String>() {
+      public Cell<String> getCell() {
         return ButtonCell.getInstance();
       }
 
-      public FieldUpdater<String, String, Void> getFieldUpdater() {
-        return new FieldUpdater<String, String, Void>() {
-          public void update(int index, String object, String value,
-              Void viewData) {
+      public FieldUpdater<String, String> getFieldUpdater() {
+        return new FieldUpdater<String, String>() {
+          public void update(int index, String object, String value) {
             Window.alert("Clicked " + object);
           }
         };
@@ -177,8 +175,8 @@ public class MyTreeViewModel implements TreeViewModel {
       AbstractListViewAdapter<Integer> adapter = new IntegerListViewAdapter(
           value.length());
       return new DefaultNodeInfo<Integer>(adapter, INTEGER_CELL, null,
-          new ValueUpdater<Integer, Void>() {
-            public void update(Integer value, Void viewData) {
+          new ValueUpdater<Integer>() {
+            public void update(Integer value) {
               Window.alert("Integer = " + value);
             }
           });

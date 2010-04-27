@@ -22,9 +22,8 @@ import com.google.gwt.dom.client.NativeEvent;
  * A light weight representation of a renderable object.
  * 
  * @param <C> the type that this Cell represents
- * @param <V> the type of view data that this cell consumes
  */
-public abstract class Cell<C, V> {
+public abstract class Cell<C> {
 
   /**
    * Returns true if the cell is interested in browser events. The default
@@ -54,8 +53,8 @@ public abstract class Cell<C, V> {
    * @param valueUpdater a {@link ValueUpdater}, or null
    * @return a view data object which may be the one passed in or a new object
    */
-  public V onBrowserEvent(Element parent, C value, V viewData,
-      NativeEvent event, ValueUpdater<C, V> valueUpdater) {
+  public Object onBrowserEvent(Element parent, C value, Object viewData,
+      NativeEvent event, ValueUpdater<C> valueUpdater) {
     return null;
   }
 
@@ -68,9 +67,9 @@ public abstract class Cell<C, V> {
    * @param sb the StringBuilder to be written to
    */
   // TODO: render needs a way of assuming text by default, but allowing HTML
-  public abstract void render(C value, V viewData, StringBuilder sb);
+  public abstract void render(C value, Object viewData, StringBuilder sb);
 
-  public void setValue(Element parent, C value, V viewData) {
+  public void setValue(Element parent, C value, Object viewData) {
     StringBuilder sb = new StringBuilder();
     render(value, viewData, sb);
     parent.setInnerHTML(sb.toString());

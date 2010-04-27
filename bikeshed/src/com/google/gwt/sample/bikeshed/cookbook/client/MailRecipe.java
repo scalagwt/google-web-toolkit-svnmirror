@@ -332,8 +332,8 @@ public class MailRecipe extends Recipe implements ClickHandler {
         return selectionModel.getType().equals("ALL");
       }
     };
-    selectedHeader.setUpdater(new ValueUpdater<Boolean, Void>() {
-      public void update(Boolean value, Void viewData) {
+    selectedHeader.setUpdater(new ValueUpdater<Boolean>() {
+      public void update(Boolean value) {
         if (value == true) {
           selectionModel.setType("ALL");
         } else if (value == false) {
@@ -356,14 +356,14 @@ public class MailRecipe extends Recipe implements ClickHandler {
       }
     });
 
-    Column<Message, Date, Void> dateColumn = addColumn(table, "Date",
-        new DatePickerCell<Void>(), new GetValue<Message, Date>() {
+    Column<Message, Date> dateColumn = addColumn(table, "Date",
+        new DatePickerCell(), new GetValue<Message, Date>() {
           public Date getValue(Message object) {
             return object.date;
           }
         }, dateComparator);
-    dateColumn.setFieldUpdater(new FieldUpdater<Message, Date, Void>() {
-      public void update(int index, Message object, Date value, Void viewData) {
+    dateColumn.setFieldUpdater(new FieldUpdater<Message, Date>() {
+      public void update(int index, Message object, Date value) {
         Window.alert("Changed date from " + object.date + " to " + value);
         object.date = value;
         table.refresh();
@@ -389,8 +389,8 @@ public class MailRecipe extends Recipe implements ClickHandler {
         return object.isRead ? "Mark Unread" : "Mark Read";
       }
     };
-    toggleColumn.setFieldUpdater(new FieldUpdater<Message, String, Void>() {
-      public void update(int index, Message object, String value, Void viewData) {
+    toggleColumn.setFieldUpdater(new FieldUpdater<Message, String>() {
+      public void update(int index, Message object, String value) {
         object.isRead = !object.isRead;
         messages.set(index, object);
       }
@@ -434,11 +434,11 @@ public class MailRecipe extends Recipe implements ClickHandler {
     return p;
   }
 
-  private <C extends Comparable<C>> Column<Message, C, Void> addColumn(
+  private <C extends Comparable<C>> Column<Message, C> addColumn(
       PagingTableListView<Message> table, final String text,
-      final Cell<C, Void> cell, final GetValue<Message, C> getter,
+      final Cell<C> cell, final GetValue<Message, C> getter,
       final Comparator<Message> comparator) {
-    Column<Message, C, Void> column = new Column<Message, C, Void>(cell) {
+    Column<Message, C> column = new Column<Message, C>(cell) {
       @Override
       public C getValue(Message object) {
         return getter.getValue(object);
@@ -450,10 +450,10 @@ public class MailRecipe extends Recipe implements ClickHandler {
         return text;
       }
     };
-    header.setUpdater(new ValueUpdater<String, Void>() {
+    header.setUpdater(new ValueUpdater<String>() {
       boolean sortUp = true;
 
-      public void update(String value, Void viewData) {
+      public void update(String value) {
         if (comparator == null) {
           sortMessages(new Comparator<Message>() {
             public int compare(Message o1, Message o2) {
@@ -470,7 +470,7 @@ public class MailRecipe extends Recipe implements ClickHandler {
     return column;
   }
 
-  private Column<Message, String, Void> addColumn(
+  private Column<Message, String> addColumn(
       PagingTableListView<Message> table, final String text,
       final GetValue<Message, String> getter) {
     return addColumn(table, text, TextCell.getInstance(), getter, null);
