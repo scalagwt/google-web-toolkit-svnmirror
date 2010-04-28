@@ -33,7 +33,7 @@ public class EmployeeDetailsActivity extends AbstractActivity {
   class RequestCallBack implements TakesValueList<EmployeeRecord> {
     public void setValueList(List<EmployeeRecord> listOfOne) {
       view.setValue(listOfOne.get(0));
-      callback.onStarted(view.asWidget());
+      callback.showActivityWidget(view);
     }
   }
 
@@ -52,7 +52,7 @@ public class EmployeeDetailsActivity extends AbstractActivity {
   private final ExpensesRequestFactory requests;
   private final View view;
   private String id;
-  private Callback callback;
+  private Display callback;
 
   /**
    * Creates an activity that uses the default singleton view instance.
@@ -70,7 +70,7 @@ public class EmployeeDetailsActivity extends AbstractActivity {
     this.view = view;
   }
 
-  public void start(Callback callback) {
+  public void start(Display callback) {
     this.callback = callback;
     requests.employeeRequest().findEmployee(Value.of(id)).to(
         new RequestCallBack()).fire();

@@ -40,7 +40,7 @@ public class EmployeeEditActivity extends AbstractActivity implements
       view.setEnabled(true);
       EmployeeRecord record = listOfOne.get(0);
       view.setValue(record);
-      callback.onStarted(view.asWidget());
+      callback.showActivityWidget(view);
     }
   }
 
@@ -59,7 +59,7 @@ public class EmployeeEditActivity extends AbstractActivity implements
   private final PlaceController<ScaffoldPlace> placeController;
 
   private DeltaValueStore deltas;
-  private Callback callback;
+  private Display callback;
 
   /**
    * Creates an activity that uses the default singleton view instance.
@@ -94,7 +94,7 @@ public class EmployeeEditActivity extends AbstractActivity implements
     }
   }
 
-  public void start(Callback callback) {
+  public void start(Display callback) {
     this.callback = callback;
     requests.employeeRequest().findEmployee(Value.of(id)).to(
         new RequestCallBack()).fire();

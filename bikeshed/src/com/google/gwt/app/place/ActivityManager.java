@@ -15,9 +15,8 @@
  */
 package com.google.gwt.app.place;
 
-import com.google.gwt.app.place.Activity.Callback;
+import com.google.gwt.app.util.IsWidget;
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Manages {@link Activity} objects that should be kicked off in response to
@@ -30,23 +29,11 @@ import com.google.gwt.user.client.ui.Widget;
 public class ActivityManager<P extends Place> implements
     PlaceChangeEvent.Handler<P>, PlaceChangeRequestedEvent.Handler<P> {
 
-  /**
-   * Implemented by the view of an ActivityManager.
-   */
-  public interface View {
-    /**
-     * Displays widget, swapping out the previous.
-     * 
-     * @param widget the widget to display
-     */
-    void setWidget(Widget widget);
-  }
-
   private final ActivityMapper<P> mapper;
   private final HandlerManager eventBus;
 
   private Activity currentActivity;
-  private View display;
+  private Activity.Display display;
   private boolean startingNext = false;
 
   /**
@@ -72,7 +59,7 @@ public class ActivityManager<P extends Place> implements
     Activity nextActivity = mapper.getActivity(event.getNewPlace());
 
     if (currentActivity != null) {
-      display.setWidget(null);
+      display.showActivityWidget(null);
       currentActivity.onStop();
     }
 
@@ -83,17 +70,22 @@ public class ActivityManager<P extends Place> implements
     }
 
     if (nextActivity == null) {
-      display.setWidget(null);
+      display.showActivityWidget(null);
       currentActivity = null;
       return;
     }
 
     currentActivity = nextActivity;
     startingNext = true;
-    currentActivity.start(new Callback() {
-      public void onStarted(Widget widget) {
+
+    /*
+     * Now start the thing. Wrap the actual display with a per-call instance
+     * that can maintain our startingNew state.
+     */
+    currentActivity.start(new Activity.Display() {
+      public void showActivityWidget(IsWidget view) {
         startingNext = false;
-        display.setWidget(widget);
+        display.showActivityWidget(view);
       }
     });
   }
@@ -134,7 +126,7 @@ public class ActivityManager<P extends Place> implements
    * 
    * @param display
    */
-  public void setDisplay(View display) {
+  public void setDisplay(Activity.Display display) {
     boolean wasActive = (null != this.display);
     boolean willBeActive = (null != display);
     this.display = display;

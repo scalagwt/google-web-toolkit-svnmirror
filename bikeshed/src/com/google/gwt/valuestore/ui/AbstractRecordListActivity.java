@@ -41,7 +41,7 @@ import java.util.List;
 public abstract class AbstractRecordListActivity<R extends Record> implements
     Activity, RecordListView.Delegate<R>, TakesValueList<R> {
   private RecordListView<R> view;
-  private Callback callback;
+  private Display callback;
 
   public AbstractRecordListActivity(RecordListView<R> view) {
     this.view = view;
@@ -78,11 +78,11 @@ public abstract class AbstractRecordListActivity<R extends Record> implements
     getView().setDataSize(values.size(), true);
     getView().setData(0, values.size(), values);
     if (callback != null) {
-      callback.onStarted(getView().asWidget());
+      callback.showActivityWidget(getView());
     }
   }
 
-  public void start(Callback callback) {
+  public void start(Display callback) {
     this.callback = callback;
     getData();
   }
