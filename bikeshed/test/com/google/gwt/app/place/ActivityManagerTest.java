@@ -112,8 +112,6 @@ public class ActivityManagerTest extends TestCase {
     
     assertEquals(0, eventBus.getHandlerCount(PlaceChangeEvent.TYPE));
     assertEquals(0, eventBus.getHandlerCount(PlaceChangeRequestedEvent.TYPE));
-    
-    manager.setDisplay(null);
   }
 
   public void testSimpleDispatch() {

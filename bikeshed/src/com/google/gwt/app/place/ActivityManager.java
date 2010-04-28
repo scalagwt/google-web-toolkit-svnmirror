@@ -80,7 +80,7 @@ public class ActivityManager<P extends Place> implements
 
     /*
      * Now start the thing. Wrap the actual display with a per-call instance
-     * that can maintain our startingNew state.
+     * that can maintain our startingNext state.
      */
     currentActivity.start(new Activity.Display() {
       public void showActivityWidget(IsWidget view) {

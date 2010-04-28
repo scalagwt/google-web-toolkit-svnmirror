@@ -46,7 +46,8 @@ public interface Activity {
   /**
    * Called when the Activity should prepare its {@link IsWidget} for the user.
    * Once the widget is ready (typically after an RPC response has been
-   * received), receiver should present it via {@link Display#widgetIsReady}.
+   * received), receiver should present it via
+   * {@link Display#showActivityWidget(IsWidget)}.
    * 
    * @param panel the panel to display this activity's widget when it is ready
    */
