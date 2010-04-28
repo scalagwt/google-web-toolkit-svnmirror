@@ -15,10 +15,12 @@
  */
 package com.google.gwt.sample.expenses.gwt.scaffold;
 
+import com.google.gwt.app.place.Activity;
 import com.google.gwt.app.place.ActivityManager;
 import com.google.gwt.app.place.ActivityMapper;
 import com.google.gwt.app.place.PlaceController;
 import com.google.gwt.app.place.PlacePicker;
+import com.google.gwt.app.util.IsWidget;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
@@ -30,7 +32,6 @@ import com.google.gwt.sample.expenses.gwt.scaffold.place.ListScaffoldPlace;
 import com.google.gwt.sample.expenses.gwt.scaffold.place.ScaffoldPlace;
 import com.google.gwt.sample.expenses.gwt.ui.ScaffoldListPlaceRenderer;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
-import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.valuestore.shared.Record;
 
 import java.util.ArrayList;
@@ -45,7 +46,7 @@ public class ExpensesScaffold implements EntryPoint {
   public void onModuleLoad() {
 
     /* App controllers and services */
-    
+
     final HandlerManager eventBus = new HandlerManager(null);
     final ExpensesRequestFactory requestFactory = GWT.create(ExpensesRequestFactory.class);
     requestFactory.init(eventBus);
@@ -72,9 +73,9 @@ public class ExpensesScaffold implements EntryPoint {
     final ActivityManager<ScaffoldPlace> activityManager = new ActivityManager<ScaffoldPlace>(
         mapper, eventBus);
 
-    activityManager.setDisplay(new ActivityManager.View() {
-      public void setWidget(Widget widget) {
-        shell.getBody().setWidget(widget);
+    activityManager.setDisplay(new Activity.Display() {
+      public void showActivityWidget(IsWidget widget) {
+        shell.getBody().setWidget(widget == null ? null : widget.asWidget());
       }
     });
 
@@ -84,7 +85,7 @@ public class ExpensesScaffold implements EntryPoint {
     loading.getParentElement().removeChild(loading);
 
     /* And show the user the shell */
-    
+
     RootLayoutPanel.get().add(shell);
   }
 
