@@ -16,11 +16,11 @@
 package com.google.gwt.requestfactory.server;
 
 import com.google.gwt.requestfactory.shared.RequestFactory;
+import com.google.gwt.requestfactory.shared.ServerType;
 import com.google.gwt.requestfactory.shared.RequestFactory.Config;
 import com.google.gwt.requestfactory.shared.RequestFactory.RequestDefinition;
 import com.google.gwt.requestfactory.shared.RequestFactory.WriteOperation;
 import com.google.gwt.requestfactory.shared.impl.RequestDataManager;
-import com.google.gwt.sample.expenses.gwt.request.ServerType;
 import com.google.gwt.valuestore.shared.Property;
 import com.google.gwt.valuestore.shared.Record;
 

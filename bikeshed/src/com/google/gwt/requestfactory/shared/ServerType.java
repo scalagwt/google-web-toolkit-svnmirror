@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.gwt.sample.expenses.gwt.request;
+package com.google.gwt.requestfactory.shared;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
