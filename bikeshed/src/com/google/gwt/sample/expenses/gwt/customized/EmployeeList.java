@@ -25,7 +25,7 @@ import java.util.List;
 
 /**
  * Manages the Employee ListBox. This should grow into a proper View, with a
- * corresponding Presenter factored out of {@link Customized}
+ * corresponding Presenter factored out of {@link Expenses}
  */
 public final class EmployeeList implements TakesValueList<EmployeeRecord> {
   interface Listener {

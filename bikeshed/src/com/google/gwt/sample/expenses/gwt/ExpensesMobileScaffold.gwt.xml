@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 0.0.999//EN" "http://google-web-toolkit.googlecode.com/svn/tags/0.0.999/distro-source/core/src/gwt-module.dtd">
-<module rename-to="expensesCustomized">
+<module rename-to="expensesMobileScaffold">
   <inherits name="com.google.gwt.user.User" />
   <inherits name="com.google.gwt.user.theme.standard.Standard" />
 
@@ -8,5 +8,5 @@
 
   <source path="customized" />
   <entry-point
-    class="com.google.gwt.sample.expenses.gwt.customized.Customized" />
+    class="com.google.gwt.sample.expenses.gwt.scaffold.ExpensesMobileScaffold" />
 </module>

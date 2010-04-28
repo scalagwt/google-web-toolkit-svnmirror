@@ -23,5 +23,5 @@
 
   <source path="scaffold" />
   <entry-point
-    class="com.google.gwt.sample.expenses.gwt.scaffold.Scaffold" />
+    class="com.google.gwt.sample.expenses.gwt.scaffold.ExpensesScaffold" />
 </module>
