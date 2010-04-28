@@ -23,10 +23,9 @@ import com.google.gwt.bikeshed.cells.client.DatePickerCell;
 import com.google.gwt.bikeshed.cells.client.FieldUpdater;
 import com.google.gwt.bikeshed.cells.client.TextCell;
 import com.google.gwt.bikeshed.cells.client.ValueUpdater;
+import com.google.gwt.bikeshed.list.client.CellTable;
 import com.google.gwt.bikeshed.list.client.Column;
 import com.google.gwt.bikeshed.list.client.Header;
-import com.google.gwt.bikeshed.list.client.CellTable;
-import com.google.gwt.bikeshed.list.client.SimpleColumn;
 import com.google.gwt.bikeshed.list.shared.DefaultSelectionModel;
 import com.google.gwt.bikeshed.list.shared.ListViewAdapter;
 import com.google.gwt.bikeshed.list.shared.ProvidesKey;
@@ -382,7 +381,7 @@ public class MailRecipe extends Recipe implements ClickHandler {
       }
     });
 
-    SimpleColumn<Message, String> toggleColumn = new SimpleColumn<Message, String>(
+    Column<Message, String> toggleColumn = new Column<Message, String>(
         ButtonCell.getInstance()) {
       @Override
       public String getValue(Message object) {

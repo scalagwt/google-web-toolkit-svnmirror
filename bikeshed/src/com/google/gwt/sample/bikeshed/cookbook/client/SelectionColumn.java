@@ -17,7 +17,7 @@ package com.google.gwt.sample.bikeshed.cookbook.client;
 
 import com.google.gwt.bikeshed.cells.client.CheckboxCell;
 import com.google.gwt.bikeshed.cells.client.FieldUpdater;
-import com.google.gwt.bikeshed.list.client.SimpleColumn;
+import com.google.gwt.bikeshed.list.client.Column;
 import com.google.gwt.bikeshed.list.shared.SelectionModel;
 
 /**
@@ -26,7 +26,7 @@ import com.google.gwt.bikeshed.list.shared.SelectionModel;
  * 
  * @param <T> the record data type, used by the row and the selection model
  */
-public class SelectionColumn<T> extends SimpleColumn<T, Boolean> {
+public class SelectionColumn<T> extends Column<T, Boolean> {
   
   private final SelectionModel<T> selectionModel;
 

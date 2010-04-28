@@ -23,7 +23,7 @@ import com.google.gwt.bikeshed.cells.client.Cell;
  *
  * @param <T> the row type
  */
-public class IdentityColumn<T> extends SimpleColumn<T, T> {
+public class IdentityColumn<T> extends Column<T, T> {
 
   /**
    * @param cell

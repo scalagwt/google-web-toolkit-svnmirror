@@ -20,7 +20,7 @@ import com.google.gwt.bikeshed.cells.client.CheckboxCell;
 import com.google.gwt.bikeshed.cells.client.CurrencyCell;
 import com.google.gwt.bikeshed.cells.client.ProfitLossCell;
 import com.google.gwt.bikeshed.cells.client.TextCell;
-import com.google.gwt.bikeshed.list.client.SimpleColumn;
+import com.google.gwt.bikeshed.list.client.Column;
 import com.google.gwt.sample.bikeshed.stocks.shared.StockQuote;
 import com.google.gwt.sample.bikeshed.stocks.shared.Transaction;
 
@@ -29,7 +29,7 @@ import com.google.gwt.sample.bikeshed.stocks.shared.Transaction;
  */
 public class Columns {
 
-  static SimpleColumn<StockQuote, String> buyColumn = new SimpleColumn<StockQuote, String>(
+  static Column<StockQuote, String> buyColumn = new Column<StockQuote, String>(
       ButtonCell.getInstance()) {
     @Override
     public String getValue(StockQuote object) {
@@ -37,7 +37,7 @@ public class Columns {
     }
   };
 
-  static SimpleColumn<StockQuote, String> changeColumn = new SimpleColumn<StockQuote, String>(
+  static Column<StockQuote, String> changeColumn = new Column<StockQuote, String>(
       new ChangeCell()) {
     @Override
     public String getValue(StockQuote object) {
@@ -45,7 +45,7 @@ public class Columns {
     }
   };
 
-  static SimpleColumn<StockQuote, Integer> dollarsColumn = new SimpleColumn<StockQuote, Integer>(
+  static Column<StockQuote, Integer> dollarsColumn = new Column<StockQuote, Integer>(
       new CurrencyCell()) {
     @Override
     public Integer getValue(StockQuote object) {
@@ -53,7 +53,7 @@ public class Columns {
     }
   };
 
-  static SimpleColumn<StockQuote, Boolean> favoriteColumn = new SimpleColumn<StockQuote, Boolean>(
+  static Column<StockQuote, Boolean> favoriteColumn = new Column<StockQuote, Boolean>(
       new CheckboxCell()) {
     @Override
     public Boolean getValue(StockQuote object) {
@@ -64,7 +64,7 @@ public class Columns {
   // TODO - use an ellipsis cell
   static HighlightingTextCell nameCell = new HighlightingTextCell();
 
-  static SimpleColumn<StockQuote, String> nameColumn = new SimpleColumn<StockQuote, String>(
+  static Column<StockQuote, String> nameColumn = new Column<StockQuote, String>(
       nameCell) {
     @Override
     public String getValue(StockQuote object) {
@@ -72,7 +72,7 @@ public class Columns {
     }
   };
 
-  static SimpleColumn<StockQuote, Integer> priceColumn = new SimpleColumn<StockQuote, Integer>(
+  static Column<StockQuote, Integer> priceColumn = new Column<StockQuote, Integer>(
       new CurrencyCell()) {
     @Override
     public Integer getValue(StockQuote object) {
@@ -80,7 +80,7 @@ public class Columns {
     }
   };
 
-  static SimpleColumn<StockQuote, Integer> profitLossColumn = new SimpleColumn<StockQuote, Integer>(
+  static Column<StockQuote, Integer> profitLossColumn = new Column<StockQuote, Integer>(
       new ProfitLossCell()) {
     @Override
     public Integer getValue(StockQuote object) {
@@ -88,7 +88,7 @@ public class Columns {
     }
   };
 
-  static SimpleColumn<StockQuote, String> sellColumn = new SimpleColumn<StockQuote, String>(
+  static Column<StockQuote, String> sellColumn = new Column<StockQuote, String>(
       ButtonCell.getInstance()) {
     @Override
     public String getValue(StockQuote object) {
@@ -98,16 +98,16 @@ public class Columns {
 
   static TextCell textCell = TextCell.getInstance();
 
-  static SimpleColumn<StockQuote, String> sharesColumn =
-    new SimpleColumn<StockQuote, String>(textCell) {
+  static Column<StockQuote, String> sharesColumn =
+    new Column<StockQuote, String>(textCell) {
     @Override
     public String getValue(StockQuote object) {
       return "" + object.getSharesOwned();
     }
   };
 
-  static SimpleColumn<Transaction, String> subtotalColumn =
-    new SimpleColumn<Transaction, String>(textCell) {
+  static Column<Transaction, String> subtotalColumn =
+    new Column<Transaction, String>(textCell) {
     @Override
     public String getValue(Transaction object) {
       int price = object.getActualPrice() * object.getQuantity();
@@ -116,16 +116,16 @@ public class Columns {
     }
   };
 
-  static SimpleColumn<StockQuote, String> tickerColumn =
-    new SimpleColumn<StockQuote, String>(textCell) {
+  static Column<StockQuote, String> tickerColumn =
+    new Column<StockQuote, String>(textCell) {
     @Override
     public String getValue(StockQuote object) {
       return object.getTicker();
     }
   };
 
-  static SimpleColumn<Transaction, String> transactionColumn =
-    new SimpleColumn<Transaction, String>(textCell) {
+  static Column<Transaction, String> transactionColumn =
+    new Column<Transaction, String>(textCell) {
     @Override
     public String getValue(Transaction object) {
       return object.toString();
