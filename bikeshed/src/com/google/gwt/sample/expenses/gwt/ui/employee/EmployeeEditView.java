@@ -102,7 +102,7 @@ public class EmployeeEditView extends Composite implements
     displayName.setValue(record.getDisplayName());
     userName.setValue(record.getUserName());
     idSpan.setInnerText(record.getId());
-    version.setInnerText(record.getVersion());
+    version.setInnerText(record.getVersion().toString());
     password.setText(record.getPassword());
     supervisorKey.setText(record.getSupervisorKey());
   }

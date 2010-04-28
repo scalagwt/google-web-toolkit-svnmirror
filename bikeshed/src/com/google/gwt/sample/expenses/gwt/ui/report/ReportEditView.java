@@ -104,7 +104,7 @@ public class ReportEditView extends Composite implements
     created.setInnerText(new DateTimeFormatRenderer(
         DateTimeFormat.getShortDateFormat()).render(record.getCreated()));
     idSpan.setInnerText(record.getId());
-    version.setInnerText(record.getVersion());
+    version.setInnerText(record.getVersion().toString());
   }
   
   @UiHandler("approvedSupervisorKey")

@@ -59,7 +59,7 @@ public class ReportDetailsView extends Composite implements ReportDetailsActivit
     purpose.setInnerText(record.getPurpose());
     created.setInnerText(DateTimeFormat.getShortDateFormat().format(record.getCreated()));
     idSpan.setInnerText(record.getId());
-    versionSpan.setInnerText(record.getVersion());
+    versionSpan.setInnerText(record.getVersion().toString());
     reporterKey.setInnerText(record.getReporterKey());
     approvedSupervisorKey.setInnerText(record.getApprovedSupervisorKey());
   }

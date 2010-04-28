@@ -43,7 +43,7 @@ public class RecordJsoImpl extends JavaScriptObject implements Record {
   }
 
   public static RecordJsoImpl newCopy(RecordSchema<?> schema, String id,
-      String version) {
+      Integer version) {
     RecordJsoImpl newCopy = create();
     newCopy.setSchema(schema);
     newCopy.set(Record.id, id);
@@ -101,7 +101,7 @@ public class RecordJsoImpl extends JavaScriptObject implements Record {
     return this['__key'];
   }-*/;
 
-  public final String getVersion() {
+  public final Integer getVersion() {
     return this.get(version);
   }
 

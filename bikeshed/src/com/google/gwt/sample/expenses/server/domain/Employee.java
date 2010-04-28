@@ -106,7 +106,7 @@ public class Employee {
 
   @Version
   @Column(name = "version")
-  private Long version;
+  private Integer version;
 
   public String getDisplayName() {
     return this.displayName;
@@ -128,7 +128,7 @@ public class Employee {
     return this.userName;
   }
 
-  public Long getVersion() {
+  public Integer getVersion() {
     return this.version;
   }
 
@@ -171,7 +171,7 @@ public class Employee {
     this.userName = userName;
   }
 
-  public void setVersion(Long version) {
+  public void setVersion(Integer version) {
     this.version = version;
   }
 

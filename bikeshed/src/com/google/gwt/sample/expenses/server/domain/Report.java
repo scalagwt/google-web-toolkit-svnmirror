@@ -116,7 +116,7 @@ public class Report {
 
   @Version
   @Column(name = "version")
-  private Long version;
+  private Integer version;
 
   private Date created;
 
@@ -154,7 +154,7 @@ public class Report {
     return this.reporterKey;
   }
 
-  public Long getVersion() {
+  public Integer getVersion() {
     return this.version;
   }
 
@@ -197,7 +197,7 @@ public class Report {
     this.reporterKey = reporter;
   }
 
-  public void setVersion(Long version) {
+  public void setVersion(Integer version) {
     this.version = version;
   }
 

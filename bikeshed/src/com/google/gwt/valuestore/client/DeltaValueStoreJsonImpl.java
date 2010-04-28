@@ -93,7 +93,7 @@ public class DeltaValueStoreJsonImpl implements DeltaValueStore {
     }
   }
 
-  private static final String INITIAL_VERSION = "1";
+  private static final Integer INITIAL_VERSION = 1;
 
   private boolean used = false;
   private final FutureIdGenerator futureIdGenerator = new FutureIdGenerator();

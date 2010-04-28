@@ -37,6 +37,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -196,18 +197,13 @@ public class RequestFactoryServlet extends HttpServlet {
       Iterator<?> keys = recordObject.keys();
       while (keys.hasNext()) {
         String key = (String) keys.next();
-        Object value = recordObject.getString(key);
         Class<?> propertyType = propertiesInRecord.get(key);
-        // TODO: hack to work around the GAE integer bug.
-        if ("version".equals(key)) {
-          propertyType = Long.class;
-          value = new Long(value.toString());
-        }
         if (writeOperation == WriteOperation.CREATE && ("id".equals(key))) {
           // ignored. id is assigned by default.
         } else {
           entity.getMethod(getMethodNameFromPropertyName(key, "set"),
-              propertyType).invoke(entityInstance, value);
+              propertyType).invoke(entityInstance,
+              getPropertyValueFromRequest(recordObject, key, propertyType));
         }
       }
       entity.getMethod("persist").invoke(entityInstance);
@@ -341,8 +337,8 @@ public class RequestFactoryServlet extends HttpServlet {
 
         if (requestedProperty(p)) {
           String propertyName = p.getName();
-          jsonObject.put(propertyName, getPropertyValue(entityElement,
-              propertyName));
+          jsonObject.put(propertyName, getPropertyValueFromDataStore(
+              entityElement, propertyName));
         }
       }
       jsonArray.put(jsonObject);
@@ -414,13 +410,12 @@ public class RequestFactoryServlet extends HttpServlet {
   }
 
   /**
-   * @param entityElement
-   * @param property
-   * @return
+   * Returns the propertyValue in the right type, from the DataStore. The value
+   * is sent into the response.
    */
-  private Object getPropertyValue(Object entityElement, String propertyName)
-      throws SecurityException, NoSuchMethodException, IllegalAccessException,
-      InvocationTargetException {
+  private Object getPropertyValueFromDataStore(Object entityElement,
+      String propertyName) throws SecurityException, NoSuchMethodException,
+      IllegalAccessException, InvocationTargetException {
     String methodName = getMethodNameFromPropertyName(propertyName, "get");
     Method method = entityElement.getClass().getMethod(methodName);
     Object returnValue = method.invoke(entityElement);
@@ -435,6 +430,28 @@ public class RequestFactoryServlet extends HttpServlet {
       return new Double(((java.util.Date) returnValue).getTime());
     }
     return returnValue;
+  }
+
+  /**
+   * Returns the property value, in the specified type, from the request object.
+   * The value is put in the DataStore.
+   */
+  private Object getPropertyValueFromRequest(JSONObject recordObject,
+      String key, Class<?> propertyType) throws JSONException {
+    if (propertyType == java.lang.Integer.class) {
+      return new Integer(recordObject.getInt(key));
+    }
+    /*
+     * 1. decode String to long.
+     * 2. decode Double to Date.
+     */
+    if (propertyType == java.lang.Long.class) {
+      return Long.valueOf(recordObject.getString(key));
+    }
+    if (propertyType == java.util.Date.class) {
+      return new Date((long) recordObject.getDouble(key));
+    }
+    return recordObject.get(key);
   }
 
   private JSONObject getReturnRecord(WriteOperation writeOperation,

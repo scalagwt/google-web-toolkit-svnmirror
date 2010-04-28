@@ -60,6 +60,6 @@ public class EmployeeDetailsView extends Composite implements EmployeeDetailsAct
     password.setInnerText(record.getPassword());
     supervisorKey.setInnerText(record.getSupervisorKey());
     idSpan.setInnerText(record.getId());
-    versionSpan.setInnerText(record.getVersion());
+    versionSpan.setInnerText(record.getVersion().toString());
   }
 }
