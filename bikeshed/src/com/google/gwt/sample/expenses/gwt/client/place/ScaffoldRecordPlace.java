@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.gwt.sample.expenses.gwt.scaffold.place;
+package com.google.gwt.sample.expenses.gwt.client.place;
 
 /**
  * A place in the app focused on the {@link Values} of a particular type of

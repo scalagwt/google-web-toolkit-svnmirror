@@ -18,9 +18,9 @@ package com.google.gwt.sample.expenses.gwt.ui.report;
 import com.google.gwt.app.place.Activity;
 import com.google.gwt.app.place.ActivityMapper;
 import com.google.gwt.app.place.PlaceController;
+import com.google.gwt.sample.expenses.gwt.client.place.ReportScaffoldPlace;
+import com.google.gwt.sample.expenses.gwt.client.place.ScaffoldPlace;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
-import com.google.gwt.sample.expenses.gwt.scaffold.place.ReportScaffoldPlace;
-import com.google.gwt.sample.expenses.gwt.scaffold.place.ScaffoldPlace;
 
 /**
  * Maps {@link ReportScaffoldPlace} instances to the {@link Activity} to run.

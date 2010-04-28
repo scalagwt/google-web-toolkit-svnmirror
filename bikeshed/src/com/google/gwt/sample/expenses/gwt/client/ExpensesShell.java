@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.gwt.sample.expenses.gwt.customized;
+package com.google.gwt.sample.expenses.gwt.client;
 
 import com.google.gwt.bikeshed.cells.client.DateCell;
 import com.google.gwt.bikeshed.cells.client.EditTextCell;
@@ -42,13 +42,13 @@ import java.util.List;
  * UI shell for expenses sample app. A horrible clump of stuff that should be
  * refactored into proper MVP pieces.
  */
-public class CustomizedShell extends Composite implements
+public class ExpensesShell extends Composite implements
     TakesValueList<ReportRecord>, ReportRecordChanged.Handler {
   interface Listener {
     void setPurpose(ReportRecord report, String purpose);
   }
 
-  interface ShellUiBinder extends UiBinder<Widget, CustomizedShell> {
+  interface ShellUiBinder extends UiBinder<Widget, ExpensesShell> {
   }
 
   private static ShellUiBinder uiBinder = GWT.create(ShellUiBinder.class);
@@ -96,7 +96,7 @@ public class CustomizedShell extends Composite implements
 
   private List<ReportRecord> values;
 
-  public CustomizedShell() {
+  public ExpensesShell() {
     adapter = new ListViewAdapter<ReportRecord>();
     table = createTable();
     initWidget(uiBinder.createAndBindUi(this));

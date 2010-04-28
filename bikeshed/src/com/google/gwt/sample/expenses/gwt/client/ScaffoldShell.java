@@ -13,12 +13,12 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.gwt.sample.expenses.gwt.scaffold;
+package com.google.gwt.sample.expenses.gwt.client;
 
 import com.google.gwt.app.place.PlacePickerView;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.sample.expenses.gwt.scaffold.place.ListScaffoldPlace;
+import com.google.gwt.sample.expenses.gwt.client.place.ListScaffoldPlace;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;

@@ -18,11 +18,11 @@ package com.google.gwt.sample.expenses.gwt.ui;
 import com.google.gwt.app.place.Activity;
 import com.google.gwt.app.place.ActivityMapper;
 import com.google.gwt.app.place.PlaceController;
+import com.google.gwt.sample.expenses.gwt.client.place.ListScaffoldPlace;
+import com.google.gwt.sample.expenses.gwt.client.place.ScaffoldPlace;
 import com.google.gwt.sample.expenses.gwt.request.EmployeeRecord;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
 import com.google.gwt.sample.expenses.gwt.request.ReportRecord;
-import com.google.gwt.sample.expenses.gwt.scaffold.place.ListScaffoldPlace;
-import com.google.gwt.sample.expenses.gwt.scaffold.place.ScaffoldPlace;
 import com.google.gwt.sample.expenses.gwt.ui.employee.EmployeeListActivity;
 import com.google.gwt.sample.expenses.gwt.ui.report.ReportListActivity;
 

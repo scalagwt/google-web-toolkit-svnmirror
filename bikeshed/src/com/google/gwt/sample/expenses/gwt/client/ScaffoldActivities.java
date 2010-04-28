@@ -13,17 +13,17 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.gwt.sample.expenses.gwt.scaffold;
+package com.google.gwt.sample.expenses.gwt.client;
 
 import com.google.gwt.app.place.Activity;
 import com.google.gwt.app.place.ActivityMapper;
 import com.google.gwt.app.place.PlaceController;
+import com.google.gwt.sample.expenses.gwt.client.place.EmployeeScaffoldPlace;
+import com.google.gwt.sample.expenses.gwt.client.place.ListScaffoldPlace;
+import com.google.gwt.sample.expenses.gwt.client.place.ReportScaffoldPlace;
+import com.google.gwt.sample.expenses.gwt.client.place.ScaffoldPlace;
+import com.google.gwt.sample.expenses.gwt.client.place.ScaffoldPlaceFilter;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
-import com.google.gwt.sample.expenses.gwt.scaffold.place.EmployeeScaffoldPlace;
-import com.google.gwt.sample.expenses.gwt.scaffold.place.ListScaffoldPlace;
-import com.google.gwt.sample.expenses.gwt.scaffold.place.ReportScaffoldPlace;
-import com.google.gwt.sample.expenses.gwt.scaffold.place.ScaffoldPlace;
-import com.google.gwt.sample.expenses.gwt.scaffold.place.ScaffoldPlaceFilter;
 import com.google.gwt.sample.expenses.gwt.ui.ListActivitiesMapper;
 import com.google.gwt.sample.expenses.gwt.ui.employee.EmployeeActivitiesMapper;
 import com.google.gwt.sample.expenses.gwt.ui.report.ReportActivitiesMapper;

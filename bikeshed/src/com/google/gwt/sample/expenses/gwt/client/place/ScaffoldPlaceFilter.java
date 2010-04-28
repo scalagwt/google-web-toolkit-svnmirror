@@ -13,19 +13,16 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.gwt.sample.expenses.gwt.scaffold;
-
-import com.google.gwt.app.util.IsWidget;
-import com.google.gwt.user.client.ui.TakesValue;
-import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.valuestore.shared.Record;
+package com.google.gwt.sample.expenses.gwt.client.place;
 
 /**
- * Implemented by a widget that edit sthe properties of a bean-style object.
+ * Implemented by objects that filter {@link ScaffoldPlace} subtypes to other
+ * objects.
  * 
- * @param <T> the type of the object being edited
+ * @param <T> the type to filter to 
  */
-public interface EditorView<T extends Record> extends IsWidget, TakesValue<T> {
-
-  Widget asWidget();
+public interface ScaffoldPlaceFilter<T> {
+  T filter(EmployeeScaffoldPlace place);
+  T filter(ListScaffoldPlace place);
+  T filter(ReportScaffoldPlace place);
 }

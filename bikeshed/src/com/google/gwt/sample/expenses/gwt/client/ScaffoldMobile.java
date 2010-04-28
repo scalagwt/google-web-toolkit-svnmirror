@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.gwt.sample.expenses.gwt.scaffold;
+package com.google.gwt.sample.expenses.gwt.client;
 
 import com.google.gwt.app.place.Activity;
 import com.google.gwt.app.place.ActivityManager;
@@ -26,10 +26,10 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.sample.expenses.gwt.client.place.ListScaffoldPlace;
+import com.google.gwt.sample.expenses.gwt.client.place.ScaffoldPlace;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesEntityTypesProcessor;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
-import com.google.gwt.sample.expenses.gwt.scaffold.place.ListScaffoldPlace;
-import com.google.gwt.sample.expenses.gwt.scaffold.place.ScaffoldPlace;
 import com.google.gwt.sample.expenses.gwt.ui.ScaffoldListPlaceRenderer;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.valuestore.shared.Record;
@@ -43,7 +43,7 @@ import java.util.List;
  * 
  * TODO(jgw): Make this actually mobile-friendly.
  */
-public class ExpensesMobileScaffold implements EntryPoint {
+public class ScaffoldMobile implements EntryPoint {
 
   public void onModuleLoad() {
 

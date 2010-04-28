@@ -17,10 +17,10 @@ package com.google.gwt.sample.expenses.gwt.ui.report;
 
 import com.google.gwt.app.place.AbstractActivity;
 import com.google.gwt.app.place.PlaceController;
+import com.google.gwt.sample.expenses.gwt.client.place.ListScaffoldPlace;
+import com.google.gwt.sample.expenses.gwt.client.place.ScaffoldPlace;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
 import com.google.gwt.sample.expenses.gwt.request.ReportRecord;
-import com.google.gwt.sample.expenses.gwt.scaffold.place.ListScaffoldPlace;
-import com.google.gwt.sample.expenses.gwt.scaffold.place.ScaffoldPlace;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.TakesValueList;
 import com.google.gwt.valuestore.shared.DeltaValueStore;

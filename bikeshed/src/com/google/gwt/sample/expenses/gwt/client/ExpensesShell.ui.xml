@@ -3,7 +3,7 @@
   xmlns:ui='urn:ui:com.google.gwt.uibinder'
   xmlns:g='urn:import:com.google.gwt.user.client.ui'
   xmlns:l='urn:import:com.google.gwt.bikeshed.list.client'
-  xmlns:c='urn:import:com.google.gwt.sample.expenses.gwt.customized'>
+  xmlns:c='urn:import:com.google.gwt.sample.expenses.gwt.client'>
 
   <ui:with
     field='styles'

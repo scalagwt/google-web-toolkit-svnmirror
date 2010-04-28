@@ -5,8 +5,5 @@
   <inherits name="com.google.gwt.user.theme.standard.Standard" />
 
   <inherits name="com.google.gwt.sample.expenses.gwt.ExpensesCommon" />
-
-  <source path="customized" />
-  <entry-point
-    class="com.google.gwt.sample.expenses.gwt.customized.Expenses" />
+  <entry-point class="com.google.gwt.sample.expenses.gwt.client.Expenses" />
 </module>

@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.gwt.sample.expenses.gwt.scaffold.place;
+package com.google.gwt.sample.expenses.gwt.client.place;
 
 import com.google.gwt.valuestore.shared.Record;
 
