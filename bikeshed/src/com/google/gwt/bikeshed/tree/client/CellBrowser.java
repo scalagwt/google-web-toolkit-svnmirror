@@ -123,7 +123,7 @@ public class CellBrowser extends CellTreeView implements ProvidesResize,
 
   /**
    * A wrapper around a cell that adds an open button.
-   *
+   * 
    * @param <C> the data type of the cell
    */
   private class CellDecorator<C> extends Cell<C> {
@@ -150,7 +150,7 @@ public class CellBrowser extends CellTreeView implements ProvidesResize,
 
     /**
      * Construct a new {@link CellDecorator}.
-     *
+     * 
      * @param nodeInfo the {@link NodeInfo} associated with the cell
      * @param level the level of items rendered by this decorator
      */
@@ -173,29 +173,30 @@ public class CellBrowser extends CellTreeView implements ProvidesResize,
     @Override
     public Object onBrowserEvent(Element parent, C value, Object viewData,
         NativeEvent event, ValueUpdater<C> valueUpdater) {
-      Element target = event.getEventTarget().cast();
-      if (getImageElement(parent).isOrHasChild(target)) {
-        if (Event.getTypeInt(event.getType()) == Event.ONMOUSEDOWN) {
-          trimToLevel(level);
 
-          // Remove style from currently open item.
-          Element curOpenItem = Document.get().getElementById(getOpenId());
-          if (curOpenItem != null) {
-            replaceImageElement(curOpenItem.getParentElement(), false);
+      // Fire the event to the inner cell.
+      viewData = cell.onBrowserEvent(getCellParent(parent), value, viewData,
+          event, valueUpdater);
+
+      // Open child nodes.
+      if (Event.getTypeInt(event.getType()) == Event.ONMOUSEDOWN) {
+        trimToLevel(level);
+
+        // Remove style from currently open item.
+        updateOpenElement(false);
+
+        // Save the key of the new open item and update the Element.
+        if (!getTreeViewModel().isLeaf(value)) {
+          NodeInfo<?> nodeInfo = getTreeViewModel().getNodeInfo(value);
+          if (nodeInfo != null) {
+            openKey = providesKey.getKey(value);
+            replaceImageElement(parent, true);
+            appendTreeNode(nodeInfo);
           }
-
-          // Save the key of the new open item and update the Element.
-          openKey = providesKey.getKey(value);
-          replaceImageElement(parent, true);
-
-          // Add a tree node for the next level.
-          appendTreeNode(getTreeViewModel().getNodeInfo(value));
         }
-        return viewData;
-      } else {
-        return cell.onBrowserEvent(getCellParent(parent), value, viewData,
-            event, valueUpdater);
       }
+
+      return viewData;
     }
 
     @Override
@@ -207,7 +208,6 @@ public class CellBrowser extends CellTreeView implements ProvidesResize,
       sb.append(imageWidth);
       sb.append("px;'");
       if (isOpen) {
-        sb.append(" class='").append(STYLENAME_OPEN).append("'");
         sb.append(" id='").append(getOpenId()).append("'");
       }
       sb.append(">");
@@ -229,8 +229,23 @@ public class CellBrowser extends CellTreeView implements ProvidesResize,
     }
 
     /**
+     * Find the currently open element and update its style.
+     * 
+     * @param isOpen if the open element is still open
+     */
+    public void updateOpenElement(boolean isOpen) {
+      Element curOpenItem = Document.get().getElementById(getOpenId());
+      if (curOpenItem != null) {
+        replaceImageElement(curOpenItem.getParentElement(), isOpen);
+      }
+      if (!isOpen) {
+        openKey = null;
+      }
+    }
+
+    /**
      * Get the parent element of the decorated cell.
-     *
+     * 
      * @param parent the parent of this cell
      * @return the decorated cell's parent
      */
@@ -240,7 +255,7 @@ public class CellBrowser extends CellTreeView implements ProvidesResize,
 
     /**
      * Get the image element of the decorated cell.
-     *
+     * 
      * @param parent the parent of this cell
      * @return the image element
      */
@@ -250,7 +265,7 @@ public class CellBrowser extends CellTreeView implements ProvidesResize,
 
     /**
      * Get the ID of the open element.
-     *
+     * 
      * @return the ID
      */
     private String getOpenId() {
@@ -259,7 +274,7 @@ public class CellBrowser extends CellTreeView implements ProvidesResize,
 
     /**
      * Replace the image element of a cell.
-     *
+     * 
      * @param parent the parent element of the cell
      * @param open true if open, false if closed
      */
@@ -267,10 +282,10 @@ public class CellBrowser extends CellTreeView implements ProvidesResize,
       // Update the style name and ID.
       Element wrapper = parent.getFirstChildElement();
       if (open) {
-        wrapper.addClassName(STYLENAME_OPEN);
+        parent.addClassName(STYLENAME_OPEN);
         wrapper.setId(getOpenId());
       } else {
-        wrapper.removeClassName(STYLENAME_OPEN);
+        parent.removeClassName(STYLENAME_OPEN);
         wrapper.setId("");
       }
 
@@ -286,7 +301,7 @@ public class CellBrowser extends CellTreeView implements ProvidesResize,
 
   /**
    * A node in the tree.
-   *
+   * 
    * @param <C> the data type of the children of the node
    */
   private class TreeNode<C> {
@@ -297,7 +312,7 @@ public class CellBrowser extends CellTreeView implements ProvidesResize,
 
     /**
      * Construct a new {@link TreeNode}.
-     *
+     * 
      * @param nodeInfo the nodeInfo for the children nodes
      * @param listView the list view assocated with the node
      * @param widget the widget that represents the list view
@@ -312,7 +327,7 @@ public class CellBrowser extends CellTreeView implements ProvidesResize,
 
     /**
      * Get the {@link CellDecorator} used to render the node.
-     *
+     * 
      * @return the cell decorator
      */
     public CellDecorator<C> getCell() {
@@ -381,7 +396,7 @@ public class CellBrowser extends CellTreeView implements ProvidesResize,
 
   /**
    * Construct a new {@link CellTreeView}.
-   *
+   * 
    * @param <T> the type of data in the root node
    * @param viewModel the {@link CellTreeViewModel} that backs the tree
    * @param rootValue the hidden root value of the tree
@@ -412,7 +427,7 @@ public class CellBrowser extends CellTreeView implements ProvidesResize,
 
   /**
    * Get the default width of new columns.
-   *
+   * 
    * @return the default width in pixels
    */
   public int getDefaultColumnWidth() {
@@ -421,7 +436,7 @@ public class CellBrowser extends CellTreeView implements ProvidesResize,
 
   /**
    * Get the minimum width of columns.
-   *
+   * 
    * @return the minimum width in pixels
    */
   public int getMinimumColumnWidth() {
@@ -453,7 +468,7 @@ public class CellBrowser extends CellTreeView implements ProvidesResize,
 
   /**
    * Set the default width of new columns.
-   *
+   * 
    * @param width the default width in pixels
    */
   public void setDefaultColumnWidth(int width) {
@@ -462,7 +477,7 @@ public class CellBrowser extends CellTreeView implements ProvidesResize,
 
   /**
    * Set the minimum width of columns.
-   *
+   * 
    * @param minWidth the minimum width in pixels
    */
   public void setMinimumColumnWidth(int minWidth) {
@@ -472,7 +487,7 @@ public class CellBrowser extends CellTreeView implements ProvidesResize,
   /**
    * Create a Pager to control the list view. The {@link ListView} must extend
    * {@link Widget}.
-   *
+   * 
    * @param <C> the item type in the list view
    * @param listView the list view to add paging too
    * @return the {@link Pager}
@@ -484,7 +499,7 @@ public class CellBrowser extends CellTreeView implements ProvidesResize,
   /**
    * Create a {@link PagingListView} that will display items. The
    * {@link PagingListView} must extend {@link Widget}.
-   *
+   * 
    * @param <C> the item type in the list view
    * @param nodeInfo the node info with child data
    * @param cell the cell to use in the list view
@@ -513,14 +528,14 @@ public class CellBrowser extends CellTreeView implements ProvidesResize,
 
   /**
    * Create a new {@link TreeNode} and append it to the end of the LayoutPanel.
-   *
+   * 
    * @param <C> the data type of the children
    * @param nodeInfo the info about the node
    */
   private <C> void appendTreeNode(final NodeInfo<C> nodeInfo) {
     // Create the list view.
     final int level = treeNodes.size();
-    CellDecorator<C> cell = new CellDecorator<C>(nodeInfo, level);
+    final CellDecorator<C> cell = new CellDecorator<C>(nodeInfo, level);
     final PagingListView<C> listView = createPagingListView(nodeInfo, cell);
     assert (listView instanceof Widget) : "createPagingListView() must return a widget";
 
@@ -567,6 +582,11 @@ public class CellBrowser extends CellTreeView implements ProvidesResize,
 
         // Refresh the list.
         listView.setData(start, length, values);
+
+        // Update the style of the open item. We do this after the rows have
+        // been rendered because we want the style to live on the cell's parent
+        // element, which is controlled by the PagingListView.
+        cell.updateOpenElement(true);
       }
 
       public void setDataSize(int size, boolean isExact) {
@@ -627,7 +647,7 @@ public class CellBrowser extends CellTreeView implements ProvidesResize,
 
   /**
    * Get the {@link SplitLayoutPanel} used to lay out the views.
-   *
+   * 
    * @return the {@link SplitLayoutPanel}
    */
   private SplitLayoutPanel getSplitLayoutPanel() {
@@ -636,7 +656,7 @@ public class CellBrowser extends CellTreeView implements ProvidesResize,
 
   /**
    * Reduce the number of {@link ListView}s down to the specified level.
-   *
+   * 
    * @param level the level to trim to
    */
   private void trimToLevel(int level) {

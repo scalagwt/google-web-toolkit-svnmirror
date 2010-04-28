@@ -1,15 +1,18 @@
 /* global */
 body {
-  background-color: #eee;
   color: black;
   margin: 8px;
   margin-top: 3px;
 }
 
-body, table {
+body, table, td {
   font-family: Arial, sans-serif;
   font-weight: light;
   font-size: 12px;
+}
+
+h1 {
+  color: #4b4a4a;
 }
 
 /* odds and ends */
@@ -52,8 +55,12 @@ body, table {
 }
 
 th {
-  border-bottom: 1px solid #ccc;
-  background-color: #c0d7f9
+  border-bottom: 1px solid #5478af;
+  border-left: 1px solid #5478af;
+  background: #b4cff6 url(headerGradient.png) left top repeat-x;
+  padding: 5px 20px;
+  text-align: left;
+  color: #4b4a4a;
 }
 
 .table td {
@@ -77,11 +84,6 @@ th {
   border: 1px solid #5478af;
 }
 
-.gwt-CellTable th {
-  border-bottom: 1px solid #5478af;
-  border-left: 1px solid #5478af;
-}
-
 th.gwt-cellTable-firstColumn {
   border-left: 0px;
 }
@@ -95,8 +97,8 @@ th.gwt-cellTable-firstColumn {
 }
 
 .gwt-cellTable-selectedRow {
-  background-color: #9fbd46;
-  color: #ffffff;
+  background: #e6e6e6 url(selectionGradient.png) left top repeat-x;
+  color: white;
 }
 
 /** Applies to CellTree **/
@@ -110,28 +112,24 @@ th.gwt-cellTable-firstColumn {
 }
 
 .gwt-cellBrowser-column {
-  border-right: 1px solid #aaa;
-  border-left: 1px solid #aaa;
 }
 
 .gwt-cellBrowser-firstColumn {
   border-left: 0px;
 }
 
-.gwt-cellBrowser-openItem {
-  background-color: rgb(200, 200, 255);
-}
-
-.gwt-cellList-evenRow {
-  background-color: rgb(255, 255, 255);
-}
-
+.gwt-cellList-evenRow,
 .gwt-cellList-oddRow {
-  background-color: rgb(220, 220, 220);
+  padding: 4px 4px 4px 15px;
 }
 
+.gwt-cellBrowser-openItem {
+  background: #e6e6e6 url(openGradient.png) left top repeat-x;
+  color: white;
+}
 .gwt-cellList-selectedItem {
-  background-color: rgb(56, 117, 215);
+  background: #e6e6e6 url(selectionGradient.png) left top  repeat-x;
+  color: white;
 }
 
 /* date picker */
@@ -230,9 +228,9 @@ td.datePickerMonth {
 
 /* splitters */
 .gwt-SplitLayoutPanel-HDragger {
-  background: transparent url(hsplitter-grip.png) center center no-repeat;
+  background: #b6cef3 url(hsplitter-grip.png) center center no-repeat;
 }
 
 .gwt-SplitLayoutPanel-VDragger {
-  background: transparent url(vsplitter-grip.png) center center no-repeat;
+  background: #b6cef3 url(vsplitter-grip.png) center center no-repeat;
 }

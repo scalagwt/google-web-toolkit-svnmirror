@@ -19,8 +19,8 @@ import com.google.gwt.bikeshed.cells.client.DateCell;
 import com.google.gwt.bikeshed.cells.client.EditTextCell;
 import com.google.gwt.bikeshed.cells.client.FieldUpdater;
 import com.google.gwt.bikeshed.cells.client.TextCell;
-import com.google.gwt.bikeshed.list.client.Column;
 import com.google.gwt.bikeshed.list.client.CellTable;
+import com.google.gwt.bikeshed.list.client.Column;
 import com.google.gwt.bikeshed.list.shared.ListViewAdapter;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.sample.expenses.gwt.request.ReportRecord;
@@ -30,7 +30,6 @@ import com.google.gwt.uibinder.client.UiFactory;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
-import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.TakesValueList;
@@ -62,8 +61,6 @@ public class CustomizedShell extends Composite implements
   DockLayoutPanel northPanel;
   @UiField
   SplitLayoutPanel splitLayout;
-  @UiField
-  HTMLPanel westPanel;
 
   // TODO(jlabanca): Remove this when the app is done.
   CellTable<ReportRecord> table;
@@ -104,7 +101,6 @@ public class CustomizedShell extends Composite implements
     table = createTable();
     initWidget(uiBinder.createAndBindUi(this));
     splitLayout.setWidgetMinSize(northPanel, 150);
-    splitLayout.setWidgetMinSize(westPanel, 150);
 
     table.addColumn(createdCol, "Created");
     table.addColumn(statusCol, "Status (tbd)");

@@ -4,29 +4,56 @@
   xmlns:g="urn:import:com.google.gwt.user.client.ui"
   xmlns:l='urn:import:com.google.gwt.bikeshed.list.client'>
 
+  <ui:image
+    field='searchIcon' />
+
   <ui:style>
+    .paddedLeft {
+      padding-left: 20px;
+    }
     
+    .paddedRight {
+      padding-right: 20px;
+    }
+    
+    .textBox {
+      width: 250px;
+      border: 1px solid #5478af;
+    }
+    
+    @sprite .searchIcon {
+      gwt-image: 'searchIcon';
+    }
   </ui:style>
 
   <g:HTMLPanel
     width='100%'
     height='100%'>
-    <table
-      width='100%'>
-      <tr>
-        <td>
-          <h1>Reports</h1>
-        </td>
-        <td
-          align='right'>
-          <g:TextBox
-            ui:field='nameSearchBox'></g:TextBox>
-        </td>
-      </tr>
-    </table>
-    <l:CellTable
-      width='100%'
-      ui:field='table' />
+    <div
+      class='{style.paddedLeft}'>
+      <table
+        width='100%'>
+        <tr>
+          <td>
+            <h1>Reports</h1>
+          </td>
+          <td
+            align='right'>
+            <g:TextBox
+              styleName='{style.textBox}'
+              ui:field='searchBox'></g:TextBox>
+          </td>
+          <td
+            width='60'>
+            <div
+              class='{style.searchIcon}' />
+          </td>
+        </tr>
+      </table>
+      <l:CellTable
+        width='100%'
+        ui:field='table' />
+    </div>
   </g:HTMLPanel>
 
 </ui:UiBinder> 

@@ -8,29 +8,36 @@
     .label {
       font-weight: bold;
     }
+    
+    .padded {
+      padding: 0px 20px 0px 28px;
+    }
   </ui:style>
 
   <g:HTMLPanel
     width='100%'
     height='100%'>
-    <h1>Jamaica Trip</h1>
-    <table>
-      <td
-        class='{style.label}'>
-        Total Approved:
+    <div
+      class='{style.padded}'>
+      <h1>Jamaica Trip</h1>
+      <table>
+        <td
+          class='{style.label}'>
+          Total Approved:
       </td>
-      <td>
-        <g:Label
-          ui:field='totalLabel'></g:Label>
-      </td>
-    </table>
-    <span
-      class='{style.label}'>Notes:</span>
-    <g:TextBox
-      ui:field='notesBox'></g:TextBox>
-    <l:CellTable
-      width='100%'
-      ui:field='table' />
+        <td>
+          <g:Label
+            ui:field='totalLabel'></g:Label>
+        </td>
+      </table>
+      <span
+        class='{style.label}'>Notes:</span>
+      <g:TextBox
+        ui:field='notesBox'></g:TextBox>
+      <l:CellTable
+        width='100%'
+        ui:field='table' />
+    </div>
   </g:HTMLPanel>
 
 </ui:UiBinder> 

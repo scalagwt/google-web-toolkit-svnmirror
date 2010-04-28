@@ -9,28 +9,24 @@
     field='styles'
     type='com.google.gwt.sample.bikeshed.style.client.Styles' />
 
+  <ui:image
+    field='verticalShadow'
+    repeatStyle='Vertical' />
+
   <ui:style>
-    .disabled {
-      color: gray;
+    .title {
+      border-bottom: 1px solid #c3c3c3;
     }
     
-    table.reports td {
-      border-width: 1px;
-      padding: 1px;
-      border-style: solid;
-      background-color: white;
+    .titleText {
+      font-family: Times New Roman, sans-serif;
+      color: #7b8fae;
+      font-size: 18pt;
+      font-weight: bold;
     }
     
-    .error {
-      position: absolute;
-      width: 100%;
-      text-align: center;
-      background-color: red;
-    }
-    
-    .users {
-      position: absolute;
-      right: 0;
+    @sprite .shadowLeft {
+      gwt-image: 'verticalShadow';
     }
   </ui:style>
 
@@ -43,36 +39,45 @@
         ui:field='northPanel'>
         <g:north
           size='50'>
-          <g:HTMLPanel>
-            <h1>Expenses Sample</h1>
+          <g:HTMLPanel
+            styleName='{style.title}'>
+            <table
+              height='100%'>
+              <tr>
+                <td>
+                  <img
+                    height='40'
+                    src='http://www.google.com/intl/en_ALL/images/logo.gif' />
+                </td>
+                <td
+                  class='{style.titleText}'
+                  valign='middle'>
+                  Expenses Sample
+                </td>
+              </tr>
+            </table>
           </g:HTMLPanel>
         </g:north>
         <g:center>
-          <g:HTMLPanel
-            styleName='{styles.common.box}'>
-            <c:ExpenseBrowser
-              ui:field='expenseBrowser'></c:ExpenseBrowser>
-          </g:HTMLPanel>
+          <c:ExpenseBrowser
+            ui:field='expenseBrowser'></c:ExpenseBrowser>
         </g:center>
       </g:DockLayoutPanel>
     </g:north>
-
-    <g:west
-      size='450'>
-      <g:HTMLPanel
-        ui:field='westPanel'
-        styleName='{styles.common.box}'>
-        <c:ExpenseList
-          ui:field='expenseList'></c:ExpenseList>
-      </g:HTMLPanel>
-    </g:west>
-
     <g:center>
-      <g:HTMLPanel
-        styleName='{styles.common.box}'>
-        <c:ExpenseDetails
-          ui:field='expenseDetails'></c:ExpenseDetails>
-      </g:HTMLPanel>
+      <g:DockLayoutPanel
+        unit='PCT'>
+        <g:west
+          size='50'>
+          <c:ExpenseList
+            ui:field='expenseList'></c:ExpenseList>
+        </g:west>
+        <g:center>
+          <c:ExpenseDetails
+            styleName='{style.shadowLeft}'
+            ui:field='expenseDetails'></c:ExpenseDetails>
+        </g:center>
+      </g:DockLayoutPanel>
     </g:center>
   </g:SplitLayoutPanel>
 

@@ -83,7 +83,7 @@ public class ExpenseList extends Composite implements
   @UiField
   CellTable<ReportRecord> table;
   @UiField
-  TextBox nameSearchBox;
+  TextBox searchBox;
 
   private Listener listener;
 
@@ -109,26 +109,26 @@ public class ExpenseList extends Composite implements
     reports.addView(table);
 
     // Setup the search box.
-    nameSearchBox.setText(TEXTBOX_DEFAULT_TEXT);
-    nameSearchBox.getElement().getStyle().setColor(TEXTBOX_DISABLED_COLOR);
-    nameSearchBox.addKeyUpHandler(new KeyUpHandler() {
+    searchBox.setText(TEXTBOX_DEFAULT_TEXT);
+    searchBox.getElement().getStyle().setColor(TEXTBOX_DISABLED_COLOR);
+    searchBox.addKeyUpHandler(new KeyUpHandler() {
       public void onKeyUp(KeyUpEvent event) {
         searchTimer.schedule(500);
       }
     });
-    nameSearchBox.addFocusHandler(new FocusHandler() {
+    searchBox.addFocusHandler(new FocusHandler() {
       public void onFocus(FocusEvent event) {
-        nameSearchBox.getElement().getStyle().clearColor();
-        if (TEXTBOX_DEFAULT_TEXT.equals(nameSearchBox.getText())) {
-          nameSearchBox.setText("");
+        searchBox.getElement().getStyle().clearColor();
+        if (TEXTBOX_DEFAULT_TEXT.equals(searchBox.getText())) {
+          searchBox.setText("");
         }
       }
     });
-    nameSearchBox.addBlurHandler(new BlurHandler() {
+    searchBox.addBlurHandler(new BlurHandler() {
       public void onBlur(BlurEvent event) {
-        if ("".equals(nameSearchBox.getText())) {
-          nameSearchBox.setText(TEXTBOX_DEFAULT_TEXT);
-          nameSearchBox.getElement().getStyle().setColor(TEXTBOX_DISABLED_COLOR);
+        if ("".equals(searchBox.getText())) {
+          searchBox.setText(TEXTBOX_DEFAULT_TEXT);
+          searchBox.getElement().getStyle().setColor(TEXTBOX_DISABLED_COLOR);
         }
       }
     });
@@ -146,7 +146,7 @@ public class ExpenseList extends Composite implements
   public void setValueList(List<ReportRecord> newValues) {
     // TODO(jlabanca): Handle search on the server.
     // Search through the values.
-    String startsWith = nameSearchBox.getText().toLowerCase();
+    String startsWith = searchBox.getText().toLowerCase();
     if (TEXTBOX_DEFAULT_TEXT.equals(startsWith)) {
       startsWith = "";
     }
@@ -165,7 +165,7 @@ public class ExpenseList extends Composite implements
   }
 
   @UiFactory
-  CellTable<ReportRecord> createC() {
+  CellTable<ReportRecord> createTable() {
     CellTable<ReportRecord> view = new CellTable<ReportRecord>(25);
 
     // Add a selection model.
@@ -215,7 +215,7 @@ public class ExpenseList extends Composite implements
    */
   private void search() {
     if (listener != null) {
-      String startsWith = nameSearchBox.getText();
+      String startsWith = searchBox.getText();
       if (TEXTBOX_DEFAULT_TEXT.equals(startsWith)) {
         startsWith = "";
       }
