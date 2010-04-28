@@ -19,6 +19,7 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.sample.expenses.gwt.request.EmployeeRecord;
+import com.google.gwt.sample.expenses.gwt.request.ExpenseRecord;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
 import com.google.gwt.sample.expenses.gwt.request.ReportRecord;
 import com.google.gwt.sample.expenses.gwt.request.ReportRecordChanged;
@@ -51,9 +52,11 @@ public class Expenses implements EntryPoint {
     // Listen for requests from the ExpenseList.
     final ExpenseList expenseList = shell.getExpenseList();
     expenseList.setListener(new ExpenseList.Listener() {
-
       public void onReportSelected(ReportRecord report) {
         shell.getExpenseDetails().setReportRecord(report);
+
+        requestFactory.expenseRequest().findExpensesByReport(
+            report.getRef(Record.id)).forProperties(getExpenseColumns()).to(shell.getExpenseDetails()).fire();
       }
 
       public void onSearch(String startWith) {
@@ -89,6 +92,17 @@ public class Expenses implements EntryPoint {
     List<Property<?>> columns = new ArrayList<Property<?>>();
     columns.add(EmployeeRecord.displayName);
     columns.add(EmployeeRecord.userName);
+    return columns;
+  }
+
+  private Collection<Property<?>> getExpenseColumns() {
+    List<Property<?>> columns = new ArrayList<Property<?>>();
+    columns.add(ExpenseRecord.amount);
+    columns.add(ExpenseRecord.approval);
+    columns.add(ExpenseRecord.category);
+    columns.add(ExpenseRecord.date);
+    columns.add(ExpenseRecord.description);
+    columns.add(ExpenseRecord.reasonDenied);
     return columns;
   }
 

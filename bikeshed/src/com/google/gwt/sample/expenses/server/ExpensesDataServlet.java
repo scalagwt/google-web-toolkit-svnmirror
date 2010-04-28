@@ -17,9 +17,11 @@ package com.google.gwt.sample.expenses.server;
 
 import com.google.gwt.requestfactory.server.RequestFactoryServlet;
 import com.google.gwt.sample.expenses.server.domain.Employee;
+import com.google.gwt.sample.expenses.server.domain.Expense;
 import com.google.gwt.sample.expenses.server.domain.Report;
 
 import java.util.Date;
+import java.util.Random;
 
 /**
  * Dwindling interim servlet that calls our mock storage backend directly
@@ -28,6 +30,33 @@ import java.util.Date;
 @SuppressWarnings("serial")
 public class ExpensesDataServlet extends RequestFactoryServlet {
 
+  // Must be in sync with DESCRIPTIONS
+  private static final String[] CATEGORIES = {
+    "Dining", "Dining", "Dining",
+    "Lodging", "Lodging",
+    "Local Transportation", "Local Transportation", "Local Transportation",
+    "Air Travel", "Air Travel",
+    "Office Supplies", "Office Supplies", "Office Supplies", "Office Supplies",
+  };
+
+  // Must be in sync with CATEGORIES
+  private static final String[] DESCRIPTIONS = {
+    "Breakfast", "Lunch", "Dinner",
+    "Hotel", "Bed & Breakfast",
+    "Train fare", "Taxi fare", "Bus ticket",
+    "Flight from ATL to SFO", "Flight from SFO to ATL",
+    "Paperclips", "Stapler", "Scissors", "Paste",
+  };
+  
+  private static final String[] NOTES = {
+    "", "", "", "", "", "", "", "", "", "",
+    "Please bill to the Widgets project",
+    "High priority",
+    "Review A.S.A.P."
+  };
+
+  Random rand = new Random();
+  
   @Override
   protected void initDb() {
     long size = Employee.countEmployees();
@@ -59,7 +88,10 @@ public class ExpensesDataServlet extends RequestFactoryServlet {
       report.setReporterKey(abc.getId());
       report.setCreated(new Date());
       report.setPurpose(purpose);
+      report.setNotes(getNote());
       report.persist();
+      
+      addExpenses(report.getId());
     }
 
     for (String purpose : new String[] {"Money laundering", "Donut day"}) {
@@ -67,7 +99,10 @@ public class ExpensesDataServlet extends RequestFactoryServlet {
       report.setCreated(new Date());
       report.setReporterKey(def.getId());
       report.setPurpose(purpose);
+      report.setNotes(getNote());
       report.persist();
+      
+      addExpenses(report.getId());
     }
 
     for (String purpose : new String[] {
@@ -77,7 +112,46 @@ public class ExpensesDataServlet extends RequestFactoryServlet {
       report.setCreated(new Date());
       report.setReporterKey(ghi.getId());
       report.setPurpose(purpose);
+      report.setNotes(getNote());
       report.persist();
+      
+      addExpenses(report.getId());
     }
+  }
+  
+  private void addExpenses(String reportId) {
+    int num = rand.nextInt(5) + 1;
+    for (int i = 0; i < num; i++) {
+      String[] descCat = getDescriptionAndCategory();
+
+      Expense detail = new Expense();
+      detail.setReportId(reportId);
+      detail.setDescription(descCat[0]);
+      detail.setDate(getDate());
+      detail.setAmount(rand.nextInt(25000) / 100.0);
+      detail.setCategory(descCat[1]);
+      detail.setApproval("");
+      detail.setReasonDenied("");
+      detail.persist();
+    }
+  }
+  
+  private Date getDate() {
+    long now = new Date().getTime();
+    // Go back up to 90 days from the current date
+    long dateOffset = rand.nextInt(60 * 60 * 24 * 90) * 1000L;
+    return new Date(now - dateOffset);
+  }
+
+  private String[] getDescriptionAndCategory() {
+    String[] dc = new String[2];
+    int index = rand.nextInt(DESCRIPTIONS.length);
+    dc[0] = DESCRIPTIONS[index];
+    dc[1] = CATEGORIES[index];
+    return dc;
+  }
+  
+  private String getNote() {
+    return NOTES[rand.nextInt(NOTES.length)];
   }
 }

@@ -47,6 +47,8 @@ public class ReportEditView extends Composite implements
   private static final Binder BINDER = GWT.create(Binder.class);
 
   @UiField
+  TextBox notes;
+  @UiField
   TextBox purpose;
   @UiField
   TextBox reporterKey;
@@ -76,6 +78,7 @@ public class ReportEditView extends Composite implements
 
   public Set<Property<?>> getProperties() {
     Set<Property<?>> rtn = new HashSet<Property<?>>();
+    rtn.add(ReportRecord.notes);
     rtn.add(ReportRecord.purpose);
     rtn.add(ReportRecord.created);
     rtn.add(ReportRecord.reporterKey);
@@ -92,12 +95,14 @@ public class ReportEditView extends Composite implements
   }
 
   public void setEnabled(boolean enabled) {
+    notes.setEnabled(enabled);
     purpose.setEnabled(enabled);
     save.setEnabled(enabled);
   }
 
   public void setValue(ReportRecord value) {
     this.record = value;
+    notes.setValue(record.getNotes());
     purpose.setValue(record.getPurpose());
     reporterKey.setValue(record.getReporterKey());
     approvedSupervisorKey.setValue(record.getApprovedSupervisorKey());
@@ -111,6 +116,10 @@ public class ReportEditView extends Composite implements
   void onApprovedSupervisorKeyChange(ValueChangeEvent<String> event) {
     deltas.set(ReportRecord.approvedSupervisorKey, record, event.getValue());
   }
+  @UiHandler("notes")
+  void onNotesChange(ValueChangeEvent<String> event) {
+    deltas.set(ReportRecord.notes, record, event.getValue());
+  }
   @UiHandler("purpose")
   void onPurposeChange(ValueChangeEvent<String> event) {
     deltas.set(ReportRecord.purpose, record, event.getValue());
@@ -119,10 +128,8 @@ public class ReportEditView extends Composite implements
   void onReporterKeyChange(ValueChangeEvent<String> event) {
     deltas.set(ReportRecord.reporterKey, record, event.getValue());
   }
-
   @UiHandler("save")
   void onSave(@SuppressWarnings("unused") ClickEvent event) {
     delegate.saveClicked();
   }
-
 }

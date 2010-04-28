@@ -116,9 +116,11 @@ public class Report {
 
   @Version
   @Column(name = "version")
-  private Integer version;
+  private Long version;
 
   private Date created;
+  
+  private String notes;
 
   private String purpose;
 
@@ -145,6 +147,10 @@ public class Report {
   public String getId() {
     return this.id;
   }
+  
+  public String getNotes() {
+    return this.notes;
+  }
 
   public String getPurpose() {
     return this.purpose;
@@ -154,7 +160,7 @@ public class Report {
     return this.reporterKey;
   }
 
-  public Integer getVersion() {
+  public Long getVersion() {
     return this.version;
   }
 
@@ -188,6 +194,10 @@ public class Report {
   public void setId(String id) {
     this.id = id;
   }
+  
+  public void setNotes(String notes) {
+    this.notes = notes;
+  }
 
   public void setPurpose(String purpose) {
     this.purpose = purpose;
@@ -197,7 +207,7 @@ public class Report {
     this.reporterKey = reporter;
   }
 
-  public void setVersion(Integer version) {
+  public void setVersion(Long version) {
     this.version = version;
   }
 
@@ -206,8 +216,9 @@ public class Report {
     sb.append("Id: ").append(getId()).append(", ");
     sb.append("Version: ").append(getVersion()).append(", ");
     sb.append("Created: ").append(getCreated()).append(", ");
+    sb.append("Notes: ").append(getNotes()).append(", ");
     sb.append("Purpose: ").append(getPurpose()).append(", ");
-    sb.append("Reporter: ").append(getReporterKey());
+    sb.append("Reporter: ").append(getReporterKey()).append(", ");
     sb.append("ApprovedSupervisor: ").append(getApprovedSupervisorKey());
     return sb.toString();
   }

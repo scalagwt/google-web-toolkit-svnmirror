@@ -5,6 +5,7 @@
     <h3><ui:msg>Edit Report <span ui:field='idSpan' /> (v<span ui:field='version'/>)</ui:msg></h3>
 
     <div><span>Purpose:</span> <g:TextBox ui:field='purpose'></g:TextBox></div>
+    <div><span>Notes:</span> <g:TextBox ui:field='notes'></g:TextBox></div>
     <div><span>Created:</span> <span ui:field='created'></span></div>
     <div><span>Reporter Key:</span> <g:TextBox ui:field='reporterKey'></g:TextBox></div>
     <div><span>Approved Supervisor Key:</span> <g:TextBox ui:field='approvedSupervisorKey'></g:TextBox></div>

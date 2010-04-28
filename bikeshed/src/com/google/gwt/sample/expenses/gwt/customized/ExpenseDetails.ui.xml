@@ -17,17 +17,16 @@
   <g:HTMLPanel
     width='100%'
     height='100%'>
-    <div
-      class='{style.padded}'>
-      <h1>Jamaica Trip</h1>
-      <table>
-        <td
-          class='{style.label}'>
-          Total Approved:
+    <div class='{style.padded}'>
+    <h1><g:Label ui:field='reportName'></g:Label></h1>
+    <table>
+      <td
+        class='{style.label}'>
+        Total Approved:
       </td>
-        <td>
-          <g:Label
-            ui:field='totalLabel'></g:Label>
+      <td>
+        <g:Label
+          ui:field='totalLabel'></g:Label>
         </td>
       </table>
       <span

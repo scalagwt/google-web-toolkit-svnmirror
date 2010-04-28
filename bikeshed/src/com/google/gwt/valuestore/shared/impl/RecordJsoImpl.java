@@ -71,6 +71,9 @@ public class RecordJsoImpl extends JavaScriptObject implements Record {
     if (Integer.class.equals(property.getType())) {
       return (V) Integer.valueOf(getInt(property.getName()));
     }
+    if (Double.class.equals(property.getType())) {
+      return (V) Double.valueOf(getDouble(property.getName()));
+    }
     if (Date.class.equals(property.getType())) {
       double millis = getDouble(property.getName());
       if (GWT.isScript()) {

@@ -4,7 +4,8 @@
   <g:HTMLPanel>
     <h3><ui:msg>Report <span ui:field='idSpan' /> (v<span ui:field='versionSpan'/>)</ui:msg></h3>
 
-	<div><span>Purpose:</span> <span ui:field='purpose'></span></div>
+  <div><span>Purpose:</span> <span ui:field='purpose'></span></div>
+  <div><span>Notes:</span> <span ui:field='notes'></span></div>
   <div><span>Created:</span> <span ui:field='created'></span></div>
   <div><span>Reporter Key:</span> <span ui:field='reporterKey'></span></div>
   <div><span>Approved Supervisor Key:</span> <span ui:field='approvedSupervisorKey'></span></div>

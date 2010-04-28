@@ -106,7 +106,7 @@ public class Employee {
 
   @Version
   @Column(name = "version")
-  private Integer version;
+  private Long version;
 
   public String getDisplayName() {
     return this.displayName;
@@ -128,7 +128,7 @@ public class Employee {
     return this.userName;
   }
 
-  public Integer getVersion() {
+  public Long getVersion() {
     return this.version;
   }
 
@@ -171,7 +171,7 @@ public class Employee {
     this.userName = userName;
   }
 
-  public void setVersion(Integer version) {
+  public void setVersion(Long version) {
     this.version = version;
   }
 
@@ -184,5 +184,4 @@ public class Employee {
     sb.append("Password: ").append(getPassword()).append(", ");
     return sb.toString();
   }
-
 }

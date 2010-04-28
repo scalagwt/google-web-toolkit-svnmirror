@@ -1,12 +1,12 @@
 /*
  * Copyright 2010 Google Inc.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -15,25 +15,31 @@
  */
 package com.google.gwt.sample.expenses.gwt.customized;
 
-import com.google.gwt.bikeshed.cells.client.CheckboxCell;
+import com.google.gwt.bikeshed.cells.client.Cell;
+import com.google.gwt.bikeshed.cells.client.ClickableTextCell;
 import com.google.gwt.bikeshed.cells.client.CurrencyCell;
 import com.google.gwt.bikeshed.cells.client.DateCell;
 import com.google.gwt.bikeshed.cells.client.TextCell;
+import com.google.gwt.bikeshed.cells.client.ValueUpdater;
 import com.google.gwt.bikeshed.list.client.CellTable;
 import com.google.gwt.bikeshed.list.client.Column;
 import com.google.gwt.bikeshed.list.client.Header;
 import com.google.gwt.bikeshed.list.shared.ListViewAdapter;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.sample.expenses.gwt.request.ExpenseRecord;
+import com.google.gwt.sample.expenses.gwt.request.ExpenseRecordChanged;
 import com.google.gwt.sample.expenses.gwt.request.ReportRecord;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiFactory;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.TakesValueList;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -41,140 +47,189 @@ import java.util.List;
  * Details about the current expense report on the right side of the app,
  * including the list of expenses.
  */
-public class ExpenseDetails extends Composite {
-
-  private static ExpenseDetailsUiBinder uiBinder = GWT.create(ExpenseDetailsUiBinder.class);
+public class ExpenseDetails extends Composite implements
+    TakesValueList<ExpenseRecord>, ExpenseRecordChanged.Handler {
 
   interface ExpenseDetailsUiBinder extends UiBinder<Widget, ExpenseDetails> {
   }
 
-  /**
-   * An expense in an expense report.
-   * 
-   * TODO(jlabanca): Replace this with a generated class.
-   */
-  private static class ExpenseItem {
-    public String name;
-    public Date date;
-    public String category;
-    public int price;
-    public boolean approved;
-
-    public ExpenseItem(String name, Date date, String category, int price,
-        boolean approved) {
-      this.name = name;
-      this.date = date;
-      this.category = category;
-      this.price = price;
-      this.approved = approved;
-    }
+  static interface GetValue<T, C> {
+    C getValue(T object);
   }
 
-  /**
-   * The adapter that provides expense items.
-   */
-  private ListViewAdapter<ExpenseItem> items = new ListViewAdapter<ExpenseItem>();
-
-  @UiField
-  CellTable<ExpenseItem> table;
+  private static ExpenseDetailsUiBinder uiBinder = GWT.create(ExpenseDetailsUiBinder.class);
 
   @UiField
   TextBox notesBox;
 
   @UiField
+  Label reportName;
+
+  @UiField
+  CellTable<ExpenseRecord> table;
+
+  @UiField
   Label totalLabel;
+
+  private final Comparator<ExpenseRecord> amountComparator = new Comparator<ExpenseRecord>() {
+    public int compare(ExpenseRecord o1, ExpenseRecord o2) {
+      double cmp = o1.getAmount() - o2.getAmount();
+      if (cmp < 0) {
+        return -1;
+      } else if (cmp > 0) {
+        return 1;
+      } else {
+        return 0;
+      }
+    }
+  };
+
+  private final Comparator<ExpenseRecord> dateComparator = new Comparator<ExpenseRecord>() {
+    public int compare(ExpenseRecord o1, ExpenseRecord o2) {
+      long cmp = o1.getDate().getTime() - o2.getDate().getTime();
+      if (cmp < 0) {
+        return -1;
+      } else if (cmp > 0) {
+        return 1;
+      } else {
+        return 0;
+      }
+    }
+  };
+
+  /**
+   * The adapter that provides expense items.
+   */
+  private ListViewAdapter<ExpenseRecord> items = new ListViewAdapter<ExpenseRecord>();
+
+  private List<ExpenseRecord> itemList = items.getList();
+
+  private Comparator<ExpenseRecord> lastComparator = dateComparator;
+
+  private boolean lastSortUp = true;
 
   public ExpenseDetails() {
     initWidget(uiBinder.createAndBindUi(this));
-
-    // Initialize the widgets.
-    notesBox.setText("Trip to Jaimaica for 'research'");
-    totalLabel.setText("$42");
-
-    // Initialize the list of expenses.
-    List<ExpenseItem> itemList = items.getList();
-    itemList.add(new ExpenseItem("Beer", new Date(), "Food", 4215, true));
-    itemList.add(new ExpenseItem("Jerk Chicken", new Date(), "Food", 1500,
-        false));
 
     // Add the view to the adapter.
     items.addView(table);
   }
 
-  public void setReportRecord(ReportRecord report) {
-    // TODO(rice): implement this
-    Window.alert("Selected Report: " + report.getPurpose());
+  public void onReportDetailChanged(ExpenseRecordChanged event) {
+    items.refresh();
+    itemList = items.getList();
+    sortExpenses(lastComparator, lastSortUp);
   }
-  
+
+  public void setReportRecord(ReportRecord report) {
+    reportName.setText(report.getPurpose());
+    notesBox.setText(report.getNotes());
+  }
+
+  public void setValueList(List<ExpenseRecord> newValues) {
+    items.setList(newValues);
+    itemList = items.getList();
+    sortExpenses(lastComparator, lastSortUp);
+  }
+
   @UiFactory
-  CellTable<ExpenseItem> createTable() {
-    CellTable<ExpenseItem> view = new CellTable<ExpenseItem>(15);
+  CellTable<ExpenseRecord> createTable() {
+    CellTable<ExpenseRecord> view = new CellTable<ExpenseRecord>(15);
 
-    // Name column.
-    view.addColumn(new Column<ExpenseItem, String>(TextCell.getInstance()) {
-      @Override
-      public String getValue(ExpenseItem object) {
-        return object.name;
-      }
-    }, new Header<String>(TextCell.getInstance()) {
-      @Override
-      public String getValue() {
-        return "Name";
-      }
-    });
+    // Date column
+    addColumn(view, "Date", new DateCell(),
+        new GetValue<ExpenseRecord, Date>() {
+          public Date getValue(ExpenseRecord object) {
+            return object.getDate();
+          }
+        }, dateComparator);
 
-    // Date column.
-    view.addColumn(new Column<ExpenseItem, Date>(new DateCell()) {
-      @Override
-      public Date getValue(ExpenseItem object) {
-        return object.date;
-      }
-    }, new Header<String>(TextCell.getInstance()) {
-      @Override
-      public String getValue() {
-        return "Date";
+    // Description column.
+    addColumn(view, "Description", new GetValue<ExpenseRecord, String>() {
+      public String getValue(ExpenseRecord object) {
+        return object.getDescription();
       }
     });
 
     // Category column.
-    view.addColumn(new Column<ExpenseItem, String>(TextCell.getInstance()) {
-      @Override
-      public String getValue(ExpenseItem object) {
-        return object.category;
-      }
-    }, new Header<String>(TextCell.getInstance()) {
-      @Override
-      public String getValue() {
-        return "Category";
+    addColumn(view, "Category", new GetValue<ExpenseRecord, String>() {
+      public String getValue(ExpenseRecord object) {
+        return object.getCategory();
       }
     });
 
-    // Price column.
-    view.addColumn(new Column<ExpenseItem, Integer>(new CurrencyCell()) {
-      @Override
-      public Integer getValue(ExpenseItem object) {
-        return object.price;
-      }
-    }, new Header<String>(TextCell.getInstance()) {
-      @Override
-      public String getValue() {
-        return "Price";
-      }
-    });
+    // Amount column.
+    addColumn(view, "Amount", new CurrencyCell(),
+        new GetValue<ExpenseRecord, Integer>() {
+          public Integer getValue(ExpenseRecord object) {
+            return (int) (object.getAmount().doubleValue() * 100);
+          }
+        }, amountComparator);
 
-    // Approved column.
-    view.addColumn(new Column<ExpenseItem, Boolean>(new CheckboxCell()) {
-      @Override
-      public Boolean getValue(ExpenseItem object) {
-        return object.approved;
-      }
-    }, new Header<String>(TextCell.getInstance()) {
-      @Override
-      public String getValue() {
-        return "Approved";
+    // Approval column.
+    addColumn(view, "Approval Status", new GetValue<ExpenseRecord, String>() {
+      public String getValue(ExpenseRecord object) {
+        return object.getApproval();
       }
     });
 
     return view;
+  }
+
+  private <C extends Comparable<C>> Column<ExpenseRecord, C> addColumn(
+      CellTable<ExpenseRecord> table, final String text, final Cell<C> cell,
+      final GetValue<ExpenseRecord, C> getter,
+      final Comparator<ExpenseRecord> comparator) {
+    Column<ExpenseRecord, C> column = new Column<ExpenseRecord, C>(cell) {
+      @Override
+      public C getValue(ExpenseRecord object) {
+        return getter.getValue(object);
+      }
+    };
+    Header<String> header = new Header<String>(ClickableTextCell.getInstance()) {
+      @Override
+      public String getValue() {
+        return text;
+      }
+    };
+    header.setUpdater(new ValueUpdater<String>() {
+      boolean sortUp = true;
+
+      public void update(String value) {
+        if (comparator == null) {
+          sortExpenses(new Comparator<ExpenseRecord>() {
+            public int compare(ExpenseRecord o1, ExpenseRecord o2) {
+              return getter.getValue(o1).compareTo(getter.getValue(o2));
+            }
+          }, sortUp);
+        } else {
+          sortExpenses(comparator, sortUp);
+        }
+        sortUp = !sortUp;
+      }
+    });
+    table.addColumn(column, header);
+    return column;
+  }
+
+  private Column<ExpenseRecord, String> addColumn(
+      CellTable<ExpenseRecord> table, final String text,
+      final GetValue<ExpenseRecord, String> getter) {
+    return addColumn(table, text, TextCell.getInstance(), getter, null);
+  }
+
+  private void sortExpenses(final Comparator<ExpenseRecord> comparator,
+      boolean sortUp) {
+    lastComparator = comparator;
+    lastSortUp = sortUp;
+    if (sortUp) {
+      Collections.sort(itemList, comparator);
+    } else {
+      Collections.sort(itemList, new Comparator<ExpenseRecord>() {
+        public int compare(ExpenseRecord o1, ExpenseRecord o2) {
+          return -comparator.compare(o1, o2);
+        }
+      });
+    }
   }
 }

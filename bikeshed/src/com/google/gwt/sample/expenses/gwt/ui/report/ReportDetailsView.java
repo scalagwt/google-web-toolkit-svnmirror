@@ -39,6 +39,8 @@ public class ReportDetailsView extends Composite implements ReportDetailsActivit
   @UiField
   SpanElement versionSpan;
   @UiField
+  SpanElement notes;
+  @UiField
   SpanElement purpose;
   @UiField
   SpanElement created;
@@ -57,11 +59,11 @@ public class ReportDetailsView extends Composite implements ReportDetailsActivit
 
   public void setValue(ReportRecord record) {
     purpose.setInnerText(record.getPurpose());
+    notes.setInnerText(record.getNotes());
     created.setInnerText(DateTimeFormat.getShortDateFormat().format(record.getCreated()));
     idSpan.setInnerText(record.getId());
     versionSpan.setInnerText(record.getVersion().toString());
     reporterKey.setInnerText(record.getReporterKey());
     approvedSupervisorKey.setInnerText(record.getApprovedSupervisorKey());
   }
-
 }
