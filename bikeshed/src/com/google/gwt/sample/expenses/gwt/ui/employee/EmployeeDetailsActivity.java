@@ -17,26 +17,17 @@ package com.google.gwt.sample.expenses.gwt.ui.employee;
 
 import com.google.gwt.app.place.AbstractActivity;
 import com.google.gwt.app.util.IsWidget;
+import com.google.gwt.requestfactory.shared.Receiver;
 import com.google.gwt.sample.expenses.gwt.request.EmployeeRecord;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
 import com.google.gwt.user.client.ui.TakesValue;
-import com.google.gwt.user.client.ui.TakesValueList;
 import com.google.gwt.valuestore.shared.Value;
-
-import java.util.List;
 
 /**
  * An {@link com.google.gwt.app.place.Activity Activity} that requests and
  * displays detailed information on a given employee.
  */
 public class EmployeeDetailsActivity extends AbstractActivity {
-  class RequestCallBack implements TakesValueList<EmployeeRecord> {
-    public void setValueList(List<EmployeeRecord> listOfOne) {
-      view.setValue(listOfOne.get(0));
-      callback.showActivityWidget(view);
-    }
-  }
-
   interface View extends TakesValue<EmployeeRecord>, IsWidget {
   }
 
@@ -52,7 +43,6 @@ public class EmployeeDetailsActivity extends AbstractActivity {
   private final ExpensesRequestFactory requests;
   private final View view;
   private String id;
-  private Display callback;
 
   /**
    * Creates an activity that uses the default singleton view instance.
@@ -64,15 +54,21 @@ public class EmployeeDetailsActivity extends AbstractActivity {
   /**
    * Creates an activity that uses its own view instance.
    */
-  public EmployeeDetailsActivity(String id, ExpensesRequestFactory requests, View view) {
+  public EmployeeDetailsActivity(String id, ExpensesRequestFactory requests,
+      View view) {
     this.id = id;
     this.requests = requests;
     this.view = view;
   }
 
-  public void start(Display callback) {
-    this.callback = callback;
-    requests.employeeRequest().findEmployee(Value.of(id)).to(
-        new RequestCallBack()).fire();
+  public void start(final Display display) {
+    Receiver<EmployeeRecord> callback = new Receiver<EmployeeRecord>() {
+      public void onSuccess(EmployeeRecord record) {
+        view.setValue(record);
+        display.showActivityWidget(view);
+      }
+    };
+
+    requests.employeeRequest().findEmployee(Value.of(id)).to(callback).fire();
   }
 }

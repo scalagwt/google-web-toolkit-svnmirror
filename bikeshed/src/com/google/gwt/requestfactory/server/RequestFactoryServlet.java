@@ -97,6 +97,7 @@ public class RequestFactoryServlet extends HttpServlet {
 
   protected Map<String, EntityRecordPair> tokenToEntityRecord;
 
+  @SuppressWarnings("unchecked")
   @Override
   protected void doPost(HttpServletRequest request, HttpServletResponse response)
       throws IOException {
@@ -110,7 +111,7 @@ public class RequestFactoryServlet extends HttpServlet {
       PrintWriter writer = response.getWriter();
       JSONObject topLevelJsonObject = new JSONObject(getContent(request));
       String operationName = topLevelJsonObject.getString(RequestDataManager.OPERATION_TOKEN);
-      if (operationName.equals(RequestFactory.UPDATE_STRING)) {
+      if (operationName.equals(RequestFactory.SYNC)) {
         sync(topLevelJsonObject.getString(RequestDataManager.CONTENT_TOKEN),
             writer);
       } else {
@@ -125,14 +126,27 @@ public class RequestFactoryServlet extends HttpServlet {
         Object args[] = RequestDataManager.getObjectsFromParameterMap(
             getParameterMap(topLevelJsonObject),
             domainMethod.getParameterTypes());
-        Object resultList = domainMethod.invoke(null, args);
-        if (!(resultList instanceof List<?>)) {
-          throw new IllegalArgumentException("return value not a list "
-              + resultList);
+        Object result = domainMethod.invoke(null, args);
+
+        if ((result instanceof List<?>) != operation.isReturnTypeList()) {
+          throw new IllegalArgumentException(String.format(
+              "Type mismatch, expected %s%s, but %s returns %s",
+              operation.isReturnTypeList() ? "list of " : "",
+              operation.getReturnType(), domainMethod,
+              domainMethod.getReturnType()));
         }
-        JSONArray jsonArray = getJsonArray((List<?>) resultList,
-            operation.getReturnType());
-        writer.print(jsonArray.toString());
+
+        if (result instanceof List<?>) {
+          JSONArray jsonArray = getJsonArray((List<?>) result,
+              (Class<? extends Record>) operation.getReturnType());
+          writer.print(jsonArray.toString());
+        } else if (result instanceof Number) {
+          writer.print(result.toString());
+        } else {
+          JSONObject jsonObject = getJsonObject(result,
+              (Class<? extends Record>) operation.getReturnType());
+          writer.print("(" + jsonObject.toString() + ")");
+        }
       }
       writer.flush();
       // TODO: clean exception handling code below.
@@ -332,18 +346,24 @@ public class RequestFactoryServlet extends HttpServlet {
     }
 
     for (Object entityElement : resultList) {
-      JSONObject jsonObject = new JSONObject();
-      for (Property<?> p : allProperties(entityKeyClass)) {
-
-        if (requestedProperty(p)) {
-          String propertyName = p.getName();
-          jsonObject.put(propertyName, getPropertyValueFromDataStore(
-              entityElement, propertyName));
-        }
-      }
-      jsonArray.put(jsonObject);
+      jsonArray.put(getJsonObject(entityElement, entityKeyClass));
     }
     return jsonArray;
+  }
+
+  private JSONObject getJsonObject(Object entityElement,
+      Class<? extends Record> entityKeyClass) throws JSONException,
+      NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+    JSONObject jsonObject = new JSONObject();
+    for (Property<?> p : allProperties(entityKeyClass)) {
+
+      if (requestedProperty(p)) {
+        String propertyName = p.getName();
+        jsonObject.put(propertyName, getPropertyValueFromDataStore(
+            entityElement, propertyName));
+      }
+    }
+    return jsonObject;
   }
 
   /**
@@ -442,8 +462,7 @@ public class RequestFactoryServlet extends HttpServlet {
       return new Integer(recordObject.getInt(key));
     }
     /*
-     * 1. decode String to long.
-     * 2. decode Double to Date.
+     * 1. decode String to long. 2. decode Double to Date.
      */
     if (propertyType == java.lang.Long.class) {
       return Long.valueOf(recordObject.getString(key));
@@ -502,18 +521,16 @@ public class RequestFactoryServlet extends HttpServlet {
         }
         for (int i = 0; i < length; i++) {
           JSONObject recordWithSchema = reportArray.getJSONObject(i);
-          // iterator has just one element.
           Iterator<?> iterator = recordWithSchema.keys();
-          iterator.hasNext();
           String recordToken = (String) iterator.next();
-          JSONObject recordObject = recordWithSchema.getJSONObject(recordToken);
-          JSONObject returnObject = updateRecordInDataStore(recordToken,
-              recordObject, writeOperation);
-          returnArray.put(returnObject);
           if (iterator.hasNext()) {
             throw new IllegalArgumentException(
                 "There cannot be more than one record token");
           }
+          JSONObject recordObject = recordWithSchema.getJSONObject(recordToken);
+          JSONObject returnObject = updateRecordInDataStore(recordToken,
+              recordObject, writeOperation);
+          returnArray.put(returnObject);
         }
         returnJsonObject.put(writeOperation.name(), returnArray);
       }

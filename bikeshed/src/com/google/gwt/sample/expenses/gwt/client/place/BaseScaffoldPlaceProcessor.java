@@ -21,8 +21,8 @@ package com.google.gwt.sample.expenses.gwt.client.place;
  * <p>
  * <strong>NB</strong>It is a bad idea to use this class if your code needs to
  * be extended when new subclasses of {@link ScaffoldPlace} are added. If that's
- * the case, implement ScaffoldPlaceVisitor yourself, so that the compiler will
- * let you know to update your code.
+ * the case, implement ScaffoldPlaceProcessor yourself, so that the compiler
+ * will let you know to update your code.
  */
 public class BaseScaffoldPlaceProcessor implements ScaffoldPlaceProcessor {
 

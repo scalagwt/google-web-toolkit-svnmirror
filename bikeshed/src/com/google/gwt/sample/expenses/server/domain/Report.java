@@ -17,7 +17,6 @@ package com.google.gwt.sample.expenses.server.domain;
 
 import org.datanucleus.jpa.annotations.Extension;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -40,7 +39,7 @@ public class Report {
   public static long countReports() {
     EntityManager em = entityManager();
     try {
-      return ((Integer) em.createQuery("select count(o) from Report o").getSingleResult()).intValue();
+      return ((Number) em.createQuery("select count(o) from Employee o").getSingleResult()).longValue();
     } finally {
       em.close();
     }
@@ -63,10 +62,6 @@ public class Report {
     }
   }
 
-  public static List<Report> findListOfOneReport(String id) {
-    return Collections.singletonList(findReport(id));
-  }
-  
   public static Report findReport(String id) {
     if (id == null) {
       return null;

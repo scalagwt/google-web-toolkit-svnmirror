@@ -16,7 +16,9 @@
 package com.google.gwt.sample.expenses.gwt.ui.report;
 
 import com.google.gwt.app.place.PlaceController;
-import com.google.gwt.requestfactory.shared.EntityListRequest;
+import com.google.gwt.bikeshed.list.shared.Range;
+import com.google.gwt.requestfactory.shared.Receiver;
+import com.google.gwt.requestfactory.shared.RecordListRequest;
 import com.google.gwt.sample.expenses.gwt.client.place.ReportScaffoldPlace;
 import com.google.gwt.sample.expenses.gwt.client.place.ScaffoldPlace;
 import com.google.gwt.sample.expenses.gwt.client.place.ScaffoldRecordPlace.Operation;
@@ -71,7 +73,13 @@ public final class ReportListActivity extends
     placeController.goTo(new ReportScaffoldPlace(record, Operation.DETAILS));
   }
 
-  protected EntityListRequest<ReportRecord> createRequest() {
-    return requests.reportRequest().findAllReports();
+  protected RecordListRequest<ReportRecord> createRangeRequest(Range range) {
+    return requests.reportRequest().findReportEntries(range.getStart(),
+        range.getLength());
+  }
+
+  @Override
+  protected void fireCountRequest(Receiver<Long> callback) {
+    requests.reportRequest().countReports().to(callback).fire();
   }
 }

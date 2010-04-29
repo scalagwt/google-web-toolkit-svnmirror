@@ -17,9 +17,9 @@ package com.google.gwt.sample.expenses.gwt.client;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.requestfactory.shared.Receiver;
 import com.google.gwt.sample.expenses.gwt.request.EmployeeRecord;
 import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.TakesValueList;
 
 import java.util.List;
 
@@ -27,7 +27,7 @@ import java.util.List;
  * Manages the Employee ListBox. This should grow into a proper View, with a
  * corresponding Presenter factored out of {@link Expenses}
  */
-public final class EmployeeList implements TakesValueList<EmployeeRecord> {
+public final class EmployeeList implements Receiver<List<EmployeeRecord>> {
   interface Listener {
     void onEmployeeSelected(EmployeeRecord e);
   }
@@ -52,16 +52,16 @@ public final class EmployeeList implements TakesValueList<EmployeeRecord> {
     listBox.addChangeHandler(new MyChangeHandler());
   }
 
-  public void setListener(Listener listener) {
-    this.listener = listener;
-  }
-
-  public void setValueList(List<EmployeeRecord> newValues) {
+  public void onSuccess(List<EmployeeRecord> newValues) {
     this.employeeValues = newValues;
     listBox.clear();
     for (int i = 0; i < employeeValues.size(); i++) {
       EmployeeRecord values = employeeValues.get(i);
       listBox.addItem(values.getDisplayName());
     }
+  }
+
+  public void setListener(Listener listener) {
+    this.listener = listener;
   }
 }

@@ -23,6 +23,7 @@ import com.google.gwt.bikeshed.list.client.CellTable;
 import com.google.gwt.bikeshed.list.client.Column;
 import com.google.gwt.bikeshed.list.shared.ListViewAdapter;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.requestfactory.shared.Receiver;
 import com.google.gwt.sample.expenses.gwt.request.ReportRecord;
 import com.google.gwt.sample.expenses.gwt.request.ReportRecordChanged;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -32,7 +33,6 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
-import com.google.gwt.user.client.ui.TakesValueList;
 import com.google.gwt.user.client.ui.Widget;
 
 import java.util.Date;
@@ -43,7 +43,7 @@ import java.util.List;
  * refactored into proper MVP pieces.
  */
 public class ExpensesShell extends Composite implements
-    TakesValueList<ReportRecord>, ReportRecordChanged.Handler {
+    Receiver<List<ReportRecord>>, ReportRecordChanged.Handler {
   interface Listener {
     void setPurpose(ReportRecord report, String purpose);
   }
@@ -130,13 +130,13 @@ public class ExpensesShell extends Composite implements
     refresh();
   }
 
-  public void setListener(Listener listener) {
-    this.listener = listener;
-  }
-
-  public void setValueList(List<ReportRecord> newValues) {
+  public void onSuccess(List<ReportRecord> newValues) {
     this.values = newValues;
     refresh();
+  }
+
+  public void setListener(Listener listener) {
+    this.listener = listener;
   }
 
   @UiFactory

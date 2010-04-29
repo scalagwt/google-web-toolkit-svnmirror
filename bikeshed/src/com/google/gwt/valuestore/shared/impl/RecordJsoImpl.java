@@ -42,6 +42,10 @@ public class RecordJsoImpl extends JavaScriptObject implements Record {
     return copy;
   }
 
+  public static native RecordJsoImpl fromJson(String json) /*-{
+    return eval(json);
+  }-*/;
+
   public static RecordJsoImpl newCopy(RecordSchema<?> schema, String id,
       Integer version) {
     RecordJsoImpl newCopy = create();
@@ -64,9 +68,11 @@ public class RecordJsoImpl extends JavaScriptObject implements Record {
 
   @SuppressWarnings("unchecked")
   public final <V> V get(Property<V> property) {
-    // TODO lax for the moment b/c client code can't yet reasonably make the request
-//     assert isDefined(property.getName()) : "Cannot ask for a property before setting it: "
-//         + property.getName();
+    // TODO lax for the moment b/c client code can't yet reasonably make the
+    // request
+    // assert isDefined(property.getName()) :
+    // "Cannot ask for a property before setting it: "
+    // + property.getName();
 
     if (Integer.class.equals(property.getType())) {
       return (V) Integer.valueOf(getInt(property.getName()));
@@ -170,7 +176,7 @@ public class RecordJsoImpl extends JavaScriptObject implements Record {
     //      return value;
     //    }
     // return JSON.stringify(this, replacer);
-    
+
     var key = this.__key;
     delete this.__key;
     // TODO verify that the stringify() from json2.js works on IE
@@ -182,18 +188,18 @@ public class RecordJsoImpl extends JavaScriptObject implements Record {
   /**
    * Return JSON representation of just id and version fields, using org.json
    * library.
-   *
+   * 
    * @return returned string.
    */
   public final native String toJsonIdVersion() /*-{
     // Safari 4.0.5 appears not to honor the replacer argument, so we can't do this:
-//    var replacer = function(key, value) {
-//      if (key == 'id' || key == 'version') {
-//        return value;
-//      }
-//      return;
-//    }
-//    return JSON.stringify(this, replacer);
+    //    var replacer = function(key, value) {
+    //      if (key == 'id' || key == 'version') {
+    //        return value;
+    //      }
+    //      return;
+    //    }
+    //    return JSON.stringify(this, replacer);
     var object = { id: this.id, version: this.version };
     return JSON.stringify(object);
   }-*/;

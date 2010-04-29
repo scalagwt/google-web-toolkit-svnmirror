@@ -31,6 +31,7 @@ import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.requestfactory.shared.Receiver;
 import com.google.gwt.sample.expenses.gwt.request.ReportRecord;
 import com.google.gwt.sample.expenses.gwt.request.ReportRecordChanged;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -38,7 +39,6 @@ import com.google.gwt.uibinder.client.UiFactory;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.TakesValueList;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -50,24 +50,14 @@ import java.util.List;
  * The list of expense reports on the left side of the app.
  */
 public class ExpenseList extends Composite implements
-    TakesValueList<ReportRecord>, ReportRecordChanged.Handler {
+    Receiver<List<ReportRecord>>, ReportRecordChanged.Handler {
 
-  private static final String TEXTBOX_DISABLED_COLOR = "#aaaaaa";
-  private static final String TEXTBOX_DEFAULT_TEXT = "search";
-
-  private static ExpenseListUiBinder uiBinder = GWT.create(ExpenseListUiBinder.class);
-
+  interface ExpenseListUiBinder extends UiBinder<Widget, ExpenseList> {
+  }
   /**
    * Custom listener for this widget.
    */
   interface Listener {
-
-    /**
-     * Called when the user enters a search value.
-     * 
-     * @param startWith the search string
-     */
-    void onSearch(String startWith);
 
     /**
      * Called whent he user selects a report.
@@ -75,10 +65,20 @@ public class ExpenseList extends Composite implements
      * @param report the selected report
      */
     void onReportSelected(ReportRecord report);
+
+    /**
+     * Called when the user enters a search value.
+     * 
+     * @param startWith the search string
+     */
+    void onSearch(String startWith);
   }
 
-  interface ExpenseListUiBinder extends UiBinder<Widget, ExpenseList> {
-  }
+  private static final String TEXTBOX_DISABLED_COLOR = "#aaaaaa";
+
+  private static final String TEXTBOX_DEFAULT_TEXT = "search";
+
+  private static ExpenseListUiBinder uiBinder = GWT.create(ExpenseListUiBinder.class);
 
   @UiField
   CellTable<ReportRecord> table;
@@ -138,12 +138,7 @@ public class ExpenseList extends Composite implements
     reports.refresh();
   }
 
-  public void setListener(Listener listener) {
-    this.listener = listener;
-    search();
-  }
-
-  public void setValueList(List<ReportRecord> newValues) {
+  public void onSuccess(List<ReportRecord> newValues) {
     // TODO(jlabanca): Handle search on the server.
     // Search through the values.
     String startsWith = searchBox.getText().toLowerCase();
@@ -162,6 +157,11 @@ public class ExpenseList extends Composite implements
     }
 
     reports.setList(matched);
+  }
+
+  public void setListener(Listener listener) {
+    this.listener = listener;
+    search();
   }
 
   @UiFactory

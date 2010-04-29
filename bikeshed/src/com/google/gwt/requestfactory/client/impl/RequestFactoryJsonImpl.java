@@ -87,8 +87,8 @@ public class RequestFactoryJsonImpl implements RequestFactory {
         RequestBuilder builder = new RequestBuilder(RequestBuilder.POST,
             "/expenses/data");
 
-        builder.setRequestData(ClientRequestObject.getRequestString(RequestDataManager.getRequestMap(
-            RequestFactory.UPDATE_STRING, null, jsonDeltas.toJson())));
+        builder.setRequestData(ClientRequestHelper.getRequestString(RequestDataManager.getRequestMap(
+            RequestFactory.SYNC, null, jsonDeltas.toJson())));
         builder.setCallback(new RequestCallback() {
 
           public void onError(Request request, Throwable exception) {

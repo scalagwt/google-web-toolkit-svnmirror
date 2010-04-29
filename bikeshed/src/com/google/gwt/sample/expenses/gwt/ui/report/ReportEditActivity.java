@@ -17,17 +17,15 @@ package com.google.gwt.sample.expenses.gwt.ui.report;
 
 import com.google.gwt.app.place.AbstractActivity;
 import com.google.gwt.app.place.PlaceController;
+import com.google.gwt.requestfactory.shared.Receiver;
 import com.google.gwt.sample.expenses.gwt.client.place.ListScaffoldPlace;
 import com.google.gwt.sample.expenses.gwt.client.place.ScaffoldPlace;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
 import com.google.gwt.sample.expenses.gwt.request.ReportRecord;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.TakesValueList;
 import com.google.gwt.valuestore.shared.DeltaValueStore;
 import com.google.gwt.valuestore.shared.Value;
 import com.google.gwt.valuestore.ui.RecordEditView;
-
-import java.util.List;
 
 /**
  * An activity that requests all info on a report, allows the user to edit it,
@@ -35,15 +33,6 @@ import java.util.List;
  */
 public class ReportEditActivity extends AbstractActivity implements
     RecordEditView.Delegate {
-  class RequestCallBack implements TakesValueList<ReportRecord> {
-    public void setValueList(List<ReportRecord> listOfOne) {
-      view.setEnabled(true);
-      ReportRecord record = listOfOne.get(0);
-      view.setValue(record);
-      callback.showActivityWidget(view);
-    }
-  }
-
   private static RecordEditView<ReportRecord> defaultView;
 
   private static RecordEditView<ReportRecord> getDefaultView() {
@@ -59,7 +48,6 @@ public class ReportEditActivity extends AbstractActivity implements
   private final PlaceController<ScaffoldPlace> placeController;
 
   private DeltaValueStore deltas;
-  private Display callback;
 
   /**
    * Creates an activity that uses the default singleton view instance.
@@ -94,10 +82,15 @@ public class ReportEditActivity extends AbstractActivity implements
     }
   }
 
-  public void start(Display callback) {
-    this.callback = callback;
-    requests.reportRequest().findReport(Value.of(id)).to(
-        new RequestCallBack()).fire();
+  public void start(final Display display) {
+    Receiver<ReportRecord> callback = new Receiver<ReportRecord>() {
+      public void onSuccess(ReportRecord record) {
+        view.setEnabled(true);
+        view.setValue(record);
+        display.showActivityWidget(view);
+      }
+    };
+    requests.reportRequest().findReport(Value.of(id)).to(callback).fire();
   }
 
   @Override

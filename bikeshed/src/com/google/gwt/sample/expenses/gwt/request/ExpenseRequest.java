@@ -15,7 +15,7 @@
  */
 package com.google.gwt.sample.expenses.gwt.request;
 
-import com.google.gwt.requestfactory.shared.EntityListRequest;
+import com.google.gwt.requestfactory.shared.RecordListRequest;
 import com.google.gwt.requestfactory.shared.RequestFactory;
 import com.google.gwt.requestfactory.shared.ServerOperation;
 import com.google.gwt.valuestore.shared.PropertyReference;
@@ -71,25 +71,29 @@ public interface ExpenseRequest {
     public Class<? extends Record> getReturnType() {
       return ExpenseRecord.class;
     }
+    
+    public boolean isReturnTypeList() {
+      return true;
+    }
   }
 
   /**
    * @return a request object
    */
   @ServerOperation("FIND_ALL_EXPENSES")
-  EntityListRequest<ExpenseRecord> findAllExpenses();
+  RecordListRequest<ExpenseRecord> findAllExpenses();
 
   /**
    * @return a request object
    */
   @ServerOperation("FIND_EXPENSE")
-  EntityListRequest<ExpenseRecord> findExpense(
+  RecordListRequest<ExpenseRecord> findExpense(
       PropertyReference<String> id);
 
   /**
    * @return a request object
    */
   @ServerOperation("FIND_EXPENSES_BY_REPORT")
-  EntityListRequest<ExpenseRecord> findExpensesByReport(
+  RecordListRequest<ExpenseRecord> findExpensesByReport(
       PropertyReference<String> reportId);
 }

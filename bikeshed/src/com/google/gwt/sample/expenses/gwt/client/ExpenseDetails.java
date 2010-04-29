@@ -26,6 +26,7 @@ import com.google.gwt.bikeshed.list.client.Column;
 import com.google.gwt.bikeshed.list.client.Header;
 import com.google.gwt.bikeshed.list.shared.ListViewAdapter;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.requestfactory.shared.Receiver;
 import com.google.gwt.sample.expenses.gwt.request.ExpenseRecord;
 import com.google.gwt.sample.expenses.gwt.request.ExpenseRecordChanged;
 import com.google.gwt.sample.expenses.gwt.request.ReportRecord;
@@ -34,7 +35,6 @@ import com.google.gwt.uibinder.client.UiFactory;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.TakesValueList;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -48,7 +48,7 @@ import java.util.List;
  * including the list of expenses.
  */
 public class ExpenseDetails extends Composite implements
-    TakesValueList<ExpenseRecord>, ExpenseRecordChanged.Handler {
+    Receiver<List<ExpenseRecord>>, ExpenseRecordChanged.Handler {
 
   interface ExpenseDetailsUiBinder extends UiBinder<Widget, ExpenseDetails> {
   }
@@ -121,15 +121,15 @@ public class ExpenseDetails extends Composite implements
     sortExpenses(lastComparator, lastSortUp);
   }
 
-  public void setReportRecord(ReportRecord report) {
-    reportName.setText(report.getPurpose());
-    notesBox.setText(report.getNotes());
-  }
-
-  public void setValueList(List<ExpenseRecord> newValues) {
+  public void onSuccess(List<ExpenseRecord> newValues) {
     items.setList(newValues);
     itemList = items.getList();
     sortExpenses(lastComparator, lastSortUp);
+  }
+
+  public void setReportRecord(ReportRecord report) {
+    reportName.setText(report.getPurpose());
+    notesBox.setText(report.getNotes());
   }
 
   @UiFactory

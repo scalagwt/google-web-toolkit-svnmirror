@@ -42,24 +42,14 @@ public class ValueStoreJsonImpl implements ValueStore {
     throw new UnsupportedOperationException("Auto-generated method stub");
   }
 
-  public void setRecords(JsArray<RecordJsoImpl> newRecords) {
+  public void setRecord(RecordJsoImpl newRecord) {
+    setRecordInList(newRecord, 0, null);
+  }
 
+  public void setRecords(JsArray<RecordJsoImpl> newRecords) {
     for (int i = 0, l = newRecords.length(); i < l; i++) {
       RecordJsoImpl newRecord = newRecords.get(i);
-      RecordKey recordKey = new RecordKey(newRecord);
-
-      RecordJsoImpl oldRecord = records.get(recordKey);
-      if (oldRecord == null) {
-        records.put(recordKey, newRecord);
-      } else {
-        boolean changed = oldRecord.merge(newRecord);
-        newRecord = oldRecord.cast();
-        newRecords.set(i, newRecord);
-        if (changed) {
-          eventBus.fireEvent(newRecord.getSchema().createChangeEvent(newRecord,
-              WriteOperation.UPDATE));
-        }
-      }
+      setRecordInList(newRecord, i, newRecords);
     }
   }
 
@@ -68,5 +58,30 @@ public class ValueStoreJsonImpl implements ValueStore {
    */
   public DeltaValueStoreJsonImpl spawnDeltaView() {
     return new DeltaValueStoreJsonImpl(this);
+  }
+
+  /**
+   * @param newRecord
+   * @param i
+   * @param array
+   */
+  private void setRecordInList(RecordJsoImpl newRecord, int i,
+      JsArray<RecordJsoImpl> array) {
+    RecordKey recordKey = new RecordKey(newRecord);
+
+    RecordJsoImpl oldRecord = records.get(recordKey);
+    if (oldRecord == null) {
+      records.put(recordKey, newRecord);
+    } else {
+      boolean changed = oldRecord.merge(newRecord);
+      newRecord = oldRecord.cast();
+      if (array != null) {
+        array.set(i, newRecord);
+      }
+      if (changed) {
+        eventBus.fireEvent(newRecord.getSchema().createChangeEvent(newRecord,
+            WriteOperation.UPDATE));
+      }
+    }
   }
 }

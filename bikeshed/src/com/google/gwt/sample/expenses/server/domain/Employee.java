@@ -17,7 +17,6 @@ package com.google.gwt.sample.expenses.server.domain;
 
 import org.datanucleus.jpa.annotations.Extension;
 
-import java.util.Collections;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -38,7 +37,7 @@ public class Employee {
   public static long countEmployees() {
     EntityManager em = entityManager();
     try {
-      return ((Integer) em.createQuery("select count(o) from Employee o").getSingleResult()).intValue();
+      return ((Number) em.createQuery("select count(o) from Employee o").getSingleResult()).longValue();
     } finally {
       em.close();
     }
@@ -78,17 +77,16 @@ public class Employee {
       int maxResults) {
     EntityManager em = entityManager();
     try {
-      return em.createQuery("select o from Employee o").setFirstResult(
+      List resultList = em.createQuery("select o from Employee o").setFirstResult(
           firstResult).setMaxResults(maxResults).getResultList();
+      // force it to materialize
+      resultList.size();
+      return resultList;
     } finally {
       em.close();
     }
   }
 
-  public static List<Employee> findListOfOneEmployee(String id) {
-    return Collections.singletonList(findEmployee(id));
-  }
-  
   private String userName;
 
   private String displayName;

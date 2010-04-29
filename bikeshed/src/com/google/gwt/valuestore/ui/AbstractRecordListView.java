@@ -16,8 +16,8 @@
 package com.google.gwt.valuestore.ui;
 
 import com.google.gwt.bikeshed.cells.client.ActionCell;
-import com.google.gwt.bikeshed.list.client.IdentityColumn;
 import com.google.gwt.bikeshed.list.client.CellTable;
+import com.google.gwt.bikeshed.list.client.IdentityColumn;
 import com.google.gwt.bikeshed.list.shared.Range;
 import com.google.gwt.bikeshed.list.shared.SelectionModel;
 import com.google.gwt.user.client.ui.Composite;
@@ -82,7 +82,7 @@ public abstract class AbstractRecordListView<R extends Record> extends
       List<PropertyColumn<R, ?>> columns) {
     super.initWidget(root);
     this.table = table;
-
+    
     for (PropertyColumn<R, ?> column : columns) {
       table.addColumn(column, column.getProperty().getName());
       properties.add(column.getProperty());

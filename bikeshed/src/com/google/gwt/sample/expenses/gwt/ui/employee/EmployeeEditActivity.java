@@ -17,17 +17,15 @@ package com.google.gwt.sample.expenses.gwt.ui.employee;
 
 import com.google.gwt.app.place.AbstractActivity;
 import com.google.gwt.app.place.PlaceController;
+import com.google.gwt.requestfactory.shared.Receiver;
 import com.google.gwt.sample.expenses.gwt.client.place.ListScaffoldPlace;
 import com.google.gwt.sample.expenses.gwt.client.place.ScaffoldPlace;
 import com.google.gwt.sample.expenses.gwt.request.EmployeeRecord;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.TakesValueList;
 import com.google.gwt.valuestore.shared.DeltaValueStore;
 import com.google.gwt.valuestore.shared.Value;
 import com.google.gwt.valuestore.ui.RecordEditView;
-
-import java.util.List;
 
 /**
  * An activity that requests all info on an employee, allows the user to  edit it,
@@ -35,15 +33,6 @@ import java.util.List;
  */
 public class EmployeeEditActivity extends AbstractActivity implements
     RecordEditView.Delegate {
-  class RequestCallBack implements TakesValueList<EmployeeRecord> {
-    public void setValueList(List<EmployeeRecord> listOfOne) {
-      view.setEnabled(true);
-      EmployeeRecord record = listOfOne.get(0);
-      view.setValue(record);
-      callback.showActivityWidget(view);
-    }
-  }
-
   private static RecordEditView<EmployeeRecord> defaultView;
 
   private static RecordEditView<EmployeeRecord> getDefaultView() {
@@ -59,7 +48,6 @@ public class EmployeeEditActivity extends AbstractActivity implements
   private final PlaceController<ScaffoldPlace> placeController;
 
   private DeltaValueStore deltas;
-  private Display callback;
 
   /**
    * Creates an activity that uses the default singleton view instance.
@@ -94,10 +82,15 @@ public class EmployeeEditActivity extends AbstractActivity implements
     }
   }
 
-  public void start(Display callback) {
-    this.callback = callback;
-    requests.employeeRequest().findEmployee(Value.of(id)).to(
-        new RequestCallBack()).fire();
+  public void start(final Display display) {
+    Receiver<EmployeeRecord> callback = new Receiver<EmployeeRecord>() {
+      public void onSuccess(EmployeeRecord record) {
+        view.setEnabled(true);
+        view.setValue(record);
+        display.showActivityWidget(view);
+      }
+    };
+    requests.employeeRequest().findEmployee(Value.of(id)).to(callback).fire();
   }
 
   @Override
