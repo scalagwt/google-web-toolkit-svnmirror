@@ -95,17 +95,18 @@ th.gwt-cellTable-firstColumn {
 .gwt-cellTable-oddRow {
   background-color: #eef4fb;
 }
-
-.gwt-cellTable-selectedRow {
-  background: #e6e6e6 url(selectionGradient.png) left top repeat-x;
+@sprite .gwt-cellTable-selectedRow {
+  gwt-image: 'selectionGradient';
+  background-color: #628cd5;
   color: white;
+  height: auto;
+  overflow: auto;
 }
 
 /** Applies to CellTree **/
 .gwt-cellTree-selectedItem {
   background-color: rgb(56, 117, 215);
 }
-
 
 /** Applies to CellBrowser **/
 .gwt-CellBrowser {
@@ -120,16 +121,30 @@ th.gwt-cellTable-firstColumn {
 
 .gwt-cellList-evenRow,
 .gwt-cellList-oddRow {
-  padding: 4px 4px 4px 15px;
 }
-
-.gwt-cellBrowser-openItem {
-  background: #e6e6e6 url(openGradient.png) left top repeat-x;
-  color: white;
+.gwt-cellBrowser-item {
+  padding: 4px;
 }
-.gwt-cellList-selectedItem {
-  background: #e6e6e6 url(selectionGradient.png) left top  repeat-x;
+@sprite .gwt-cellBrowser-openItem {
+  gwt-image: 'openGradient';
+  background-color: #7b7b7b;
   color: white;
+  height: auto;
+  overflow: auto;
+}
+@sprite .gwt-cellList-selectedItem {
+  gwt-image: 'selectionGradient';
+  background-color: #628cd5;
+  color: white;
+  height: auto;
+  overflow: auto;
+}
+@sprite .gwt-cellBrowser-selectedItem {
+  gwt-image: 'selectionGradient';
+  background-color: #628cd5;
+  color: white;
+  height: auto;
+  overflow: auto;
 }
 
 /* date picker */

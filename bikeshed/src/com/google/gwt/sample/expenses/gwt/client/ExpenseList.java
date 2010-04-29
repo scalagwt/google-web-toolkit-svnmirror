@@ -69,9 +69,9 @@ public class ExpenseList extends Composite implements
     /**
      * Called when the user enters a search value.
      * 
-     * @param startWith the search string
+     * @param startsWith the search string
      */
-    void onSearch(String startWith);
+    void onSearch(String startsWith);
   }
 
   private static final String TEXTBOX_DISABLED_COLOR = "#aaaaaa";

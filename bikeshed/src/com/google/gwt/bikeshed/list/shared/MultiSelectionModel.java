@@ -40,16 +40,16 @@ public class MultiSelectionModel<T> extends AbstractSelectionModel<T> {
   }
 
   public boolean isSelected(T object) {
-    return selectedKeys.contains(getKeyProvider().getKey(object));
+    return selectedKeys.contains(getKey(object));
   }
 
   public void setSelected(T object, boolean selected) {
     if (selected) {
       selectedSet.add(object);
-      selectedKeys.add(getKeyProvider().getKey(object));
+      selectedKeys.add(getKey(object));
     } else {
       selectedSet.remove(object);
-      selectedKeys.remove(getKeyProvider().getKey(object));
+      selectedKeys.remove(getKey(object));
     }
     scheduleSelectionChangeEvent();
   }

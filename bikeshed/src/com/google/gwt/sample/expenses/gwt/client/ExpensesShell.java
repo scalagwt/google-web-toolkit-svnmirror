@@ -54,6 +54,8 @@ public class ExpensesShell extends Composite implements
   private static ShellUiBinder uiBinder = GWT.create(ShellUiBinder.class);
 
   @UiField
+  ExpenseBrowser expenseBrowser;
+  @UiField
   ExpenseDetails expenseDetails;
   @UiField
   ExpenseList expenseList;
@@ -112,6 +114,10 @@ public class ExpensesShell extends Composite implements
         listener.setPurpose(object, value);
       }
     });
+  }
+
+  public ExpenseBrowser getExpenseBrowser() {
+    return expenseBrowser;
   }
 
   public ExpenseDetails getExpenseDetails() {

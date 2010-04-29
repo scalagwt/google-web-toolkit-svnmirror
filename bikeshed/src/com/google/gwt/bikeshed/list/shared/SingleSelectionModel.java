@@ -38,13 +38,11 @@ public final class SingleSelectionModel<T> extends AbstractSelectionModel<T> {
     if (curSelection == null || curKey == null || object == null) {
       return false;
     }
-    ProvidesKey<T> keyProvider = getKeyProvider();
-    Object newKey = keyProvider.getKey(object);
-    return curKey.equals(newKey);
+    return curKey.equals(getKey(object));
   }
 
   public void setSelected(T object, boolean selected) {
-    Object key = getKeyProvider().getKey(object);
+    Object key = getKey(object);
     if (selected) {
       curSelection = object;
       curKey = key;

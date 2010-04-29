@@ -71,9 +71,19 @@ public class CellBrowser extends CellTreeView implements ProvidesResize,
   private static final String STYLENAME_FIRST_COLUMN = "gwt-cellBrowser-firstColumn";
 
   /**
-   * The style name assigned to each column.
+   * The style name assigned to each item.
+   */
+  private static final String STYLENAME_ITEM = "gwt-cellBrowser-item";
+
+  /**
+   * The style name assigned to open items.
    */
   private static final String STYLENAME_OPEN = "gwt-cellBrowser-openItem";
+
+  /**
+   * The style name assigned to open items.
+   */
+  private static final String STYLENAME_SELECTED = "gwt-cellBrowser-selectedItem";
 
   /**
    * The prefix of the ID assigned to open cells.
@@ -149,6 +159,11 @@ public class CellBrowser extends CellTreeView implements ProvidesResize,
     private final ProvidesKey<C> providesKey;
 
     /**
+     * The selection model for the node.
+     */
+    private final SelectionModel<? super C> selectionModel;
+
+    /**
      * Construct a new {@link CellDecorator}.
      * 
      * @param nodeInfo the {@link NodeInfo} associated with the cell
@@ -158,6 +173,7 @@ public class CellBrowser extends CellTreeView implements ProvidesResize,
       this.cell = nodeInfo.getCell();
       this.level = level;
       this.providesKey = nodeInfo.getProvidesKey();
+      this.selectionModel = nodeInfo.getSelectionModel();
     }
 
     @Override
@@ -183,14 +199,18 @@ public class CellBrowser extends CellTreeView implements ProvidesResize,
         trimToLevel(level);
 
         // Remove style from currently open item.
-        updateOpenElement(false);
+        Element curOpenItem = Document.get().getElementById(getOpenId());
+        if (curOpenItem != null) {
+          setElementOpenState(curOpenItem.getParentElement(), false);
+        }
+        openKey = null;
 
         // Save the key of the new open item and update the Element.
         if (!getTreeViewModel().isLeaf(value)) {
           NodeInfo<?> nodeInfo = getTreeViewModel().getNodeInfo(value);
           if (nodeInfo != null) {
             openKey = providesKey.getKey(value);
-            replaceImageElement(parent, true);
+            setElementOpenState(parent, true);
             appendTreeNode(nodeInfo);
           }
         }
@@ -203,10 +223,20 @@ public class CellBrowser extends CellTreeView implements ProvidesResize,
     public void render(C value, Object viewData, StringBuilder sb) {
       boolean isOpen = (openKey == null) ? false
           : openKey.equals(providesKey.getKey(value));
+      boolean isSelected = (selectionModel == null) ? false
+          : selectionModel.isSelected(value);
       int imageWidth = getImageWidth();
       sb.append("<div style='position:relative;padding-right:");
       sb.append(imageWidth);
       sb.append("px;'");
+      sb.append(" class='").append(STYLENAME_ITEM);
+      if (isOpen) {
+        sb.append(" ").append(STYLENAME_OPEN);
+      }
+      if (isSelected) {
+        sb.append(" ").append(STYLENAME_SELECTED);
+      }
+      sb.append("'");
       if (isOpen) {
         sb.append(" id='").append(getOpenId()).append("'");
       }
@@ -226,21 +256,6 @@ public class CellBrowser extends CellTreeView implements ProvidesResize,
     @Override
     public void setValue(Element parent, C value, Object viewData) {
       cell.setValue(getCellParent(parent), value, viewData);
-    }
-
-    /**
-     * Find the currently open element and update its style.
-     * 
-     * @param isOpen if the open element is still open
-     */
-    public void updateOpenElement(boolean isOpen) {
-      Element curOpenItem = Document.get().getElementById(getOpenId());
-      if (curOpenItem != null) {
-        replaceImageElement(curOpenItem.getParentElement(), isOpen);
-      }
-      if (!isOpen) {
-        openKey = null;
-      }
     }
 
     /**
@@ -273,19 +288,20 @@ public class CellBrowser extends CellTreeView implements ProvidesResize,
     }
 
     /**
-     * Replace the image element of a cell.
+     * Replace the image element of a cell and update the styles associated with
+     * the open state.
      * 
      * @param parent the parent element of the cell
      * @param open true if open, false if closed
      */
-    private void replaceImageElement(Element parent, boolean open) {
+    private void setElementOpenState(Element parent, boolean open) {
       // Update the style name and ID.
       Element wrapper = parent.getFirstChildElement();
       if (open) {
-        parent.addClassName(STYLENAME_OPEN);
+        wrapper.addClassName(STYLENAME_OPEN);
         wrapper.setId(getOpenId());
       } else {
-        parent.removeClassName(STYLENAME_OPEN);
+        wrapper.removeClassName(STYLENAME_OPEN);
         wrapper.setId("");
       }
 
@@ -582,11 +598,6 @@ public class CellBrowser extends CellTreeView implements ProvidesResize,
 
         // Refresh the list.
         listView.setData(start, length, values);
-
-        // Update the style of the open item. We do this after the rows have
-        // been rendered because we want the style to live on the cell's parent
-        // element, which is controlled by the PagingListView.
-        cell.updateOpenElement(true);
       }
 
       public void setDataSize(int size, boolean isExact) {

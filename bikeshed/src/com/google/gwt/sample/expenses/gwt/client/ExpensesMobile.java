@@ -18,18 +18,11 @@ package com.google.gwt.sample.expenses.gwt.client;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.sample.expenses.gwt.request.EmployeeRecord;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
 import com.google.gwt.sample.expenses.gwt.request.ReportRecord;
 import com.google.gwt.sample.expenses.gwt.request.ReportRecordChanged;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.valuestore.shared.DeltaValueStore;
-import com.google.gwt.valuestore.shared.Property;
-import com.google.gwt.valuestore.shared.Record;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 /**
  * Entry point for the mobile version of the Expenses app.
@@ -49,7 +42,6 @@ public class ExpensesMobile implements EntryPoint {
     RootLayoutPanel root = RootLayoutPanel.get();
 
     final ExpensesShell shell = new ExpensesShell();
-    final EmployeeList employees = new EmployeeList(shell.users);
 
     root.add(shell);
 
@@ -61,30 +53,6 @@ public class ExpensesMobile implements EntryPoint {
       }
     });
 
-    employees.setListener(new EmployeeList.Listener() {
-      public void onEmployeeSelected(EmployeeRecord e) {
-        requestFactory.reportRequest().findReportsByEmployee(
-            e.getRef(Record.id)).forProperties(getReportColumns()).to(shell).fire();
-      }
-    });
-
     eventBus.addHandler(ReportRecordChanged.TYPE, shell);
-
-    requestFactory.employeeRequest().findAllEmployees().forProperties(
-        getEmployeeMenuProperties()).to(employees).fire();
-  }
-
-  private Collection<Property<?>> getEmployeeMenuProperties() {
-    List<Property<?>> columns = new ArrayList<Property<?>>();
-    columns.add(EmployeeRecord.displayName);
-    columns.add(EmployeeRecord.userName);
-    return columns;
-  }
-
-  private Collection<Property<?>> getReportColumns() {
-    List<Property<?>> columns = new ArrayList<Property<?>>();
-    columns.add(ReportRecord.created);
-    columns.add(ReportRecord.purpose);
-    return columns;
   }
 }

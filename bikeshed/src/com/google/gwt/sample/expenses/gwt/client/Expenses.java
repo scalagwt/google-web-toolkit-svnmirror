@@ -15,6 +15,7 @@
  */
 package com.google.gwt.sample.expenses.gwt.client;
 
+import com.google.gwt.bikeshed.list.shared.ProvidesKey;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerManager;
@@ -37,32 +38,61 @@ import java.util.List;
  */
 public class Expenses implements EntryPoint {
 
+  /**
+   * The key provider for {@link EmployeeRecord}s.
+   */
+  public static final ProvidesKey<EmployeeRecord> EMPLOYEE_RECORD_KEY_PROVIDER = new ProvidesKey<EmployeeRecord>() {
+    public Object getKey(EmployeeRecord item) {
+      return item == null ? null : item.getId();
+    }
+  };
+
+  private ExpensesRequestFactory requestFactory;
+  private String searchCategory;
+  private EmployeeRecord searchEmployee;
+  private String searchStartsWith;
+  private ExpensesShell shell;
+
   public void onModuleLoad() {
     final HandlerManager eventBus = new HandlerManager(null);
-    final ExpensesRequestFactory requestFactory = GWT.create(ExpensesRequestFactory.class);
+    requestFactory = GWT.create(ExpensesRequestFactory.class);
     requestFactory.init(eventBus);
 
     RootLayoutPanel root = RootLayoutPanel.get();
 
-    final ExpensesShell shell = new ExpensesShell();
-    final EmployeeList employees = new EmployeeList(shell.users);
+    shell = new ExpensesShell();
+    final ExpenseBrowser expenseBrowser = shell.getExpenseBrowser();
+    final ExpenseList expenseList = shell.getExpenseList();
 
     root.add(shell);
 
+    // Listen for requests from ExpenseBrowser.
+    expenseBrowser.setListener(new ExpenseBrowser.Listener() {
+      public void onBrowse(String category, EmployeeRecord employee) {
+        if (category != null && !category.equals(searchCategory)) {
+          // TODO(jlabanca): Limit employees using category.
+          requestFactory.employeeRequest().findAllEmployees().forProperties(
+              getEmployeeMenuProperties()).to(expenseBrowser).fire();
+        }
+        searchEmployee = employee;
+        searchCategory = category;
+        searchForReports();
+      }
+    });
+
     // Listen for requests from the ExpenseList.
-    final ExpenseList expenseList = shell.getExpenseList();
     expenseList.setListener(new ExpenseList.Listener() {
       public void onReportSelected(ReportRecord report) {
         shell.getExpenseDetails().setReportRecord(report);
 
         requestFactory.expenseRequest().findExpensesByReport(
-            report.getRef(Record.id)).forProperties(getExpenseColumns()).to(shell.getExpenseDetails()).fire();
+            report.getRef(Record.id)).forProperties(getExpenseColumns()).to(
+            shell.getExpenseDetails()).fire();
       }
 
-      public void onSearch(String startWith) {
-        // TODO(jlabanca): Limit search using a query.
-        requestFactory.reportRequest().findAllReports().forProperties(
-            getReportColumns()).to(expenseList).fire();
+      public void onSearch(String startsWith) {
+        searchStartsWith = startsWith;
+        searchForReports();
       }
     });
     eventBus.addHandler(ReportRecordChanged.TYPE, expenseList);
@@ -75,17 +105,7 @@ public class Expenses implements EntryPoint {
       }
     });
 
-    employees.setListener(new EmployeeList.Listener() {
-      public void onEmployeeSelected(EmployeeRecord e) {
-        requestFactory.reportRequest().findReportsByEmployee(
-            e.getRef(Record.id)).forProperties(getReportColumns()).to(shell).fire();
-      }
-    });
-
     eventBus.addHandler(ReportRecordChanged.TYPE, shell);
-
-    requestFactory.employeeRequest().findAllEmployees().forProperties(
-        getEmployeeMenuProperties()).to(employees).fire();
   }
 
   private Collection<Property<?>> getEmployeeMenuProperties() {
@@ -111,5 +131,15 @@ public class Expenses implements EntryPoint {
     columns.add(ReportRecord.created);
     columns.add(ReportRecord.purpose);
     return columns;
+  }
+
+  /**
+   * Search for reports based on the search criteria in the browser and search
+   * box.
+   */
+  private void searchForReports() {
+    // TODO(jlabanca): Limit search using search terms.
+    requestFactory.reportRequest().findAllReports().forProperties(
+        getReportColumns()).to(shell.getExpenseList()).fire();
   }
 }

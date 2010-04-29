@@ -28,7 +28,7 @@ import com.google.gwt.event.shared.HasHandlers;
  * 
  * @param <T> the data type of records in the list
  */
-public interface SelectionModel<T> extends HasHandlers {
+public interface SelectionModel<T> extends HasHandlers, ProvidesKey<T> {
 
   /**
    * Handler interface for {@link SelectionChangeEvent} events.
@@ -122,17 +122,14 @@ public interface SelectionModel<T> extends HasHandlers {
       handlerManager.fireEvent(event);
     }
 
+    public Object getKey(T item) {
+      return keyProvider == null ? item : keyProvider.getKey(item);
+    }
+
     /**
      * Returns a ProvidesKey instance that simply returns the input data item.
      */
     public ProvidesKey<T> getKeyProvider() {
-      if (keyProvider == null) {
-        keyProvider = new ProvidesKey<T>() {
-          public Object getKey(T item) {
-            return item;
-          }
-        };
-      }
       return keyProvider;
     }
 
@@ -169,12 +166,6 @@ public interface SelectionModel<T> extends HasHandlers {
    * @return the registration for the event
    */
   HandlerRegistration addSelectionChangeHandler(SelectionChangeHandler handler);
-
-  /**
-   * Returns a ProvidesKey instance that may be used to provide a unique key for
-   * each record.
-   */
-  ProvidesKey<T> getKeyProvider();
 
   /**
    * Check if an object is selected.

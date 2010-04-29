@@ -24,15 +24,13 @@ import java.util.Map;
  * A convenience {@link SelectionModel} that allows records to be selected
  * according to a subclass-defined rule, plus a list of positive or negative
  * exceptions.
- *
+ * 
  * @param <T> the data type of records in the list
  */
 public abstract class DefaultSelectionModel<T> extends
     AbstractSelectionModel<T> {
 
   private final Map<Object, Boolean> exceptions = new HashMap<Object, Boolean>();
-
-  private final ProvidesKey<T> keyProvider = getKeyProvider();
 
   /**
    * Removes all exceptions.
@@ -88,12 +86,5 @@ public abstract class DefaultSelectionModel<T> extends
   protected void getExceptions(Map<Object, Boolean> output) {
     output.clear();
     output.putAll(exceptions);
-  }
-
-  private Object getKey(T object) {
-    if (keyProvider == null) {
-      return object;
-    }
-    return keyProvider.getKey(object);
   }
 }
