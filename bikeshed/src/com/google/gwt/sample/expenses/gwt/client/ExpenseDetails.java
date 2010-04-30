@@ -26,6 +26,7 @@ import com.google.gwt.bikeshed.list.client.CellTable;
 import com.google.gwt.bikeshed.list.client.Column;
 import com.google.gwt.bikeshed.list.shared.ListViewAdapter;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
@@ -43,7 +44,6 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -128,19 +128,28 @@ public class ExpenseDetails extends Composite implements
 
   private static ExpenseDetailsUiBinder uiBinder = GWT.create(ExpenseDetailsUiBinder.class);
 
+  @UiField
+  Element approvedLabel;
+
+  @UiField
+  Element costLabel;
+
+  @UiField
+  Element defaultText;
+
   ExpensesRequestFactory expensesRequestFactory;
+
+  @UiField
+  Element mainLayout;
 
   @UiField
   TextBox notesBox;
 
   @UiField
-  Label reportName;
+  Element reportName;
 
   @UiField
   CellTable<ExpenseRecord> table;
-
-  @UiField
-  Label totalLabel;
 
   private List<SortableHeader> allHeaders = new ArrayList<SortableHeader>();
 
@@ -155,6 +164,7 @@ public class ExpenseDetails extends Composite implements
 
   public ExpenseDetails() {
     initWidget(uiBinder.createAndBindUi(this));
+    setReportRecord(null);
 
     // Add the view to the adapter.
     items.addView(table);
@@ -189,7 +199,17 @@ public class ExpenseDetails extends Composite implements
   }
 
   public void setReportRecord(ReportRecord report) {
-    reportName.setText(report.getPurpose());
+    if (report == null) {
+      setVisible(defaultText, true);
+      setVisible(mainLayout, false);
+      return;
+    }
+
+    // Show the main layout when a report becomes available.
+    setVisible(defaultText, false);
+    setVisible(mainLayout, true);
+
+    reportName.setInnerText(report.getPurpose());
     notesBox.setText(report.getNotes());
 
     // Reset sorting state of table

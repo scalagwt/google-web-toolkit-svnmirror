@@ -20,6 +20,7 @@ import com.google.gwt.bikeshed.cells.client.DateCell;
 import com.google.gwt.bikeshed.cells.client.TextCell;
 import com.google.gwt.bikeshed.cells.client.ValueUpdater;
 import com.google.gwt.bikeshed.list.client.CellTable;
+import com.google.gwt.bikeshed.list.client.SimplePager;
 import com.google.gwt.bikeshed.list.shared.ListViewAdapter;
 import com.google.gwt.bikeshed.list.shared.SingleSelectionModel;
 import com.google.gwt.bikeshed.list.shared.SelectionModel.SelectionChangeEvent;
@@ -83,8 +84,15 @@ public class ExpenseList extends Composite implements
   private static ExpenseListUiBinder uiBinder = GWT.create(ExpenseListUiBinder.class);
 
   @UiField
-  TextBox searchBox;
+  SimplePager<ReportRecord> pager;
   @UiField
+  TextBox searchBox;
+
+  /**
+   * The main table. We provide this in the constructor before calling
+   * {@link UiBinder#createAndBindUi(Object)} because the pager depends on it.
+   */
+  @UiField(provided = true)
   CellTable<ReportRecord> table;
 
   private List<SortableHeader> allHeaders = new ArrayList<SortableHeader>();
@@ -109,6 +117,7 @@ public class ExpenseList extends Composite implements
   private SortableColumn<ReportRecord, String> purposeColumn;
 
   public ExpenseList() {
+    createTable();
     initWidget(uiBinder.createAndBindUi(this));
 
     // Add the view to the adapter.
@@ -174,45 +183,19 @@ public class ExpenseList extends Composite implements
     this.listener = listener;
     search();
   }
-  
+
   @UiFactory
-  CellTable<ReportRecord> createTable() {
-    CellTable<ReportRecord> view = new CellTable<ReportRecord>(25);
-
-    // Add a selection model.
-    final SingleSelectionModel<ReportRecord> selectionModel = new SingleSelectionModel<ReportRecord>();
-    view.setSelectionModel(selectionModel);
-    view.setSelectionEnabled(true);
-    selectionModel.addSelectionChangeHandler(new SelectionChangeHandler() {
-      public void onSelectionChange(SelectionChangeEvent event) {
-        Object selected = selectionModel.getSelectedObject();
-        if (selected != null && listener != null) {
-          listener.onReportSelected((ReportRecord) selected);
-        }
-      }
-    });
-
-    // Purpose column.
-    purposeColumn = addColumn(view, "Purpose", TextCell.getInstance(), new GetValue<ReportRecord, String>() {
-      public String getValue(ReportRecord object) {
-        return object.getPurpose();
-      }
-    });
-
-    // Created column.
-    addColumn(view, "Created", new DateCell(), new GetValue<ReportRecord, Date>() {
-      public Date getValue(ReportRecord object) {
-        return object.getCreated();
-      }
-    });
-
-    return view;
+  SimplePager<ReportRecord> createPager() {
+    SimplePager<ReportRecord> p = new SimplePager<ReportRecord>(table);
+    p.setRangeLimited(true);
+    return p;
   }
-  
+
   private <C extends Comparable<C>> SortableColumn<ReportRecord, C> addColumn(
-      final CellTable<ReportRecord> table, final String text, final Cell<C> cell,
-      final GetValue<ReportRecord, C> getter) {
-    final SortableColumn<ReportRecord, C> column = new SortableColumn<ReportRecord, C>(cell) {
+      final CellTable<ReportRecord> table, final String text,
+      final Cell<C> cell, final GetValue<ReportRecord, C> getter) {
+    final SortableColumn<ReportRecord, C> column = new SortableColumn<ReportRecord, C>(
+        cell) {
       @Override
       public C getValue(ReportRecord object) {
         return getter.getValue(object);
@@ -241,6 +224,42 @@ public class ExpenseList extends Composite implements
   }
 
   /**
+   * Create the {@link CellTable}.
+   */
+  private void createTable() {
+    table = new CellTable<ReportRecord>(8);
+
+    // Add a selection model.
+    final SingleSelectionModel<ReportRecord> selectionModel = new SingleSelectionModel<ReportRecord>();
+    table.setSelectionModel(selectionModel);
+    table.setSelectionEnabled(true);
+    selectionModel.addSelectionChangeHandler(new SelectionChangeHandler() {
+      public void onSelectionChange(SelectionChangeEvent event) {
+        Object selected = selectionModel.getSelectedObject();
+        if (selected != null && listener != null) {
+          listener.onReportSelected((ReportRecord) selected);
+        }
+      }
+    });
+
+    // Purpose column.
+    purposeColumn = addColumn(table, "Purpose", TextCell.getInstance(),
+        new GetValue<ReportRecord, String>() {
+          public String getValue(ReportRecord object) {
+            return object.getPurpose();
+          }
+        });
+
+    // Created column.
+    addColumn(table, "Created", new DateCell(),
+        new GetValue<ReportRecord, Date>() {
+          public Date getValue(ReportRecord object) {
+            return object.getCreated();
+          }
+        });
+  }
+
+  /**
    * Search based on the text.
    */
   private void search() {
@@ -252,7 +271,7 @@ public class ExpenseList extends Composite implements
       listener.onSearch(startsWith);
     }
   }
-  
+
   private void sortReports(final Comparator<ReportRecord> comparator) {
     Collections.sort(reports.getList(), comparator);
   }

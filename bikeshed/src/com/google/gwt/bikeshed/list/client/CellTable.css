@@ -8,7 +8,7 @@
 
 @sprite .footer {
   gwt-image: 'cellTableFooterBackground';
-  background-color: #b5d0f7;
+  background-color: #b4d0f8;
   border-top: 1px solid #5478af;
   border-left: 1px solid #5478af;
   padding: 5px 20px;
@@ -18,7 +18,7 @@
 
 @sprite .header {
   gwt-image: 'cellTableHeaderBackground';
-  background-color: #b5d0f7;
+  background-color: #b4d0f8;
   border-bottom: 1px solid #5478af;
   border-left: 1px solid #5478af;
   padding: 5px 20px;

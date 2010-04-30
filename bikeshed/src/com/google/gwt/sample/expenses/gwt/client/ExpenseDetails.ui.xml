@@ -10,32 +10,92 @@
     }
     
     .padded {
-      padding: 0px 20px 0px 28px;
+      padding: 0px 20px;
+    }
+    
+    .reportName {
+      font-size: 16pt;
+    }
+    
+    .details {
+      background-color: #eef4fb;
+      border: 1px solid #5478af;
+    }
+    
+    .table {
+      padding-top: 20px;
+      padding-left: 30px;
     }
   </ui:style>
 
   <g:HTMLPanel
     width='100%'
     height='100%'>
-    <div class='{style.padded}'>
-    <h1><g:Label ui:field='reportName'></g:Label></h1>
-    <table>
-      <td
-        class='{style.label}'>
-        Total Approved:
-      </td>
-      <td>
-        <g:Label
-          ui:field='totalLabel'></g:Label>
-        </td>
+
+    <div
+      ui:field='defaultText'>Select a report above</div>
+
+    <div
+      ui:field='mainLayout'
+      class='{style.padded}'>
+
+      <table
+        width='100%'>
+        <tr>
+          <td
+            valign='top'
+            align='center'
+            width='100'>
+
+            <h1
+              class='{style.reportName}'
+              ui:field='reportName'>
+            </h1>
+
+            <table
+              class='{style.details}'
+              cellpadding='8'>
+              <tr>
+                <td
+                  class='{style.label}'>
+                  Cost:
+                </td>
+                <td
+                  ui:field='costLabel'>
+                </td>
+              </tr>
+              <tr>
+                <td
+                  class='{style.label}'>
+                  Approved:
+                </td>
+                <td
+                  ui:field='approvedLabel'>
+                </td>
+              </tr>
+              <tr>
+                <td
+                  class='{style.label}'>
+                  Notes:
+                </td>
+                <td>
+                  <g:TextBox
+                    ui:field='notesBox'></g:TextBox>
+                </td>
+              </tr>
+            </table>
+          </td>
+
+          <td
+            valign='top'
+            align='center'
+            class='{style.table}'>
+            <l:CellTable
+              width='100%'
+              ui:field='table' />
+          </td>
+        </tr>
       </table>
-      <span
-        class='{style.label}'>Notes:</span>
-      <g:TextBox
-        ui:field='notesBox'></g:TextBox>
-      <l:CellTable
-        width='100%'
-        ui:field='table' />
     </div>
   </g:HTMLPanel>
 

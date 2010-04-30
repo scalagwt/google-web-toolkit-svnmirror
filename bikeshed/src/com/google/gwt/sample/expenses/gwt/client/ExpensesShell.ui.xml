@@ -30,55 +30,58 @@
     }
   </ui:style>
 
-  <g:SplitLayoutPanel
-    ui:field='splitLayout'>
+  <g:DockLayoutPanel
+    unit='PX'>
     <g:north
-      size='250'>
-      <g:DockLayoutPanel
-        unit='PX'
-        ui:field='northPanel'>
-        <g:north
-          size='50'>
-          <g:HTMLPanel
-            styleName='{style.title}'>
-            <table
-              height='100%'>
-              <tr>
-                <td>
-                  <img
-                    height='40'
-                    src='http://www.google.com/intl/en_ALL/images/logo.gif' />
+      size='50'>
+      <g:HTMLPanel
+        styleName='{style.title}'>
+        <table
+          height='100%'>
+          <tr>
+            <td>
+              <img
+                height='40'
+                src='http://www.google.com/intl/en_ALL/images/logo.gif' />
+            </td>
+            <td
+              class='{style.titleText}'
+              valign='middle'>
+              Expenses Sample
                 </td>
-                <td
-                  class='{style.titleText}'
-                  valign='middle'>
-                  Expenses Sample
-                </td>
-              </tr>
-            </table>
-          </g:HTMLPanel>
-        </g:north>
-        <g:center>
-          <c:ExpenseBrowser
-            ui:field='expenseBrowser'></c:ExpenseBrowser>
-        </g:center>
-      </g:DockLayoutPanel>
+          </tr>
+        </table>
+      </g:HTMLPanel>
     </g:north>
+
     <g:center>
-      <g:DockLayoutPanel
-        unit='PCT'>
-        <g:west
-          size='50'>
-          <c:ExpenseList
-            ui:field='expenseList'></c:ExpenseList>
-        </g:west>
+      <g:SplitLayoutPanel
+        ui:field='splitLayout'>
+        <g:north
+          size='300'>
+          <g:DockLayoutPanel
+            unit='PCT'
+            ui:field='northPanel'>
+            <g:west
+              size='40'>
+              <c:ExpenseBrowser
+                ui:field='expenseBrowser' />
+            </g:west>
+            <g:center
+              size='60'>
+              <c:ExpenseList
+                ui:field='expenseList'
+                styleName='{style.shadowLeft}' />
+            </g:center>
+          </g:DockLayoutPanel>
+        </g:north>
+
         <g:center>
           <c:ExpenseDetails
-            styleName='{style.shadowLeft}'
-            ui:field='expenseDetails'></c:ExpenseDetails>
+            ui:field='expenseDetails' />
         </g:center>
-      </g:DockLayoutPanel>
+      </g:SplitLayoutPanel>
     </g:center>
-  </g:SplitLayoutPanel>
+  </g:DockLayoutPanel>
 
 </ui:UiBinder>

@@ -15,11 +15,11 @@
  */
 package com.google.gwt.sample.bikeshed.cookbook.client;
 
+import com.google.gwt.bikeshed.list.client.AbstractPager;
 import com.google.gwt.bikeshed.list.client.PagingListView;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 
@@ -29,17 +29,17 @@ import com.google.gwt.user.client.ui.Label;
  * 
  * @param <T> the type of the PagingListView being controlled
  */
-public class SimplePager<T> extends Composite implements
-    PagingListView.Pager<T>, ClickHandler {
+public class SimplePager<T> extends AbstractPager<T> implements ClickHandler {
 
   private Button nextPageButton;
   private Button prevPageButton;
   private Button remove1Button;
   private Button remove5Button;
-  private PagingListView<T> view;
   private Label infoLabel;
+  private PagingListView<T> view;
 
   public SimplePager(PagingListView<T> view) {
+    super(view);
     FlowPanel p = new FlowPanel();
     p.add(prevPageButton = makeButton("Previous Page", "PREV"));
     p.add(nextPageButton = makeButton("Next Page", "NEXT"));
@@ -51,7 +51,6 @@ public class SimplePager<T> extends Composite implements
     initWidget(p);
 
     this.view = view;
-    view.setPager(this);
   }
 
   /**
@@ -70,31 +69,6 @@ public class SimplePager<T> extends Composite implements
     return view.getPageSize() > rows;
   }
 
-  /**
-   * Returns true if there is enough data such that a call to
-   * {@link #nextPage()} will succeed in moving the starting point of the table
-   * forward.
-   */
-  public boolean hasNextPage() {
-    return view.getPageStart() + view.getPageSize() < view.getDataSize();
-  }
-
-  /**
-   * Returns true if there is enough data such that a call to
-   * {@link #previousPage()} will succeed in moving the starting point of the
-   * table backward.
-   */
-  public boolean hasPreviousPage() {
-    return view.getPageStart() > 0 && view.getDataSize() > 0;
-  }
-
-  /**
-   * Advance the starting row by 'pageSize' rows.
-   */
-  public void nextPage() {
-    view.setPageStart(view.getPageStart() + view.getPageSize());
-  }
-
   public void onClick(ClickEvent event) {
     String id = ((Button) event.getSource()).getElement().getId();
 
@@ -110,15 +84,10 @@ public class SimplePager<T> extends Composite implements
     updateButtons();
   }
 
+  @Override
   public void onRangeOrSizeChanged(PagingListView<T> listView) {
+    super.onRangeOrSizeChanged(listView);
     updateButtons();
-  }
-
-  /**
-   * Move the starting row back by 'pageSize' rows.
-   */
-  public void previousPage() {
-    view.setPageStart(view.getPageStart() - view.getPageSize());
   }
 
   private void addRows(int rows) {
