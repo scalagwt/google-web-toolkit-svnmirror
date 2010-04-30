@@ -29,6 +29,10 @@ public class MutableArrayInternalTest extends GWTTestCase {
     return null;
   }
 
+  public native boolean hasElems(MutableArray ma) /*-{
+    return !(ma.elems === undefined) 
+  }-*/;
+
   public void testSetSizeNullElems() {
     MutableArray<String> b = createMutableArray();
     
@@ -38,9 +42,5 @@ public class MutableArrayInternalTest extends GWTTestCase {
     b.setSize(0, null);
     assertFalse(hasElems(b));
   }
-  
-  public native boolean hasElems(MutableArray ma) /*-{
-    return !(ma.elems === undefined) 
-  }-*/;
 
 }
