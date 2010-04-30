@@ -42,7 +42,7 @@ public class RequestFactoryJsonImpl implements RequestFactory {
     this.valueStore = new ValueStoreJsonImpl(handlerManager);
   }
 
-  public void fire(final RequestObject requestObject) {
+  public void fire(final RequestObject<?> requestObject) {
     RequestBuilder builder = new RequestBuilder(RequestBuilder.POST,
         RequestFactory.URL);
     builder.setRequestData(requestObject.getRequestData());

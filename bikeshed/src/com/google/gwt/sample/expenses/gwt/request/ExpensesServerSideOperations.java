@@ -55,6 +55,7 @@ public class ExpensesServerSideOperations implements Config {
     Set<Class<? extends Record>> records = new HashSet<Class<? extends Record>>();
     records.add(EmployeeRecord.class);
     records.add(ReportRecord.class);
+    records.add(ExpenseRecord.class);
     return records;
   }
 

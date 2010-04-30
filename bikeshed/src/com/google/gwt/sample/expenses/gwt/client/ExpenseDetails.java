@@ -16,28 +16,40 @@
 package com.google.gwt.sample.expenses.gwt.client;
 
 import com.google.gwt.bikeshed.cells.client.Cell;
-import com.google.gwt.bikeshed.cells.client.ClickableTextCell;
 import com.google.gwt.bikeshed.cells.client.CurrencyCell;
 import com.google.gwt.bikeshed.cells.client.DateCell;
+import com.google.gwt.bikeshed.cells.client.FieldUpdater;
+import com.google.gwt.bikeshed.cells.client.SelectionCell;
 import com.google.gwt.bikeshed.cells.client.TextCell;
 import com.google.gwt.bikeshed.cells.client.ValueUpdater;
 import com.google.gwt.bikeshed.list.client.CellTable;
 import com.google.gwt.bikeshed.list.client.Column;
-import com.google.gwt.bikeshed.list.client.Header;
 import com.google.gwt.bikeshed.list.shared.ListViewAdapter;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.requestfactory.shared.Receiver;
 import com.google.gwt.sample.expenses.gwt.request.ExpenseRecord;
 import com.google.gwt.sample.expenses.gwt.request.ExpenseRecordChanged;
+import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
 import com.google.gwt.sample.expenses.gwt.request.ReportRecord;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiFactory;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.valuestore.shared.DeltaValueStore;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -50,14 +62,73 @@ import java.util.List;
 public class ExpenseDetails extends Composite implements
     Receiver<List<ExpenseRecord>>, ExpenseRecordChanged.Handler {
 
+  class DenialPopup extends DialogBox {
+    private Button cancelButton = new Button("Cancel", new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        reasonDenied = "";
+        hide();
+      }
+    });
+    private Button confirmButton = new Button("Confirm", new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        reasonDenied = reasonBox.getText();
+        hide();
+      }
+    });
+
+    private ExpenseRecord expenseRecord;
+    private FlexTable layout = new FlexTable();
+    private TextBox reasonBox = new TextBox();
+    private String reasonDenied;
+
+    public DenialPopup() {
+      super(false, true);
+      setGlassEnabled(true);
+      setWidget(layout);
+
+      layout.setHTML(0, 0, "Reason for denial:");
+      layout.setWidget(1, 0, reasonBox);
+      HorizontalPanel p = new HorizontalPanel();
+      p.add(confirmButton);
+      p.add(cancelButton);
+      layout.setWidget(2, 0, p);
+    }
+
+    public ExpenseRecord getExpenseRecord() {
+      return expenseRecord;
+    }
+
+    public String getReasonDenied() {
+      return reasonDenied;
+    }
+
+    public void popup() {
+      center();
+      reasonBox.setFocus(true);
+    }
+
+    public void setExpenseRecord(ExpenseRecord expenseRecord) {
+      this.expenseRecord = expenseRecord;
+    }
+
+    public void setReasonDenied(String reasonDenied) {
+      this.reasonDenied = reasonDenied;
+      reasonBox.setText(reasonDenied);
+    }
+  }
+
   interface ExpenseDetailsUiBinder extends UiBinder<Widget, ExpenseDetails> {
   }
 
-  static interface GetValue<T, C> {
-    C getValue(T object);
-  }
+  private static final GetValue<ExpenseRecord, Date> dateGetter = new GetValue<ExpenseRecord, Date>() {
+    public Date getValue(ExpenseRecord object) {
+      return object.getDate();
+    }
+  };
 
   private static ExpenseDetailsUiBinder uiBinder = GWT.create(ExpenseDetailsUiBinder.class);
+
+  ExpensesRequestFactory expensesRequestFactory;
 
   @UiField
   TextBox notesBox;
@@ -71,42 +142,16 @@ public class ExpenseDetails extends Composite implements
   @UiField
   Label totalLabel;
 
-  private final Comparator<ExpenseRecord> amountComparator = new Comparator<ExpenseRecord>() {
-    public int compare(ExpenseRecord o1, ExpenseRecord o2) {
-      double cmp = o1.getAmount() - o2.getAmount();
-      if (cmp < 0) {
-        return -1;
-      } else if (cmp > 0) {
-        return 1;
-      } else {
-        return 0;
-      }
-    }
-  };
+  private List<SortableHeader> allHeaders = new ArrayList<SortableHeader>();
 
-  private final Comparator<ExpenseRecord> dateComparator = new Comparator<ExpenseRecord>() {
-    public int compare(ExpenseRecord o1, ExpenseRecord o2) {
-      long cmp = o1.getDate().getTime() - o2.getDate().getTime();
-      if (cmp < 0) {
-        return -1;
-      } else if (cmp > 0) {
-        return 1;
-      } else {
-        return 0;
-      }
-    }
-  };
+  private SortableColumn<ExpenseRecord, Date> dateColumn;
 
   /**
    * The adapter that provides expense items.
    */
   private ListViewAdapter<ExpenseRecord> items = new ListViewAdapter<ExpenseRecord>();
 
-  private List<ExpenseRecord> itemList = items.getList();
-
-  private Comparator<ExpenseRecord> lastComparator = dateComparator;
-
-  private boolean lastSortUp = true;
+  private Comparator<ExpenseRecord> lastComparator;
 
   public ExpenseDetails() {
     initWidget(uiBinder.createAndBindUi(this));
@@ -115,34 +160,44 @@ public class ExpenseDetails extends Composite implements
     items.addView(table);
   }
 
-  public void onReportDetailChanged(ExpenseRecordChanged event) {
+  public void onExpenseRecordChanged(ExpenseRecordChanged event) {
+    if (lastComparator != null) {
+      sortExpenses(lastComparator);
+    }
     items.refresh();
-    itemList = items.getList();
-    sortExpenses(lastComparator, lastSortUp);
   }
 
   public void onSuccess(List<ExpenseRecord> newValues) {
     items.setList(newValues);
-    itemList = items.getList();
-    sortExpenses(lastComparator, lastSortUp);
+    sortExpenses(dateColumn.getComparator(false));
+  }
+
+  public void setExpensesRequestFactory(
+      ExpensesRequestFactory expensesRequestFactory) {
+    this.expensesRequestFactory = expensesRequestFactory;
   }
 
   public void setReportRecord(ReportRecord report) {
     reportName.setText(report.getPurpose());
     notesBox.setText(report.getNotes());
+
+    // Reset sorting state of table
+    lastComparator = null;
+    for (SortableHeader header : allHeaders) {
+      header.setSorted(false);
+      header.setReverseSort(true);
+    }
+    allHeaders.get(0).setSorted(true);
+    allHeaders.get(0).setReverseSort(false);
+    table.refreshHeaders();
   }
 
   @UiFactory
   CellTable<ExpenseRecord> createTable() {
     CellTable<ExpenseRecord> view = new CellTable<ExpenseRecord>(15);
 
-    // Date column
-    addColumn(view, "Date", new DateCell(),
-        new GetValue<ExpenseRecord, Date>() {
-          public Date getValue(ExpenseRecord object) {
-            return object.getDate();
-          }
-        }, dateComparator);
+    dateColumn = addColumn(view, "Date", new DateCell(), dateGetter);
+    lastComparator = dateColumn.getComparator(false);
 
     // Description column.
     addColumn(view, "Description", new GetValue<ExpenseRecord, String>() {
@@ -164,48 +219,76 @@ public class ExpenseDetails extends Composite implements
           public Integer getValue(ExpenseRecord object) {
             return (int) (object.getAmount().doubleValue() * 100);
           }
-        }, amountComparator);
+        });
+
+    // Dialog box to obtain a reason for a denial
+    final DenialPopup denialPopup = new DenialPopup();
+    denialPopup.addCloseHandler(new CloseHandler<PopupPanel>() {
+      public void onClose(CloseEvent<PopupPanel> event) {
+        String reasonDenied = denialPopup.getReasonDenied();
+        ExpenseRecord record = denialPopup.getExpenseRecord();
+        if (reasonDenied == null || reasonDenied.length() == 0) {
+          updateExpenseRecord(record, "", "");
+        } else {
+          updateExpenseRecord(record, "Denied", reasonDenied);
+        }
+      }
+    });
 
     // Approval column.
-    addColumn(view, "Approval Status", new GetValue<ExpenseRecord, String>() {
-      public String getValue(ExpenseRecord object) {
-        return object.getApproval();
+    List<String> options = new ArrayList<String>();
+    // TODO(rice): I18N
+    options.add("");
+    options.add("Approved");
+    options.add("Denied");
+    SortableColumn<ExpenseRecord, String> approvalColumn = addColumn(view,
+        "Approval Status", new SelectionCell(options),
+        new GetValue<ExpenseRecord, String>() {
+          public String getValue(ExpenseRecord object) {
+            return object.getApproval();
+          }
+        });
+    approvalColumn.setFieldUpdater(new FieldUpdater<ExpenseRecord, String>() {
+      public void update(int index, final ExpenseRecord object, String value) {
+        if ("Denied".equals(value)) {
+          denialPopup.setExpenseRecord(object);
+          denialPopup.setReasonDenied(object.getReasonDenied());
+          denialPopup.popup();
+        } else {
+          updateExpenseRecord(object, value, "");
+        }
       }
     });
 
     return view;
   }
 
-  private <C extends Comparable<C>> Column<ExpenseRecord, C> addColumn(
-      CellTable<ExpenseRecord> table, final String text, final Cell<C> cell,
-      final GetValue<ExpenseRecord, C> getter,
-      final Comparator<ExpenseRecord> comparator) {
-    Column<ExpenseRecord, C> column = new Column<ExpenseRecord, C>(cell) {
+  private <C extends Comparable<C>> SortableColumn<ExpenseRecord, C> addColumn(
+      final CellTable<ExpenseRecord> table, final String text,
+      final Cell<C> cell, final GetValue<ExpenseRecord, C> getter) {
+    final SortableColumn<ExpenseRecord, C> column = new SortableColumn<ExpenseRecord, C>(
+        cell) {
       @Override
       public C getValue(ExpenseRecord object) {
         return getter.getValue(object);
       }
     };
-    Header<String> header = new Header<String>(ClickableTextCell.getInstance()) {
-      @Override
-      public String getValue() {
-        return text;
-      }
-    };
-    header.setUpdater(new ValueUpdater<String>() {
-      boolean sortUp = true;
+    final SortableHeader header = new SortableHeader(text);
+    allHeaders.add(header);
 
+    header.setUpdater(new ValueUpdater<String>() {
       public void update(String value) {
-        if (comparator == null) {
-          sortExpenses(new Comparator<ExpenseRecord>() {
-            public int compare(ExpenseRecord o1, ExpenseRecord o2) {
-              return getter.getValue(o1).compareTo(getter.getValue(o2));
-            }
-          }, sortUp);
-        } else {
-          sortExpenses(comparator, sortUp);
+        header.setSorted(true);
+        header.toggleReverseSort();
+
+        for (SortableHeader otherHeader : allHeaders) {
+          if (otherHeader != header) {
+            otherHeader.setSorted(false);
+            otherHeader.setReverseSort(true);
+          }
         }
-        sortUp = !sortUp;
+        sortExpenses(column.getComparator(header.getReverseSort()));
+        table.refreshHeaders();
       }
     });
     table.addColumn(column, header);
@@ -215,21 +298,19 @@ public class ExpenseDetails extends Composite implements
   private Column<ExpenseRecord, String> addColumn(
       CellTable<ExpenseRecord> table, final String text,
       final GetValue<ExpenseRecord, String> getter) {
-    return addColumn(table, text, TextCell.getInstance(), getter, null);
+    return addColumn(table, text, TextCell.getInstance(), getter);
   }
 
-  private void sortExpenses(final Comparator<ExpenseRecord> comparator,
-      boolean sortUp) {
+  private void sortExpenses(final Comparator<ExpenseRecord> comparator) {
     lastComparator = comparator;
-    lastSortUp = sortUp;
-    if (sortUp) {
-      Collections.sort(itemList, comparator);
-    } else {
-      Collections.sort(itemList, new Comparator<ExpenseRecord>() {
-        public int compare(ExpenseRecord o1, ExpenseRecord o2) {
-          return -comparator.compare(o1, o2);
-        }
-      });
-    }
+    Collections.sort(items.getList(), comparator);
+  }
+
+  private void updateExpenseRecord(ExpenseRecord record, String approval,
+      String reasonDenied) {
+    DeltaValueStore deltas = expensesRequestFactory.getValueStore().spawnDeltaView();
+    deltas.set(ExpenseRecord.approval, record, approval);
+    deltas.set(ExpenseRecord.reasonDenied, record, reasonDenied);
+    expensesRequestFactory.syncRequest(deltas).fire();
   }
 }

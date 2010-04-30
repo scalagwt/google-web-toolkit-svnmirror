@@ -15,11 +15,11 @@
  */
 package com.google.gwt.sample.expenses.gwt.client;
 
+import com.google.gwt.bikeshed.cells.client.Cell;
 import com.google.gwt.bikeshed.cells.client.DateCell;
 import com.google.gwt.bikeshed.cells.client.TextCell;
+import com.google.gwt.bikeshed.cells.client.ValueUpdater;
 import com.google.gwt.bikeshed.list.client.CellTable;
-import com.google.gwt.bikeshed.list.client.Column;
-import com.google.gwt.bikeshed.list.client.Header;
 import com.google.gwt.bikeshed.list.shared.ListViewAdapter;
 import com.google.gwt.bikeshed.list.shared.SingleSelectionModel;
 import com.google.gwt.bikeshed.list.shared.SelectionModel.SelectionChangeEvent;
@@ -43,6 +43,8 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -60,7 +62,7 @@ public class ExpenseList extends Composite implements
   interface Listener {
 
     /**
-     * Called whent he user selects a report.
+     * Called when the user selects a report.
      * 
      * @param report the selected report
      */
@@ -74,16 +76,18 @@ public class ExpenseList extends Composite implements
     void onSearch(String startsWith);
   }
 
-  private static final String TEXTBOX_DISABLED_COLOR = "#aaaaaa";
-
   private static final String TEXTBOX_DEFAULT_TEXT = "search";
+
+  private static final String TEXTBOX_DISABLED_COLOR = "#aaaaaa";
 
   private static ExpenseListUiBinder uiBinder = GWT.create(ExpenseListUiBinder.class);
 
   @UiField
-  CellTable<ReportRecord> table;
-  @UiField
   TextBox searchBox;
+  @UiField
+  CellTable<ReportRecord> table;
+
+  private List<SortableHeader> allHeaders = new ArrayList<SortableHeader>();
 
   private Listener listener;
 
@@ -101,6 +105,8 @@ public class ExpenseList extends Composite implements
       search();
     }
   };
+
+  private SortableColumn<ReportRecord, String> purposeColumn;
 
   public ExpenseList() {
     initWidget(uiBinder.createAndBindUi(this));
@@ -157,13 +163,18 @@ public class ExpenseList extends Composite implements
     }
 
     reports.setList(matched);
+
+    allHeaders.get(0).setSorted(true);
+    allHeaders.get(0).setReverseSort(false);
+    table.refreshHeaders();
+    sortReports(purposeColumn.getComparator(false));
   }
 
   public void setListener(Listener listener) {
     this.listener = listener;
     search();
   }
-
+  
   @UiFactory
   CellTable<ReportRecord> createTable() {
     CellTable<ReportRecord> view = new CellTable<ReportRecord>(25);
@@ -182,32 +193,51 @@ public class ExpenseList extends Composite implements
     });
 
     // Purpose column.
-    view.addColumn(new Column<ReportRecord, String>(TextCell.getInstance()) {
-      @Override
+    purposeColumn = addColumn(view, "Purpose", TextCell.getInstance(), new GetValue<ReportRecord, String>() {
       public String getValue(ReportRecord object) {
         return object.getPurpose();
       }
-    }, new Header<String>(TextCell.getInstance()) {
-      @Override
-      public String getValue() {
-        return "Name";
-      }
     });
 
-    // Date column.
-    view.addColumn(new Column<ReportRecord, Date>(new DateCell()) {
-      @Override
+    // Created column.
+    addColumn(view, "Created", new DateCell(), new GetValue<ReportRecord, Date>() {
       public Date getValue(ReportRecord object) {
         return object.getCreated();
-      }
-    }, new Header<String>(TextCell.getInstance()) {
-      @Override
-      public String getValue() {
-        return "Date";
       }
     });
 
     return view;
+  }
+  
+  private <C extends Comparable<C>> SortableColumn<ReportRecord, C> addColumn(
+      final CellTable<ReportRecord> table, final String text, final Cell<C> cell,
+      final GetValue<ReportRecord, C> getter) {
+    final SortableColumn<ReportRecord, C> column = new SortableColumn<ReportRecord, C>(cell) {
+      @Override
+      public C getValue(ReportRecord object) {
+        return getter.getValue(object);
+      }
+    };
+    final SortableHeader header = new SortableHeader(text);
+    allHeaders.add(header);
+
+    header.setUpdater(new ValueUpdater<String>() {
+      public void update(String value) {
+        header.setSorted(true);
+        header.toggleReverseSort();
+
+        for (SortableHeader otherHeader : allHeaders) {
+          if (otherHeader != header) {
+            otherHeader.setSorted(false);
+            otherHeader.setReverseSort(true);
+          }
+        }
+        sortReports(column.getComparator(header.getReverseSort()));
+        table.refreshHeaders();
+      }
+    });
+    table.addColumn(column, header);
+    return column;
   }
 
   /**
@@ -221,5 +251,9 @@ public class ExpenseList extends Composite implements
       }
       listener.onSearch(startsWith);
     }
+  }
+  
+  private void sortReports(final Comparator<ReportRecord> comparator) {
+    Collections.sort(reports.getList(), comparator);
   }
 }

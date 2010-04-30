@@ -21,6 +21,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.sample.expenses.gwt.request.EmployeeRecord;
 import com.google.gwt.sample.expenses.gwt.request.ExpenseRecord;
+import com.google.gwt.sample.expenses.gwt.request.ExpenseRecordChanged;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
 import com.google.gwt.sample.expenses.gwt.request.ReportRecord;
 import com.google.gwt.sample.expenses.gwt.request.ReportRecordChanged;
@@ -63,6 +64,7 @@ public class Expenses implements EntryPoint {
     shell = new ExpensesShell();
     final ExpenseBrowser expenseBrowser = shell.getExpenseBrowser();
     final ExpenseList expenseList = shell.getExpenseList();
+    final ExpenseDetails expenseDetails = shell.getExpenseDetails();
 
     root.add(shell);
 
@@ -83,11 +85,12 @@ public class Expenses implements EntryPoint {
     // Listen for requests from the ExpenseList.
     expenseList.setListener(new ExpenseList.Listener() {
       public void onReportSelected(ReportRecord report) {
-        shell.getExpenseDetails().setReportRecord(report);
+        expenseDetails.setExpensesRequestFactory(requestFactory);
+        expenseDetails.setReportRecord(report);
 
         requestFactory.expenseRequest().findExpensesByReport(
             report.getRef(Record.id)).forProperties(getExpenseColumns()).to(
-            shell.getExpenseDetails()).fire();
+            expenseDetails).fire();
       }
 
       public void onSearch(String startsWith) {
@@ -105,6 +108,7 @@ public class Expenses implements EntryPoint {
       }
     });
 
+    eventBus.addHandler(ExpenseRecordChanged.TYPE, expenseDetails);
     eventBus.addHandler(ReportRecordChanged.TYPE, shell);
   }
 

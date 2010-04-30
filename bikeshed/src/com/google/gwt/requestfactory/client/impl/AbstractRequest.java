@@ -25,7 +25,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Abstract implementation of RequestFactory.RequestObject
+ * Abstract implementation of {@link RequestFactory.RequestObject}.
  * 
  * @param <T> return type
  * @param <R> type of this request object

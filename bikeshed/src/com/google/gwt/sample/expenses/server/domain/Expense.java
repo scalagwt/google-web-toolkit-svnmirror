@@ -93,7 +93,7 @@ public class Expense {
 
   @Version
   @Column(name = "version")
-  private Long version;
+  private Integer version;
 
   private Double amount;
 
@@ -143,7 +143,7 @@ public class Expense {
     return this.reportId;
   }
 
-  public Long getVersion() {
+  public Integer getVersion() {
     return this.version;
   }
 
@@ -198,7 +198,7 @@ public class Expense {
     this.reportId = reportId; 
   }
 
-  public void setVersion(Long version) {
+  public void setVersion(Integer version) {
     this.version = version;
   }
 

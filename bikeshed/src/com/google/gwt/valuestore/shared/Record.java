@@ -25,7 +25,7 @@ public interface Record {
 
   /**
    * Get this record's value for the given property. Behavior is undefined if
-   * the record has no such property, or if the property have never been set. It
+   * the record has no such property, or if the property has never been set. It
    * is unusual to call this method directly. Rather it is expected to be called
    * by bean-style getter methods provided by implementing classes.
    * 

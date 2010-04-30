@@ -19,18 +19,32 @@ import com.google.gwt.bikeshed.cells.client.Cell;
 import com.google.gwt.bikeshed.cells.client.FieldUpdater;
 
 /**
- * An interface for extracting a value from an underlying data type, provide a
- * cell to render that value, and provide a FieldUpdater to perform notification
- * of updates to the cell.
+ * An interface for extracting a value of type C from an underlying data value
+ * of type T, provide a {@link Cell} to render that value, and provide a
+ * {@link FieldUpdater} to perform notification of updates to the cell.
  * 
  * @param <T> the underlying data type
  * @param <C> the cell data type
  */
 public interface HasCell<T, C> {
 
+  /**
+   * Returns the {@link Cell} of type C.
+   */
   Cell<C> getCell();
 
+  /**
+   * Returns the {@link FieldUpdater} instance.
+   * 
+   * @return an instance of FieldUpdater<T, C>
+   */
   FieldUpdater<T, C> getFieldUpdater();
 
+  /**
+   * Returns the value of type C extracted from the record of type T.
+   * 
+   * @param object a record of type T
+   * @return a value of type C suitable for passing to the cell
+   */
   C getValue(T object);
 }

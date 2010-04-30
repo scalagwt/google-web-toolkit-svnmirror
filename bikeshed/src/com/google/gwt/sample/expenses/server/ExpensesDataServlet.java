@@ -49,7 +49,7 @@ public class ExpensesDataServlet extends RequestFactoryServlet {
   };
   
   private static final String[] NOTES = {
-    "", "", "", "", "", "", "", "", "", "",
+    "Need approval by Monday", "Show me the money",
     "Please bill to the Widgets project",
     "High priority",
     "Review A.S.A.P."
@@ -86,7 +86,7 @@ public class ExpensesDataServlet extends RequestFactoryServlet {
         "Visit to Istanbul"}) {
       Report report = new Report();
       report.setReporterKey(abc.getId());
-      report.setCreated(new Date());
+      report.setCreated(getDate());
       report.setPurpose(purpose);
       report.setNotes(getNote());
       report.persist();
@@ -96,7 +96,7 @@ public class ExpensesDataServlet extends RequestFactoryServlet {
 
     for (String purpose : new String[] {"Money laundering", "Donut day"}) {
       Report report = new Report();
-      report.setCreated(new Date());
+      report.setCreated(getDate());
       report.setReporterKey(def.getId());
       report.setPurpose(purpose);
       report.setNotes(getNote());
@@ -109,7 +109,7 @@ public class ExpensesDataServlet extends RequestFactoryServlet {
         "ISDN modem for telecommuting", "Sushi offsite",
         "Baseball card research", "Potato chip cooking offsite"}) {
       Report report = new Report();
-      report.setCreated(new Date());
+      report.setCreated(getDate());
       report.setReporterKey(ghi.getId());
       report.setPurpose(purpose);
       report.setNotes(getNote());

@@ -91,7 +91,6 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
   private TableElement table;
   private TableSectionElement tbody;
   private TableSectionElement tfoot;
-
   private TableSectionElement thead;
 
   /**
@@ -325,11 +324,6 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
       Header<?> header = headers.get(col);
       if (header != null) {
         header.onBrowserEvent(cell, event);
-        StringBuilder sb = new StringBuilder();
-        header.render(sb);
-
-        Element th = tr.getChild(col).cast();
-        th.setInnerHTML(sb.toString());
       }
     } else if (section == tfoot) {
       Header<?> footer = footers.get(col);
@@ -370,6 +364,14 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
    */
   public void refresh() {
     impl.refresh();
+  }
+
+  public void refreshFooters() {
+    createHeaders(footers, tfoot);
+  }
+
+  public void refreshHeaders() {
+    createHeaders(headers, thead);
   }
 
   public void setData(int start, int length, List<T> values) {
@@ -484,6 +486,6 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
   }
 
   private native int getClientHeight(Element element) /*-{
-                                                      return element.clientHeight;
-                                                      }-*/;
+    return element.clientHeight;
+  }-*/;
 }

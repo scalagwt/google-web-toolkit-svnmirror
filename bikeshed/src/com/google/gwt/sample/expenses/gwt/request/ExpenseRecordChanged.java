@@ -33,7 +33,7 @@ public class ExpenseRecordChanged extends
    * Implemented by handlers of this type of event.
    */
   public interface Handler extends EventHandler {
-    void onReportDetailChanged(ExpenseRecordChanged event);
+    void onExpenseRecordChanged(ExpenseRecordChanged event);
   }
 
   public static final Type<Handler> TYPE = new Type<Handler>();
@@ -49,6 +49,6 @@ public class ExpenseRecordChanged extends
 
   @Override
   protected void dispatch(Handler handler) {
-    handler.onReportDetailChanged(this);
+    handler.onExpenseRecordChanged(this);
   }
 }
