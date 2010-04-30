@@ -161,10 +161,21 @@ public class ExpenseDetails extends Composite implements
   }
 
   public void onExpenseRecordChanged(ExpenseRecordChanged event) {
+    ExpenseRecord newRecord = event.getRecord();
+    String id = newRecord.getId();
+
+    int index = 0;
+    List<ExpenseRecord> list = items.getList();
+    for (ExpenseRecord r : list) {
+      if (r.getId().equals(id)) {
+        list.set(index, newRecord);
+      }
+      index++;
+    }
+
     if (lastComparator != null) {
       sortExpenses(lastComparator);
     }
-    items.refresh();
   }
 
   public void onSuccess(List<ExpenseRecord> newValues) {
