@@ -18,7 +18,8 @@ package com.google.gwt.bikeshed.cells.client;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.resources.client.ImageResource;
-import com.google.gwt.user.client.ui.AbstractImagePrototype;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HasVerticalAlignment.VerticalAlignmentConstant;
 
 /**
  * A {@link Cell} decorator that adds an icon to another Cell.
@@ -29,8 +30,8 @@ public class IconCellDecorator<C> extends Cell<C> {
 
   private final Cell<C> cell;
   private final String iconHtml;
+  private final int imageWidth;
   private final String placeHolderHtml;
-  private final String valign;
 
   /**
    * Construct a new {@link IconCellDecorator}. The icon and the content will be
@@ -40,7 +41,7 @@ public class IconCellDecorator<C> extends Cell<C> {
    * @param cell the cell to decorate
    */
   public IconCellDecorator(ImageResource icon, Cell<C> cell) {
-    this(icon, cell, "middle");
+    this(icon, cell, HasVerticalAlignment.ALIGN_MIDDLE, 6);
   }
 
   /**
@@ -49,15 +50,14 @@ public class IconCellDecorator<C> extends Cell<C> {
    * @param icon the icon to use
    * @param cell the cell to decorate
    * @param valign the vertical alignment attribute of the contents
+   * @param spacing the pixel space between the icon and the cell
    */
-  public IconCellDecorator(ImageResource icon, Cell<C> cell, String valign) {
+  public IconCellDecorator(ImageResource icon, Cell<C> cell,
+      VerticalAlignmentConstant valign, int spacing) {
     this.cell = cell;
-    this.iconHtml = AbstractImagePrototype.create(icon).getHTML();
-    this.valign = valign;
-
-    // A div element won't line up correctly, so we use a copy of the img
-    // element, but without a background.
-    placeHolderHtml = iconHtml.replace("background:", "nobackground:");
+    this.iconHtml = getImageHtml(icon, valign, false);
+    this.imageWidth = icon.getWidth() + 6;
+    this.placeHolderHtml = getImageHtml(icon, valign, true);
   }
 
   @Override
@@ -73,27 +73,28 @@ public class IconCellDecorator<C> extends Cell<C> {
   @Override
   public Object onBrowserEvent(Element parent, C value, Object viewData,
       NativeEvent event, ValueUpdater<C> valueUpdater) {
-    return cell.onBrowserEvent(parent, value, viewData, event, valueUpdater);
+    return cell.onBrowserEvent(getCellParent(parent), value, viewData, event,
+        valueUpdater);
   }
 
   @Override
   public void render(C value, Object viewData, StringBuilder sb) {
-    sb.append("<table><tr>");
-    sb.append("<td valign='").append(valign).append("'>");
+    sb.append("<div style='position:relative;padding-left:");
+    sb.append(imageWidth);
+    sb.append("px;'>");
     if (isIconUsed(value)) {
       sb.append(getIconHtml(value));
     } else {
       sb.append(placeHolderHtml);
     }
-    sb.append("</td><td valign='").append(valign).append("'>");
+    sb.append("<div>");
     cell.render(value, viewData, sb);
-    sb.append("</td>");
-    sb.append("</tr></table>");
+    sb.append("</div></div>");
   }
 
   @Override
   public void setValue(Element parent, C value, Object viewData) {
-    cell.setValue(parent, value, viewData);
+    cell.setValue(getCellParent(parent), value, viewData);
   }
 
   /**
@@ -117,5 +118,44 @@ public class IconCellDecorator<C> extends Cell<C> {
    */
   protected boolean isIconUsed(C value) {
     return true;
+  }
+
+  /**
+   * Get the parent element of the decorated cell.
+   * 
+   * @param parent the parent of this cell
+   * @return the decorated cell's parent
+   */
+  private Element getCellParent(Element parent) {
+    return parent.getFirstChildElement().getChild(1).cast();
+  }
+
+  /**
+   * Get the HTML representation of an image.
+   * 
+   * @param res the {@link ImageResource} to render as HTML
+   * @param valign the vertical alignment
+   * @param isPlaceholder if true, do not include the background image
+   * @return the rendered HTML
+   */
+  // TODO(jlabanca): Move this to a Utility class.
+  private String getImageHtml(ImageResource res,
+      VerticalAlignmentConstant valign, boolean isPlaceholder) {
+    // Add the position and dimensions.
+    StringBuilder sb = new StringBuilder();
+    sb.append("<div style=\"position:absolute;left:0px;top:0px;height:100%;");
+    sb.append("width:").append(res.getWidth()).append("px;");
+
+    // Add the background, vertically centered.
+    if (!isPlaceholder) {
+      String vert = valign == HasVerticalAlignment.ALIGN_MIDDLE ? "center"
+          : valign.getVerticalAlignString();
+      sb.append("background:url('").append(res.getURL()).append("') ");
+      sb.append("no-repeat scroll ").append(vert).append(" center transparent;");
+    }
+
+    // Close the div and return.
+    sb.append("\"></div>");
+    return sb.toString();
   }
 }

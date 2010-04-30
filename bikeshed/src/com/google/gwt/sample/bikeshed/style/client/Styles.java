@@ -15,13 +15,15 @@
  */
 package com.google.gwt.sample.bikeshed.style.client;
 
+import com.google.gwt.bikeshed.list.client.CellList;
+import com.google.gwt.bikeshed.list.client.CellTable;
+import com.google.gwt.bikeshed.tree.client.CellBrowser;
+import com.google.gwt.bikeshed.tree.client.CellTree;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.resources.client.CssResource.NotStrict;
-import com.google.gwt.resources.client.ImageResource.ImageOptions;
-import com.google.gwt.resources.client.ImageResource.RepeatStyle;
 
 /**
  * The Styles used in bikeshed.
@@ -48,7 +50,9 @@ public class Styles {
   /**
    * Shared resources.
    */
-  public interface Resources extends ClientBundle {
+  public interface Resources extends ClientBundle, CellBrowser.Resources,
+      CellList.Resources, CellTable.Resources, CellTree.Resources {
+
     @NotStrict
     @Source("common.css")
     Common common();
@@ -57,12 +61,6 @@ public class Styles {
      * Icon used to represent a user group.
      */
     ImageResource groupIcon();
-
-    @ImageOptions(repeatStyle = RepeatStyle.Horizontal)
-    ImageResource openGradient();
-
-    @ImageOptions(repeatStyle = RepeatStyle.Horizontal)
-    ImageResource selectionGradient();
 
     /**
      * Icon used to represent a user.

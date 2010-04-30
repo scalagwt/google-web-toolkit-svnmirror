@@ -1,0 +1,19 @@
+.item {
+  padding: 4px 3px;
+}
+
+.itemImage {
+  top: 2px !important;
+}
+
+.openItem {
+  font-weight: bold;
+}
+
+@sprite .selectedItem {
+  gwt-image: 'cellBrowserSelectedBackground';
+  background-color: #628cd5;
+  color: white;
+  height: auto;
+  overflow: auto;
+}

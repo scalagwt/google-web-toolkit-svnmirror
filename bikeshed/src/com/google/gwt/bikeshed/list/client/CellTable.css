@@ -1,0 +1,55 @@
+.cellTable {
+  border: 1px solid #5478af;
+}
+
+.firstColumn {
+  
+}
+
+@sprite .footer {
+  gwt-image: 'cellTableFooterBackground';
+  background-color: #b5d0f7;
+  border-top: 1px solid #5478af;
+  border-left: 1px solid #5478af;
+  padding: 5px 20px;
+  text-align: left;
+  color: #4b4a4a;
+}
+
+@sprite .header {
+  gwt-image: 'cellTableHeaderBackground';
+  background-color: #b5d0f7;
+  border-bottom: 1px solid #5478af;
+  border-left: 1px solid #5478af;
+  padding: 5px 20px;
+  text-align: left;
+  color: #4b4a4a;
+}
+
+.firstColumnFooter {
+  border-left: 0px;
+}
+
+.firstColumnHeader {
+  border-left: 0px;
+}
+
+.evenRow {
+  background-color: #ffffff;
+}
+
+.oddRow {
+  background-color: #eef4fb;
+}
+
+.hoveredRow {
+  background-color: lightblue;
+}
+
+@sprite .selectedRow {
+  gwt-image: 'cellTableSelectedBackground';
+  background-color: #628cd5;
+  color: white;
+  height: auto;
+  overflow: auto;
+}

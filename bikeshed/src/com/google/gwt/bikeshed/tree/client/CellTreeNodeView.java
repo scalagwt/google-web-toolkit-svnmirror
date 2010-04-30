@@ -37,7 +37,7 @@ import java.util.Map;
 
 /**
  * A view of a tree node.
- *
+ * 
  * @param <T> the type that this view contains
  */
 class CellTreeNodeView<T> extends UIObject {
@@ -53,13 +53,8 @@ class CellTreeNodeView<T> extends UIObject {
   private static final String LEAF_IMAGE = "<div style='position:absolute;display:none;'></div>";
 
   /**
-   * Style name applied to selected rows.
-   */
-  private static final String STYLENNAME_SELECTED = "gwt-cellTree-selectedItem";
-
-  /**
    * Returns the element that parents the cell contents of the node.
-   *
+   * 
    * @param nodeElem the element that represents the node
    * @return the cell parent within the node
    */
@@ -69,7 +64,7 @@ class CellTreeNodeView<T> extends UIObject {
 
   /**
    * Show or hide an element.
-   *
+   * 
    * @param element the element to show or hide
    * @param show true to show, false to hide
    */
@@ -84,7 +79,7 @@ class CellTreeNodeView<T> extends UIObject {
   /**
    * The {@link com.google.gwt.bikeshed.list.client.ListView ListView} used to
    * show children.
-   *
+   * 
    * @param <C> the child item type
    */
   private static class NodeListView<C> implements PagingListView<C> {
@@ -149,8 +144,8 @@ class CellTreeNodeView<T> extends UIObject {
           Element childElem = nodeView.ensureChildContainer().getFirstChildElement();
           for (int i = start; i < end; i++) {
             C childValue = values.get(i - start);
-            CellTreeNodeView<C> child = nodeView.createTreeNodeView(
-                nodeInfo, childElem, childValue, null);
+            CellTreeNodeView<C> child = nodeView.createTreeNodeView(nodeInfo,
+                childElem, childValue, null);
             CellTreeNodeView<?> savedChild = savedViews.remove(providesKey.getKey(childValue));
             // Copy the saved child's state into the new child
             if (savedChild != null) {
@@ -203,26 +198,33 @@ class CellTreeNodeView<T> extends UIObject {
         @Override
         protected void emitHtml(StringBuilder sb, List<C> values, int start,
             SelectionModel<? super C> selectionModel) {
+          String selectedStyle = nodeView.tree.getStyle().selectedItem();
+          String itemStyle = nodeView.tree.getStyle().item();
+          String openStyle = nodeView.tree.getStyle().openItem();
+
           ProvidesKey<C> providesKey = nodeInfo.getProvidesKey();
           CellTreeViewModel model = nodeView.tree.getTreeViewModel();
           int imageWidth = nodeView.tree.getImageWidth();
           for (C value : values) {
             Object key = providesKey.getKey(value);
-            sb.append("<div style=\"position:relative;padding-left:");
-            sb.append(imageWidth);
-            sb.append("px;\">");
-            if (savedViews.get(key) != null) {
+            boolean isOpen = savedViews.containsKey(key);
+            sb.append("<div style='position:relative;padding-left:");
+            sb.append(imageWidth).append("px'>");
+            if (isOpen) {
               sb.append(nodeView.tree.getOpenImageHtml());
             } else if (model.isLeaf(value)) {
               sb.append(LEAF_IMAGE);
             } else {
               sb.append(nodeView.tree.getClosedImageHtml());
             }
-            if (selectionModel != null && selectionModel.isSelected(value)) {
-              sb.append("<div class='").append(STYLENNAME_SELECTED).append("'>");
-            } else {
-              sb.append("<div>");
+            sb.append("<div class='").append(itemStyle);
+            if (isOpen) {
+              sb.append(" ").append(openStyle);
             }
+            if (selectionModel != null && selectionModel.isSelected(value)) {
+              sb.append(" ").append(selectedStyle);
+            }
+            sb.append("'>");
             cell.render(value, null, sb);
             sb.append("</div></div>");
           }
@@ -237,7 +239,8 @@ class CellTreeNodeView<T> extends UIObject {
 
         @Override
         protected void setSelected(Element elem, boolean selected) {
-          setStyleName(getCellParent(elem), STYLENNAME_SELECTED, selected);
+          setStyleName(getCellParent(elem),
+              nodeView.tree.getStyle().selectedItem(), selected);
         }
       };
 
@@ -306,8 +309,8 @@ class CellTreeNodeView<T> extends UIObject {
     }
 
     /**
-     * Assign this {@link ListView} to a new {@link CellTreeNodeView}.
-     *
+     * Assign this {@link PagingListView} to a new {@link CellTreeNodeView}.
+     * 
      * @param nodeView the new node view
      */
     private void setNodeView(CellTreeNodeView<?> nodeView) {
@@ -396,7 +399,7 @@ class CellTreeNodeView<T> extends UIObject {
   private Element showMoreElem;
 
   /**
-   * The {@link CellTreeView} that this node belongs to.
+   * The {@link CellTree} that this node belongs to.
    */
   private final CellTree tree;
 
@@ -407,16 +410,15 @@ class CellTreeNodeView<T> extends UIObject {
 
   /**
    * Construct a {@link CellTreeNodeView}.
-   *
+   * 
    * @param tree the parent {@link CellTreeNodeView}
    * @param parent the parent {@link CellTreeNodeView}
    * @param parentNodeInfo the {@link NodeInfo} of the parent
    * @param elem the outer element of this {@link CellTreeNodeView}
    * @param value the value of this node
    */
-  CellTreeNodeView(final CellTree tree,
-      final CellTreeNodeView<?> parent, NodeInfo<T> parentNodeInfo,
-      Element elem, T value) {
+  CellTreeNodeView(final CellTree tree, final CellTreeNodeView<?> parent,
+      NodeInfo<T> parentNodeInfo, Element elem, T value) {
     this.tree = tree;
     this.parentNode = parent;
     this.parentNodeInfo = parentNodeInfo;
@@ -434,7 +436,7 @@ class CellTreeNodeView<T> extends UIObject {
 
   /**
    * Check whether or not this node is open.
-   *
+   * 
    * @return true if open, false if closed
    */
   public boolean isOpen() {
@@ -453,7 +455,7 @@ class CellTreeNodeView<T> extends UIObject {
 
   /**
    * Sets whether this item's children are displayed.
-   *
+   * 
    * @param open whether the item is open
    */
   public void setOpen(boolean open) {
@@ -519,7 +521,7 @@ class CellTreeNodeView<T> extends UIObject {
   /**
    * Returns an instance of TreeNodeView of the same subclass as the calling
    * object.
-   *
+   * 
    * @param <C> the data type of the node's children
    * @param nodeInfo a NodeInfo object describing the child nodes
    * @param childElem the DOM element used to parent the new TreeNodeView
@@ -527,15 +529,14 @@ class CellTreeNodeView<T> extends UIObject {
    * @param viewData view data associated with the node
    * @return a TreeNodeView of suitable type
    */
-  protected <C> CellTreeNodeView<C> createTreeNodeView(
-      NodeInfo<C> nodeInfo, Element childElem, C childValue, Object viewData) {
-    return new CellTreeNodeView<C>(tree, this, nodeInfo, childElem,
-        childValue);
+  protected <C> CellTreeNodeView<C> createTreeNodeView(NodeInfo<C> nodeInfo,
+      Element childElem, C childValue, Object viewData) {
+    return new CellTreeNodeView<C>(tree, this, nodeInfo, childElem, childValue);
   }
 
   /**
    * Fire an event to the {@link com.google.gwt.bikeshed.cells.client.Cell}.
-   *
+   * 
    * @param event the native event
    * @return true if the cell consumes the event, false if not
    */
@@ -559,7 +560,7 @@ class CellTreeNodeView<T> extends UIObject {
 
   /**
    * Returns the element corresponding to the open/close image.
-   *
+   * 
    * @return the open/close image element
    */
   protected Element getImageElement() {
@@ -576,7 +577,7 @@ class CellTreeNodeView<T> extends UIObject {
 
   /**
    * Set up the node when it is opened.
-   *
+   * 
    * @param nodeInfo the {@link NodeInfo} that provides information about the
    *          child values
    * @param <C> the child data type of the node
@@ -612,7 +613,7 @@ class CellTreeNodeView<T> extends UIObject {
 
   /**
    * Ensure that the animation frame exists and return it.
-   *
+   * 
    * @return the animation frame
    */
   Element ensureAnimationFrame() {
@@ -628,7 +629,7 @@ class CellTreeNodeView<T> extends UIObject {
 
   /**
    * Ensure that the child container exists and return it.
-   *
+   * 
    * @return the child container
    */
   Element ensureChildContainer() {
@@ -641,7 +642,7 @@ class CellTreeNodeView<T> extends UIObject {
 
   /**
    * Ensure that the content container exists and return it.
-   *
+   * 
    * @return the content container
    */
   Element ensureContentContainer() {

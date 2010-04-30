@@ -80,7 +80,7 @@ public class BasicTableRecipe extends Recipe {
 
     // String column.
     table.addColumn(new IdentityColumn<String>(TextCell.getInstance()),
-        "TextCell");
+        "TextCell", "TextCell");
 
     // Button column tied to selection.
     Column<String, String> buttonCol = new Column<String, String>(
@@ -106,7 +106,7 @@ public class BasicTableRecipe extends Recipe {
         Window.alert("You clicked: " + object);
       }
     });
-    table.addColumn(buttonCol, "ButtonCell");
+    table.addColumn(buttonCol, "ButtonCell", "ButtonCell");
 
     // Add a Pager to control the table.
     SimplePager<String> pager = new SimplePager<String>(table);

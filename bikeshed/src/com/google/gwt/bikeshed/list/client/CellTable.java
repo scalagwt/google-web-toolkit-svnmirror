@@ -26,6 +26,12 @@ import com.google.gwt.dom.client.TableCellElement;
 import com.google.gwt.dom.client.TableElement;
 import com.google.gwt.dom.client.TableRowElement;
 import com.google.gwt.dom.client.TableSectionElement;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.resources.client.ImageResource.ImageOptions;
+import com.google.gwt.resources.client.ImageResource.RepeatStyle;
+import com.google.gwt.sample.bikeshed.style.client.Styles;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -40,31 +46,97 @@ import java.util.List;
 public class CellTable<T> extends Widget implements PagingListView<T> {
 
   /**
-   * Style name applied to the entire table.
+   * The default page size.
    */
-  private static final String STYLENAME_DEFAULT = "gwt-CellTable";
+  private static final int DEFAULT_PAGESIZE = 15;
 
   /**
-   * Style name applied to even rows.
+   * Styles used by this widget.
    */
-  private static final String STYLENAME_EVEN = "gwt-cellTable-evenRow";
+  public static interface Style extends CssResource {
+
+    /**
+     * Applied to the table.
+     */
+    String cellTable();
+
+    /**
+     * Applied to even rows.
+     */
+    String evenRow();
+
+    /**
+     * Applied to the first column.
+     */
+    String firstColumn();
+
+    /**
+     * Applied to the first column footers.
+     */
+    String firstColumnFooter();
+
+    /**
+     * Applied to the first column headers.
+     */
+    String firstColumnHeader();
+
+    /**
+     * Applied to footers cells.
+     */
+    String footer();
+
+    /**
+     * Applied to headers cells.
+     */
+    String header();
+
+    /**
+     * Applied to the hovered row.
+     */
+    String hoveredRow();
+
+    /**
+     * Applied to odd rows.
+     */
+    String oddRow();
+
+    /**
+     * Applied to selected rows.
+     */
+    String selectedRow();
+  }
 
   /**
-   * Style name applied to the first column.
+   * A ClientBundle that provides images for this widget.
    */
-  private static final String STYLENAME_FIRST = "gwt-cellTable-firstColumn";
+  public static interface Resources extends ClientBundle {
 
-  /**
-   * Style name applied to odd rows.
-   */
-  private static final String STYLENAME_ODD = "gwt-cellTable-oddRow";
+    /**
+     * The background used for header cells.
+     */
+    @ImageOptions(repeatStyle = RepeatStyle.Horizontal)
+    ImageResource cellTableHeaderBackground();
 
-  /**
-   * The style name applied to selected rows.
-   */
-  private static final String STYLENAME_SELECTED = "gwt-cellTable-selectedRow";
+    /**
+     * The background used for footer cells.
+     */
+    @Source("cellTableHeaderBackground.png")
+    @ImageOptions(repeatStyle = RepeatStyle.Horizontal)
+    ImageResource cellTableFooterBackground();
 
-  private static final int DEFAULT_SIZE = 10;
+    /**
+     * The background used for selected cells.
+     */
+    @Source("cellListSelectedBackground.png")
+    @ImageOptions(repeatStyle = RepeatStyle.Horizontal)
+    ImageResource cellTableSelectedBackground();
+
+    /**
+     * The styles used in this widget.
+     */
+    @Source("CellTable.css")
+    Style cellTableStyle();
+  }
 
   private List<Column<T, ?>> columns = new ArrayList<Column<T, ?>>();
   private List<Header<?>> footers = new ArrayList<Header<?>>();
@@ -88,16 +160,17 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
    */
   private boolean isSelectionEnabled;
 
-  private TableElement table;
-  private TableSectionElement tbody;
-  private TableSectionElement tfoot;
+  private final Style style;
+  private final TableElement table;
+  private final TableSectionElement tbody;
+  private final TableSectionElement tfoot;
   private TableSectionElement thead;
 
   /**
-   * Constructs a table with a default page size of 10.
+   * Constructs a table with a default page size of 15.
    */
   public CellTable() {
-    this(DEFAULT_SIZE);
+    this(DEFAULT_PAGESIZE);
   }
 
   /**
@@ -106,12 +179,26 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
    * @param pageSize the page size
    */
   public CellTable(final int pageSize) {
+    this(pageSize, Styles.resources());
+  }
+
+  /**
+   * Constructs a table with the given page size with the specified
+   * {@link Resources}.
+   * 
+   * @param pageSize the page size
+   * @param resources the resources to use for this widget
+   */
+  public CellTable(final int pageSize, Resources resources) {
+    this.style = resources.cellTableStyle();
+    this.style.ensureInjected();
+
     setElement(table = Document.get().createTableElement());
     table.setCellSpacing(0);
     thead = table.createTHead();
     table.appendChild(tbody = Document.get().createTBodyElement());
     tfoot = table.createTFoot();
-    setStyleName(STYLENAME_DEFAULT);
+    setStyleName(this.style.cellTable());
 
     // Create the implementation.
     this.impl = new CellListImpl<T>(this, pageSize, tbody) {
@@ -151,9 +238,9 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
               ? false : selectionModel.isSelected(value);
           sb.append("<tr __idx='").append(i).append("'");
           sb.append(" class='");
-          sb.append(i % 2 == 0 ? STYLENAME_EVEN : STYLENAME_ODD);
+          sb.append(i % 2 == 0 ? style.evenRow() : style.oddRow());
           if (isSelected) {
-            sb.append(" ").append(STYLENAME_SELECTED);
+            sb.append(" ").append(style.selectedRow());
           }
           sb.append("'>");
           boolean first = true;
@@ -161,7 +248,7 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
             // TODO(jlabanca): How do we sink ONFOCUS and ONBLUR?
             if (first) {
               first = false;
-              sb.append("<td class='").append(STYLENAME_FIRST).append("'>");
+              sb.append("<td class='").append(style.firstColumn()).append("'>");
             } else {
               sb.append("<td>");
             }
@@ -176,7 +263,7 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
 
       @Override
       protected void setSelected(Element elem, boolean selected) {
-        setStyleName(elem, STYLENAME_SELECTED, selected);
+        setStyleName(elem, style.selectedRow(), selected);
       }
 
       @Override
@@ -184,7 +271,7 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
         // Refresh headers.
         for (Header<?> header : headers) {
           if (header != null && header.dependsOnSelection()) {
-            createHeaders(headers, thead);
+            createHeaders(false);
             break;
           }
         }
@@ -192,7 +279,7 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
         // Refresh footers.
         for (Header<?> footer : footers) {
           if (footer != null && footer.dependsOnSelection()) {
-            createHeaders(footers, tfoot);
+            createHeaders(true);
             break;
           }
         }
@@ -214,7 +301,7 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
    * Adds a column to the table.
    */
   public void addColumn(Column<T, ?> col) {
-    addColumn(col, null, null);
+    addColumn(col, (Header<?>) null, (Header<?>) null);
   }
 
   /**
@@ -240,6 +327,14 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
    */
   public void addColumn(Column<T, ?> col, String headerString) {
     addColumn(col, new TextHeader(headerString), null);
+  }
+
+  /**
+   * Adds a column to the table with an associated String header and footer.
+   */
+  public void addColumn(Column<T, ?> col, String headerString,
+      String footerString) {
+    addColumn(col, new TextHeader(headerString), new TextHeader(footerString));
   }
 
   // TODO: remove(Column)
@@ -335,13 +430,13 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
 
       if (event.getType().equals("mouseover")) {
         if (hoveringRow != null) {
-          hoveringRow.removeClassName("hover");
+          hoveringRow.removeClassName(style.hoveredRow());
         }
         hoveringRow = tr;
-        tr.addClassName("hover");
+        tr.addClassName(style.hoveredRow());
       } else if (event.getType().equals("mouseout")) {
         hoveringRow = null;
-        tr.removeClassName("hover");
+        tr.removeClassName(style.hoveredRow());
       }
 
       T value = impl.getData().get(row);
@@ -367,11 +462,11 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
   }
 
   public void refreshFooters() {
-    createHeaders(footers, tfoot);
+    createHeaders(true);
   }
 
   public void refreshHeaders() {
-    createHeaders(headers, thead);
+    createHeaders(false);
   }
 
   public void setData(int start, int length, List<T> values) {
@@ -437,19 +532,29 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
     impl.setSelectionModel(selectionModel, true);
   }
 
-  private void createHeaders(List<Header<?>> headers,
-      TableSectionElement section) {
+  /**
+   * Render the header of footer.
+   * 
+   * @param isFooter true if this is the footer table, false if the header table
+   */
+  private void createHeaders(boolean isFooter) {
+    List<Header<?>> theHeaders = isFooter ? footers : headers;
+    TableSectionElement section = isFooter ? tfoot : thead;
+    String className = isFooter ? style.footer() : style.header();
+
     boolean hasHeader = false;
     StringBuilder sb = new StringBuilder();
     sb.append("<tr>");
     boolean first = true;
-    for (Header<?> header : headers) {
+    for (Header<?> header : theHeaders) {
+      sb.append("<th class='").append(className);
       if (first) {
         first = false;
-        sb.append("<th class='").append(STYLENAME_FIRST).append("'>");
-      } else {
-        sb.append("<th>");
+        sb.append(" ");
+        sb.append(isFooter ? style.firstColumnFooter()
+            : style.firstColumnHeader());
       }
+      sb.append("'>");
       if (header != null) {
         hasHeader = true;
         header.render(sb);
@@ -467,8 +572,8 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
   private void createHeadersAndFooters() {
     if (headersStale) {
       headersStale = false;
-      createHeaders(headers, thead);
-      createHeaders(footers, tfoot);
+      createHeaders(false);
+      createHeaders(true);
     }
   }
 
@@ -489,3 +594,4 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
     return element.clientHeight;
   }-*/;
 }
+

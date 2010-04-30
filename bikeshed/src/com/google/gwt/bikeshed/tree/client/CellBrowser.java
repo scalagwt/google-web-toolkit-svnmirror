@@ -18,15 +18,16 @@ package com.google.gwt.bikeshed.tree.client;
 import com.google.gwt.animation.client.Animation;
 import com.google.gwt.bikeshed.cells.client.Cell;
 import com.google.gwt.bikeshed.cells.client.ValueUpdater;
+import com.google.gwt.bikeshed.list.client.CellList;
 import com.google.gwt.bikeshed.list.client.ListView;
 import com.google.gwt.bikeshed.list.client.PageSizePager;
 import com.google.gwt.bikeshed.list.client.PagingListView;
-import com.google.gwt.bikeshed.list.client.CellList;
 import com.google.gwt.bikeshed.list.client.PagingListView.Pager;
 import com.google.gwt.bikeshed.list.shared.ProvidesKey;
 import com.google.gwt.bikeshed.list.shared.Range;
 import com.google.gwt.bikeshed.list.shared.SelectionModel;
 import com.google.gwt.bikeshed.tree.client.CellTreeViewModel.NodeInfo;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
@@ -34,9 +35,15 @@ import com.google.gwt.dom.client.Style.Overflow;
 import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.dom.client.Style.Visibility;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.resources.client.ImageResource.ImageOptions;
+import com.google.gwt.resources.client.ImageResource.RepeatStyle;
+import com.google.gwt.sample.bikeshed.style.client.Styles;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.ui.AbstractImagePrototype;
+import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasAnimation;
 import com.google.gwt.user.client.ui.ProvidesResize;
@@ -52,7 +59,7 @@ import java.util.List;
  * A "browsable" view of a tree in which only a single node per level may be
  * open at one time.
  */
-public class CellBrowser extends CellTreeView implements ProvidesResize,
+public class CellBrowser extends Composite implements ProvidesResize,
     RequiresResize, HasAnimation {
 
   /**
@@ -61,34 +68,79 @@ public class CellBrowser extends CellTreeView implements ProvidesResize,
   private static final String LEAF_IMAGE = "<div style='position:absolute;display:none;'></div>";
 
   /**
-   * The style name assigned to each column.
+   * Styles used by this widget.
    */
-  private static final String STYLENAME_COLUMN = "gwt-cellBrowser-column";
+  public static interface Style extends CssResource {
+
+    /**
+     * Applied to the first column.
+     */
+    String firstColumn();
+
+    /**
+     * Applied to all columns.
+     */
+    String column();
+
+    /**
+     * Applied to all list items.
+     */
+    String item();
+
+    /***
+     * Applied to open items.
+     */
+    String openItem();
+
+    /***
+     * Applied to selected items.
+     */
+    String selectedItem();
+  }
 
   /**
-   * The style name assigned to the first column.
+   * A ClientBundle that provides images for this widget.
    */
-  private static final String STYLENAME_FIRST_COLUMN = "gwt-cellBrowser-firstColumn";
+  public static interface Resources extends ClientBundle {
+
+    /**
+     * An image indicating a closed branch.
+     */
+    ImageResource cellBrowserClosed();
+
+    /**
+     * An image indicating an open branch.
+     */
+    ImageResource cellBrowserOpen();
+
+    /**
+     * The background used for open items.
+     */
+    @ImageOptions(repeatStyle = RepeatStyle.Horizontal)
+    ImageResource cellBrowserOpenBackground();
+
+    /**
+     * The background used for selected items.
+     */
+    @Source("../../list/client/cellListSelectedBackground.png")
+    @ImageOptions(repeatStyle = RepeatStyle.Horizontal)
+    ImageResource cellBrowserSelectedBackground();
+
+    /**
+     * The styles used in this widget.
+     */
+    @Source("CellBrowser.css")
+    Style cellBrowserStyle();
+  }
 
   /**
-   * The style name assigned to each item.
+   * We override the Resources in {@link CellList} so that the styles in
+   * {@link CellList} don't conflict with the styles in {@link CellBrowser}.
    */
-  private static final String STYLENAME_ITEM = "gwt-cellBrowser-item";
-
-  /**
-   * The style name assigned to open items.
-   */
-  private static final String STYLENAME_OPEN = "gwt-cellBrowser-openItem";
-
-  /**
-   * The style name assigned to open items.
-   */
-  private static final String STYLENAME_SELECTED = "gwt-cellBrowser-selectedItem";
-
-  /**
-   * The prefix of the ID assigned to open cells.
-   */
-  private static final String ID_PREFIX_OPEN = "__gwt-cellBrowser-open-";
+  static interface CellListResources extends CellList.Resources {
+    @Source("CellBrowserOverride.css")
+    CellList.Style cellListStyle();
+  }
 
   /**
    * The animation used to scroll to the newly added list view.
@@ -206,8 +258,8 @@ public class CellBrowser extends CellTreeView implements ProvidesResize,
         openKey = null;
 
         // Save the key of the new open item and update the Element.
-        if (!getTreeViewModel().isLeaf(value)) {
-          NodeInfo<?> nodeInfo = getTreeViewModel().getNodeInfo(value);
+        if (!viewModel.isLeaf(value)) {
+          NodeInfo<?> nodeInfo = viewModel.getNodeInfo(value);
           if (nodeInfo != null) {
             openKey = providesKey.getKey(value);
             setElementOpenState(parent, true);
@@ -225,16 +277,15 @@ public class CellBrowser extends CellTreeView implements ProvidesResize,
           : openKey.equals(providesKey.getKey(value));
       boolean isSelected = (selectionModel == null) ? false
           : selectionModel.isSelected(value);
-      int imageWidth = getImageWidth();
       sb.append("<div style='position:relative;padding-right:");
       sb.append(imageWidth);
       sb.append("px;'");
-      sb.append(" class='").append(STYLENAME_ITEM);
+      sb.append(" class='").append(style.item());
       if (isOpen) {
-        sb.append(" ").append(STYLENAME_OPEN);
+        sb.append(" ").append(style.openItem());
       }
       if (isSelected) {
-        sb.append(" ").append(STYLENAME_SELECTED);
+        sb.append(" ").append(style.selectedItem());
       }
       sb.append("'");
       if (isOpen) {
@@ -242,11 +293,11 @@ public class CellBrowser extends CellTreeView implements ProvidesResize,
       }
       sb.append(">");
       if (isOpen) {
-        sb.append(getOpenImageHtml());
-      } else if (getTreeViewModel().isLeaf(value)) {
+        sb.append(openImageHtml);
+      } else if (viewModel.isLeaf(value)) {
         sb.append(LEAF_IMAGE);
       } else {
-        sb.append(getClosedImageHtml());
+        sb.append(closedImageHtml);
       }
       sb.append("<div>");
       cell.render(value, viewData, sb);
@@ -284,7 +335,7 @@ public class CellBrowser extends CellTreeView implements ProvidesResize,
      * @return the ID
      */
     private String getOpenId() {
-      return ID_PREFIX_OPEN + level + "-" + uniqueId;
+      return uniqueId + "-" + level;
     }
 
     /**
@@ -298,15 +349,15 @@ public class CellBrowser extends CellTreeView implements ProvidesResize,
       // Update the style name and ID.
       Element wrapper = parent.getFirstChildElement();
       if (open) {
-        wrapper.addClassName(STYLENAME_OPEN);
+        wrapper.addClassName(style.openItem());
         wrapper.setId(getOpenId());
       } else {
-        wrapper.removeClassName(STYLENAME_OPEN);
+        wrapper.removeClassName(style.openItem());
         wrapper.setId("");
       }
 
       // Replace the image element.
-      String html = open ? getOpenImageHtml() : getClosedImageHtml();
+      String html = open ? openImageHtml : closedImageHtml;
       Element tmp = Document.get().createDivElement();
       tmp.setInnerHTML(html);
       Element imageElem = tmp.getFirstChildElement();
@@ -361,9 +412,19 @@ public class CellBrowser extends CellTreeView implements ProvidesResize,
   }
 
   /**
-   * The counter used to assigned unique IDs.
+   * The override styles used in {@link CellList}.
    */
-  private static int NEXT_ID = 0;
+  private static CellListResources cellListResource;
+
+  /**
+   * Get the {@link CellList.Resources} overrides.
+   */
+  private static CellListResources getCellListResources() {
+    if (cellListResource == null) {
+      cellListResource = GWT.create(CellListResources.class);
+    }
+    return cellListResource;
+  }
 
   /**
    * The animation used for scrolling.
@@ -378,12 +439,12 @@ public class CellBrowser extends CellTreeView implements ProvidesResize,
   /**
    * The HTML used to generate the closed image.
    */
-  private String closedImageHtml;
+  private final String closedImageHtml;
 
   /**
-   * The unique ID assigned to this tree view.
+   * The unique ID assigned to this tree widget.
    */
-  private final int uniqueId = NEXT_ID++;
+  private final String uniqueId = Document.get().createUniqueId();
 
   /**
    * A boolean indicating whether or not animations are enabled.
@@ -393,12 +454,22 @@ public class CellBrowser extends CellTreeView implements ProvidesResize,
   /**
    * The minimum width of new columns.
    */
-  private int minWidth = getImageWidth() + 20;
+  private int minWidth;
+
+  /**
+   * The maximum width of the open and closed images.
+   */
+  private final int imageWidth;
 
   /**
    * The HTML used to generate the open image.
    */
-  private String openImageHtml;
+  private final String openImageHtml;
+
+  /**
+   * The styles used by this widget.
+   */
+  private final Style style;
 
   /**
    * The element used to maintain the scrollbar when columns are removed.
@@ -408,19 +479,48 @@ public class CellBrowser extends CellTreeView implements ProvidesResize,
   /**
    * The visible {@link TreeNode}.
    */
-  private List<TreeNode<?>> treeNodes = new ArrayList<TreeNode<?>>();
+  private final List<TreeNode<?>> treeNodes = new ArrayList<TreeNode<?>>();
 
   /**
-   * Construct a new {@link CellTreeView}.
+   * The {@link CellTreeViewModel} that backs the tree.
+   */
+  private final CellTreeViewModel viewModel;
+
+  /**
+   * Construct a new {@link CellBrowser}.
    * 
    * @param <T> the type of data in the root node
    * @param viewModel the {@link CellTreeViewModel} that backs the tree
    * @param rootValue the hidden root value of the tree
    */
   public <T> CellBrowser(CellTreeViewModel viewModel, T rootValue) {
-    super(viewModel, new SplitLayoutPanel());
+    this(viewModel, rootValue, Styles.resources());
+  }
+
+  /**
+   * Construct a new {@link CellBrowser} with the specified {@link Resources}.
+   * 
+   * @param <T> the type of data in the root node
+   * @param viewModel the {@link CellTreeViewModel} that backs the tree
+   * @param rootValue the hidden root value of the tree
+   * @param resources the {@link Resources} used for images
+   */
+  public <T> CellBrowser(CellTreeViewModel viewModel, T rootValue,
+      Resources resources) {
+    this.viewModel = viewModel;
+    this.style = resources.cellBrowserStyle();
+    this.style.ensureInjected();
+    initWidget(new SplitLayoutPanel());
     getElement().getStyle().setOverflow(Overflow.AUTO);
     setStyleName("gwt-SideBySideTreeView");
+
+    // Initialize the open and close images strings.
+    ImageResource treeOpen = resources.cellBrowserOpen();
+    ImageResource treeClosed = resources.cellBrowserClosed();
+    openImageHtml = getImageHtml(treeOpen);
+    closedImageHtml = getImageHtml(treeClosed);
+    imageWidth = Math.max(treeOpen.getWidth(), treeClosed.getWidth());
+    minWidth = imageWidth + 20;
 
     // Add a placeholder to maintain the scroll width.
     scrollLock = Document.get().createDivElement();
@@ -523,7 +623,7 @@ public class CellBrowser extends CellTreeView implements ProvidesResize,
    */
   protected <C> PagingListView<C> createPagingListView(NodeInfo<C> nodeInfo,
       Cell<C> cell) {
-    CellList<C> pagingListView = new CellList<C>(cell);
+    CellList<C> pagingListView = new CellList<C>(cell, getCellListResources());
     pagingListView.setValueUpdater(nodeInfo.getValueUpdater());
     return pagingListView;
   }
@@ -567,9 +667,9 @@ public class CellBrowser extends CellTreeView implements ProvidesResize,
     } else {
       scrollable.setWidget((Widget) listView);
     }
-    scrollable.setStyleName(STYLENAME_COLUMN);
+    scrollable.setStyleName(style.column());
     if (level == 0) {
-      scrollable.addStyleName(STYLENAME_FIRST_COLUMN);
+      scrollable.addStyleName(style.firstColumn());
     }
 
     // Create a delegate list view so we can trap data changes.
@@ -633,27 +733,24 @@ public class CellBrowser extends CellTreeView implements ProvidesResize,
   }
 
   /**
-   * @return the HTML to render the closed image.
+   * Get the HTML representation of an image.
+   * 
+   * @param res the {@link ImageResource} to render as HTML
+   * @return the rendered HTML
    */
-  private String getClosedImageHtml() {
-    if (closedImageHtml == null) {
-      AbstractImagePrototype proto = AbstractImagePrototype.create(getResources().treeClosed());
-      closedImageHtml = proto.getHTML().replace("style='",
-          "style='position:absolute;right:0px;top:0px;");
-    }
-    return closedImageHtml;
-  }
+  private String getImageHtml(ImageResource res) {
+    // Add the position and dimensions.
+    StringBuilder sb = new StringBuilder();
+    sb.append("<div style=\"position:absolute;right:0px;top:0px;height:100%;");
+    sb.append("width:").append(res.getWidth()).append("px;");
 
-  /**
-   * @return the HTML to render the open image.
-   */
-  private String getOpenImageHtml() {
-    if (openImageHtml == null) {
-      AbstractImagePrototype proto = AbstractImagePrototype.create(getResources().treeOpen());
-      openImageHtml = proto.getHTML().replace("style='",
-          "style='position:absolute;right:0px;top:0px;");
-    }
-    return openImageHtml;
+    // Add the background, vertically centered.
+    sb.append("background:url('").append(res.getURL()).append("') ");
+    sb.append("no-repeat scroll center center transparent;");
+
+    // Close the div and return.
+    sb.append("\"></div>");
+    return sb.toString();
   }
 
   /**

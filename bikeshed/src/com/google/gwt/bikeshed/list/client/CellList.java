@@ -24,6 +24,12 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Display;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.resources.client.ImageResource.ImageOptions;
+import com.google.gwt.resources.client.ImageResource.RepeatStyle;
+import com.google.gwt.sample.bikeshed.style.client.Styles;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -31,7 +37,7 @@ import java.util.List;
 
 /**
  * A single column list of cells.
- *
+ * 
  * @param <T> the data type of list items
  */
 public class CellList<T> extends Widget implements PagingListView<T> {
@@ -42,33 +48,70 @@ public class CellList<T> extends Widget implements PagingListView<T> {
   private static final int DEFAULT_PAGE_SIZE = 25;
 
   /**
-   * Style name applied to even rows.
+   * Styles used by this widget.
    */
-  private static final String STYLENAME_EVEN = "gwt-cellList-evenRow";
+  public static interface Style extends CssResource {
+
+    /**
+     * Applied to even items.
+     */
+    String evenItem();
+
+    /**
+     * Applied to odd items.
+     */
+    String oddItem();
+
+    /**
+     * Applied to selected items.
+     */
+    String selectedItem();
+  }
 
   /**
-   * Style name applied to odd rows.
+   * A ClientBundle that provides images for this widget.
    */
-  private static final String STYLENAME_ODD = "gwt-cellList-oddRow";
+  public static interface Resources extends ClientBundle {
 
-  /**
-   * Style name applied to selected rows.
-   */
-  private static final String STYLENAME_SELECTED = "gwt-cellList-selectedItem";
+    /**
+     * The background used for selected items.
+     */
+    @ImageOptions(repeatStyle = RepeatStyle.Horizontal)
+    ImageResource cellListSelectedBackground();
+
+    /**
+     * The styles used in this widget.
+     */
+    @Source("CellList.css")
+    Style cellListStyle();
+  }
 
   private final Cell<T> cell;
   private final Element emptyMessageElem;
   private final CellListImpl<T> impl;
+  private final Style style;
   private ValueUpdater<T> valueUpdater;
 
   /**
    * Construct a new {@link CellList}.
-   *
+   * 
    * @param cell the cell used to render each item
    */
-  // TODO(jlabanca): Should cell support ViewData?
   public CellList(final Cell<T> cell) {
+    this(cell, Styles.resources());
+  }
+
+  /**
+   * Construct a new {@link CellList} with the specified {@link Resources}.
+   * 
+   * @param cell the cell used to render each item
+   * @param resources the resources used for this widget
+   */
+  // TODO(jlabanca): Should cell support ViewData?
+  public CellList(final Cell<T> cell, Resources resources) {
     this.cell = cell;
+    this.style = resources.cellListStyle();
+    this.style.ensureInjected();
 
     // Create the DOM hierarchy.
     Element childContainer = Document.get().createDivElement();
@@ -103,9 +146,9 @@ public class CellList<T> extends Widget implements PagingListView<T> {
               : selectionModel.isSelected(value);
           sb.append("<div __idx='").append(i).append("'");
           sb.append(" class='");
-          sb.append(i % 2 == 0 ? STYLENAME_EVEN : STYLENAME_ODD);
+          sb.append(i % 2 == 0 ? style.evenItem() : style.oddItem());
           if (isSelected) {
-            sb.append(" ").append(STYLENAME_SELECTED);
+            sb.append(" ").append(style.selectedItem());
           }
           sb.append("'>");
           cell.render(value, null, sb);
@@ -121,7 +164,7 @@ public class CellList<T> extends Widget implements PagingListView<T> {
 
       @Override
       protected void setSelected(Element elem, boolean selected) {
-        setStyleName(elem, STYLENAME_SELECTED, selected);
+        setStyleName(elem, style.selectedItem(), selected);
       }
     };
   }
@@ -196,7 +239,7 @@ public class CellList<T> extends Widget implements PagingListView<T> {
 
   /**
    * Set the value updater to use when cells modify items.
-   *
+   * 
    * @param valueUpdater the {@link ValueUpdater}
    */
   public void setValueUpdater(ValueUpdater<T> valueUpdater) {
@@ -205,7 +248,7 @@ public class CellList<T> extends Widget implements PagingListView<T> {
 
   /**
    * Show or hide an element.
-   *
+   * 
    * @param element the element
    * @param show true to show, false to hide
    */

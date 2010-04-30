@@ -20,16 +20,78 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.resources.client.ImageResource.ImageOptions;
+import com.google.gwt.resources.client.ImageResource.RepeatStyle;
+import com.google.gwt.sample.bikeshed.style.client.Styles;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.ui.AbstractImagePrototype;
+import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasAnimation;
+import com.google.gwt.user.client.ui.SimplePanel;
 
 import java.util.ArrayList;
 
 /**
  * A view of a tree.
  */
-public class CellTree extends CellTreeView implements HasAnimation {
+public class CellTree extends Composite implements HasAnimation {
+
+  /**
+   * Styles used by this widget.
+   */
+  public static interface Style extends CssResource {
+
+    /**
+     * Applied to tree items.
+     */
+    String item();
+
+    /**
+     * Applied to open/close icon.
+     */
+    String itemImage();
+
+    /**
+     * Applied to open tree items.
+     */
+    String openItem();
+
+    /**
+     * Applied to selected tree items.
+     */
+    String selectedItem();
+  }
+
+  /**
+   * A ClientBundle that provides images for this widget.
+   */
+  public static interface Resources extends ClientBundle {
+
+    /**
+     * An image indicating a closed branch.
+     */
+    ImageResource cellTreeClosedItem();
+
+    /**
+     * An image indicating an open branch.
+     */
+    ImageResource cellTreeOpenItem();
+
+    /**
+     * The background used for selected items.
+     */
+    @Source("../../list/client/cellListSelectedBackground.png")
+    @ImageOptions(repeatStyle = RepeatStyle.Horizontal)
+    ImageResource cellTreeSelectedBackground();
+
+    /**
+     * The styles used in this widget.
+     */
+    @Source("CellTree.css")
+    Style cellTreeStyle();
+  }
 
   /**
    * A node animation.
@@ -51,12 +113,11 @@ public class CellTree extends CellTreeView implements HasAnimation {
 
     /**
      * Animate a tree node into its new state.
-     *
+     * 
      * @param node the node to animate
      * @param isAnimationEnabled true to animate
      */
-    abstract void animate(CellTreeNodeView<?> node,
-        boolean isAnimationEnabled);
+    abstract void animate(CellTreeNodeView<?> node, boolean isAnimationEnabled);
 
     public int getDuration() {
       return duration;
@@ -195,7 +256,7 @@ public class CellTree extends CellTreeView implements HasAnimation {
   public static class SlideAnimation extends RevealAnimation {
     /**
      * Create a new {@link RevealAnimation}.
-     *
+     * 
      * @return the new animation
      */
     public static SlideAnimation create() {
@@ -248,7 +309,12 @@ public class CellTree extends CellTreeView implements HasAnimation {
   /**
    * The HTML used to generate the closed image.
    */
-  private String closedImageHtml;
+  private final String closedImageHtml;
+
+  /**
+   * The maximum width of the open and closed images.
+   */
+  private final int imageWidth;
 
   /**
    * Indicates whether or not animations are enabled.
@@ -264,23 +330,56 @@ public class CellTree extends CellTreeView implements HasAnimation {
   /**
    * The HTML used to generate the open image.
    */
-  private String openImageHtml;
+  private final String openImageHtml;
 
   /**
    * The hidden root node in the tree.
    */
-  private CellTreeNodeView<?> rootNode;
+  private final CellTreeNodeView<?> rootNode;
 
   /**
-   * Construct a new {@link CellTreeView}.
-   *
+   * The styles used by this widget.
+   */
+  private final Style style;
+
+  /**
+   * The {@link CellTreeViewModel} that backs the tree.
+   */
+  private final CellTreeViewModel viewModel;
+
+  /**
+   * Construct a new {@link CellTree}.
+   * 
    * @param <T> the type of data in the root node
    * @param viewModel the {@link CellTreeViewModel} that backs the tree
    * @param rootValue the hidden root value of the tree
    */
   public <T> CellTree(CellTreeViewModel viewModel, T rootValue) {
-    super(viewModel);
+    this(viewModel, rootValue, Styles.resources());
+  }
+
+  /**
+   * Construct a new {@link CellTree}.
+   * 
+   * @param <T> the type of data in the root node
+   * @param viewModel the {@link CellTreeViewModel} that backs the tree
+   * @param rootValue the hidden root value of the tree
+   * @param resources the resources used to render the tree
+   */
+  public <T> CellTree(CellTreeViewModel viewModel, T rootValue,
+      Resources resources) {
+    this.viewModel = viewModel;
+    this.style = resources.cellTreeStyle();
+    this.style.ensureInjected();
+    initWidget(new SimplePanel());
     setStyleName("gwt-StandardTreeView");
+
+    // Initialize the open and close images strings.
+    ImageResource treeOpen = resources.cellTreeOpenItem();
+    ImageResource treeClosed = resources.cellTreeClosedItem();
+    openImageHtml = getImageHtml(treeOpen);
+    closedImageHtml = getImageHtml(treeClosed);
+    imageWidth = Math.max(treeOpen.getWidth(), treeClosed.getWidth());
 
     // We use one animation for the entire tree.
     setAnimation(SlideAnimation.create());
@@ -289,8 +388,8 @@ public class CellTree extends CellTreeView implements HasAnimation {
     sinkEvents(Event.ONCLICK | Event.ONCHANGE | Event.MOUSEEVENTS);
 
     // Associate a view with the item.
-    CellTreeNodeView<T> root = new CellTreeNodeView<T>(this, null,
-        null, getElement(), rootValue);
+    CellTreeNodeView<T> root = new CellTreeNodeView<T>(this, null, null,
+        getElement(), rootValue);
     rootNode = root;
     root.setOpen(true);
   }
@@ -298,7 +397,7 @@ public class CellTree extends CellTreeView implements HasAnimation {
   /**
    * Get the animation used to open and close nodes in this tree if animations
    * are enabled.
-   *
+   * 
    * @return the animation
    * @see #isAnimationEnabled()
    */
@@ -309,11 +408,15 @@ public class CellTree extends CellTreeView implements HasAnimation {
   /**
    * Get the HTML string that is displayed while nodes wait for their children
    * to load.
-   *
+   * 
    * @return the loading HTML string
    */
   public String getLoadingHtml() {
     return loadingHtml;
+  }
+
+  public CellTreeViewModel getTreeViewModel() {
+    return viewModel;
   }
 
   public boolean isAnimationEnabled() {
@@ -360,7 +463,7 @@ public class CellTree extends CellTreeView implements HasAnimation {
   /**
    * Set the animation used to open and close nodes in this tree. You must call
    * {@link #setAnimationEnabled(boolean)} to enable or disable animation.
-   *
+   * 
    * @param animation a {@link NodeAnimation}
    * @see #setAnimationEnabled(boolean)
    */
@@ -379,7 +482,7 @@ public class CellTree extends CellTreeView implements HasAnimation {
   /**
    * Set the HTML string that will be displayed when a node is waiting for its
    * child nodes to load.
-   *
+   * 
    * @param loadingHtml the HTML string
    */
   public void setLoadingHtml(String loadingHtml) {
@@ -390,29 +493,35 @@ public class CellTree extends CellTreeView implements HasAnimation {
    * @return the HTML to render the closed image.
    */
   String getClosedImageHtml() {
-    if (closedImageHtml == null) {
-      AbstractImagePrototype proto = AbstractImagePrototype.create(getResources().treeClosed());
-      closedImageHtml = proto.getHTML().replace("style='",
-          "style='position:absolute;left:0px;top:0px;");
-    }
     return closedImageHtml;
+  }
+
+  /**
+   * Get the width required for the images.
+   * 
+   * @return the maximum width required for images.
+   */
+  int getImageWidth() {
+    return imageWidth;
   }
 
   /**
    * @return the HTML to render the open image.
    */
   String getOpenImageHtml() {
-    if (openImageHtml == null) {
-      AbstractImagePrototype proto = AbstractImagePrototype.create(getResources().treeOpen());
-      openImageHtml = proto.getHTML().replace("style='",
-          "style='position:absolute;left:0px;top:0px;");
-    }
     return openImageHtml;
   }
 
   /**
+   * @return the Style used by the tree
+   */
+  Style getStyle() {
+    return style;
+  }
+
+  /**
    * Animate the current state of a {@link CellTreeNodeView} in this tree.
-   *
+   * 
    * @param node the node to animate
    */
   void maybeAnimateTreeNode(CellTreeNodeView<?> node) {
@@ -453,5 +562,29 @@ public class CellTree extends CellTreeView implements HasAnimation {
     }
 
     return findItemByChain(chain, idx + 1, parent);
+  }
+
+  /**
+   * Get the HTML representation of an image.
+   * 
+   * @param res the {@link ImageResource} to render as HTML
+   * @return the rendered HTML
+   */
+  private String getImageHtml(ImageResource res) {
+    StringBuilder sb = new StringBuilder();
+    sb.append("<div class='").append(style.itemImage()).append("' ");
+
+    // Add the position and dimensions.
+    sb.append("style=\"position:absolute;left:0px;top:0px;");
+    sb.append("height:").append(res.getHeight()).append("px;");
+    sb.append("width:").append(res.getWidth()).append("px;");
+
+    // Add the background, vertically centered.
+    sb.append("background:url('").append(res.getURL()).append("') ");
+    sb.append("no-repeat scroll center center transparent;");
+
+    // Close the div and return.
+    sb.append("\"></div>");
+    return sb.toString();
   }
 }
