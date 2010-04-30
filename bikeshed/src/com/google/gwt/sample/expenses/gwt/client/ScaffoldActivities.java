@@ -53,7 +53,6 @@ public final class ScaffoldActivities implements ActivityMapper<ScaffoldPlace> {
 
   public Activity getActivity(ScaffoldPlace place) {
     return place.acceptFilter(new ScaffoldPlaceFilter<Activity>() {
-
       public Activity filter(EmployeeScaffoldPlace place) {
         return employeeActivitiesBuilder.getActivity(place);
       }

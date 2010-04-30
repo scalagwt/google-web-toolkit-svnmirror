@@ -57,7 +57,7 @@ public class ScaffoldMobile implements EntryPoint {
 
     /* Top level UI */
 
-    final ScaffoldShell shell = new ScaffoldShell();
+    final ScaffoldMobileShell shell = new ScaffoldMobileShell();
 
     /* Left side lets us pick from all the types of entities */
 

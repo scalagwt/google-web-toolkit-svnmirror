@@ -19,17 +19,39 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
-import com.google.gwt.sample.expenses.gwt.request.ReportRecord;
-import com.google.gwt.sample.expenses.gwt.request.ReportRecordChanged;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
-import com.google.gwt.valuestore.shared.DeltaValueStore;
 
 /**
  * Entry point for the mobile version of the Expenses app.
- * 
- * TODO(jgw): Make this actually mobile-friendly.
  */
 public class ExpensesMobile implements EntryPoint {
+
+  /**
+   * TODO(jgw): Put this some place more sensible.
+   */
+  public static String formatCurrency(int price) {
+    StringBuilder sb = new StringBuilder();
+
+    boolean negative = price < 0;
+    if (negative) {
+      price = -price;
+    }
+    int dollars = price / 100;
+    int cents = price % 100;
+
+    if (negative) {
+      sb.append("-");
+    }
+    sb.append("$");
+    sb.append(dollars);
+    sb.append('.');
+    if (cents < 10) {
+      sb.append('0');
+    }
+    sb.append(cents);
+
+    return sb.toString();
+  }
 
   /**
    * This is the entry point method.
@@ -39,20 +61,7 @@ public class ExpensesMobile implements EntryPoint {
     final ExpensesRequestFactory requestFactory = GWT.create(ExpensesRequestFactory.class);
     requestFactory.init(eventBus);
 
-    RootLayoutPanel root = RootLayoutPanel.get();
-
-    final ExpensesShell shell = new ExpensesShell();
-
-    root.add(shell);
-
-    shell.setListener(new ExpensesShell.Listener() {
-      public void setPurpose(ReportRecord report, String purpose) {
-        DeltaValueStore deltaValueStore = requestFactory.getValueStore().spawnDeltaView();
-        deltaValueStore.set(ReportRecord.purpose, report, purpose);
-        requestFactory.syncRequest(deltaValueStore).fire();
-      }
-    });
-
-    eventBus.addHandler(ReportRecordChanged.TYPE, shell);
+    final ExpensesMobileShell shell = new ExpensesMobileShell(requestFactory);
+    RootLayoutPanel.get().add(shell);
   }
 }
