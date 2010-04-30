@@ -13,30 +13,26 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.gwt.valuestore.ui;
+package com.google.gwt.app.client;
 
-import com.google.gwt.app.util.IsWidget;
-import com.google.gwt.user.client.ui.TakesValue;
-import com.google.gwt.valuestore.shared.DeltaValueStore;
+import com.google.gwt.valuestore.shared.Property;
 import com.google.gwt.valuestore.shared.Record;
+import com.google.gwt.valuestore.ui.RecordEditView;
+
+import java.util.Set;
 
 /**
- * Implemented by views that edit {@link Record}s.
+ * The DataBinder base class for all the editor functionality.
  * 
- * @param <R> the type of the record
+ * @param <R> the Record type
+ * @param <V> the View type
  */
-public interface RecordEditView<R extends Record> extends TakesValue<R>,
-    IsWidget, PropertyView<R> {
+public interface EditorSupport<R extends Record, V extends RecordEditView<R>> {
+  void init(final V view);
   
-  /**
-   * Implemented by the owner of the view.
-   */
-  interface Delegate {
-    void saveClicked();
-  }
-  
-  DeltaValueStore getDeltaValueStore();
-  void setDelegate(Delegate delegate);
-  void setDeltaValueStore(DeltaValueStore deltas);
-  void setEnabled(boolean b);
+  Set<Property<?>> getProperties();
+
+  void setEnabled(V view, boolean enabled);
+
+  void setValue(V view, R value);
 }

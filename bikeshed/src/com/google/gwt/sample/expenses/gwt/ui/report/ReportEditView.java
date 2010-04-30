@@ -15,12 +15,9 @@
  */
 package com.google.gwt.sample.expenses.gwt.ui.report;
 
-import com.google.gwt.app.util.DateTimeFormatRenderer;
+import com.google.gwt.app.client.EditorSupport;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.sample.expenses.gwt.request.ReportRecord;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -28,12 +25,12 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.valuestore.shared.DeltaValueStore;
 import com.google.gwt.valuestore.shared.Property;
 import com.google.gwt.valuestore.ui.RecordEditView;
 
-import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -44,8 +41,11 @@ public class ReportEditView extends Composite implements
   interface Binder extends UiBinder<HTMLPanel, ReportEditView> {
   }
 
-  private static final Binder BINDER = GWT.create(Binder.class);
+  interface DataBinder extends EditorSupport<ReportRecord, ReportEditView> {
+  }
 
+  private static final Binder BINDER = GWT.create(Binder.class);
+  private static final DataBinder DATA_BINDER = GWT.create(DataBinder.class);
   @UiField
   TextBox notes;
   @UiField
@@ -55,13 +55,13 @@ public class ReportEditView extends Composite implements
   @UiField
   TextBox approvedSupervisorKey;
   @UiField
-  SpanElement created; //TODO: use a DatePicker
+  InlineLabel created; //TODO: use a DatePicker
   @UiField
   Button save;
   @UiField
-  SpanElement idSpan;
+  InlineLabel id;
   @UiField
-  SpanElement version;
+  InlineLabel version;
 
   private Delegate delegate;
   private DeltaValueStore deltas;
@@ -70,20 +70,23 @@ public class ReportEditView extends Composite implements
 
   public ReportEditView() {
     initWidget(BINDER.createAndBindUi(this));
+    DATA_BINDER.init(this);
   }
 
   public ReportEditView asWidget() {
     return this;
   }
 
+  public DeltaValueStore getDeltaValueStore() {
+    return deltas;
+  }
+
   public Set<Property<?>> getProperties() {
-    Set<Property<?>> rtn = new HashSet<Property<?>>();
-    rtn.add(ReportRecord.notes);
-    rtn.add(ReportRecord.purpose);
-    rtn.add(ReportRecord.created);
-    rtn.add(ReportRecord.reporterKey);
-    rtn.add(ReportRecord.approvedSupervisorKey);
-    return rtn;
+    return DATA_BINDER.getProperties();
+  }
+
+  public ReportRecord getValue() {
+    return record;
   }
 
   public void setDelegate(Delegate delegate) {
@@ -95,39 +98,15 @@ public class ReportEditView extends Composite implements
   }
 
   public void setEnabled(boolean enabled) {
-    notes.setEnabled(enabled);
-    purpose.setEnabled(enabled);
+    DATA_BINDER.setEnabled(this, enabled);
     save.setEnabled(enabled);
   }
 
   public void setValue(ReportRecord value) {
     this.record = value;
-    notes.setValue(record.getNotes());
-    purpose.setValue(record.getPurpose());
-    reporterKey.setValue(record.getReporterKey());
-    approvedSupervisorKey.setValue(record.getApprovedSupervisorKey());
-    created.setInnerText(new DateTimeFormatRenderer(
-        DateTimeFormat.getShortDateFormat()).render(record.getCreated()));
-    idSpan.setInnerText(record.getId());
-    version.setInnerText(record.getVersion().toString());
+    DATA_BINDER.setValue(this, value);
   }
-  
-  @UiHandler("approvedSupervisorKey")
-  void onApprovedSupervisorKeyChange(ValueChangeEvent<String> event) {
-    deltas.set(ReportRecord.approvedSupervisorKey, record, event.getValue());
-  }
-  @UiHandler("notes")
-  void onNotesChange(ValueChangeEvent<String> event) {
-    deltas.set(ReportRecord.notes, record, event.getValue());
-  }
-  @UiHandler("purpose")
-  void onPurposeChange(ValueChangeEvent<String> event) {
-    deltas.set(ReportRecord.purpose, record, event.getValue());
-  }
-  @UiHandler("reporterKey")
-  void onReporterKeyChange(ValueChangeEvent<String> event) {
-    deltas.set(ReportRecord.reporterKey, record, event.getValue());
-  }
+
   @UiHandler("save")
   void onSave(@SuppressWarnings("unused") ClickEvent event) {
     delegate.saveClicked();

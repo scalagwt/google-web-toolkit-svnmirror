@@ -33,6 +33,8 @@ public class EmployeeDetailsView extends Composite implements EmployeeDetailsAct
 
   private static final Binder BINDER = GWT.create(Binder.class);
 
+  EmployeeRecord record;
+
   @UiField
   SpanElement idSpan;
   @UiField
@@ -54,7 +56,12 @@ public class EmployeeDetailsView extends Composite implements EmployeeDetailsAct
     return this;
   }
 
+  public EmployeeRecord getValue() {
+    return record;
+  }
+
   public void setValue(EmployeeRecord record) {
+    this.record = record;
     displayName.setInnerText(record.getDisplayName());
     userName.setInnerText(record.getUserName());
     password.setInnerText(record.getPassword());

@@ -34,6 +34,8 @@ public class ReportDetailsView extends Composite implements ReportDetailsActivit
 
   private static final Binder BINDER = GWT.create(Binder.class);
 
+  ReportRecord record;
+
   @UiField
   SpanElement idSpan;
   @UiField
@@ -57,7 +59,12 @@ public class ReportDetailsView extends Composite implements ReportDetailsActivit
     return this;
   }
 
+  public ReportRecord getValue() {
+    return record;
+  }
+
   public void setValue(ReportRecord record) {
+    this.record = record;
     purpose.setInnerText(record.getPurpose());
     notes.setInnerText(record.getNotes());
     created.setInnerText(DateTimeFormat.getShortDateFormat().format(record.getCreated()));
@@ -66,4 +73,5 @@ public class ReportDetailsView extends Composite implements ReportDetailsActivit
     reporterKey.setInnerText(record.getReporterKey());
     approvedSupervisorKey.setInnerText(record.getApprovedSupervisorKey());
   }
+
 }
