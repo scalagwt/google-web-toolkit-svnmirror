@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 Google Inc.
+ * Copyright 2010 Google Inc.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,22 +16,20 @@
 package com.google.gwt.collections;
 
 /**
- * Made to be switched out using super source even while Collections itself isn't.
+ * Tests {@link MutableStringMap} behavior.
  */
-public class CollectionFactory {
+public class MutableStringMapTest extends MutableMapTest<String> {
+  
+  @Override
+  protected void gwtSetUp() throws Exception {
+    super.gwtSetUp();
+    keyA = "foo";
+    keyB = "";
+  }
 
-  public static <E> MutableArray<E> createMutableArray() {
-    return new MutableArray<E>();
-  }
-  
-  public static <E> MutableArray<E> createMutableArray(int size, E fillValue) {
-    MutableArray<E> r = new MutableArray<E>();
-    r.setSize(size, fillValue);
-    return r;
-  }
-  
-  public static <V> MutableStringMap<V> createMutableStringMap() {
-    return new MutableStringMap<V>();
+  @Override
+  protected MutableMap<String, Integer> getMap() {
+    return CollectionFactory.createMutableStringMap();
   }
 
 }
