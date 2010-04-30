@@ -72,7 +72,11 @@ public class ValueStoreJsonImpl implements ValueStore {
     RecordJsoImpl oldRecord = records.get(recordKey);
     if (oldRecord == null) {
       records.put(recordKey, newRecord);
+      // TODO: need to fire a create event.
     } else {
+      // TODO: Merging is not the correct thing to do but it works as long as we
+      // don't have filtering by properties. Need to revisit this once response
+      // only has a subset of all properties.
       boolean changed = oldRecord.merge(newRecord);
       newRecord = oldRecord.cast();
       if (array != null) {

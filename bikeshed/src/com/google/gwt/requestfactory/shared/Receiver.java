@@ -16,7 +16,7 @@
 package com.google.gwt.requestfactory.shared;
 
 /**
- * Implemented by objects that display a list of values.
+ * Implemented by objects that display values.
  *
  * @param <V> value type
  */

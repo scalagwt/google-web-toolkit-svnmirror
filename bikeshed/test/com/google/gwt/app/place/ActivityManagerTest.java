@@ -25,9 +25,6 @@ import junit.framework.TestCase;
  * Eponymous unit test.
  */
 public class ActivityManagerTest extends TestCase {
-  private static class MyPlace extends Place {
-  }
-
   private static class MyActivity implements Activity {
     Boolean canceled = null;
     Boolean stopped = null;
@@ -55,8 +52,18 @@ public class ActivityManagerTest extends TestCase {
     public boolean willStop() {
       return willStop;
     }
+  }
 
+  private static class MyDisplay implements Activity.Display {
+    IsWidget widget = null;
+
+    public void showActivityWidget(IsWidget widget) {
+      this.widget = widget;
+    }
   };
+
+  private static class MyPlace extends Place {
+  }
 
   private static class MyView implements IsWidget {
     boolean asWidgetCalled = false;
@@ -64,14 +71,6 @@ public class ActivityManagerTest extends TestCase {
     public Widget asWidget() {
       asWidgetCalled = true;
       return null;
-    }
-  }
-  
-  private static class MyDisplay implements Activity.Display {
-    IsWidget widget = null;
-    
-    public void showActivityWidget(IsWidget widget) {
-      this.widget = widget;
     }
   }
 
@@ -96,8 +95,8 @@ public class ActivityManagerTest extends TestCase {
     }
   };
 
-  HandlerManager eventBus = new HandlerManager(null);
-  ActivityManager<MyPlace> manager = new ActivityManager<MyPlace>(myMap, eventBus);
+  private HandlerManager eventBus = new HandlerManager(null);
+  private ActivityManager<MyPlace> manager = new ActivityManager<MyPlace>(myMap, eventBus);
 
   public void testEventSetupAndTeardown() {
     assertEquals(0, eventBus.getHandlerCount(PlaceChangeEvent.TYPE));
@@ -114,6 +113,25 @@ public class ActivityManagerTest extends TestCase {
     assertEquals(0, eventBus.getHandlerCount(PlaceChangeRequestedEvent.TYPE));
   }
 
+  public void testRejected() {
+    manager.setDisplay(display);
+    
+    activity1.willStop = false;
+
+    PlaceChangeRequestedEvent<MyPlace> event = new PlaceChangeRequestedEvent<MyPlace>(place1);
+    eventBus.fireEvent(event);
+    assertFalse(event.isRejected());
+    assertNull(display.widget);
+    
+    eventBus.fireEvent(new PlaceChangeEvent<Place>(place1));
+    assertEquals(activity1.view, display.widget);
+    
+    event = new PlaceChangeRequestedEvent<MyPlace>(place2);
+    eventBus.fireEvent(event);
+    assertTrue(event.isRejected());
+    assertEquals(activity1.view, display.widget);
+  }
+  
   public void testSimpleDispatch() {
     manager.setDisplay(display);
     
@@ -132,24 +150,5 @@ public class ActivityManagerTest extends TestCase {
 
     eventBus.fireEvent(new PlaceChangeEvent<Place>(place2));
     assertEquals(activity2.view, display.widget);
-  }
-  
-  public void testRejected() {
-    manager.setDisplay(display);
-    
-    activity1.willStop = false;
-    
-    PlaceChangeRequestedEvent<MyPlace> event = new PlaceChangeRequestedEvent<MyPlace>(place1);
-    eventBus.fireEvent(event);
-    assertFalse(event.isRejected());
-    assertNull(display.widget);
-    
-    eventBus.fireEvent(new PlaceChangeEvent<Place>(place1));
-    assertEquals(activity1.view, display.widget);
-    
-    event = new PlaceChangeRequestedEvent<MyPlace>(place2);
-    eventBus.fireEvent(event);
-    assertTrue(event.isRejected());
-    assertEquals(activity1.view, display.widget);
   }
 }
