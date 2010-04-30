@@ -35,7 +35,6 @@ import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.user.rebind.PrintWriterManager;
 import com.google.gwt.user.rebind.SourceWriter;
 import com.google.gwt.valuestore.shared.Property;
-import com.google.gwt.valuestore.ui.RecordEditView;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -52,6 +51,29 @@ import java.util.Set;
  * and its nested interfaces.
  */
 public class EditorSupportGenerator extends Generator {
+
+  private class SuperInterfaceType {
+    private final JClassType recordType;
+    private final JClassType viewType;
+
+    SuperInterfaceType(JClassType interfaceType, TreeLogger logger)
+        throws UnableToCompleteException {
+      JClassType superInterfaces[] = interfaceType.getImplementedInterfaces();
+      JClassType superinterfaceType = superInterfaces[0];
+      if (superinterfaceType.isInterface() == null
+          || superinterfaceType.isParameterized() == null) {
+        logger.log(TreeLogger.ERROR, "The superclass of "
+            + superinterfaceType.getQualifiedSourceName()
+            + " is either not an interface or not a generic type");
+        throw new UnableToCompleteException();
+      }
+
+      JParameterizedType parameterizedType = superinterfaceType.isParameterized();
+      JClassType typeParameters[] = parameterizedType.getTypeArgs();
+      recordType = typeParameters[0];
+      viewType = typeParameters[1];
+    }
+  }
 
   @Override
   public String generate(TreeLogger logger, GeneratorContext generatorContext,
@@ -76,10 +98,8 @@ public class EditorSupportGenerator extends Generator {
       throw new UnableToCompleteException();
     }
 
-    // grandparent of the type being generated
-    Map<String, JClassType> auxiliaryTypes = getAuxiliaryTypes(interfaceType,
-        logger);
-    String implName = getImplName(auxiliaryTypes, logger);
+    SuperInterfaceType superinterfaceType = new SuperInterfaceType(interfaceType, logger);
+    String implName = getImplName(superinterfaceType, logger);
     String packageName = interfaceType.getPackage().getName();
     PrintWriterManager printWriters = new PrintWriterManager(generatorContext,
         logger, packageName);
@@ -88,7 +108,7 @@ public class EditorSupportGenerator extends Generator {
     // If an implementation already exists, we don't need to do any work
     if (out != null) {
       generateOnce(logger, generatorContext, out, interfaceType, packageName,
-          implName, auxiliaryTypes);
+          implName, superinterfaceType);
       printWriters.commit();
     }
 
@@ -109,7 +129,7 @@ public class EditorSupportGenerator extends Generator {
   private void generateOnce(TreeLogger logger,
       GeneratorContext generatorContext, PrintWriter out,
       JClassType interfaceType, String packageName, String implName,
-      Map<String, JClassType> auxiliaryTypes) throws UnableToCompleteException {
+      SuperInterfaceType superinterfaceType) throws UnableToCompleteException {
 
     logger = logger.branch(TreeLogger.DEBUG, String.format(
         "Generating implementation of %s", interfaceType.getName()));
@@ -118,9 +138,8 @@ public class EditorSupportGenerator extends Generator {
         packageName, implName);
     f.addImport(ValueChangeEvent.class.getName());
     f.addImport(ValueChangeHandler.class.getName());
-    f.addImport(auxiliaryTypes.get("recordType").getQualifiedSourceName());
+    f.addImport(superinterfaceType.recordType.getQualifiedSourceName());
     f.addImport(Property.class.getName());
-    f.addImport(RecordEditView.class.getName());
 
     f.addImport(HashSet.class.getName());
     f.addImport(Set.class.getName());
@@ -131,8 +150,8 @@ public class EditorSupportGenerator extends Generator {
 
     JClassType takesValueType = generatorContext.getTypeOracle().findType(
         TakesValue.class.getName());
-    JClassType recordType = auxiliaryTypes.get("recordType");
-    JClassType viewType = auxiliaryTypes.get("viewType");
+    JClassType recordType = superinterfaceType.recordType;
+    JClassType viewType = superinterfaceType.viewType;
     writeGetPropertiesMethod(sw, recordType);
 
     Set<JField> uiPropertyFields = getUiPropertyFields(viewType, recordType);
@@ -144,40 +163,6 @@ public class EditorSupportGenerator extends Generator {
 
     sw.outdent();
     sw.println("}");
-  }
-
-  private Set<String> getAccessibleFields(JClassType classType) {
-    boolean isInterface = false;
-    if (classType.isInterface() != null) {
-      isInterface = true;
-    }
-    Map<String, JField> fieldsByName = new HashMap<String, JField>();
-    LinkedList<JClassType> classesToBeProcessed = new LinkedList<JClassType>();
-    classesToBeProcessed.add(classType);
-    JClassType tempClassType = null;
-    while (classesToBeProcessed.peek() != null) {
-      tempClassType = classesToBeProcessed.remove();
-      JField declaredFields[] = tempClassType.getFields();
-      for (JField field : declaredFields) {
-        if (field.isPrivate()
-            || !(field.getType().getQualifiedSourceName().equals(Property.class.getName()))) {
-          continue;
-        }
-        JField existing = fieldsByName.put(field.getName(), field);
-        if (existing != null) {
-          if (existing.getEnclosingType().isAssignableTo(
-              field.getEnclosingType())) {
-            fieldsByName.put(field.getName(), existing);
-          }
-        }
-      }
-      if (isInterface) {
-        classesToBeProcessed.addAll(Arrays.asList(tempClassType.getImplementedInterfaces()));
-      } else {
-        classesToBeProcessed.add(tempClassType.getSuperclass());
-      }
-    }
-    return fieldsByName.keySet();
   }
 
   private Collection<JMethod> getAccessibleMethods(JClassType classType) {
@@ -215,34 +200,46 @@ public class EditorSupportGenerator extends Generator {
     return methodsBySignature.values();
   }
 
-  private Map<String, JClassType> getAuxiliaryTypes(JClassType interfaceType,
-      TreeLogger logger) throws UnableToCompleteException {
-    JClassType superInterfaces[] = interfaceType.getImplementedInterfaces();
-    JClassType superinterfaceType = superInterfaces[0];
-    if (superinterfaceType.isInterface() == null
-        || !(superinterfaceType instanceof JParameterizedType)) {
-      logger.log(TreeLogger.ERROR, "The superclass of "
-          + superinterfaceType.getQualifiedSourceName()
-          + " is either not an interface or not a generic type");
-      throw new UnableToCompleteException();
+  private Set<String> getAccessiblePropertyFields(JClassType classType) {
+    boolean isInterface = false;
+    if (classType.isInterface() != null) {
+      isInterface = true;
     }
-
-    // TODO: clean up this code.
-    Map<String, JClassType> auxiliaryTypes = new HashMap<String, JClassType>();
-    JParameterizedType parameterizedType = (JParameterizedType) superinterfaceType;
-    JClassType typeParameters[] = parameterizedType.getTypeArgs();
-    auxiliaryTypes.put("rawType", parameterizedType.getRawType());
-    auxiliaryTypes.put("recordType", typeParameters[0]);
-    auxiliaryTypes.put("viewType", typeParameters[1]);
-    return auxiliaryTypes;
+    Map<String, JField> fieldsByName = new HashMap<String, JField>();
+    LinkedList<JClassType> classesToBeProcessed = new LinkedList<JClassType>();
+    classesToBeProcessed.add(classType);
+    JClassType tempClassType = null;
+    while (classesToBeProcessed.peek() != null) {
+      tempClassType = classesToBeProcessed.remove();
+      JField declaredFields[] = tempClassType.getFields();
+      for (JField field : declaredFields) {
+        if (field.isPrivate()
+            || !(field.getType().getQualifiedSourceName().equals(Property.class.getName()))) {
+          continue;
+        }
+        JField existing = fieldsByName.put(field.getName(), field);
+        if (existing != null) {
+          if (existing.getEnclosingType().isAssignableTo(
+              field.getEnclosingType())) {
+            fieldsByName.put(field.getName(), existing);
+          }
+        }
+      }
+      if (isInterface) {
+        classesToBeProcessed.addAll(Arrays.asList(tempClassType.getImplementedInterfaces()));
+      } else {
+        classesToBeProcessed.add(tempClassType.getSuperclass());
+      }
+    }
+    return fieldsByName.keySet();
   }
 
   /**
    * returns the name of the Impl class.
    */
-  private String getImplName(Map<String, JClassType> auxiliaryTypes,
+  private String getImplName(SuperInterfaceType superinterfaceType,
       TreeLogger logger) throws UnableToCompleteException {
-    return auxiliaryTypes.get("viewType").getName() + "_DataBinderImpl";
+    return superinterfaceType.viewType.getName() + "_DataBinder_Impl";
   }
 
   private JMethod getPropertyFunction(JClassType recordType,
@@ -282,7 +279,7 @@ public class EditorSupportGenerator extends Generator {
 
   private Set<JField> getUiPropertyFields(JClassType viewType,
       JClassType recordType) {
-    Set<String> recordFieldNames = getAccessibleFields(recordType);
+    Set<String> recordFieldNames = getAccessiblePropertyFields(recordType);
     Set<JField> uiPropertyFields = new HashSet<JField>();
     for (JField field : viewType.getFields()) {
       if (field.getAnnotation(UiField.class) != null
@@ -386,11 +383,10 @@ public class EditorSupportGenerator extends Generator {
     sw.indent();
 
     for (JField uiField : uiPropertyFields) {
-      JType type = uiField.getType();
-      if (!(type instanceof JClassType)) {
+      JClassType classType = uiField.getType().isClassOrInterface();
+      if (classType == null) {
         continue;
       }
-      JClassType classType = (JClassType) type;
       String propertyFunctionName = getPropertyFunctionName(uiField.getName(),
           logger);
       JMethod propertyFunction = getPropertyFunction(recordType,
