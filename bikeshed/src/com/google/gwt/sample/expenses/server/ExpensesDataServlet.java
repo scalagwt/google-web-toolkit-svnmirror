@@ -119,7 +119,7 @@ public class ExpensesDataServlet extends RequestFactoryServlet {
     }
   }
   
-  private void addExpenses(String reportId) {
+  private void addExpenses(Long reportId) {
     int num = rand.nextInt(5) + 1;
     for (int i = 0; i < num; i++) {
       String[] descCat = getDescriptionAndCategory();

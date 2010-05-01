@@ -46,7 +46,7 @@ public interface ExpenseRequest {
       }
 
       public Class<?>[] getParameterTypes() {
-        return new Class[] {java.lang.String.class};
+        return new Class[] {java.lang.Long.class};
       }
     },
 
@@ -56,7 +56,7 @@ public interface ExpenseRequest {
       }
 
       public Class<?>[] getParameterTypes() {
-        return new Class[] {java.lang.String.class};
+        return new Class[] {java.lang.Long.class};
       }
     };
 

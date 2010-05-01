@@ -60,7 +60,7 @@ public interface EmployeeRequest {
       }
 
       public Class<?>[] getParameterTypes() {
-        return new Class[] {String.class};
+        return new Class[] {Long.class};
       }
 
       public boolean isReturnTypeList() {

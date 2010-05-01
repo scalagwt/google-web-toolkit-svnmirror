@@ -198,11 +198,12 @@ public class RequestFactoryServlet extends HttpServlet {
     Class<?> entity = tokenToEntityRecord.get(recordToken).entity;
     Class<? extends Record> record = tokenToEntityRecord.get(recordToken).record;
     Map<String, Class<?>> propertiesInRecord = getPropertiesFromRecord(record);
-    validateKeys(recordObject, propertiesInRecord);
+    validateKeys(recordObject, propertiesInRecord.keySet());
+    updatePropertyTypes(propertiesInRecord, entity);
 
     // get entityInstance
     Object entityInstance = getEntityInstance(writeOperation, entity,
-        recordObject.getString("id"), propertiesInRecord.get("id"));
+        recordObject.get("id"), propertiesInRecord.get("id"));
 
     // persist
     if (writeOperation == WriteOperation.DELETE) {
@@ -215,16 +216,18 @@ public class RequestFactoryServlet extends HttpServlet {
         if (writeOperation == WriteOperation.CREATE && ("id".equals(key))) {
           // ignored. id is assigned by default.
         } else {
+          Object propertyValue = getPropertyValueFromRequest(recordObject, key,
+              propertyType);
+          propertyValue = getSwizzledObject(propertyValue, propertyType);
           entity.getMethod(getMethodNameFromPropertyName(key, "set"),
-              propertyType).invoke(entityInstance,
-              getPropertyValueFromRequest(recordObject, key, propertyType));
+              propertyType).invoke(entityInstance, propertyValue);
         }
       }
       entity.getMethod("persist").invoke(entityInstance);
     }
 
     // return data back.
-    return getReturnRecord(writeOperation, entity, entityInstance, recordObject);
+    return getReturnRecord(writeOperation, entityInstance, recordObject);
   }
 
   private Collection<Property<?>> allProperties(Class<? extends Record> clazz) {
@@ -316,17 +319,16 @@ public class RequestFactoryServlet extends HttpServlet {
   }
 
   private Object getEntityInstance(WriteOperation writeOperation,
-      Class<?> entity, String idValue, Class<?> idType)
+      Class<?> entity, Object idValue, Class<?> idType)
       throws SecurityException, InstantiationException, IllegalAccessException,
       InvocationTargetException, NoSuchMethodException {
 
     if (writeOperation == WriteOperation.CREATE) {
       return entity.getConstructor().newInstance();
     }
-
     // TODO: check "version" validity.
     return entity.getMethod("find" + entity.getSimpleName(), idType).invoke(
-        null, idValue);
+        null, getSwizzledObject(idValue, idType));
   }
 
   /**
@@ -474,18 +476,36 @@ public class RequestFactoryServlet extends HttpServlet {
   }
 
   private JSONObject getReturnRecord(WriteOperation writeOperation,
-      Class<?> entity, Object entityInstance, JSONObject recordObject)
-      throws SecurityException, JSONException, IllegalAccessException,
-      InvocationTargetException, NoSuchMethodException {
+      Object entityInstance, JSONObject recordObject) throws SecurityException,
+      JSONException, IllegalAccessException, InvocationTargetException,
+      NoSuchMethodException {
 
     JSONObject returnObject = new JSONObject();
-    returnObject.put("id", entity.getMethod("getId").invoke(entityInstance));
-    returnObject.put("version", entity.getMethod("getVersion").invoke(
-        entityInstance));
+    // currently sending back only two properties.
+    for (String propertyName : new String[] {"id", "version"}) {
+      returnObject.put(propertyName, getPropertyValueFromDataStore(
+          entityInstance, propertyName));
+    }
     if (writeOperation == WriteOperation.CREATE) {
       returnObject.put("futureId", recordObject.getString("id"));
     }
     return returnObject;
+  }
+
+  /**
+   * Swizzle an idValue received from the client to the type expected by the
+   * server. Return the object of the new type.
+   */
+  private Object getSwizzledObject(Object idValue, Class<?> idType) {
+    if (idValue.getClass() == idType) {
+      return idValue;
+    }
+    // swizzle from String to Long
+    if (idValue.getClass() == String.class && idType == Long.class) {
+      return new Long((String) idValue);
+    }
+    throw new IllegalArgumentException("id is of type: " + idValue.getClass()
+        + ",  expected type: " + idType);
   }
 
   /**
@@ -540,12 +560,25 @@ public class RequestFactoryServlet extends HttpServlet {
     }
   }
 
+  /**
+   * Update propertiesInRecord based on the types of entity.
+   */
+  private void updatePropertyTypes(Map<String, Class<?>> propertiesInRecord,
+      Class<?> entity) {
+    for (Field field : entity.getDeclaredFields()) {
+      Class<?> fieldType = propertiesInRecord.get(field.getName());
+      if (fieldType != null) {
+        propertiesInRecord.put(field.getName(), field.getType());
+      }
+    }
+  }
+
   private void validateKeys(JSONObject recordObject,
-      Map<String, Class<?>> declaredProperties) {
+      Set<String> declaredProperties) {
     Iterator<?> keys = recordObject.keys();
     while (keys.hasNext()) {
       String key = (String) keys.next();
-      if (declaredProperties.get(key) == null) {
+      if (!declaredProperties.contains(key)) {
         throw new IllegalArgumentException("key " + key
             + " is not permitted to be set");
       }

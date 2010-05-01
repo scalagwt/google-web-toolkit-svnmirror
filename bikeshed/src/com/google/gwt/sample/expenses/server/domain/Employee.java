@@ -15,8 +15,6 @@
  */
 package com.google.gwt.sample.expenses.server.domain;
 
-import org.datanucleus.jpa.annotations.Extension;
-
 import java.util.List;
 
 import javax.persistence.Column;
@@ -25,7 +23,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.Version;
 
 /**
@@ -60,7 +57,7 @@ public class Employee {
     }
   }
 
-  public static Employee findEmployee(String id) {
+  public static Employee findEmployee(Long id) {
     if (id == null) {
       return null;
     }
@@ -93,14 +90,13 @@ public class Employee {
 
   private String password;
 
-  @JoinColumn
-  private String supervisorKey;
+  // @JoinColumn
+  private Long supervisorKey;
 
   @Id
   @Column(name = "id")
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Extension(vendorName = "datanucleus", key = "gae.encoded-pk", value = "true")
-  private String id;
+  private Long id;
 
   @Version
   @Column(name = "version")
@@ -110,7 +106,7 @@ public class Employee {
     return this.displayName;
   }
 
-  public String getId() {
+  public Long getId() {
     return this.id;
   }
 
@@ -118,7 +114,7 @@ public class Employee {
     return this.password;
   }
 
-  public String getSupervisorKey() {
+  public Long getSupervisorKey() {
     return supervisorKey;
   }
 
@@ -153,7 +149,7 @@ public class Employee {
     this.displayName = displayName;
   }
 
-  public void setId(String id) {
+  public void setId(Long id) {
     this.id = id;
   }
 
@@ -161,7 +157,7 @@ public class Employee {
     this.password = password;
   }
 
-  public void setSupervisorKey(String supervisorKey) {
+  public void setSupervisorKey(Long supervisorKey) {
     this.supervisorKey = supervisorKey;
   }
 

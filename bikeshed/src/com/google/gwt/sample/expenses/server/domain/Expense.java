@@ -15,8 +15,6 @@
  */
 package com.google.gwt.sample.expenses.server.domain;
 
-import org.datanucleus.jpa.annotations.Extension;
-
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -27,7 +25,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.Query;
 import javax.persistence.Version;
 
@@ -54,7 +51,7 @@ public class Expense {
     }
   }
   
-  public static Expense findExpense(String id) {
+  public static Expense findExpense(Long id) {
     if (id == null) {
       return null;
     }
@@ -67,7 +64,7 @@ public class Expense {
   }
   
   @SuppressWarnings("unchecked")
-  public static List<Expense> findExpensesByReport(String reportId) {
+  public static List<Expense> findExpensesByReport(Long reportId) {
     EntityManager em = entityManager();
     try {
       Query query = em.createQuery("select o from Expense o where o.reportId =:reportId");
@@ -81,15 +78,14 @@ public class Expense {
     }
   }
 
-  public static List<Expense> findListOfOneExpense(String id) {
+  public static List<Expense> findListOfOneExpense(Long id) {
     return Collections.singletonList(findExpense(id));
   }
 
   @Id
   @Column(name = "id")
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Extension(vendorName = "datanucleus", key = "gae.encoded-pk", value = "true")
-  private String id;
+  private Long id;
 
   @Version
   @Column(name = "version")
@@ -107,9 +103,8 @@ public class Expense {
   
   private String reasonDenied;
 
-  @JoinColumn
-  @Column(name = "reportId")
-  private String reportId;
+  // @JoinColumn
+  private Long reportId;
 
   public Double getAmount() {
     return this.amount;
@@ -131,7 +126,7 @@ public class Expense {
     return description;
   }
   
-  public String getId() {
+  public Long getId() {
     return this.id;
   }
   
@@ -139,7 +134,7 @@ public class Expense {
     return this.reasonDenied;
   }
 
-  public String getReportId() {
+  public Long getReportId() {
     return this.reportId;
   }
 
@@ -186,7 +181,7 @@ public class Expense {
     this.description = description;
   }
 
-  public void setId(String id) {
+  public void setId(Long id) {
     this.id = id;
   }
 
@@ -194,7 +189,7 @@ public class Expense {
     this.reasonDenied = reasonDenied;
   }
 
-  public void setReportId(String reportId) {
+  public void setReportId(Long reportId) {
     this.reportId = reportId; 
   }
 

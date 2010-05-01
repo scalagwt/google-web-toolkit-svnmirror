@@ -15,8 +15,6 @@
  */
 package com.google.gwt.sample.expenses.server.domain;
 
-import org.datanucleus.jpa.annotations.Extension;
-
 import java.util.Date;
 import java.util.List;
 
@@ -26,7 +24,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.Query;
 import javax.persistence.Version;
 
@@ -62,7 +59,7 @@ public class Report {
     }
   }
 
-  public static Report findReport(String id) {
+  public static Report findReport(Long id) {
     if (id == null) {
       return null;
     }
@@ -89,7 +86,7 @@ public class Report {
   }
 
   @SuppressWarnings("unchecked")
-  public static List<Report> findReportsByEmployee(String employeeId) {
+  public static List<Report> findReportsByEmployee(Long employeeId) {
     EntityManager em = entityManager();
     try {
       Query query = em.createQuery("select o from Report o where o.reporterKey =:reporterKey");
@@ -106,8 +103,7 @@ public class Report {
   @Id
   @Column(name = "id")
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Extension(vendorName = "datanucleus", key = "gae.encoded-pk", value = "true")
-  private String id;
+  private Long id;
 
   @Version
   @Column(name = "version")
@@ -124,14 +120,13 @@ public class Report {
    * http://code.google.com/appengine
    * /docs/java/datastore/relationships.html#Unowned_Relationships
    */
-  @JoinColumn
-  @Column(name = "reporter")
-  private String reporterKey;
+  // @JoinColumn
+  private Long reporterKey;
 
-  @JoinColumn
-  private String approvedSupervisorKey;
+  // @JoinColumn
+  private Long approvedSupervisorKey;
 
-  public String getApprovedSupervisorKey() {
+  public Long getApprovedSupervisorKey() {
     return approvedSupervisorKey;
   }
 
@@ -139,7 +134,7 @@ public class Report {
     return this.created;
   }
 
-  public String getId() {
+  public Long getId() {
     return this.id;
   }
   
@@ -151,7 +146,7 @@ public class Report {
     return this.purpose;
   }
 
-  public String getReporterKey() {
+  public Long getReporterKey() {
     return this.reporterKey;
   }
 
@@ -178,7 +173,7 @@ public class Report {
     }
   }
 
-  public void setApprovedSupervisorKey(String approvedSupervisorKey) {
+  public void setApprovedSupervisorKey(Long approvedSupervisorKey) {
     this.approvedSupervisorKey = approvedSupervisorKey;
   }
 
@@ -186,7 +181,7 @@ public class Report {
     this.created = created;
   }
 
-  public void setId(String id) {
+  public void setId(Long id) {
     this.id = id;
   }
   
@@ -198,7 +193,7 @@ public class Report {
     this.purpose = purpose;
   }
 
-  public void setReporterKey(String reporter) {
+  public void setReporterKey(Long reporter) {
     this.reporterKey = reporter;
   }
 

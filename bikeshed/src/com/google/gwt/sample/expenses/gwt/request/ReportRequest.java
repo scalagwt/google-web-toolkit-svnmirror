@@ -60,7 +60,7 @@ public interface ReportRequest {
       }
 
       public Class<?>[] getParameterTypes() {
-        return new Class[] {java.lang.String.class};
+        return new Class[] {java.lang.Long.class};
       }
 
       public boolean isReturnTypeList() {
@@ -74,7 +74,7 @@ public interface ReportRequest {
       }
 
       public Class<?>[] getParameterTypes() {
-        return new Class[] {java.lang.String.class};
+        return new Class[] {java.lang.Long.class};
       }
     },
 
