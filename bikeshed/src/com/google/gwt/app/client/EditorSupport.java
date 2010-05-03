@@ -19,6 +19,7 @@ import com.google.gwt.valuestore.shared.Property;
 import com.google.gwt.valuestore.shared.Record;
 import com.google.gwt.valuestore.ui.RecordEditView;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -35,4 +36,6 @@ public interface EditorSupport<R extends Record, V extends RecordEditView<R>> {
   void setEnabled(V view, boolean enabled);
 
   void setValue(V view, R value);
+
+  void showErrors(V view, Map<String, String> errorMap);
 }

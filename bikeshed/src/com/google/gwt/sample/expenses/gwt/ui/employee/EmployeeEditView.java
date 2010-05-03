@@ -18,9 +18,6 @@ package com.google.gwt.sample.expenses.gwt.ui.employee;
 import com.google.gwt.app.client.EditorSupport;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.dom.client.Document;
-import com.google.gwt.dom.client.SpanElement;
-import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.sample.expenses.gwt.request.EmployeeRecord;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -114,30 +111,7 @@ public class EmployeeEditView extends Composite implements
   }
 
   public void showErrors(Map<String, String> errorMap) {
-    // TODO Make EditorSupport do this
-    errors.setInnerText("");
-    if (errorMap == null || errorMap.isEmpty()) {
-      return;
-    }
-
-    Document doc = Document.get();
-    for (Map.Entry<String, String> entry : errorMap.entrySet()) {
-      /*
-       * Note that we are careful not to use setInnerHtml, to ensure we don't
-       * render user created markup: xsite attack protection
-       */
-
-      DivElement div = doc.createDivElement();
-      div.setInnerText(" " + entry.getValue());
-
-      SpanElement name = doc.createSpanElement();
-      name.getStyle().setFontWeight(FontWeight.BOLD);
-      name.setInnerText(entry.getKey());
-
-      div.insertFirst(name);
-
-      errors.appendChild(div);
-    }
+    DATA_BINDER.showErrors(this, errorMap);
   }
 
   @UiHandler("save")

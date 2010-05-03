@@ -25,6 +25,10 @@ import com.google.gwt.core.ext.typeinfo.JMethod;
 import com.google.gwt.core.ext.typeinfo.JParameterizedType;
 import com.google.gwt.core.ext.typeinfo.JType;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.SpanElement;
+import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiField;
@@ -140,8 +144,13 @@ public class EditorSupportGenerator extends Generator {
     f.addImport(ValueChangeHandler.class.getName());
     f.addImport(superinterfaceType.recordType.getQualifiedSourceName());
     f.addImport(Property.class.getName());
+    f.addImport(DivElement.class.getName());
+    f.addImport(Document.class.getName());
+    f.addImport(SpanElement.class.getName());
+    f.addImport(FontWeight.class.getName().replace("$", "."));
 
     f.addImport(HashSet.class.getName());
+    f.addImport(Map.class.getName());
     f.addImport(Set.class.getName());
     f.addImplementedInterface(interfaceType.getName());
 
@@ -160,6 +169,7 @@ public class EditorSupportGenerator extends Generator {
     writeSetEnabledMethod(sw, viewType, uiPropertyFields, takesValueType);
     writeSetValueMethod(sw, recordType, viewType, uiPropertyFields,
         generatorContext, logger);
+    writeShowErrorsMethod(sw, viewType, logger);
 
     sw.outdent();
     sw.println("}");
@@ -419,6 +429,46 @@ public class EditorSupportGenerator extends Generator {
       sw.println("view." + uiField.getName() + "." + functionName + "(record."
           + propertyFunctionName + "()" + suffix + ");");
     }
+    sw.outdent();
+    sw.println("}");
+    sw.outdent();
+  }
+
+  private void writeShowErrorsMethod(SourceWriter sw, JClassType viewType,
+      TreeLogger logger) {
+    sw.indent();
+    sw.println("public void showErrors(" + viewType.getName()
+        + " view, Map<String, String> errorMap) {");
+    sw.indent();
+    sw.println("view.errors.setInnerText(\"\");");
+    sw.println("if (errorMap == null || errorMap.isEmpty()) {");
+    sw.indent();
+    sw.println("return;");
+    sw.outdent();
+    sw.println("}");
+    sw.println();
+
+    sw.println("Document doc = Document.get();");
+    sw.println("for (Map.Entry<String, String> entry : errorMap.entrySet()) {");
+    sw.println("  /*");
+    sw.println("   * Note that we are careful not to use setInnerHtml, to ensure we don't");
+    sw.println("   * render user created markup: xsite attack protection");
+    sw.println("   */");
+    sw.println("");
+    sw.indent();
+    sw.println("DivElement div = doc.createDivElement();");
+    sw.println("div.setInnerText(\" \" + entry.getValue());");
+    sw.println("");
+    sw.println("SpanElement name = doc.createSpanElement();");
+    sw.println("name.getStyle().setFontWeight(FontWeight.BOLD);");
+    sw.println("name.setInnerText(entry.getKey());");
+    sw.println("");
+    sw.println("div.insertFirst(name);");
+    sw.println("");
+    sw.println("view.errors.appendChild(div);");
+    sw.outdent();
+    sw.println("}");
+
     sw.outdent();
     sw.println("}");
     sw.outdent();
