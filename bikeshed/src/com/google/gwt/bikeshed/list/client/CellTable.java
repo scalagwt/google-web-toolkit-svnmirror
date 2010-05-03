@@ -213,7 +213,7 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
 
       @Override
       protected Element convertToElements(String html) {
-        tmpElem.setInnerHTML(html);
+        tmpElem.setInnerHTML("<tbody>" + html + "</tbody>");
         return tmpElem.getTBodies().getItem(0);
       }
 
