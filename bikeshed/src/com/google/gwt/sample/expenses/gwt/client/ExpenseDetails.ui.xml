@@ -13,18 +13,28 @@
       padding: 0px 20px;
     }
     
-    .reportName {
+    .breadcrumb {
+      color: #4b4a4a;
       font-size: 16pt;
+    }
+    
+    .reportsLink {
+      text-decoration: underline;
+      color: blue;
+      cursor: hand;
+      cursor: pointer;
     }
     
     .details {
       background-color: #eef4fb;
       border: 1px solid #5478af;
+      margin-bottom: 15px;
     }
     
-    .table {
-      padding-top: 20px;
-      padding-left: 30px;
+    .notes {
+      width: 400px;
+      border: 1px solid #5478af;
+      padding: 3px;
     }
   </ui:style>
 
@@ -33,69 +43,58 @@
     height='100%'>
 
     <div
-      ui:field='defaultText'>Select a report above</div>
-
-    <div
-      ui:field='mainLayout'
       class='{style.padded}'>
 
+      <div
+        class='{style.breadcrumb}'>
+        <g:Anchor
+          styleName='{style.reportsLink}'
+          ui:field='reportsLink'>
+          Reports
+        </g:Anchor>
+        &gt;
+        <span ui:field='reportName'>
+        </span>
+      </div>
+
       <table
-        width='100%'>
+        align='center'
+        class='{style.details}'
+        cellpadding='8'>
         <tr>
           <td
-            valign='top'
-            align='center'
-            width='100'>
-
-            <h1
-              class='{style.reportName}'
-              ui:field='reportName'>
-            </h1>
-
-            <table
-              class='{style.details}'
-              cellpadding='8'>
-              <tr>
-                <td
-                  class='{style.label}'>
-                  Cost:
-                </td>
-                <td
-                  ui:field='costLabel'>
-                </td>
-              </tr>
-              <tr>
-                <td
-                  class='{style.label}'>
-                  Approved:
-                </td>
-                <td
-                  ui:field='approvedLabel'>
-                </td>
-              </tr>
-              <tr>
-                <td
-                  class='{style.label}'>
-                  Notes:
-                </td>
-                <td>
-                  <g:TextBox
-                    ui:field='notesBox'></g:TextBox>
-                </td>
-              </tr>
-            </table>
+            class='{style.label}'>
+            Cost:
           </td>
-
           <td
-            valign='top'
-            align='center'
-            class='{style.table}'>
-            <l:CellTable
-              width='100%'
-              ui:field='table' />
+            width='250'
+            ui:field='costLabel'>
+          </td>
+          <td
+            class='{style.label}'>
+            Approved:
+          </td>
+          <td
+            ui:field='approvedLabel'>
+          </td>
+        </tr>
+        <tr>
+          <td
+            class='{style.label}'>
+            Notes:
+          </td>
+          <td
+            colspan='3'>
+            <g:TextBox
+              styleName='{style.notes}'
+              ui:field='notesBox'></g:TextBox>
           </td>
         </tr>
       </table>
+      
+      <l:CellTable
+        width='100%'
+        ui:field='table' />
     </div>
   </g:HTMLPanel>
 

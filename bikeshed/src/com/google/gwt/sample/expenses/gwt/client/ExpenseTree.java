@@ -23,28 +23,21 @@ import com.google.gwt.bikeshed.list.shared.ProvidesKey;
 import com.google.gwt.bikeshed.list.shared.SingleSelectionModel;
 import com.google.gwt.bikeshed.list.shared.SelectionModel.SelectionChangeEvent;
 import com.google.gwt.bikeshed.list.shared.SelectionModel.SelectionChangeHandler;
-import com.google.gwt.bikeshed.tree.client.CellBrowser;
+import com.google.gwt.bikeshed.tree.client.CellTree;
 import com.google.gwt.bikeshed.tree.client.CellTreeViewModel;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.requestfactory.shared.Receiver;
 import com.google.gwt.sample.bikeshed.style.client.Styles;
 import com.google.gwt.sample.expenses.gwt.request.EmployeeRecord;
 import com.google.gwt.sample.expenses.gwt.request.EmployeeRecordChanged;
-import com.google.gwt.uibinder.client.UiBinder;
-import com.google.gwt.uibinder.client.UiFactory;
-import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Widget;
 
 import java.util.List;
 
 /**
- * The browser at the top of the app used to browse expense reports.
+ * The employee tree located on the left of the app.
  */
-public class ExpenseBrowser extends Composite implements
+public class ExpenseTree extends Composite implements
     Receiver<List<EmployeeRecord>>, EmployeeRecordChanged.Handler {
-
-  private static ExpenseBrowserUiBinder uiBinder = GWT.create(ExpenseBrowserUiBinder.class);
 
   /**
    * Custom listener for this widget.
@@ -52,35 +45,12 @@ public class ExpenseBrowser extends Composite implements
   public interface Listener {
 
     /**
-     * Called when the user browses for something.
+     * Called when the user selects a tree item.
      * 
      * @param category the selected category name
      * @param employee the selected employee
      */
-    void onBrowse(String category, EmployeeRecord employee);
-  }
-
-  interface ExpenseBrowserUiBinder extends UiBinder<Widget, ExpenseBrowser> {
-  }
-
-  /**
-   * A {@link Cell} that represents an {@link EmployeeRecord}.
-   */
-  private class CategoryCell extends IconCellDecorator<String> {
-
-    public CategoryCell() {
-      super(Styles.resources().groupIcon(), TextCell.getInstance());
-    }
-
-    @Override
-    public boolean dependsOnSelection() {
-      return true;
-    }
-
-    @Override
-    protected boolean isIconUsed(String value) {
-      return value == null ? false : value.equals(lastCategory);
-    }
+    void onSelection(String category, EmployeeRecord employee);
   }
 
   /**
@@ -100,17 +70,6 @@ public class ExpenseBrowser extends Composite implements
         }
       });
     }
-
-    @Override
-    public boolean dependsOnSelection() {
-      return true;
-    }
-
-    @Override
-    protected boolean isIconUsed(EmployeeRecord value) {
-      return lastEmployee == null || value == null ? false
-          : lastEmployee.getId().equals(value.getId());
-    }
   }
 
   /**
@@ -119,9 +78,10 @@ public class ExpenseBrowser extends Composite implements
   private class ExpensesTreeViewModel implements CellTreeViewModel {
 
     /**
-     * The {@link CategoryCell} singleton.
+     * The category cell singleton.
      */
-    private final CategoryCell categoryCell = new CategoryCell();
+    private final Cell<String> categoryCell = new IconCellDecorator<String>(
+        Styles.resources().groupIcon(), TextCell.getInstance());
 
     /**
      * The {@link EmployeeCell} singleton.
@@ -151,9 +111,6 @@ public class ExpenseBrowser extends Composite implements
     }
   }
 
-  @UiField
-  CellBrowser browser;
-
   /**
    * The adapter that provides categories.
    */
@@ -174,6 +131,9 @@ public class ExpenseBrowser extends Composite implements
    */
   private EmployeeRecord lastEmployee;
 
+  /**
+   * The listener of this widget.
+   */
   private Listener listener;
 
   /**
@@ -181,8 +141,14 @@ public class ExpenseBrowser extends Composite implements
    */
   private final SingleSelectionModel<Object> selectionModel = new SingleSelectionModel<Object>();
 
-  public ExpenseBrowser() {
-    initWidget(uiBinder.createAndBindUi(this));
+  /**
+   * The main widget.
+   */
+  private CellTree tree;
+
+  public ExpenseTree() {
+    createTree();
+    initWidget(tree);
 
     // Initialize the categories.
     List<String> categoriesList = categories.getList();
@@ -204,8 +170,10 @@ public class ExpenseBrowser extends Composite implements
     this.listener = listener;
   }
 
-  @UiFactory
-  CellBrowser createBrowser() {
+  /**
+   * Create the {@link CellTree}.
+   */
+  private void createTree() {
     // Listen for selection. We need to add this handler before the CellBrowser
     // adds its own handler.
     selectionModel.addSelectionChangeHandler(new SelectionChangeHandler() {
@@ -220,7 +188,10 @@ public class ExpenseBrowser extends Composite implements
           lastEmployee = null;
           lastCategory = (String) selected;
         }
-        browse();
+
+        if (listener != null) {
+          listener.onSelection(lastCategory, lastEmployee);
+        }
       }
     });
     selectionModel.setKeyProvider(new ProvidesKey<Object>() {
@@ -233,17 +204,7 @@ public class ExpenseBrowser extends Composite implements
     });
 
     // Create a CellBrowser.
-    CellBrowser view = new CellBrowser(new ExpensesTreeViewModel(), null);
-    view.setAnimationEnabled(true);
-    return view;
-  }
-
-  /**
-   * Browse based on the current selection.
-   */
-  private void browse() {
-    if (listener != null) {
-      listener.onBrowse(lastCategory, lastEmployee);
-    }
+    tree = new CellTree(new ExpensesTreeViewModel(), null);
+    tree.setAnimationEnabled(true);
   }
 }

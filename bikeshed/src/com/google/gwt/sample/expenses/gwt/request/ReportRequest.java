@@ -48,6 +48,24 @@ public interface ReportRequest {
       }
     },
 
+    COUNT_REPORTS_BY_SEARCH {
+      public String getDomainMethodName() {
+        return "countReportsBySearch";
+      }
+
+      public Class<?>[] getParameterTypes() {
+        return new Class[] {java.lang.Long.class, java.lang.String.class};
+      }
+
+      public Class<?> getReturnType() {
+        return long.class;
+      }
+
+      public boolean isReturnTypeList() {
+        return false;
+      }
+    },
+
     FIND_ALL_REPORTS {
       public String getDomainMethodName() {
         return "findAllReports";
@@ -86,6 +104,18 @@ public interface ReportRequest {
       public Class<?>[] getParameterTypes() {
         return new Class[] {int.class, int.class};
       }
+    },
+
+    FIND_REPORT_ENTRIES_BY_SEARCH {
+      public String getDomainMethodName() {
+        return "findReportEntriesBySearch";
+      }
+
+      public Class<?>[] getParameterTypes() {
+        return new Class[]{
+            java.lang.Long.class, java.lang.String.class,
+            java.lang.String.class, int.class, int.class, int.class};
+      }
     };
 
     public String getDomainClassName() {
@@ -114,6 +144,12 @@ public interface ReportRequest {
   /**
    * @return a request object
    */
+  @ServerOperation("COUNT_REPORTS_BY_SEARCH")
+  RequestFactory.RequestObject<Long> countReportsBySearch(Long employeeId, String startsWith);
+
+  /**
+   * @return a request object
+   */
   @ServerOperation("FIND_ALL_REPORTS")
   RecordListRequest<ReportRecord> findAllReports();
 
@@ -128,6 +164,14 @@ public interface ReportRequest {
    */
   @ServerOperation("FIND_REPORT_ENTRIES")
   RecordListRequest<ReportRecord> findReportEntries(int firstResult, int maxResults);
+
+  /**
+   * @return a request object
+   */
+  @ServerOperation("FIND_REPORT_ENTRIES_BY_SEARCH")
+  RecordListRequest<ReportRecord> findReportEntriesBySearch(Long employeeId,
+      String startsWith, String orderBy, int descending, int firstResult,
+      int maxResults);
 
   /**
    * @return a request object

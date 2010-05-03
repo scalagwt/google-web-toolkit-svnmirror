@@ -9,10 +9,6 @@
     field='styles'
     type='com.google.gwt.sample.bikeshed.style.client.Styles' />
 
-  <ui:image
-    field='verticalShadow'
-    repeatStyle='Vertical' />
-
   <ui:style>
     .title {
       border-bottom: 1px solid #c3c3c3;
@@ -23,10 +19,6 @@
       color: #7b8fae;
       font-size: 18pt;
       font-weight: bold;
-    }
-    
-    @sprite .shadowLeft {
-      gwt-image: 'verticalShadow';
     }
   </ui:style>
 
@@ -57,28 +49,25 @@
     <g:center>
       <g:SplitLayoutPanel
         ui:field='splitLayout'>
-        <g:north
-          size='300'>
-          <g:DockLayoutPanel
-            unit='PCT'
-            ui:field='northPanel'>
-            <g:west
-              size='40'>
-              <c:ExpenseBrowser
-                ui:field='expenseBrowser' />
-            </g:west>
-            <g:center
-              size='60'>
-              <c:ExpenseList
-                ui:field='expenseList'
-                styleName='{style.shadowLeft}' />
-            </g:center>
-          </g:DockLayoutPanel>
-        </g:north>
-
+        <g:west
+          size='250'>
+          <c:ExpenseTree
+            ui:field='expenseTree' />
+        </g:west>
         <g:center>
-          <c:ExpenseDetails
-            ui:field='expenseDetails' />
+          <g:LayoutPanel
+            ui:field='layoutPanel'>
+            <g:layer>
+              <c:ExpenseList
+                ui:field='expenseList' />
+            </g:layer>
+            <g:layer
+              right='0px'
+              width='0px'>
+              <c:ExpenseDetails
+                ui:field='expenseDetails' />
+            </g:layer>
+          </g:LayoutPanel>
         </g:center>
       </g:SplitLayoutPanel>
     </g:center>

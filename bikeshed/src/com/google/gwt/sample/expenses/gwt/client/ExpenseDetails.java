@@ -39,6 +39,7 @@ import com.google.gwt.sample.expenses.gwt.request.ReportRecord;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiFactory;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -134,19 +135,16 @@ public class ExpenseDetails extends Composite implements
   @UiField
   Element costLabel;
 
-  @UiField
-  Element defaultText;
-
   ExpensesRequestFactory expensesRequestFactory;
-
-  @UiField
-  Element mainLayout;
 
   @UiField
   TextBox notesBox;
 
   @UiField
   Element reportName;
+
+  @UiField
+  Anchor reportsLink;
 
   @UiField
   CellTable<ExpenseRecord> table;
@@ -164,10 +162,11 @@ public class ExpenseDetails extends Composite implements
 
   public ExpenseDetails() {
     initWidget(uiBinder.createAndBindUi(this));
-    setReportRecord(null);
-
-    // Add the view to the adapter.
     items.addView(table);
+  }
+
+  public Anchor getReportsLink() {
+    return reportsLink;
   }
 
   public void onExpenseRecordChanged(ExpenseRecordChanged event) {
@@ -199,16 +198,6 @@ public class ExpenseDetails extends Composite implements
   }
 
   public void setReportRecord(ReportRecord report) {
-    if (report == null) {
-      setVisible(defaultText, true);
-      setVisible(mainLayout, false);
-      return;
-    }
-
-    // Show the main layout when a report becomes available.
-    setVisible(defaultText, false);
-    setVisible(mainLayout, true);
-
     reportName.setInnerText(report.getPurpose());
     notesBox.setText(report.getNotes());
 

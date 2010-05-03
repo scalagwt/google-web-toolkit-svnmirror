@@ -26,7 +26,6 @@ import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
 import com.google.gwt.sample.expenses.gwt.request.ReportRecord;
 import com.google.gwt.sample.expenses.gwt.request.ReportRecordChanged;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
-import com.google.gwt.valuestore.shared.DeltaValueStore;
 import com.google.gwt.valuestore.shared.Property;
 import com.google.gwt.valuestore.shared.Record;
 
@@ -50,8 +49,6 @@ public class Expenses implements EntryPoint {
 
   private ExpensesRequestFactory requestFactory;
   private String searchCategory;
-  private EmployeeRecord searchEmployee;
-  private String searchStartsWith;
   private ExpensesShell shell;
 
   public void onModuleLoad() {
@@ -62,23 +59,23 @@ public class Expenses implements EntryPoint {
     RootLayoutPanel root = RootLayoutPanel.get();
 
     shell = new ExpensesShell();
-    final ExpenseBrowser expenseBrowser = shell.getExpenseBrowser();
+    final ExpenseTree expenseTree = shell.getExpenseTree();
     final ExpenseList expenseList = shell.getExpenseList();
     final ExpenseDetails expenseDetails = shell.getExpenseDetails();
 
     root.add(shell);
 
-    // Listen for requests from ExpenseBrowser.
-    expenseBrowser.setListener(new ExpenseBrowser.Listener() {
-      public void onBrowse(String category, EmployeeRecord employee) {
+    // Listen for requests from ExpenseTree.
+    expenseTree.setListener(new ExpenseTree.Listener() {
+      public void onSelection(String category, EmployeeRecord employee) {
         if (category != null && !category.equals(searchCategory)) {
           // TODO(jlabanca): Limit employees using category.
           requestFactory.employeeRequest().findAllEmployees().forProperties(
-              getEmployeeMenuProperties()).to(expenseBrowser).fire();
+              getEmployeeMenuProperties()).to(expenseTree).fire();
         }
-        searchEmployee = employee;
         searchCategory = category;
-        searchForReports();
+        expenseList.setEmployee(employee);
+        shell.showExpenseDetails(false);
       }
     });
 
@@ -87,29 +84,17 @@ public class Expenses implements EntryPoint {
       public void onReportSelected(ReportRecord report) {
         expenseDetails.setExpensesRequestFactory(requestFactory);
         expenseDetails.setReportRecord(report);
+        shell.showExpenseDetails(true);
 
         requestFactory.expenseRequest().findExpensesByReport(
             report.getRef(Record.id)).forProperties(getExpenseColumns()).to(
             expenseDetails).fire();
       }
-
-      public void onSearch(String startsWith) {
-        searchStartsWith = startsWith;
-        searchForReports();
-      }
     });
+    expenseList.setRequestFactory(requestFactory);
     eventBus.addHandler(ReportRecordChanged.TYPE, expenseList);
 
-    shell.setListener(new ExpensesShell.Listener() {
-      public void setPurpose(ReportRecord report, String purpose) {
-        DeltaValueStore deltaValueStore = requestFactory.getValueStore().spawnDeltaView();
-        deltaValueStore.set(ReportRecord.purpose, report, purpose);
-        requestFactory.syncRequest(deltaValueStore).fire();
-      }
-    });
-
     eventBus.addHandler(ExpenseRecordChanged.TYPE, expenseDetails);
-    eventBus.addHandler(ReportRecordChanged.TYPE, shell);
   }
 
   private Collection<Property<?>> getEmployeeMenuProperties() {
@@ -128,22 +113,5 @@ public class Expenses implements EntryPoint {
     columns.add(ExpenseRecord.description);
     columns.add(ExpenseRecord.reasonDenied);
     return columns;
-  }
-
-  private Collection<Property<?>> getReportColumns() {
-    List<Property<?>> columns = new ArrayList<Property<?>>();
-    columns.add(ReportRecord.created);
-    columns.add(ReportRecord.purpose);
-    return columns;
-  }
-
-  /**
-   * Search for reports based on the search criteria in the browser and search
-   * box.
-   */
-  private void searchForReports() {
-    // TODO(jlabanca): Limit search using search terms.
-    requestFactory.reportRequest().findAllReports().forProperties(
-        getReportColumns()).to(shell.getExpenseList()).fire();
   }
 }

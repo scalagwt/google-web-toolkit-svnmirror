@@ -15,38 +15,21 @@
  */
 package com.google.gwt.sample.expenses.gwt.client;
 
-import com.google.gwt.bikeshed.cells.client.DateCell;
-import com.google.gwt.bikeshed.cells.client.EditTextCell;
-import com.google.gwt.bikeshed.cells.client.FieldUpdater;
-import com.google.gwt.bikeshed.cells.client.TextCell;
-import com.google.gwt.bikeshed.list.client.CellTable;
-import com.google.gwt.bikeshed.list.client.Column;
-import com.google.gwt.bikeshed.list.shared.ListViewAdapter;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.requestfactory.shared.Receiver;
-import com.google.gwt.sample.expenses.gwt.request.ReportRecord;
-import com.google.gwt.sample.expenses.gwt.request.ReportRecordChanged;
+import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
-import com.google.gwt.uibinder.client.UiFactory;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.DockLayoutPanel;
-import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-import java.util.Date;
-import java.util.List;
-
 /**
- * UI shell for expenses sample app. A horrible clump of stuff that should be
- * refactored into proper MVP pieces.
+ * UI shell for expenses sample app.
  */
-public class ExpensesShell extends Composite implements
-    Receiver<List<ReportRecord>>, ReportRecordChanged.Handler {
-  interface Listener {
-    void setPurpose(ReportRecord report, String purpose);
-  }
+public class ExpensesShell extends Composite {
 
   interface ShellUiBinder extends UiBinder<Widget, ExpensesShell> {
   }
@@ -54,70 +37,26 @@ public class ExpensesShell extends Composite implements
   private static ShellUiBinder uiBinder = GWT.create(ShellUiBinder.class);
 
   @UiField
-  ExpenseBrowser expenseBrowser;
-  @UiField
   ExpenseDetails expenseDetails;
   @UiField
   ExpenseList expenseList;
   @UiField
-  DockLayoutPanel northPanel;
+  ExpenseTree expenseTree;
+  @UiField
+  LayoutPanel layoutPanel;
   @UiField
   SplitLayoutPanel splitLayout;
 
-  // TODO(jlabanca): Remove this when the app is done.
-  CellTable<ReportRecord> table;
-
-  // TODO(jlabanca): Remove this when the app is done.
-  ListBox users = new ListBox();
-
-  private Column<ReportRecord, Date> createdCol = new Column<ReportRecord, Date>(
-      new DateCell()) {
-    @Override
-    public Date getValue(ReportRecord object) {
-      return object.getCreated();
-    }
-  };
-  private Listener listener;
-  private final ListViewAdapter<ReportRecord> adapter;
-
-  private Column<ReportRecord, String> purposeCol = new Column<ReportRecord, String>(
-      new EditTextCell()) {
-    @Override
-    public String getValue(ReportRecord object) {
-      return object.getPurpose();
-    }
-  };
-
-  private Column<ReportRecord, String> statusCol = new Column<ReportRecord, String>(
-      TextCell.getInstance()) {
-    @Override
-    public String getValue(ReportRecord object) {
-      return "...";
-    }
-  };
-
-  private List<ReportRecord> values;
-
   public ExpensesShell() {
-    adapter = new ListViewAdapter<ReportRecord>();
-    table = createTable();
     initWidget(uiBinder.createAndBindUi(this));
-    splitLayout.setWidgetMinSize(northPanel, 150);
+    splitLayout.setWidgetMinSize(expenseTree, 150);
 
-    table.addColumn(createdCol, "Created");
-    table.addColumn(statusCol, "Status (tbd)");
-    table.addColumn(purposeCol, "Purpose");
-
-    purposeCol.setFieldUpdater(new FieldUpdater<ReportRecord, String>() {
-      public void update(int index, ReportRecord object, String value) {
-        adapter.getList().set(index, object);
-        listener.setPurpose(object, value);
+    // Handle breadcrumb events from Expense Details.
+    expenseDetails.getReportsLink().addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        showExpenseDetails(false);
       }
     });
-  }
-
-  public ExpenseBrowser getExpenseBrowser() {
-    return expenseBrowser;
   }
 
   public ExpenseDetails getExpenseDetails() {
@@ -128,31 +67,24 @@ public class ExpensesShell extends Composite implements
     return expenseList;
   }
 
-  public List<ReportRecord> getValues() {
-    return values;
+  public ExpenseTree getExpenseTree() {
+    return expenseTree;
   }
 
-  public void onReportChanged(ReportRecordChanged event) {
-    refresh();
-  }
-
-  public void onSuccess(List<ReportRecord> newValues) {
-    this.values = newValues;
-    refresh();
-  }
-
-  public void setListener(Listener listener) {
-    this.listener = listener;
-  }
-
-  @UiFactory
-  CellTable<ReportRecord> createTable() {
-    CellTable<ReportRecord> view = new CellTable<ReportRecord>(10);
-    adapter.addView(view);
-    return view;
-  }
-
-  private void refresh() {
-    adapter.setList(values);
+  /**
+   * Show or hide the expense details. When showing, the expense list is hidden.
+   * 
+   * @param isShowing true to show details, false to show reports list
+   */
+  public void showExpenseDetails(boolean isShowing) {
+    if (isShowing) {
+      layoutPanel.setWidgetLeftWidth(expenseList, 0.0, Unit.PX, 0.0, Unit.PX);
+      layoutPanel.setWidgetLeftRight(expenseDetails, 0.0, Unit.PX, 0.0, Unit.PX);
+    } else {
+      layoutPanel.setWidgetLeftRight(expenseList, 0.0, Unit.PX, 0.0, Unit.PX);
+      layoutPanel.setWidgetRightWidth(expenseDetails, 0.0, Unit.PX, 0.0,
+          Unit.PX);
+    }
+    layoutPanel.animate(300);
   }
 }

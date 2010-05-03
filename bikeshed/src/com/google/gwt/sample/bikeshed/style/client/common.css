@@ -154,7 +154,7 @@ td.datePickerMonth {
 
 /* splitters */
 .gwt-SplitLayoutPanel-HDragger {
-  background: #ddd url(hsplitter-grip.png) center center no-repeat;
+  background: #b6cef3 url(hsplitter-grip.png) center center no-repeat;
 }
 
 .gwt-SplitLayoutPanel-VDragger {

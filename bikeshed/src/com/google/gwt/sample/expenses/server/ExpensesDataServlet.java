@@ -117,6 +117,17 @@ public class ExpensesDataServlet extends RequestFactoryServlet {
       
       addExpenses(report.getId());
     }
+
+    for (int i = 0; i < 1000; i++) {
+      Report report = new Report();
+      report.setCreated(getDate());
+      report.setReporterKey(ghi.getId());
+      report.setPurpose("Report " + i);
+      report.setNotes(getNote());
+      report.persist();
+
+      addExpenses(report.getId());
+    }
   }
   
   private void addExpenses(Long reportId) {

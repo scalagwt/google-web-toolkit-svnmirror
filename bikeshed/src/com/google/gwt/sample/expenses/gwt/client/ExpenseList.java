@@ -20,8 +20,11 @@ import com.google.gwt.bikeshed.cells.client.DateCell;
 import com.google.gwt.bikeshed.cells.client.TextCell;
 import com.google.gwt.bikeshed.cells.client.ValueUpdater;
 import com.google.gwt.bikeshed.list.client.CellTable;
+import com.google.gwt.bikeshed.list.client.Column;
+import com.google.gwt.bikeshed.list.client.ListView;
 import com.google.gwt.bikeshed.list.client.SimplePager;
-import com.google.gwt.bikeshed.list.shared.ListViewAdapter;
+import com.google.gwt.bikeshed.list.shared.AsyncListViewAdapter;
+import com.google.gwt.bikeshed.list.shared.Range;
 import com.google.gwt.bikeshed.list.shared.SingleSelectionModel;
 import com.google.gwt.bikeshed.list.shared.SelectionModel.SelectionChangeEvent;
 import com.google.gwt.bikeshed.list.shared.SelectionModel.SelectionChangeHandler;
@@ -33,6 +36,8 @@ import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.requestfactory.shared.Receiver;
+import com.google.gwt.sample.expenses.gwt.request.EmployeeRecord;
+import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
 import com.google.gwt.sample.expenses.gwt.request.ReportRecord;
 import com.google.gwt.sample.expenses.gwt.request.ReportRecordChanged;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -42,10 +47,9 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.valuestore.shared.Property;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -54,6 +58,10 @@ import java.util.List;
  */
 public class ExpenseList extends Composite implements
     Receiver<List<ReportRecord>>, ReportRecordChanged.Handler {
+
+  private static final String TEXTBOX_DEFAULT_TEXT = "search";
+
+  private static final String TEXTBOX_DISABLED_COLOR = "#aaaaaa";
 
   interface ExpenseListUiBinder extends UiBinder<Widget, ExpenseList> {
   }
@@ -68,18 +76,17 @@ public class ExpenseList extends Composite implements
      * @param report the selected report
      */
     void onReportSelected(ReportRecord report);
-
-    /**
-     * Called when the user enters a search value.
-     * 
-     * @param startsWith the search string
-     */
-    void onSearch(String startsWith);
   }
 
-  private static final String TEXTBOX_DEFAULT_TEXT = "search";
-
-  private static final String TEXTBOX_DISABLED_COLOR = "#aaaaaa";
+  /**
+   * The adapter used to retrieve reports.
+   */
+  private class ReportAdapter extends AsyncListViewAdapter<ReportRecord> {
+    @Override
+    protected void onRangeChanged(ListView<ReportRecord> view) {
+      requestReports();
+    }
+  }
 
   private static ExpenseListUiBinder uiBinder = GWT.create(ExpenseListUiBinder.class);
 
@@ -97,12 +104,42 @@ public class ExpenseList extends Composite implements
 
   private List<SortableHeader> allHeaders = new ArrayList<SortableHeader>();
 
+  /**
+   * The employee being searched.
+   */
+  private EmployeeRecord employee;
+
+  /**
+   * Indicates that the report count is stale.
+   */
+  private boolean isCountStale = true;
+
+  /**
+   * The field to sort by.
+   */
+  private String orderBy = ReportRecord.purpose.getName();
+
+  /**
+   * True to sort in descending order.
+   */
+  private boolean orderByDesc = false;
+
   private Listener listener;
+
+  /**
+   * The columns to request with each report.
+   */
+  private final List<Property<?>> reportColumns;
 
   /**
    * The adapter that provides reports.
    */
-  private ListViewAdapter<ReportRecord> reports = new ListViewAdapter<ReportRecord>();
+  private final ReportAdapter reports = new ReportAdapter();
+
+  /**
+   * The factory used to send requests.
+   */
+  private ExpensesRequestFactory requestFactory;
 
   /**
    * The timer used to delay searches until the user stops typing.
@@ -110,13 +147,18 @@ public class ExpenseList extends Composite implements
   private Timer searchTimer = new Timer() {
     @Override
     public void run() {
-      search();
+      isCountStale = true;
+      requestReports();
     }
   };
 
-  private SortableColumn<ReportRecord, String> purposeColumn;
-
   public ExpenseList() {
+    reportColumns = new ArrayList<Property<?>>();
+    reportColumns.add(ReportRecord.created);
+    reportColumns.add(ReportRecord.purpose);
+    reportColumns.add(ReportRecord.notes);
+
+    // Initialize the widget.
     createTable();
     initWidget(uiBinder.createAndBindUi(this));
 
@@ -150,38 +192,38 @@ public class ExpenseList extends Composite implements
   }
 
   public void onReportChanged(ReportRecordChanged event) {
-    reports.refresh();
+    ReportRecord changed = event.getRecord();
+    String changedId = changed.getId();
+    List<ReportRecord> records = table.getDisplayedItems();
+    int i = 0;
+    for (ReportRecord record : records) {
+      if (record != null && changedId.equals(record.getId())) {
+        List<ReportRecord> changedList = new ArrayList<ReportRecord>();
+        changedList.add(changed);
+        reports.updateViewData(i + table.getPageStart(), 1, changedList);
+      }
+      i++;
+    }
   }
 
   public void onSuccess(List<ReportRecord> newValues) {
-    // TODO(jlabanca): Handle search on the server.
-    // Search through the values.
-    String startsWith = searchBox.getText().toLowerCase();
-    if (TEXTBOX_DEFAULT_TEXT.equals(startsWith)) {
-      startsWith = "";
-    }
-    List<ReportRecord> matched = new ArrayList<ReportRecord>();
-    if (startsWith != null && startsWith.length() > 0) {
-      for (ReportRecord record : newValues) {
-        if (record.getPurpose().toLowerCase().startsWith(startsWith)) {
-          matched.add(record);
-        }
-      }
-    } else {
-      matched.addAll(newValues);
-    }
+    reports.updateViewData(table.getPageStart(), newValues.size(), newValues);
+  }
 
-    reports.setList(matched);
-
-    allHeaders.get(0).setSorted(true);
-    allHeaders.get(0).setReverseSort(false);
-    table.refreshHeaders();
-    sortReports(purposeColumn.getComparator(false));
+  public void setEmployee(EmployeeRecord employee) {
+    this.employee = employee;
+    isCountStale = true;
+    pager.setPageStart(0);
+    table.refresh();
   }
 
   public void setListener(Listener listener) {
     this.listener = listener;
-    search();
+  }
+
+  public void setRequestFactory(ExpensesRequestFactory factory) {
+    this.requestFactory = factory;
+    requestReports();
   }
 
   @UiFactory
@@ -191,11 +233,20 @@ public class ExpenseList extends Composite implements
     return p;
   }
 
-  private <C extends Comparable<C>> SortableColumn<ReportRecord, C> addColumn(
-      final CellTable<ReportRecord> table, final String text,
-      final Cell<C> cell, final GetValue<ReportRecord, C> getter) {
-    final SortableColumn<ReportRecord, C> column = new SortableColumn<ReportRecord, C>(
-        cell) {
+  /**
+   * Add a sortable column to the table.
+   * 
+   * @param <C> the data type for the column
+   * @param text the header text
+   * @param cell the cell used to render the column
+   * @param getter the getter to retrieve the value for the column
+   * @param property the property to sort by
+   * @return the column
+   */
+  private <C> Column<ReportRecord, C> addColumn(final String text,
+      final Cell<C> cell, final GetValue<ReportRecord, C> getter,
+      final Property<?> property) {
+    final Column<ReportRecord, C> column = new Column<ReportRecord, C>(cell) {
       @Override
       public C getValue(ReportRecord object) {
         return getter.getValue(object);
@@ -215,8 +266,12 @@ public class ExpenseList extends Composite implements
             otherHeader.setReverseSort(true);
           }
         }
-        sortReports(column.getComparator(header.getReverseSort()));
         table.refreshHeaders();
+
+        // Request sorted rows.
+        orderBy = property.getName();
+        orderByDesc = header.getReverseSort();
+        requestReports();
       }
     });
     table.addColumn(column, header);
@@ -227,7 +282,7 @@ public class ExpenseList extends Composite implements
    * Create the {@link CellTable}.
    */
   private void createTable() {
-    table = new CellTable<ReportRecord>(8);
+    table = new CellTable<ReportRecord>(50);
 
     // Add a selection model.
     final SingleSelectionModel<ReportRecord> selectionModel = new SingleSelectionModel<ReportRecord>();
@@ -243,36 +298,59 @@ public class ExpenseList extends Composite implements
     });
 
     // Purpose column.
-    purposeColumn = addColumn(table, "Purpose", TextCell.getInstance(),
+    addColumn("Purpose", TextCell.getInstance(),
         new GetValue<ReportRecord, String>() {
           public String getValue(ReportRecord object) {
             return object.getPurpose();
           }
-        });
+        }, ReportRecord.purpose);
 
     // Created column.
-    addColumn(table, "Created", new DateCell(),
-        new GetValue<ReportRecord, Date>() {
-          public Date getValue(ReportRecord object) {
-            return object.getCreated();
+    addColumn("Created", new DateCell(), new GetValue<ReportRecord, Date>() {
+      public Date getValue(ReportRecord object) {
+        return object.getCreated();
+      }
+    }, ReportRecord.created);
+
+    // Notes column.
+    addColumn("Notes", TextCell.getInstance(),
+        new GetValue<ReportRecord, String>() {
+          public String getValue(ReportRecord object) {
+            return object.getNotes();
           }
-        });
+        }, ReportRecord.notes);
   }
 
   /**
-   * Search based on the text.
+   * Send a request for reports in the current range.
    */
-  private void search() {
-    if (listener != null) {
-      String startsWith = searchBox.getText();
-      if (TEXTBOX_DEFAULT_TEXT.equals(startsWith)) {
-        startsWith = "";
-      }
-      listener.onSearch(startsWith);
+  private void requestReports() {
+    if (requestFactory == null) {
+      return;
     }
-  }
 
-  private void sortReports(final Comparator<ReportRecord> comparator) {
-    Collections.sort(reports.getList(), comparator);
+    // Get the parameters.
+    String startsWith = searchBox.getText();
+    if (TEXTBOX_DEFAULT_TEXT.equals(startsWith)) {
+      startsWith = "";
+    }
+    Range range = table.getRange();
+    Long employeeId = employee == null ? -1 : new Long(employee.getId());
+
+    // Request the total data size.
+    if (isCountStale) {
+      isCountStale = false;
+      requestFactory.reportRequest().countReportsBySearch(employeeId,
+          startsWith).to(new Receiver<Long>() {
+        public void onSuccess(Long response) {
+          reports.updateDataSize(response.intValue(), true);
+        }
+      }).fire();
+    }
+
+    // Request reports in the current range.
+    requestFactory.reportRequest().findReportEntriesBySearch(employeeId,
+        startsWith, orderBy, orderByDesc ? 1 : 0, range.getStart(),
+        range.getLength()).forProperties(reportColumns).to(this).fire();
   }
 }
