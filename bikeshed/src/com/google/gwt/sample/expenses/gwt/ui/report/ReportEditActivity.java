@@ -18,6 +18,7 @@ package com.google.gwt.sample.expenses.gwt.ui.report;
 import com.google.gwt.app.place.AbstractActivity;
 import com.google.gwt.app.place.PlaceController;
 import com.google.gwt.requestfactory.shared.Receiver;
+import com.google.gwt.requestfactory.shared.SyncResult;
 import com.google.gwt.sample.expenses.gwt.client.place.ListScaffoldPlace;
 import com.google.gwt.sample.expenses.gwt.client.place.ScaffoldPlace;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
@@ -26,6 +27,8 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.valuestore.shared.DeltaValueStore;
 import com.google.gwt.valuestore.shared.Value;
 import com.google.gwt.valuestore.ui.RecordEditView;
+
+import java.util.Set;
 
 /**
  * An activity that requests all info on a report, allows the user to edit it,
@@ -75,10 +78,29 @@ public class ReportEditActivity extends AbstractActivity implements
   public void saveClicked() {
     if (deltas.isChanged()) {
       view.setEnabled(false);
-      DeltaValueStore toCommit = deltas;
+      final DeltaValueStore toCommit = deltas;
       deltas = null;
-      requests.syncRequest(toCommit).fire(); // TODO Need callback, idiot
-      placeController.goTo(new ListScaffoldPlace(ReportRecord.class));
+      Receiver<Set<SyncResult>> receiver = new Receiver<Set<SyncResult>>() {
+        public void onSuccess(Set<SyncResult> response) {
+          boolean hasViolations = false;
+          for (SyncResult syncResult : response) {
+            if (syncResult.getRecord().getId().equals(id)) {
+              if (syncResult.hasViolations()) {
+                hasViolations = true;
+                view.showErrors(syncResult.getViolations());
+              }
+            }
+          }
+          if (!hasViolations) {
+            placeController.goTo(new ListScaffoldPlace(ReportRecord.class));
+          } else {
+            view.setEnabled(true);
+            deltas = toCommit;
+            deltas.clearUsed();
+          }
+        }
+      };
+      requests.syncRequest(toCommit).to(receiver).fire();
     }
   }
 
@@ -87,6 +109,7 @@ public class ReportEditActivity extends AbstractActivity implements
       public void onSuccess(ReportRecord record) {
         view.setEnabled(true);
         view.setValue(record);
+        view.showErrors(null);
         display.showActivityWidget(view);
       }
     };

@@ -48,6 +48,10 @@ import java.util.Set;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 
 /**
  * Handles GWT RequestFactory JSON requests. Configured via servlet context
@@ -206,6 +210,7 @@ public class RequestFactoryServlet extends HttpServlet {
         recordObject.get("id"), propertiesInRecord.get("id"));
 
     // persist
+    Set<ConstraintViolation<Object>> violations = null;
     if (writeOperation == WriteOperation.DELETE) {
       entity.getMethod("remove").invoke(entityInstance);
     } else {
@@ -223,11 +228,20 @@ public class RequestFactoryServlet extends HttpServlet {
               propertyType).invoke(entityInstance, propertyValue);
         }
       }
-      entity.getMethod("persist").invoke(entityInstance);
+
+      // validations check..
+      ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
+      Validator validator = validatorFactory.getValidator();
+
+      violations = validator.validate(entityInstance);
+      if (violations.isEmpty()) {
+        entity.getMethod("persist").invoke(entityInstance);
+      }
     }
 
     // return data back.
-    return getReturnRecord(writeOperation, entityInstance, recordObject);
+    return getReturnRecord(writeOperation, entityInstance, recordObject,
+        violations);
   }
 
   private Collection<Property<?>> allProperties(Class<? extends Record> clazz) {
@@ -476,15 +490,24 @@ public class RequestFactoryServlet extends HttpServlet {
   }
 
   private JSONObject getReturnRecord(WriteOperation writeOperation,
-      Object entityInstance, JSONObject recordObject) throws SecurityException,
+      Object entityInstance, JSONObject recordObject,
+      Set<ConstraintViolation<Object>> violations) throws SecurityException,
       JSONException, IllegalAccessException, InvocationTargetException,
       NoSuchMethodException {
 
     JSONObject returnObject = new JSONObject();
-    // currently sending back only two properties.
-    for (String propertyName : new String[] {"id", "version"}) {
-      returnObject.put(propertyName, getPropertyValueFromDataStore(
-          entityInstance, propertyName));
+    if (writeOperation != WriteOperation.CREATE || violations == null) {
+      // currently sending back only two properties.
+      for (String propertyName : new String[] {"id", "version"}) {
+        if ("version".equals(propertyName) && violations != null) {
+          continue;
+        }
+        returnObject.put(propertyName, getPropertyValueFromDataStore(
+            entityInstance, propertyName));
+      }
+    }
+    if (violations != null) {
+      returnObject.put("violations", getViolationsAsJson(violations));
     }
     if (writeOperation == WriteOperation.CREATE) {
       returnObject.put("futureId", recordObject.getString("id"));
@@ -506,6 +529,16 @@ public class RequestFactoryServlet extends HttpServlet {
     }
     throw new IllegalArgumentException("id is of type: " + idValue.getClass()
         + ",  expected type: " + idType);
+  }
+
+  private JSONObject getViolationsAsJson(
+      Set<ConstraintViolation<Object>> violations) throws JSONException {
+    JSONObject violationsAsJson = new JSONObject();
+    for (ConstraintViolation<Object> violation : violations) {
+      violationsAsJson.put(violation.getPropertyPath().toString(),
+          violation.getMessage());
+    }
+    return violationsAsJson;
   }
 
   /**

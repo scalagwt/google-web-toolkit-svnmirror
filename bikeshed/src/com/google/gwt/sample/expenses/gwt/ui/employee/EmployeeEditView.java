@@ -113,16 +113,9 @@ public class EmployeeEditView extends Composite implements
     DATA_BINDER.setValue(this, value);
   }
 
-  @UiHandler("save")
-  void onSave(@SuppressWarnings("unused") ClickEvent event) {
-    delegate.saveClicked();
-  }
-
   public void showErrors(Map<String, String> errorMap) {
     // TODO Make EditorSupport do this
-
     errors.setInnerText("");
-
     if (errorMap == null || errorMap.isEmpty()) {
       return;
     }
@@ -145,5 +138,10 @@ public class EmployeeEditView extends Composite implements
 
       errors.appendChild(div);
     }
+  }
+
+  @UiHandler("save")
+  void onSave(@SuppressWarnings("unused") ClickEvent event) {
+    delegate.saveClicked();
   }
 }

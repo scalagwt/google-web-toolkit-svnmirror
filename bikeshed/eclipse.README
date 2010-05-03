@@ -33,5 +33,8 @@ bikeshed/war/stocksMobile/
       * src/com/google/gwt/sample/bikeshed/stocks/shared
       * src/com/google/gwt/sample/expenses/server/domain
   * Java Build Path > Libraries > Add Variable > GWT_TOOLS, Extend > redist/json/r2_20080312/json.jar
+  * Java Build Path > Extenal Library > bikeshed/war/temp-lib/validation-api-1.0.0.GA.jar
 * Copy tools/redist/json/r2_20080312/json.jar to bikeshed/war/WEB_INF/lib
+* Copy all jars from  bikeshed/war/temp-lib to bikeshed/war/WEB-INF/lib
 * Right click on the bikeshed project and choose Run as > Web Application. Choose from the various .html files
+* 

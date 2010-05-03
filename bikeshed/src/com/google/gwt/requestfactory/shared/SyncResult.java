@@ -15,13 +15,17 @@
  */
 package com.google.gwt.requestfactory.shared;
 
-import java.util.Set;
+import com.google.gwt.valuestore.shared.Record;
+
+import java.util.Map;
 
 /**
- * Request to commit CRUD operations accumulated in a DeltaValueStore.
+ * Result per record of a SyncRequest.
  */
-public interface SyncRequest {
-  void fire();
-
-  SyncRequest to(Receiver<Set<SyncResult>> receiver);
+public interface SyncResult {
+  boolean hasViolations();
+  
+  Record getRecord();
+  
+  Map<String, String> getViolations();
 }

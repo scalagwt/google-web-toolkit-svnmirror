@@ -24,6 +24,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Version;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 /**
  * The Employee domain object.
@@ -84,8 +86,10 @@ public class Employee {
     }
   }
 
+  @Size(min = 3, max = 30)
   private String userName;
 
+  @NotNull
   private String displayName;
 
   private String password;

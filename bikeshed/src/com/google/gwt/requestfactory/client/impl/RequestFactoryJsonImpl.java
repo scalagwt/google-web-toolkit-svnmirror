@@ -21,12 +21,16 @@ import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
+import com.google.gwt.requestfactory.shared.Receiver;
 import com.google.gwt.requestfactory.shared.RequestFactory;
 import com.google.gwt.requestfactory.shared.SyncRequest;
+import com.google.gwt.requestfactory.shared.SyncResult;
 import com.google.gwt.requestfactory.shared.impl.RequestDataManager;
 import com.google.gwt.valuestore.client.DeltaValueStoreJsonImpl;
 import com.google.gwt.valuestore.client.ValueStoreJsonImpl;
 import com.google.gwt.valuestore.shared.DeltaValueStore;
+
+import java.util.Set;
 
 /**
  * Base implementation of RequestFactory.
@@ -82,6 +86,7 @@ public class RequestFactoryJsonImpl implements RequestFactory {
 
     return new SyncRequest() {
 
+      Receiver<Set<SyncResult>> receiver = null;
       public void fire() {
 
         RequestBuilder builder = new RequestBuilder(RequestBuilder.POST,
@@ -98,8 +103,7 @@ public class RequestFactoryJsonImpl implements RequestFactory {
           public void onResponseReceived(Request request, Response response) {
             if (200 == response.getStatusCode()) {
               // parse the return value.
-
-              jsonDeltas.commit(response.getText());
+              receiver.onSuccess(jsonDeltas.commit(response.getText()));
             } else {
               // shell.error.setInnerText(SERVER_ERROR + " ("
               // + response.getStatusText() + ")");
@@ -113,6 +117,11 @@ public class RequestFactoryJsonImpl implements RequestFactory {
           // shell.error.setInnerText(SERVER_ERROR + " (" + e.getMessage() +
           // ")");
         }
+      }
+
+      public SyncRequest to(Receiver<Set<SyncResult>> receiver) {
+        this.receiver = receiver;
+        return this;
       }
     };
   }
