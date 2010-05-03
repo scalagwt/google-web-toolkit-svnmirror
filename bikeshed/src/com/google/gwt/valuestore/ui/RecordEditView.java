@@ -20,6 +20,8 @@ import com.google.gwt.user.client.ui.TakesValue;
 import com.google.gwt.valuestore.shared.DeltaValueStore;
 import com.google.gwt.valuestore.shared.Record;
 
+import java.util.Map;
+
 /**
  * Implemented by views that edit {@link Record}s.
  * 
@@ -39,4 +41,7 @@ public interface RecordEditView<R extends Record> extends TakesValue<R>,
   void setDelegate(Delegate delegate);
   void setDeltaValueStore(DeltaValueStore deltas);
   void setEnabled(boolean b);
+  
+  // TODO needs to be Map<Property<?>, String> errors
+  void showErrors(Map<String, String> errors);
 }

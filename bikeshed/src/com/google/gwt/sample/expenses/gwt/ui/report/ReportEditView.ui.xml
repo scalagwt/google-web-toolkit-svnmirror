@@ -3,6 +3,7 @@
   xmlns:g='urn:import:com.google.gwt.user.client.ui' >
   <g:HTMLPanel>
     <h3><ui:msg>Edit Report <g:InlineLabel ui:field='id' /> (v<g:InlineLabel ui:field='version'/>)</ui:msg></h3>
+    <div ui:field='errors' style='background-color: red; '></div>
 
     <div><span>Purpose:</span> <g:TextBox ui:field='purpose'></g:TextBox></div>
     <div><span>Notes:</span> <g:TextBox ui:field='notes'></g:TextBox></div>
