@@ -39,7 +39,7 @@ public class ClientRequestHelper {
     }-*/;
 
     private native String toJsonString()/*-{
-      return JSON.stringify(this);
+      return $wnd.JSON.stringify(this);
     }-*/;
   }
 

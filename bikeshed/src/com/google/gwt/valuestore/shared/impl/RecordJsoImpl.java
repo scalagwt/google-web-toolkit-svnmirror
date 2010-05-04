@@ -175,12 +175,12 @@ public class RecordJsoImpl extends JavaScriptObject implements Record {
     //      }
     //      return value;
     //    }
-    // return JSON.stringify(this, replacer);
+    // return $wnd.JSON.stringify(this, replacer);
 
     var key = this.__key;
     delete this.__key;
     // TODO verify that the stringify() from json2.js works on IE
-    var rtn = JSON.stringify(this);
+    var rtn = $wnd.JSON.stringify(this);
     this.__key = key;
     return rtn;
   }-*/;
@@ -199,9 +199,9 @@ public class RecordJsoImpl extends JavaScriptObject implements Record {
     //      }
     //      return;
     //    }
-    //    return JSON.stringify(this, replacer);
+    //    return $wnd.JSON.stringify(this, replacer);
     var object = { id: this.id, version: this.version };
-    return JSON.stringify(object);
+    return $wnd.JSON.stringify(object);
   }-*/;
 
   private native boolean copyPropertyIfDifferent(String name, RecordJsoImpl from) /*-{
