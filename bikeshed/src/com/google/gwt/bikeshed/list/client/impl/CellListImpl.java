@@ -34,9 +34,9 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Implementation of {@link CellList}. This class is subject to change or
- * deletion. Do not rely on this class.
- *
+ * Implementation of {@link com.google.gwt.bikeshed.list.client.CellList}. This
+ * class is subject to change or deletion. Do not rely on this class.
+ * 
  * @param <T> the data type of items in the list
  */
 public abstract class CellListImpl<T> {
@@ -115,7 +115,7 @@ public abstract class CellListImpl<T> {
   /**
    * Get the list of data within the current range. The data may not be
    * complete.
-   *
+   * 
    * @return the list of data
    */
   public List<T> getData() {
@@ -124,7 +124,7 @@ public abstract class CellListImpl<T> {
 
   /**
    * Get the overall data size.
-   *
+   * 
    * @return the data size
    */
   public int getDataSize() {
@@ -133,7 +133,7 @@ public abstract class CellListImpl<T> {
 
   /**
    * Get the number of items that are within the current page and data range.
-   *
+   * 
    * @return the number of displayed items
    */
   public int getDisplayedItemCount() {
@@ -166,20 +166,25 @@ public abstract class CellListImpl<T> {
   }
 
   /**
+   * Redraw the list with the current data.
+   */
+  public void redraw() {
+    setData(data, pageStart);
+  }
+
+  /**
    * Request data from the delegate.
    */
   public void refresh() {
-    if (delegate != null) {
-      if (!refreshScheduled) {
-        refreshScheduled = true;
-        Scheduler.get().scheduleFinally(refreshCommand);
-      }
+    if (delegate != null && !refreshScheduled) {
+      refreshScheduled = true;
+      Scheduler.get().scheduleFinally(refreshCommand);
     }
   }
 
   /**
    * Set the data in the list.
-   *
+   * 
    * @param values the new data
    * @param valuesStart the start index of the values
    */
@@ -267,7 +272,7 @@ public abstract class CellListImpl<T> {
 
   /**
    * Set the overall size of the list.
-   *
+   * 
    * @param size the overall size
    */
   public void setDataSize(int size) {
@@ -289,7 +294,7 @@ public abstract class CellListImpl<T> {
 
   /**
    * Set the number of items to show on each page.
-   *
+   * 
    * @param pageSize the page size
    */
   public void setPageSize(int pageSize) {
@@ -304,7 +309,7 @@ public abstract class CellListImpl<T> {
 
   /**
    * Set the start index of the range.
-   *
+   * 
    * @param pageStart the start index
    */
   public void setPageStart(int pageStart) {
@@ -347,7 +352,7 @@ public abstract class CellListImpl<T> {
 
   /**
    * Set the {@link SelectionModel}, optionally triggering an update.
-   *
+   * 
    * @param selectionModel the new {@link SelectionModel}
    * @param updateSelection true to update selection
    */
@@ -378,7 +383,7 @@ public abstract class CellListImpl<T> {
   /**
    * Convert the specified HTML into DOM elements and return the parent of the
    * DOM elements.
-   *
+   * 
    * @param html the HTML to convert
    * @return the parent element
    */
@@ -389,14 +394,14 @@ public abstract class CellListImpl<T> {
 
   /**
    * Check whether or not the cells in the list depend on the selection state.
-   *
+   * 
    * @return true if cells depend on selection, false if not
    */
   protected abstract boolean dependsOnSelection();
 
   /**
    * Construct the HTML that represents the list of items.
-   *
+   * 
    * @param sb the {@link StringBuilder} to build into
    * @param values the values to render
    * @param start the start index
@@ -425,7 +430,7 @@ public abstract class CellListImpl<T> {
   /**
    * Mark an element as selected or unselected. This is called when a cells
    * selection state changes, but the cell does not depend on selection.
-   *
+   * 
    * @param elem the element to modify
    * @param selected true if selected, false if not
    */

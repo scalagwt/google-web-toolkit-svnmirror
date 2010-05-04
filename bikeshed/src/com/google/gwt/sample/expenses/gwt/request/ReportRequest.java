@@ -114,7 +114,7 @@ public interface ReportRequest {
       public Class<?>[] getParameterTypes() {
         return new Class[]{
             java.lang.Long.class, java.lang.String.class,
-            java.lang.String.class, int.class, int.class, int.class};
+            java.lang.String.class, int.class, int.class};
       }
     };
 
@@ -145,7 +145,8 @@ public interface ReportRequest {
    * @return a request object
    */
   @ServerOperation("COUNT_REPORTS_BY_SEARCH")
-  RequestFactory.RequestObject<Long> countReportsBySearch(Long employeeId, String startsWith);
+  RequestFactory.RequestObject<Long> countReportsBySearch(Long employeeId,
+      String startsWith);
 
   /**
    * @return a request object
@@ -170,8 +171,7 @@ public interface ReportRequest {
    */
   @ServerOperation("FIND_REPORT_ENTRIES_BY_SEARCH")
   RecordListRequest<ReportRecord> findReportEntriesBySearch(Long employeeId,
-      String startsWith, String orderBy, int descending, int firstResult,
-      int maxResults);
+      String startsWith, String orderBy, int firstResult, int maxResults);
 
   /**
    * @return a request object

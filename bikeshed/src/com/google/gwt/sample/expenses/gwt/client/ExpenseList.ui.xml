@@ -5,6 +5,8 @@
   xmlns:l='urn:import:com.google.gwt.bikeshed.list.client'>
 
   <ui:image
+    field='highlightIcon' />
+  <ui:image
     field='searchIcon' />
 
   <ui:style>
@@ -19,8 +21,13 @@
     .textBox {
       width: 250px;
       border: 1px solid #5478af;
+      padding-left: 5px;
     }
     
+    @sprite .highlightIcon {
+      gwt-image: 'highlightIcon';
+    }
+
     @sprite .searchIcon {
       gwt-image: 'searchIcon';
     }
@@ -34,12 +41,13 @@
         width='100%'
         cellspacing='0'
         cellpadding='0'>
-        <tr>
-          <td>
+        <tr rowspan='2'>
+          <td rowspan='2'>
             <h1>Reports</h1>
           </td>
           <td
             align='right'>
+            <i>Search:</i>
             <g:TextBox
               styleName='{style.textBox}'
               ui:field='searchBox'></g:TextBox>
@@ -48,6 +56,20 @@
             width='60'>
             <div
               class='{style.searchIcon}' />
+          </td>
+        </tr>
+        <tr>
+          <td
+            align='right'>
+            <i>Highlight:</i>
+            <g:TextBox
+              styleName='{style.textBox}'
+              ui:field='highlightBox'></g:TextBox>
+          </td>
+          <td
+            width='60'>
+            <div
+              class='{style.highlightIcon}' />
           </td>
         </tr>
         <tr>

@@ -17,7 +17,6 @@ package com.google.gwt.sample.expenses.gwt.client;
 
 import com.google.gwt.bikeshed.cells.client.Cell;
 import com.google.gwt.bikeshed.cells.client.DateCell;
-import com.google.gwt.bikeshed.cells.client.TextCell;
 import com.google.gwt.bikeshed.cells.client.ValueUpdater;
 import com.google.gwt.bikeshed.list.client.CellTable;
 import com.google.gwt.bikeshed.list.client.Column;
@@ -35,6 +34,7 @@ import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.requestfactory.shared.Receiver;
 import com.google.gwt.sample.expenses.gwt.request.EmployeeRecord;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
@@ -59,9 +59,52 @@ import java.util.List;
 public class ExpenseList extends Composite implements
     Receiver<List<ReportRecord>>, ReportRecordChanged.Handler {
 
-  private static final String TEXTBOX_DEFAULT_TEXT = "search";
+  /**
+   * A text box that displays default text.
+   */
+  private static class DefaultTextBox extends TextBox {
 
-  private static final String TEXTBOX_DISABLED_COLOR = "#aaaaaa";
+    /**
+     * The text color used when the box is disabled and empty.
+     */
+    private static final String TEXTBOX_DISABLED_COLOR = "#aaaaaa";
+
+    private final String defaultText;
+
+    public DefaultTextBox(final String defaultText) {
+      this.defaultText = defaultText;
+      resetDefaultText();
+
+      // Add focus and blur handlers.
+      addFocusHandler(new FocusHandler() {
+        public void onFocus(FocusEvent event) {
+          getElement().getStyle().clearColor();
+          if (defaultText.equals(getText())) {
+            setText("");
+          }
+        }
+      });
+      addBlurHandler(new BlurHandler() {
+        public void onBlur(BlurEvent event) {
+          if ("".equals(getText())) {
+            resetDefaultText();
+          }
+        }
+      });
+    }
+
+    public String getDefaultText() {
+      return defaultText;
+    }
+
+    /**
+     * Reset the text box to the default text.
+     */
+    public void resetDefaultText() {
+      setText(defaultText);
+      getElement().getStyle().setColor(TEXTBOX_DISABLED_COLOR);
+    }
+  }
 
   interface ExpenseListUiBinder extends UiBinder<Widget, ExpenseList> {
   }
@@ -79,6 +122,24 @@ public class ExpenseList extends Composite implements
   }
 
   /**
+   * A cell used to highlight search text.
+   */
+  private class HighlightCell extends Cell<String> {
+
+    private static final String replaceString = "<span style='color:red;font-weight:bold;'>$1</span>";
+
+    @Override
+    public void render(String value, Object viewData, StringBuilder sb) {
+      if (value != null) {
+        if (searchRegExp != null) {
+          value = searchRegExp.replace(value, replaceString);
+        }
+        sb.append(value);
+      }
+    }
+  }
+
+  /**
    * The adapter used to retrieve reports.
    */
   private class ReportAdapter extends AsyncListViewAdapter<ReportRecord> {
@@ -90,10 +151,12 @@ public class ExpenseList extends Composite implements
 
   private static ExpenseListUiBinder uiBinder = GWT.create(ExpenseListUiBinder.class);
 
+  @UiField(provided = true)
+  DefaultTextBox highlightBox;
   @UiField
   SimplePager<ReportRecord> pager;
-  @UiField
-  TextBox searchBox;
+  @UiField(provided = true)
+  DefaultTextBox searchBox;
 
   /**
    * The main table. We provide this in the constructor before calling
@@ -119,11 +182,6 @@ public class ExpenseList extends Composite implements
    */
   private String orderBy = ReportRecord.purpose.getName();
 
-  /**
-   * True to sort in descending order.
-   */
-  private boolean orderByDesc = false;
-
   private Listener listener;
 
   /**
@@ -140,6 +198,11 @@ public class ExpenseList extends Composite implements
    * The factory used to send requests.
    */
   private ExpensesRequestFactory requestFactory;
+
+  /**
+   * The string that the user searched for.
+   */
+  private RegExp searchRegExp;
 
   /**
    * The timer used to delay searches until the user stops typing.
@@ -160,33 +223,28 @@ public class ExpenseList extends Composite implements
 
     // Initialize the widget.
     createTable();
+    highlightBox = new DefaultTextBox("highlight");
+    searchBox = new DefaultTextBox("search");
     initWidget(uiBinder.createAndBindUi(this));
 
     // Add the view to the adapter.
     reports.addView(table);
 
-    // Setup the search box.
-    searchBox.setText(TEXTBOX_DEFAULT_TEXT);
-    searchBox.getElement().getStyle().setColor(TEXTBOX_DISABLED_COLOR);
+    // Listen for key events from the text boxes.
     searchBox.addKeyUpHandler(new KeyUpHandler() {
       public void onKeyUp(KeyUpEvent event) {
         searchTimer.schedule(500);
       }
     });
-    searchBox.addFocusHandler(new FocusHandler() {
-      public void onFocus(FocusEvent event) {
-        searchBox.getElement().getStyle().clearColor();
-        if (TEXTBOX_DEFAULT_TEXT.equals(searchBox.getText())) {
-          searchBox.setText("");
+    highlightBox.addKeyUpHandler(new KeyUpHandler() {
+      public void onKeyUp(KeyUpEvent event) {
+        String text = highlightBox.getText();
+        if (text.length() > 0) {
+          searchRegExp = RegExp.compile("(" + text + ")", "i");
+        } else {
+          searchRegExp = null;
         }
-      }
-    });
-    searchBox.addBlurHandler(new BlurHandler() {
-      public void onBlur(BlurEvent event) {
-        if ("".equals(searchBox.getText())) {
-          searchBox.setText(TEXTBOX_DEFAULT_TEXT);
-          searchBox.getElement().getStyle().setColor(TEXTBOX_DISABLED_COLOR);
-        }
+        table.redraw();
       }
     });
   }
@@ -270,7 +328,10 @@ public class ExpenseList extends Composite implements
 
         // Request sorted rows.
         orderBy = property.getName();
-        orderByDesc = header.getReverseSort();
+        if (header.getReverseSort()) {
+          orderBy += " DESC";
+        }
+        searchBox.resetDefaultText();
         requestReports();
       }
     });
@@ -298,7 +359,7 @@ public class ExpenseList extends Composite implements
     });
 
     // Purpose column.
-    addColumn("Purpose", TextCell.getInstance(),
+    addColumn("Purpose", new HighlightCell(),
         new GetValue<ReportRecord, String>() {
           public String getValue(ReportRecord object) {
             return object.getPurpose();
@@ -313,7 +374,7 @@ public class ExpenseList extends Composite implements
     }, ReportRecord.created);
 
     // Notes column.
-    addColumn("Notes", TextCell.getInstance(),
+    addColumn("Notes", new HighlightCell(),
         new GetValue<ReportRecord, String>() {
           public String getValue(ReportRecord object) {
             return object.getNotes();
@@ -331,11 +392,20 @@ public class ExpenseList extends Composite implements
 
     // Get the parameters.
     String startsWith = searchBox.getText();
-    if (TEXTBOX_DEFAULT_TEXT.equals(startsWith)) {
+    if (searchBox.getDefaultText().equals(startsWith)) {
       startsWith = "";
     }
     Range range = table.getRange();
     Long employeeId = employee == null ? -1 : new Long(employee.getId());
+
+    // If a search string is specified, the results will not be sorted.
+    if (startsWith.length() > 0) {
+      for (SortableHeader header : allHeaders) {
+        header.setSorted(false);
+        header.setReverseSort(false);
+      }
+      table.refreshHeaders();
+    }
 
     // Request the total data size.
     if (isCountStale) {
@@ -350,7 +420,7 @@ public class ExpenseList extends Composite implements
 
     // Request reports in the current range.
     requestFactory.reportRequest().findReportEntriesBySearch(employeeId,
-        startsWith, orderBy, orderByDesc ? 1 : 0, range.getStart(),
-        range.getLength()).forProperties(reportColumns).to(this).fire();
+        startsWith, orderBy, range.getStart(), range.getLength()).forProperties(
+        reportColumns).to(this).fire();
   }
 }

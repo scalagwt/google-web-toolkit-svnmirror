@@ -455,6 +455,13 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
   }
 
   /**
+   * Redraw the table using the existing data.
+   */
+  public void redraw() {
+    impl.redraw();
+  }
+
+  /**
    * Redraw the table, requesting data from the delegate.
    */
   public void refresh() {
@@ -594,4 +601,3 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
     return element.clientHeight;
   }-*/;
 }
-
