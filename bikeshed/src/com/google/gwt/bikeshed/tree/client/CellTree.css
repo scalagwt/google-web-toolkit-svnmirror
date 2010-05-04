@@ -1,3 +1,8 @@
+.emptyMessage {
+  padding-left: 16px;
+  font-style: italic;
+}
+
 .item {
   padding: 4px 3px;
 }
@@ -7,7 +12,6 @@
 }
 
 .openItem {
-  font-weight: bold;
 }
 
 @sprite .selectedItem {
@@ -16,4 +20,9 @@
   color: white;
   height: auto;
   overflow: auto;
+}
+
+.showMoreButton {
+  padding-left: 16px;
+  outline: none;
 }

@@ -48,6 +48,24 @@ public interface EmployeeRequest {
       }
     },
 
+    COUNT_EMPLOYEES_BY_DEPARTMENT {
+      public String getDomainMethodName() {
+        return "countEmployeesByDepartment";
+      }
+
+      public Class<?>[] getParameterTypes() {
+        return new Class[]{java.lang.String.class};
+      }
+
+      public Class<?> getReturnType() {
+        return Long.class;
+      }
+
+      public boolean isReturnTypeList() {
+        return false;
+      }
+    },
+
     FIND_ALL_EMPLOYEES {
       public String getDomainMethodName() {
         return "findAllEmployees";
@@ -74,7 +92,17 @@ public interface EmployeeRequest {
       }
 
       public Class<?>[] getParameterTypes() {
-        return new Class[] {int.class, int.class};
+        return new Class[]{int.class, int.class};
+      }
+    },
+
+    FIND_EMPLOYEE_ENTRIES_BY_DEPARTMENT {
+      public String getDomainMethodName() {
+        return "findEmployeeEntriesByDepartment";
+      }
+
+      public Class<?>[] getParameterTypes() {
+        return new Class[]{java.lang.String.class, int.class, int.class};
       }
     };
 
@@ -104,6 +132,13 @@ public interface EmployeeRequest {
   /**
    * @return a request object
    */
+  @ServerOperation("COUNT_EMPLOYEES_BY_DEPARTMENT")
+  RequestFactory.RequestObject<Long> countEmployeesByDepartment(
+      String department);
+
+  /**
+   * @return a request object
+   */
   @ServerOperation("FIND_ALL_EMPLOYEES")
   RecordListRequest<EmployeeRecord> findAllEmployees();
 
@@ -119,4 +154,11 @@ public interface EmployeeRequest {
   @ServerOperation("FIND_EMPLOYEE_ENTRIES")
   RecordListRequest<EmployeeRecord> findEmployeeEntries(int firstResult,
       int maxResults);
+
+  /**
+   * @return a request object
+   */
+  @ServerOperation("FIND_EMPLOYEE_ENTRIES_BY_DEPARTMENT")
+  RecordListRequest<EmployeeRecord> findEmployeeEntriesByDepartment(
+      String department, int firstResult, int maxResults);
 }

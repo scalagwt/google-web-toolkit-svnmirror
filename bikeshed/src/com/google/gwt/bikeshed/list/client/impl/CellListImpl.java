@@ -53,6 +53,14 @@ public abstract class CellListImpl<T> {
   private final List<T> data = new ArrayList<T>();
 
   private int dataSize;
+
+  /**
+   * A boolean indicating whether or not the data size has ever been set. If the
+   * data size has never been set, then we will always pass it along to the
+   * view.
+   */
+  private boolean dataSizeInitialized;
+
   private Delegate<T> delegate;
   private final PagingListView<T> listView;
   private Pager<T> pager;
@@ -276,9 +284,10 @@ public abstract class CellListImpl<T> {
    * @param size the overall size
    */
   public void setDataSize(int size) {
-    if (size == this.dataSize) {
+    if (dataSizeInitialized && size == this.dataSize) {
       return;
     }
+    dataSizeInitialized = true;
     this.dataSize = size;
     updateDataAndView();
     onSizeChanged();

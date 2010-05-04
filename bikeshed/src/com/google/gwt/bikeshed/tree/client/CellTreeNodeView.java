@@ -22,6 +22,7 @@ import com.google.gwt.bikeshed.list.shared.ProvidesKey;
 import com.google.gwt.bikeshed.list.shared.Range;
 import com.google.gwt.bikeshed.list.shared.SelectionModel;
 import com.google.gwt.bikeshed.tree.client.CellTreeViewModel.NodeInfo;
+import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
@@ -41,11 +42,6 @@ import java.util.Map;
  * @param <T> the type that this view contains
  */
 class CellTreeNodeView<T> extends UIObject {
-
-  /**
-   * The default number of children to show under a tree node.
-   */
-  private static final int DEFAULT_LIST_SIZE = 100;
 
   /**
    * The element used in place of an image when a node has no children.
@@ -84,21 +80,23 @@ class CellTreeNodeView<T> extends UIObject {
    */
   private static class NodeListView<C> implements PagingListView<C> {
 
+    private final int defaultPageSize;
     private final CellListImpl<C> impl;
     private CellTreeNodeView<?> nodeView;
     private Map<Object, CellTreeNodeView<?>> savedViews;
 
     public NodeListView(final NodeInfo<C> nodeInfo,
-        final CellTreeNodeView<?> nodeView) {
+        final CellTreeNodeView<?> nodeView, int pageSize) {
+      this.defaultPageSize = pageSize;
       this.nodeView = nodeView;
 
       final Cell<C> cell = nodeInfo.getCell();
-      impl = new CellListImpl<C>(this, DEFAULT_LIST_SIZE,
+      impl = new CellListImpl<C>(this, pageSize,
           nodeView.ensureChildContainer()) {
 
         @Override
         public void setData(List<C> values, int start) {
-          showOrHide(nodeView.loadingMessageElem, false);
+          nodeView.updateImage(false);
 
           // Ensure that we have a children array.
           if (nodeView.children == null) {
@@ -157,7 +155,6 @@ class CellTreeNodeView<T> extends UIObject {
               child.nodeInfo = savedChild.nodeInfo;
               child.nodeInfoLoaded = savedChild.nodeInfoLoaded;
               child.open = savedChild.open;
-              child.showFewerElem = savedChild.showFewerElem;
               child.showMoreElem = savedChild.showMoreElem;
 
               // Swap the node view in the child. We reuse the same NodeListView
@@ -248,11 +245,14 @@ class CellTreeNodeView<T> extends UIObject {
       impl.setPager(new Pager<C>() {
         public void onRangeOrSizeChanged(PagingListView<C> listView) {
           // Assumes a page start of 0.
-          showOrHide(nodeView.showMoreElem,
-              impl.getDataSize() > impl.getPageSize());
-          showOrHide(nodeView.showFewerElem,
-              impl.getPageSize() > DEFAULT_LIST_SIZE);
-          showOrHide(nodeView.emptyMessageElem, impl.getDataSize() == 0);
+          int dataSize = impl.getDataSize();
+          showOrHide(nodeView.showMoreElem, dataSize > impl.getPageSize());
+          if (dataSize == 0) {
+            showOrHide(nodeView.emptyMessageElem, true);
+            nodeView.updateImage(false);
+          } else {
+            showOrHide(nodeView.emptyMessageElem, false);
+          }
         }
       });
     }
@@ -266,6 +266,10 @@ class CellTreeNodeView<T> extends UIObject {
 
     public int getDataSize() {
       return impl.getDataSize();
+    }
+
+    public int getDefaultPageSize() {
+      return defaultPageSize;
     }
 
     public int getPageSize() {
@@ -359,11 +363,6 @@ class CellTreeNodeView<T> extends UIObject {
   private NodeListView<?> listView;
 
   /**
-   * The element used when the children are loading.
-   */
-  private Element loadingMessageElem;
-
-  /**
    * The info about children of this node.
    */
   private NodeInfo<?> nodeInfo;
@@ -389,14 +388,9 @@ class CellTreeNodeView<T> extends UIObject {
   private final NodeInfo<T> parentNodeInfo;
 
   /**
-   * The element used to display less children.
-   */
-  private Element showFewerElem;
-
-  /**
    * The element used to display more children.
    */
-  private Element showMoreElem;
+  private AnchorElement showMoreElem;
 
   /**
    * The {@link CellTree} that this node belongs to.
@@ -476,20 +470,23 @@ class CellTreeNodeView<T> extends UIObject {
       if (nodeInfo != null) {
         // Add a loading message.
         ensureChildContainer();
-        showOrHide(loadingMessageElem, true);
-        showOrHide(showFewerElem, false);
         showOrHide(showMoreElem, false);
         showOrHide(emptyMessageElem, false);
+        if (!isRootNode()) {
+          setStyleName(getCellParent(), tree.getStyle().openItem(), true);
+        }
         ensureAnimationFrame().getStyle().setProperty("display", "");
+        updateImage(true);
         onOpen(nodeInfo);
       }
     } else {
+      if (!isRootNode()) {
+        setStyleName(getCellParent(), tree.getStyle().openItem(), false);
+      }
       cleanup();
       tree.maybeAnimateTreeNode(this);
+      updateImage(false);
     }
-
-    // Update the image.
-    updateImage();
   }
 
   /**
@@ -583,32 +580,11 @@ class CellTreeNodeView<T> extends UIObject {
    * @param <C> the child data type of the node
    */
   protected <C> void onOpen(final NodeInfo<C> nodeInfo) {
-    NodeListView<C> view = new NodeListView<C>(nodeInfo, this);
+    NodeListView<C> view = new NodeListView<C>(nodeInfo, this,
+        tree.getDefaultNodeSize());
     listView = view;
     view.setSelectionModel(nodeInfo.getSelectionModel());
     nodeInfo.setView(view);
-  }
-
-  /**
-   * Update the image based on the current state.
-   */
-  protected void updateImage() {
-    // Early out if this is a root node.
-    if (parentNode == null) {
-      return;
-    }
-
-    // Replace the image element with a new one.
-    String html = open ? tree.getOpenImageHtml() : tree.getClosedImageHtml();
-    if (nodeInfoLoaded && nodeInfo == null) {
-      html = LEAF_IMAGE;
-    }
-    Element tmp = Document.get().createDivElement();
-    tmp.setInnerHTML(html);
-    Element imageElem = tmp.getFirstChildElement();
-
-    Element oldImg = getImageElement();
-    oldImg.getParentElement().replaceChild(imageElem, oldImg);
   }
 
   /**
@@ -650,32 +626,21 @@ class CellTreeNodeView<T> extends UIObject {
       contentContainer = Document.get().createDivElement();
       ensureAnimationFrame().appendChild(contentContainer);
 
-      loadingMessageElem = Document.get().createDivElement();
-      loadingMessageElem.setInnerHTML(tree.getLoadingHtml());
-      showOrHide(loadingMessageElem, false);
-      contentContainer.appendChild(loadingMessageElem);
-
       // TODO(jlabanca): I18N no data string.
       emptyMessageElem = Document.get().createDivElement();
-      emptyMessageElem.setInnerHTML("<i>no data</i>");
+      emptyMessageElem.setInnerHTML("no data");
+      setStyleName(emptyMessageElem, tree.getStyle().emptyMessage(), true);
       showOrHide(emptyMessageElem, false);
       contentContainer.appendChild(emptyMessageElem);
 
-      showMoreElem = Document.get().createPushButtonElement();
+      showMoreElem = Document.get().createAnchorElement();
+      showMoreElem.setHref("javascript:;");
       showMoreElem.setInnerText("Show more");
+      setStyleName(showMoreElem, tree.getStyle().showMoreButton(), true);
       showOrHide(showMoreElem, false);
       contentContainer.appendChild(showMoreElem);
-
-      showFewerElem = Document.get().createPushButtonElement();
-      showFewerElem.setInnerText("Show fewer");
-      showOrHide(showFewerElem, false);
-      contentContainer.appendChild(showFewerElem);
     }
     return contentContainer;
-  }
-
-  Element getShowFewerElement() {
-    return showFewerElem;
   }
 
   Element getShowMoreElement() {
@@ -683,12 +648,50 @@ class CellTreeNodeView<T> extends UIObject {
   }
 
   void showFewer() {
-    int maxSize = Math.max(DEFAULT_LIST_SIZE, listView.impl.getPageSize()
-        - DEFAULT_LIST_SIZE);
+    int defaultPageSize = listView.getDefaultPageSize();
+    int maxSize = Math.max(defaultPageSize, listView.impl.getPageSize()
+        - defaultPageSize);
     listView.impl.setPageSize(maxSize);
   }
 
   void showMore() {
-    listView.impl.setPageSize(listView.impl.getPageSize() + DEFAULT_LIST_SIZE);
+    listView.impl.setPageSize(listView.impl.getPageSize()
+        + listView.getDefaultPageSize());
+  }
+
+  /**
+   * Check if this node is a root node.
+   * 
+   * @return true if a root node
+   */
+  private boolean isRootNode() {
+    return parentNode == null;
+  }
+
+  /**
+   * Update the image based on the current state.
+   * 
+   * @param isLoading true if still loading data
+   */
+  private void updateImage(boolean isLoading) {
+    // Early out if this is a root node.
+    if (isRootNode()) {
+      return;
+    }
+
+    // Replace the image element with a new one.
+    String html = tree.getClosedImageHtml();
+    if (open) {
+      html = isLoading ? tree.getLoadingImageHtml() : tree.getOpenImageHtml();
+    }
+    if (nodeInfoLoaded && nodeInfo == null) {
+      html = LEAF_IMAGE;
+    }
+    Element tmp = Document.get().createDivElement();
+    tmp.setInnerHTML(html);
+    Element imageElem = tmp.getFirstChildElement();
+
+    Element oldImg = getImageElement();
+    oldImg.getParentElement().replaceChild(imageElem, oldImg);
   }
 }

@@ -48,7 +48,6 @@ public class Expenses implements EntryPoint {
   };
 
   private ExpensesRequestFactory requestFactory;
-  private String searchCategory;
   private ExpensesShell shell;
 
   public void onModuleLoad() {
@@ -67,17 +66,12 @@ public class Expenses implements EntryPoint {
 
     // Listen for requests from ExpenseTree.
     expenseTree.setListener(new ExpenseTree.Listener() {
-      public void onSelection(String category, EmployeeRecord employee) {
-        if (category != null && !category.equals(searchCategory)) {
-          // TODO(jlabanca): Limit employees using category.
-          requestFactory.employeeRequest().findAllEmployees().forProperties(
-              getEmployeeMenuProperties()).to(expenseTree).fire();
-        }
-        searchCategory = category;
+      public void onSelection(String department, EmployeeRecord employee) {
         expenseList.setEmployee(employee);
         shell.showExpenseDetails(false);
       }
     });
+    expenseTree.setRequestFactory(requestFactory);
 
     // Listen for requests from the ExpenseList.
     expenseList.setListener(new ExpenseList.Listener() {
@@ -95,13 +89,6 @@ public class Expenses implements EntryPoint {
     eventBus.addHandler(ReportRecordChanged.TYPE, expenseList);
 
     eventBus.addHandler(ExpenseRecordChanged.TYPE, expenseDetails);
-  }
-
-  private Collection<Property<?>> getEmployeeMenuProperties() {
-    List<Property<?>> columns = new ArrayList<Property<?>>();
-    columns.add(EmployeeRecord.displayName);
-    columns.add(EmployeeRecord.userName);
-    return columns;
   }
 
   private Collection<Property<?>> getExpenseColumns() {

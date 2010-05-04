@@ -23,6 +23,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Query;
 import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -37,6 +38,17 @@ public class Employee {
     EntityManager em = entityManager();
     try {
       return ((Number) em.createQuery("select count(o) from Employee o").getSingleResult()).longValue();
+    } finally {
+      em.close();
+    }
+  }
+
+  public static long countEmployeesByDepartment(String department) {
+    EntityManager em = entityManager();
+    try {
+      Query query = em.createQuery("select count(o) from Employee o where o.department=:department");
+      query.setParameter("department", department);
+      return ((Number) query.getSingleResult()).longValue();
     } finally {
       em.close();
     }
@@ -86,8 +98,28 @@ public class Employee {
     }
   }
 
+  @SuppressWarnings("unchecked")
+  public static List<Employee> findEmployeeEntriesByDepartment(
+      String department, int firstResult, int maxResults) {
+    EntityManager em = entityManager();
+    try {
+      Query query = em.createQuery("select o from Employee o WHERE o.department =:department");
+      query.setFirstResult(firstResult);
+      query.setMaxResults(maxResults);
+      query.setParameter("department", department);
+      List resultList = query.getResultList();
+      // force it to materialize
+      resultList.size();
+      return resultList;
+    } finally {
+      em.close();
+    }
+  }
+
   @Size(min = 3, max = 30)
   private String userName;
+
+  private String department;
 
   @NotNull
   private String displayName;
@@ -105,6 +137,10 @@ public class Employee {
   @Version
   @Column(name = "version")
   private Integer version;
+
+  public String getDepartment() {
+    return department;
+  }
 
   public String getDisplayName() {
     return this.displayName;
@@ -147,6 +183,10 @@ public class Employee {
     } finally {
       em.close();
     }
+  }
+
+  public void setDepartment(String department) {
+    this.department = department;
   }
 
   public void setDisplayName(String displayName) {

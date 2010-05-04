@@ -18,26 +18,32 @@ package com.google.gwt.sample.expenses.gwt.client;
 import com.google.gwt.bikeshed.cells.client.Cell;
 import com.google.gwt.bikeshed.cells.client.IconCellDecorator;
 import com.google.gwt.bikeshed.cells.client.TextCell;
+import com.google.gwt.bikeshed.list.client.ListView;
+import com.google.gwt.bikeshed.list.shared.AsyncListViewAdapter;
 import com.google.gwt.bikeshed.list.shared.ListViewAdapter;
 import com.google.gwt.bikeshed.list.shared.ProvidesKey;
+import com.google.gwt.bikeshed.list.shared.Range;
 import com.google.gwt.bikeshed.list.shared.SingleSelectionModel;
 import com.google.gwt.bikeshed.list.shared.SelectionModel.SelectionChangeEvent;
 import com.google.gwt.bikeshed.list.shared.SelectionModel.SelectionChangeHandler;
 import com.google.gwt.bikeshed.tree.client.CellTree;
 import com.google.gwt.bikeshed.tree.client.CellTreeViewModel;
+import com.google.gwt.dom.client.Style.Overflow;
 import com.google.gwt.requestfactory.shared.Receiver;
 import com.google.gwt.sample.bikeshed.style.client.Styles;
 import com.google.gwt.sample.expenses.gwt.request.EmployeeRecord;
-import com.google.gwt.sample.expenses.gwt.request.EmployeeRecordChanged;
+import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.valuestore.shared.Property;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
  * The employee tree located on the left of the app.
  */
-public class ExpenseTree extends Composite implements
-    Receiver<List<EmployeeRecord>>, EmployeeRecordChanged.Handler {
+public class ExpenseTree extends Composite {
 
   /**
    * Custom listener for this widget.
@@ -47,10 +53,10 @@ public class ExpenseTree extends Composite implements
     /**
      * Called when the user selects a tree item.
      * 
-     * @param category the selected category name
+     * @param department the selected department name
      * @param employee the selected employee
      */
-    void onSelection(String category, EmployeeRecord employee);
+    void onSelection(String department, EmployeeRecord employee);
   }
 
   /**
@@ -73,14 +79,53 @@ public class ExpenseTree extends Composite implements
   }
 
   /**
+   * The {@link ListViewAdapter} used for Employee lists.
+   */
+  private class EmployeeListViewAdapter extends
+      AsyncListViewAdapter<EmployeeRecord> implements
+      Receiver<List<EmployeeRecord>> {
+
+    private final String department;
+
+    public EmployeeListViewAdapter(String department) {
+      this.department = department;
+    }
+
+    @Override
+    public void addView(ListView<EmployeeRecord> view) {
+      super.addView(view);
+
+      // Request the count anytime a view is added.
+      requestFactory.employeeRequest().countEmployeesByDepartment(department).to(
+          new Receiver<Long>() {
+            public void onSuccess(Long response) {
+              updateDataSize(response.intValue(), true);
+            }
+          }).fire();
+    }
+
+    public void onSuccess(List<EmployeeRecord> response) {
+      updateViewData(0, response.size(), response);
+    }
+
+    @Override
+    protected void onRangeChanged(ListView<EmployeeRecord> view) {
+      Range range = view.getRange();
+      requestFactory.employeeRequest().findEmployeeEntriesByDepartment(
+          department, range.getStart(), range.getLength()).forProperties(
+          getEmployeeMenuProperties()).to(this).fire();
+    }
+  }
+
+  /**
    * The {@link CellTreeViewModel} used to browse expense reports.
    */
   private class ExpensesTreeViewModel implements CellTreeViewModel {
 
     /**
-     * The category cell singleton.
+     * The department cell singleton.
      */
-    private final Cell<String> categoryCell = new IconCellDecorator<String>(
+    private final Cell<String> departmentCell = new IconCellDecorator<String>(
         Styles.resources().groupIcon(), TextCell.getInstance());
 
     /**
@@ -91,11 +136,16 @@ public class ExpenseTree extends Composite implements
     public <T> NodeInfo<?> getNodeInfo(T value) {
       if (value == null) {
         // Top level.
-        return new DefaultNodeInfo<String>(categories, categoryCell,
+        return new DefaultNodeInfo<String>(departments, departmentCell,
             selectionModel, null);
+      } else if (isAllDepartment(value)) {
+        // Employees are not displayed under the 'All' Department.
+        return null;
       } else if (value instanceof String) {
         // Second level.
-        return new DefaultNodeInfo<EmployeeRecord>(employees, employeeCell,
+        EmployeeListViewAdapter adapter = new EmployeeListViewAdapter(
+            (String) value);
+        return new DefaultNodeInfo<EmployeeRecord>(adapter, employeeCell,
             selectionModel, null);
       }
 
@@ -103,31 +153,36 @@ public class ExpenseTree extends Composite implements
     }
 
     public boolean isLeaf(Object value) {
-      return !isCategory(value);
+      return !isDepartment(value) || isAllDepartment(value);
     }
 
-    private boolean isCategory(Object value) {
-      return categories.getList().contains(value.toString());
+    /**
+     * @return true if the object is the All department
+     */
+    private boolean isAllDepartment(Object value) {
+      return departments.getList().get(0).equals(value);
+    }
+
+    /**
+     * @return true if the object is a department
+     */
+    private boolean isDepartment(Object value) {
+      return departments.getList().contains(value.toString());
     }
   }
 
   /**
-   * The adapter that provides categories.
+   * The adapter that provides departments.
    */
-  private ListViewAdapter<String> categories = new ListViewAdapter<String>();
+  private ListViewAdapter<String> departments = new ListViewAdapter<String>();
 
   /**
-   * The adapter that provides employees.
+   * The last selected department.
    */
-  private ListViewAdapter<EmployeeRecord> employees = new ListViewAdapter<EmployeeRecord>();
+  private String lastDepartment;
 
   /**
-   * The last selected category.
-   */
-  private String lastCategory;
-
-  /**
-   * The last selected category.
+   * The last selected employee.
    */
   private EmployeeRecord lastEmployee;
 
@@ -135,6 +190,11 @@ public class ExpenseTree extends Composite implements
    * The listener of this widget.
    */
   private Listener listener;
+
+  /**
+   * The factory used to send requests.
+   */
+  private ExpensesRequestFactory requestFactory;
 
   /**
    * The shared {@link SingleSelectionModel}.
@@ -149,25 +209,25 @@ public class ExpenseTree extends Composite implements
   public ExpenseTree() {
     createTree();
     initWidget(tree);
+    getElement().getStyle().setOverflow(Overflow.AUTO);
 
-    // Initialize the categories.
-    List<String> categoriesList = categories.getList();
-    categoriesList.add("All");
-    categoriesList.add("Sales");
-    categoriesList.add("Marketing");
-    categoriesList.add("Engineering");
-  }
-
-  public void onEmployeeChanged(EmployeeRecordChanged event) {
-    employees.refresh();
-  }
-
-  public void onSuccess(List<EmployeeRecord> response) {
-    employees.setList(response);
+    // Initialize the departments.
+    List<String> departmentList = departments.getList();
+    departmentList.add("All");
+    departmentList.add("Engineering");
+    // The Finance department is empty.
+    departmentList.add("Finance");
+    departmentList.add("Marketing");
+    departmentList.add("Operations");
+    departmentList.add("Sales");
   }
 
   public void setListener(Listener listener) {
     this.listener = listener;
+  }
+
+  public void setRequestFactory(ExpensesRequestFactory factory) {
+    this.requestFactory = factory;
   }
 
   /**
@@ -181,16 +241,16 @@ public class ExpenseTree extends Composite implements
         Object selected = selectionModel.getSelectedObject();
         if (selected == null) {
           lastEmployee = null;
-          lastCategory = null;
+          lastDepartment = null;
         } else if (selected instanceof EmployeeRecord) {
           lastEmployee = (EmployeeRecord) selected;
         } else if (selected instanceof String) {
           lastEmployee = null;
-          lastCategory = (String) selected;
+          lastDepartment = (String) selected;
         }
 
         if (listener != null) {
-          listener.onSelection(lastCategory, lastEmployee);
+          listener.onSelection(lastDepartment, lastEmployee);
         }
       }
     });
@@ -206,5 +266,12 @@ public class ExpenseTree extends Composite implements
     // Create a CellBrowser.
     tree = new CellTree(new ExpensesTreeViewModel(), null);
     tree.setAnimationEnabled(true);
+  }
+
+  private Collection<Property<?>> getEmployeeMenuProperties() {
+    List<Property<?>> columns = new ArrayList<Property<?>>();
+    columns.add(EmployeeRecord.displayName);
+    columns.add(EmployeeRecord.userName);
+    return columns;
   }
 }

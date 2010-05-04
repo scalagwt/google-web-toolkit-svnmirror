@@ -39,9 +39,19 @@ import java.util.ArrayList;
 public class CellTree extends Composite implements HasAnimation {
 
   /**
+   * The default number of children to show under a tree node.
+   */
+  private static final int DEFAULT_LIST_SIZE = 25;
+
+  /**
    * Styles used by this widget.
    */
   public static interface Style extends CssResource {
+
+    /**
+     * Applied to the empty message.
+     */
+    String emptyMessage();
 
     /**
      * Applied to tree items.
@@ -62,6 +72,11 @@ public class CellTree extends Composite implements HasAnimation {
      * Applied to selected tree items.
      */
     String selectedItem();
+
+    /**
+     * Applied to the show more button.
+     */
+    String showMoreButton();
   }
 
   /**
@@ -73,6 +88,11 @@ public class CellTree extends Composite implements HasAnimation {
      * An image indicating a closed branch.
      */
     ImageResource cellTreeClosedItem();
+
+    /**
+     * An image indicating that a node is loading.
+     */
+    ImageResource cellTreeLoading();
 
     /**
      * An image indicating an open branch.
@@ -312,6 +332,11 @@ public class CellTree extends Composite implements HasAnimation {
   private final String closedImageHtml;
 
   /**
+   * The default number of children to display under each node.
+   */
+  private int defaultNodeSize = DEFAULT_LIST_SIZE;
+
+  /**
    * The maximum width of the open and closed images.
    */
   private final int imageWidth;
@@ -322,10 +347,9 @@ public class CellTree extends Composite implements HasAnimation {
   private boolean isAnimationEnabled;
 
   /**
-   * The message displayed while child nodes are loading.
+   * The HTML used to generate the loading image.
    */
-  // TODO(jlabanca): I18N loading HTML, or remove the text.
-  private String loadingHtml = "Loading...";
+  private final String loadingImageHtml;
 
   /**
    * The HTML used to generate the open image.
@@ -377,9 +401,12 @@ public class CellTree extends Composite implements HasAnimation {
     // Initialize the open and close images strings.
     ImageResource treeOpen = resources.cellTreeOpenItem();
     ImageResource treeClosed = resources.cellTreeClosedItem();
+    ImageResource treeLoading = resources.cellTreeLoading();
     openImageHtml = getImageHtml(treeOpen);
     closedImageHtml = getImageHtml(treeClosed);
-    imageWidth = Math.max(treeOpen.getWidth(), treeClosed.getWidth());
+    loadingImageHtml = getImageHtml(treeLoading);
+    imageWidth = Math.max(Math.max(treeOpen.getWidth(), treeClosed.getWidth()),
+        treeLoading.getWidth());
 
     // We use one animation for the entire tree.
     setAnimation(SlideAnimation.create());
@@ -406,13 +433,12 @@ public class CellTree extends Composite implements HasAnimation {
   }
 
   /**
-   * Get the HTML string that is displayed while nodes wait for their children
-   * to load.
+   * Get the default maximum number of children to display under each tree node.
    * 
-   * @return the loading HTML string
+   * @return the default node size
    */
-  public String getLoadingHtml() {
-    return loadingHtml;
+  public int getDefaultNodeSize() {
+    return defaultNodeSize;
   }
 
   public CellTreeViewModel getTreeViewModel() {
@@ -436,13 +462,9 @@ public class CellTree extends Composite implements HasAnimation {
     if (nodeView != null && nodeView != rootNode) {
       if ("click".equals(event.getType())) {
         // Open the node when the open image is clicked.
-        Element showFewerElem = nodeView.getShowFewerElement();
         Element showMoreElem = nodeView.getShowMoreElement();
         if (nodeView.getImageElement().isOrHasChild(target)) {
           nodeView.setOpen(!nodeView.isOpen());
-          return;
-        } else if (showFewerElem != null && showFewerElem.isOrHasChild(target)) {
-          nodeView.showFewer();
           return;
         } else if (showMoreElem != null && showMoreElem.isOrHasChild(target)) {
           nodeView.showMore();
@@ -480,13 +502,15 @@ public class CellTree extends Composite implements HasAnimation {
   }
 
   /**
-   * Set the HTML string that will be displayed when a node is waiting for its
-   * child nodes to load.
+   * Set the default number of children to display beneath each child node. If
+   * more nodes are available, a button will appear at the end of the list
+   * allowing the user to show more items. Changing this value will not affect
+   * tree nodes that are already open.
    * 
-   * @param loadingHtml the HTML string
+   * @param defaultNodeSize the max
    */
-  public void setLoadingHtml(String loadingHtml) {
-    this.loadingHtml = loadingHtml;
+  public void setDefaultNodeSize(int defaultNodeSize) {
+    this.defaultNodeSize = defaultNodeSize;
   }
 
   /**
@@ -503,6 +527,13 @@ public class CellTree extends Composite implements HasAnimation {
    */
   int getImageWidth() {
     return imageWidth;
+  }
+
+  /**
+   * @return the HTML to render the loading image.
+   */
+  String getLoadingImageHtml() {
+    return loadingImageHtml;
   }
 
   /**

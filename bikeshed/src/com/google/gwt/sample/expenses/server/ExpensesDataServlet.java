@@ -32,121 +32,108 @@ public class ExpensesDataServlet extends RequestFactoryServlet {
 
   // Must be in sync with DESCRIPTIONS
   private static final String[] CATEGORIES = {
-    "Dining", "Dining", "Dining",
-    "Lodging", "Lodging",
-    "Local Transportation", "Local Transportation", "Local Transportation",
-    "Air Travel", "Air Travel",
-    "Office Supplies", "Office Supplies", "Office Supplies", "Office Supplies",
-  };
+      "Dining", "Dining", "Dining", "Lodging", "Lodging",
+      "Local Transportation", "Local Transportation", "Local Transportation",
+      "Air Travel", "Air Travel", "Office Supplies", "Office Supplies",
+      "Office Supplies", "Office Supplies",};
+
+  private static final String[] DEPARTMENTS = {
+      "Sales", "Marketing", "Engineering", "Operations"};
 
   // Must be in sync with CATEGORIES
   private static final String[] DESCRIPTIONS = {
-    "Breakfast", "Lunch", "Dinner",
-    "Hotel", "Bed & Breakfast",
-    "Train fare", "Taxi fare", "Bus ticket",
-    "Flight from ATL to SFO", "Flight from SFO to ATL",
-    "Paperclips", "Stapler", "Scissors", "Paste",
-  };
-  
+      "Breakfast", "Lunch", "Dinner", "Hotel", "Bed & Breakfast", "Train fare",
+      "Taxi fare", "Bus ticket", "Flight from ATL to SFO",
+      "Flight from SFO to ATL", "Paperclips", "Stapler", "Scissors", "Paste",};
+
+  private static final String[] FIRST_NAMES = {
+      "Amy", "Bob", "Catherine", "Dave", "Earl", "Flin", "George", "Harriot",
+      "Ingrid", "John", "Katy", "Leo", "Mike", "Nancy", "Owen", "Paul",
+      "Reece", "Sally", "Terry", "Val", "Wes", "Xavier", "Zack"};
+
+  private static final String[] LAST_NAMES = {
+      "Awesome", "Bravo", "Cool", "Fantastic", "Great", "Happy",
+      "Ignoranomous", "Krazy", "Luminous", "Magnanimous", "Outstanding",
+      "Perfect", "Radical", "Stellar", "Terrific", "Wonderful"};
+
   private static final String[] NOTES = {
-    "Need approval by Monday", "Show me the money",
-    "Please bill to the Widgets project",
-    "High priority",
-    "Review A.S.A.P."
-  };
+      // Some entries do not have notes.
+      "", "Need approval by Monday", "Show me the money",
+      "Please bill to the Widgets project", "High priority", "Review A.S.A.P."};
+
+  private static final String[] PURPOSES = {
+      "Spending lots of money", "Team building diamond cutting offsite",
+      "Visit to Istanbul", "ISDN modem for telecommuting", "Sushi offsite",
+      "Baseball card research", "Potato chip cooking offsite",
+      "Money laundering", "Donut day"};
 
   Random rand = new Random();
-  
+
   @Override
   protected void initDb() {
     long size = Employee.countEmployees();
     if (size > 1) {
       return;
     }
-    // initialize
-    Employee abc = new Employee();
-    abc.setUserName("abc");
-    abc.setDisplayName("Able B. Charlie");
-    abc.persist();
 
-    Employee def = new Employee();
-    def.setUserName("def");
-    def.setDisplayName("Delta E. Foxtrot");
-    def.setSupervisorKey(abc.getId());
-    def.persist();
-
-    Employee ghi = new Employee();
-    ghi.setUserName("ghi");
-    ghi.setDisplayName("George H. Indigo");
-    ghi.setSupervisorKey(abc.getId());
-    ghi.persist();
-
-    for (String purpose : new String[] {
-        "Spending lots of money", "Team building diamond cutting offsite",
-        "Visit to Istanbul"}) {
-      Report report = new Report();
-      report.setReporterKey(abc.getId());
-      report.setCreated(getDate());
-      report.setPurpose(purpose);
-      report.setNotes(getNote());
-      report.persist();
-      
-      addExpenses(report.getId());
-    }
-
-    for (String purpose : new String[] {"Money laundering", "Donut day"}) {
-      Report report = new Report();
-      report.setCreated(getDate());
-      report.setReporterKey(def.getId());
-      report.setPurpose(purpose);
-      report.setNotes(getNote());
-      report.persist();
-      
-      addExpenses(report.getId());
-    }
-
-    for (String purpose : new String[] {
-        "ISDN modem for telecommuting", "Sushi offsite",
-        "Baseball card research", "Potato chip cooking offsite"}) {
-      Report report = new Report();
-      report.setCreated(getDate());
-      report.setReporterKey(ghi.getId());
-      report.setPurpose(purpose);
-      report.setNotes(getNote());
-      report.persist();
-      
-      addExpenses(report.getId());
-    }
-
-    for (int i = 0; i < 1000; i++) {
-      Report report = new Report();
-      report.setCreated(getDate());
-      report.setReporterKey(ghi.getId());
-      report.setPurpose("Report " + i);
-      report.setNotes(getNote());
-      report.persist();
-
-      addExpenses(report.getId());
+    // Initialize the database.
+    for (int i = 0; i < 100; i++) {
+      addEmployee();
     }
   }
-  
+
+  /**
+   * Add a randomly generated employee.
+   */
+  private void addEmployee() {
+    Employee abc = new Employee();
+    String firstName = nextValue(FIRST_NAMES);
+    String lastName = nextValue(LAST_NAMES);
+    String username = (firstName.charAt(0) + lastName).toLowerCase();
+    abc.setUserName(username);
+    abc.setDisplayName(firstName + " " + lastName);
+    abc.setDepartment(nextValue(DEPARTMENTS));
+    abc.persist();
+
+    addReports(abc.getId());
+  }
+
   private void addExpenses(Long reportId) {
     int num = rand.nextInt(5) + 1;
     for (int i = 0; i < num; i++) {
-      String[] descCat = getDescriptionAndCategory();
-
+      int index = rand.nextInt(DESCRIPTIONS.length);
       Expense detail = new Expense();
       detail.setReportId(reportId);
-      detail.setDescription(descCat[0]);
+      detail.setDescription(DESCRIPTIONS[index]);
       detail.setDate(getDate());
       detail.setAmount(rand.nextInt(25000) / 100.0);
-      detail.setCategory(descCat[1]);
+      detail.setCategory(CATEGORIES[index]);
       detail.setApproval("");
       detail.setReasonDenied("");
       detail.persist();
     }
   }
-  
+
+  /**
+   * Add a randomly generated report.
+   * 
+   * @param employeeId the id of the employee who created the report
+   */
+  private void addReports(Long employeeId) {
+    // Add 1-20 expense reports.
+    int reportCount = 1 + rand.nextInt(20);
+    for (int i = 0; i < reportCount; i++) {
+      Report report = new Report();
+      report.setCreated(getDate());
+      report.setReporterKey(employeeId);
+      report.setPurpose(nextValue(PURPOSES));
+      report.setNotes(nextValue(NOTES));
+      report.persist();
+
+      addExpenses(report.getId());
+    }
+  }
+
   private Date getDate() {
     long now = new Date().getTime();
     // Go back up to 90 days from the current date
@@ -154,15 +141,13 @@ public class ExpensesDataServlet extends RequestFactoryServlet {
     return new Date(now - dateOffset);
   }
 
-  private String[] getDescriptionAndCategory() {
-    String[] dc = new String[2];
-    int index = rand.nextInt(DESCRIPTIONS.length);
-    dc[0] = DESCRIPTIONS[index];
-    dc[1] = CATEGORIES[index];
-    return dc;
-  }
-  
-  private String getNote() {
-    return NOTES[rand.nextInt(NOTES.length)];
+  /**
+   * Get the next random value from an array.
+   * 
+   * @param array the array
+   * @return a random value from the array
+   */
+  private String nextValue(String[] array) {
+    return array[rand.nextInt(array.length)];
   }
 }
