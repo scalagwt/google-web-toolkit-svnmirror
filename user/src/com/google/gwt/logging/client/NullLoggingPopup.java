@@ -27,18 +27,14 @@ import java.util.Iterator;
  */
 public class NullLoggingPopup implements HasWidgets {
 
-  @Override
   public void add(Widget w) { }
 
-  @Override
   public void clear() { }
 
-  @Override
   public Iterator<Widget> iterator() {
     return null;
   }
 
-  @Override
   public boolean remove(Widget w) {
     return false;
   }

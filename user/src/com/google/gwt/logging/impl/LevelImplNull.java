@@ -24,65 +24,52 @@ import java.util.logging.Level;
  */
 public class LevelImplNull implements LevelImpl {
 
-  @Override
   public Level all() {
     return null;
   }
 
-  @Override
   public Level config() {
     return null;
   }
 
-  @Override
   public Level fine() {
     return null;
   }
 
-  @Override
   public Level finer() {
     return null;
   }
 
-  @Override
   public Level finest() {
     return null;
   }
 
-  @Override
   public String getName() {
     return null;
   }
 
-  @Override
   public Level info() {
     return null;
   }
 
-  @Override
   public int intValue() {
     return 0;
   }
 
-  @Override
   public Level off() {
     return null;
   }
 
-  @Override
   public void setName(String newName) {
   }
 
-  @Override
   public void setValue(int newValue) {
   }
 
-  @Override
   public Level severe() {
     return null;
   }
 
-  @Override
   public Level warning() {
     return null;
   }

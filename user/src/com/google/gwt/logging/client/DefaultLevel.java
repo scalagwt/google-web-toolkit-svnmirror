@@ -24,11 +24,11 @@ import java.util.logging.Level;
  * gwt.xml file.
  */
 public interface DefaultLevel {
-  /** 
+  /**
    * Returns Level.ALL as the default level
    */
   public class All implements DefaultLevel {
-    @Override public Level getLevel() {
+    public Level getLevel() {
       return Level.ALL;
     }
   }
@@ -37,16 +37,16 @@ public interface DefaultLevel {
    * Returns Level.CONFIG as the default level
    */
   public class Config implements DefaultLevel {
-    @Override public Level getLevel() {
+    public Level getLevel() {
       return Level.CONFIG;
     }
   }
-  
+
   /**
    * Returns Level.FINE as the default level
    */
   public class Fine implements DefaultLevel {
-    @Override public Level getLevel() {
+    public Level getLevel() {
       return Level.FINE;
     }
   }
@@ -55,7 +55,7 @@ public interface DefaultLevel {
    * Returns Level.FINER as the default level
    */
   public class Finer implements DefaultLevel {
-    @Override public Level getLevel() {
+    public Level getLevel() {
       return Level.FINER;
     }
   }
@@ -64,7 +64,7 @@ public interface DefaultLevel {
    * Returns Level.FINEST as the default level
    */
   public class Finest implements DefaultLevel {
-    @Override public Level getLevel() {
+    public Level getLevel() {
       return Level.FINEST;
     }
   }
@@ -73,7 +73,7 @@ public interface DefaultLevel {
    * Returns Level.INFO as the default level
    */
   public class Info implements DefaultLevel {
-    @Override public Level getLevel() {
+    public Level getLevel() {
       return Level.INFO;
     }
   }
@@ -82,7 +82,7 @@ public interface DefaultLevel {
    * Returns Level.SEVERE as the default level
    */
   public class Severe implements DefaultLevel {
-    @Override public Level getLevel() {
+    public Level getLevel() {
       return Level.SEVERE;
     }
   }
@@ -91,7 +91,7 @@ public interface DefaultLevel {
    * Returns Level.WARNING as the default level
    */
   public class Warning implements DefaultLevel {
-    @Override public Level getLevel() {
+    public Level getLevel() {
       return Level.WARNING;
     }
   }

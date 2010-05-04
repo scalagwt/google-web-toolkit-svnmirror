@@ -58,27 +58,22 @@ public class LevelImplRegular implements LevelImpl {
 
   public LevelImplRegular() { }
   
-  @Override
   public Level all() {
     return LevelImplRegular.ALL;
   }
   
-  @Override
   public Level config() {
     return LevelImplRegular.CONFIG;
   }
     
-  @Override
   public Level fine() {
     return LevelImplRegular.FINE;
   }
   
-  @Override
   public Level finer() {
     return LevelImplRegular.FINER;
   }
   
-  @Override
   public Level finest() {
     return LevelImplRegular.FINEST;
   }
@@ -87,7 +82,6 @@ public class LevelImplRegular implements LevelImpl {
     return name;
   }
 
-  @Override
   public Level info() {
     return LevelImplRegular.INFO;
   }
@@ -96,7 +90,6 @@ public class LevelImplRegular implements LevelImpl {
     return value;
   }
 
-  @Override
   public Level off() {
     return LevelImplRegular.OFF;
   }
@@ -109,17 +102,14 @@ public class LevelImplRegular implements LevelImpl {
     value = newValue;
   }
 
-  @Override
   public Level severe() {
     return LevelImplRegular.SEVERE;
   }
 
-  @Override
   public String toString() {
     return getName();
   }
 
-  @Override
   public Level warning() {
     return LevelImplRegular.WARNING;
   }
