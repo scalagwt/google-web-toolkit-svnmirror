@@ -30,6 +30,12 @@ import java.util.Date;
 @ServerType(type = com.google.gwt.sample.expenses.server.domain.Expense.class)
 public interface ExpenseRecord extends Record {
 
+  /**
+   * Used as input to {@link com.google.gwt.valuestore.shared.DeltaValueStore#create(Record)
+   * DeltaValueStore#create()} and in the wire format during sync requests.
+   */
+  String TOKEN = "ExpenseRecord";
+
   Property<Double> amount = new Property<Double>("amount", Double.class);
   Property<String> approval = new Property<String>("approval", String.class);
   Property<String> category = new Property<String>("category", String.class);

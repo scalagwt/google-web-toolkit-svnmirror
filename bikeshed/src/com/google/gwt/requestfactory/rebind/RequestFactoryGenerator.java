@@ -37,7 +37,6 @@ import com.google.gwt.requestfactory.client.impl.RequestFactoryJsonImpl;
 import com.google.gwt.requestfactory.shared.RecordListRequest;
 import com.google.gwt.requestfactory.shared.RecordRequest;
 import com.google.gwt.requestfactory.shared.ServerOperation;
-import com.google.gwt.requestfactory.shared.ServerType;
 import com.google.gwt.requestfactory.shared.RequestFactory.WriteOperation;
 import com.google.gwt.requestfactory.shared.impl.RequestDataManager;
 import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
@@ -167,7 +166,7 @@ public class RequestFactoryGenerator extends Generator {
       sw.println();
 
       JClassType propertyType = printSchema(typeOracle, publicRecordType,
-          recordImplTypeName, eventType, sw);
+          recordImplTypeName, eventType, sw, logger);
 
       sw.println();
       String simpleImplName = publicRecordType.getSimpleSourceName() + "Impl";
@@ -483,10 +482,11 @@ public class RequestFactoryGenerator extends Generator {
    * @param eventType
    * @param sw
    * @return
+   * @throws UnableToCompleteException
    */
   private JClassType printSchema(TypeOracle typeOracle,
       JClassType publicRecordType, String recordImplTypeName,
-      JClassType eventType, SourceWriter sw) {
+      JClassType eventType, SourceWriter sw, TreeLogger logger) throws UnableToCompleteException {
     sw.println(String.format(
         "public static class MySchema extends RecordSchema<%s> {",
         recordImplTypeName));
@@ -546,17 +546,27 @@ public class RequestFactoryGenerator extends Generator {
     sw.println();
     sw.println("public String getToken() {");
     sw.indent();
-    ServerType serverType = publicRecordType.getAnnotation(ServerType.class);
-    String token = serverType.token();
-    if ("[UNASSIGNED]".equals(token)) {
-      token = publicRecordType.getName();
-    }
-    sw.println("return \"" + token + "\";");
+    String fieldName = "TOKEN";
+    validateTokenField(publicRecordType, fieldName, typeOracle, logger);
+    sw.println("return " + publicRecordType.getName() + "." + fieldName
+        + "; // special field");
     sw.outdent();
     sw.println("}");
 
     sw.outdent();
     sw.println("}");
     return propertyType;
+  }
+
+  private void validateTokenField(JClassType publicRecordType,
+      String fieldName, TypeOracle typeOracle, TreeLogger logger)
+      throws UnableToCompleteException {
+    JField field = publicRecordType.getField(fieldName);
+    if (field == null
+        || field.getType() != typeOracle.findType("java.lang.String")) {
+      logger.log(TreeLogger.ERROR, "The field " + fieldName
+          + " of type String must be defined on " + publicRecordType.getName());
+      throw new UnableToCompleteException();
+    }
   }
 }

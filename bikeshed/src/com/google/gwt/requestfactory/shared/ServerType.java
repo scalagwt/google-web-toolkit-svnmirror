@@ -21,16 +21,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation on Record classes specifying 'type' and 'token'. 'type' represents
- * the server-side counterpart of the Record. 'token' is an optional String that
- * is sent in sync requests to the server. server and their type. If 'token' is
- * absent, the record name is used instead.
+ * Annotation on Record classes specifying 'type'. 'type' represents the
+ * server-side counterpart of the Record.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface ServerType {
-
-  String token() default "[UNASSIGNED]";
 
   Class<?> type();
 }

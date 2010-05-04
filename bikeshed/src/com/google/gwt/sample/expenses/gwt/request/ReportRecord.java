@@ -30,6 +30,12 @@ import java.util.Date;
 @ServerType(type = com.google.gwt.sample.expenses.server.domain.Report.class)
 public interface ReportRecord extends Record {
 
+  /**
+   * Used as input to {@link com.google.gwt.valuestore.shared.DeltaValueStore#create(Record)
+   * DeltaValueStore#create()} and in the wire format during sync requests.
+   */
+  String TOKEN = "ReportRecord";
+
   Property<String> approvedSupervisorKey = new Property<String>("approvedSupervisorKey",
       String.class);
   Property<Date> created = new Property<Date>("created", Date.class);

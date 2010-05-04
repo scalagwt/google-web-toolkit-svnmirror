@@ -280,9 +280,18 @@ public class RequestFactoryServlet extends HttpServlet {
             tokenToEntityRecord = new HashMap<String, EntityRecordPair>();
             for (Class<? extends Record> recordClass : config.recordTypes()) {
               ServerType serverType = recordClass.getAnnotation(ServerType.class);
-              String token = serverType.token();
-              if ("[UNASSIGNED]".equals(token)) {
-                token = recordClass.getSimpleName();
+              String token = (String) recordClass.getField("TOKEN").get(null);
+              if (token == null) {
+                throw new IllegalStateException("TOKEN field on "
+                    + recordClass.getName() + " can not be null");
+              }
+              EntityRecordPair previousValue = tokenToEntityRecord.get(token);
+              if (previousValue != null) {
+                throw new IllegalStateException(
+                    "TOKEN fields have to be unique. TOKEN fields for both "
+                        + recordClass.getName() + " and "
+                        + previousValue.record.getName()
+                        + " have the same value, value = " + token);
               }
               tokenToEntityRecord.put(token, new EntityRecordPair(
                   serverType.type(), recordClass));
@@ -298,6 +307,8 @@ public class RequestFactoryServlet extends HttpServlet {
         } catch (SecurityException e) {
           failConfig(e);
         } catch (ClassCastException e) {
+          failConfig(e);
+        } catch (NoSuchFieldException e) {
           failConfig(e);
         }
       }

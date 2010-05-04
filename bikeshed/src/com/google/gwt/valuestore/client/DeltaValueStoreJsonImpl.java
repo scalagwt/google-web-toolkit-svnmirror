@@ -248,13 +248,11 @@ public class DeltaValueStoreJsonImpl implements DeltaValueStore {
     return syncResults;
   }
 
-  // TODO: don't use RecordSchema
-  public Record create(Record record) {
+  public Record create(String token) {
     assert !used;
-    assert record instanceof RecordImpl;
-    RecordImpl recordImpl = (RecordImpl) record;
     String futureId = futureIdGenerator.getFutureId();
-    RecordJsoImpl newRecord = RecordJsoImpl.newCopy(recordImpl.getSchema(),
+    // TODO: get schema from token
+    RecordJsoImpl newRecord = RecordJsoImpl.newCopy(null,
         futureId, INITIAL_VERSION);
     RecordKey recordKey = new RecordKey(newRecord);
     assert operations.get(recordKey) == null;
