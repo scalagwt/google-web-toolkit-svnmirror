@@ -111,17 +111,17 @@ public class ActivityManagerTest extends TestCase {
   private ActivityManager<MyPlace> manager = new ActivityManager<MyPlace>(
       myMap, eventBus);
 
-  public void testCancel() {
-    final AsyncActivity activity1 = new AsyncActivity(new MyView());
-    final AsyncActivity activity2 = new AsyncActivity(new MyView());
+  public void testAsyncDispatch() {
+    final AsyncActivity asyncActivity1 = new AsyncActivity(new MyView());
+    final AsyncActivity asyncActivity2 = new AsyncActivity(new MyView());
 
     ActivityMapper<MyPlace> map = new ActivityMapper<MyPlace>() {
       public Activity getActivity(MyPlace place) {
         if (place.equals(place1)) {
-          return activity1;
+          return asyncActivity1;
         }
         if (place.equals(place2)) {
-          return activity2;
+          return asyncActivity2;
         }
 
         return null;
@@ -136,49 +136,54 @@ public class ActivityManagerTest extends TestCase {
     eventBus.fireEvent(event);
     assertFalse(event.isRejected());
     assertNull(realDisplay.widget);
-    assertFalse(activity1.stopped);
-    assertFalse(activity1.canceled);
-    assertNull(activity1.display);
+    assertFalse(asyncActivity1.stopped);
+    assertFalse(asyncActivity1.canceled);
+    assertNull(asyncActivity1.display);
 
     eventBus.fireEvent(new PlaceChangeEvent<Place>(place1));
     assertNull(realDisplay.widget);
-    assertFalse(activity1.stopped);
-    assertFalse(activity1.canceled);
-    assertNotNull(activity1.display);
+    assertFalse(asyncActivity1.stopped);
+    assertFalse(asyncActivity1.canceled);
+    assertNotNull(asyncActivity1.display);
+
+    asyncActivity1.finish();
+    assertEquals(asyncActivity1.view, realDisplay.widget);
+    assertFalse(asyncActivity1.stopped);
+    assertFalse(asyncActivity1.canceled);
 
     event = new PlaceChangeRequestedEvent<MyPlace>(place2);
     eventBus.fireEvent(event);
     assertFalse(event.isRejected());
-    assertNull(realDisplay.widget);
-    assertFalse(activity1.stopped);
-    assertFalse(activity1.canceled);
+    assertEquals(asyncActivity1.view, realDisplay.widget);
+    assertFalse(asyncActivity1.stopped);
+    assertFalse(asyncActivity1.canceled);
+    assertFalse(asyncActivity2.stopped);
+    assertFalse(asyncActivity2.canceled);
+    assertNull(asyncActivity2.display);
 
     eventBus.fireEvent(new PlaceChangeEvent<Place>(place2));
     assertNull(realDisplay.widget);
-    assertTrue(activity1.canceled);
-    assertFalse(activity1.stopped);
-    assertFalse(activity2.stopped);
-    assertFalse(activity2.canceled);
-    assertNotNull(activity2.display);
+    assertFalse(asyncActivity1.canceled);
+    assertTrue(asyncActivity1.stopped);
+    assertFalse(asyncActivity2.stopped);
+    assertFalse(asyncActivity2.canceled);
+    assertNotNull(asyncActivity2.display);
 
-    activity2.finish();
-    assertEquals(activity2.view, realDisplay.widget);
-    
-    activity1.finish();
-    assertEquals(activity2.view, realDisplay.widget);
+    asyncActivity2.finish();
+    assertEquals(asyncActivity2.view, realDisplay.widget);
   }
 
-  public void testAsyncDispatch() {
-    final AsyncActivity activity1 = new AsyncActivity(new MyView());
-    final AsyncActivity activity2 = new AsyncActivity(new MyView());
+  public void testCancel() {
+    final AsyncActivity asyncActivity1 = new AsyncActivity(new MyView());
+    final AsyncActivity ayncActivity2 = new AsyncActivity(new MyView());
 
     ActivityMapper<MyPlace> map = new ActivityMapper<MyPlace>() {
       public Activity getActivity(MyPlace place) {
         if (place.equals(place1)) {
-          return activity1;
+          return asyncActivity1;
         }
         if (place.equals(place2)) {
-          return activity2;
+          return ayncActivity2;
         }
 
         return null;
@@ -193,41 +198,36 @@ public class ActivityManagerTest extends TestCase {
     eventBus.fireEvent(event);
     assertFalse(event.isRejected());
     assertNull(realDisplay.widget);
-    assertFalse(activity1.stopped);
-    assertFalse(activity1.canceled);
-    assertNull(activity1.display);
+    assertFalse(asyncActivity1.stopped);
+    assertFalse(asyncActivity1.canceled);
+    assertNull(asyncActivity1.display);
 
     eventBus.fireEvent(new PlaceChangeEvent<Place>(place1));
     assertNull(realDisplay.widget);
-    assertFalse(activity1.stopped);
-    assertFalse(activity1.canceled);
-    assertNotNull(activity1.display);
-
-    activity1.finish();
-    assertEquals(activity1.view, realDisplay.widget);
-    assertFalse(activity1.stopped);
-    assertFalse(activity1.canceled);
+    assertFalse(asyncActivity1.stopped);
+    assertFalse(asyncActivity1.canceled);
+    assertNotNull(asyncActivity1.display);
 
     event = new PlaceChangeRequestedEvent<MyPlace>(place2);
     eventBus.fireEvent(event);
     assertFalse(event.isRejected());
-    assertEquals(activity1.view, realDisplay.widget);
-    assertFalse(activity1.stopped);
-    assertFalse(activity1.canceled);
-    assertFalse(activity2.stopped);
-    assertFalse(activity2.canceled);
-    assertNull(activity2.display);
+    assertNull(realDisplay.widget);
+    assertFalse(asyncActivity1.stopped);
+    assertFalse(asyncActivity1.canceled);
 
     eventBus.fireEvent(new PlaceChangeEvent<Place>(place2));
     assertNull(realDisplay.widget);
-    assertFalse(activity1.canceled);
-    assertTrue(activity1.stopped);
-    assertFalse(activity2.stopped);
-    assertFalse(activity2.canceled);
-    assertNotNull(activity2.display);
+    assertTrue(asyncActivity1.canceled);
+    assertFalse(asyncActivity1.stopped);
+    assertFalse(ayncActivity2.stopped);
+    assertFalse(ayncActivity2.canceled);
+    assertNotNull(ayncActivity2.display);
 
-    activity2.finish();
-    assertEquals(activity2.view, realDisplay.widget);
+    ayncActivity2.finish();
+    assertEquals(ayncActivity2.view, realDisplay.widget);
+
+    asyncActivity1.finish();
+    assertEquals(ayncActivity2.view, realDisplay.widget);
   }
 
   public void testEventSetupAndTeardown() {
