@@ -43,6 +43,7 @@ public abstract class AbstractRequest<T, R extends AbstractRequest<T, R>>
   }
 
   public void fire() {
+    assert null != receiver : "to(Receiver) was not called";
     requestFactory.fire(this);
   }
 
