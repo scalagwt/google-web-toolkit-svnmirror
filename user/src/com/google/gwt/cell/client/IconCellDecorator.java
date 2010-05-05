@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.gwt.bikeshed.cells.client;
+package com.google.gwt.cell.client;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
@@ -22,11 +22,15 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment.VerticalAlignmentConstant;
 
 /**
- * A {@link Cell} decorator that adds an icon to another Cell.
+ * A {@link Cell} decorator that adds an icon to another {@link Cell}.
+ * 
+ * <p>
+ * Note: This class is new and its interface subject to change.
+ * </p>
  * 
  * @param <C> the type that this Cell represents
  */
-public class IconCellDecorator<C> extends Cell<C> {
+public class IconCellDecorator<C> extends AbstractCell<C> {
 
   private final Cell<C> cell;
   private final String iconHtml;

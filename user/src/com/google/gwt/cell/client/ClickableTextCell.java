@@ -13,16 +13,20 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.gwt.bikeshed.cells.client;
+package com.google.gwt.cell.client;
 
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.dom.client.NativeEvent;
 
 /**
- * A {@link Cell} used to render a text input.
+ * A {@link Cell} used to render text. Clicking on the call causes its
+ * {@link ValueUpdater} to be called.
+ * 
+ * <p>
+ * Note: This class is new and its interface subject to change.
+ * </p>
  */
-public class TextInputCell extends Cell<String> {
+public class ClickableTextCell extends AbstractCell<String> {
 
   @Override
   public boolean consumesEvents() {
@@ -32,20 +36,17 @@ public class TextInputCell extends Cell<String> {
   @Override
   public Object onBrowserEvent(Element parent, String value, Object viewData,
       NativeEvent event, ValueUpdater<String> valueUpdater) {
-    if (valueUpdater != null && "change".equals(event.getType())) {
-      InputElement input = parent.getFirstChild().cast();
-      valueUpdater.update(input.getValue());
+    String type = event.getType();
+    if (type.equals("click")) {
+      valueUpdater.update(value);
     }
-
-    return viewData;
+    return null;
   }
 
   @Override
-  public void render(String data, Object viewData, StringBuilder sb) {
-    sb.append("<input type='text'");
-    if (data != null) {
-      sb.append(" value='" + data + "'");
+  public void render(String value, Object viewData, StringBuilder sb) {
+    if (value != null) {
+      sb.append(value);
     }
-    sb.append("></input>");
   }
 }

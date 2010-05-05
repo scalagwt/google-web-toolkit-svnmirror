@@ -15,12 +15,12 @@
  */
 package com.google.gwt.sample.expenses.gwt.client;
 
-import com.google.gwt.bikeshed.cells.client.Cell;
 import com.google.gwt.bikeshed.list.client.CellList;
 import com.google.gwt.bikeshed.list.shared.ListViewAdapter;
 import com.google.gwt.bikeshed.list.shared.SelectionModel;
 import com.google.gwt.bikeshed.list.shared.SingleSelectionModel;
 import com.google.gwt.bikeshed.list.shared.SelectionModel.SelectionChangeEvent;
+import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.requestfactory.shared.Receiver;
 import com.google.gwt.sample.expenses.gwt.request.ExpenseRecord;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
@@ -56,12 +56,13 @@ public class MobileExpenseList extends Composite implements
     expenseAdapter = new ListViewAdapter<ExpenseRecord>();
 
     expenseList = new CellList<ExpenseRecord>(
-        new Cell<ExpenseRecord>() {
+        new AbstractCell<ExpenseRecord>() {
           @Override
           public void render(ExpenseRecord value, Object viewData,
               StringBuilder sb) {
-            sb.append(value.getDescription() + " " +
-                ExpensesMobile.formatCurrency(value.getAmount().intValue()));
+            sb.append("<div onclick='' class='item'>" + value.getDescription() + " " +
+                ExpensesMobile.formatCurrency(value.getAmount().intValue())
+                + "</div>");
           }
         });
 

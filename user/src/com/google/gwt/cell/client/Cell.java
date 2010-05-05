@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.gwt.bikeshed.cells.client;
+package com.google.gwt.cell.client;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
@@ -21,26 +21,26 @@ import com.google.gwt.dom.client.NativeEvent;
 /**
  * A light weight representation of a renderable object.
  * 
+ * <p>
+ * Note: This class is new and its interface subject to change.
+ * </p>
+ * 
  * @param <C> the type that this Cell represents
  */
-public abstract class Cell<C> {
+public interface Cell<C> {
 
   /**
    * Returns true if the cell is interested in browser events. The default
    * implementation returns false.
    */
-  public boolean consumesEvents() {
-    return false;
-  }
+  public abstract boolean consumesEvents();
 
   /**
    * Check if this cell depends on the selection state.
    * 
    * @return true if dependant on selection, false if not
    */
-  public boolean dependsOnSelection() {
-    return false;
-  }
+  public abstract boolean dependsOnSelection();
 
   /**
    * Handle a browser event that took place within the cell. The default
@@ -53,10 +53,8 @@ public abstract class Cell<C> {
    * @param valueUpdater a {@link ValueUpdater}, or null
    * @return a view data object which may be the one passed in or a new object
    */
-  public Object onBrowserEvent(Element parent, C value, Object viewData,
-      NativeEvent event, ValueUpdater<C> valueUpdater) {
-    return null;
-  }
+  public abstract Object onBrowserEvent(Element parent, C value,
+      Object viewData, NativeEvent event, ValueUpdater<C> valueUpdater);
 
   /**
    * Render a cell as HTML into a StringBuilder, suitable for passing to
@@ -66,12 +64,17 @@ public abstract class Cell<C> {
    * @param viewData view data associated with the cell
    * @param sb the StringBuilder to be written to
    */
-  // TODO: render needs a way of assuming text by default, but allowing HTML
   public abstract void render(C value, Object viewData, StringBuilder sb);
 
-  public void setValue(Element parent, C value, Object viewData) {
-    StringBuilder sb = new StringBuilder();
-    render(value, viewData, sb);
-    parent.setInnerHTML(sb.toString());
-  }
+  /**
+   * This method may be used by cell containers to set the value on a single
+   * cell directly, rather than using {@link Element#setInnerHTML(String)}. See
+   * {@link AbstractCell#setValue(Element, Object, Object)} for a default
+   * implementation that uses {@link #render(Object, Object, StringBuilder)}.
+   * 
+   * @param parent the parent Element
+   * @param value the value associated with the cell
+   * @param viewData the view data associated with the cell, or null
+   */
+  public abstract void setValue(Element parent, C value, Object viewData);
 }

@@ -15,16 +15,16 @@
  */
 package com.google.gwt.sample.expenses.gwt.client;
 
-import com.google.gwt.bikeshed.cells.client.Cell;
-import com.google.gwt.bikeshed.cells.client.CurrencyCell;
-import com.google.gwt.bikeshed.cells.client.DateCell;
-import com.google.gwt.bikeshed.cells.client.FieldUpdater;
-import com.google.gwt.bikeshed.cells.client.SelectionCell;
-import com.google.gwt.bikeshed.cells.client.TextCell;
-import com.google.gwt.bikeshed.cells.client.ValueUpdater;
 import com.google.gwt.bikeshed.list.client.CellTable;
 import com.google.gwt.bikeshed.list.client.Column;
 import com.google.gwt.bikeshed.list.shared.ListViewAdapter;
+import com.google.gwt.cell.client.Cell;
+import com.google.gwt.cell.client.CurrencyCell;
+import com.google.gwt.cell.client.DateCell;
+import com.google.gwt.cell.client.FieldUpdater;
+import com.google.gwt.cell.client.SelectionCell;
+import com.google.gwt.cell.client.TextCell;
+import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -318,7 +318,7 @@ public class ExpenseDetails extends Composite implements
   private Column<ExpenseRecord, String> addColumn(
       CellTable<ExpenseRecord> table, final String text,
       final GetValue<ExpenseRecord, String> getter) {
-    return addColumn(table, text, TextCell.getInstance(), getter);
+    return addColumn(table, text, new TextCell(), getter);
   }
 
   private void sortExpenses(final Comparator<ExpenseRecord> comparator) {

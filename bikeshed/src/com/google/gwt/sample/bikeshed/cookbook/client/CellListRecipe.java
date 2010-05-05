@@ -15,11 +15,11 @@
  */
 package com.google.gwt.sample.bikeshed.cookbook.client;
 
-import com.google.gwt.bikeshed.cells.client.TextCell;
 import com.google.gwt.bikeshed.list.client.CellList;
 import com.google.gwt.bikeshed.list.shared.ListViewAdapter;
 import com.google.gwt.bikeshed.list.shared.SelectionModel;
 import com.google.gwt.bikeshed.list.shared.SingleSelectionModel;
+import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -43,8 +43,7 @@ public class CellListRecipe extends Recipe {
       list.add("" + ((i + 10) * 1000));
     }
 
-    final CellList<String> cellList = new CellList<String>(
-        TextCell.getInstance());
+    final CellList<String> cellList = new CellList<String>(new TextCell());
     cellList.setPageSize(10);
     final SelectionModel<String> selectionModel = new SingleSelectionModel<String>();
     cellList.setSelectionModel(selectionModel);

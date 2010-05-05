@@ -16,8 +16,8 @@
 package com.google.gwt.bikeshed.list.client;
 
 /**
- * Interface that must be implemented by
- * {@link com.google.gwt.bikeshed.cells.client.Cell Cell} containers.
+ * Interface that must be implemented by {@link com.google.gwt.cell.client.Cell}
+ * containers.
  */
 public interface HasViewData {
 

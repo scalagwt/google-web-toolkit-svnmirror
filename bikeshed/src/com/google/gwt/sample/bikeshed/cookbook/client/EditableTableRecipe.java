@@ -15,13 +15,13 @@
  */
 package com.google.gwt.sample.bikeshed.cookbook.client;
 
-import com.google.gwt.bikeshed.cells.client.EditTextCell;
-import com.google.gwt.bikeshed.cells.client.FieldUpdater;
-import com.google.gwt.bikeshed.cells.client.TextCell;
 import com.google.gwt.bikeshed.list.client.Column;
 import com.google.gwt.bikeshed.list.client.Header;
 import com.google.gwt.bikeshed.list.client.CellTable;
 import com.google.gwt.bikeshed.list.shared.ListViewAdapter;
+import com.google.gwt.cell.client.EditTextCell;
+import com.google.gwt.cell.client.FieldUpdater;
+import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
@@ -62,7 +62,7 @@ public class EditableTableRecipe extends Recipe {
     }
 
     EditTextColumn column = new EditTextColumn();
-    Header<String> header = new Header<String>(TextCell.getInstance()) {
+    Header<String> header = new Header<String>(new TextCell()) {
       @Override
       public String getValue() {
         return "<b>item</b>";

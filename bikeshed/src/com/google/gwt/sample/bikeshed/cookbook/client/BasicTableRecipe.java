@@ -15,16 +15,16 @@
  */
 package com.google.gwt.sample.bikeshed.cookbook.client;
 
-import com.google.gwt.bikeshed.cells.client.ButtonCell;
-import com.google.gwt.bikeshed.cells.client.CheckboxCell;
-import com.google.gwt.bikeshed.cells.client.FieldUpdater;
-import com.google.gwt.bikeshed.cells.client.TextCell;
 import com.google.gwt.bikeshed.list.client.Column;
 import com.google.gwt.bikeshed.list.client.IdentityColumn;
 import com.google.gwt.bikeshed.list.client.CellTable;
 import com.google.gwt.bikeshed.list.shared.ListViewAdapter;
 import com.google.gwt.bikeshed.list.shared.MultiSelectionModel;
 import com.google.gwt.bikeshed.list.shared.SelectionModel;
+import com.google.gwt.cell.client.ButtonCell;
+import com.google.gwt.cell.client.CheckboxCell;
+import com.google.gwt.cell.client.FieldUpdater;
+import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
@@ -79,12 +79,12 @@ public class BasicTableRecipe extends Recipe {
     });
 
     // String column.
-    table.addColumn(new IdentityColumn<String>(TextCell.getInstance()),
+    table.addColumn(new IdentityColumn<String>(new TextCell()),
         "TextCell", "TextCell");
 
     // Button column tied to selection.
     Column<String, String> buttonCol = new Column<String, String>(
-        ButtonCell.getInstance()) {
+        new ButtonCell()) {
 
       @Override
       public boolean dependsOnSelection() {

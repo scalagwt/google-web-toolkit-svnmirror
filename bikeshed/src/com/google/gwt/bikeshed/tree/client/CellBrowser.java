@@ -16,8 +16,6 @@
 package com.google.gwt.bikeshed.tree.client;
 
 import com.google.gwt.animation.client.Animation;
-import com.google.gwt.bikeshed.cells.client.Cell;
-import com.google.gwt.bikeshed.cells.client.ValueUpdater;
 import com.google.gwt.bikeshed.list.client.CellList;
 import com.google.gwt.bikeshed.list.client.ListView;
 import com.google.gwt.bikeshed.list.client.PageSizePager;
@@ -27,6 +25,9 @@ import com.google.gwt.bikeshed.list.shared.ProvidesKey;
 import com.google.gwt.bikeshed.list.shared.Range;
 import com.google.gwt.bikeshed.list.shared.SelectionModel;
 import com.google.gwt.bikeshed.tree.client.CellTreeViewModel.NodeInfo;
+import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.cell.client.Cell;
+import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
@@ -188,7 +189,7 @@ public class CellBrowser extends Composite implements ProvidesResize,
    * 
    * @param <C> the data type of the cell
    */
-  private class CellDecorator<C> extends Cell<C> {
+  private class CellDecorator<C> extends AbstractCell<C> {
 
     /**
      * The cell used to render the inner contents.

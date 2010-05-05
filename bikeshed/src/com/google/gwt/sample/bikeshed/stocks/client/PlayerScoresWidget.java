@@ -15,9 +15,9 @@
  */
 package com.google.gwt.sample.bikeshed.stocks.client;
 
-import com.google.gwt.bikeshed.cells.client.Cell;
 import com.google.gwt.bikeshed.list.client.CellList;
 import com.google.gwt.bikeshed.list.shared.AbstractListViewAdapter;
+import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.sample.bikeshed.stocks.shared.PlayerInfo;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -39,9 +39,9 @@ public class PlayerScoresWidget extends Composite {
   private static final Binder binder = GWT.create(Binder.class);
 
   /**
-   * A {@link Cell} that displays the status of a single player.
+   * A {@link AbstractCell} that displays the status of a single player.
    */
-  private static final class PlayerInfoCell extends Cell<PlayerInfo> {
+  private static final class PlayerInfoCell extends AbstractCell<PlayerInfo> {
     @Override
     public void render(PlayerInfo value, Object viewData, StringBuilder sb) {
       sb.append("<div class='playerScoreBox'>");

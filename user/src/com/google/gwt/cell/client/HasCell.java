@@ -13,15 +13,16 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.gwt.bikeshed.list.client;
-
-import com.google.gwt.bikeshed.cells.client.Cell;
-import com.google.gwt.bikeshed.cells.client.FieldUpdater;
+package com.google.gwt.cell.client;
 
 /**
  * An interface for extracting a value of type C from an underlying data value
  * of type T, provide a {@link Cell} to render that value, and provide a
  * {@link FieldUpdater} to perform notification of updates to the cell.
+ * 
+ * <p>
+ * Note: This class is new and its interface subject to change.
+ * </p>
  * 
  * @param <T> the underlying data type
  * @param <C> the cell data type

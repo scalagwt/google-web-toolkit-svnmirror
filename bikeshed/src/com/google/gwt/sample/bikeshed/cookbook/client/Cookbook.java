@@ -15,13 +15,13 @@
  */
 package com.google.gwt.sample.bikeshed.cookbook.client;
 
-import com.google.gwt.bikeshed.cells.client.Cell;
 import com.google.gwt.bikeshed.list.shared.ListViewAdapter;
 import com.google.gwt.bikeshed.list.shared.SelectionModel;
 import com.google.gwt.bikeshed.list.shared.SingleSelectionModel;
 import com.google.gwt.bikeshed.list.shared.SelectionModel.SelectionChangeEvent;
 import com.google.gwt.bikeshed.tree.client.CellTree;
 import com.google.gwt.bikeshed.tree.client.CellTreeViewModel;
+import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -42,14 +42,14 @@ public class Cookbook implements EntryPoint {
   interface Binder extends UiBinder<Widget, Cookbook> {
   }
 
-  static class CategoryCell extends Cell<Category> {
+  static class CategoryCell extends AbstractCell<Category> {
     @Override
     public void render(Category value, Object viewData, StringBuilder sb) {
       sb.append(value.getTitle());
     }
   }
 
-  static class RecipeCell extends Cell<Recipe> {
+  static class RecipeCell extends AbstractCell<Recipe> {
     @Override
     public void render(Recipe value, Object viewData, StringBuilder sb) {
       sb.append(value.getTitle());

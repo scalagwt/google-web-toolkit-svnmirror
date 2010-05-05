@@ -13,13 +13,15 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.gwt.bikeshed.cells.client;
+package com.google.gwt.cell.client;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
 import com.google.gwt.user.datepicker.client.DatePicker;
@@ -40,8 +42,13 @@ import java.util.Date;
  * Each DatePickerCell has a unique DatePicker popup associated with it; thus,
  * if a single DatePickerCell is used as the cell for a column in a table, only
  * one entry in that column will be editable at a given time.
+ * </p>
+ * 
+ * <p>
+ * Note: This class is new and its interface subject to change.
+ * </p>
  */
-public class DatePickerCell extends Cell<Date> {
+public class DatePickerCell extends AbstractCell<Date> {
 
   private static final int ESCAPE = 27;
 
@@ -68,13 +75,14 @@ public class DatePickerCell extends Cell<Date> {
 
     this.datePicker = new DatePicker();
     this.panel = new PopupPanel(true, true) {
-      // Dismiss when escape is pressed
       @Override
-      public boolean onKeyUpPreview(char key, int modifiers) {
-        if (key == ESCAPE) {
-          panel.hide();
+      protected void onPreviewNativeEvent(NativePreviewEvent event) {
+        if (Event.ONKEYUP == event.getTypeInt()) {
+          if (event.getNativeEvent().getKeyCode() == ESCAPE) {
+            // Dismiss when escape is pressed
+            panel.hide();
+          }
         }
-        return true;
       }
     };
     panel.add(datePicker);

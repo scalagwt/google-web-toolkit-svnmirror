@@ -15,13 +15,13 @@
  */
 package com.google.gwt.bikeshed.tree.client;
 
-import com.google.gwt.bikeshed.cells.client.Cell;
-import com.google.gwt.bikeshed.cells.client.ValueUpdater;
 import com.google.gwt.bikeshed.list.client.ListView;
 import com.google.gwt.bikeshed.list.shared.AbstractListViewAdapter;
 import com.google.gwt.bikeshed.list.shared.ProvidesKey;
 import com.google.gwt.bikeshed.list.shared.SelectionModel;
 import com.google.gwt.bikeshed.list.shared.SingleSelectionModel;
+import com.google.gwt.cell.client.Cell;
+import com.google.gwt.cell.client.ValueUpdater;
 
 /**
  * A model of a tree.

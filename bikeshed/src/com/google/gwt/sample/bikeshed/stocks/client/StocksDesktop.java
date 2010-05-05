@@ -15,12 +15,12 @@
  */
 package com.google.gwt.sample.bikeshed.stocks.client;
 
-import com.google.gwt.bikeshed.cells.client.FieldUpdater;
 import com.google.gwt.bikeshed.list.client.ListView;
 import com.google.gwt.bikeshed.list.shared.AsyncListViewAdapter;
 import com.google.gwt.bikeshed.list.shared.ListViewAdapter;
 import com.google.gwt.bikeshed.list.shared.Range;
 import com.google.gwt.bikeshed.tree.client.CellBrowser;
+import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.CloseEvent;

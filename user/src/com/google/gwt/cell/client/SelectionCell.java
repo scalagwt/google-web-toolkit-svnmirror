@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.gwt.bikeshed.cells.client;
+package com.google.gwt.cell.client;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
@@ -25,13 +25,21 @@ import java.util.List;
 
 /**
  * A {@link Cell} used to render a drop-down list.
+ * 
+ * <p>
+ * Note: This class is new and its interface subject to change.
+ * </p>
  */
-public class SelectionCell extends Cell<String> {
+public class SelectionCell extends AbstractCell<String> {
 
   private HashMap<String, Integer> indexForOption = new HashMap<String, Integer>();
-
   private final List<String> options;
 
+  /**
+   * TODO: doc
+   * 
+   * @param options
+   */
   public SelectionCell(List<String> options) {
     this.options = new ArrayList<String>(options);
     int index = 0;
@@ -40,6 +48,7 @@ public class SelectionCell extends Cell<String> {
     }
   }
 
+  @Override
   public Object onBrowserEvent(Element parent, String value, Object viewData,
       NativeEvent event, ValueUpdater<String> valueUpdater) {
     String type = event.getType();

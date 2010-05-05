@@ -13,29 +13,43 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.gwt.bikeshed.cells.client;
+package com.google.gwt.cell.client;
+
+import com.google.gwt.i18n.client.DateTimeFormat;
+
+import java.util.Date;
 
 /**
- * A {@link Cell} used to render text.
+ * A {@link Cell} used to render {@link Date}s.
+ * 
+ * <p>
+ * Note: This class is new and its interface subject to change.
+ * </p>
  */
-public class TextCell extends Cell<String> {
+public class DateCell extends AbstractCell<Date> {
 
-  private static TextCell instance;
+  private final DateTimeFormat format;
 
-  public static TextCell getInstance() {
-    if (instance == null) {
-      instance = new TextCell();
-    }
-    return instance;
+  /**
+   * TODO: doc
+   */
+  public DateCell() {
+    this(DateTimeFormat.getFullDateFormat());
   }
 
-  private TextCell() {
+  /**
+   * TODO: doc
+   * 
+   * @param format
+   */
+  public DateCell(DateTimeFormat format) {
+    this.format = format;
   }
 
   @Override
-  public void render(String value, Object viewData, StringBuilder sb) {
+  public void render(Date value, Object viewData, StringBuilder sb) {
     if (value != null) {
-      sb.append(value);
+      sb.append(format.format(value));
     }
   }
 }

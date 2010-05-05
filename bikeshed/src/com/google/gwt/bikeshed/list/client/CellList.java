@@ -15,11 +15,11 @@
  */
 package com.google.gwt.bikeshed.list.client;
 
-import com.google.gwt.bikeshed.cells.client.Cell;
-import com.google.gwt.bikeshed.cells.client.ValueUpdater;
 import com.google.gwt.bikeshed.list.client.impl.CellListImpl;
 import com.google.gwt.bikeshed.list.shared.Range;
 import com.google.gwt.bikeshed.list.shared.SelectionModel;
+import com.google.gwt.cell.client.Cell;
+import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;

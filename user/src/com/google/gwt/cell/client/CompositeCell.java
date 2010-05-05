@@ -13,9 +13,8 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.gwt.bikeshed.cells.client;
+package com.google.gwt.cell.client;
 
-import com.google.gwt.bikeshed.list.client.HasCell;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 
@@ -26,15 +25,20 @@ import java.util.List;
  * <p>
  * A {@link Cell} that is composed of other {@link Cell}s.
  * </p>
+ * 
  * <p>
  * When this cell is rendered, it will render each component {@link Cell} inside
  * a span. If the component {@link Cell} uses block level elements (such as a
  * Div), the component cells will stack vertically.
  * </p>
  * 
+ * <p>
+ * Note: This class is new and its interface subject to change.
+ * </p>
+ * 
  * @param <C> the type that this Cell represents
  */
-public class CompositeCell<C> extends Cell<C> {
+public class CompositeCell<C> extends AbstractCell<C> {
 
   /**
    * The cells that compose this {@link Cell}.

@@ -15,8 +15,8 @@
  */
 package com.google.gwt.sample.expenses.gwt.client;
 
-import com.google.gwt.bikeshed.cells.client.ClickableTextCell;
 import com.google.gwt.bikeshed.list.client.Header;
+import com.google.gwt.cell.client.ClickableTextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
@@ -54,7 +54,7 @@ public class SortableHeader extends Header<String> {
   private String text;
 
   SortableHeader(String text) {
-    super(ClickableTextCell.getInstance());
+    super(new ClickableTextCell());
     this.text = text;
   }
 

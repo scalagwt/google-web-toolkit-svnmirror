@@ -13,12 +13,16 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.gwt.bikeshed.cells.client;
+package com.google.gwt.cell.client;
 
 /**
  * A {@link FieldUpdater} may be added to a Column to update a particular field
  * of a data item.
  *
+ * <p>
+ * Note: This class is new and its interface subject to change.
+ * </p>
+ * 
  * @param <T> the data type that will be modified
  * @param <C> the data type of the modified field
  */
@@ -26,6 +30,7 @@ public interface FieldUpdater<T, C> {
 
   /**
    * Announces a new value for a field within a base object.
+   * 
    * @param index the current row index of the object
    * @param object the base object to be updated
    * @param value the new value of the field being updated

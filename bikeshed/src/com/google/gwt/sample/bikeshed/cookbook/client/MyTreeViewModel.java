@@ -15,17 +15,18 @@
  */
 package com.google.gwt.sample.bikeshed.cookbook.client;
 
-import com.google.gwt.bikeshed.cells.client.ButtonCell;
-import com.google.gwt.bikeshed.cells.client.Cell;
-import com.google.gwt.bikeshed.cells.client.CheckboxCell;
-import com.google.gwt.bikeshed.cells.client.CompositeCell;
-import com.google.gwt.bikeshed.cells.client.FieldUpdater;
-import com.google.gwt.bikeshed.cells.client.ValueUpdater;
-import com.google.gwt.bikeshed.list.client.HasCell;
 import com.google.gwt.bikeshed.list.client.ListView;
 import com.google.gwt.bikeshed.list.shared.AbstractListViewAdapter;
 import com.google.gwt.bikeshed.list.shared.SelectionModel;
 import com.google.gwt.bikeshed.tree.client.CellTreeViewModel;
+import com.google.gwt.cell.client.ButtonCell;
+import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.cell.client.Cell;
+import com.google.gwt.cell.client.CheckboxCell;
+import com.google.gwt.cell.client.CompositeCell;
+import com.google.gwt.cell.client.FieldUpdater;
+import com.google.gwt.cell.client.HasCell;
+import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
@@ -98,7 +99,7 @@ public class MyTreeViewModel implements CellTreeViewModel {
   /**
    * The cell used to render integers.
    */
-  private static final Cell<Integer> INTEGER_CELL = new Cell<Integer>() {
+  private static final Cell<Integer> INTEGER_CELL = new AbstractCell<Integer>() {
     @Override
     public void render(Integer value, Object viewData, StringBuilder sb) {
       sb.append(value);
@@ -134,7 +135,7 @@ public class MyTreeViewModel implements CellTreeViewModel {
     });
     compositeCell.addHasCell(new HasCell<String, String>() {
       public Cell<String> getCell() {
-        return ButtonCell.getInstance();
+        return new ButtonCell();
       }
 
       public FieldUpdater<String, String> getFieldUpdater() {

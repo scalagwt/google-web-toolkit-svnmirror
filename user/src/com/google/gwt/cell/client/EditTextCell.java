@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.gwt.bikeshed.cells.client;
+package com.google.gwt.cell.client;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.InputElement;
@@ -22,8 +22,21 @@ import com.google.gwt.event.dom.client.KeyCodes;
 
 /**
  * An editable text cell. Click to edit, escape to cancel, return to commit.
+ * 
+ * <p>
+ * Note: This class is new and its interface subject to change.
+ * </p>
+ * 
+ * Important TODO: This cell still treats its value as HTML for rendering
+ * purposes, which is entirely wrong. It should be able to treat it as a proper
+ * string (especially since that's all the user can enter).
  */
-public class EditTextCell extends Cell<String> {
+public class EditTextCell extends AbstractCell<String> {
+
+  @Override
+  public boolean consumesEvents() {
+    return true;
+  }
 
   @Override
   public String onBrowserEvent(Element parent, String value, Object viewData,
@@ -57,9 +70,8 @@ public class EditTextCell extends Cell<String> {
   }
 
   private String commit(Element parent, ValueUpdater<String> valueUpdater) {
-    String value;
     InputElement input = (InputElement) parent.getFirstChild();
-    value = input.getValue();
+    String value = input.getValue();
     valueUpdater.update(value);
     return cancel(parent, value);
   }

@@ -15,9 +15,6 @@
  */
 package com.google.gwt.sample.expenses.gwt.client;
 
-import com.google.gwt.bikeshed.cells.client.Cell;
-import com.google.gwt.bikeshed.cells.client.IconCellDecorator;
-import com.google.gwt.bikeshed.cells.client.TextCell;
 import com.google.gwt.bikeshed.list.client.ListView;
 import com.google.gwt.bikeshed.list.shared.AsyncListViewAdapter;
 import com.google.gwt.bikeshed.list.shared.ListViewAdapter;
@@ -29,6 +26,10 @@ import com.google.gwt.bikeshed.list.shared.SelectionModel.SelectionChangeHandler
 import com.google.gwt.bikeshed.tree.client.CellTree;
 import com.google.gwt.bikeshed.tree.client.CellTreeViewModel;
 import com.google.gwt.dom.client.Style.Overflow;
+import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.cell.client.Cell;
+import com.google.gwt.cell.client.IconCellDecorator;
+import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.requestfactory.shared.Receiver;
 import com.google.gwt.sample.bikeshed.style.client.Styles;
 import com.google.gwt.sample.expenses.gwt.request.EmployeeRecord;
@@ -60,12 +61,12 @@ public class ExpenseTree extends Composite {
   }
 
   /**
-   * A {@link Cell} that represents an {@link EmployeeRecord}.
+   * A {@link AbstractCell} that represents an {@link EmployeeRecord}.
    */
   private class EmployeeCell extends IconCellDecorator<EmployeeRecord> {
 
     public EmployeeCell() {
-      super(Styles.resources().userIcon(), new Cell<EmployeeRecord>() {
+      super(Styles.resources().userIcon(), new AbstractCell<EmployeeRecord>() {
         @Override
         public void render(EmployeeRecord value, Object viewData,
             StringBuilder sb) {
@@ -126,7 +127,7 @@ public class ExpenseTree extends Composite {
      * The department cell singleton.
      */
     private final Cell<String> departmentCell = new IconCellDecorator<String>(
-        Styles.resources().groupIcon(), TextCell.getInstance());
+        Styles.resources().groupIcon(), new TextCell());
 
     /**
      * The {@link EmployeeCell} singleton.

@@ -15,10 +15,6 @@
  */
 package com.google.gwt.sample.bikeshed.stocks.client;
 
-import com.google.gwt.bikeshed.cells.client.ButtonCell;
-import com.google.gwt.bikeshed.cells.client.Cell;
-import com.google.gwt.bikeshed.cells.client.TextCell;
-import com.google.gwt.bikeshed.cells.client.ValueUpdater;
 import com.google.gwt.bikeshed.list.client.ListView;
 import com.google.gwt.bikeshed.list.shared.AbstractListViewAdapter;
 import com.google.gwt.bikeshed.list.shared.AsyncListViewAdapter;
@@ -26,6 +22,11 @@ import com.google.gwt.bikeshed.list.shared.ListViewAdapter;
 import com.google.gwt.bikeshed.list.shared.ProvidesKey;
 import com.google.gwt.bikeshed.list.shared.SingleSelectionModel;
 import com.google.gwt.bikeshed.tree.client.CellTreeViewModel;
+import com.google.gwt.cell.client.ButtonCell;
+import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.cell.client.Cell;
+import com.google.gwt.cell.client.TextCell;
+import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.sample.bikeshed.stocks.shared.StockQuote;
 import com.google.gwt.sample.bikeshed.stocks.shared.Transaction;
 
@@ -59,9 +60,9 @@ class TransactionTreeViewModel implements CellTreeViewModel {
   }
 
   /**
-   * A {@link Cell} used to render a {@link StockQuote}.
+   * A {@link AbstractCell} used to render a {@link StockQuote}.
    */
-  private static final Cell<StockQuote> STOCK_QUOTE_CELL = new Cell<StockQuote>() {
+  private static final Cell<StockQuote> STOCK_QUOTE_CELL = new AbstractCell<StockQuote>() {
     @Override
     public void render(StockQuote value, Object viewData, StringBuilder sb) {
       sb.append(value.getTicker() + " - " + value.getDisplayPrice());
@@ -69,9 +70,9 @@ class TransactionTreeViewModel implements CellTreeViewModel {
   };
 
   /**
-   * A {@link Cell} used to render a {@link Transaction}.
+   * A {@link AbstractCell} used to render a {@link Transaction}.
    */
-  private static final Cell<Transaction> TRANSACTION_CELL = new Cell<Transaction>() {
+  private static final Cell<Transaction> TRANSACTION_CELL = new AbstractCell<Transaction>() {
     @Override
     public void render(Transaction value, Object viewData, StringBuilder sb) {
       sb.append(value.toString());
@@ -125,7 +126,7 @@ class TransactionTreeViewModel implements CellTreeViewModel {
     if (value == null) {
       // Return list of sectors.
       return new CellTreeViewModel.DefaultNodeInfo<String>(topLevelListViewAdapter,
-          TextCell.getInstance(), selectionModel, null);
+          new TextCell(), selectionModel, null);
     } else if ("Favorites".equals(value)) {
       // Return favorites. 
       return new CellTreeViewModel.DefaultNodeInfo<StockQuote>(
@@ -147,7 +148,7 @@ class TransactionTreeViewModel implements CellTreeViewModel {
       list.add("Buy");
       list.add("Sell");
       return new CellTreeViewModel.DefaultNodeInfo<String>(adapter,
-          ButtonCell.getInstance(), selectionModel,
+          new ButtonCell(), selectionModel,
           new ValueUpdater<String>() {
             public void update(String value) {
               if ("Buy".equals(value)) {
@@ -172,7 +173,7 @@ class TransactionTreeViewModel implements CellTreeViewModel {
       list.add("Actions");
       list.add("History");
       return new CellTreeViewModel.DefaultNodeInfo<String>(adapter,
-          TextCell.getInstance(), selectionModel, null);
+          new TextCell(), selectionModel, null);
     }
 
     throw new IllegalArgumentException(value.toString());

@@ -15,9 +15,6 @@
  */
 package com.google.gwt.sample.expenses.gwt.client;
 
-import com.google.gwt.bikeshed.cells.client.Cell;
-import com.google.gwt.bikeshed.cells.client.DateCell;
-import com.google.gwt.bikeshed.cells.client.ValueUpdater;
 import com.google.gwt.bikeshed.list.client.CellTable;
 import com.google.gwt.bikeshed.list.client.Column;
 import com.google.gwt.bikeshed.list.client.ListView;
@@ -27,6 +24,10 @@ import com.google.gwt.bikeshed.list.shared.Range;
 import com.google.gwt.bikeshed.list.shared.SingleSelectionModel;
 import com.google.gwt.bikeshed.list.shared.SelectionModel.SelectionChangeEvent;
 import com.google.gwt.bikeshed.list.shared.SelectionModel.SelectionChangeHandler;
+import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.cell.client.Cell;
+import com.google.gwt.cell.client.DateCell;
+import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
@@ -124,7 +125,7 @@ public class ExpenseList extends Composite implements
   /**
    * A cell used to highlight search text.
    */
-  private class HighlightCell extends Cell<String> {
+  private class HighlightCell extends AbstractCell<String> {
 
     private static final String replaceString = "<span style='color:red;font-weight:bold;'>$1</span>";
 

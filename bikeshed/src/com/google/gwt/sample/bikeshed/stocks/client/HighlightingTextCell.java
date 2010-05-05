@@ -15,15 +15,15 @@
  */
 package com.google.gwt.sample.bikeshed.stocks.client;
 
-import com.google.gwt.bikeshed.cells.client.Cell;
+import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 
 /**
- * A {@link Cell} used to render text, with portions matching a given
+ * A {@link AbstractCell} used to render text, with portions matching a given
  * regular expression highlighted.
  */
-public class HighlightingTextCell extends Cell<String> {
+public class HighlightingTextCell extends AbstractCell<String> {
 
   private RegExp highlightRegex;
 

@@ -15,13 +15,13 @@
  */
 package com.google.gwt.bikeshed.tree.client;
 
-import com.google.gwt.bikeshed.cells.client.Cell;
 import com.google.gwt.bikeshed.list.client.PagingListView;
 import com.google.gwt.bikeshed.list.client.impl.CellListImpl;
 import com.google.gwt.bikeshed.list.shared.ProvidesKey;
 import com.google.gwt.bikeshed.list.shared.Range;
 import com.google.gwt.bikeshed.list.shared.SelectionModel;
 import com.google.gwt.bikeshed.tree.client.CellTreeViewModel.NodeInfo;
+import com.google.gwt.cell.client.Cell;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
@@ -532,7 +532,7 @@ class CellTreeNodeView<T> extends UIObject {
   }
 
   /**
-   * Fire an event to the {@link com.google.gwt.bikeshed.cells.client.Cell}.
+   * Fire an event to the {@link com.google.gwt.cell.client.AbstractCell}.
    * 
    * @param event the native event
    * @return true if the cell consumes the event, false if not

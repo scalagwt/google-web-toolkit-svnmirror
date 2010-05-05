@@ -15,20 +15,20 @@
  */
 package com.google.gwt.sample.bikeshed.cookbook.client;
 
-import com.google.gwt.bikeshed.cells.client.ButtonCell;
-import com.google.gwt.bikeshed.cells.client.Cell;
-import com.google.gwt.bikeshed.cells.client.CheckboxCell;
-import com.google.gwt.bikeshed.cells.client.ClickableTextCell;
-import com.google.gwt.bikeshed.cells.client.DatePickerCell;
-import com.google.gwt.bikeshed.cells.client.FieldUpdater;
-import com.google.gwt.bikeshed.cells.client.TextCell;
-import com.google.gwt.bikeshed.cells.client.ValueUpdater;
 import com.google.gwt.bikeshed.list.client.CellTable;
 import com.google.gwt.bikeshed.list.client.Column;
 import com.google.gwt.bikeshed.list.client.Header;
 import com.google.gwt.bikeshed.list.shared.DefaultSelectionModel;
 import com.google.gwt.bikeshed.list.shared.ListViewAdapter;
 import com.google.gwt.bikeshed.list.shared.ProvidesKey;
+import com.google.gwt.cell.client.ButtonCell;
+import com.google.gwt.cell.client.Cell;
+import com.google.gwt.cell.client.CheckboxCell;
+import com.google.gwt.cell.client.ClickableTextCell;
+import com.google.gwt.cell.client.DatePickerCell;
+import com.google.gwt.cell.client.FieldUpdater;
+import com.google.gwt.cell.client.TextCell;
+import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
@@ -342,7 +342,7 @@ public class MailRecipe extends Recipe implements ClickHandler {
     });
     table.addColumn(selectedColumn, selectedHeader);
 
-    addColumn(table, "ID", TextCell.getInstance(),
+    addColumn(table, "ID", new TextCell(),
         new GetValue<Message, String>() {
           public String getValue(Message object) {
             return "" + object.id;
@@ -382,7 +382,7 @@ public class MailRecipe extends Recipe implements ClickHandler {
     });
 
     Column<Message, String> toggleColumn = new Column<Message, String>(
-        ButtonCell.getInstance()) {
+        new ButtonCell()) {
       @Override
       public String getValue(Message object) {
         return object.isRead ? "Mark Unread" : "Mark Read";
@@ -443,7 +443,7 @@ public class MailRecipe extends Recipe implements ClickHandler {
         return getter.getValue(object);
       }
     };
-    Header<String> header = new Header<String>(ClickableTextCell.getInstance()) {
+    Header<String> header = new Header<String>(new ClickableTextCell()) {
       @Override
       public String getValue() {
         return text;
@@ -472,7 +472,7 @@ public class MailRecipe extends Recipe implements ClickHandler {
   private Column<Message, String> addColumn(
       CellTable<Message> table, final String text,
       final GetValue<Message, String> getter) {
-    return addColumn(table, text, TextCell.getInstance(), getter, null);
+    return addColumn(table, text, new TextCell(), getter, null);
   }
 
   private void addMessages(int count) {

@@ -1,42 +1,41 @@
 /*
  * Copyright 2010 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.gwt.bikeshed.cells.client;
+package com.google.gwt.cell.client;
 
 /**
- * A {@link Cell} used to render profit and loss.  Positive values are shown in
- * green with a "+" sign and negative values are shown in red with a "-" sign.
+ * A {@link Cell} used to render currency.
+ * 
+ * <p>
+ * Note: This class is new and its interface subject to change.
+ * </p>
  */
-public class ProfitLossCell extends Cell<Integer> {
+public class CurrencyCell extends AbstractCell<Integer> {
 
   @Override
-  public void render(Integer priceDelta, Object viewData, StringBuilder sb) {
-    boolean negative = priceDelta < 0;
+  public void render(Integer price, Object viewData, StringBuilder sb) {
+    // TODO: Use legit i18n'd currency formatting.
+    boolean negative = price < 0;
     if (negative) {
-      priceDelta = -priceDelta;
+      price = -price;
     }
-    int dollars = priceDelta / 100;
-    int cents = priceDelta % 100;
+    int dollars = price / 100;
+    int cents = price % 100;
 
-    sb.append("<span style=\"color:");
-    if (priceDelta == 0) {
-      sb.append("green\">  ");
-    } else if (negative) {
-      sb.append("red\">-");
-    } else {
-      sb.append("green\">+");
+    if (negative) {
+      sb.append("-");
     }
     sb.append("$");
     sb.append(dollars);
@@ -45,6 +44,5 @@ public class ProfitLossCell extends Cell<Integer> {
       sb.append('0');
     }
     sb.append(cents);
-    sb.append("</span>");
   }
 }
