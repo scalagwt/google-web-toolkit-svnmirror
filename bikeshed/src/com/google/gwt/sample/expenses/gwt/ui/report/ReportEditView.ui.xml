@@ -12,5 +12,6 @@
     <div><span>Approved Supervisor Key:</span> <g:TextBox ui:field='approvedSupervisorKey'></g:TextBox></div>
 
     <g:Button ui:field='save'>Save</g:Button>
+    <g:Button ui:field='cancel'>Cancel</g:Button>
   </g:HTMLPanel>
 </ui:UiBinder>

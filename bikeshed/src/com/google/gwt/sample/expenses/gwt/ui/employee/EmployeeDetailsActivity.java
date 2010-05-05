@@ -16,24 +16,25 @@
 package com.google.gwt.sample.expenses.gwt.ui.employee;
 
 import com.google.gwt.app.place.AbstractActivity;
-import com.google.gwt.app.util.IsWidget;
+import com.google.gwt.app.place.PlaceController;
 import com.google.gwt.requestfactory.shared.Receiver;
+import com.google.gwt.sample.expenses.gwt.client.place.EmployeeScaffoldPlace;
+import com.google.gwt.sample.expenses.gwt.client.place.ScaffoldPlace;
+import com.google.gwt.sample.expenses.gwt.client.place.ScaffoldRecordPlace.Operation;
 import com.google.gwt.sample.expenses.gwt.request.EmployeeRecord;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
-import com.google.gwt.user.client.ui.TakesValue;
 import com.google.gwt.valuestore.shared.Value;
+import com.google.gwt.valuestore.ui.RecordDetailsView;
 
 /**
  * An {@link com.google.gwt.app.place.Activity Activity} that requests and
  * displays detailed information on a given employee.
  */
-public class EmployeeDetailsActivity extends AbstractActivity {
-  interface View extends TakesValue<EmployeeRecord>, IsWidget {
-  }
+public class EmployeeDetailsActivity extends AbstractActivity implements
+    RecordDetailsView.Delegate {
+  private static RecordDetailsView<EmployeeRecord> defaultView;
 
-  private static View defaultView;
-
-  private static View getDefaultView() {
+  private static RecordDetailsView<EmployeeRecord> getDefaultView() {
     if (defaultView == null) {
       defaultView = new EmployeeDetailsView();
     }
@@ -41,24 +42,34 @@ public class EmployeeDetailsActivity extends AbstractActivity {
   }
 
   private final ExpensesRequestFactory requests;
-  private final View view;
+  private final PlaceController<ScaffoldPlace> placeController;
+  private final RecordDetailsView<EmployeeRecord> view;
   private String id;
 
   /**
    * Creates an activity that uses the default singleton view instance.
    */
-  public EmployeeDetailsActivity(String id, ExpensesRequestFactory requests) {
-    this(id, requests, getDefaultView());
+  public EmployeeDetailsActivity(String id, ExpensesRequestFactory requests,
+      PlaceController<ScaffoldPlace> placeController) {
+    this(id, requests, placeController, getDefaultView());
   }
 
   /**
    * Creates an activity that uses its own view instance.
    */
   public EmployeeDetailsActivity(String id, ExpensesRequestFactory requests,
-      View view) {
+      PlaceController<ScaffoldPlace> placeController,
+      RecordDetailsView<EmployeeRecord> view) {
+    this.placeController = placeController;
     this.id = id;
     this.requests = requests;
+    view.setDelegate(this);
     this.view = view;
+  }
+
+  public void editClicked() {
+    placeController.goTo(new EmployeeScaffoldPlace(view.getValue(),
+        Operation.EDIT));
   }
 
   public void start(final Display display) {

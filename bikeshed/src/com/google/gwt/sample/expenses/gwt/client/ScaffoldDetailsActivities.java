@@ -18,51 +18,40 @@ package com.google.gwt.sample.expenses.gwt.client;
 import com.google.gwt.app.place.Activity;
 import com.google.gwt.app.place.ActivityMapper;
 import com.google.gwt.app.place.PlaceController;
+import com.google.gwt.sample.expenses.gwt.client.place.BaseScaffoldPlaceFilter;
 import com.google.gwt.sample.expenses.gwt.client.place.EmployeeScaffoldPlace;
-import com.google.gwt.sample.expenses.gwt.client.place.ListScaffoldPlace;
 import com.google.gwt.sample.expenses.gwt.client.place.ReportScaffoldPlace;
 import com.google.gwt.sample.expenses.gwt.client.place.ScaffoldPlace;
-import com.google.gwt.sample.expenses.gwt.client.place.ScaffoldPlaceFilter;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
-import com.google.gwt.sample.expenses.gwt.ui.ListActivitiesMapper;
 import com.google.gwt.sample.expenses.gwt.ui.employee.EmployeeActivitiesMapper;
 import com.google.gwt.sample.expenses.gwt.ui.report.ReportActivitiesMapper;
 
 /**
- * Finds the activity to run for a particular {@link ScaffoldPlace}.
+ * Finds the activity to run for a particular {@link ScaffoldPlace} in the bottom
+ * half of the {@link ScaffoldShell}.
  */
-public final class ScaffoldActivities implements ActivityMapper<ScaffoldPlace> {
+public final class ScaffoldDetailsActivities implements
+    ActivityMapper<ScaffoldPlace> {
 
-  private final ActivityMapper<ListScaffoldPlace> listActivitiesBuilder;
-  private final ActivityMapper<EmployeeScaffoldPlace> employeeActivitiesBuilder;
-  private final ActivityMapper<ReportScaffoldPlace> reportActivitiesBuilder;
-
-  /**
-   * @param requestFactory
-   * @param placeController
-   */
-  public ScaffoldActivities(ExpensesRequestFactory requestFactory,
+  private final ActivityMapper<EmployeeScaffoldPlace> employeeActivities;
+  private final ActivityMapper<ReportScaffoldPlace> reportActivities;
+  
+  public ScaffoldDetailsActivities(ExpensesRequestFactory requestFactory,
       PlaceController<ScaffoldPlace> placeController) {
-    this.listActivitiesBuilder = new ListActivitiesMapper(requestFactory,
-        placeController);
-    this.employeeActivitiesBuilder = new EmployeeActivitiesMapper(
+    this.employeeActivities = new EmployeeActivitiesMapper(
         requestFactory, placeController);
-    this.reportActivitiesBuilder = new ReportActivitiesMapper(requestFactory,
+    this.reportActivities = new ReportActivitiesMapper(requestFactory,
         placeController);
   }
 
   public Activity getActivity(ScaffoldPlace place) {
-    return place.acceptFilter(new ScaffoldPlaceFilter<Activity>() {
+    return place.acceptFilter(new BaseScaffoldPlaceFilter<Activity>(null) {
       public Activity filter(EmployeeScaffoldPlace place) {
-        return employeeActivitiesBuilder.getActivity(place);
-      }
-
-      public Activity filter(ListScaffoldPlace place) {
-        return listActivitiesBuilder.getActivity(place);
+        return employeeActivities.getActivity(place);
       }
 
       public Activity filter(ReportScaffoldPlace place) {
-        return reportActivitiesBuilder.getActivity(place);
+        return reportActivities.getActivity(place);
       }
     });
   }

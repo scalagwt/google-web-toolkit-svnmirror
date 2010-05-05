@@ -15,6 +15,7 @@
  */
 package com.google.gwt.app.place;
 
+import com.google.gwt.app.place.Activity.Display;
 import com.google.gwt.app.util.IsWidget;
 import com.google.gwt.event.shared.HandlerManager;
 
@@ -29,11 +30,31 @@ import com.google.gwt.event.shared.HandlerManager;
 public class ActivityManager<P extends Place> implements
     PlaceChangeEvent.Handler<P>, PlaceChangeRequestedEvent.Handler<P> {
 
-  private final ActivityMapper<P> mapper;
-  private final HandlerManager eventBus;
+  /**
+   * Wraps our real display to prevent an Activity from taking it over if it is
+   * not the currentActivity.
+   */
+  private class ProtectedDisplay implements Display {
+    private final Activity activity;
 
+    ProtectedDisplay(Activity activity) {
+      this.activity = activity;
+    }
+
+    public void showActivityWidget(IsWidget view) {
+      if (this.activity == ActivityManager.this.currentActivity) {
+        startingNext = false;
+        display.showActivityWidget(view);
+      }
+    }
+  }
+
+  private final ActivityMapper<P> mapper;
+
+  private final HandlerManager eventBus;
   private Activity currentActivity;
   private Activity.Display display;
+
   private boolean startingNext = false;
 
   /**
@@ -58,15 +79,17 @@ public class ActivityManager<P extends Place> implements
   public void onPlaceChange(PlaceChangeEvent<P> event) {
     Activity nextActivity = mapper.getActivity(event.getNewPlace());
 
-    if (currentActivity != null) {
-      display.showActivityWidget(null);
-      currentActivity.onStop();
+    if (currentActivity == nextActivity) {
+      return;
     }
 
     if (startingNext) {
       currentActivity.onCancel();
       currentActivity = null;
       startingNext = false;
+    } else if (currentActivity != null) {
+      display.showActivityWidget(null);
+      currentActivity.onStop();
     }
 
     if (nextActivity == null) {
@@ -80,14 +103,10 @@ public class ActivityManager<P extends Place> implements
 
     /*
      * Now start the thing. Wrap the actual display with a per-call instance
-     * that can maintain our startingNext state.
+     * that protects the display from canceled or stopped activities, and which
+     * maintain our startingNext state.
      */
-    currentActivity.start(new Activity.Display() {
-      public void showActivityWidget(IsWidget view) {
-        startingNext = false;
-        display.showActivityWidget(view);
-      }
-    });
+    currentActivity.start(new ProtectedDisplay(currentActivity));
   }
 
   /**

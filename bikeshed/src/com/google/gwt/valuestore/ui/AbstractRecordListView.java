@@ -15,11 +15,10 @@
  */
 package com.google.gwt.valuestore.ui;
 
-import com.google.gwt.bikeshed.cells.client.ActionCell;
 import com.google.gwt.bikeshed.list.client.CellTable;
-import com.google.gwt.bikeshed.list.client.IdentityColumn;
 import com.google.gwt.bikeshed.list.shared.Range;
 import com.google.gwt.bikeshed.list.shared.SelectionModel;
+import com.google.gwt.bikeshed.list.shared.SingleSelectionModel;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.valuestore.shared.Property;
@@ -40,7 +39,6 @@ public abstract class AbstractRecordListView<R extends Record> extends
     Composite implements RecordListView<R> {
 
   private CellTable<R> table;
-  private Delegate<R> delegate;
   private Set<Property<?>> properties = new HashSet<Property<?>>();
 
   public AbstractRecordListView<R> asWidget() {
@@ -69,9 +67,16 @@ public abstract class AbstractRecordListView<R extends Record> extends
         "A RecordListView requires a RecordListView.Delegate");
   }
 
-  public void setDelegate(Delegate<R> delegate) {
-    this.delegate = delegate;
+  public void setDelegate(final Delegate<R> delegate) {
     table.setDelegate(delegate);
+    
+    table.setSelectionModel(new SingleSelectionModel<R>() {
+      @Override
+      public void setSelected(R object, boolean selected) {
+        super.setSelected(object, selected);
+        delegate.showDetails(object);
+      }
+    });
   }
 
   public void setSelectionModel(SelectionModel<? super R> selectionModel) {
@@ -82,25 +87,12 @@ public abstract class AbstractRecordListView<R extends Record> extends
       List<PropertyColumn<R, ?>> columns) {
     super.initWidget(root);
     this.table = table;
+    table.setSelectionEnabled(true);
     
     for (PropertyColumn<R, ?> column : columns) {
       table.addColumn(column, column.getProperty().getName());
       properties.add(column.getProperty());
     }
-
-    table.addColumn(new IdentityColumn<R>(new ActionCell<R>("Show",
-        new ActionCell.Delegate<R>() {
-          public void execute(R object) {
-            delegate.showDetails(object);
-          }
-        })));
-
-    table.addColumn(new IdentityColumn<R>(new ActionCell<R>("Edit",
-        new ActionCell.Delegate<R>() {
-          public void execute(R object) {
-            delegate.edit(object);
-          }
-        })));
   }
 
   @Override

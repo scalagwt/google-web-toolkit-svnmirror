@@ -16,22 +16,32 @@
 package com.google.gwt.sample.expenses.gwt.client.place;
 
 /**
- * A convenient base implementation of {@link ScaffoldPlaceProcessor}. Just
+ * A convenient base implementation of {@link ScaffoldPlaceFilter}. Just
  * override the methods for the types of places that you actually care about.
  * <p>
  * <strong>NB</strong>It is a bad idea to use this class if your code needs to
  * be extended when new subclasses of {@link ScaffoldPlace} are added. If that's
- * the case, implement {@link ScaffoldPlaceProcessor} yourself, so that the compiler
- * will let you know to update your code.
+ * the case, implement {@link ScaffoldPlaceFilter} yourself, so that the
+ * compiler will let you know to update your code.
+ * 
+ * @param <T> the type of the default value
  */
-public class BaseScaffoldPlaceProcessor implements ScaffoldPlaceProcessor {
-
-  public void process(EmployeeScaffoldPlace employeePlace) {
+public class BaseScaffoldPlaceFilter<T> implements ScaffoldPlaceFilter<T> {
+  private final T defaultValue;
+  
+  public BaseScaffoldPlaceFilter(T defaultValue) {
+    this.defaultValue = defaultValue;
   }
 
-  public void process(ListScaffoldPlace listPlace) {
+  public T filter(EmployeeScaffoldPlace place) {
+    return defaultValue;
   }
 
-  public void process(ReportScaffoldPlace reportPlace) {
+  public T filter(ListScaffoldPlace place) {
+    return defaultValue;
+  }
+
+  public T filter(ReportScaffoldPlace place) {
+    return defaultValue;
   }
 }

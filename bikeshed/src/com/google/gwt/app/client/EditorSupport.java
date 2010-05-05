@@ -29,12 +29,14 @@ import java.util.Set;
  * @param <V> the View type
  */
 public interface EditorSupport<R extends Record, V extends RecordEditView<R>> {
-  void init(final V view);
-  
   Set<Property<?>> getProperties();
+  
+  void init(final V view);
+
+  boolean isChanged(V view);
 
   void setEnabled(V view, boolean enabled);
-
+  
   void setValue(V view, R value);
 
   void showErrors(V view, Map<String, String> errorMap);

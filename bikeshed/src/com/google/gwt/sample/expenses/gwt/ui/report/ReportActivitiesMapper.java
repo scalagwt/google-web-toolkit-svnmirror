@@ -38,7 +38,7 @@ public class ReportActivitiesMapper implements
   public Activity getActivity(ReportScaffoldPlace place) {
     switch (place.getOperation()) {
       case DETAILS:
-        return new ReportDetailsActivity(place.getId(), requests);
+        return new ReportDetailsActivity(place.getId(), requests, placeController);
       case EDIT:
         return new ReportEditActivity(place.getId(), requests, placeController);
     }

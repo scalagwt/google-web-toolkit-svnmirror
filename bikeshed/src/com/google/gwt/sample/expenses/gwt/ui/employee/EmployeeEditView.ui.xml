@@ -11,5 +11,6 @@
     <div><span>Password:</span> <g:PasswordTextBox ui:field='password'></g:PasswordTextBox></div>
 
     <g:Button ui:field='save'>Save</g:Button>
+    <g:Button ui:field='cancel'>Cancel</g:Button>
   </g:HTMLPanel>
 </ui:UiBinder>

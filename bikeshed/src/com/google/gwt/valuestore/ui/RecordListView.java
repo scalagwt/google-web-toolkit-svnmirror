@@ -38,11 +38,6 @@ public interface RecordListView<R extends Record> extends ListView<R>,
    */
   interface Delegate<R extends Record> extends ListView.Delegate<R> {
     /**
-     * @param record the record the user wants to edit
-     */
-    void edit(R record);
-
-    /**
      * @param record the record whose details the user wants to see
      */
     void showDetails(R record);

@@ -22,7 +22,7 @@ import com.google.gwt.bikeshed.list.shared.SelectionModel.AbstractSelectionModel
  * 
  * @param <T> the record data type
  */
-public final class SingleSelectionModel<T> extends AbstractSelectionModel<T> {
+public class SingleSelectionModel<T> extends AbstractSelectionModel<T> {
 
   private T curSelection;
   private Object curKey;

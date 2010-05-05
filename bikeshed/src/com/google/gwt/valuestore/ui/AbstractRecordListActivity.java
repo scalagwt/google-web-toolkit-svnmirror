@@ -22,7 +22,10 @@ import com.google.gwt.requestfactory.shared.Receiver;
 import com.google.gwt.requestfactory.shared.RecordListRequest;
 import com.google.gwt.valuestore.shared.Record;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Abstract activity for requesting and displaying a list of {@Record}.
@@ -41,6 +44,8 @@ import java.util.List;
  */
 public abstract class AbstractRecordListActivity<R extends Record> implements
     Activity, RecordListView.Delegate<R> {
+  private final Map<String, Integer> recordToRow = new HashMap<String, Integer>();
+
   private RecordListView<R> view;
   private Display display;
 
@@ -62,18 +67,22 @@ public abstract class AbstractRecordListActivity<R extends Record> implements
    */
   public void onRangeChanged(ListView<R> listView) {
     final Range range = listView.getRange();
-    
+
     final Receiver<List<R>> callback = new Receiver<List<R>>() {
       public void onSuccess(List<R> values) {
+        recordToRow.clear();
+        for (int i = 0, r = range.getStart(); i < values.size(); i++, r++) {
+          recordToRow.put(values.get(i).getId(), r);
+        }
         getView().setData(range.getStart(), range.getLength(), values);
         if (display != null) {
           display.showActivityWidget(getView());
         }
       }
     };
-    
-    createRangeRequest(range).forProperties(
-        getView().getProperties()).to(callback).fire();
+
+    createRangeRequest(range).forProperties(getView().getProperties()).to(
+        callback).fire();
   }
 
   public void onStop() {
@@ -83,6 +92,12 @@ public abstract class AbstractRecordListActivity<R extends Record> implements
   public void start(Display display) {
     this.display = display;
     init();
+  }
+
+  public void update(R record) {
+    // TODO Must handle delete, new
+    Integer row = recordToRow.get(record.getId());
+    getView().setData(row, 1, Collections.singletonList(record));
   }
 
   public boolean willStop() {

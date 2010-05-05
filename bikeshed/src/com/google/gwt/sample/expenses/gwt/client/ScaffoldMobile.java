@@ -30,6 +30,7 @@ import com.google.gwt.sample.expenses.gwt.client.place.ListScaffoldPlace;
 import com.google.gwt.sample.expenses.gwt.client.place.ScaffoldPlace;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesEntityTypesProcessor;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
+import com.google.gwt.sample.expenses.gwt.ui.ListActivitiesMapper;
 import com.google.gwt.sample.expenses.gwt.ui.ScaffoldListPlaceRenderer;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.valuestore.shared.Record;
@@ -48,7 +49,7 @@ public class ScaffoldMobile implements EntryPoint {
   public void onModuleLoad() {
 
     /* App controllers and services */
-    
+
     final HandlerManager eventBus = new HandlerManager(null);
     final ExpensesRequestFactory requestFactory = GWT.create(ExpensesRequestFactory.class);
     requestFactory.init(eventBus);
@@ -70,7 +71,8 @@ public class ScaffoldMobile implements EntryPoint {
      * and finds the corresponding Activity to run
      */
 
-    final ActivityMapper<ScaffoldPlace> mapper = new ScaffoldActivities(
+    final ActivityMapper<ScaffoldPlace> mapper = new ScaffoldMobileActivities(
+        new ListActivitiesMapper(eventBus, requestFactory, placeController),
         requestFactory, placeController);
     final ActivityManager<ScaffoldPlace> activityManager = new ActivityManager<ScaffoldPlace>(
         mapper, eventBus);
@@ -87,7 +89,7 @@ public class ScaffoldMobile implements EntryPoint {
     loading.getParentElement().removeChild(loading);
 
     /* And show the user the shell */
-    
+
     RootLayoutPanel.get().add(shell);
   }
 

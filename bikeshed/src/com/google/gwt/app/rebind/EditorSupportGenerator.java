@@ -102,8 +102,9 @@ public class EditorSupportGenerator extends Generator {
       throw new UnableToCompleteException();
     }
 
-    SuperInterfaceType superinterfaceType = new SuperInterfaceType(interfaceType, logger);
-    String implName = getImplName(superinterfaceType, logger);
+    SuperInterfaceType superinterfaceType = new SuperInterfaceType(
+        interfaceType, logger);
+    String implName = getImplName(superinterfaceType);
     String packageName = interfaceType.getPackage().getName();
     PrintWriterManager printWriters = new PrintWriterManager(generatorContext,
         logger, packageName);
@@ -117,6 +118,35 @@ public class EditorSupportGenerator extends Generator {
     }
 
     return packageName + "." + implName;
+  }
+
+  private String findGetterMethod(JField property, JField uiField,
+      JClassType takesValueType, JClassType hasTextType, JClassType stringType,
+      TreeLogger logger) {
+
+    JClassType valueType = property.getType().isClass().isParameterized().getTypeArgs()[0];
+
+    JClassType uiFieldClassType = uiField.getType().isClass();
+    
+    if (takesValueType.isAssignableFrom(uiFieldClassType)) {
+      for (JClassType implemented : uiFieldClassType.getImplementedInterfaces()) {
+        JParameterizedType parameterized = implemented.isParameterized(); 
+        if (parameterized != null && (takesValueType == parameterized.getRawType()) 
+          && (valueType == parameterized.getTypeArgs()[0])) {
+          return "getValue";
+        }
+      }
+    }
+
+    if ((stringType == valueType)
+        && hasTextType.isAssignableFrom(uiFieldClassType)) {
+      return "getText";
+    }
+
+    logger.log(TreeLogger.WARN, String.format("Unable to take values from field \"%s\""
+        + " due to EditorSupport still being a complete hack.", uiField.getName()));
+
+    return null;
   }
 
   /**
@@ -159,6 +189,10 @@ public class EditorSupportGenerator extends Generator {
 
     JClassType takesValueType = generatorContext.getTypeOracle().findType(
         TakesValue.class.getName());
+    JClassType hasTextType = generatorContext.getTypeOracle().findType(
+        HasText.class.getName());
+    JClassType stringType = generatorContext.getTypeOracle().findType(
+        String.class.getName());
     JClassType recordType = superinterfaceType.recordType;
     JClassType viewType = superinterfaceType.viewType;
     writeGetPropertiesMethod(sw, recordType);
@@ -166,10 +200,12 @@ public class EditorSupportGenerator extends Generator {
     Set<JField> uiPropertyFields = getUiPropertyFields(viewType, recordType);
     writeInit(sw, viewType, recordType, uiPropertyFields, takesValueType,
         logger);
+    writeIsChangedMethod(sw, recordType, viewType, uiPropertyFields,
+        takesValueType, hasTextType, stringType, logger);
     writeSetEnabledMethod(sw, viewType, uiPropertyFields, takesValueType);
     writeSetValueMethod(sw, recordType, viewType, uiPropertyFields,
         generatorContext, logger);
-    writeShowErrorsMethod(sw, viewType, logger);
+    writeShowErrorsMethod(sw, viewType);
 
     sw.outdent();
     sw.println("}");
@@ -247,14 +283,12 @@ public class EditorSupportGenerator extends Generator {
   /**
    * returns the name of the Impl class.
    */
-  private String getImplName(SuperInterfaceType superinterfaceType,
-      TreeLogger logger) throws UnableToCompleteException {
-    return superinterfaceType.viewType.getName() + "_DataBinder_Impl";
+  private String getImplName(SuperInterfaceType superinterfaceType) {
+    return superinterfaceType.viewType.getName() + "_EditorSupport_Impl";
   }
 
   private JMethod getPropertyFunction(JClassType recordType,
-      String propertyFunctionName, TypeOracle typeOracle, TreeLogger logger)
-      throws UnableToCompleteException {
+      String propertyFunctionName) {
 
     for (JMethod method : getAccessibleMethods(recordType)) {
       if (method.getName().equals(propertyFunctionName)
@@ -323,8 +357,7 @@ public class EditorSupportGenerator extends Generator {
 
   private void writeInit(SourceWriter sw, JClassType viewType,
       JClassType recordType, Set<JField> uiPropertyFields,
-      JClassType takesValueType, TreeLogger logger)
-      throws UnableToCompleteException {
+      JClassType takesValueType, TreeLogger logger) {
     sw.indent();
     sw.println("public void init(final " + viewType.getName() + " view) {");
     sw.indent();
@@ -354,6 +387,32 @@ public class EditorSupportGenerator extends Generator {
       sw.outdent();
       sw.println("});");
     }
+    sw.outdent();
+    sw.println("}");
+    sw.outdent();
+  }
+
+  private void writeIsChangedMethod(SourceWriter sw, JClassType recordType,
+      JClassType viewType, Set<JField> uiPropertyFields,
+      JClassType takesValueType, JClassType hasTextType, JClassType stringType,
+      TreeLogger logger) {
+    sw.indent();
+    sw.println("public boolean isChanged(" + viewType.getName() + " view) {");
+    sw.indent();
+    for (JField uiField : uiPropertyFields) {
+      JField property = recordType.getField(uiField.getName());
+      if (property != null) {
+        String getter = findGetterMethod(property, uiField, takesValueType,
+            hasTextType, stringType, logger);
+        if (getter != null) {
+          sw.println(String.format(
+              "view.getDeltaValueStore().set(%s.%s, view.getValue(), view.%s.%s());",
+              recordType.getName(), property.getName(), uiField.getName(),
+              getter));
+        }
+      }
+    }
+    sw.println("return view.getDeltaValueStore().isChanged();");
     sw.outdent();
     sw.println("}");
     sw.outdent();
@@ -400,7 +459,7 @@ public class EditorSupportGenerator extends Generator {
       String propertyFunctionName = getPropertyFunctionName(uiField.getName(),
           logger);
       JMethod propertyFunction = getPropertyFunction(recordType,
-          propertyFunctionName, generatorContext.getTypeOracle(), logger);
+          propertyFunctionName);
       if (propertyFunction == null) {
         logger.log(TreeLogger.WARN,
             "Not generating setValue/setText call for field " + uiField);
@@ -408,6 +467,11 @@ public class EditorSupportGenerator extends Generator {
       }
       JType paramTypes[] = new JType[1];
       paramTypes[0] = propertyFunction.getReturnType();
+
+      // TODO No method name matching magic! Rely on interfaces or nothing!
+      // Where are the checks that the property value matches the param type on
+      // TakesValue?
+
       JMethod setValueMethod = classType.findMethod("setValue", paramTypes);
       String suffix = "";
       String functionName = "";
@@ -434,8 +498,7 @@ public class EditorSupportGenerator extends Generator {
     sw.outdent();
   }
 
-  private void writeShowErrorsMethod(SourceWriter sw, JClassType viewType,
-      TreeLogger logger) {
+  private void writeShowErrorsMethod(SourceWriter sw, JClassType viewType) {
     sw.indent();
     sw.println("public void showErrors(" + viewType.getName()
         + " view, Map<String, String> errorMap) {");

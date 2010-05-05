@@ -17,7 +17,6 @@ package com.google.gwt.sample.expenses.gwt.client;
 
 import com.google.gwt.app.place.Activity;
 import com.google.gwt.app.place.ActivityManager;
-import com.google.gwt.app.place.ActivityMapper;
 import com.google.gwt.app.place.PlaceController;
 import com.google.gwt.app.place.PlacePicker;
 import com.google.gwt.app.util.IsWidget;
@@ -30,6 +29,7 @@ import com.google.gwt.sample.expenses.gwt.client.place.ListScaffoldPlace;
 import com.google.gwt.sample.expenses.gwt.client.place.ScaffoldPlace;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesEntityTypesProcessor;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
+import com.google.gwt.sample.expenses.gwt.ui.ListActivitiesMapper;
 import com.google.gwt.sample.expenses.gwt.ui.ScaffoldListPlaceRenderer;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.valuestore.shared.Record;
@@ -64,18 +64,35 @@ public class Scaffold implements EntryPoint {
     placePicker.setPlaces(getTopPlaces());
 
     /*
-     * The body is run by an ActivitManager that listens for PlaceChange events
-     * and finds the corresponding Activity to run
+     * The app is run by ActivityManager instances that listen for place change
+     * events and run the appropriate Activity
+     * 
+     * The top half runs list activities of a traditional master / details view,
+     * although here "master" is a misnomer. The two ActivityManagers are
+     * completely independent of one another.
      */
+    final ActivityManager<ScaffoldPlace> masterActivityManager = new ActivityManager<ScaffoldPlace>(
+        new ScaffoldMasterActivities(new ListActivitiesMapper(eventBus,
+            requestFactory, placeController)), eventBus);
 
-    final ActivityMapper<ScaffoldPlace> mapper = new ScaffoldActivities(
-        requestFactory, placeController);
-    final ActivityManager<ScaffoldPlace> activityManager = new ActivityManager<ScaffoldPlace>(
-        mapper, eventBus);
-
-    activityManager.setDisplay(new Activity.Display() {
+    masterActivityManager.setDisplay(new Activity.Display() {
       public void showActivityWidget(IsWidget widget) {
-        shell.getBody().setWidget(widget == null ? null : widget.asWidget());
+        shell.getMasterPanel().setWidget(
+            widget == null ? null : widget.asWidget());
+      }
+    });
+
+    /*
+     * The bottom half handles details
+     */
+    final ActivityManager<ScaffoldPlace> detailsActivityManager = new ActivityManager<ScaffoldPlace>(
+        new ScaffoldDetailsActivities(requestFactory, placeController),
+        eventBus);
+
+    detailsActivityManager.setDisplay(new Activity.Display() {
+      public void showActivityWidget(IsWidget widget) {
+        shell.getDetailsPanel().setWidget(
+            widget == null ? null : widget.asWidget());
       }
     });
 

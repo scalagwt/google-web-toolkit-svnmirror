@@ -58,6 +58,8 @@ public class EmployeeEditView extends Composite implements
   @UiField
   TextBox userName;
   @UiField
+  Button cancel;
+  @UiField
   Button save;
   @UiField
   InlineLabel id;
@@ -92,6 +94,10 @@ public class EmployeeEditView extends Composite implements
     return record;
   }
 
+  public boolean isChanged() {
+    return DATA_BINDER.isChanged(this);
+  }
+
   public void setDelegate(Delegate delegate) {
     this.delegate = delegate;
   }
@@ -112,6 +118,11 @@ public class EmployeeEditView extends Composite implements
 
   public void showErrors(Map<String, String> errorMap) {
     DATA_BINDER.showErrors(this, errorMap);
+  }
+
+  @UiHandler("cancel")
+  void onCancel(@SuppressWarnings("unused") ClickEvent event) {
+    delegate.cancelClicked();
   }
 
   @UiHandler("save")

@@ -33,7 +33,8 @@ public class ScaffoldShell extends Composite {
   }
   private static final Binder BINDER = GWT.create(Binder.class);
 
-  @UiField SimplePanel body;
+  @UiField SimplePanel master;
+  @UiField SimplePanel details;
   @UiField PlacePickerView<ListScaffoldPlace> placesBox;
   @UiField DivElement error;
 
@@ -42,10 +43,17 @@ public class ScaffoldShell extends Composite {
   }
 
   /**
-   * @return the body
+   * @return the panel to hold the details
    */
-  public SimplePanel getBody() {
-    return body;
+  public SimplePanel getDetailsPanel() {
+    return details;
+  }
+
+  /**
+   * @return the panel to hold the master list
+   */
+  public SimplePanel getMasterPanel() {
+    return master;
   }
 
   /**

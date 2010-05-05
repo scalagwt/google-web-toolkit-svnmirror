@@ -39,7 +39,7 @@ public class EmployeeActivitiesMapper implements
   public Activity getActivity(EmployeeScaffoldPlace place) {
     switch (place.getOperation()) {
       case DETAILS:
-        return new EmployeeDetailsActivity(place.getId(), requests);
+        return new EmployeeDetailsActivity(place.getId(), requests, placeController);
 
       case EDIT:
         return new EmployeeEditActivity(place.getId(), requests,

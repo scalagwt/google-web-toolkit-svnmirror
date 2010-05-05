@@ -17,17 +17,22 @@ package com.google.gwt.sample.expenses.gwt.ui.employee;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.SpanElement;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.sample.expenses.gwt.request.EmployeeRecord;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.valuestore.ui.RecordDetailsView;
 
 /**
  * Details view for employee records.
  */
-public class EmployeeDetailsView extends Composite implements EmployeeDetailsActivity.View {
+public class EmployeeDetailsView extends Composite implements
+    RecordDetailsView<EmployeeRecord> {
   interface Binder extends UiBinder<HTMLPanel, EmployeeDetailsView> {
   }
 
@@ -47,6 +52,10 @@ public class EmployeeDetailsView extends Composite implements EmployeeDetailsAct
   SpanElement password;
   @UiField
   SpanElement supervisorKey;
+  @UiField
+  Button edit;
+
+  private Delegate delegate;
 
   public EmployeeDetailsView() {
     initWidget(BINDER.createAndBindUi(this));
@@ -58,6 +67,15 @@ public class EmployeeDetailsView extends Composite implements EmployeeDetailsAct
 
   public EmployeeRecord getValue() {
     return record;
+  }
+
+  @UiHandler("edit")
+  public void onEditClicked(@SuppressWarnings("unused") ClickEvent e) {
+    delegate.editClicked();
+  }
+
+  public void setDelegate(Delegate delegate) {
+    this.delegate = delegate;
   }
 
   public void setValue(EmployeeRecord record) {

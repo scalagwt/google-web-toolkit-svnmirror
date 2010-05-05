@@ -44,12 +44,16 @@
     </g:west>
 
     <g:center>
-      <g:SimplePanel ui:field='body'>
-      <g:HTML>
-      <h3>Welcome to Expenses</h3>
-      <p>Choose an entity set from the list on the left to get started</p>
-      </g:HTML>
+      <g:FlowPanel>
+      <g:SimplePanel ui:field='master'>
+        <g:HTML>
+          <h3>Welcome to Expenses</h3>
+          <p>Choose an entity set from the list on the left to get started</p>
+        </g:HTML>
       </g:SimplePanel>
+      <g:SimplePanel ui:field='details'>
+      </g:SimplePanel>
+      </g:FlowPanel>
     </g:center>
   </g:DockLayoutPanel>
 </ui:UiBinder>

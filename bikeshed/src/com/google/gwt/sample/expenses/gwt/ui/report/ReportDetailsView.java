@@ -17,18 +17,22 @@ package com.google.gwt.sample.expenses.gwt.ui.report;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.SpanElement;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.sample.expenses.gwt.request.ReportRecord;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.valuestore.ui.RecordDetailsView;
 
 /**
  * Details view for employee records.
  */
-public class ReportDetailsView extends Composite implements ReportDetailsActivity.View {
+public class ReportDetailsView extends Composite implements RecordDetailsView<ReportRecord> {
   interface Binder extends UiBinder<HTMLPanel, ReportDetailsView> {
   }
 
@@ -50,6 +54,10 @@ public class ReportDetailsView extends Composite implements ReportDetailsActivit
   SpanElement reporterKey;
   @UiField
   SpanElement approvedSupervisorKey;
+  @UiField
+  Button edit;
+
+  private Delegate delegate;
 
   public ReportDetailsView() {
     initWidget(BINDER.createAndBindUi(this));
@@ -63,6 +71,15 @@ public class ReportDetailsView extends Composite implements ReportDetailsActivit
     return record;
   }
 
+  @UiHandler("edit")
+  public void onEditClicked(@SuppressWarnings("unused") ClickEvent e) {
+    delegate.editClicked();
+  }
+
+  public void setDelegate(Delegate delegate) {
+    this.delegate = delegate;
+  }
+
   public void setValue(ReportRecord record) {
     this.record = record;
     purpose.setInnerText(record.getPurpose());
@@ -73,5 +90,4 @@ public class ReportDetailsView extends Composite implements ReportDetailsActivit
     reporterKey.setInnerText(record.getReporterKey());
     approvedSupervisorKey.setInnerText(record.getApprovedSupervisorKey());
   }
-
 }

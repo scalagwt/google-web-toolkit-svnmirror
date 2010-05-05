@@ -4,13 +4,12 @@
   <g:HTMLPanel>
     <h3><ui:msg>Employee <span ui:field='idSpan' /> (v<span ui:field='versionSpan'/>)</ui:msg></h3>
 
+  <div><span>Display Name:</span> <span ui:field='displayName'></span></div>
   <div><span>User Name:</span> <span ui:field='userName'></span></div>
-
+  <div><span>Supervisor Key:</span> <span ui:field='supervisorKey'></span></div>
   <div><span>Password:</span> <span ui:field='password'></span></div>
 
-  <div><span>Supervisor Key:</span> <span ui:field='supervisorKey'></span></div>
-
-  <div><span>Display Name:</span> <span ui:field='displayName'></span></div>
+  <g:Button ui:field='edit'>Edit</g:Button>
 
   </g:HTMLPanel>
 </ui:UiBinder>
