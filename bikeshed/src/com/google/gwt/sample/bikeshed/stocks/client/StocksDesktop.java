@@ -15,10 +15,6 @@
  */
 package com.google.gwt.sample.bikeshed.stocks.client;
 
-import com.google.gwt.bikeshed.list.client.ListView;
-import com.google.gwt.bikeshed.list.shared.AsyncListViewAdapter;
-import com.google.gwt.bikeshed.list.shared.ListViewAdapter;
-import com.google.gwt.bikeshed.list.shared.Range;
 import com.google.gwt.bikeshed.tree.client.CellBrowser;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.EntryPoint;
@@ -43,6 +39,10 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.AsyncListViewAdapter;
+import com.google.gwt.view.client.ListView;
+import com.google.gwt.view.client.ListViewAdapter;
+import com.google.gwt.view.client.Range;
 
 import java.util.HashMap;
 import java.util.List;

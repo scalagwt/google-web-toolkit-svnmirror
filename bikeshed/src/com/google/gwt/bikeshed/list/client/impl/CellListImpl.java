@@ -15,18 +15,18 @@
  */
 package com.google.gwt.bikeshed.list.client.impl;
 
-import com.google.gwt.bikeshed.list.client.PagingListView;
-import com.google.gwt.bikeshed.list.client.ListView.Delegate;
-import com.google.gwt.bikeshed.list.client.PagingListView.Pager;
-import com.google.gwt.bikeshed.list.shared.Range;
-import com.google.gwt.bikeshed.list.shared.SelectionModel;
-import com.google.gwt.bikeshed.list.shared.AbstractListViewAdapter.DefaultRange;
-import com.google.gwt.bikeshed.list.shared.SelectionModel.SelectionChangeEvent;
-import com.google.gwt.bikeshed.list.shared.SelectionModel.SelectionChangeHandler;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.view.client.PagingListView;
+import com.google.gwt.view.client.Range;
+import com.google.gwt.view.client.SelectionModel;
+import com.google.gwt.view.client.AbstractListViewAdapter.DefaultRange;
+import com.google.gwt.view.client.ListView.Delegate;
+import com.google.gwt.view.client.PagingListView.Pager;
+import com.google.gwt.view.client.SelectionModel.SelectionChangeEvent;
+import com.google.gwt.view.client.SelectionModel.SelectionChangeHandler;
 
 import java.util.ArrayList;
 import java.util.HashSet;

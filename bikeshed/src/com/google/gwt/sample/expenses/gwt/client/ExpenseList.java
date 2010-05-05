@@ -17,13 +17,7 @@ package com.google.gwt.sample.expenses.gwt.client;
 
 import com.google.gwt.bikeshed.list.client.CellTable;
 import com.google.gwt.bikeshed.list.client.Column;
-import com.google.gwt.bikeshed.list.client.ListView;
 import com.google.gwt.bikeshed.list.client.SimplePager;
-import com.google.gwt.bikeshed.list.shared.AsyncListViewAdapter;
-import com.google.gwt.bikeshed.list.shared.Range;
-import com.google.gwt.bikeshed.list.shared.SingleSelectionModel;
-import com.google.gwt.bikeshed.list.shared.SelectionModel.SelectionChangeEvent;
-import com.google.gwt.bikeshed.list.shared.SelectionModel.SelectionChangeHandler;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.DateCell;
@@ -49,6 +43,12 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.valuestore.shared.Property;
+import com.google.gwt.view.client.AsyncListViewAdapter;
+import com.google.gwt.view.client.ListView;
+import com.google.gwt.view.client.Range;
+import com.google.gwt.view.client.SingleSelectionModel;
+import com.google.gwt.view.client.SelectionModel.SelectionChangeEvent;
+import com.google.gwt.view.client.SelectionModel.SelectionChangeHandler;
 
 import java.util.ArrayList;
 import java.util.Date;

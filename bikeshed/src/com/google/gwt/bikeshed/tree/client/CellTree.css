@@ -15,7 +15,7 @@
 }
 
 @sprite .selectedItem {
-  gwt-image: 'cellBrowserSelectedBackground';
+  gwt-image: 'cellTreeSelectedBackground';
   background-color: #628cd5;
   color: white;
   height: auto;

@@ -16,16 +16,16 @@
 package com.google.gwt.sample.expenses.gwt.client;
 
 import com.google.gwt.bikeshed.list.client.CellList;
-import com.google.gwt.bikeshed.list.shared.ListViewAdapter;
-import com.google.gwt.bikeshed.list.shared.SelectionModel;
-import com.google.gwt.bikeshed.list.shared.SingleSelectionModel;
-import com.google.gwt.bikeshed.list.shared.SelectionModel.SelectionChangeEvent;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.requestfactory.shared.Receiver;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
 import com.google.gwt.sample.expenses.gwt.request.ReportRecord;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.valuestore.shared.Property;
+import com.google.gwt.view.client.ListViewAdapter;
+import com.google.gwt.view.client.SelectionModel;
+import com.google.gwt.view.client.SingleSelectionModel;
+import com.google.gwt.view.client.SelectionModel.SelectionChangeEvent;
 
 import java.util.ArrayList;
 import java.util.Collection;

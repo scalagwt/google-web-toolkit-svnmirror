@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.gwt.bikeshed.list.shared;
+package com.google.gwt.view.client;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -25,6 +25,10 @@ import com.google.gwt.event.shared.HasHandlers;
 
 /**
  * A model for selection within a list.
+ * 
+ * <p>
+ * Note: This class is new and its interface subject to change.
+ * </p>
  * 
  * @param <T> the data type of records in the list
  */

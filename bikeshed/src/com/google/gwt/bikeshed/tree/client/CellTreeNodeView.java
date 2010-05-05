@@ -15,12 +15,7 @@
  */
 package com.google.gwt.bikeshed.tree.client;
 
-import com.google.gwt.bikeshed.list.client.PagingListView;
 import com.google.gwt.bikeshed.list.client.impl.CellListImpl;
-import com.google.gwt.bikeshed.list.shared.ProvidesKey;
-import com.google.gwt.bikeshed.list.shared.Range;
-import com.google.gwt.bikeshed.list.shared.SelectionModel;
-import com.google.gwt.bikeshed.tree.client.CellTreeViewModel.NodeInfo;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.Document;
@@ -30,6 +25,12 @@ import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.dom.client.Style.Overflow;
 import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.user.client.ui.UIObject;
+import com.google.gwt.view.client.TreeViewModel;
+import com.google.gwt.view.client.PagingListView;
+import com.google.gwt.view.client.ProvidesKey;
+import com.google.gwt.view.client.Range;
+import com.google.gwt.view.client.SelectionModel;
+import com.google.gwt.view.client.TreeViewModel.NodeInfo;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -73,7 +74,7 @@ class CellTreeNodeView<T> extends UIObject {
   }
 
   /**
-   * The {@link com.google.gwt.bikeshed.list.client.ListView ListView} used to
+   * The {@link com.google.gwt.view.client.ListView ListView} used to
    * show children.
    * 
    * @param <C> the child item type
@@ -200,7 +201,7 @@ class CellTreeNodeView<T> extends UIObject {
           String openStyle = nodeView.tree.getStyle().openItem();
 
           ProvidesKey<C> providesKey = nodeInfo.getProvidesKey();
-          CellTreeViewModel model = nodeView.tree.getTreeViewModel();
+          TreeViewModel model = nodeView.tree.getTreeViewModel();
           int imageWidth = nodeView.tree.getImageWidth();
           for (C value : values) {
             Object key = providesKey.getKey(value);

@@ -16,7 +16,6 @@
 package com.google.gwt.sample.bikeshed.stocks.client;
 
 import com.google.gwt.bikeshed.list.client.CellList;
-import com.google.gwt.bikeshed.list.shared.AbstractListViewAdapter;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.sample.bikeshed.stocks.shared.PlayerInfo;
@@ -25,6 +24,7 @@ import com.google.gwt.uibinder.client.UiFactory;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.AbstractListViewAdapter;
 
 import java.util.List;
 

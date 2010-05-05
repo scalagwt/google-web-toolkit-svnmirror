@@ -13,10 +13,14 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.gwt.bikeshed.list.shared;
+package com.google.gwt.view.client;
 
 /**
  * The range of interest for a single handler.
+ * 
+ * <p>
+ * Note: This class is new and its interface subject to change.
+ * </p>
  */
 public interface Range {
 
@@ -34,4 +38,3 @@ public interface Range {
    */
   int getLength();
 }
-

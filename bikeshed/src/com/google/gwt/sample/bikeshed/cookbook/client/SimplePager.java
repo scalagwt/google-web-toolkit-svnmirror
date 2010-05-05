@@ -16,12 +16,12 @@
 package com.google.gwt.sample.bikeshed.cookbook.client;
 
 import com.google.gwt.bikeshed.list.client.AbstractPager;
-import com.google.gwt.bikeshed.list.client.PagingListView;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.view.client.PagingListView;
 
 /**
  * A pager for controlling a PagingListView that uses a series of buttons for

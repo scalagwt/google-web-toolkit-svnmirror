@@ -13,9 +13,9 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.gwt.bikeshed.list.shared;
+package com.google.gwt.view.client;
 
-import com.google.gwt.bikeshed.list.shared.SelectionModel.AbstractSelectionModel;
+import com.google.gwt.view.client.SelectionModel.AbstractSelectionModel;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +24,10 @@ import java.util.Map;
  * A convenience {@link SelectionModel} that allows records to be selected
  * according to a subclass-defined rule, plus a list of positive or negative
  * exceptions.
+ * 
+ * <p>
+ * Note: This class is new and its interface subject to change.
+ * </p>
  * 
  * @param <T> the data type of records in the list
  */

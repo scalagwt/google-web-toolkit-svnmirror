@@ -15,16 +15,7 @@
  */
 package com.google.gwt.sample.expenses.gwt.client;
 
-import com.google.gwt.bikeshed.list.client.ListView;
-import com.google.gwt.bikeshed.list.shared.AsyncListViewAdapter;
-import com.google.gwt.bikeshed.list.shared.ListViewAdapter;
-import com.google.gwt.bikeshed.list.shared.ProvidesKey;
-import com.google.gwt.bikeshed.list.shared.Range;
-import com.google.gwt.bikeshed.list.shared.SingleSelectionModel;
-import com.google.gwt.bikeshed.list.shared.SelectionModel.SelectionChangeEvent;
-import com.google.gwt.bikeshed.list.shared.SelectionModel.SelectionChangeHandler;
 import com.google.gwt.bikeshed.tree.client.CellTree;
-import com.google.gwt.bikeshed.tree.client.CellTreeViewModel;
 import com.google.gwt.dom.client.Style.Overflow;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.Cell;
@@ -36,6 +27,15 @@ import com.google.gwt.sample.expenses.gwt.request.EmployeeRecord;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.valuestore.shared.Property;
+import com.google.gwt.view.client.AsyncListViewAdapter;
+import com.google.gwt.view.client.TreeViewModel;
+import com.google.gwt.view.client.ListView;
+import com.google.gwt.view.client.ListViewAdapter;
+import com.google.gwt.view.client.ProvidesKey;
+import com.google.gwt.view.client.Range;
+import com.google.gwt.view.client.SingleSelectionModel;
+import com.google.gwt.view.client.SelectionModel.SelectionChangeEvent;
+import com.google.gwt.view.client.SelectionModel.SelectionChangeHandler;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -119,9 +119,9 @@ public class ExpenseTree extends Composite {
   }
 
   /**
-   * The {@link CellTreeViewModel} used to browse expense reports.
+   * The {@link TreeViewModel} used to browse expense reports.
    */
-  private class ExpensesTreeViewModel implements CellTreeViewModel {
+  private class ExpensesTreeViewModel implements TreeViewModel {
 
     /**
      * The department cell singleton.

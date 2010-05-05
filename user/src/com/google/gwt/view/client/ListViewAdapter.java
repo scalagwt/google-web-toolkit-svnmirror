@@ -13,9 +13,8 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.gwt.bikeshed.list.shared;
+package com.google.gwt.view.client;
 
-import com.google.gwt.bikeshed.list.client.ListView;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
 
@@ -29,6 +28,10 @@ import java.util.NoSuchElementException;
 /**
  * A concrete subclass of {@link AbstractListViewAdapter} that is backed by an
  * in-memory list.
+ * 
+ * <p>
+ * Note: This class is new and its interface subject to change.
+ * </p>
  * 
  * @param <T> the data type of the list
  */

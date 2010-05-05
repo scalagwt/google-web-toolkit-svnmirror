@@ -15,16 +15,17 @@
  */
 package com.google.gwt.bikeshed.list.client;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.ImageResource;
-import com.google.gwt.sample.bikeshed.style.client.Styles;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.view.client.PagingListView;
 
 /**
  * A pager for controlling a {@link PagingListView} that only supports simple
@@ -33,27 +34,6 @@ import com.google.gwt.user.client.ui.Label;
  * @param <T> the type of the PagingListView being controlled
  */
 public class SimplePager<T> extends AbstractPager<T> {
-
-  /**
-   * Styles used by this widget.
-   */
-  public static interface Style extends CssResource {
-
-    /**
-     * Applied to buttons.
-     */
-    String button();
-
-    /**
-     * Applied to disabled buttons.
-     */
-    String disabledButton();
-
-    /**
-     * Applied to the details text.
-     */
-    String pageDetails();
-  }
 
   /**
    * A ClientBundle that provides images for this widget.
@@ -107,9 +87,40 @@ public class SimplePager<T> extends AbstractPager<T> {
     Style simplePagerStyle();
   }
 
+  /**
+   * Styles used by this widget.
+   */
+  public static interface Style extends CssResource {
+
+    /**
+     * Applied to buttons.
+     */
+    String button();
+
+    /**
+     * Applied to disabled buttons.
+     */
+    String disabledButton();
+
+    /**
+     * Applied to the details text.
+     */
+    String pageDetails();
+  }
+
+  private static Resources DEFAULT_RESOURCES;
+
+  private static Resources getDefaultResources() {
+    if (DEFAULT_RESOURCES == null) {
+      DEFAULT_RESOURCES = GWT.create(Resources.class);
+    }
+    return DEFAULT_RESOURCES;
+  }
+
   private final Image firstPage;
   private final Label label = new Label();
   private final Image lastPage;
+
   /**
    * Set to true when the next and last buttons are disabled.
    */
@@ -140,7 +151,7 @@ public class SimplePager<T> extends AbstractPager<T> {
    * @param view the {@link PagingListView} to page
    */
   public SimplePager(PagingListView<T> view) {
-    this(view, Styles.resources());
+    this(view, getDefaultResources());
   }
 
   /**

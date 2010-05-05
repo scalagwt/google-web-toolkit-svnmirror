@@ -18,7 +18,6 @@ package com.google.gwt.sample.bikeshed.cookbook.client;
 import com.google.gwt.bikeshed.list.client.Column;
 import com.google.gwt.bikeshed.list.client.Header;
 import com.google.gwt.bikeshed.list.client.CellTable;
-import com.google.gwt.bikeshed.list.shared.ListViewAdapter;
 import com.google.gwt.cell.client.EditTextCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.TextCell;
@@ -27,6 +26,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.ListViewAdapter;
 
 import java.util.List;
 

@@ -13,15 +13,19 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.gwt.bikeshed.list.shared;
+package com.google.gwt.view.client;
 
-import com.google.gwt.bikeshed.list.shared.SelectionModel.AbstractSelectionModel;
+import com.google.gwt.view.client.SelectionModel.AbstractSelectionModel;
 
 import java.util.Set;
 import java.util.TreeSet;
 
 /**
  * A simple selection model that allows multiple objects to be selected.
+ * 
+ * <p>
+ * Note: This class is new and its interface subject to change.
+ * </p>
  * 
  * @param <T> the record data type
  */

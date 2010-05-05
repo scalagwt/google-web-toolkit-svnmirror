@@ -15,7 +15,6 @@
  */
 package com.google.gwt.sample.expenses.gwt.client;
 
-import com.google.gwt.bikeshed.list.shared.ProvidesKey;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerManager;
@@ -28,6 +27,7 @@ import com.google.gwt.sample.expenses.gwt.request.ReportRecordChanged;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.valuestore.shared.Property;
 import com.google.gwt.valuestore.shared.Record;
+import com.google.gwt.view.client.ProvidesKey;
 
 import java.util.ArrayList;
 import java.util.Collection;

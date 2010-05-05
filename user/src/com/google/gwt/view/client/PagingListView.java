@@ -13,10 +13,14 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.gwt.bikeshed.list.client;
+package com.google.gwt.view.client;
 
 /**
  * A list view that displays data in 'pages'.
+ *
+ * <p>
+ * Note: This class is new and its interface subject to change.
+ * </p>
  *
  * @param <T> the data type of each row
  */
@@ -32,15 +36,39 @@ public interface PagingListView<T> extends ListView<T> {
     void onRangeOrSizeChanged(PagingListView<T> listView);
   }
 
+  /**
+   * TODO: doc.
+   */
   int getDataSize();
-  
+
+  /**
+   * TODO: doc.
+   */
   int getPageSize();
-  
+
+  /**
+   * TODO: doc.
+   */
   int getPageStart();
-  
+
+  /**
+   * TODO: doc.
+   * 
+   * @param pager
+   */
   void setPager(Pager<T> pager);
-  
+
+  /**
+   * TODO: doc.
+   * 
+   * @param pageSize
+   */
   void setPageSize(int pageSize);
-  
+
+  /**
+   * TODO: doc.
+   * 
+   * @param pageStart
+   */
   void setPageStart(int pageStart);
 }

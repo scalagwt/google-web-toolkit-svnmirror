@@ -15,12 +15,7 @@
  */
 package com.google.gwt.sample.bikeshed.cookbook.client;
 
-import com.google.gwt.bikeshed.list.shared.ListViewAdapter;
-import com.google.gwt.bikeshed.list.shared.SelectionModel;
-import com.google.gwt.bikeshed.list.shared.SingleSelectionModel;
-import com.google.gwt.bikeshed.list.shared.SelectionModel.SelectionChangeEvent;
 import com.google.gwt.bikeshed.tree.client.CellTree;
-import com.google.gwt.bikeshed.tree.client.CellTreeViewModel;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -31,6 +26,11 @@ import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.TreeViewModel;
+import com.google.gwt.view.client.ListViewAdapter;
+import com.google.gwt.view.client.SelectionModel;
+import com.google.gwt.view.client.SingleSelectionModel;
+import com.google.gwt.view.client.SelectionModel.SelectionChangeEvent;
 
 import java.util.List;
 
@@ -56,7 +56,7 @@ public class Cookbook implements EntryPoint {
     }
   }
 
-  private static final class RecipeTreeModel implements CellTreeViewModel {
+  private static final class RecipeTreeModel implements TreeViewModel {
     private ListViewAdapter<Category> adapter = new ListViewAdapter<Category>();
     private SelectionModel<Object> selectionModel;
 

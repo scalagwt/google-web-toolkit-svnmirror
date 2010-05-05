@@ -15,13 +15,6 @@
  */
 package com.google.gwt.sample.bikeshed.stocks.client;
 
-import com.google.gwt.bikeshed.list.client.ListView;
-import com.google.gwt.bikeshed.list.shared.AbstractListViewAdapter;
-import com.google.gwt.bikeshed.list.shared.AsyncListViewAdapter;
-import com.google.gwt.bikeshed.list.shared.ListViewAdapter;
-import com.google.gwt.bikeshed.list.shared.ProvidesKey;
-import com.google.gwt.bikeshed.list.shared.SingleSelectionModel;
-import com.google.gwt.bikeshed.tree.client.CellTreeViewModel;
 import com.google.gwt.cell.client.ButtonCell;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.Cell;
@@ -29,6 +22,13 @@ import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.sample.bikeshed.stocks.shared.StockQuote;
 import com.google.gwt.sample.bikeshed.stocks.shared.Transaction;
+import com.google.gwt.view.client.AbstractListViewAdapter;
+import com.google.gwt.view.client.AsyncListViewAdapter;
+import com.google.gwt.view.client.TreeViewModel;
+import com.google.gwt.view.client.ListView;
+import com.google.gwt.view.client.ListViewAdapter;
+import com.google.gwt.view.client.ProvidesKey;
+import com.google.gwt.view.client.SingleSelectionModel;
 
 import java.util.HashMap;
 import java.util.List;
@@ -38,7 +38,7 @@ import java.util.Map;
  * A TreeViewModel for a tree with a hidden root node of null, a first level
  * containing ticker symbol Strings, and a second level containing Transactions.
  */
-class TransactionTreeViewModel implements CellTreeViewModel {
+class TransactionTreeViewModel implements TreeViewModel {
 
   class SectorListViewAdapter extends AsyncListViewAdapter<StockQuote> {
 
@@ -125,11 +125,11 @@ class TransactionTreeViewModel implements CellTreeViewModel {
   public <T> NodeInfo<?> getNodeInfo(T value) {
     if (value == null) {
       // Return list of sectors.
-      return new CellTreeViewModel.DefaultNodeInfo<String>(topLevelListViewAdapter,
+      return new TreeViewModel.DefaultNodeInfo<String>(topLevelListViewAdapter,
           new TextCell(), selectionModel, null);
     } else if ("Favorites".equals(value)) {
       // Return favorites. 
-      return new CellTreeViewModel.DefaultNodeInfo<StockQuote>(
+      return new TreeViewModel.DefaultNodeInfo<StockQuote>(
           stockQuoteListViewAdapter, STOCK_QUOTE_CELL, selectionModel, null);
     } else if ("History".equals(value)) {
       // Return history of the current stock quote.
@@ -139,7 +139,7 @@ class TransactionTreeViewModel implements CellTreeViewModel {
         adapter = new ListViewAdapter<Transaction>();
         transactionListViewAdaptersByTicker.put(ticker, adapter);
       }
-      return new CellTreeViewModel.DefaultNodeInfo<Transaction>(adapter,
+      return new TreeViewModel.DefaultNodeInfo<Transaction>(adapter,
           TRANSACTION_CELL, selectionModel, null);
     } else if ("Actions".equals(value)) {
       // Return the actions for the current stock quote.
@@ -147,7 +147,7 @@ class TransactionTreeViewModel implements CellTreeViewModel {
       List<String> list = adapter.getList();
       list.add("Buy");
       list.add("Sell");
-      return new CellTreeViewModel.DefaultNodeInfo<String>(adapter,
+      return new TreeViewModel.DefaultNodeInfo<String>(adapter,
           new ButtonCell(), selectionModel,
           new ValueUpdater<String>() {
             public void update(String value) {
@@ -163,7 +163,7 @@ class TransactionTreeViewModel implements CellTreeViewModel {
       lastSector = (String) value;
       SectorListViewAdapter adapter = new SectorListViewAdapter(lastSector);
       sectorListViewAdapters.put(lastSector, adapter);
-      return new CellTreeViewModel.DefaultNodeInfo<StockQuote>(adapter,
+      return new TreeViewModel.DefaultNodeInfo<StockQuote>(adapter,
           STOCK_QUOTE_CELL, selectionModel, null);
     } else if (value instanceof StockQuote) {
       // Return the submenu for a stock quote.
@@ -172,7 +172,7 @@ class TransactionTreeViewModel implements CellTreeViewModel {
       List<String> list = adapter.getList();
       list.add("Actions");
       list.add("History");
-      return new CellTreeViewModel.DefaultNodeInfo<String>(adapter,
+      return new TreeViewModel.DefaultNodeInfo<String>(adapter,
           new TextCell(), selectionModel, null);
     }
 

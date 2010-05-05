@@ -13,15 +13,16 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.gwt.bikeshed.list.client;
-
-import com.google.gwt.bikeshed.list.shared.Range;
-import com.google.gwt.bikeshed.list.shared.SelectionModel;
+package com.google.gwt.view.client;
 
 import java.util.List;
 
 /**
  * A list view.
+ * 
+ * <p>
+ * Note: This class is new and its interface subject to change.
+ * </p>
  * 
  * @param <T> the data type of each row
  */
@@ -36,8 +37,16 @@ public interface ListView<T> {
     void onRangeChanged(ListView<T> listView);
   }
 
+  /**
+   * TODO: doc.
+   * 
+   * @param delegate
+   */
   void setDelegate(Delegate<T> delegate);
 
+  /**
+   * TODO: doc.
+   */
   Range getRange();
 
   /**
@@ -49,6 +58,12 @@ public interface ListView<T> {
    */
   void setData(int start, int length, List<T> values);
 
+  /**
+   * TODO: doc.
+   * 
+   * @param size
+   * @param isExact
+   */
   void setDataSize(int size, boolean isExact);
 
   /**

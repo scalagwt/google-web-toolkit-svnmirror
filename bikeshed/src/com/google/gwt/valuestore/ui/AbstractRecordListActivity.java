@@ -16,11 +16,11 @@
 package com.google.gwt.valuestore.ui;
 
 import com.google.gwt.app.place.Activity;
-import com.google.gwt.bikeshed.list.client.ListView;
-import com.google.gwt.bikeshed.list.shared.Range;
 import com.google.gwt.requestfactory.shared.Receiver;
 import com.google.gwt.requestfactory.shared.RecordListRequest;
 import com.google.gwt.valuestore.shared.Record;
+import com.google.gwt.view.client.ListView;
+import com.google.gwt.view.client.Range;
 
 import java.util.Collections;
 import java.util.HashMap;

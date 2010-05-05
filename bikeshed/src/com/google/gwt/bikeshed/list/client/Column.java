@@ -15,13 +15,14 @@
  */
 package com.google.gwt.bikeshed.list.client;
 
-import com.google.gwt.bikeshed.list.shared.ProvidesKey;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.HasCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.view.client.HasViewData;
+import com.google.gwt.view.client.ProvidesKey;
 
 import java.util.HashMap;
 import java.util.Map;

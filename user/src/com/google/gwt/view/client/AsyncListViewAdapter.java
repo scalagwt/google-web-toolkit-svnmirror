@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.gwt.bikeshed.list.shared;
+package com.google.gwt.view.client;
 
 import java.util.List;
 
@@ -21,6 +21,10 @@ import java.util.List;
  * An implementation of {@link AbstractListViewAdapter} that allows the data to be
  * modified.
  *
+ * <p>
+ * Note: This class is new and its interface subject to change.
+ * </p>
+ * 
  * @param <T> the data type of records in the list
  */
 public abstract class AsyncListViewAdapter<T> extends AbstractListViewAdapter<T> {

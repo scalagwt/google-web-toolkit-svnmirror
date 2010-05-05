@@ -13,9 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.gwt.bikeshed.list.shared;
-
-import com.google.gwt.bikeshed.list.client.ListView;
+package com.google.gwt.view.client;
 
 import java.io.Serializable;
 import java.util.HashSet;
@@ -25,6 +23,10 @@ import java.util.Set;
 /**
  * A base implementation of a data source for list views.
  *
+ * <p>
+ * Note: This class is new and its interface subject to change.
+ * </p>
+ * 
  * @param <T> the data type of records in the list
  */
 public abstract class AbstractListViewAdapter<T> implements ProvidesKey<T> {
@@ -36,6 +38,12 @@ public abstract class AbstractListViewAdapter<T> implements ProvidesKey<T> {
     private int length;
     private int start;
 
+    /**
+     * TODO: doc.
+     * 
+     * @param start
+     * @param length
+     */
     public DefaultRange(int start, int length) {
       this.start = start;
       this.length = length;

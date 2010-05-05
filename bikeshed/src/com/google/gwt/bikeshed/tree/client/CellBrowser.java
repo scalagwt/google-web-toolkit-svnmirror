@@ -17,14 +17,7 @@ package com.google.gwt.bikeshed.tree.client;
 
 import com.google.gwt.animation.client.Animation;
 import com.google.gwt.bikeshed.list.client.CellList;
-import com.google.gwt.bikeshed.list.client.ListView;
 import com.google.gwt.bikeshed.list.client.PageSizePager;
-import com.google.gwt.bikeshed.list.client.PagingListView;
-import com.google.gwt.bikeshed.list.client.PagingListView.Pager;
-import com.google.gwt.bikeshed.list.shared.ProvidesKey;
-import com.google.gwt.bikeshed.list.shared.Range;
-import com.google.gwt.bikeshed.list.shared.SelectionModel;
-import com.google.gwt.bikeshed.tree.client.CellTreeViewModel.NodeInfo;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.ValueUpdater;
@@ -41,7 +34,6 @@ import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.resources.client.ImageResource.ImageOptions;
 import com.google.gwt.resources.client.ImageResource.RepeatStyle;
-import com.google.gwt.sample.bikeshed.style.client.Styles;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Composite;
@@ -52,6 +44,14 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.ListView;
+import com.google.gwt.view.client.PagingListView;
+import com.google.gwt.view.client.ProvidesKey;
+import com.google.gwt.view.client.Range;
+import com.google.gwt.view.client.SelectionModel;
+import com.google.gwt.view.client.TreeViewModel;
+import com.google.gwt.view.client.PagingListView.Pager;
+import com.google.gwt.view.client.TreeViewModel.NodeInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,42 +62,6 @@ import java.util.List;
  */
 public class CellBrowser extends Composite implements ProvidesResize,
     RequiresResize, HasAnimation {
-
-  /**
-   * The element used in place of an image when a node has no children.
-   */
-  private static final String LEAF_IMAGE = "<div style='position:absolute;display:none;'></div>";
-
-  /**
-   * Styles used by this widget.
-   */
-  public static interface Style extends CssResource {
-
-    /**
-     * Applied to the first column.
-     */
-    String firstColumn();
-
-    /**
-     * Applied to all columns.
-     */
-    String column();
-
-    /**
-     * Applied to all list items.
-     */
-    String item();
-
-    /***
-     * Applied to open items.
-     */
-    String openItem();
-
-    /***
-     * Applied to selected items.
-     */
-    String selectedItem();
-  }
 
   /**
    * A ClientBundle that provides images for this widget.
@@ -135,53 +99,43 @@ public class CellBrowser extends Composite implements ProvidesResize,
   }
 
   /**
+   * Styles used by this widget.
+   */
+  public static interface Style extends CssResource {
+
+    /**
+     * Applied to all columns.
+     */
+    String column();
+
+    /**
+     * Applied to the first column.
+     */
+    String firstColumn();
+
+    /**
+     * Applied to all list items.
+     */
+    String item();
+
+    /***
+     * Applied to open items.
+     */
+    String openItem();
+
+    /***
+     * Applied to selected items.
+     */
+    String selectedItem();
+  }
+
+  /**
    * We override the Resources in {@link CellList} so that the styles in
    * {@link CellList} don't conflict with the styles in {@link CellBrowser}.
    */
   static interface CellListResources extends CellList.Resources {
     @Source("CellBrowserOverride.css")
     CellList.Style cellListStyle();
-  }
-
-  /**
-   * The animation used to scroll to the newly added list view.
-   */
-  private class ScrollAnimation extends Animation {
-
-    /**
-     * The starting scroll position.
-     */
-    private int startScrollLeft;
-
-    /**
-     * The ending scroll position.
-     */
-    private int targetScrollLeft;
-
-    @Override
-    protected void onComplete() {
-      getElement().setScrollLeft(targetScrollLeft);
-    }
-
-    @Override
-    protected void onUpdate(double progress) {
-      int diff = targetScrollLeft - startScrollLeft;
-      getElement().setScrollLeft(startScrollLeft + (int) (diff * progress));
-    }
-
-    void scrollToEnd() {
-      Element elem = getElement();
-      targetScrollLeft = elem.getScrollWidth() - elem.getClientWidth();
-
-      if (isAnimationEnabled()) {
-        // Animate the scrolling.
-        startScrollLeft = elem.getScrollLeft();
-        run(250);
-      } else {
-        // Scroll instantly.
-        onComplete();
-      }
-    }
   }
 
   /**
@@ -368,6 +322,47 @@ public class CellBrowser extends Composite implements ProvidesResize,
   }
 
   /**
+   * The animation used to scroll to the newly added list view.
+   */
+  private class ScrollAnimation extends Animation {
+
+    /**
+     * The starting scroll position.
+     */
+    private int startScrollLeft;
+
+    /**
+     * The ending scroll position.
+     */
+    private int targetScrollLeft;
+
+    @Override
+    protected void onComplete() {
+      getElement().setScrollLeft(targetScrollLeft);
+    }
+
+    @Override
+    protected void onUpdate(double progress) {
+      int diff = targetScrollLeft - startScrollLeft;
+      getElement().setScrollLeft(startScrollLeft + (int) (diff * progress));
+    }
+
+    void scrollToEnd() {
+      Element elem = getElement();
+      targetScrollLeft = elem.getScrollWidth() - elem.getClientWidth();
+
+      if (isAnimationEnabled()) {
+        // Animate the scrolling.
+        startScrollLeft = elem.getScrollLeft();
+        run(250);
+      } else {
+        // Scroll instantly.
+        onComplete();
+      }
+    }
+  }
+
+  /**
    * A node in the tree.
    * 
    * @param <C> the data type of the children of the node
@@ -413,6 +408,13 @@ public class CellBrowser extends Composite implements ProvidesResize,
   }
 
   /**
+   * The element used in place of an image when a node has no children.
+   */
+  private static final String LEAF_IMAGE = "<div style='position:absolute;display:none;'></div>";
+
+  private static Resources DEFAULT_RESOURCES;
+
+  /**
    * The override styles used in {@link CellList}.
    */
   private static CellListResources cellListResource;
@@ -425,6 +427,13 @@ public class CellBrowser extends Composite implements ProvidesResize,
       cellListResource = GWT.create(CellListResources.class);
     }
     return cellListResource;
+  }
+
+  private static Resources getDefaultResources() {
+    if (DEFAULT_RESOURCES == null) {
+      DEFAULT_RESOURCES = GWT.create(Resources.class);
+    }
+    return DEFAULT_RESOURCES;
   }
 
   /**
@@ -483,30 +492,30 @@ public class CellBrowser extends Composite implements ProvidesResize,
   private final List<TreeNode<?>> treeNodes = new ArrayList<TreeNode<?>>();
 
   /**
-   * The {@link CellTreeViewModel} that backs the tree.
+   * The {@link TreeViewModel} that backs the tree.
    */
-  private final CellTreeViewModel viewModel;
+  private final TreeViewModel viewModel;
 
   /**
    * Construct a new {@link CellBrowser}.
    * 
    * @param <T> the type of data in the root node
-   * @param viewModel the {@link CellTreeViewModel} that backs the tree
+   * @param viewModel the {@link TreeViewModel} that backs the tree
    * @param rootValue the hidden root value of the tree
    */
-  public <T> CellBrowser(CellTreeViewModel viewModel, T rootValue) {
-    this(viewModel, rootValue, Styles.resources());
+  public <T> CellBrowser(TreeViewModel viewModel, T rootValue) {
+    this(viewModel, rootValue, getDefaultResources());
   }
 
   /**
    * Construct a new {@link CellBrowser} with the specified {@link Resources}.
    * 
    * @param <T> the type of data in the root node
-   * @param viewModel the {@link CellTreeViewModel} that backs the tree
+   * @param viewModel the {@link TreeViewModel} that backs the tree
    * @param rootValue the hidden root value of the tree
    * @param resources the {@link Resources} used for images
    */
-  public <T> CellBrowser(CellTreeViewModel viewModel, T rootValue,
+  public <T> CellBrowser(TreeViewModel viewModel, T rootValue,
       Resources resources) {
     this.viewModel = viewModel;
     this.style = resources.cellBrowserStyle();

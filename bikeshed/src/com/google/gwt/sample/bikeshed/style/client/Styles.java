@@ -15,11 +15,6 @@
  */
 package com.google.gwt.sample.bikeshed.style.client;
 
-import com.google.gwt.bikeshed.list.client.CellList;
-import com.google.gwt.bikeshed.list.client.CellTable;
-import com.google.gwt.bikeshed.list.client.SimplePager;
-import com.google.gwt.bikeshed.tree.client.CellBrowser;
-import com.google.gwt.bikeshed.tree.client.CellTree;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
@@ -51,9 +46,7 @@ public class Styles {
   /**
    * Shared resources.
    */
-  public interface Resources extends ClientBundle, CellBrowser.Resources,
-      CellList.Resources, CellTable.Resources, CellTree.Resources,
-      SimplePager.Resources {
+  public interface Resources extends ClientBundle {
 
     @NotStrict
     @Source("common.css")

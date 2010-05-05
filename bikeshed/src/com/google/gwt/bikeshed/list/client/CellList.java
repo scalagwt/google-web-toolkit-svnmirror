@@ -16,10 +16,9 @@
 package com.google.gwt.bikeshed.list.client;
 
 import com.google.gwt.bikeshed.list.client.impl.CellListImpl;
-import com.google.gwt.bikeshed.list.shared.Range;
-import com.google.gwt.bikeshed.list.shared.SelectionModel;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.ValueUpdater;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
@@ -29,9 +28,11 @@ import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.resources.client.ImageResource.ImageOptions;
 import com.google.gwt.resources.client.ImageResource.RepeatStyle;
-import com.google.gwt.sample.bikeshed.style.client.Styles;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.PagingListView;
+import com.google.gwt.view.client.Range;
+import com.google.gwt.view.client.SelectionModel;
 
 import java.util.List;
 
@@ -86,6 +87,15 @@ public class CellList<T> extends Widget implements PagingListView<T> {
     Style cellListStyle();
   }
 
+  private static Resources DEFAULT_RESOURCES;
+
+  private static Resources getDefaultResources() {
+    if (DEFAULT_RESOURCES == null) {
+      DEFAULT_RESOURCES = GWT.create(Resources.class);
+    }
+    return DEFAULT_RESOURCES;
+  }
+
   private final Cell<T> cell;
   private final Element emptyMessageElem;
   private final CellListImpl<T> impl;
@@ -98,7 +108,7 @@ public class CellList<T> extends Widget implements PagingListView<T> {
    * @param cell the cell used to render each item
    */
   public CellList(final Cell<T> cell) {
-    this(cell, Styles.resources());
+    this(cell, getDefaultResources());
   }
 
   /**

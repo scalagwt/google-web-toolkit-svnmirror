@@ -16,6 +16,7 @@
 package com.google.gwt.bikeshed.tree.client;
 
 import com.google.gwt.animation.client.Animation;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.dom.client.Style.Position;
@@ -25,11 +26,11 @@ import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.resources.client.ImageResource.ImageOptions;
 import com.google.gwt.resources.client.ImageResource.RepeatStyle;
-import com.google.gwt.sample.bikeshed.style.client.Styles;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasAnimation;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.view.client.TreeViewModel;
 
 import java.util.ArrayList;
 
@@ -39,44 +40,38 @@ import java.util.ArrayList;
 public class CellTree extends Composite implements HasAnimation {
 
   /**
-   * The default number of children to show under a tree node.
+   * A node animation.
    */
-  private static final int DEFAULT_LIST_SIZE = 25;
-
-  /**
-   * Styles used by this widget.
-   */
-  public static interface Style extends CssResource {
+  public abstract static class NodeAnimation extends Animation {
 
     /**
-     * Applied to the empty message.
+     * The default animation delay in milliseconds.
      */
-    String emptyMessage();
+    private static final int DEFAULT_ANIMATION_DURATION = 450;
 
     /**
-     * Applied to tree items.
+     * The duration of the animation.
      */
-    String item();
+    private int duration = DEFAULT_ANIMATION_DURATION;
+
+    NodeAnimation() {
+    }
+
+    public int getDuration() {
+      return duration;
+    }
+
+    public void setDuration(int duration) {
+      this.duration = duration;
+    }
 
     /**
-     * Applied to open/close icon.
+     * Animate a tree node into its new state.
+     * 
+     * @param node the node to animate
+     * @param isAnimationEnabled true to animate
      */
-    String itemImage();
-
-    /**
-     * Applied to open tree items.
-     */
-    String openItem();
-
-    /**
-     * Applied to selected tree items.
-     */
-    String selectedItem();
-
-    /**
-     * Applied to the show more button.
-     */
-    String showMoreButton();
+    abstract void animate(CellTreeNodeView<?> node, boolean isAnimationEnabled);
   }
 
   /**
@@ -111,41 +106,6 @@ public class CellTree extends Composite implements HasAnimation {
      */
     @Source("CellTree.css")
     Style cellTreeStyle();
-  }
-
-  /**
-   * A node animation.
-   */
-  public abstract static class NodeAnimation extends Animation {
-
-    /**
-     * The default animation delay in milliseconds.
-     */
-    private static final int DEFAULT_ANIMATION_DURATION = 450;
-
-    /**
-     * The duration of the animation.
-     */
-    private int duration = DEFAULT_ANIMATION_DURATION;
-
-    NodeAnimation() {
-    }
-
-    /**
-     * Animate a tree node into its new state.
-     * 
-     * @param node the node to animate
-     * @param isAnimationEnabled true to animate
-     */
-    abstract void animate(CellTreeNodeView<?> node, boolean isAnimationEnabled);
-
-    public int getDuration() {
-      return duration;
-    }
-
-    public void setDuration(int duration) {
-      this.duration = duration;
-    }
   }
 
   /**
@@ -193,6 +153,33 @@ public class CellTree extends Composite implements HasAnimation {
     private RevealAnimation() {
     }
 
+    @Override
+    protected void onComplete() {
+      cleanup();
+    }
+
+    @Override
+    protected void onStart() {
+      if (opening) {
+        animFrame.getStyle().setHeight(1.0, Unit.PX);
+        animFrame.getStyle().clearDisplay();
+        height = contentContainer.getScrollHeight();
+      } else {
+        height = contentContainer.getOffsetHeight();
+      }
+    }
+
+    @Override
+    protected void onUpdate(double progress) {
+      if (opening) {
+        double curHeight = progress * height;
+        animFrame.getStyle().setHeight(curHeight, Unit.PX);
+      } else {
+        double curHeight = (1.0 - progress) * height;
+        animFrame.getStyle().setHeight(curHeight, Unit.PX);
+      }
+    }
+
     /**
      * Animate a {@link CellTreeNodeView} into its new state.
      * 
@@ -223,33 +210,6 @@ public class CellTree extends Composite implements HasAnimation {
       } else {
         // Non animated.
         cleanup();
-      }
-    }
-
-    @Override
-    protected void onComplete() {
-      cleanup();
-    }
-
-    @Override
-    protected void onStart() {
-      if (opening) {
-        animFrame.getStyle().setHeight(1.0, Unit.PX);
-        animFrame.getStyle().clearDisplay();
-        height = contentContainer.getScrollHeight();
-      } else {
-        height = contentContainer.getOffsetHeight();
-      }
-    }
-
-    @Override
-    protected void onUpdate(double progress) {
-      if (opening) {
-        double curHeight = progress * height;
-        animFrame.getStyle().setHeight(curHeight, Unit.PX);
-      } else {
-        double curHeight = (1.0 - progress) * height;
-        animFrame.getStyle().setHeight(curHeight, Unit.PX);
       }
     }
 
@@ -322,6 +282,56 @@ public class CellTree extends Composite implements HasAnimation {
   }
 
   /**
+   * Styles used by this widget.
+   */
+  public static interface Style extends CssResource {
+
+    /**
+     * Applied to the empty message.
+     */
+    String emptyMessage();
+
+    /**
+     * Applied to tree items.
+     */
+    String item();
+
+    /**
+     * Applied to open/close icon.
+     */
+    String itemImage();
+
+    /**
+     * Applied to open tree items.
+     */
+    String openItem();
+
+    /**
+     * Applied to selected tree items.
+     */
+    String selectedItem();
+
+    /**
+     * Applied to the show more button.
+     */
+    String showMoreButton();
+  }
+
+  /**
+   * The default number of children to show under a tree node.
+   */
+  private static final int DEFAULT_LIST_SIZE = 25;
+
+  private static Resources DEFAULT_RESOURCES;
+
+  private static Resources getDefaultResources() {
+    if (DEFAULT_RESOURCES == null) {
+      DEFAULT_RESOURCES = GWT.create(Resources.class);
+    }
+    return DEFAULT_RESOURCES;
+  }
+
+  /**
    * The animation.
    */
   private NodeAnimation animation;
@@ -367,30 +377,30 @@ public class CellTree extends Composite implements HasAnimation {
   private final Style style;
 
   /**
-   * The {@link CellTreeViewModel} that backs the tree.
+   * The {@link TreeViewModel} that backs the tree.
    */
-  private final CellTreeViewModel viewModel;
+  private final TreeViewModel viewModel;
 
   /**
    * Construct a new {@link CellTree}.
    * 
    * @param <T> the type of data in the root node
-   * @param viewModel the {@link CellTreeViewModel} that backs the tree
+   * @param viewModel the {@link TreeViewModel} that backs the tree
    * @param rootValue the hidden root value of the tree
    */
-  public <T> CellTree(CellTreeViewModel viewModel, T rootValue) {
-    this(viewModel, rootValue, Styles.resources());
+  public <T> CellTree(TreeViewModel viewModel, T rootValue) {
+    this(viewModel, rootValue, getDefaultResources());
   }
 
   /**
    * Construct a new {@link CellTree}.
    * 
    * @param <T> the type of data in the root node
-   * @param viewModel the {@link CellTreeViewModel} that backs the tree
+   * @param viewModel the {@link TreeViewModel} that backs the tree
    * @param rootValue the hidden root value of the tree
    * @param resources the resources used to render the tree
    */
-  public <T> CellTree(CellTreeViewModel viewModel, T rootValue,
+  public <T> CellTree(TreeViewModel viewModel, T rootValue,
       Resources resources) {
     this.viewModel = viewModel;
     this.style = resources.cellTreeStyle();
@@ -441,7 +451,7 @@ public class CellTree extends Composite implements HasAnimation {
     return defaultNodeSize;
   }
 
-  public CellTreeViewModel getTreeViewModel() {
+  public TreeViewModel getTreeViewModel() {
     return viewModel;
   }
 

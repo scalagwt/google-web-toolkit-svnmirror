@@ -15,8 +15,9 @@
  */
 package com.google.gwt.bikeshed.list.client;
 
-import com.google.gwt.bikeshed.list.client.PagingListView.Pager;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.view.client.PagingListView;
+import com.google.gwt.view.client.PagingListView.Pager;
 
 /**
  * An abstract pager that exposes many methods useful for paging.

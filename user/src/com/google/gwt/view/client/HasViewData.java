@@ -13,11 +13,15 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.gwt.bikeshed.list.client;
+package com.google.gwt.view.client;
 
 /**
  * Interface that must be implemented by {@link com.google.gwt.cell.client.Cell}
  * containers.
+ * 
+ * <p>
+ * Note: This class is new and its interface subject to change.
+ * </p>
  */
 public interface HasViewData {
 

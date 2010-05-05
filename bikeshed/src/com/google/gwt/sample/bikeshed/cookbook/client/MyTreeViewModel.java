@@ -15,10 +15,6 @@
  */
 package com.google.gwt.sample.bikeshed.cookbook.client;
 
-import com.google.gwt.bikeshed.list.client.ListView;
-import com.google.gwt.bikeshed.list.shared.AbstractListViewAdapter;
-import com.google.gwt.bikeshed.list.shared.SelectionModel;
-import com.google.gwt.bikeshed.tree.client.CellTreeViewModel;
 import com.google.gwt.cell.client.ButtonCell;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.Cell;
@@ -31,6 +27,10 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.view.client.AbstractListViewAdapter;
+import com.google.gwt.view.client.TreeViewModel;
+import com.google.gwt.view.client.ListView;
+import com.google.gwt.view.client.SelectionModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +38,7 @@ import java.util.List;
 /**
  * A demo TreeModel.
  */
-public class MyTreeViewModel implements CellTreeViewModel {
+public class MyTreeViewModel implements TreeViewModel {
 
   private static class IntegerListViewAdapter extends
       AbstractListViewAdapter<Integer> {

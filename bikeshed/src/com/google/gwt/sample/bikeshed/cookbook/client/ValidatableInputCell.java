@@ -15,13 +15,13 @@
  */
 package com.google.gwt.sample.bikeshed.cookbook.client;
 
-import com.google.gwt.bikeshed.list.client.HasViewData;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.sample.bikeshed.cookbook.client.ValidatableField.DefaultValidatableField;
+import com.google.gwt.view.client.HasViewData;
 
 /**
  * A String {@link AbstractCell} that supports validation using a

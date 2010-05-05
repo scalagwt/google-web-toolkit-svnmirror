@@ -17,7 +17,6 @@ package com.google.gwt.sample.expenses.gwt.client;
 
 import com.google.gwt.bikeshed.list.client.CellTable;
 import com.google.gwt.bikeshed.list.client.Column;
-import com.google.gwt.bikeshed.list.shared.ListViewAdapter;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.CurrencyCell;
 import com.google.gwt.cell.client.DateCell;
@@ -49,6 +48,7 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.valuestore.shared.DeltaValueStore;
+import com.google.gwt.view.client.ListViewAdapter;
 
 import java.util.ArrayList;
 import java.util.Collections;

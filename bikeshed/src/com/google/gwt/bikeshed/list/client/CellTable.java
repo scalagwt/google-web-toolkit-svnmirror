@@ -16,9 +16,7 @@
 package com.google.gwt.bikeshed.list.client;
 
 import com.google.gwt.bikeshed.list.client.impl.CellListImpl;
-import com.google.gwt.bikeshed.list.shared.ProvidesKey;
-import com.google.gwt.bikeshed.list.shared.Range;
-import com.google.gwt.bikeshed.list.shared.SelectionModel;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.EventTarget;
@@ -31,9 +29,12 @@ import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.resources.client.ImageResource.ImageOptions;
 import com.google.gwt.resources.client.ImageResource.RepeatStyle;
-import com.google.gwt.sample.bikeshed.style.client.Styles;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.PagingListView;
+import com.google.gwt.view.client.ProvidesKey;
+import com.google.gwt.view.client.Range;
+import com.google.gwt.view.client.SelectionModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -138,6 +139,15 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
     Style cellTableStyle();
   }
 
+  private static Resources DEFAULT_RESOURCES;
+
+  private static Resources getDefaultResources() {
+    if (DEFAULT_RESOURCES == null) {
+      DEFAULT_RESOURCES = GWT.create(Resources.class);
+    }
+    return DEFAULT_RESOURCES;
+  }
+
   private List<Column<T, ?>> columns = new ArrayList<Column<T, ?>>();
   private List<Header<?>> footers = new ArrayList<Header<?>>();
   private List<Header<?>> headers = new ArrayList<Header<?>>();
@@ -179,7 +189,7 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
    * @param pageSize the page size
    */
   public CellTable(final int pageSize) {
-    this(pageSize, Styles.resources());
+    this(pageSize, getDefaultResources());
   }
 
   /**

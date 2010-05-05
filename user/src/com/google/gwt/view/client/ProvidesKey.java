@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.gwt.bikeshed.list.shared;
+package com.google.gwt.view.client;
 
 /**
  * <p>
@@ -27,6 +27,10 @@ package com.google.gwt.bikeshed.list.shared;
  * treated as identical, then A.equals(B), B.equals(A), and A.hashCode() ==
  * B.hashCode().  If A and B are to be treated as unequal, then it must
  * be the case that A.equals(B) == false and B.equals(A) == false.
+ * </p>
+ *
+ * <p>
+ * Note: This class is new and its interface subject to change.
  * </p>
  *
  * @param <T> the data type of records in the list

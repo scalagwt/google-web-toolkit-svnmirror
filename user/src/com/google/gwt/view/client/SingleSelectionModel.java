@@ -13,12 +13,16 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.gwt.bikeshed.list.shared;
+package com.google.gwt.view.client;
 
-import com.google.gwt.bikeshed.list.shared.SelectionModel.AbstractSelectionModel;
+import com.google.gwt.view.client.SelectionModel.AbstractSelectionModel;
 
 /**
  * A simple selection model that allows only one object to be selected a a time.
+ * 
+ * <p>
+ * Note: This class is new and its interface subject to change.
+ * </p>
  * 
  * @param <T> the record data type
  */

@@ -16,13 +16,13 @@
 package com.google.gwt.valuestore.ui;
 
 import com.google.gwt.bikeshed.list.client.CellTable;
-import com.google.gwt.bikeshed.list.shared.Range;
-import com.google.gwt.bikeshed.list.shared.SelectionModel;
-import com.google.gwt.bikeshed.list.shared.SingleSelectionModel;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.valuestore.shared.Property;
 import com.google.gwt.valuestore.shared.Record;
+import com.google.gwt.view.client.Range;
+import com.google.gwt.view.client.SelectionModel;
+import com.google.gwt.view.client.SingleSelectionModel;
 
 import java.util.HashSet;
 import java.util.List;
@@ -62,7 +62,7 @@ public abstract class AbstractRecordListView<R extends Record> extends
   }
   
   public void setDelegate(
-      com.google.gwt.bikeshed.list.client.ListView.Delegate<R> delegate) {
+      com.google.gwt.view.client.ListView.Delegate<R> delegate) {
     throw new UnsupportedOperationException(
         "A RecordListView requires a RecordListView.Delegate");
   }
