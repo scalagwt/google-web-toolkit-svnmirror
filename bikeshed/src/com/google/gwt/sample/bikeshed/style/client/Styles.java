@@ -30,7 +30,14 @@ public class Styles {
    * Common styles.
    */
   public interface Common extends CssResource {
+
+    String approvedOption();
+
+    String blankOption();
+
     String box();
+
+    String deniedOption();
 
     String header();
 
@@ -41,6 +48,16 @@ public class Styles {
     String padded();
 
     String table();
+
+    /**
+     * Applied to the username portion of a tree item.
+     */
+    String usernameTreeItem();
+
+    /**
+     * Applied to the username portion of a tree item when selected.
+     */
+    String usernameTreeItemSelected();
   }
 
   /**
@@ -53,9 +70,29 @@ public class Styles {
     Common common();
 
     /**
+     * Icon used to represent an approved item.
+     */
+    ImageResource approvedIcon();
+
+    /**
+     * Blank icon used for spacing.
+     */
+    ImageResource blankIcon();
+
+    /**
+     * Icon used to represent a denied item.
+     */
+    ImageResource deniedIcon();
+
+    /**
      * Icon used to represent a user group.
      */
     ImageResource groupIcon();
+
+    /**
+     * Right rounded corner of a search box.
+     */
+    ImageResource searchRight();
 
     /**
      * Icon used to represent a user.

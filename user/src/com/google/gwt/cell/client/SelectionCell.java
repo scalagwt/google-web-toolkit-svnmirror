@@ -36,9 +36,9 @@ public class SelectionCell extends AbstractCell<String> {
   private final List<String> options;
 
   /**
-   * TODO: doc
+   * Contruct a new {@link SelectionCell} with the specified options.
    * 
-   * @param options
+   * @param options the options in the cell.s
    */
   public SelectionCell(List<String> options) {
     this.options = new ArrayList<String>(options);
@@ -52,7 +52,7 @@ public class SelectionCell extends AbstractCell<String> {
   public Object onBrowserEvent(Element parent, String value, Object viewData,
       NativeEvent event, ValueUpdater<String> valueUpdater) {
     String type = event.getType();
-    if (valueUpdater != null && "click".equals(type)) {
+    if (valueUpdater != null && "change".equals(type)) {
       SelectElement select = parent.getFirstChild().cast();
       valueUpdater.update(options.get(select.getSelectedIndex()));
     }
@@ -68,7 +68,7 @@ public class SelectionCell extends AbstractCell<String> {
       if (index++ == selectedIndex) {
         sb.append("<option selected='selected'>");
       } else {
-      sb.append("<option>");
+        sb.append("<option>");
       }
       sb.append(option);
       sb.append("</option>");

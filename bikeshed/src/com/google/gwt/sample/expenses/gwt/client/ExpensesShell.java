@@ -19,6 +19,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.layout.client.Layout;
+import com.google.gwt.layout.client.Layout.Layer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -37,8 +39,6 @@ public class ExpensesShell extends Composite {
   private static ShellUiBinder uiBinder = GWT.create(ShellUiBinder.class);
 
   @UiField
-  ExpenseDetails expenseDetails;
-  @UiField
   ExpenseList expenseList;
   @UiField
   ExpenseTree expenseTree;
@@ -46,6 +46,8 @@ public class ExpensesShell extends Composite {
   LayoutPanel layoutPanel;
   @UiField
   SplitLayoutPanel splitLayout;
+
+  private final ExpenseDetails expenseDetails = new ExpenseDetails();
 
   public ExpensesShell() {
     initWidget(uiBinder.createAndBindUi(this));
@@ -78,13 +80,50 @@ public class ExpensesShell extends Composite {
    */
   public void showExpenseDetails(boolean isShowing) {
     if (isShowing) {
-      layoutPanel.setWidgetLeftWidth(expenseList, 0.0, Unit.PX, 0.0, Unit.PX);
-      layoutPanel.setWidgetLeftRight(expenseDetails, 0.0, Unit.PX, 0.0, Unit.PX);
+      showWidget(expenseDetails, false);
     } else {
-      layoutPanel.setWidgetLeftRight(expenseList, 0.0, Unit.PX, 0.0, Unit.PX);
-      layoutPanel.setWidgetRightWidth(expenseDetails, 0.0, Unit.PX, 0.0,
-          Unit.PX);
+      showWidget(expenseList, true);
     }
-    layoutPanel.animate(300);
+  }
+
+  /**
+   * Slide a widget into view.
+   * 
+   * @param widget the widget to show
+   * @param fromLeft true to slide from left, false to slide from right
+   */
+  private void showWidget(Widget widget, boolean fromLeft) {
+    // Early out if the widget is already in the layout panel.
+    final Widget current = layoutPanel.getWidget(0);
+    if (current == widget) {
+      return;
+    }
+
+    // Initialize the layout.
+    layoutPanel.add(widget);
+    layoutPanel.setWidgetLeftWidth(current, 0, Unit.PCT, 100, Unit.PCT);
+    if (fromLeft) {
+      layoutPanel.setWidgetLeftWidth(widget, -100, Unit.PCT, 100, Unit.PCT);
+    } else {
+      layoutPanel.setWidgetLeftWidth(widget, 100, Unit.PCT, 100, Unit.PCT);
+    }
+    layoutPanel.forceLayout();
+
+    // Slide into view.
+    if (fromLeft) {
+      layoutPanel.setWidgetLeftWidth(current, 100, Unit.PCT, 100, Unit.PCT);
+    } else {
+      layoutPanel.setWidgetLeftWidth(current, -100, Unit.PCT, 100, Unit.PCT);
+    }
+    layoutPanel.setWidgetLeftWidth(widget, 0, Unit.PCT, 100, Unit.PCT);
+    layoutPanel.animate(500, new Layout.AnimationCallback() {
+      public void onAnimationComplete() {
+        // Remove the old widget when the animation completes.
+        layoutPanel.remove(current);
+      }
+
+      public void onLayout(Layer layer, double progress) {
+      }
+    });
   }
 }

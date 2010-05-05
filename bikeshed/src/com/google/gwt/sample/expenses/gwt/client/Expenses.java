@@ -19,19 +19,12 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.sample.expenses.gwt.request.EmployeeRecord;
-import com.google.gwt.sample.expenses.gwt.request.ExpenseRecord;
 import com.google.gwt.sample.expenses.gwt.request.ExpenseRecordChanged;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
 import com.google.gwt.sample.expenses.gwt.request.ReportRecord;
 import com.google.gwt.sample.expenses.gwt.request.ReportRecordChanged;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
-import com.google.gwt.valuestore.shared.Property;
-import com.google.gwt.valuestore.shared.Record;
 import com.google.gwt.view.client.ProvidesKey;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 /**
  * Entry point for the Expenses app.
@@ -47,6 +40,8 @@ public class Expenses implements EntryPoint {
     }
   };
 
+  private String lastDepartment;
+  private EmployeeRecord lastEmployee;
   private ExpensesRequestFactory requestFactory;
   private ExpensesShell shell;
 
@@ -67,7 +62,9 @@ public class Expenses implements EntryPoint {
     // Listen for requests from ExpenseTree.
     expenseTree.setListener(new ExpenseTree.Listener() {
       public void onSelection(String department, EmployeeRecord employee) {
-        expenseList.setEmployee(employee);
+        lastDepartment = department;
+        lastEmployee = employee;
+        expenseList.setEmployee(department, employee);
         shell.showExpenseDetails(false);
       }
     });
@@ -77,28 +74,13 @@ public class Expenses implements EntryPoint {
     expenseList.setListener(new ExpenseList.Listener() {
       public void onReportSelected(ReportRecord report) {
         expenseDetails.setExpensesRequestFactory(requestFactory);
-        expenseDetails.setReportRecord(report);
+        expenseDetails.setReportRecord(report, lastDepartment, lastEmployee);
         shell.showExpenseDetails(true);
-
-        requestFactory.expenseRequest().findExpensesByReport(
-            report.getRef(Record.id)).forProperties(getExpenseColumns()).to(
-            expenseDetails).fire();
       }
     });
     expenseList.setRequestFactory(requestFactory);
     eventBus.addHandler(ReportRecordChanged.TYPE, expenseList);
 
     eventBus.addHandler(ExpenseRecordChanged.TYPE, expenseDetails);
-  }
-
-  private Collection<Property<?>> getExpenseColumns() {
-    List<Property<?>> columns = new ArrayList<Property<?>>();
-    columns.add(ExpenseRecord.amount);
-    columns.add(ExpenseRecord.approval);
-    columns.add(ExpenseRecord.category);
-    columns.add(ExpenseRecord.date);
-    columns.add(ExpenseRecord.description);
-    columns.add(ExpenseRecord.reasonDenied);
-    return columns;
   }
 }

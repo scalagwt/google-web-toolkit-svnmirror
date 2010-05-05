@@ -46,6 +46,40 @@ h1 {
   font-size: 18pt;
 }
 
+.usernameTreeItem {
+  color: #999;
+  font-size: 90%;
+}
+
+.usernameTreeItemSelected {
+  color: white;
+  font-size: 90%;
+}
+
+@sprite .blankOption {
+  gwt-image: 'blankIcon';
+  padding-left: 20px;
+  width: auto;
+  height: auto;
+  overflow: auto;
+}
+
+@sprite .approvedOption {
+  gwt-image: 'approvedIcon';
+  padding-left: 20px;
+  width: auto;
+  height: auto;
+  overflow: auto;
+}
+
+@sprite .deniedOption {
+  gwt-image: 'deniedIcon';
+  padding-left: 20px;
+  width: auto;
+  height: auto;
+  overflow: auto;
+}
+
 /* tables */
 .table {
   width: 100%;

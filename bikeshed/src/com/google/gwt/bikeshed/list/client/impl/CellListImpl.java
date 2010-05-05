@@ -81,12 +81,28 @@ public abstract class CellListImpl<T> {
   private boolean pageStartChanged;
 
   /**
-   * The command used to refresh the page.
+   * Indicates whether or not a redraw is scheduled.
+   */
+  private boolean redrawScheduled;
+
+  /**
+   * The command used to refresh or redraw the page. If both are scheduled, the
+   * refresh will take priority.
    */
   private final Scheduler.ScheduledCommand refreshCommand = new Scheduler.ScheduledCommand() {
     public void execute() {
+      // We clear the variables before making the refresh/redraw call so another
+      // refresh/redraw can be scheduled synchronously.
+      boolean wasRefreshScheduled = refreshScheduled;
+      boolean wasRedrawScheduled = redrawScheduled;
       refreshScheduled = false;
-      delegate.onRangeChanged(listView);
+      redrawScheduled = false;
+      if (wasRefreshScheduled && delegate != null) {
+        // Refresh takes priority over redraw.
+        delegate.onRangeChanged(listView);
+      } else if (wasRedrawScheduled) {
+        setData(data, pageStart);
+      }
     }
   };
 
@@ -177,17 +193,14 @@ public abstract class CellListImpl<T> {
    * Redraw the list with the current data.
    */
   public void redraw() {
-    setData(data, pageStart);
+    scheduleRefresh(true);
   }
 
   /**
    * Request data from the delegate.
    */
   public void refresh() {
-    if (delegate != null && !refreshScheduled) {
-      refreshScheduled = true;
-      Scheduler.get().scheduleFinally(refreshCommand);
-    }
+    scheduleRefresh(false);
   }
 
   /**
@@ -477,6 +490,22 @@ public abstract class CellListImpl<T> {
     // Refresh the entire list if needed.
     if (refreshRequired && dependsOnSelection) {
       setData(data, pageStart);
+    }
+  }
+
+  /**
+   * Schedule a redraw or refresh.
+   * 
+   * @param redrawOnly if true, only schedule a redraw
+   */
+  private void scheduleRefresh(boolean redrawOnly) {
+    if (!refreshScheduled && !redrawScheduled) {
+      Scheduler.get().scheduleDeferred(refreshCommand);
+    }
+    if (redrawOnly) {
+      redrawScheduled = true;
+    } else {
+      refreshScheduled = true;
     }
   }
 

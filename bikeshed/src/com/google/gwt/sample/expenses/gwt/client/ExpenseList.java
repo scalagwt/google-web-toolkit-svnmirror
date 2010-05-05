@@ -18,15 +18,20 @@ package com.google.gwt.sample.expenses.gwt.client;
 import com.google.gwt.bikeshed.list.client.CellTable;
 import com.google.gwt.bikeshed.list.client.Column;
 import com.google.gwt.bikeshed.list.client.SimplePager;
+import com.google.gwt.bikeshed.list.client.SimplePager.TextLocation;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.DateCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.regexp.shared.RegExp;
@@ -38,8 +43,8 @@ import com.google.gwt.sample.expenses.gwt.request.ReportRecordChanged;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiFactory;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.valuestore.shared.Property;
@@ -59,6 +64,26 @@ import java.util.List;
  */
 public class ExpenseList extends Composite implements
     Receiver<List<ReportRecord>>, ReportRecordChanged.Handler {
+
+  private static ExpenseListUiBinder uiBinder = GWT.create(ExpenseListUiBinder.class);
+
+  /**
+   * Utility method to get the first part of the breadcrumb based on the
+   * department and employee.
+   * 
+   * @param department the selected department
+   * @param employee the selected employee
+   * @return the breadcrumb
+   */
+  public static String getBreadcrumb(String department, EmployeeRecord employee) {
+    if (employee != null) {
+      return employee.getDisplayName() + "'s Reports";
+    } else if (department != null) {
+      return department + " Reports";
+    } else {
+      return "All Reports";
+    }
+  }
 
   /**
    * A text box that displays default text.
@@ -150,14 +175,14 @@ public class ExpenseList extends Composite implements
     }
   }
 
-  private static ExpenseListUiBinder uiBinder = GWT.create(ExpenseListUiBinder.class);
-
-  @UiField(provided = true)
-  DefaultTextBox highlightBox;
+  @UiField
+  Element breadcrumb;
   @UiField
   SimplePager<ReportRecord> pager;
   @UiField(provided = true)
   DefaultTextBox searchBox;
+  @UiField
+  Image searchButton;
 
   /**
    * The main table. We provide this in the constructor before calling
@@ -205,17 +230,6 @@ public class ExpenseList extends Composite implements
    */
   private RegExp searchRegExp;
 
-  /**
-   * The timer used to delay searches until the user stops typing.
-   */
-  private Timer searchTimer = new Timer() {
-    @Override
-    public void run() {
-      isCountStale = true;
-      requestReports();
-    }
-  };
-
   public ExpenseList() {
     reportColumns = new ArrayList<Property<?>>();
     reportColumns.add(ReportRecord.created);
@@ -224,7 +238,6 @@ public class ExpenseList extends Composite implements
 
     // Initialize the widget.
     createTable();
-    highlightBox = new DefaultTextBox("highlight");
     searchBox = new DefaultTextBox("search");
     initWidget(uiBinder.createAndBindUi(this));
 
@@ -234,18 +247,27 @@ public class ExpenseList extends Composite implements
     // Listen for key events from the text boxes.
     searchBox.addKeyUpHandler(new KeyUpHandler() {
       public void onKeyUp(KeyUpEvent event) {
-        searchTimer.schedule(500);
-      }
-    });
-    highlightBox.addKeyUpHandler(new KeyUpHandler() {
-      public void onKeyUp(KeyUpEvent event) {
-        String text = highlightBox.getText();
+        // Search on enter.
+        if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+          isCountStale = true;
+          requestReports();
+          return;
+        }
+
+        // Highlight as the user types.
+        String text = searchBox.getText();
         if (text.length() > 0) {
           searchRegExp = RegExp.compile("(" + text + ")", "i");
         } else {
           searchRegExp = null;
         }
         table.redraw();
+      }
+    });
+    searchButton.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        isCountStale = true;
+        requestReports();
       }
     });
   }
@@ -269,9 +291,19 @@ public class ExpenseList extends Composite implements
     reports.updateViewData(table.getPageStart(), newValues.size(), newValues);
   }
 
-  public void setEmployee(EmployeeRecord employee) {
+  /**
+   * Set the current department and employee to filter on.
+   * 
+   * @param department the department, or null if none selected
+   * @param employee the employee, or null if none selected
+   */
+  public void setEmployee(String department, EmployeeRecord employee) {
     this.employee = employee;
     isCountStale = true;
+    searchBox.resetDefaultText();
+    breadcrumb.setInnerText(getBreadcrumb(department, employee));
+
+    // Refresh the table.
     pager.setPageStart(0);
     table.refresh();
   }
@@ -287,7 +319,8 @@ public class ExpenseList extends Composite implements
 
   @UiFactory
   SimplePager<ReportRecord> createPager() {
-    SimplePager<ReportRecord> p = new SimplePager<ReportRecord>(table);
+    SimplePager<ReportRecord> p = new SimplePager<ReportRecord>(table,
+        TextLocation.RIGHT);
     p.setRangeLimited(true);
     return p;
   }
@@ -333,6 +366,7 @@ public class ExpenseList extends Composite implements
           orderBy += " DESC";
         }
         searchBox.resetDefaultText();
+        searchRegExp = null;
         requestReports();
       }
     });
@@ -367,13 +401,6 @@ public class ExpenseList extends Composite implements
           }
         }, ReportRecord.purpose);
 
-    // Created column.
-    addColumn("Created", new DateCell(), new GetValue<ReportRecord, Date>() {
-      public Date getValue(ReportRecord object) {
-        return object.getCreated();
-      }
-    }, ReportRecord.created);
-
     // Notes column.
     addColumn("Notes", new HighlightCell(),
         new GetValue<ReportRecord, String>() {
@@ -381,6 +408,13 @@ public class ExpenseList extends Composite implements
             return object.getNotes();
           }
         }, ReportRecord.notes);
+
+    // Created column.
+    addColumn("Created", new DateCell(), new GetValue<ReportRecord, Date>() {
+      public Date getValue(ReportRecord object) {
+        return object.getCreated();
+      }
+    }, ReportRecord.created);
   }
 
   /**

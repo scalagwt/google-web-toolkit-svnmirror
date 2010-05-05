@@ -67,12 +67,28 @@ public class ExpenseTree extends Composite {
 
     public EmployeeCell() {
       super(Styles.resources().userIcon(), new AbstractCell<EmployeeRecord>() {
+
+        private final String usernameStyle = Styles.common().usernameTreeItem();
+        private final String usernameStyleSelected = Styles.common().usernameTreeItemSelected();
+
+        @Override
+        public boolean dependsOnSelection() {
+          return true;
+        }
+
         @Override
         public void render(EmployeeRecord value, Object viewData,
             StringBuilder sb) {
           if (value != null) {
             sb.append(value.getDisplayName()).append("<br>");
-            sb.append("<i>").append(value.getUserName()).append("</i>");
+            sb.append("<span class='").append(usernameStyle);
+            if (lastEmployee != null
+                && lastEmployee.getId().equals(value.getId())) {
+              sb.append(" ").append(usernameStyleSelected);
+            }
+            sb.append("'>");
+            sb.append(value.getUserName());
+            sb.append("</span>");
           }
         }
       });

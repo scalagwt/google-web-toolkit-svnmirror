@@ -26,11 +26,16 @@ import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.dom.client.SelectElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.requestfactory.shared.Receiver;
+import com.google.gwt.requestfactory.shared.SyncResult;
+import com.google.gwt.sample.bikeshed.style.client.Styles;
+import com.google.gwt.sample.expenses.gwt.request.EmployeeRecord;
 import com.google.gwt.sample.expenses.gwt.request.ExpenseRecord;
 import com.google.gwt.sample.expenses.gwt.request.ExpenseRecordChanged;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
@@ -48,13 +53,17 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.valuestore.shared.DeltaValueStore;
+import com.google.gwt.valuestore.shared.Property;
+import com.google.gwt.valuestore.shared.Record;
 import com.google.gwt.view.client.ListViewAdapter;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Details about the current expense report on the right side of the app,
@@ -62,6 +71,88 @@ import java.util.List;
  */
 public class ExpenseDetails extends Composite implements
     Receiver<List<ExpenseRecord>>, ExpenseRecordChanged.Handler {
+
+  /**
+   * String indicating approval.
+   */
+  private static final String APPROVED = "Approved";
+
+  /**
+   * String indicating denial.
+   */
+  private static final String DENIED = "Denied";
+
+  /**
+   * The maximum amount that can be approved for a given report.
+   */
+  private static final int MAX_COST = 500;
+
+  /**
+   * The cell used for approval status.
+   */
+  private static class ApprovalCell extends SelectionCell {
+
+    private final String approvedClass;
+    private final String blankClass;
+    private final String deniedClass;
+
+    public ApprovalCell(List<String> options) {
+      super(options);
+      approvedClass = " class='" + Styles.common().approvedOption() + "'";
+      blankClass = " class='" + Styles.common().blankOption() + "'";
+      deniedClass = " class='" + Styles.common().deniedOption() + "'";
+    }
+
+    @Override
+    public Object onBrowserEvent(Element parent, String value, Object viewData,
+        NativeEvent event, ValueUpdater<String> valueUpdater) {
+      String type = event.getType();
+      if ("change".equals(type)) {
+        SelectElement select = parent.getFirstChild().cast();
+        select.setClassName(Styles.common().blankOption());
+
+        // Remember which item is now selected.
+        int index = select.getSelectedIndex();
+        viewData = select.getOptions().getItem(index).getValue();
+        select.setDisabled(true);
+      }
+      super.onBrowserEvent(parent, value, viewData, event, valueUpdater);
+      return viewData;
+    }
+
+    @Override
+    public void render(String value, Object viewData, StringBuilder sb) {
+      boolean isApproved = APPROVED.equals(value);
+      boolean isDenied = DENIED.equals(value);
+
+      sb.append("<select style='background-color:white;border:1px solid #707172;width:10em;'");
+      if (isApproved) {
+        sb.append(approvedClass);
+      } else if (isDenied) {
+        sb.append(deniedClass);
+      } else {
+        sb.append(blankClass);
+      }
+      sb.append(">");
+      sb.append("<option></option>");
+
+      // Approved.
+      sb.append("<option");
+      sb.append(approvedClass);
+      if (isApproved) {
+        sb.append(" selected='selected'");
+      }
+      sb.append(">").append(APPROVED).append("</option>");
+
+      // Denied.
+      sb.append("<option");
+      sb.append(deniedClass);
+      if (isDenied) {
+        sb.append(" selected='selected'");
+      }
+      sb.append(">").append(DENIED).append("</option>");
+    }
+  }
 
   class DenialPopup extends DialogBox {
     private Button cancelButton = new Button("Cancel", new ClickHandler() {
@@ -135,6 +226,9 @@ public class ExpenseDetails extends Composite implements
   @UiField
   Element costLabel;
 
+  @UiField
+  Element errorText;
+
   ExpensesRequestFactory expensesRequestFactory;
 
   @UiField
@@ -154,11 +248,26 @@ public class ExpenseDetails extends Composite implements
   private SortableColumn<ExpenseRecord, Date> dateColumn;
 
   /**
+   * The {@link ExpenseRecord} that caused an error.
+   */
+  private ExpenseRecord errorExpense;
+
+  /**
    * The adapter that provides expense items.
    */
   private ListViewAdapter<ExpenseRecord> items = new ListViewAdapter<ExpenseRecord>();
 
   private Comparator<ExpenseRecord> lastComparator;
+
+  /**
+   * The current report being displayed.
+   */
+  private ReportRecord report;
+
+  /**
+   * The total amount that has been approved.
+   */
+  private double totalApproved;
 
   public ExpenseDetails() {
     initWidget(uiBinder.createAndBindUi(this));
@@ -182,14 +291,17 @@ public class ExpenseDetails extends Composite implements
       index++;
     }
 
+    refreshCost();
     if (lastComparator != null) {
-      sortExpenses(lastComparator);
+      sortExpenses(list, lastComparator);
     }
   }
 
   public void onSuccess(List<ExpenseRecord> newValues) {
-    items.setList(newValues);
-    sortExpenses(dateColumn.getComparator(false));
+    List<ExpenseRecord> list = new ArrayList<ExpenseRecord>(newValues);
+    sortExpenses(list, lastComparator);
+    items.setList(list);
+    refreshCost();
   }
 
   public void setExpensesRequestFactory(
@@ -197,12 +309,27 @@ public class ExpenseDetails extends Composite implements
     this.expensesRequestFactory = expensesRequestFactory;
   }
 
-  public void setReportRecord(ReportRecord report) {
+  /**
+   * Set the {@link ReportRecord} to show.
+   * 
+   * @param report the {@link ReportRecord}
+   * @param department the selected department
+   * @param employee the selected employee
+   */
+  public void setReportRecord(ReportRecord report, String department,
+      EmployeeRecord employee) {
+    this.report = report;
     reportName.setInnerText(report.getPurpose());
     notesBox.setText(report.getNotes());
+    costLabel.setInnerText("");
+    approvedLabel.setInnerText("");
+    totalApproved = 0;
+
+    // Update the breadcrumb.
+    reportsLink.setText(ExpenseList.getBreadcrumb(department, employee));
 
     // Reset sorting state of table
-    lastComparator = null;
+    lastComparator = dateColumn.getComparator(false);
     for (SortableHeader header : allHeaders) {
       header.setSorted(false);
       header.setReverseSort(true);
@@ -210,6 +337,9 @@ public class ExpenseDetails extends Composite implements
     allHeaders.get(0).setSorted(true);
     allHeaders.get(0).setReverseSort(false);
     table.refreshHeaders();
+
+    // Request the expenses.
+    requestExpenses();
   }
 
   @UiFactory
@@ -248,7 +378,8 @@ public class ExpenseDetails extends Composite implements
         String reasonDenied = denialPopup.getReasonDenied();
         ExpenseRecord record = denialPopup.getExpenseRecord();
         if (reasonDenied == null || reasonDenied.length() == 0) {
-          updateExpenseRecord(record, "", "");
+          // We need to redraw the table to reset the select box.
+          table.redraw();
         } else {
           updateExpenseRecord(record, "Denied", reasonDenied);
         }
@@ -262,7 +393,7 @@ public class ExpenseDetails extends Composite implements
     options.add("Approved");
     options.add("Denied");
     SortableColumn<ExpenseRecord, String> approvalColumn = addColumn(view,
-        "Approval Status", new SelectionCell(options),
+        "Approval Status", new ApprovalCell(options),
         new GetValue<ExpenseRecord, String>() {
           public String getValue(ExpenseRecord object) {
             return object.getApproval();
@@ -307,7 +438,8 @@ public class ExpenseDetails extends Composite implements
             otherHeader.setReverseSort(true);
           }
         }
-        sortExpenses(column.getComparator(header.getReverseSort()));
+        sortExpenses(items.getList(),
+            column.getComparator(header.getReverseSort()));
         table.refreshHeaders();
       }
     });
@@ -321,16 +453,122 @@ public class ExpenseDetails extends Composite implements
     return addColumn(table, text, new TextCell(), getter);
   }
 
-  private void sortExpenses(final Comparator<ExpenseRecord> comparator) {
+  /**
+   * Return a formatted currency string.
+   * 
+   * @param amount the amount in dollars
+   * @return a formatted string
+   */
+  private String formatCurrency(double amount) {
+    boolean negative = amount < 0;
+    if (negative) {
+      amount = -amount;
+    }
+    int dollars = (int) amount;
+    int cents = (int) ((amount * 100) % 100);
+
+    StringBuilder sb = new StringBuilder();
+    if (negative) {
+      sb.append("-");
+    }
+    sb.append("$");
+    sb.append(dollars);
+    sb.append('.');
+    if (cents < 10) {
+      sb.append('0');
+    }
+    sb.append(cents);
+    return sb.toString();
+  }
+
+  /**
+   * Get the columns displayed in the expense table.
+   */
+  private Collection<Property<?>> getExpenseColumns() {
+    List<Property<?>> columns = new ArrayList<Property<?>>();
+    columns.add(ExpenseRecord.amount);
+    columns.add(ExpenseRecord.approval);
+    columns.add(ExpenseRecord.category);
+    columns.add(ExpenseRecord.date);
+    columns.add(ExpenseRecord.description);
+    columns.add(ExpenseRecord.reasonDenied);
+    return columns;
+  }
+
+  /**
+   * Refresh the total cost and approved amount.
+   */
+  private void refreshCost() {
+    double totalCost = 0;
+    totalApproved = 0;
+    List<ExpenseRecord> records = items.getList();
+    for (ExpenseRecord record : records) {
+      double cost = record.getAmount();
+      totalCost += cost;
+      if (APPROVED.equals(record.getApproval())) {
+        totalApproved += cost;
+      }
+    }
+    costLabel.setInnerText(formatCurrency(totalCost));
+    approvedLabel.setInnerText(formatCurrency(totalApproved));
+  }
+
+  /**
+   * Request the expenses.
+   */
+  private void requestExpenses() {
+    expensesRequestFactory.expenseRequest().findExpensesByReport(
+        report.getRef(Record.id)).forProperties(getExpenseColumns()).to(this).fire();
+  }
+
+  /**
+   * Show an error message related to an expense.
+   * 
+   * @param expense the {@link ExpenseRecord} that caused the error
+   * @param message the error message
+   */
+  private void showExpenseError(ExpenseRecord expense, String message) {
+    errorExpense = expense;
+    errorText.setInnerText(message);
+  }
+
+  private void sortExpenses(List<ExpenseRecord> list,
+      final Comparator<ExpenseRecord> comparator) {
     lastComparator = comparator;
-    Collections.sort(items.getList(), comparator);
+    Collections.sort(list, comparator);
   }
 
   private void updateExpenseRecord(ExpenseRecord record, String approval,
       String reasonDenied) {
+    // Verify that the total is under the cap.
+    if (APPROVED.equals(approval) && !APPROVED.equals(record.getApproval())) {
+      double amount = record.getAmount();
+      if (amount + totalApproved > MAX_COST) {
+        showExpenseError(record,
+            "The total approved amount for an Expense Report cannot exceed $"
+                + MAX_COST);
+        table.redraw();
+        return;
+      }
+    }
+
+    // Create a delta and sync with the value store.
     DeltaValueStore deltas = expensesRequestFactory.getValueStore().spawnDeltaView();
     deltas.set(ExpenseRecord.approval, record, approval);
     deltas.set(ExpenseRecord.reasonDenied, record, reasonDenied);
-    expensesRequestFactory.syncRequest(deltas).fire();
+    expensesRequestFactory.syncRequest(deltas).to(
+        new Receiver<Set<SyncResult>>() {
+          public void onSuccess(Set<SyncResult> response) {
+            for (SyncResult result : response) {
+              if (result.hasViolations()) {
+                // TODO(jlabanca): Handle errors.
+                result.getViolations();
+              }
+            }
+
+            // Request the updated expenses.
+            requestExpenses();
+          }
+        }).fire();
   }
 }

@@ -36,6 +36,13 @@ import com.google.gwt.view.client.PagingListView;
 public class SimplePager<T> extends AbstractPager<T> {
 
   /**
+   * The location of the text relative to the paging buttons.
+   */
+  public static enum TextLocation {
+    LEFT, RIGHT, CENTER;
+  }
+
+  /**
    * A ClientBundle that provides images for this widget.
    */
   public static interface Resources extends ClientBundle {
@@ -151,15 +158,28 @@ public class SimplePager<T> extends AbstractPager<T> {
    * @param view the {@link PagingListView} to page
    */
   public SimplePager(PagingListView<T> view) {
-    this(view, getDefaultResources());
+    this(view, TextLocation.CENTER);
+  }
+
+  /**
+   * Construct a {@link SimplePager} with the specified text location.
+   * 
+   * @param view the {@link PagingListView} to page
+   * @param location the location of the text relative to the buttons
+   */
+  public SimplePager(PagingListView<T> view, TextLocation location) {
+    this(view, location, getDefaultResources());
   }
 
   /**
    * Construct a {@link SimplePager} with the specified resources.
    * 
    * @param view the {@link PagingListView} to page
+   * @param location the location of the text relative to the buttons
+   * @param resources the {@link Resources} to use
    */
-  public SimplePager(PagingListView<T> view, Resources resources) {
+  public SimplePager(PagingListView<T> view, TextLocation location,
+      Resources resources) {
     super(view);
     this.resources = resources;
     this.style = resources.simplePagerStyle();
@@ -197,11 +217,19 @@ public class SimplePager<T> extends AbstractPager<T> {
     HorizontalPanel layout = new HorizontalPanel();
     layout.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
     initWidget(layout);
+    if (location == TextLocation.RIGHT) {
+      layout.add(label);
+    }
     layout.add(firstPage);
     layout.add(prevPage);
-    layout.add(label);
+    if (location == TextLocation.CENTER) {
+      layout.add(label);
+    }
     layout.add(nextPage);
     layout.add(lastPage);
+    if (location == TextLocation.LEFT) {
+      layout.add(label);
+    }
 
     // Add style names to the cells.
     firstPage.getElement().getParentElement().addClassName(style.button());

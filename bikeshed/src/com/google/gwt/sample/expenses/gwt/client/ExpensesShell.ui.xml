@@ -61,12 +61,6 @@
               <c:ExpenseList
                 ui:field='expenseList' />
             </g:layer>
-            <g:layer
-              right='0px'
-              width='0px'>
-              <c:ExpenseDetails
-                ui:field='expenseDetails' />
-            </g:layer>
           </g:LayoutPanel>
         </g:center>
       </g:SplitLayoutPanel>

@@ -1,5 +1,5 @@
 .cellTable {
-  border: 1px solid #5478af;
+  border: 1px solid #88b0f2;
 }
 
 .firstColumn {
@@ -9,21 +9,29 @@
 @sprite .footer {
   gwt-image: 'cellTableFooterBackground';
   background-color: #b4d0f8;
-  border-top: 1px solid #5478af;
-  border-left: 1px solid #5478af;
+  border-top: 1px solid #88b0f2;
+  border-left: 1px solid #88b0f2;
+  border-right: 1px solid #eef;
   padding: 5px 20px;
   text-align: left;
   color: #4b4a4a;
+  text-shadow: #ddf 1px 1px 0
 }
 
 @sprite .header {
   gwt-image: 'cellTableHeaderBackground';
   background-color: #b4d0f8;
-  border-bottom: 1px solid #5478af;
-  border-left: 1px solid #5478af;
-  padding: 5px 20px;
+  border-bottom: 1px solid #88b0f2;
+  border-left: 1px solid #88b0f2;
+  border-right: 1px solid #eef;
+  padding: 0px 20px;
   text-align: left;
   color: #4b4a4a;
+  text-shadow: #ddf 1px 1px 0; 
+}
+
+.cell {
+  padding: 4px 10px;
 }
 
 .firstColumnFooter {
@@ -43,7 +51,7 @@
 }
 
 .hoveredRow {
-  background-color: lightblue;
+  background-color: #88b0f2;
 }
 
 @sprite .selectedRow {

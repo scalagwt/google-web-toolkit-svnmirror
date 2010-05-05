@@ -57,6 +57,11 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
   public static interface Style extends CssResource {
 
     /**
+     * Applied to every cell.
+     */
+    String cell();
+
+    /**
      * Applied to the table.
      */
     String cellTable();
@@ -256,12 +261,12 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
           boolean first = true;
           for (Column<T, ?> column : columns) {
             // TODO(jlabanca): How do we sink ONFOCUS and ONBLUR?
+            sb.append("<td class='").append(style.cell());
             if (first) {
               first = false;
-              sb.append("<td class='").append(style.firstColumn()).append("'>");
-            } else {
-              sb.append("<td>");
+              sb.append(" ").append(style.firstColumn());
             }
+            sb.append("'>");
             if (value != null) {
               column.render(value, sb);
             }
