@@ -56,7 +56,27 @@ class CellTreeNodeView<T> extends UIObject {
    * @return the cell parent within the node
    */
   private static Element getCellParent(Element nodeElem) {
-    return nodeElem.getChild(1).cast();
+    return getSelectionElement(nodeElem).getFirstChildElement().getChild(1).cast();
+  }
+
+  /**
+   * Returns the element that selection is applied to.
+   * 
+   * @param nodeElem the element that represents the node
+   * @return the cell parent within the node
+   */
+  private static Element getImageElement(Element nodeElem) {
+    return getSelectionElement(nodeElem).getFirstChildElement().getFirstChildElement();
+  }
+
+  /**
+   * Returns the element that selection is applied to.
+   * 
+   * @param nodeElem the element that represents the node
+   * @return the cell parent within the node
+   */
+  private static Element getSelectionElement(Element nodeElem) {
+    return nodeElem.getFirstChildElement();
   }
 
   /**
@@ -74,8 +94,8 @@ class CellTreeNodeView<T> extends UIObject {
   }
 
   /**
-   * The {@link com.google.gwt.view.client.ListView ListView} used to
-   * show children.
+   * The {@link com.google.gwt.view.client.ListView ListView} used to show
+   * children.
    * 
    * @param <C> the child item type
    */
@@ -196,35 +216,68 @@ class CellTreeNodeView<T> extends UIObject {
         @Override
         protected void emitHtml(StringBuilder sb, List<C> values, int start,
             SelectionModel<? super C> selectionModel) {
-          String selectedStyle = nodeView.tree.getStyle().selectedItem();
-          String itemStyle = nodeView.tree.getStyle().item();
-          String openStyle = nodeView.tree.getStyle().openItem();
+          // Cache the style names that will be used for each child.
+          CellTree.Style style = nodeView.tree.getStyle();
+          String selectedStyle = style.selectedItem();
+          String itemStyle = style.item();
+          String itemImageValueStyle = style.itemImageValue();
+          String itemValueStyle = style.itemValue();
+          String openStyle = style.openItem();
+          String topStyle = style.topItem();
+          String topImageValueStyle = style.topItemImageValue();
+          boolean isRootNode = nodeView.isRootNode();
+          String openImage = nodeView.tree.getOpenImageHtml(isRootNode);
+          String closedImage = nodeView.tree.getClosedImageHtml(isRootNode);
+          int imageWidth = nodeView.tree.getImageWidth();
+          int paddingLeft = imageWidth * nodeView.depth;
 
+          // Render the child nodes.
           ProvidesKey<C> providesKey = nodeInfo.getProvidesKey();
           TreeViewModel model = nodeView.tree.getTreeViewModel();
-          int imageWidth = nodeView.tree.getImageWidth();
           for (C value : values) {
             Object key = providesKey.getKey(value);
             boolean isOpen = savedViews.containsKey(key);
-            sb.append("<div style='position:relative;padding-left:");
-            sb.append(imageWidth).append("px'>");
-            if (isOpen) {
-              sb.append(nodeView.tree.getOpenImageHtml());
-            } else if (model.isLeaf(value)) {
-              sb.append(LEAF_IMAGE);
-            } else {
-              sb.append(nodeView.tree.getClosedImageHtml());
-            }
-            sb.append("<div class='").append(itemStyle);
+
+            // Outer div contains image, value, and children (when open).
+            sb.append("<div>");
+
+            // The selection pads the content based on the depth.
+            sb.append("<div style='padding-left:");
+            sb.append(paddingLeft);
+            sb.append("px;' class='").append(itemStyle);
             if (isOpen) {
               sb.append(" ").append(openStyle);
+            }
+            if (isRootNode) {
+              sb.append(" ").append(topStyle);
             }
             if (selectionModel != null && selectionModel.isSelected(value)) {
               sb.append(" ").append(selectedStyle);
             }
             sb.append("'>");
+
+            // Inner div contains image and value.
+            sb.append("<div style='position:relative;padding-left:");
+            sb.append(imageWidth);
+            sb.append("px;' class='").append(itemImageValueStyle);
+            if (isRootNode) {
+              sb.append(" ").append(topImageValueStyle);
+            }
+            sb.append("'>");
+
+            // Add the open/close icon.
+            if (isOpen) {
+              sb.append(openImage);
+            } else if (model.isLeaf(value)) {
+              sb.append(LEAF_IMAGE);
+            } else {
+              sb.append(closedImage);
+            }
+
+            // Content div contains value.
+            sb.append("<div class='").append(itemValueStyle).append("'>");
             cell.render(value, null, sb);
-            sb.append("</div></div>");
+            sb.append("</div></div></div></div>");
           }
         }
 
@@ -237,7 +290,7 @@ class CellTreeNodeView<T> extends UIObject {
 
         @Override
         protected void setSelected(Element elem, boolean selected) {
-          setStyleName(getCellParent(elem),
+          setStyleName(getSelectionElement(elem),
               nodeView.tree.getStyle().selectedItem(), selected);
         }
       };
@@ -354,6 +407,11 @@ class CellTreeNodeView<T> extends UIObject {
   private Element contentContainer;
 
   /**
+   * The depth of this node in the tree.
+   */
+  private final int depth;
+
+  /**
    * The element used when there are no children to display.
    */
   private Element emptyMessageElem;
@@ -417,6 +475,7 @@ class CellTreeNodeView<T> extends UIObject {
     this.tree = tree;
     this.parentNode = parent;
     this.parentNodeInfo = parentNodeInfo;
+    this.depth = parentNode == null ? 0 : parentNode.depth + 1;
     this.value = value;
     setElement(elem);
   }
@@ -562,7 +621,7 @@ class CellTreeNodeView<T> extends UIObject {
    * @return the open/close image element
    */
   protected Element getImageElement() {
-    return getElement().getFirstChildElement();
+    return getImageElement(getElement());
   }
 
   /**
@@ -681,9 +740,11 @@ class CellTreeNodeView<T> extends UIObject {
     }
 
     // Replace the image element with a new one.
-    String html = tree.getClosedImageHtml();
+    boolean isTopLevel = parentNode.isRootNode();
+    String html = tree.getClosedImageHtml(isTopLevel);
     if (open) {
-      html = isLoading ? tree.getLoadingImageHtml() : tree.getOpenImageHtml();
+      html = isLoading ? tree.getLoadingImageHtml()
+          : tree.getOpenImageHtml(isTopLevel);
     }
     if (nodeInfoLoaded && nodeInfo == null) {
       html = LEAF_IMAGE;

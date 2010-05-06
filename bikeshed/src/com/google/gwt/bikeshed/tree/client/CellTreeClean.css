@@ -25,6 +25,21 @@
   
 }
 
+.topItem {
+  font-weight: bold;
+  color: #4b4a4a;
+  margin-top: 20px;
+  padding: 3px 13px 1px 10px !important;
+}
+
+.topItemImage {
+  
+}
+
+.topItemImageValue {
+  border-bottom: 2px solid #6f7277;
+}
+
 @sprite .selectedItem {
   gwt-image: 'cellTreeSelectedBackground';
   background-color: #628cd5;
@@ -36,16 +51,4 @@
 .showMoreButton {
   padding-left: 16px;
   outline: none;
-}
-
-.topItem {
-  
-}
-
-.topItemImage {
-  
-}
-
-.topItemImageValue {
-  
 }

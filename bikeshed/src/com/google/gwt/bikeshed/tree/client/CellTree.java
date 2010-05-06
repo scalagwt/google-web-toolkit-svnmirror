@@ -302,6 +302,16 @@ public class CellTree extends Composite implements HasAnimation {
     String itemImage();
 
     /**
+     * Applied to the wrapper around the image and value.
+     */
+    String itemImageValue();
+
+    /**
+     * Applied to the value in an item.
+     */
+    String itemValue();
+
+    /**
      * Applied to open tree items.
      */
     String openItem();
@@ -315,6 +325,45 @@ public class CellTree extends Composite implements HasAnimation {
      * Applied to the show more button.
      */
     String showMoreButton();
+
+    /**
+     * Applied to top level items.
+     */
+    String topItem();
+
+    /**
+     * Applied to open/close icon at the top level.
+     */
+    String topItemImage();
+
+    /**
+     * Applied to the wrapper around the image and value of top level items.
+     */
+    String topItemImageValue();
+  }
+
+  /**
+   * A cleaner version of the table that uses less graphics.
+   */
+  public static interface CleanStyle extends Style {
+    String topItem();
+
+    String topItemImageValue();
+  }
+
+  /**
+   * A cleaner version of the table that uses less graphics.
+   */
+  public static interface CleanResources extends Resources {
+
+    @Source("cellTreeClosedArrow.gif")
+    ImageResource cellTreeClosedItem();
+
+    @Source("cellTreeOpenArrow.gif")
+    ImageResource cellTreeOpenItem();
+
+    @Source("CellTreeClean.css")
+    CleanStyle cellTreeStyle();
   }
 
   /**
@@ -342,6 +391,11 @@ public class CellTree extends Composite implements HasAnimation {
   private final String closedImageHtml;
 
   /**
+   * The HTML used to generate the closed image for the top items.
+   */
+  private final String closedImageTopHtml;
+
+  /**
    * The default number of children to display under each node.
    */
   private int defaultNodeSize = DEFAULT_LIST_SIZE;
@@ -365,6 +419,11 @@ public class CellTree extends Composite implements HasAnimation {
    * The HTML used to generate the open image.
    */
   private final String openImageHtml;
+
+  /**
+   * The HTML used to generate the open image for the top items.
+   */
+  private final String openImageTopHtml;
 
   /**
    * The hidden root node in the tree.
@@ -400,8 +459,7 @@ public class CellTree extends Composite implements HasAnimation {
    * @param rootValue the hidden root value of the tree
    * @param resources the resources used to render the tree
    */
-  public <T> CellTree(TreeViewModel viewModel, T rootValue,
-      Resources resources) {
+  public <T> CellTree(TreeViewModel viewModel, T rootValue, Resources resources) {
     this.viewModel = viewModel;
     this.style = resources.cellTreeStyle();
     this.style.ensureInjected();
@@ -412,9 +470,11 @@ public class CellTree extends Composite implements HasAnimation {
     ImageResource treeOpen = resources.cellTreeOpenItem();
     ImageResource treeClosed = resources.cellTreeClosedItem();
     ImageResource treeLoading = resources.cellTreeLoading();
-    openImageHtml = getImageHtml(treeOpen);
-    closedImageHtml = getImageHtml(treeClosed);
-    loadingImageHtml = getImageHtml(treeLoading);
+    openImageHtml = getImageHtml(treeOpen, false);
+    closedImageHtml = getImageHtml(treeClosed, false);
+    openImageTopHtml = getImageHtml(treeOpen, true);
+    closedImageTopHtml = getImageHtml(treeClosed, true);
+    loadingImageHtml = getImageHtml(treeLoading, false);
     imageWidth = Math.max(Math.max(treeOpen.getWidth(), treeClosed.getWidth()),
         treeLoading.getWidth());
 
@@ -524,10 +584,13 @@ public class CellTree extends Composite implements HasAnimation {
   }
 
   /**
-   * @return the HTML to render the closed image.
+   * Get the HTML to render the closed image.
+   * 
+   * @param isTop true if the top element, false if not
+   * @return the HTML string
    */
-  String getClosedImageHtml() {
-    return closedImageHtml;
+  String getClosedImageHtml(boolean isTop) {
+    return isTop ? closedImageTopHtml : closedImageHtml;
   }
 
   /**
@@ -547,10 +610,13 @@ public class CellTree extends Composite implements HasAnimation {
   }
 
   /**
-   * @return the HTML to render the open image.
+   * Get the HTML to render the open image.
+   * 
+   * @param isTop true if the top element, false if not
+   * @return the HTML string
    */
-  String getOpenImageHtml() {
-    return openImageHtml;
+  String getOpenImageHtml(boolean isTop) {
+    return isTop ? openImageTopHtml : openImageHtml;
   }
 
   /**
@@ -609,11 +675,16 @@ public class CellTree extends Composite implements HasAnimation {
    * Get the HTML representation of an image.
    * 
    * @param res the {@link ImageResource} to render as HTML
+   * @param isTop true if the image is for a top level element.
    * @return the rendered HTML
    */
-  private String getImageHtml(ImageResource res) {
+  private String getImageHtml(ImageResource res, boolean isTop) {
     StringBuilder sb = new StringBuilder();
-    sb.append("<div class='").append(style.itemImage()).append("' ");
+    sb.append("<img class='").append(style.itemImage());
+    if (isTop) {
+      sb.append(" ").append(style.topItemImage());
+    }
+    sb.append("' ");
 
     // Add the position and dimensions.
     sb.append("style=\"position:absolute;left:0px;top:0px;");
@@ -625,7 +696,7 @@ public class CellTree extends Composite implements HasAnimation {
     sb.append("no-repeat scroll center center transparent;");
 
     // Close the div and return.
-    sb.append("\"></div>");
+    sb.append("\"></img>");
     return sb.toString();
   }
 }
