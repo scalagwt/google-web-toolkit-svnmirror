@@ -17,6 +17,7 @@ package com.google.gwt.valuestore.client;
 
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
+import com.google.gwt.requestfactory.client.impl.RecordToTypeMap;
 import com.google.gwt.requestfactory.shared.SyncResult;
 import com.google.gwt.requestfactory.shared.RequestFactory.WriteOperation;
 import com.google.gwt.valuestore.shared.DeltaValueStore;
@@ -118,6 +119,7 @@ public class DeltaValueStoreJsonImpl implements DeltaValueStore {
   private final FutureIdGenerator futureIdGenerator = new FutureIdGenerator();
 
   private final ValueStoreJsonImpl master;
+  private final RecordToTypeMap recordToTypeMap;
 
   // track C-U-D of CRUD operations
   private final Map<RecordKey, RecordJsoImpl> creates = new HashMap<RecordKey, RecordJsoImpl>();
@@ -126,8 +128,10 @@ public class DeltaValueStoreJsonImpl implements DeltaValueStore {
 
   private final Map<RecordKey, WriteOperation> operations = new HashMap<RecordKey, WriteOperation>();
 
-  DeltaValueStoreJsonImpl(ValueStoreJsonImpl master) {
+  DeltaValueStoreJsonImpl(ValueStoreJsonImpl master,
+      RecordToTypeMap recordToTypeMap) {
     this.master = master;
+    this.recordToTypeMap = recordToTypeMap;
   }
 
   public void addValidation() {
@@ -251,9 +255,9 @@ public class DeltaValueStoreJsonImpl implements DeltaValueStore {
   public Record create(String token) {
     assert !used;
     String futureId = futureIdGenerator.getFutureId();
-    // TODO: get schema from token
-    RecordJsoImpl newRecord = RecordJsoImpl.newCopy(null,
-        futureId, INITIAL_VERSION);
+
+    RecordJsoImpl newRecord = RecordJsoImpl.newCopy(
+        recordToTypeMap.getType(token), futureId, INITIAL_VERSION);
     RecordKey recordKey = new RecordKey(newRecord);
     assert operations.get(recordKey) == null;
     operations.put(recordKey, WriteOperation.CREATE);
@@ -375,7 +379,7 @@ public class DeltaValueStoreJsonImpl implements DeltaValueStore {
        * entail persisting all entities as part of a single transaction. In
        * particular, the transaction should fail if the validation check on any
        * of the entities fail.
-       *
+       * 
        * Multiple entities belonging to different records can not be persisted
        * at present due to the appEngine limitation of a transaction not being
        * allowed to span multiple entity groups.

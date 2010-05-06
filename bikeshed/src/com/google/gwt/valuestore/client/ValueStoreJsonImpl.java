@@ -17,6 +17,7 @@ package com.google.gwt.valuestore.client;
 
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.requestfactory.client.impl.RecordToTypeMap;
 import com.google.gwt.requestfactory.shared.RequestFactory.WriteOperation;
 import com.google.gwt.valuestore.shared.ValueStore;
 import com.google.gwt.valuestore.shared.impl.RecordJsoImpl;
@@ -31,11 +32,13 @@ public class ValueStoreJsonImpl implements ValueStore {
   // package protected fields for use by DeltaValueStoreJsonImpl
 
   final HandlerManager eventBus;
+  final RecordToTypeMap map;
 
   final Map<RecordKey, RecordJsoImpl> records = new HashMap<RecordKey, RecordJsoImpl>();
 
-  public ValueStoreJsonImpl(HandlerManager eventBus) {
+  public ValueStoreJsonImpl(HandlerManager eventBus, RecordToTypeMap map) {
     this.eventBus = eventBus;
+    this.map = map;
   }
 
   public void addValidation() {
@@ -57,7 +60,7 @@ public class ValueStoreJsonImpl implements ValueStore {
    * @return
    */
   public DeltaValueStoreJsonImpl spawnDeltaView() {
-    return new DeltaValueStoreJsonImpl(this);
+    return new DeltaValueStoreJsonImpl(this, map);
   }
 
   /**

@@ -35,15 +35,15 @@ import java.util.Set;
 /**
  * Base implementation of RequestFactory.
  */
-public class RequestFactoryJsonImpl implements RequestFactory {
+public abstract class RequestFactoryJsonImpl implements RequestFactory {
 
   private ValueStoreJsonImpl valueStore;
 
   /**
    * @param handlerManager
    */
-  public void init(HandlerManager handlerManager) {
-    this.valueStore = new ValueStoreJsonImpl(handlerManager);
+  protected void init(HandlerManager handlerManager, RecordToTypeMap map) {
+    this.valueStore = new ValueStoreJsonImpl(handlerManager, map);
   }
 
   public void fire(final RequestObject<?> requestObject) {
