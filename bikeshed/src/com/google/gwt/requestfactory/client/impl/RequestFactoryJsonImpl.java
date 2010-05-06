@@ -88,6 +88,7 @@ public abstract class RequestFactoryJsonImpl implements RequestFactory {
 
       Receiver<Set<SyncResult>> receiver = null;
       public void fire() {
+        assert null != receiver : "to(Receiver) was not called";
 
         RequestBuilder builder = new RequestBuilder(RequestBuilder.POST,
             "/expenses/data");

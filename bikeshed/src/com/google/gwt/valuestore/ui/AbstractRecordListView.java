@@ -60,7 +60,7 @@ public abstract class AbstractRecordListView<R extends Record> extends
   public void setDataSize(int size, boolean isExact) {
     table.setDataSize(size, isExact);
   }
-  
+
   public void setDelegate(
       com.google.gwt.view.client.ListView.Delegate<R> delegate) {
     throw new UnsupportedOperationException(
@@ -69,7 +69,7 @@ public abstract class AbstractRecordListView<R extends Record> extends
 
   public void setDelegate(final Delegate<R> delegate) {
     table.setDelegate(delegate);
-    
+
     table.setSelectionModel(new SingleSelectionModel<R>() {
       @Override
       public void setSelected(R object, boolean selected) {
@@ -88,7 +88,7 @@ public abstract class AbstractRecordListView<R extends Record> extends
     super.initWidget(root);
     this.table = table;
     table.setSelectionEnabled(true);
-    
+
     for (PropertyColumn<R, ?> column : columns) {
       table.addColumn(column, column.getProperty().getName());
       properties.add(column.getProperty());

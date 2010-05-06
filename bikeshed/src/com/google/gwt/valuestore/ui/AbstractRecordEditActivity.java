@@ -34,11 +34,10 @@ import java.util.Set;
 public abstract class AbstractRecordEditActivity<R extends Record> implements
     Activity, RecordEditView.Delegate {
 
-  private final RecordEditView<R> view;
+  private RecordEditView<R> view;
   private final String id;
   private DeltaValueStore deltas;
   private final RequestFactory requests;
-  private boolean dead = false;
 
   public AbstractRecordEditActivity(RecordEditView<R> view, String id,
       RequestFactory requests) {
@@ -57,11 +56,11 @@ public abstract class AbstractRecordEditActivity<R extends Record> implements
   }
 
   public void onCancel() {
-    this.dead = true;
+    onStop();
   }
 
   public void onStop() {
-    this.dead = true;
+    this.view = null;
   }
 
   public void saveClicked() {
@@ -73,7 +72,7 @@ public abstract class AbstractRecordEditActivity<R extends Record> implements
 
       Receiver<Set<SyncResult>> receiver = new Receiver<Set<SyncResult>>() {
         public void onSuccess(Set<SyncResult> response) {
-          if (dead) {
+          if (view == null) {
             return;
           }
           boolean hasViolations = false;
@@ -103,7 +102,7 @@ public abstract class AbstractRecordEditActivity<R extends Record> implements
   public void start(final Display display) {
     Receiver<R> callback = new Receiver<R>() {
       public void onSuccess(R record) {
-        if (dead) {
+        if (view == null) {
           return;
         }
         view.setEnabled(true);

@@ -41,7 +41,7 @@ public abstract class RecordChangedEvent<R extends Record, H extends EventHandle
     return record;
   }
 
-  public WriteOperation writeOperation() {
+  public WriteOperation getWriteOperation() {
     return writeOperation;
   }
 }

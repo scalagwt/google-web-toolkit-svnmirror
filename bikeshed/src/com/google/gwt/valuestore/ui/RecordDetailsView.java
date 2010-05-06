@@ -29,8 +29,11 @@ public interface RecordDetailsView<R> extends TakesValue<R>, IsWidget {
    * Implemented by the owner of the view.
    */
   interface Delegate {
+    void deleteClicked();
     void editClicked();
   }
+  
+  boolean confirm(String msg);
   
   void setDelegate(Delegate delegate);
 }

@@ -83,6 +83,7 @@ public interface RequestFactory {
    * Implemented by the request objects created by this factory.
    */
   interface RequestObject<T> {
+    // TODO merge fire() and to(), s.t. compiler enforces providing a callback
     void fire();
 
     String getRequestData();

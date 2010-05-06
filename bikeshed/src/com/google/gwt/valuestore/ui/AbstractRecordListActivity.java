@@ -18,6 +18,7 @@ package com.google.gwt.valuestore.ui;
 import com.google.gwt.app.place.Activity;
 import com.google.gwt.requestfactory.shared.Receiver;
 import com.google.gwt.requestfactory.shared.RecordListRequest;
+import com.google.gwt.requestfactory.shared.RequestFactory.WriteOperation;
 import com.google.gwt.valuestore.shared.Record;
 import com.google.gwt.view.client.ListView;
 import com.google.gwt.view.client.Range;
@@ -70,6 +71,10 @@ public abstract class AbstractRecordListActivity<R extends Record> implements
 
     final Receiver<List<R>> callback = new Receiver<List<R>>() {
       public void onSuccess(List<R> values) {
+        if (view == null) {
+          // This activity is dead
+          return;
+        }
         recordToRow.clear();
         for (int i = 0, r = range.getStart(); i < values.size(); i++, r++) {
           recordToRow.put(values.get(i).getId(), r);
@@ -87,6 +92,7 @@ public abstract class AbstractRecordListActivity<R extends Record> implements
 
   public void onStop() {
     view.setDelegate((RecordListView.Delegate<R>) null);
+    view = null;
   }
 
   public void start(Display display) {
@@ -94,10 +100,19 @@ public abstract class AbstractRecordListActivity<R extends Record> implements
     init();
   }
 
-  public void update(R record) {
-    // TODO Must handle delete, new
-    Integer row = recordToRow.get(record.getId());
-    getView().setData(row, 1, Collections.singletonList(record));
+  public void update(WriteOperation writeOperation, R record) {
+    switch (writeOperation) {
+      case UPDATE:
+        update(record);
+        break;
+
+      case DELETE:
+        delete(record);
+        break;
+
+      case CREATE:
+        break;
+    }
   }
 
   public boolean willStop() {
@@ -108,6 +123,13 @@ public abstract class AbstractRecordListActivity<R extends Record> implements
 
   protected abstract void fireCountRequest(Receiver<Long> callback);
 
+  private void delete(R record) {
+    Integer row = recordToRow.get(record.getId());
+    if (row != null) {
+      onRangeChanged(view);
+    }
+  }
+
   private void init() {
     fireCountRequest(new Receiver<Long>() {
       public void onSuccess(Long response) {
@@ -115,5 +137,10 @@ public abstract class AbstractRecordListActivity<R extends Record> implements
         onRangeChanged(view);
       }
     });
+  }
+
+  private void update(R record) {
+    Integer row = recordToRow.get(record.getId());
+    getView().setData(row, 1, Collections.singletonList(record));
   }
 }

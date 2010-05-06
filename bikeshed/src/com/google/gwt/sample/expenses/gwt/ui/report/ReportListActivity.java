@@ -86,7 +86,7 @@ public final class ReportListActivity extends
   public void start(Display display) {
     this.registration = eventBus.addHandler(ReportRecordChanged.TYPE, new ReportRecordChanged.Handler() {
       public void onReportChanged(ReportRecordChanged event) {
-        update(event.getRecord());
+        update(event.getWriteOperation(), event.getRecord());
       }
     });
     super.start(display);

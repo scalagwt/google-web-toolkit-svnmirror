@@ -86,7 +86,7 @@ public class EmployeeListActivity extends
     this.registration = eventBus.addHandler(EmployeeRecordChanged.TYPE,
         new EmployeeRecordChanged.Handler() {
           public void onEmployeeChanged(EmployeeRecordChanged event) {
-            update(event.getRecord());
+            update(event.getWriteOperation(), event.getRecord());
           }
         });
     super.start(display);
