@@ -36,6 +36,7 @@ import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.requestfactory.shared.Receiver;
+import com.google.gwt.sample.bikeshed.style.client.Styles;
 import com.google.gwt.sample.expenses.gwt.request.EmployeeRecord;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
 import com.google.gwt.sample.expenses.gwt.request.ReportRecord;
@@ -77,9 +78,9 @@ public class ExpenseList extends Composite implements
    */
   public static String getBreadcrumb(String department, EmployeeRecord employee) {
     if (employee != null) {
-      return employee.getDisplayName() + "'s Reports";
+      return "Reports for " + employee.getDisplayName();
     } else if (department != null) {
-      return department + " Reports";
+      return "Reports for " + department;
     } else {
       return "All Reports";
     }
@@ -378,7 +379,11 @@ public class ExpenseList extends Composite implements
    * Create the {@link CellTable}.
    */
   private void createTable() {
-    table = new CellTable<ReportRecord>(50);
+    CellTable.Resources resources = GWT.create(CellTable.CleanResources.class);
+    table = new CellTable<ReportRecord>(50, resources);
+    Styles.Common common = Styles.common();
+    table.addColumnStyleName(0, common.expenseListPurposeColumn());
+    table.addColumnStyleName(2, common.expenseListCreatedColumn());
 
     // Add a selection model.
     final SingleSelectionModel<ReportRecord> selectionModel = new SingleSelectionModel<ReportRecord>();

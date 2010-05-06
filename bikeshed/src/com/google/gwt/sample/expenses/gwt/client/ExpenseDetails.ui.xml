@@ -4,15 +4,66 @@
   xmlns:g='urn:import:com.google.gwt.user.client.ui'
   xmlns:l='urn:import:com.google.gwt.bikeshed.list.client'>
 
+  <ui:image
+    field='cornerTopRight' />
+  <ui:image
+    field='cornerTopLeft' />
+  <ui:image
+    field='cornerBottomRight' />
+  <ui:image
+    field='cornerBottomLeft' />
+
   <ui:style>
+    .top {
+      padding-top: 15px;
+    }
+    
+    .corner {
+      height: 4px;
+      width: 4px;
+    }
+    
+    @sprite .cornerTopRight {
+      gwt-image: 'cornerTopRight';
+    }
+    
+    @sprite .cornerTopLeft {
+      gwt-image: 'cornerTopLeft';
+    }
+    
+    @sprite .cornerBottomRight {
+      gwt-image: 'cornerBottomRight';
+    }
+    
+    @sprite .cornerBottomLeft {
+      gwt-image: 'cornerBottomLeft';
+    }
+    
+    .tableControlsBackground {
+      background: #d7dde8;
+    }
+    
+    .tableControlsBorderInner {
+      height: 1px;
+      width: 1px;
+      overflow: hidden;
+    }
+    
     .breadcrumb {
       padding-left: 5px;
       color: #4b4a4a;
-      font-size: 160%;
+      font-size: 130%;
       font-weight: bold;
     }
     
     .reportsLink {
+      text-decoration: none;
+      color: blue;
+      cursor: hand;
+      cursor: pointer;
+    }
+
+    .reportsLink:hover {
       text-decoration: underline;
       color: blue;
       cursor: hand;
@@ -34,16 +85,8 @@
     
     .notes {
       width: 400px;
-      border: 1px solid #5478af;
+      border: 1px solid #d7dde8;
       padding: 3px;
-    }
-    
-    .error {
-      color: red;
-    }
-    
-    .center {
-      border-top: 1px solid #88b0f2;
     }
     
     .table {
@@ -54,18 +97,76 @@
   <g:DockLayoutPanel
     unit='PX'>
     <g:north
-      size='150'>
-      <g:HTMLPanel>
-        <div
-          class='{style.breadcrumb}'>
-          <g:Anchor
-            styleName='{style.reportsLink}'
-            ui:field='reportsLink'>
-            Reports
-          </g:Anchor>
-          &gt;
-          <span ui:field='reportName' />
-        </div>
+      size='160'>
+      <g:HTMLPanel 
+        styleName='{style.top}'>
+        <table
+          align='center'
+          width='98%'
+          cellspacing='0'
+          cellpadding='0'>
+          <!-- Top of 9 box. -->
+          <tr>
+            <td
+              class='{style.corner}'>
+              <div
+                class='{style.cornerTopLeft}' />
+            </td>
+            <td
+              class='{style.tableControlsBackground}'>
+              <div
+                class='{style.tableControlsBorderInner}' />
+            </td>
+            <td
+              class='{style.corner}'>
+              <div
+                class='{style.cornerTopRight}' />
+            </td>
+          </tr>
+          <tr>
+            <!-- Left of 9 box. -->
+            <td
+              class='{style.tableControlsBackground}'>
+              <div
+                class='{style.tableControlsBorderInner}' />
+            </td>
+            <!-- Breadcrumb. -->
+            <td
+              class='{style.breadcrumb} {style.tableControlsBackground}'>
+              <g:Anchor
+                styleName='{style.reportsLink}'
+                ui:field='reportsLink'>
+                Reports
+              </g:Anchor>
+              &gt;
+              <span ui:field='reportName' />
+            </td>
+            <!-- Right of 9 box. -->
+            <td
+              class='{style.tableControlsBackground}'>
+              <div
+                class='{style.tableControlsBorderInner}' />
+            </td>
+          </tr>
+          <!-- Bottom of 9 box. -->
+          <tr>
+            <td
+              class='{style.corner}'>
+              <div
+                class='{style.cornerBottomLeft}' />
+            </td>
+            <td
+              class='{style.tableControlsBackground}'>
+              <div
+                class='{style.tableControlsBorderInner}' />
+            </td>
+            <td
+              class='{style.corner}'>
+              <div
+                class='{style.cornerBottomRight}' />
+            </td>
+          </tr>
+        </table>
 
         <table
           class='{style.details}'
@@ -112,20 +213,12 @@
                 ui:field='notesBox'></g:TextBox>
             </td>
           </tr>
-          <tr>
-            <td
-              class='{style.error}'
-              colspan='4'
-              ui:field='errorText'>
-            </td>
-          </tr>
         </table>
       </g:HTMLPanel>
     </g:north>
     
     <g:center>
-      <g:ScrollPanel
-        styleName='{style.center}'>
+      <g:ScrollPanel>
         <l:CellTable
           addStyleNames='{style.table}'
           width='100%'

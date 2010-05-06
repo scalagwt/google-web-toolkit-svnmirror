@@ -42,11 +42,58 @@ import java.util.Map;
 // TODO - have a ViewDataColumn superclass / SimpleColumn subclass
 public abstract class Column<T, C> implements HasViewData, HasCell<T, C> {
 
+  /**
+   * A {@link ValueUpdater} used by the {@link Column} to delay the field update
+   * until after the view data has been set.
+   * 
+   * @param <C> the type of data
+   */
+  private static class DelayedValueUpdater<C> implements ValueUpdater<C> {
+    private C newValue;
+    private boolean hasNewValue;
+
+    /**
+     * Get the new value.
+     * 
+     * @return the new value
+     */
+    public C getNewValue() {
+      return newValue;
+    }
+
+    /**
+     * Check if the value has been updated.
+     * 
+     * @return true if updated, false if not
+     */
+    public boolean hasNewValue() {
+      return hasNewValue;
+    }
+
+    /**
+     * Reset this updater so it can be reused.
+     */
+    public void reset() {
+      newValue = null;
+      hasNewValue = false;
+    }
+
+    public void update(C value) {
+      hasNewValue = true;
+      newValue = value;
+    }
+  }
+
   protected final Cell<C> cell;
 
   protected FieldUpdater<T, C> fieldUpdater;
 
   protected Map<Object, Object> viewDataMap = new HashMap<Object, Object>();
+
+  /**
+   * The {@link DelayedValueUpdater} singleton.
+   */
+  private final DelayedValueUpdater<C> delayedValueUpdater = new DelayedValueUpdater<C>();
 
   public Column(Cell<C> cell) {
     this.cell = cell;
@@ -85,21 +132,35 @@ public abstract class Column<T, C> implements HasViewData, HasCell<T, C> {
    */
   public void onBrowserEvent(Element elem, final int index, final T object,
       NativeEvent event, ProvidesKey<T> providesKey) {
-    Object key = providesKey == null ? object : providesKey.getKey(object);
-    Object viewData = viewDataMap.get(key);
+    Object key = getKey(object, providesKey);
+    Object viewData = getViewData(key);
+    delayedValueUpdater.reset();
     Object newViewData = cell.onBrowserEvent(elem, getValue(object), viewData,
-        event, fieldUpdater == null ? null : new ValueUpdater<C>() {
-          public void update(C value) {
-            fieldUpdater.update(index, object, value);
-          }
-        });
+        event, fieldUpdater == null ? null : delayedValueUpdater);
+
+    // We have to save the view data before calling the field updater, or the
+    // view data will not be available.
+    // TODO(jlabanca): This is a squirrelly.
     if (newViewData != viewData) {
-      viewDataMap.put(key, newViewData);
+      setViewData(key, newViewData);
+    }
+
+    // Call the FieldUpdater after setting the view data.
+    if (delayedValueUpdater.hasNewValue) {
+      fieldUpdater.update(index, object, delayedValueUpdater.getNewValue());
     }
   }
 
-  public void render(T object, StringBuilder sb) {
-    cell.render(getValue(object), viewDataMap.get(object), sb);
+  /**
+   * Render the object into the cell.
+   * 
+   * @param object the object to render
+   * @param keyProvider the {@link ProvidesKey} for the object
+   * @param sb the buffer to render into
+   */
+  public void render(T object, ProvidesKey<T> keyProvider, StringBuilder sb) {
+    Object key = getKey(object, keyProvider);
+    cell.render(getValue(object), getViewData(key), sb);
   }
 
   public void setFieldUpdater(FieldUpdater<T, C> fieldUpdater) {
@@ -107,6 +168,22 @@ public abstract class Column<T, C> implements HasViewData, HasCell<T, C> {
   }
 
   public void setViewData(Object key, Object viewData) {
-    viewDataMap.put(key, viewData);
+    if (viewData == null) {
+      viewDataMap.remove(key);
+    } else {
+      viewDataMap.put(key, viewData);
+    }
+  }
+
+  /**
+   * Get the view keu for the object given the {@link ProvidesKey}. If the
+   * {@link ProvidesKey} is null, the object is used as the key.
+   * 
+   * @param object the row object
+   * @param keyProvider the {@link ProvidesKey}
+   * @return the key for the object
+   */
+  private Object getKey(T object, ProvidesKey<T> keyProvider) {
+    return keyProvider == null ? object : keyProvider.getKey(object);
   }
 }

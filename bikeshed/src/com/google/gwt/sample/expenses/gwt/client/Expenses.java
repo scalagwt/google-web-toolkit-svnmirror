@@ -19,6 +19,7 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.sample.expenses.gwt.request.EmployeeRecord;
+import com.google.gwt.sample.expenses.gwt.request.ExpenseRecord;
 import com.google.gwt.sample.expenses.gwt.request.ExpenseRecordChanged;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
 import com.google.gwt.sample.expenses.gwt.request.ReportRecord;
@@ -36,6 +37,15 @@ public class Expenses implements EntryPoint {
    */
   public static final ProvidesKey<EmployeeRecord> EMPLOYEE_RECORD_KEY_PROVIDER = new ProvidesKey<EmployeeRecord>() {
     public Object getKey(EmployeeRecord item) {
+      return item == null ? null : item.getId();
+    }
+  };
+
+  /**
+   * The key provider for {@link ExpenseRecord}s.
+   */
+  public static final ProvidesKey<ExpenseRecord> EXPENSE_RECORD_KEY_PROVIDER = new ProvidesKey<ExpenseRecord>() {
+    public Object getKey(ExpenseRecord item) {
       return item == null ? null : item.getId();
     }
   };

@@ -9,32 +9,42 @@
     field='styles'
     type='com.google.gwt.sample.bikeshed.style.client.Styles' />
 
+  <ui:image
+    field='logo' />
+
   <ui:style>
+    @sprite .logo {
+      gwt-image: 'logo';
+    }
+    
     .title {
       border-bottom: 1px solid #c3c3c3;
     }
     
     .titleText {
-      font-family: Times New Roman, sans-serif;
+      font-family: Ariel, sans-serif;
       color: #7b8fae;
-      font-size: 18pt;
+      font-size: 20pt;
       font-weight: bold;
+    }
+    
+    .expenseTree {
+      background-color: #d7dde8;
     }
   </ui:style>
 
   <g:DockLayoutPanel
     unit='PX'>
     <g:north
-      size='50'>
+      size='90'>
       <g:HTMLPanel
         styleName='{style.title}'>
         <table
           height='100%'>
           <tr>
             <td>
-              <img
-                height='40'
-                src='http://www.google.com/intl/en_ALL/images/logo.gif' />
+              <div
+                class='{style.logo}' />
             </td>
             <td
               class='{style.titleText}'
@@ -47,11 +57,12 @@
     </g:north>
 
     <g:center>
-      <g:SplitLayoutPanel
-        ui:field='splitLayout'>
+      <g:DockLayoutPanel
+        ui:field='dockLayout'>
         <g:west
           size='250'>
           <c:ExpenseTree
+            addStyleNames='{style.expenseTree}'
             ui:field='expenseTree' />
         </g:west>
         <g:center>
@@ -63,7 +74,7 @@
             </g:layer>
           </g:LayoutPanel>
         </g:center>
-      </g:SplitLayoutPanel>
+      </g:DockLayoutPanel>
     </g:center>
   </g:DockLayoutPanel>
 

@@ -16,15 +16,24 @@
     field='searchLeft'
     src='../../../bikeshed/style/client/searchLeft.png' />
 
+  <ui:image
+    field='cornerTopRight' />
+  <ui:image
+    field='cornerTopLeft' />
+  <ui:image
+    field='cornerBottomRight' />
+  <ui:image
+    field='cornerBottomLeft' />
+
   <ui:style>
     .top {
-      padding-top: 4px;
+      padding-top: 15px;
     }
     
     .breadcrumb {
       padding-left: 5px;
       color: #4b4a4a;
-      font-size: 160%;
+      font-size: 130%;
       font-weight: bold;
     }
     
@@ -50,13 +59,39 @@
       gwt-image: 'searchLeft';
     }
     
-    .tableControls {
-      background: white;
+    .corner {
+      height: 4px;
+      width: 4px;
+    }
+    
+    @sprite .cornerTopRight {
+      gwt-image: 'cornerTopRight';
+    }
+    
+    @sprite .cornerTopLeft {
+      gwt-image: 'cornerTopLeft';
+    }
+    
+    @sprite .cornerBottomRight {
+      gwt-image: 'cornerBottomRight';
+    }
+    
+    @sprite .cornerBottomLeft {
+      gwt-image: 'cornerBottomLeft';
+    }
+    
+    .tableControlsBackground {
+      background: #d7dde8;
+    }
+    
+    .tableControlsBorderInner {
+      height: 1px;
+      width: 1px;
+      overflow: hidden;
     }
     
     .center {
-      border-top: 1px solid #88b0f2;
-      border-bottom: 1px solid #88b0f2;
+      border-bottom: 1px solid #d7dde8;
     }
     
     .table {
@@ -68,23 +103,50 @@
     unit='PX'>
 
     <g:north
-      size='40'>
+      size='70'>
       <g:HTMLPanel
         styleName='{style.top}'>
         <table
-          class='{style.tableControls}'
-          width='100%'
+          align='center'
+          width='98%'
           cellspacing='0'
           cellpadding='0'>
+          <!-- Top of 9 box. -->
           <tr>
             <td
-              class='{style.breadcrumb}'
+              class='{style.corner}'>
+              <div
+                class='{style.cornerTopLeft}' />
+            </td>
+            <td
+              colspan='2'
+              class='{style.tableControlsBackground}'>
+              <div
+                class='{style.tableControlsBorderInner}' />
+            </td>
+            <td
+              class='{style.corner}'>
+              <div
+                class='{style.cornerTopRight}' />
+            </td>
+          </tr>
+          <tr>
+            <!-- Left of 9 box. -->
+            <td
+              class='{style.tableControlsBackground}'>
+              <div
+                class='{style.tableControlsBorderInner}' />
+            </td>
+            <!-- Breadcrumb. -->
+            <td
+              class='{style.breadcrumb} {style.tableControlsBackground}'
               align='left'
-              colspan='3'
               ui:field='breadcrumb'>
               All Reports
             </td>
+            <!-- Search Box. -->
             <td
+              class='{style.tableControlsBackground}'
               align='right'
               valign='middle'>
               <table
@@ -110,12 +172,37 @@
                       ui:field='searchButton'
                       resource='{styles.searchRight}' />
                   </td>
-                  <td
-                    width='10'>
-                &nbsp;
+                  <td>
+                    <div
+                      style='width:50px;' />
                   </td>
                 </tr>
               </table>
+            </td>
+            <!-- Right of 9 box. -->
+            <td
+              class='{style.tableControlsBackground}'>
+              <div
+                class='{style.tableControlsBorderInner}' />
+            </td>
+          </tr>
+          <!-- Bottom of 9 box. -->
+          <tr>
+            <td
+              class='{style.corner}'>
+              <div
+                class='{style.cornerBottomLeft}' />
+            </td>
+            <td
+              colspan='2'
+              class='{style.tableControlsBackground}'>
+              <div
+                class='{style.tableControlsBorderInner}' />
+            </td>
+            <td
+              class='{style.corner}'>
+              <div
+                class='{style.cornerBottomRight}' />
             </td>
           </tr>
         </table>

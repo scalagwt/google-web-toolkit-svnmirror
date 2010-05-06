@@ -39,6 +39,41 @@ public class Styles {
 
     String deniedOption();
 
+    /**
+     * Applied to the amount column in ExpenseDetails.
+     */
+    String expenseDetailsAmountColumn();
+
+    /**
+     * Applied to the approval column in ExpenseDetails.
+     */
+    String expenseDetailsApprovalColumn();
+
+    /**
+     * Applied to the category column in ExpenseDetails.
+     */
+    String expenseDetailsCategoryColumn();
+
+    /**
+     * Applied to the date column in ExpenseDetails.
+     */
+    String expenseDetailsDateColumn();
+
+    /**
+     * Applied to the message in the error popup.
+     */
+    String expenseDetailsErrorPopupMessage();
+
+    /**
+     * Applied to the created column in ExpenseList.
+     */
+    String expenseListCreatedColumn();
+
+    /**
+     * Applied to the purpose column in ExpenseList.
+     */
+    String expenseListPurposeColumn();
+
     String header();
 
     String headerLeft();
@@ -85,9 +120,19 @@ public class Styles {
     ImageResource deniedIcon();
 
     /**
+     * Icon used to represent an error.
+     */
+    ImageResource errorIcon();
+
+    /**
      * Icon used to represent a user group.
      */
     ImageResource groupIcon();
+
+    /**
+     * Animated image used to indicate a pending change.
+     */
+    ImageResource pendingCommit();
 
     /**
      * Right rounded corner of a search box.

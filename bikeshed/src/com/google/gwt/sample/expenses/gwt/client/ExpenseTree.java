@@ -142,8 +142,7 @@ public class ExpenseTree extends Composite {
     /**
      * The department cell singleton.
      */
-    private final Cell<String> departmentCell = new IconCellDecorator<String>(
-        Styles.resources().groupIcon(), new TextCell());
+    private final Cell<String> departmentCell = new TextCell();
 
     /**
      * The {@link EmployeeCell} singleton.

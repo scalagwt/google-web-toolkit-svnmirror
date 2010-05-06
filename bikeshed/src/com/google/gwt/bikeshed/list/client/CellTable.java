@@ -21,6 +21,7 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.dom.client.TableCellElement;
+import com.google.gwt.dom.client.TableColElement;
 import com.google.gwt.dom.client.TableElement;
 import com.google.gwt.dom.client.TableRowElement;
 import com.google.gwt.dom.client.TableSectionElement;
@@ -144,6 +145,24 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
     Style cellTableStyle();
   }
 
+  /**
+   * A cleaner version of the table that uses less graphics.
+   */
+  public static interface CleanStyle extends Style {
+    String footer();
+
+    String header();
+  }
+
+  /**
+   * A cleaner version of the table that uses less graphics.
+   */
+  public static interface CleanResources extends Resources {
+
+    @Source("CellTableClean.css")
+    CleanStyle cellTableStyle();
+  }
+
   private static Resources DEFAULT_RESOURCES;
 
   private static Resources getDefaultResources() {
@@ -153,6 +172,7 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
     return DEFAULT_RESOURCES;
   }
 
+  private final TableColElement colgroup;
   private List<Column<T, ?>> columns = new ArrayList<Column<T, ?>>();
   private List<Header<?>> footers = new ArrayList<Header<?>>();
   private List<Header<?>> headers = new ArrayList<Header<?>>();
@@ -210,6 +230,8 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
 
     setElement(table = Document.get().createTableElement());
     table.setCellSpacing(0);
+    colgroup = Document.get().createColGroupElement();
+    table.appendChild(colgroup);
     thead = table.createTHead();
     table.appendChild(tbody = Document.get().createTBodyElement());
     tfoot = table.createTFoot();
@@ -268,7 +290,7 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
             }
             sb.append("'>");
             if (value != null) {
-              column.render(value, sb);
+              column.render(value, providesKey, sb);
             }
             sb.append("</td>");
           }
@@ -354,6 +376,17 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
 
   // TODO: remove(Column)
 
+  /**
+   * Add a style name to the {@link TableColElement} at the specified index,
+   * creating it if necessary.
+   * 
+   * @param index the column index
+   * @param styleName the style name to add
+   */
+  public void addColumnStyleName(int index, String styleName) {
+    ensureTableColElement(index).addClassName(styleName);
+  }
+
   public int getBodyHeight() {
     int height = getClientHeight(tbody);
     return height;
@@ -379,6 +412,10 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
     return height;
   }
 
+  public ProvidesKey<T> getKeyProvider() {
+    return providesKey;
+  }
+
   public int getNumDisplayedItems() {
     return impl.getDisplayedItemCount();
   }
@@ -389,10 +426,6 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
 
   public int getPageStart() {
     return impl.getPageStart();
-  }
-
-  public ProvidesKey<T> getProvidesKey() {
-    return providesKey;
   }
 
   public Range getRange() {
@@ -491,6 +524,19 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
     createHeaders(false);
   }
 
+  /**
+   * Remove a style from the {@link TableColElement} at the specified index.
+   * 
+   * @param index the column index
+   * @param styleName the style name to remove
+   */
+  public void removeColumnStyleName(int index, String styleName) {
+    if (index >= colgroup.getChildCount()) {
+      return;
+    }
+    ensureTableColElement(index).removeClassName(styleName);
+  }
+
   public void setData(int start, int length, List<T> values) {
     impl.setData(values, start);
   }
@@ -501,6 +547,18 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
 
   public void setDelegate(Delegate<T> delegate) {
     impl.setDelegate(delegate);
+  }
+
+  /**
+   * Sets the {@link ProvidesKey} instance that will be used to generate keys
+   * for each record object as needed.
+   * 
+   * @param providesKey an instance of {@link ProvidesKey} used to generate keys
+   *          for record objects.
+   */
+  // TODO - when is this valid? Do we rehash column view data if it changes?
+  public void setKeyProvider(ProvidesKey<T> providesKey) {
+    this.providesKey = providesKey;
   }
 
   public void setPager(PagingListView.Pager<T> pager) {
@@ -527,18 +585,6 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
    */
   public void setPageStart(int pageStart) {
     impl.setPageStart(pageStart);
-  }
-
-  /**
-   * Sets the {@link ProvidesKey} instance that will be used to generate keys
-   * for each record object as needed.
-   * 
-   * @param providesKey an instance of {@link ProvidesKey} used to generate keys
-   *          for record objects.
-   */
-  // TODO - when is this valid? Do we rehash column view data if it changes?
-  public void setProvidesKey(ProvidesKey<T> providesKey) {
-    this.providesKey = providesKey;
   }
 
   /**
@@ -597,6 +643,21 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
       createHeaders(false);
       createHeaders(true);
     }
+  }
+
+  /**
+   * Get the {@link TableColElement} at the specified index, creating it if
+   * necessary.
+   * 
+   * @param index the column index
+   * @return the {@link TableColElement}
+   */
+  private TableColElement ensureTableColElement(int index) {
+    // Ensure that we have enough columns.
+    for (int i = colgroup.getChildCount(); i <= index; i++) {
+      colgroup.appendChild(Document.get().createColElement());
+    }
+    return colgroup.getChild(index).cast();
   }
 
   private TableCellElement findNearestParentCell(Element elem) {

@@ -25,6 +25,7 @@ import com.google.gwt.cell.client.SelectionCell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.SelectElement;
@@ -34,6 +35,7 @@ import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.requestfactory.shared.Receiver;
 import com.google.gwt.requestfactory.shared.SyncResult;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.sample.bikeshed.style.client.Styles;
 import com.google.gwt.sample.expenses.gwt.request.EmployeeRecord;
 import com.google.gwt.sample.expenses.gwt.request.ExpenseRecord;
@@ -43,14 +45,18 @@ import com.google.gwt.sample.expenses.gwt.request.ReportRecord;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiFactory;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.valuestore.shared.DeltaValueStore;
 import com.google.gwt.valuestore.shared.Property;
@@ -88,19 +94,59 @@ public class ExpenseDetails extends Composite implements
   private static final int MAX_COST = 500;
 
   /**
+   * The ViewData associated with the {@link ApprovalCell}.
+   */
+  private static class ApprovalViewData {
+    private final String pendingApproval;
+    private String rejectionText;
+
+    public ApprovalViewData(String approval) {
+      this.pendingApproval = approval;
+    }
+
+    public String getPendingApproval() {
+      return pendingApproval;
+    }
+
+    public String getRejectionText() {
+      return rejectionText;
+    }
+
+    public boolean isRejected() {
+      return rejectionText != null;
+    }
+
+    public void reject(String text) {
+      this.rejectionText = text;
+    }
+  }
+
+  /**
    * The cell used for approval status.
    */
-  private static class ApprovalCell extends SelectionCell {
+  private class ApprovalCell extends SelectionCell {
 
     private final String approvedClass;
     private final String blankClass;
     private final String deniedClass;
+    private final String errorIconHtml;
+    private final String pendingIconHtml;
 
     public ApprovalCell(List<String> options) {
       super(options);
       approvedClass = " class='" + Styles.common().approvedOption() + "'";
       blankClass = " class='" + Styles.common().blankOption() + "'";
       deniedClass = " class='" + Styles.common().deniedOption() + "'";
+
+      // Cache the html string for the error icon.
+      ImageResource errorIcon = Styles.resources().errorIcon();
+      AbstractImagePrototype errorImg = AbstractImagePrototype.create(errorIcon);
+      errorIconHtml = errorImg.getHTML();
+
+      // Cache the html string for the pending icon.
+      ImageResource pendingIcon = Styles.resources().pendingCommit();
+      AbstractImagePrototype pendingImg = AbstractImagePrototype.create(pendingIcon);
+      pendingIconHtml = pendingImg.getHTML();
     }
 
     @Override
@@ -108,13 +154,38 @@ public class ExpenseDetails extends Composite implements
         NativeEvent event, ValueUpdater<String> valueUpdater) {
       String type = event.getType();
       if ("change".equals(type)) {
+        // Disable the select box.
         SelectElement select = parent.getFirstChild().cast();
         select.setClassName(Styles.common().blankOption());
-
-        // Remember which item is now selected.
-        int index = select.getSelectedIndex();
-        viewData = select.getOptions().getItem(index).getValue();
         select.setDisabled(true);
+
+        // Add the pending icon if it isn't already visible.
+        if (viewData == null) {
+          Element tmpElem = Document.get().createDivElement();
+          tmpElem.setInnerHTML(pendingIconHtml);
+          parent.appendChild(tmpElem.getFirstChildElement());
+        }
+
+        // Remember which value is now selected.
+        int index = select.getSelectedIndex();
+        String pendingValue = select.getOptions().getItem(index).getValue();
+        viewData = new ApprovalViewData(pendingValue);
+      } else if ("click".equals(type) && viewData != null
+          && parent.getChildCount() >= 3) {
+        // Alert the user of the error
+        Element img = parent.getChild(1).cast();
+        Element anchor = img.getNextSiblingElement();
+        if (anchor.isOrHasChild(Element.as(event.getEventTarget().cast()))) {
+          // Alert the user of the error.
+          ApprovalViewData avd = (ApprovalViewData) viewData;
+          errorPopupMessage.setText(avd.getRejectionText());
+          errorPopup.center();
+
+          // Clear the view data now that we've viewed the message.
+          viewData = null;
+          parent.removeChild(anchor);
+          parent.removeChild(img);
+        }
       }
       super.onBrowserEvent(parent, value, viewData, event, valueUpdater);
       return viewData;
@@ -122,11 +193,30 @@ public class ExpenseDetails extends Composite implements
 
     @Override
     public void render(String value, Object viewData, StringBuilder sb) {
-      boolean isApproved = APPROVED.equals(value);
-      boolean isDenied = DENIED.equals(value);
+      // Get the view data.
+      boolean isRejected = false;
+      String pendingValue = null;
+      String renderValue = value;
+      if (viewData != null) {
+        ApprovalViewData avd = (ApprovalViewData) viewData;
+        if (!avd.getPendingApproval().equals(value)) {
+          isRejected = avd.isRejected();
+          pendingValue = avd.getPendingApproval();
+          if (!isRejected) {
+            renderValue = pendingValue;
+          }
+        }
+      }
+      boolean isApproved = APPROVED.equals(renderValue);
+      boolean isDenied = DENIED.equals(renderValue);
 
-      sb.append("<select style='background-color:white;border:1px solid #707172;width:10em;'");
-      if (isApproved) {
+      // Create the select element.
+      sb.append("<select style='background-color:white;");
+      sb.append("border:1px solid #707172;width:10em;margin-right:10px;'");
+      if (pendingValue != null && !isRejected) {
+        // No icon on pending values.
+        sb.append(blankClass);
+      } else if (isApproved) {
         sb.append(approvedClass);
       } else if (isDenied) {
         sb.append(deniedClass);
@@ -136,7 +226,7 @@ public class ExpenseDetails extends Composite implements
       sb.append(">");
       sb.append("<option></option>");
 
-      // Approved.
+      // Approved Option.
       sb.append("<option");
       sb.append(approvedClass);
       if (isApproved) {
@@ -144,17 +234,32 @@ public class ExpenseDetails extends Composite implements
       }
       sb.append(">").append(APPROVED).append("</option>");
 
-      // Denied.
+      // Denied Option.
       sb.append("<option");
       sb.append(deniedClass);
       if (isDenied) {
         sb.append(" selected='selected'");
       }
       sb.append(">").append(DENIED).append("</option>");
+
+      sb.append("</select>");
+
+      // Add an icon indicating the commit state.
+      if (isRejected) {
+        // Add error icon if viewData does not match.
+        sb.append(errorIconHtml);
+        sb.append("<a style='padding-left:3px;color:red;' href='javascript:;'>Error!</a>");
+      } else if (pendingValue != null) {
+        // Add refresh icon if pending.
+        sb.append(pendingIconHtml);
+      }
     }
   }
 
-  class DenialPopup extends DialogBox {
+  /**
+   * The popup used to enter the rejection reason.
+   */
+  private class DenialPopup extends DialogBox {
     private Button cancelButton = new Button("Cancel", new ClickHandler() {
       public void onClick(ClickEvent event) {
         reasonDenied = "";
@@ -226,9 +331,6 @@ public class ExpenseDetails extends Composite implements
   @UiField
   Element costLabel;
 
-  @UiField
-  Element errorText;
-
   ExpensesRequestFactory expensesRequestFactory;
 
   @UiField
@@ -245,17 +347,23 @@ public class ExpenseDetails extends Composite implements
 
   private List<SortableHeader> allHeaders = new ArrayList<SortableHeader>();
 
+  private SortableColumn<ExpenseRecord, String> approvalColumn;
   private SortableColumn<ExpenseRecord, Date> dateColumn;
 
   /**
-   * The {@link ExpenseRecord} that caused an error.
+   * The popup used to display errors to the user.
    */
-  private ExpenseRecord errorExpense;
+  private final PopupPanel errorPopup = new PopupPanel(false, true);
+
+  /**
+   * The label inside the error popup.
+   */
+  private final Label errorPopupMessage = new Label();
 
   /**
    * The adapter that provides expense items.
    */
-  private ListViewAdapter<ExpenseRecord> items = new ListViewAdapter<ExpenseRecord>();
+  private final ListViewAdapter<ExpenseRecord> items;
 
   private Comparator<ExpenseRecord> lastComparator;
 
@@ -270,7 +378,11 @@ public class ExpenseDetails extends Composite implements
   private double totalApproved;
 
   public ExpenseDetails() {
+    createErrorPopup();
     initWidget(uiBinder.createAndBindUi(this));
+    items = new ListViewAdapter<ExpenseRecord>();
+    items.setKeyProvider(Expenses.EXPENSE_RECORD_KEY_PROVIDER);
+    table.setKeyProvider(items);
     items.addView(table);
   }
 
@@ -344,7 +456,13 @@ public class ExpenseDetails extends Composite implements
 
   @UiFactory
   CellTable<ExpenseRecord> createTable() {
-    CellTable<ExpenseRecord> view = new CellTable<ExpenseRecord>(15);
+    CellTable.Resources resources = GWT.create(CellTable.CleanResources.class);
+    CellTable<ExpenseRecord> view = new CellTable<ExpenseRecord>(15, resources);
+    Styles.Common common = Styles.common();
+    view.addColumnStyleName(0, common.expenseDetailsDateColumn());
+    view.addColumnStyleName(2, common.expenseDetailsCategoryColumn());
+    view.addColumnStyleName(3, common.expenseDetailsAmountColumn());
+    view.addColumnStyleName(4, common.expenseDetailsApprovalColumn());
 
     dateColumn = addColumn(view, "Date", new DateCell(), dateGetter);
     lastComparator = dateColumn.getComparator(false);
@@ -379,7 +497,7 @@ public class ExpenseDetails extends Composite implements
         ExpenseRecord record = denialPopup.getExpenseRecord();
         if (reasonDenied == null || reasonDenied.length() == 0) {
           // We need to redraw the table to reset the select box.
-          table.redraw();
+          syncCommit(record, null);
         } else {
           updateExpenseRecord(record, "Denied", reasonDenied);
         }
@@ -392,13 +510,12 @@ public class ExpenseDetails extends Composite implements
     options.add("");
     options.add("Approved");
     options.add("Denied");
-    SortableColumn<ExpenseRecord, String> approvalColumn = addColumn(view,
-        "Approval Status", new ApprovalCell(options),
-        new GetValue<ExpenseRecord, String>() {
-          public String getValue(ExpenseRecord object) {
-            return object.getApproval();
-          }
-        });
+    approvalColumn = addColumn(view, "Approval Status", new ApprovalCell(
+        options), new GetValue<ExpenseRecord, String>() {
+      public String getValue(ExpenseRecord object) {
+        return object.getApproval();
+      }
+    });
     approvalColumn.setFieldUpdater(new FieldUpdater<ExpenseRecord, String>() {
       public void update(int index, final ExpenseRecord object, String value) {
         if ("Denied".equals(value)) {
@@ -451,6 +568,27 @@ public class ExpenseDetails extends Composite implements
       CellTable<ExpenseRecord> table, final String text,
       final GetValue<ExpenseRecord, String> getter) {
     return addColumn(table, text, new TextCell(), getter);
+  }
+
+  /**
+   * Create the error message popup.
+   */
+  private void createErrorPopup() {
+    errorPopup.setGlassEnabled(true);
+    errorPopupMessage.addStyleName(Styles.common().expenseDetailsErrorPopupMessage());
+
+    Button closeButton = new Button("Dismiss", new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        errorPopup.hide();
+      }
+    });
+
+    // Organize the widgets in the popup.
+    VerticalPanel layout = new VerticalPanel();
+    layout.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+    layout.add(errorPopupMessage);
+    layout.add(closeButton);
+    errorPopup.setWidget(layout);
   }
 
   /**
@@ -521,33 +659,42 @@ public class ExpenseDetails extends Composite implements
         report.getRef(Record.id)).forProperties(getExpenseColumns()).to(this).fire();
   }
 
-  /**
-   * Show an error message related to an expense.
-   * 
-   * @param expense the {@link ExpenseRecord} that caused the error
-   * @param message the error message
-   */
-  private void showExpenseError(ExpenseRecord expense, String message) {
-    errorExpense = expense;
-    errorText.setInnerText(message);
-  }
-
   private void sortExpenses(List<ExpenseRecord> list,
       final Comparator<ExpenseRecord> comparator) {
     lastComparator = comparator;
     Collections.sort(list, comparator);
   }
 
-  private void updateExpenseRecord(ExpenseRecord record, String approval,
+  /**
+   * Update the state of a pending approval change.
+   * 
+   * @param record the {@link ExpenseRecord} to sync
+   * @param message the error message if rejected, or null if accepted
+   */
+  private void syncCommit(ExpenseRecord record, String message) {
+    final Object key = items.getKey(record);
+    if (message != null) {
+      final ApprovalViewData avd = (ApprovalViewData) approvalColumn.getViewData(key);
+      if (avd != null) {
+        avd.reject(message);
+      }
+
+      // Redraw the table so the changes are applied.
+      table.redraw();
+    } else {
+      approvalColumn.setViewData(key, null);
+    }
+  }
+
+  private void updateExpenseRecord(final ExpenseRecord record, String approval,
       String reasonDenied) {
     // Verify that the total is under the cap.
     if (APPROVED.equals(approval) && !APPROVED.equals(record.getApproval())) {
       double amount = record.getAmount();
       if (amount + totalApproved > MAX_COST) {
-        showExpenseError(record,
+        syncCommit(record,
             "The total approved amount for an Expense Report cannot exceed $"
                 + MAX_COST);
-        table.redraw();
         return;
       }
     }
@@ -559,11 +706,19 @@ public class ExpenseDetails extends Composite implements
     expensesRequestFactory.syncRequest(deltas).to(
         new Receiver<Set<SyncResult>>() {
           public void onSuccess(Set<SyncResult> response) {
+            // Check for commit errors.
+            String errorMessage = "";
             for (SyncResult result : response) {
               if (result.hasViolations()) {
-                // TODO(jlabanca): Handle errors.
-                result.getViolations();
+                // TODO(jlabanca): Get the error messages from the violations.
+                errorMessage = "Could not commit change";
               }
+            }
+
+            // Sync the view data.
+            if (errorMessage.length() > 0) {
+              syncCommit(record, errorMessage.length() > 0 ? errorMessage
+                  : null);
             }
 
             // Request the updated expenses.
