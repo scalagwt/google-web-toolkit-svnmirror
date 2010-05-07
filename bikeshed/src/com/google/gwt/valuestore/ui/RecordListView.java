@@ -49,7 +49,7 @@ public interface RecordListView<R extends Record> extends ListView<R>,
   void setDelegate(
       com.google.gwt.view.client.ListView.Delegate<R> delegate)
       throws UnsupportedOperationException;
-
+  
   /**
    * Sets the delegate.
    */

@@ -4,6 +4,7 @@
   xmlns:b='urn:import:com.google.gwt.bikeshed.list.client'>
   <g:HTMLPanel>
     <h3><ui:msg>Reports</ui:msg></h3>
-    <b:CellTable ui:field='table'/>
+    <b:CellTable ui:field='table' pageSize='8'/>
+    <b:SimplePager view='{table}' location='LEFT'/>
   </g:HTMLPanel>
 </ui:UiBinder>

@@ -21,6 +21,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
@@ -167,6 +168,7 @@ public class SimplePager<T> extends AbstractPager<T> {
    * @param view the {@link PagingListView} to page
    * @param location the location of the text relative to the buttons
    */
+  @UiConstructor
   public SimplePager(PagingListView<T> view, TextLocation location) {
     this(view, location, getDefaultResources());
   }

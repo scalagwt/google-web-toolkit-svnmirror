@@ -17,6 +17,7 @@ package com.google.gwt.bikeshed.list.client;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -44,6 +45,7 @@ public class PageSizePager<T> extends Composite implements Pager<T> {
   private final Anchor showMoreButton = new Anchor("Show More");
   private final Anchor showLessButton = new Anchor("Show Less");
 
+  @UiConstructor
   public PageSizePager(final PagingListView<T> listView, final int increment) {
     this.increment = increment;
     initWidget(layout);
