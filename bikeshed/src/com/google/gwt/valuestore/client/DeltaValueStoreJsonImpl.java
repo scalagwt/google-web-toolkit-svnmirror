@@ -25,6 +25,7 @@ import com.google.gwt.valuestore.shared.Property;
 import com.google.gwt.valuestore.shared.Record;
 import com.google.gwt.valuestore.shared.impl.RecordImpl;
 import com.google.gwt.valuestore.shared.impl.RecordJsoImpl;
+import com.google.gwt.valuestore.shared.impl.RecordSchema;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -191,10 +192,12 @@ public class DeltaValueStoreJsonImpl implements DeltaValueStore {
           toRemove.add(key);
           master.eventBus.fireEvent(masterRecord.getSchema().createChangeEvent(
               masterRecord, WriteOperation.CREATE));
-          syncResults.add(new SyncResultImpl(masterRecord, null));
+          syncResults.add(new SyncResultImpl(masterRecord, null,
+              futureKey.id.toString()));
         } else {
           // do not change the masterRecord or fire event
-          syncResults.add(new SyncResultImpl(entry.getValue(), violations));
+          syncResults.add(new SyncResultImpl(entry.getValue(), violations,
+              futureKey.id.toString()));
         }
       }
     }
@@ -216,10 +219,10 @@ public class DeltaValueStoreJsonImpl implements DeltaValueStore {
           toRemove.add(key);
           master.eventBus.fireEvent(masterRecord.getSchema().createChangeEvent(
               masterRecord, WriteOperation.DELETE));
-          syncResults.add(new SyncResultImpl(masterRecord, null));
+          syncResults.add(new SyncResultImpl(masterRecord, null, null));
         } else {
           // do not change the masterRecord or fire event
-          syncResults.add(new SyncResultImpl(entry.getValue(), violations));
+          syncResults.add(new SyncResultImpl(entry.getValue(), violations, null));
         }
       }
     }
@@ -241,10 +244,10 @@ public class DeltaValueStoreJsonImpl implements DeltaValueStore {
           toRemove.add(key);
           master.eventBus.fireEvent(masterRecord.getSchema().createChangeEvent(
               masterRecord, WriteOperation.UPDATE));
-          syncResults.add(new SyncResultImpl(masterRecord, null));
+          syncResults.add(new SyncResultImpl(masterRecord, null, null));
         } else {
           // do not change the masterRecord or fire event
-          syncResults.add(new SyncResultImpl(entry.getValue(), violations));
+          syncResults.add(new SyncResultImpl(entry.getValue(), violations, null));
         }
       }
     }
@@ -256,13 +259,14 @@ public class DeltaValueStoreJsonImpl implements DeltaValueStore {
     assert !used;
     String futureId = futureIdGenerator.getFutureId();
 
-    RecordJsoImpl newRecord = RecordJsoImpl.newCopy(
-        recordToTypeMap.getType(token), futureId, INITIAL_VERSION);
+    RecordSchema<? extends Record> schema = recordToTypeMap.getType(token);
+    RecordJsoImpl newRecord = RecordJsoImpl.create(futureId, INITIAL_VERSION,
+        schema);
     RecordKey recordKey = new RecordKey(newRecord);
     assert operations.get(recordKey) == null;
     operations.put(recordKey, WriteOperation.CREATE);
     creates.put(recordKey, newRecord);
-    return newRecord;
+    return schema.create(newRecord);
   }
 
   public void delete(Record record) {

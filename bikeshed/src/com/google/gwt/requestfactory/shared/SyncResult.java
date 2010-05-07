@@ -25,6 +25,8 @@ import java.util.Map;
 public interface SyncResult {
   boolean hasViolations();
   
+  String getFutureId();
+
   Record getRecord();
   
   Map<String, String> getViolations();

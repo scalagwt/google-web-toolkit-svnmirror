@@ -72,6 +72,10 @@ public class EmployeeListActivity extends
     this.placeController = placeController;
   }
 
+  public void createClicked() {
+    placeController.goTo(new EmployeeScaffoldPlace("", Operation.EDIT));
+  }
+
   @Override
   public void onStop() {
     registration.removeHandler();

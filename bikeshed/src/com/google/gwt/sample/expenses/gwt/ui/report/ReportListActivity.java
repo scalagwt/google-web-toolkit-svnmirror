@@ -72,6 +72,10 @@ public final class ReportListActivity extends
     this.placeController = placeController;
   }
 
+  public void createClicked() {
+    placeController.goTo(new ReportScaffoldPlace("", Operation.EDIT));
+  }
+
   @Override
   public void onStop() {
     registration.removeHandler();

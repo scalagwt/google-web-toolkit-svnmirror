@@ -63,13 +63,18 @@ public class ReportEditActivity extends
     this.placeController = placeController;
   }
 
+  protected void exit() {
+    placeController.goTo(new ReportScaffoldPlace(getId(), Operation.DETAILS));
+  }
+
   @Override
   protected void fireFindRequest(Value<String> id,
       Receiver<ReportRecord> callback) {
     requests.reportRequest().findReport(id).to(callback).fire();
   }
-
-  protected void exit() {
-    placeController.goTo(new ReportScaffoldPlace(getId(), Operation.DETAILS));
+  
+  @Override
+  protected String getRecordToken() {
+    return ReportRecord.TOKEN;
   }
 }

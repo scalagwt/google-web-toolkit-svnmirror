@@ -40,6 +40,7 @@ public interface RecordEditView<R extends Record> extends TakesValue<R>,
   
   DeltaValueStore getDeltaValueStore();
   boolean isChanged();
+  void setCreating(boolean b);
   void setDelegate(Delegate delegate);
   void setDeltaValueStore(DeltaValueStore deltas);
   void setEnabled(boolean b);

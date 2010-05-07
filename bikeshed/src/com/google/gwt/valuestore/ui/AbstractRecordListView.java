@@ -16,10 +16,14 @@
 package com.google.gwt.valuestore.ui;
 
 import com.google.gwt.bikeshed.list.client.CellTable;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.valuestore.shared.Property;
 import com.google.gwt.valuestore.shared.Record;
+import com.google.gwt.view.client.PagingListView;
 import com.google.gwt.view.client.Range;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
@@ -40,7 +44,12 @@ public abstract class AbstractRecordListView<R extends Record> extends
 
   private CellTable<R> table;
   private Set<Property<?>> properties = new HashSet<Property<?>>();
+  private Delegate<R> delegate;
 
+  public PagingListView<R> asPagingListView() {
+    return table;
+  }
+  
   public AbstractRecordListView<R> asWidget() {
     return this;
   }
@@ -61,14 +70,8 @@ public abstract class AbstractRecordListView<R extends Record> extends
     table.setDataSize(size, isExact);
   }
 
-  public void setDelegate(
-      com.google.gwt.view.client.ListView.Delegate<R> delegate) {
-    throw new UnsupportedOperationException(
-        "A RecordListView requires a RecordListView.Delegate");
-  }
-
   public void setDelegate(final Delegate<R> delegate) {
-    table.setDelegate(delegate);
+    this.delegate = delegate;
 
     table.setSelectionModel(new SingleSelectionModel<R>() {
       @Override
@@ -83,7 +86,7 @@ public abstract class AbstractRecordListView<R extends Record> extends
     table.setSelectionModel(selectionModel);
   }
 
-  protected void init(Widget root, CellTable<R> table,
+  protected void init(Widget root, CellTable<R> table, Button newButton,
       List<PropertyColumn<R, ?>> columns) {
     super.initWidget(root);
     this.table = table;
@@ -93,6 +96,12 @@ public abstract class AbstractRecordListView<R extends Record> extends
       table.addColumn(column, column.getProperty().getName());
       properties.add(column.getProperty());
     }
+    
+    newButton.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        delegate.createClicked();
+      }
+    });
   }
 
   @Override

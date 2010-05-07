@@ -507,17 +507,21 @@ public class RequestFactoryServlet extends HttpServlet {
       NoSuchMethodException {
 
     JSONObject returnObject = new JSONObject();
-    if (writeOperation != WriteOperation.CREATE || violations == null) {
+    if (writeOperation == WriteOperation.CREATE && violations != null
+        && !violations.isEmpty()) {
+      // don't send anything back
+    } else {
       // currently sending back only two properties.
       for (String propertyName : new String[] {"id", "version"}) {
-        if ("version".equals(propertyName) && violations != null) {
+        if ("version".equals(propertyName) && violations != null
+            && !violations.isEmpty()) {
           continue;
         }
         returnObject.put(propertyName, getPropertyValueFromDataStore(
             entityInstance, propertyName));
       }
     }
-    if (violations != null) {
+    if (violations != null && !violations.isEmpty()) {
       returnObject.put("violations", getViolationsAsJson(violations));
     }
     if (writeOperation == WriteOperation.CREATE) {

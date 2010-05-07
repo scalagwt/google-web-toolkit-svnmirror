@@ -21,6 +21,7 @@ import com.google.gwt.requestfactory.shared.RecordListRequest;
 import com.google.gwt.requestfactory.shared.RequestFactory.WriteOperation;
 import com.google.gwt.valuestore.shared.Record;
 import com.google.gwt.view.client.ListView;
+import com.google.gwt.view.client.PagingListView;
 import com.google.gwt.view.client.Range;
 
 import java.util.Collections;
@@ -44,7 +45,7 @@ import java.util.Map;
  * @param <R> the type of {@link Record} listed
  */
 public abstract class AbstractRecordListActivity<R extends Record> implements
-    Activity, RecordListView.Delegate<R> {
+    Activity, RecordListView.Delegate<R>, ListView.Delegate<R> {
   private final Map<String, Integer> recordToRow = new HashMap<String, Integer>();
 
   private RecordListView<R> view;
@@ -53,6 +54,7 @@ public abstract class AbstractRecordListActivity<R extends Record> implements
   public AbstractRecordListActivity(RecordListView<R> view) {
     this.view = view;
     view.setDelegate(this);
+    view.asPagingListView().setDelegate(this);
   }
 
   public RecordListView<R> getView() {
@@ -79,7 +81,7 @@ public abstract class AbstractRecordListActivity<R extends Record> implements
         for (int i = 0, r = range.getStart(); i < values.size(); i++, r++) {
           recordToRow.put(values.get(i).getId(), r);
         }
-        getView().setData(range.getStart(), range.getLength(), values);
+        getView().asPagingListView().setData(range.getStart(), range.getLength(), values);
         if (display != null) {
           display.showActivityWidget(getView());
         }
@@ -91,7 +93,8 @@ public abstract class AbstractRecordListActivity<R extends Record> implements
   }
 
   public void onStop() {
-    view.setDelegate((RecordListView.Delegate<R>) null);
+    view.setDelegate(null);
+    view.asPagingListView().setDelegate(null);
     view = null;
   }
 
@@ -111,6 +114,11 @@ public abstract class AbstractRecordListActivity<R extends Record> implements
         break;
 
       case CREATE:
+        /*
+         * On create, we presume the new record is at the end of the list,
+         * so fetch the last page of items.
+         */
+        getLastPage();
         break;
     }
   }
@@ -126,21 +134,39 @@ public abstract class AbstractRecordListActivity<R extends Record> implements
   private void delete(R record) {
     Integer row = recordToRow.get(record.getId());
     if (row != null) {
-      onRangeChanged(view);
+      onRangeChanged(view.asPagingListView());
     }
+  }
+
+  private void getLastPage() {
+    fireCountRequest(new Receiver<Long>() {
+      public void onSuccess(Long response) {
+        PagingListView<R> table = getView().asPagingListView();
+        int rows = response.intValue();
+        table.setDataSize(rows, true);
+        int pageSize = table.getPageSize();
+        int remnant = rows % pageSize;
+        if (remnant == 0) {
+          table.setPageStart(rows - pageSize);
+        } else {
+          table.setPageStart(rows - remnant);
+        }
+        onRangeChanged(table);
+      }
+    });
   }
 
   private void init() {
     fireCountRequest(new Receiver<Long>() {
       public void onSuccess(Long response) {
-        getView().setDataSize(response.intValue(), true);
-        onRangeChanged(view);
+        getView().asPagingListView().setDataSize(response.intValue(), true);
+        onRangeChanged(view.asPagingListView());
       }
     });
   }
 
   private void update(R record) {
     Integer row = recordToRow.get(record.getId());
-    getView().setData(row, 1, Collections.singletonList(record));
+    getView().asPagingListView().setData(row, 1, Collections.singletonList(record));
   }
 }

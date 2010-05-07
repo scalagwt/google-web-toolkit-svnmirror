@@ -34,19 +34,21 @@ import java.util.Set;
 public abstract class AbstractRecordEditActivity<R extends Record> implements
     Activity, RecordEditView.Delegate {
 
-  private RecordEditView<R> view;
-  private final String id;
-  private DeltaValueStore deltas;
+  private String id;
   private final RequestFactory requests;
+  private final boolean creating;
+  private String futureId;
+
+  private RecordEditView<R> view;
+  private DeltaValueStore deltas;
 
   public AbstractRecordEditActivity(RecordEditView<R> view, String id,
       RequestFactory requests) {
     this.view = view;
+    this.creating = "".equals(id);
     this.id = id;
     this.requests = requests;
     this.deltas = requests.getValueStore().spawnDeltaView();
-    view.setDelegate(this);
-    view.setDeltaValueStore(deltas);
   }
 
   public void cancelClicked() {
@@ -77,11 +79,21 @@ public abstract class AbstractRecordEditActivity<R extends Record> implements
           }
           boolean hasViolations = false;
           for (SyncResult syncResult : response) {
-            if (syncResult.getRecord().getId().equals(id)) {
-              if (syncResult.hasViolations()) {
-                hasViolations = true;
-                view.showErrors(syncResult.getViolations());
+            Record syncRecord = syncResult.getRecord();
+            if (creating) {
+              if (futureId == null
+                  || !futureId.equals(syncResult.getFutureId())) {
+                continue;
               }
+              id = syncRecord.getId();
+            } else {
+              if (!syncRecord.getId().equals(id)) {
+                continue;
+              }
+            }
+            if (syncResult.hasViolations()) {
+              hasViolations = true;
+              view.showErrors(syncResult.getViolations());
             }
           }
           if (!hasViolations) {
@@ -99,20 +111,27 @@ public abstract class AbstractRecordEditActivity<R extends Record> implements
     }
   }
 
+  @SuppressWarnings("unchecked")
   public void start(final Display display) {
-    Receiver<R> callback = new Receiver<R>() {
-      public void onSuccess(R record) {
-        if (view == null) {
-          return;
-        }
-        view.setEnabled(true);
-        view.setValue(record);
-        view.showErrors(null);
-        display.showActivityWidget(view);
-      }
-    };
+    view.setDelegate(this);
+    view.setDeltaValueStore(deltas);
+    view.setCreating(creating);
 
-    fireFindRequest(Value.of(id), callback);
+    if (creating) {
+      // TODO shouldn't have to cast like this. Let's get something better than
+      // a string token
+      R tempRecord = (R) deltas.create(getRecordToken());
+      futureId = tempRecord.getId();
+      doStart(display, tempRecord);
+    } else {
+      fireFindRequest(Value.of(id), new Receiver<R>() {
+        public void onSuccess(R record) {
+          if (view != null) {
+            doStart(display, record);
+          }
+        }
+      });
+    }
   }
 
   public boolean willStop() {
@@ -134,4 +153,16 @@ public abstract class AbstractRecordEditActivity<R extends Record> implements
     return id;
   }
 
+  /**
+   * Called to fetch the string token needed to get a new record via
+   * {@link DeltaValueStore#create}
+   */
+  protected abstract String getRecordToken();
+
+  private void doStart(final Display display, R record) {
+    view.setEnabled(true);
+    view.setValue(record);
+    view.showErrors(null);
+    display.showActivityWidget(view);
+  }
 }

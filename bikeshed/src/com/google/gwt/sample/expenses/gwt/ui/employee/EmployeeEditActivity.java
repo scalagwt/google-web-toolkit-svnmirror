@@ -64,13 +64,18 @@ public class EmployeeEditActivity extends
   }
 
   @Override
+  protected void exit() {
+    placeController.goTo(new EmployeeScaffoldPlace(getId(), Operation.DETAILS));
+  }
+
+  @Override
   protected void fireFindRequest(Value<String> id,
       Receiver<EmployeeRecord> callback) {
     requests.employeeRequest().findEmployee(id).to(callback).fire();
   }
 
   @Override
-  protected void exit() {
-    placeController.goTo(new EmployeeScaffoldPlace(getId(), Operation.DETAILS));
+  protected String getRecordToken() {
+    return EmployeeRecord.TOKEN;
   }
 }
