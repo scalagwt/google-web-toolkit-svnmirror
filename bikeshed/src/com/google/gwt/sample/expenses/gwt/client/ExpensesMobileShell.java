@@ -16,7 +16,8 @@
 package com.google.gwt.sample.expenses.gwt.client;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.SpanElement;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.sample.expenses.gwt.request.ExpenseRecord;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
@@ -25,34 +26,53 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiFactory;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DeckPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
  * TODO
  */
-public class ExpensesMobileShell extends Composite {
+public class ExpensesMobileShell extends Composite implements Controller {
 
   interface ShellUiBinder extends UiBinder<Widget, ExpensesMobileShell> { }
   private static ShellUiBinder BINDER = GWT.create(ShellUiBinder.class);
 
-  private final ExpensesRequestFactory requestFactory;
-
   @UiField DeckPanel deck;
+  @UiField HTML backButton, addButton, refreshButton;
+  @UiField Element titleSpan;
+
   @UiField MobileReportList reportList;
   @UiField MobileExpenseList expenseList;
-  @UiField MobileExpenseDetails expenseDetails;
+  @UiField MobileExpenseEntry expenseEntry;
 
-  @UiField Button backButton, forwardButton;
-  @UiField SpanElement titleSpan;
+  private final ExpensesRequestFactory requestFactory;
+  private int curPage;
+  private Page[] pages;
 
   public ExpensesMobileShell(ExpensesRequestFactory requestFactory) {
     this.requestFactory = requestFactory;
     initWidget(BINDER.createAndBindUi(this));
 
-    deck.showWidget(0);
+    pages = new Page[] {reportList, expenseList, expenseEntry};
+    showPage(0);
+  }
+
+  public void showButtons(boolean back, boolean refresh, boolean add) {
+    setVisible(backButton, back);
+    setVisible(refreshButton, refresh);
+    setVisible(addButton, add);
+  }
+
+  @UiFactory
+  MobileExpenseList createExpenseList() {
+    return new MobileExpenseList(new MobileExpenseList.Listener() {
+      public void onExpenseSelected(ExpenseRecord expense) {
+        expenseEntry.show(expense);
+        showPage(2);
+      }
+    }, requestFactory);
   }
 
   @UiFactory
@@ -60,30 +80,41 @@ public class ExpensesMobileShell extends Composite {
     return new MobileReportList(new MobileReportList.Listener() {
       public void onReportSelected(ReportRecord report) {
         expenseList.show(report);
-        deck.showWidget(1);
+        showPage(1);
       }
     }, requestFactory);
   }
 
-  @UiFactory
-  MobileExpenseList createExpenseList() {
-    return new MobileExpenseList(new MobileExpenseList.Listener() {
-      public void onExpenseSelected(ExpenseRecord expense) {
-        expenseDetails.show(expense);
-        deck.showWidget(2);
-      }
-    }, requestFactory);
+  @UiHandler("addButton")
+  void onAdd(ClickEvent evt) {
+    pages[curPage].onAdd();
   }
 
   @UiHandler("backButton")
   void onBack(ClickEvent evt) {
-    int idx = deck.getVisibleWidget();
-    if (idx > 0) {
-      deck.showWidget(idx - 1);
+    if (curPage > 0) {
+      showPage(curPage - 1);
     }
   }
 
-  @UiHandler("forwardButton")
-  void onForward(ClickEvent evt) {
+  @UiHandler("refreshButton")
+  void onRefresh(ClickEvent evt) {
+    pages[curPage].onRefresh();
+  }
+
+  private void setVisible(Widget widget, boolean visible) {
+    widget.getElement().getStyle().setVisibility(
+        visible ? Visibility.VISIBLE : Visibility.HIDDEN);
+  }
+
+  private void showPage(int idx) {
+    if (curPage < 0 || curPage >= pages.length) {
+      return;
+    }
+
+    curPage = idx;
+    pages[idx].onShow(this);
+    deck.showWidget(idx);
+    titleSpan.setInnerText(pages[idx].getPageTitle());
   }
 }

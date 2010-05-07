@@ -36,7 +36,7 @@ import java.util.List;
  * TODO
  */
 public class MobileExpenseList extends Composite implements
-    Receiver<List<ExpenseRecord>> {
+    Page, Receiver<List<ExpenseRecord>> {
 
   /**
    * TODO
@@ -49,6 +49,7 @@ public class MobileExpenseList extends Composite implements
   private final CellList<ExpenseRecord> expenseList;
   private final ListViewAdapter<ExpenseRecord> expenseAdapter;
   private final SingleSelectionModel<ExpenseRecord> expenseSelection;
+  private ReportRecord report;
 
   public MobileExpenseList(final Listener listener,
       final ExpensesRequestFactory requestFactory) {
@@ -78,14 +79,32 @@ public class MobileExpenseList extends Composite implements
     initWidget(expenseList);
   }
 
+  public String getPageTitle() {
+    return report != null ? report.getPurpose() : "";
+  }
+
+  public void onAdd() {
+    // TODO Auto-generated method stub
+  }
+  
+  public void onRefresh() {
+    requestFactory.expenseRequest().findExpensesByReport(
+        report.getRef(ReportRecord.id)).forProperties(getExpenseColumns()).to(
+        this).fire();
+  }
+
+  public void onShow(Controller controller) {
+    controller.showButtons(true, true, true);
+  }
+
   public void onSuccess(List<ExpenseRecord> newValues) {
     expenseAdapter.setList(newValues);
   }
 
   public void show(ReportRecord report) {
-    requestFactory.expenseRequest().findExpensesByReport(
-        report.getRef(ReportRecord.id)).forProperties(getExpenseColumns()).to(
-        this).fire();
+    this.report = report;
+
+    onRefresh();
   }
 
   private Collection<Property<?>> getExpenseColumns() {

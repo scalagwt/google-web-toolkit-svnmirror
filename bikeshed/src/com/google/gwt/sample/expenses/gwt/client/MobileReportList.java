@@ -35,7 +35,7 @@ import java.util.List;
  * TODO
  */
 public class MobileReportList extends Composite implements
-    Receiver<List<ReportRecord>> {
+    Page, Receiver<List<ReportRecord>> {
 
   /**
    * TODO
@@ -47,9 +47,11 @@ public class MobileReportList extends Composite implements
   private final CellList<ReportRecord> reportList;
   private final ListViewAdapter<ReportRecord> reportAdapter;
   private final SingleSelectionModel<ReportRecord> reportSelection;
+  private final ExpensesRequestFactory requestFactory;
 
   public MobileReportList(final Listener listener,
       final ExpensesRequestFactory requestFactory) {
+    this.requestFactory = requestFactory;
     reportAdapter = new ListViewAdapter<ReportRecord>();
 
     reportList = new CellList<ReportRecord>(
@@ -72,9 +74,25 @@ public class MobileReportList extends Composite implements
     reportAdapter.addView(reportList);
 
     initWidget(reportList);
+    onRefresh();
+  }
 
-    requestFactory.reportRequest().findAllReports().forProperties(
+  public String getPageTitle() {
+    return "Expense Reports";
+  }
+
+  public void onAdd() {
+    // TODO Auto-generated method stub
+  }
+
+  public void onRefresh() {
+    requestFactory.reportRequest().findReportEntriesBySearch(new Long(-1),
+        "", ReportRecord.created.getName(), 0, 25).forProperties(
         getReportColumns()).to(this).fire();
+  }
+
+  public void onShow(Controller controller) {
+    controller.showButtons(false, true, true);
   }
 
   public void onSuccess(List<ReportRecord> newValues) {

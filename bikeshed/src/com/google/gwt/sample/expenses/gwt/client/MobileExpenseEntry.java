@@ -29,20 +29,51 @@ import java.util.Date;
 /**
  * TODO
  */
-public class MobileExpenseDetails extends Composite {
+public class MobileExpenseEntry extends Composite implements Page {
 
-  interface Binder extends UiBinder<Widget, MobileExpenseDetails> { }
+  interface Binder extends UiBinder<Widget, MobileExpenseEntry> { }
   private static Binder BINDER = GWT.create(Binder.class);
 
   @UiField TextBox nameText, categoryText, priceText;
   @UiField ListBox dateYear, dateMonth, dateDay;
 
-  public MobileExpenseDetails() {
+  private ExpenseRecord expense;
+
+  public MobileExpenseEntry() {
     initWidget(BINDER.createAndBindUi(this));
 
     populateList(dateYear, 2000, 2010);
     populateList(dateMonth, 1, 12);
     populateList(dateDay, 1, 31);
+  }
+
+  public String getPageTitle() {
+    return expense != null ? expense.getDescription() : "";
+  }
+
+  public void onAdd() {
+    // TODO Auto-generated method stub
+  }
+
+  public void onRefresh() {
+    // TODO Auto-generated method stub
+  }
+
+  public void onShow(Controller controller) {
+    controller.showButtons(true, false, false);
+  }
+
+  public void show(ExpenseRecord expense) {
+    this.expense = expense;
+
+    nameText.setText(expense.getDescription());
+    categoryText.setText(expense.getCategory());
+    priceText.setText(ExpensesMobile.formatCurrency(expense.getAmount().intValue()));
+
+    Date d = expense.getDate();
+    dateYear.setSelectedIndex(d.getYear() + 1900 - 2000);
+    dateMonth.setSelectedIndex(d.getMonth());
+    dateDay.setSelectedIndex(d.getDate() - 1);
   }
 
   private void populateList(ListBox list, int start, int end) {
@@ -53,16 +84,5 @@ public class MobileExpenseDetails extends Composite {
         list.addItem("" + i);
       }
     }
-  }
-
-  public void show(ExpenseRecord expense) {
-    nameText.setText(expense.getDescription());
-    categoryText.setText(expense.getCategory());
-    priceText.setText(ExpensesMobile.formatCurrency(expense.getAmount().intValue()));
-
-    Date d = expense.getDate();
-    dateYear.setSelectedIndex(d.getYear() + 1900 - 2000);
-    dateMonth.setSelectedIndex(d.getMonth());
-    dateDay.setSelectedIndex(d.getDate() - 1);
   }
 }
