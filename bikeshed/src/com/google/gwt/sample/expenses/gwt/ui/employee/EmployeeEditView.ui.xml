@@ -19,13 +19,18 @@
      }
       
     .bar {
-      margin-top: 2em;
+      float:right;
+     }
+     .underlined {
+       border-bottom: 2px solid #666;
      }
   </ui:style>
 
   <g:HTMLPanel>
-    <h3 ui:field='editTitle'><ui:msg>Employee <g:InlineLabel ui:field='id'></g:InlineLabel> (v<g:InlineLabel ui:field='version'/>)</ui:msg></h3>
-    <h3 ui:field='createTitle'><ui:msg>New Employee</ui:msg></h3>
+    <h3 ui:field='editTitle'>
+      <ui:msg>Employee <g:InlineLabel ui:field='id'></g:InlineLabel> (v<g:InlineLabel ui:field='version'/>)</ui:msg>
+    </h3>
+    <h3 class='{style.underlined}' ui:field='createTitle'><ui:msg>New Employee</ui:msg></h3>
     <div ui:field='errors' style='background-color: red; '></div>
 
     <div class='{style.fields}'>

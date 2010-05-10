@@ -19,24 +19,27 @@
      }
       
     .bar {
-      margin-top: 2em;
+      float: right;
+     }
+     .underlined {
+       border-bottom: 2px solid #666;
      }
   </ui:style>
-  
-  <g:HTMLPanel>
-    <h3><ui:msg>Report <span ui:field='idSpan' /> (v<span ui:field='versionSpan'/>)</ui:msg></h3>
 
-  <div class='{style.fields}'>
-  <div><span class='{style.label}'>Purpose:</span> <span ui:field='purpose'></span></div>
-  <div><span class='{style.label}'>Notes:</span> <span ui:field='notes'></span></div>
-  <div><span class='{style.label}'>Created:</span> <span ui:field='created'></span></div>
-  <div><span class='{style.label}'>Reporter Key:</span> <span ui:field='reporterKey'></span></div>
-  <div><span class='{style.label}'>Approved Supervisor Key:</span> <span ui:field='approvedSupervisorKey'></span></div>
-  </div>
-  
-  <div class='{style.bar}'>
-  <g:Button addStyleNames='{style.button}' ui:field='edit'>Edit</g:Button>
-  <g:Anchor ui:field='delete'>Delete</g:Anchor>
-  </div>
+  <g:HTMLPanel>
+    <h3 class='{style.underlined}'><ui:msg>Report <span ui:field='idSpan' /> (v<span ui:field='versionSpan'/>)</ui:msg></h3>
+
+    <div class='{style.fields}'>
+    <div><span class='{style.label}'>Purpose:</span> <span ui:field='purpose'></span></div>
+    <div><span class='{style.label}'>Notes:</span> <span ui:field='notes'></span></div>
+    <div><span class='{style.label}'>Created:</span> <span ui:field='created'></span></div>
+    <div><span class='{style.label}'>Reporter Key:</span> <span ui:field='reporterKey'></span></div>
+    <div><span class='{style.label}'>Approved Supervisor Key:</span> <span ui:field='approvedSupervisorKey'></span></div>
+    </div>
+
+    <div class='{style.bar}'>
+    <g:Button addStyleNames='{style.button}' ui:field='edit'>Edit</g:Button>
+    <g:Anchor ui:field='delete'>Delete</g:Anchor>
+    </div>
   </g:HTMLPanel>
 </ui:UiBinder>

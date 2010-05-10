@@ -167,7 +167,7 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
 
   private static Resources getDefaultResources() {
     if (DEFAULT_RESOURCES == null) {
-      DEFAULT_RESOURCES = GWT.create(Resources.class);
+      DEFAULT_RESOURCES = GWT.create(CleanResources.class);
     }
     return DEFAULT_RESOURCES;
   }
