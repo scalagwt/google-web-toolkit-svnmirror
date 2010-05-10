@@ -6,6 +6,10 @@
   
 }
 
+.lastColumn {
+
+}
+
 @sprite .footer {
   gwt-image: 'cellTableFooterBackground';
   background-color: #b4d0f8;
@@ -40,6 +44,14 @@
 
 .firstColumnHeader {
   border-left: 0px;
+}
+
+.lastColumnFooter {
+
+}
+
+.lastColumnHeader {
+
 }
 
 .evenRow {

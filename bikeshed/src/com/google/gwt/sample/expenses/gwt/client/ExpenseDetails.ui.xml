@@ -1,86 +1,57 @@
 <!DOCTYPE ui:UiBinder SYSTEM 'http://dl.google.com/gwt/DTD/xhtml.ent'>
-<ui:UiBinder
-  xmlns:ui='urn:ui:com.google.gwt.uibinder'
-  xmlns:g='urn:import:com.google.gwt.user.client.ui'
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui'
   xmlns:l='urn:import:com.google.gwt.bikeshed.list.client'>
 
-  <ui:image
-    field='cornerTopRight' />
-  <ui:image
-    field='cornerTopLeft' />
-  <ui:image
-    field='cornerBottomRight' />
-  <ui:image
-    field='cornerBottomLeft' />
+  <ui:style field='desktop' src='desktop.css' />
+    
+  <ui:image field='cornerTopRight' />
+  <ui:image field='cornerTopLeft' />
+  <ui:image field='cornerBottomRight' />
+  <ui:image field='cornerBottomLeft' />
+  <ui:image field='leftArrow' />
 
   <ui:style>
-    .top {
-      padding-top: 15px;
-    }
-    
-    .corner {
-      height: 4px;
-      width: 4px;
-    }
-    
-    @sprite .cornerTopRight {
-      gwt-image: 'cornerTopRight';
-    }
-    
-    @sprite .cornerTopLeft {
-      gwt-image: 'cornerTopLeft';
-    }
-    
-    @sprite .cornerBottomRight {
-      gwt-image: 'cornerBottomRight';
-    }
-    
-    @sprite .cornerBottomLeft {
-      gwt-image: 'cornerBottomLeft';
-    }
-    
-    .tableControlsBackground {
-      background: #d7dde8;
-    }
-    
-    .tableControlsBorderInner {
-      height: 1px;
-      width: 1px;
-      overflow: hidden;
-    }
-    
-    .breadcrumb {
-      padding-left: 5px;
-      color: #4b4a4a;
-      font-size: 130%;
-      font-weight: bold;
-    }
-    
-    .reportsLink {
-      text-decoration: none;
-      color: blue;
-      cursor: hand;
-      cursor: pointer;
-    }
-
-    .reportsLink:hover {
-      text-decoration: underline;
-      color: blue;
-      cursor: hand;
-      cursor: pointer;
-    }
-    
     .details {
-      margin-left: 30px;
-      margin-top: 20px;
+      width: 100%;
+      margin-top: 25px;
+    }
+    
+    @sprite .leftArrow {
+      gwt-image: 'leftArrow';
+    }
+    
+    .reportLink {
+      margin-left: 5px;
+      text-decoration: underline;
+      color: black;
+      cursor: hand;
+      cursor: pointer;
+    }
+    
+    .reportLink:hover {
+      text-decoration: underline;
+      color: black;
+      cursor: hand;
+      cursor: pointer;
     }
     
     .label {
-      font-weight: bold;
+      width: 250px;
+      padding: 3px 0px 3px 9px;
     }
     
-    .underline {
-      border-bottom: 1px solid black;
+    .amount {
+      width: 100px;
+      padding: 3px 9px 3px 0px;
+    }
+    
+    .dotted {
+      border-bottom: 1px dotted black;
+    }
+    
+    .notesColumn {
+      width: 400px;
+      padding-right: 100px; 
     }
     
     .notes {
@@ -88,142 +59,111 @@
       border: 1px solid #d7dde8;
       padding: 3px;
     }
-    
-    .table {
-      border: 0px;
-    }
   </ui:style>
 
-  <g:DockLayoutPanel
-    unit='PX'>
-    <g:north
-      size='160'>
-      <g:HTMLPanel 
-        styleName='{style.top}'>
-        <table
-          align='center'
-          width='98%'
-          cellspacing='0'
-          cellpadding='0'>
+  <g:DockLayoutPanel unit='PX'>
+    <g:north size='160'>
+      <g:HTMLPanel styleName='{desktop.breadcrumbBar}'>
+        <table align='center' width='100%' cellspacing='0' cellpadding='0'>
           <!-- Top of 9 box. -->
           <tr>
-            <td
-              class='{style.corner}'>
-              <div
-                class='{style.cornerTopLeft}' />
+            <td class='{desktop.breadcrumbCorner}'>
+              <div class='{desktop.breadcrumbCornerTopLeft}' />
             </td>
-            <td
-              class='{style.tableControlsBackground}'>
-              <div
-                class='{style.tableControlsBorderInner}' />
+            <td class='{desktop.breadcrumbBorder}'>
+              <div class='{desktop.breadcrumbBorderInner}' />
             </td>
-            <td
-              class='{style.corner}'>
-              <div
-                class='{style.cornerTopRight}' />
+            <td class='{desktop.breadcrumbCorner}'>
+              <div class='{desktop.breadcrumbCornerTopRight}' />
             </td>
           </tr>
           <tr>
             <!-- Left of 9 box. -->
-            <td
-              class='{style.tableControlsBackground}'>
-              <div
-                class='{style.tableControlsBorderInner}' />
+            <td class='{desktop.breadcrumbBorder}'>
+              <div class='{desktop.breadcrumbBorderInner}' />
             </td>
             <!-- Breadcrumb. -->
-            <td
-              class='{style.breadcrumb} {style.tableControlsBackground}'>
-              <g:Anchor
-                styleName='{style.reportsLink}'
-                ui:field='reportsLink'>
-                Reports
-              </g:Anchor>
-              &gt;
-              <span ui:field='reportName' />
+            <td class='{desktop.breadcrumb} {desktop.breadcrumbBorder}'
+              ui:field='reportName'>
             </td>
             <!-- Right of 9 box. -->
-            <td
-              class='{style.tableControlsBackground}'>
-              <div
-                class='{style.tableControlsBorderInner}' />
+            <td class='{desktop.breadcrumbBorder}'>
+              <div class='{desktop.breadcrumbBorderInner}' />
             </td>
           </tr>
           <!-- Bottom of 9 box. -->
           <tr>
-            <td
-              class='{style.corner}'>
-              <div
-                class='{style.cornerBottomLeft}' />
+            <td class='{desktop.breadcrumbCorner}'>
+              <div class='{desktop.breadcrumbCornerBottomLeft}' />
             </td>
-            <td
-              class='{style.tableControlsBackground}'>
-              <div
-                class='{style.tableControlsBorderInner}' />
+            <td class='{desktop.breadcrumbBorder}'>
+              <div class='{desktop.breadcrumbBorderInner}' />
             </td>
-            <td
-              class='{style.corner}'>
-              <div
-                class='{style.cornerBottomRight}' />
+            <td class='{desktop.breadcrumbCorner}'>
+              <div class='{desktop.breadcrumbCornerBottomRight}' />
+            </td>
+          </tr>
+
+          <!-- Link back to report list. -->
+          <tr>
+            <td colspan='3' style='padding-top:6px;'>
+              <table cellpadding='0' cellspacing='0'>
+                <tr>
+                  <td>
+                    <div class='{style.leftArrow}' />
+                  </td>
+                  <td>
+                    <g:Anchor styleName='{style.reportLink}' ui:field='reportsLink' />
+                  </td>
+                </tr>
+              </table>
             </td>
           </tr>
         </table>
 
-        <table
-          class='{style.details}'
-          cellpadding='0'
-          cellspacing='0'>
+        <!-- Details about the Report. -->
+        <table class='{style.details}' cellpadding='0' cellspacing='0'>
           <tr>
-            <td
-              class='{style.label} {style.underline}'>
-              Total Cost:
+            <td class='{style.label}'>
+              Cost:
             </td>
-            <td
-              width='150'
-              align='right'
-              class='{style.underline}'
-              ui:field='costLabel'>
+            <td align='right' class='{style.amount}' ui:field='costLabel'>
             </td>
-            <td width='150'>
+            <td rowspan='3'>
+              &nbsp;
             </td>
-            <td
-              class='{style.label} {style.underline}'>
-              Approved So Far:
-            </td>
-            <td
-              width='150'
-              align='right'
-              class='{style.underline}'
-              ui:field='approvedLabel'>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <div style='height:30px'/>
-            </td>
-          </tr>
-          <tr>
-            <td
-              class='{style.label}'>
+            <td class='{style.label} {style.notesColumn}'>
               Notes:
             </td>
-            <td
-              colspan='3'>
-              <g:TextBox
-                styleName='{style.notes}'
-                ui:field='notesBox'></g:TextBox>
+          </tr>
+          <tr>
+            <td class='{style.label} {style.dotted}'>
+              Approved:
+            </td>
+            <td align='right' class='{style.amount}  {style.dotted}'
+              ui:field='approvedLabel'>
+            </td>
+            <td rowspan='2' class='{style.notesColumn}' valign='top'>
+              <g:TextBox styleName='{style.notes}' ui:field='notesBox' />
+            </td>
+          </tr>
+          <tr>
+            <td class='{style.label}'>
+              <b>Un-reconciled:</b>
+            </td>
+            <td align='right' class='{style.amount}' style='font-weight:bold'
+              ui:field='unreconciledLabel'>
             </td>
           </tr>
         </table>
       </g:HTMLPanel>
     </g:north>
-    
+
     <g:center>
       <g:ScrollPanel>
-        <l:CellTable
-          addStyleNames='{style.table}'
-          width='100%'
+        <l:CellTable addStyleNames='{desktop.table}' width='100%'
           ui:field='table' />
-        </g:ScrollPanel>
+      </g:ScrollPanel>
     </g:center>
   </g:DockLayoutPanel>
 

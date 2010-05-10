@@ -127,17 +127,11 @@ public class ExpenseDetails extends Composite implements
    */
   private class ApprovalCell extends SelectionCell {
 
-    private final String approvedClass;
-    private final String blankClass;
-    private final String deniedClass;
     private final String errorIconHtml;
     private final String pendingIconHtml;
 
     public ApprovalCell(List<String> options) {
       super(options);
-      approvedClass = " class='" + Styles.common().approvedOption() + "'";
-      blankClass = " class='" + Styles.common().blankOption() + "'";
-      deniedClass = " class='" + Styles.common().deniedOption() + "'";
 
       // Cache the html string for the error icon.
       ImageResource errorIcon = Styles.resources().errorIcon();
@@ -157,7 +151,6 @@ public class ExpenseDetails extends Composite implements
       if ("change".equals(type)) {
         // Disable the select box.
         SelectElement select = parent.getFirstChild().cast();
-        select.setClassName(Styles.common().blankOption());
         select.setDisabled(true);
 
         // Add the pending icon if it isn't already visible.
@@ -213,23 +206,11 @@ public class ExpenseDetails extends Composite implements
 
       // Create the select element.
       sb.append("<select style='background-color:white;");
-      sb.append("border:1px solid #707172;width:10em;margin-right:10px;'");
-      if (pendingValue != null && !isRejected) {
-        // No icon on pending values.
-        sb.append(blankClass);
-      } else if (isApproved) {
-        sb.append(approvedClass);
-      } else if (isDenied) {
-        sb.append(deniedClass);
-      } else {
-        sb.append(blankClass);
-      }
-      sb.append(">");
+      sb.append("border:1px solid #707172;width:10em;margin-right:10px;'>");
       sb.append("<option></option>");
 
       // Approved Option.
       sb.append("<option");
-      sb.append(approvedClass);
       if (isApproved) {
         sb.append(" selected='selected'");
       }
@@ -237,7 +218,6 @@ public class ExpenseDetails extends Composite implements
 
       // Denied Option.
       sb.append("<option");
-      sb.append(deniedClass);
       if (isDenied) {
         sb.append(" selected='selected'");
       }
@@ -318,6 +298,27 @@ public class ExpenseDetails extends Composite implements
   interface ExpenseDetailsUiBinder extends UiBinder<Widget, ExpenseDetails> {
   }
 
+  /**
+   * The styles applied to the table.
+   */
+  interface TableStyle extends CellTable.CleanStyle {
+    String evenRow();
+
+    String hoveredRow();
+
+    String oddRow();
+
+    String selectedRow();
+  }
+
+  /**
+   * The resources applied to the table.
+   */
+  interface TableResources extends CellTable.CleanResources {
+    @Source("ExpenseDetailsCellTable.css")
+    TableStyle cellTableStyle();
+  }
+
   private static final GetValue<ExpenseRecord, Date> dateGetter = new GetValue<ExpenseRecord, Date>() {
     public Date getValue(ExpenseRecord object) {
       return object.getDate();
@@ -345,6 +346,9 @@ public class ExpenseDetails extends Composite implements
 
   @UiField
   CellTable<ExpenseRecord> table;
+
+  @UiField
+  Element unreconciledLabel;
 
   private List<SortableHeader> allHeaders = new ArrayList<SortableHeader>();
 
@@ -436,6 +440,7 @@ public class ExpenseDetails extends Composite implements
     notesBox.setText(report.getNotes());
     costLabel.setInnerText("");
     approvedLabel.setInnerText("");
+    unreconciledLabel.setInnerText("");
     totalApproved = 0;
 
     // Update the breadcrumb.
@@ -457,14 +462,25 @@ public class ExpenseDetails extends Composite implements
 
   @UiFactory
   CellTable<ExpenseRecord> createTable() {
-    CellTable.Resources resources = GWT.create(CellTable.CleanResources.class);
-    CellTable<ExpenseRecord> view = new CellTable<ExpenseRecord>(15, resources);
+    CellTable.Resources resources = GWT.create(TableResources.class);
+    CellTable<ExpenseRecord> view = new CellTable<ExpenseRecord>(100, resources);
     Styles.Common common = Styles.common();
-    view.addColumnStyleName(0, common.expenseDetailsDateColumn());
-    view.addColumnStyleName(2, common.expenseDetailsCategoryColumn());
-    view.addColumnStyleName(3, common.expenseDetailsAmountColumn());
-    view.addColumnStyleName(4, common.expenseDetailsApprovalColumn());
+    view.addColumnStyleName(0, common.spacerColumn());
+    view.addColumnStyleName(1, common.expenseDetailsDateColumn());
+    view.addColumnStyleName(3, common.expenseDetailsCategoryColumn());
+    view.addColumnStyleName(4, common.expenseDetailsAmountColumn());
+    view.addColumnStyleName(5, common.expenseDetailsApprovalColumn());
+    view.addColumnStyleName(6, common.spacerColumn());
 
+    // Spacer column.
+    view.addColumn(new Column<ExpenseRecord, String>(new TextCell()) {
+      @Override
+      public String getValue(ExpenseRecord object) {
+        return "<div style='display:none;'/>";
+      }
+    });
+
+    // Date column.
     dateColumn = addColumn(view, "Date", new DateCell(
         DateTimeFormat.getFormat("MMM dd yyyy")), dateGetter);
     lastComparator = dateColumn.getComparator(false);
@@ -527,6 +543,14 @@ public class ExpenseDetails extends Composite implements
         } else {
           updateExpenseRecord(object, value, "");
         }
+      }
+    });
+
+    // Spacer column.
+    view.addColumn(new Column<ExpenseRecord, String>(new TextCell()) {
+      @Override
+      public String getValue(ExpenseRecord object) {
+        return "<div style='display:none;'/>";
       }
     });
 
@@ -649,8 +673,10 @@ public class ExpenseDetails extends Composite implements
         totalApproved += cost;
       }
     }
+    double unreconciled = totalCost - totalApproved;
     costLabel.setInnerText(formatCurrency(totalCost));
     approvedLabel.setInnerText(formatCurrency(totalApproved));
+    unreconciledLabel.setInnerText(formatCurrency(unreconciled));
   }
 
   /**

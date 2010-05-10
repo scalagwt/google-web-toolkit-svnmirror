@@ -7,6 +7,7 @@
   <ui:with
     field='styles'
     type='com.google.gwt.sample.bikeshed.style.client.Styles.Resources' />
+  <ui:style field='desktop' src='desktop.css' />
 
   <ui:image
     field='searchCenter'
@@ -25,19 +26,8 @@
   <ui:image
     field='cornerBottomLeft' />
 
-  <ui:style>
-    .top {
-      padding-top: 15px;
-    }
-    
-    .breadcrumb {
-      padding-left: 5px;
-      color: #4b4a4a;
-      font-size: 130%;
-      font-weight: bold;
-    }
-    
-    .textBox {
+  <ui:style>   
+   .textBox {
       width: 250px;
       border: 0px;
       padding: 0px;
@@ -45,12 +35,12 @@
       font-size: 12px;
       outline-width: 0px;
     }
-    
+
     .searchButton {
       cursor: pointer;
       cursor: hand;
     }
-    
+
     @sprite .searchCenter {
       gwt-image: 'searchCenter';
       padding-top: 4px;
@@ -59,44 +49,9 @@
     @sprite .searchLeft {
       gwt-image: 'searchLeft';
     }
-    
-    .corner {
-      height: 4px;
-      width: 4px;
-    }
-    
-    @sprite .cornerTopRight {
-      gwt-image: 'cornerTopRight';
-    }
-    
-    @sprite .cornerTopLeft {
-      gwt-image: 'cornerTopLeft';
-    }
-    
-    @sprite .cornerBottomRight {
-      gwt-image: 'cornerBottomRight';
-    }
-    
-    @sprite .cornerBottomLeft {
-      gwt-image: 'cornerBottomLeft';
-    }
-    
-    .tableControlsBackground {
-      background: #d7dde8;
-    }
-    
-    .tableControlsBorderInner {
-      height: 1px;
-      width: 1px;
-      overflow: hidden;
-    }
-    
+
     .center {
       border-bottom: 1px solid #d7dde8;
-    }
-    
-    .table {
-      border: 0px;
     }
   </ui:style>
 
@@ -106,48 +61,48 @@
     <g:north
       size='70'>
       <g:HTMLPanel
-        styleName='{style.top}'>
+        styleName='{desktop.breadcrumbBar}'>
         <table
           align='center'
-          width='98%'
+          width='100%'
           cellspacing='0'
           cellpadding='0'>
           <!-- Top of 9 box. -->
           <tr>
             <td
-              class='{style.corner}'>
+              class='{desktop.breadcrumbCorner}'>
               <div
-                class='{style.cornerTopLeft}' />
+                class='{desktop.breadcrumbCornerTopLeft}' />
             </td>
             <td
               colspan='2'
-              class='{style.tableControlsBackground}'>
+              class='{desktop.breadcrumbBorder}'>
               <div
-                class='{style.tableControlsBorderInner}' />
+                class='{desktop.breadcrumbBorderInner}' />
             </td>
             <td
-              class='{style.corner}'>
+              class='{desktop.breadcrumbCorner}'>
               <div
-                class='{style.cornerTopRight}' />
+                class='{desktop.breadcrumbCornerTopRight}' />
             </td>
           </tr>
           <tr>
             <!-- Left of 9 box. -->
             <td
-              class='{style.tableControlsBackground}'>
+              class='{desktop.breadcrumbBorder}'>
               <div
-                class='{style.tableControlsBorderInner}' />
+                class='{desktop.breadcrumbBorderInner}' />
             </td>
             <!-- Breadcrumb. -->
             <td
-              class='{style.breadcrumb} {style.tableControlsBackground}'
+              class='{desktop.breadcrumb} {desktop.breadcrumbBorder}'
               align='left'
               ui:field='breadcrumb'>
               All Reports
             </td>
             <!-- Search Box. -->
             <td
-              class='{style.tableControlsBackground}'
+              class='{desktop.breadcrumbBorder}'
               align='right'
               valign='middle'>
               <table
@@ -182,28 +137,28 @@
             </td>
             <!-- Right of 9 box. -->
             <td
-              class='{style.tableControlsBackground}'>
+              class='{desktop.breadcrumbBorder}'>
               <div
-                class='{style.tableControlsBorderInner}' />
+                class='{desktop.breadcrumbBorderInner}' />
             </td>
           </tr>
           <!-- Bottom of 9 box. -->
           <tr>
             <td
-              class='{style.corner}'>
+              class='{desktop.breadcrumbCorner}'>
               <div
-                class='{style.cornerBottomLeft}' />
+                class='{desktop.breadcrumbCornerBottomLeft}' />
             </td>
             <td
               colspan='2'
-              class='{style.tableControlsBackground}'>
+              class='{desktop.breadcrumbBorder}'>
               <div
-                class='{style.tableControlsBorderInner}' />
+                class='{desktop.breadcrumbBorderInner}' />
             </td>
             <td
-              class='{style.corner}'>
+              class='{desktop.breadcrumbCorner}'>
               <div
-                class='{style.cornerBottomRight}' />
+                class='{desktop.breadcrumbCornerBottomRight}' />
             </td>
           </tr>
         </table>
@@ -214,7 +169,7 @@
       <g:ScrollPanel
         styleName='{style.center}'>
         <l:CellTable
-          addStyleNames='{style.table}'
+          addStyleNames='{desktop.table}'
           width='100%'
           ui:field='table' />
       </g:ScrollPanel>

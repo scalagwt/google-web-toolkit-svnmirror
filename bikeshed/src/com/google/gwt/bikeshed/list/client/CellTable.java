@@ -103,6 +103,21 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
     String hoveredRow();
 
     /**
+     * Applied to the last column.
+     */
+    String lastColumn();
+
+    /**
+     * Applied to the last column footers.
+     */
+    String lastColumnFooter();
+
+    /**
+     * Applied to the last column headers.
+     */
+    String lastColumnHeader();
+
+    /**
      * Applied to odd rows.
      */
     String oddRow();
@@ -267,6 +282,9 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
       @Override
       protected void emitHtml(StringBuilder sb, List<T> values, int start,
           SelectionModel<? super T> selectionModel) {
+        String firstColumnStyle = style.firstColumn();
+        String lastColumnStyle = style.lastColumn();
+        int columnCount = columns.size();
         int length = values.size();
         int end = start + length;
         for (int i = start; i < end; i++) {
@@ -280,13 +298,16 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
             sb.append(" ").append(style.selectedRow());
           }
           sb.append("'>");
-          boolean first = true;
+          int curColumn = 0;
           for (Column<T, ?> column : columns) {
             // TODO(jlabanca): How do we sink ONFOCUS and ONBLUR?
             sb.append("<td class='").append(style.cell());
-            if (first) {
-              first = false;
-              sb.append(" ").append(style.firstColumn());
+            if (curColumn == 0) {
+              sb.append(" ").append(firstColumnStyle);
+            }
+            // The first and last column could be the same column.
+            if (curColumn == columnCount - 1) {
+              sb.append(" ").append(lastColumnStyle);
             }
             sb.append("'>");
             int bufferLength = sb.length();
@@ -299,6 +320,7 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
               sb.append("&nbsp");
             }
             sb.append("</td>");
+            curColumn++;
           }
           sb.append("</tr>");
         }
@@ -619,14 +641,20 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
     boolean hasHeader = false;
     StringBuilder sb = new StringBuilder();
     sb.append("<tr>");
-    boolean first = true;
+    int columnCount = columns.size();
+    int curColumn = 0;
     for (Header<?> header : theHeaders) {
       sb.append("<th class='").append(className);
-      if (first) {
-        first = false;
+      if (curColumn == 0) {
         sb.append(" ");
         sb.append(isFooter ? style.firstColumnFooter()
             : style.firstColumnHeader());
+      }
+      // The first and last columns could be the same column.
+      if (curColumn == columnCount - 1) {
+        sb.append(" ");
+        sb.append(isFooter ? style.lastColumnFooter()
+            : style.lastColumnHeader());
       }
       sb.append("'>");
       if (header != null) {
@@ -634,6 +662,7 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
         header.render(sb);
       }
       sb.append("</th>");
+      curColumn++;
     }
     sb.append("</tr>");
 

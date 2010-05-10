@@ -355,10 +355,10 @@ public class CellTree extends Composite implements HasAnimation {
    */
   public static interface CleanResources extends Resources {
 
-    @Source("cellTreeClosedArrow.gif")
+    @Source("cellTreeClosedArrow.png")
     ImageResource cellTreeClosedItem();
 
-    @Source("cellTreeOpenArrow.gif")
+    @Source("cellTreeOpenArrow.png")
     ImageResource cellTreeOpenItem();
 
     @Source("CellTreeClean.css")

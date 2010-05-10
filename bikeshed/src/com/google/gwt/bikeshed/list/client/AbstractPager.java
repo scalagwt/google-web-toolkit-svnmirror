@@ -29,7 +29,7 @@ public abstract class AbstractPager<T> extends Composite implements Pager<T> {
   /**
    * If true, all operations should be limited to the data size.
    */
-  private boolean isRangeLimited;
+  private boolean isRangeLimited = true;
 
   /**
    * The {@link PagingListView} being paged.
@@ -108,7 +108,8 @@ public abstract class AbstractPager<T> extends Composite implements Pager<T> {
   }
 
   /**
-   * Check if the page should be limited to the actual data size.
+   * Check if the page should be limited to the actual data size. Defaults to
+   * true.
    * 
    * @return true if the range is limited to the data size
    */

@@ -108,6 +108,11 @@ h1 {
   overflow: auto;
 }
 
+.spacerColumn {
+  width: 15px;
+  border: 0 !important;
+}
+
 /* tables */
 .table {
   width: 100%;

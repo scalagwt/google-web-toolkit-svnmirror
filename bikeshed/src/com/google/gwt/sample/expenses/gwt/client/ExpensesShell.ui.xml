@@ -22,10 +22,10 @@
     }
     
     .titleText {
-      font-family: Ariel, sans-serif;
       color: #7b8fae;
       font-size: 20pt;
       font-weight: bold;
+      text-shadow: #ddd 3px 3px 1px;
     }
     
     .expenseTree {

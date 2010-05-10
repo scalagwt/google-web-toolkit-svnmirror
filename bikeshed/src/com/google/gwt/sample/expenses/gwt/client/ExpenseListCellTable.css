@@ -2,34 +2,52 @@
   
 }
 
-.firstColumn {
-  
-}
-
 .footer {
   border-top: 2px solid #6f7277;
-  padding: 3px 15px;
+  padding: 3px 9px;
   text-align: left;
   color: #4b4a4a;
+  text-shadow: #ddf 1px 1px 0;
 }
 
 .header {
   border-bottom: 2px solid #6f7277;
-  padding: 3px 15px;
+  padding: 3px 9px;
   text-align: left;
   color: #4b4a4a;
+  text-shadow: #ddf 1px 1px 0;
 }
 
 .cell {
-  padding: 4px 15px;
+  padding: 4px 9px;
+}
+
+.firstColumn {
+  padding: 0px;
+}
+
+.lastColumn {
+  padding: 0px;
 }
 
 .firstColumnFooter {
-  border-left: 0px;
+  border: 0px;
+  padding: 0px;
 }
 
 .firstColumnHeader {
-  border-left: 0px;
+  border: 0px;
+  padding: 0px;
+}
+
+.lastColumnFooter {
+  border: 0px;
+  padding: 0px;
+}
+
+.lastColumnHeader {
+  border: 0px;
+  padding: 0px;
 }
 
 .evenRow {
@@ -44,8 +62,12 @@
   cursor: pointer;
 }
 
-.hoveredRow {
-  background-color: #88b0f2;
+@sprite .hoveredRow {
+  gwt-image: 'cellTableSelectedBackground';
+  background-color: #628cd5;
+  color: white;
+  height: auto;
+  overflow: auto;
 }
 
 .selectedRow {

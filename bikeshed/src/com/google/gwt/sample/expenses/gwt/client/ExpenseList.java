@@ -22,6 +22,7 @@ import com.google.gwt.bikeshed.list.client.SimplePager.TextLocation;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.DateCell;
+import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
@@ -154,6 +155,8 @@ public class ExpenseList extends Composite implements
    */
   interface TableStyle extends CellTable.CleanStyle {
     String evenRow();
+
+    String hoveredRow();
 
     String oddRow();
 
@@ -402,8 +405,10 @@ public class ExpenseList extends Composite implements
     CellTable.Resources resources = GWT.create(TableResources.class);
     table = new CellTable<ReportRecord>(20, resources);
     Styles.Common common = Styles.common();
-    table.addColumnStyleName(0, common.expenseListPurposeColumn());
-    table.addColumnStyleName(2, common.expenseListCreatedColumn());
+    table.addColumnStyleName(0, common.spacerColumn());
+    table.addColumnStyleName(1, common.expenseListPurposeColumn());
+    table.addColumnStyleName(3, common.expenseListCreatedColumn());
+    table.addColumnStyleName(4, common.spacerColumn());
 
     // Add a selection model.
     final SingleSelectionModel<ReportRecord> selectionModel = new SingleSelectionModel<ReportRecord>();
@@ -415,6 +420,14 @@ public class ExpenseList extends Composite implements
         if (selected != null && listener != null) {
           listener.onReportSelected((ReportRecord) selected);
         }
+      }
+    });
+
+    // Spacer column.
+    table.addColumn(new Column<ReportRecord, String>(new TextCell()) {
+      @Override
+      public String getValue(ReportRecord object) {
+        return "<div style='display:none;'/>";
       }
     });
 
@@ -441,6 +454,14 @@ public class ExpenseList extends Composite implements
             return object.getCreated();
           }
         }, ReportRecord.created);
+
+    // Spacer column.
+    table.addColumn(new Column<ReportRecord, String>(new TextCell()) {
+      @Override
+      public String getValue(ReportRecord object) {
+        return "<div style='display:none;'/>";
+      }
+    });
   }
 
   /**

@@ -82,6 +82,11 @@ public class Styles {
 
     String padded();
 
+    /**
+     * Applied to columns used as spacers.
+     */
+    String spacerColumn();
+
     String table();
 
     /**
