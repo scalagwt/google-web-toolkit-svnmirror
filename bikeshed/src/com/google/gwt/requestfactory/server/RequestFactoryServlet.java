@@ -542,6 +542,17 @@ public class RequestFactoryServlet extends HttpServlet {
     if (idValue.getClass() == String.class && idType == Long.class) {
       return new Long((String) idValue);
     }
+    if (idType == Double.class) {
+      if (idValue.getClass() == Integer.class) {
+        return new Double((Integer) idValue);
+      }
+      if (idValue.getClass() == Long.class) {
+        return new Double((Long) idValue);
+      }
+      if (idValue.getClass() == Float.class) {
+        return new Double((Float) idValue);
+      }
+    }
     throw new IllegalArgumentException("id is of type: " + idValue.getClass()
         + ",  expected type: " + idType);
   }

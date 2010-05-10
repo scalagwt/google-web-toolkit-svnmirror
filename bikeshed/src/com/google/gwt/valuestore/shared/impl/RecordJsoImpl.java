@@ -77,6 +77,9 @@ public class RecordJsoImpl extends JavaScriptObject implements Record {
       return (V) Integer.valueOf(getInt(property.getName()));
     }
     if (Double.class.equals(property.getType())) {
+      if (!isDefined(property.getName())) {
+        return (V) new Double(0.0);
+      }
       return (V) Double.valueOf(getDouble(property.getName()));
     }
     if (Date.class.equals(property.getType())) {
@@ -158,6 +161,10 @@ public class RecordJsoImpl extends JavaScriptObject implements Record {
     if (value instanceof Date) {
       double millis = (double) ((Date) value).getTime();
       setDouble(property.getName(), millis);
+      return;
+    }
+    if (value instanceof Double) {
+      setDouble(property.getName(), (Double) value);
       return;
     }
     throw new UnsupportedOperationException("Can't yet set properties of type "
