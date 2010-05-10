@@ -97,7 +97,6 @@ public class CellTree extends Composite implements HasAnimation {
     /**
      * The background used for selected items.
      */
-    @Source("../../list/client/cellListSelectedBackground.png")
     @ImageOptions(repeatStyle = RepeatStyle.Horizontal)
     ImageResource cellTreeSelectedBackground();
 

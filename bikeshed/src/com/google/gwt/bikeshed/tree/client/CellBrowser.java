@@ -87,7 +87,7 @@ public class CellBrowser extends Composite implements ProvidesResize,
     /**
      * The background used for selected items.
      */
-    @Source("../../list/client/cellListSelectedBackground.png")
+    @Source("cellTreeSelectedBackground.png")
     @ImageOptions(repeatStyle = RepeatStyle.Horizontal)
     ImageResource cellBrowserSelectedBackground();
 
