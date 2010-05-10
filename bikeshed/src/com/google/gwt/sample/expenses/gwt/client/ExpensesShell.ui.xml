@@ -30,17 +30,20 @@
     
     .expenseTree {
       background-color: #d7dde8;
+      border-right: 1px solid #c3c3c3;
     }
   </ui:style>
 
   <g:DockLayoutPanel
     unit='PX'>
     <g:north
-      size='90'>
+      size='96'>
       <g:HTMLPanel
         styleName='{style.title}'>
         <table
-          height='100%'>
+          height='100%'
+          cellpadding='8'
+          cellspacing='0'>
           <tr>
             <td>
               <div
@@ -49,8 +52,8 @@
             <td
               class='{style.titleText}'
               valign='middle'>
-              Expenses Sample
-                </td>
+              Expense Reports
+            </td>
           </tr>
         </table>
       </g:HTMLPanel>
@@ -60,7 +63,7 @@
       <g:DockLayoutPanel
         ui:field='dockLayout'>
         <g:west
-          size='250'>
+          size='225'>
           <c:ExpenseTree
             addStyleNames='{style.expenseTree}'
             ui:field='expenseTree' />

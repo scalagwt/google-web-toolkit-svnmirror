@@ -1,0 +1,52 @@
+.cellTable {
+  
+}
+
+.firstColumn {
+  
+}
+
+.footer {
+  border-top: 2px solid #6f7277;
+  padding: 3px 15px;
+  text-align: left;
+  color: #4b4a4a;
+}
+
+.header {
+  border-bottom: 2px solid #6f7277;
+  padding: 3px 15px;
+  text-align: left;
+  color: #4b4a4a;
+}
+
+.cell {
+  padding: 4px 15px;
+}
+
+.firstColumnFooter {
+  border-left: 0px;
+}
+
+.firstColumnHeader {
+  border-left: 0px;
+}
+
+.evenRow {
+  background-color: #ffffff;
+  cursor: hand;
+  cursor: pointer;
+}
+
+.oddRow {
+  background-color: #f3f7fb;
+  cursor: hand;
+  cursor: pointer;
+}
+
+.hoveredRow {
+  background-color: #88b0f2;
+}
+
+.selectedRow {
+}

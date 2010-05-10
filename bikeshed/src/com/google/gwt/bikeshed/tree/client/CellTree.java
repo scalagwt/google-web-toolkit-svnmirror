@@ -633,7 +633,8 @@ public class CellTree extends Composite implements HasAnimation {
    */
   void maybeAnimateTreeNode(CellTreeNodeView<?> node) {
     if (animation != null) {
-      animation.animate(node, node.consumeAnimate() && isAnimationEnabled());
+      animation.animate(node, node.consumeAnimate() && isAnimationEnabled()
+          && !node.isRootNode());
     }
   }
 
@@ -680,7 +681,7 @@ public class CellTree extends Composite implements HasAnimation {
    */
   private String getImageHtml(ImageResource res, boolean isTop) {
     StringBuilder sb = new StringBuilder();
-    sb.append("<img class='").append(style.itemImage());
+    sb.append("<div class='").append(style.itemImage());
     if (isTop) {
       sb.append(" ").append(style.topItemImage());
     }
@@ -696,7 +697,7 @@ public class CellTree extends Composite implements HasAnimation {
     sb.append("no-repeat scroll center center transparent;");
 
     // Close the div and return.
-    sb.append("\"></img>");
+    sb.append("\"></div>");
     return sb.toString();
   }
 }

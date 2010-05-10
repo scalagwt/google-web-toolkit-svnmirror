@@ -289,8 +289,14 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
               sb.append(" ").append(style.firstColumn());
             }
             sb.append("'>");
+            int bufferLength = sb.length();
             if (value != null) {
               column.render(value, providesKey, sb);
+            }
+
+            // Add blank space to ensure empty rows aren't squished.
+            if (bufferLength == sb.length()) {
+              sb.append("&nbsp");
             }
             sb.append("</td>");
           }

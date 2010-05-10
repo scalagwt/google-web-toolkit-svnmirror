@@ -33,6 +33,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.requestfactory.shared.Receiver;
 import com.google.gwt.requestfactory.shared.SyncResult;
 import com.google.gwt.resources.client.ImageResource;
@@ -464,7 +465,8 @@ public class ExpenseDetails extends Composite implements
     view.addColumnStyleName(3, common.expenseDetailsAmountColumn());
     view.addColumnStyleName(4, common.expenseDetailsApprovalColumn());
 
-    dateColumn = addColumn(view, "Date", new DateCell(), dateGetter);
+    dateColumn = addColumn(view, "Date", new DateCell(
+        DateTimeFormat.getFormat("MMM dd yyyy")), dateGetter);
     lastComparator = dateColumn.getComparator(false);
 
     // Description column.

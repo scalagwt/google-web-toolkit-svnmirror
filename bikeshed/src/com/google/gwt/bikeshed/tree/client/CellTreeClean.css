@@ -6,6 +6,8 @@
 .item {
   padding-top: 4px;
   padding-bottom: 4px;
+  cursor: hand;
+  cursor: pointer;
 }
 
 .itemImage {
@@ -29,7 +31,7 @@
   font-weight: bold;
   color: #4b4a4a;
   margin-top: 20px;
-  padding: 3px 13px 1px 10px !important;
+  padding: 3px 13px 3px 10px !important;
 }
 
 .topItemImage {
@@ -37,7 +39,7 @@
 }
 
 .topItemImageValue {
-  border-bottom: 2px solid #6f7277;
+  border-bottom: 1px solid #6f7277;
 }
 
 @sprite .selectedItem {

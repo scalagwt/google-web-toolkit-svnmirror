@@ -34,6 +34,7 @@ import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.requestfactory.shared.Receiver;
 import com.google.gwt.sample.bikeshed.style.client.Styles;
@@ -146,6 +147,25 @@ public class ExpenseList extends Composite implements
      * @param report the selected report
      */
     void onReportSelected(ReportRecord report);
+  }
+
+  /**
+   * The styles applied to the table.
+   */
+  interface TableStyle extends CellTable.CleanStyle {
+    String evenRow();
+
+    String oddRow();
+
+    String selectedRow();
+  }
+
+  /**
+   * The resources applied to the table.
+   */
+  interface TableResources extends CellTable.CleanResources {
+    @Source("ExpenseListCellTable.css")
+    TableStyle cellTableStyle();
   }
 
   /**
@@ -379,8 +399,8 @@ public class ExpenseList extends Composite implements
    * Create the {@link CellTable}.
    */
   private void createTable() {
-    CellTable.Resources resources = GWT.create(CellTable.CleanResources.class);
-    table = new CellTable<ReportRecord>(50, resources);
+    CellTable.Resources resources = GWT.create(TableResources.class);
+    table = new CellTable<ReportRecord>(20, resources);
     Styles.Common common = Styles.common();
     table.addColumnStyleName(0, common.expenseListPurposeColumn());
     table.addColumnStyleName(2, common.expenseListCreatedColumn());
@@ -415,11 +435,12 @@ public class ExpenseList extends Composite implements
         }, ReportRecord.notes);
 
     // Created column.
-    addColumn("Created", new DateCell(), new GetValue<ReportRecord, Date>() {
-      public Date getValue(ReportRecord object) {
-        return object.getCreated();
-      }
-    }, ReportRecord.created);
+    addColumn("Created", new DateCell(DateTimeFormat.getFormat("MMM dd yyyy")),
+        new GetValue<ReportRecord, Date>() {
+          public Date getValue(ReportRecord object) {
+            return object.getCreated();
+          }
+        }, ReportRecord.created);
   }
 
   /**

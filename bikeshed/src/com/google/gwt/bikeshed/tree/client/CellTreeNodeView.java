@@ -707,6 +707,15 @@ class CellTreeNodeView<T> extends UIObject {
     return showMoreElem;
   }
 
+  /**
+   * Check if this node is a root node.
+   * 
+   * @return true if a root node
+   */
+  boolean isRootNode() {
+    return parentNode == null;
+  }
+
   void showFewer() {
     int defaultPageSize = listView.getDefaultPageSize();
     int maxSize = Math.max(defaultPageSize, listView.impl.getPageSize()
@@ -717,15 +726,6 @@ class CellTreeNodeView<T> extends UIObject {
   void showMore() {
     listView.impl.setPageSize(listView.impl.getPageSize()
         + listView.getDefaultPageSize());
-  }
-
-  /**
-   * Check if this node is a root node.
-   * 
-   * @return true if a root node
-   */
-  private boolean isRootNode() {
-    return parentNode == null;
   }
 
   /**

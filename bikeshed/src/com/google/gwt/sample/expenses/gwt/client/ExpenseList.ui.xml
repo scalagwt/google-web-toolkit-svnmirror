@@ -41,8 +41,9 @@
       width: 250px;
       border: 0px;
       padding: 0px;
-      height: 16px;
+      height: 14px;
       font-size: 12px;
+      outline-width: 0px;
     }
     
     .searchButton {
@@ -52,7 +53,7 @@
     
     @sprite .searchCenter {
       gwt-image: 'searchCenter';
-      padding-top: 5px;
+      padding-top: 4px;
     }
     
     @sprite .searchLeft {

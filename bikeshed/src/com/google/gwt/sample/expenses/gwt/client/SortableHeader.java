@@ -67,9 +67,11 @@ public class SortableHeader extends Header<String> {
     return text;
   }
 
+  @Override
   public void render(StringBuilder sb) {
     int imageWidth = IMAGE_WIDTH;
-    sb.append("<div style='position:relative;padding-right:");
+    sb.append("<div style='position:relative;cursor:hand;cursor:pointer;");
+    sb.append("padding-right:");
     sb.append(imageWidth);
     sb.append("px;'>");
     if (sorted) {
