@@ -15,13 +15,22 @@
  */
 package com.google.gwt.sample.expenses.gwt.client;
 
+import com.google.gwt.user.client.ui.Widget;
+
 /**
  * TODO: doc
  */
-public interface Page {
+public interface MobilePage {
+
+  Widget asWidget();
 
   String getPageTitle();
+
+  boolean needsAddButton();
+  String needsCustomButton();
+  boolean needsRefreshButton();
+
   void onAdd();
+  void onCustom();
   void onRefresh();
-  void onShow(Controller controller);
 }

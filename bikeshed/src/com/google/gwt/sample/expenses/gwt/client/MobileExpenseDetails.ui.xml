@@ -12,21 +12,14 @@
     font-weight: bold;
     font-size: 13px;
   }
-
-  .error {
-  }
   </ui:style>
 
   <g:HTMLPanel styleName='{style.form}'>
     <table border='0'>
-      <tr><td>Name:</td><td><g:TextBox ui:field='nameText'/></td></tr>
-      <tr>
-        <td>Date:</td>
-        <td><g:ListBox ui:field='dateYear'/>/<g:ListBox ui:field='dateMonth'/>/<g:ListBox ui:field='dateDay'/></td>
-      </tr>
-      <tr><td>Category:</td><td><g:TextBox ui:field='categoryText'/></td></tr>
-      <tr><td>Price:</td><td>$<g:TextBox ui:field='priceText'/></td></tr>
+      <tr><td>Name:</td><td ui:field='nameText'></td></tr>
+      <tr><td>Date:</td><td ui:field='dateText'></td></tr>
+      <tr><td>Category:</td><td ui:field='categoryText'></td></tr>
+      <tr><td>Price:</td><td>$<span ui:field='priceText'/></td></tr>
     </table>
-    <div class='error' ui:field='errorText'/>
   </g:HTMLPanel>
 </ui:UiBinder>

@@ -16,30 +16,49 @@
 package com.google.gwt.sample.expenses.gwt.client;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.requestfactory.shared.Receiver;
+import com.google.gwt.requestfactory.shared.SyncResult;
 import com.google.gwt.sample.expenses.gwt.request.ExpenseRecord;
+import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.valuestore.shared.DeltaValueStore;
 
 import java.util.Date;
+import java.util.Set;
 
 /**
  * TODO
  */
-public class MobileExpenseEntry extends Composite implements Page {
+public class MobileExpenseEntry extends Composite implements MobilePage {
+
+  /**
+   * TODO
+   */
+  public interface Listener {
+    void onExpenseUpdated();
+  }
 
   interface Binder extends UiBinder<Widget, MobileExpenseEntry> { }
   private static Binder BINDER = GWT.create(Binder.class);
 
   @UiField TextBox nameText, categoryText, priceText;
   @UiField ListBox dateYear, dateMonth, dateDay;
+  @UiField Element errorText;
 
   private ExpenseRecord expense;
+  private final ExpensesRequestFactory requestFactory;
+  private final Listener listener;
 
-  public MobileExpenseEntry() {
+  public MobileExpenseEntry(Listener listener,
+      ExpensesRequestFactory requestFactory) {
+    this.listener = listener;
+    this.requestFactory = requestFactory;
     initWidget(BINDER.createAndBindUi(this));
 
     populateList(dateYear, 2000, 2010);
@@ -47,20 +66,68 @@ public class MobileExpenseEntry extends Composite implements Page {
     populateList(dateDay, 1, 31);
   }
 
+  public Widget asWidget() {
+    return this;
+  }
+
   public String getPageTitle() {
     return expense != null ? expense.getDescription() : "";
   }
 
+  public boolean needsAddButton() {
+    return false;
+  }
+
+  public String needsCustomButton() {
+    return "Done";
+  }
+
+  public boolean needsRefreshButton() {
+    return false;
+  }
+
   public void onAdd() {
-    // TODO Auto-generated method stub
+  }
+
+  public void onCustom() {
+    // Create a delta and sync with the value store.
+    DeltaValueStore deltas = requestFactory.getValueStore().spawnDeltaView();
+    deltas.set(ExpenseRecord.description, expense, nameText.getText());
+    deltas.set(ExpenseRecord.category, expense, categoryText.getText());
+
+    // TODO: validate amount, store amount
+    // (currently writing doubles seems to be unimplemented)
+//    String amountText = priceText.getText();
+//    double amount = Double.parseDouble(amountText);
+//    deltas.set(ExpenseRecord.amount, expense, amount);
+
+    // TODO(jgw): Use non-deprecated date methods for this.
+    Date date = new Date(
+        dateYear.getSelectedIndex() + 100,
+        dateMonth.getSelectedIndex(),
+        dateDay.getSelectedIndex() + 1
+    );
+    deltas.set(ExpenseRecord.date, expense, date);
+
+    // TODO: wait throbber
+    requestFactory.syncRequest(deltas).to(
+        new Receiver<Set<SyncResult>>() {
+          public void onSuccess(Set<SyncResult> response) {
+            // Check for commit errors.
+            for (SyncResult result : response) {
+              if (result.hasViolations()) {
+                // TODO(jgw): Get the error messages from the violations.
+                errorText.setInnerText("Could not commit change");
+                return;
+              }
+            }
+
+            listener.onExpenseUpdated();
+          }
+        }).fire();
   }
 
   public void onRefresh() {
-    // TODO Auto-generated method stub
-  }
-
-  public void onShow(Controller controller) {
-    controller.showButtons(true, false, false);
   }
 
   public void show(ExpenseRecord expense) {
@@ -70,8 +137,9 @@ public class MobileExpenseEntry extends Composite implements Page {
     categoryText.setText(expense.getCategory());
     priceText.setText(ExpensesMobile.formatCurrency(expense.getAmount().intValue()));
 
+    // TODO(jgw): Use non-deprecated date methods for this.
     Date d = expense.getDate();
-    dateYear.setSelectedIndex(d.getYear() + 1900 - 2000);
+    dateYear.setSelectedIndex(d.getYear() - 100);
     dateMonth.setSelectedIndex(d.getMonth());
     dateDay.setSelectedIndex(d.getDate() - 1);
   }

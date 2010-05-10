@@ -5,70 +5,17 @@
   xmlns:l='urn:import:com.google.gwt.bikeshed.list.client'
   xmlns:c='urn:import:com.google.gwt.sample.expenses.gwt.client'>
 
-  <ui:with field='styles'
-    type='com.google.gwt.sample.bikeshed.style.client.Styles'/>
-
-  <ui:style>
-    .bar {
-      position: relative;
-      -webkit-border-image: url(images/toolbar_bg.png) 0 0 4 0 stretch stretch;
-      -moz-border-image: url(images/toolbar_bg.png) 0 0 4 0 stretch stretch;
-      border-width: 0px 0px 4px;
-      margin: 0px 0px -4px;
-      padding: 7px 0px 5px;
-      background-color: #ebeff9;
-      color: #2e4987;
-      height: 32px;
-      text-align: center;
-      text-shadow: white 0px 1px 1px;
-      color: #2e4987;
-
-      font-size: 13px;
-      font-weight: bold;
-      line-height: 24px;
-    }
-
-    .title {
-    }
-
-    .backButton {
-      float: left;
-      height: 22px;
-      margin-left: 3px;
-
-      border-width: 4px 4px 5px 12px;
-      -webkit-border-image: url(images/button_back.png) 4 4 5 12 stretch stretch;
-      -moz-border-image: url(images/button_back.png) 4 4 5 12 stretch stretch;
-
-      text-align: center;
-      display: table-cell;
-    }
-
-    .button {
-      float: right;
-      height: 22px;
-      width: 22px;
-      margin-right: 6px;
-
-      border-width: 4px 4px 5px 4px;
-      -webkit-border-image: url(images/button.png) 4 4 5 4 stretch stretch;
-      -moz-border-image: url(images/button.png) 4 4 5 4 stretch stretch;
-      color: #2e4987;
-    }
-  </ui:style>
+  <ui:style field='mobile' src='mobile.css'/>
 
   <g:HTMLPanel>
-    <div class='{style.bar}'>
-      <g:HTML ui:field='backButton' styleName='{style.backButton}'><div>Back</div></g:HTML>
-      <g:HTML ui:field='addButton' styleName='{style.button}'><img src='images/add.png'/></g:HTML>
-      <g:HTML ui:field='refreshButton' styleName='{style.button}'><img src='images/refresh.png'/></g:HTML>
-      <div class='{style.title}' ui:field='titleSpan'>Expenses</div>
+    <div class='{mobile.bar}'>
+      <g:HTML ui:field='backButton' styleName='{mobile.backButton}'><div>Back</div></g:HTML>
+      <g:HTML ui:field='addButton' styleName='{mobile.button}'><img src='images/add.png'/></g:HTML>
+      <g:HTML ui:field='customButton' styleName='{mobile.customButton}'/>
+      <g:HTML ui:field='refreshButton' styleName='{mobile.button}'><img src='images/refresh.png'/></g:HTML>
+      <div class='{mobile.title}' ui:field='titleSpan'>Expenses</div>
     </div>
 
-    <g:DeckPanel ui:field='deck'>
-      <c:MobileReportList ui:field='reportList'/>
-      <c:MobileExpenseList ui:field='expenseList'/>
-      <c:MobileExpenseEntry ui:field='expenseEntry'/>
-    </g:DeckPanel>
+    <g:SimplePanel ui:field='container'/>
   </g:HTMLPanel>
 </ui:UiBinder>

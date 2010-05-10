@@ -17,104 +17,158 @@ package com.google.gwt.sample.expenses.gwt.client;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.sample.expenses.gwt.request.ExpenseRecord;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
 import com.google.gwt.sample.expenses.gwt.request.ReportRecord;
 import com.google.gwt.uibinder.client.UiBinder;
-import com.google.gwt.uibinder.client.UiFactory;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.DeckPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+
+import java.util.ArrayList;
 
 /**
  * TODO
  */
-public class ExpensesMobileShell extends Composite implements Controller {
+public class ExpensesMobileShell extends Composite {
 
   interface ShellUiBinder extends UiBinder<Widget, ExpensesMobileShell> { }
   private static ShellUiBinder BINDER = GWT.create(ShellUiBinder.class);
 
-  @UiField DeckPanel deck;
-  @UiField HTML backButton, addButton, refreshButton;
+  @UiField SimplePanel container;
+  @UiField HTML backButton, addButton, refreshButton, customButton;
   @UiField Element titleSpan;
 
-  @UiField MobileReportList reportList;
-  @UiField MobileExpenseList expenseList;
-  @UiField MobileExpenseEntry expenseEntry;
+  private MobileReportList reportList;
+  private MobileExpenseList expenseList;
+  private MobileExpenseDetails expenseDetails;
+  private MobileExpenseEntry expenseEntry;
 
+  private final HandlerManager eventBus;
   private final ExpensesRequestFactory requestFactory;
-  private int curPage;
-  private Page[] pages;
+  private ArrayList<MobilePage> pages = new ArrayList<MobilePage>();
 
-  public ExpensesMobileShell(ExpensesRequestFactory requestFactory) {
+  public ExpensesMobileShell(HandlerManager eventBus,
+      ExpensesRequestFactory requestFactory) {
+    this.eventBus = eventBus;
     this.requestFactory = requestFactory;
+
     initWidget(BINDER.createAndBindUi(this));
-
-    pages = new Page[] {reportList, expenseList, expenseEntry};
-    showPage(0);
-  }
-
-  public void showButtons(boolean back, boolean refresh, boolean add) {
-    setVisible(backButton, back);
-    setVisible(refreshButton, refresh);
-    setVisible(addButton, add);
-  }
-
-  @UiFactory
-  MobileExpenseList createExpenseList() {
-    return new MobileExpenseList(new MobileExpenseList.Listener() {
-      public void onExpenseSelected(ExpenseRecord expense) {
-        expenseEntry.show(expense);
-        showPage(2);
-      }
-    }, requestFactory);
-  }
-
-  @UiFactory
-  MobileReportList createReportList() {
-    return new MobileReportList(new MobileReportList.Listener() {
-      public void onReportSelected(ReportRecord report) {
-        expenseList.show(report);
-        showPage(1);
-      }
-    }, requestFactory);
+    showReportList();
   }
 
   @UiHandler("addButton")
   void onAdd(ClickEvent evt) {
-    pages[curPage].onAdd();
+    topPage().onAdd();
   }
 
   @UiHandler("backButton")
   void onBack(ClickEvent evt) {
-    if (curPage > 0) {
-      showPage(curPage - 1);
-    }
+    popPage();
+  }
+
+  @UiHandler("customButton")
+  void onCustom(ClickEvent evt) {
+    topPage().onCustom();
   }
 
   @UiHandler("refreshButton")
   void onRefresh(ClickEvent evt) {
-    pages[curPage].onRefresh();
+    topPage().onRefresh();
   }
 
-  private void setVisible(Widget widget, boolean visible) {
-    widget.getElement().getStyle().setVisibility(
-        visible ? Visibility.VISIBLE : Visibility.HIDDEN);
+  private void popPage() {
+    assert pages.size() > 1;
+    pages.remove(topPage());
+    showPage(topPage());
   }
 
-  private void showPage(int idx) {
-    if (curPage < 0 || curPage >= pages.length) {
-      return;
+  private void pushPage(MobilePage page) {
+    pages.add(page);
+    showPage(page);
+  }
+
+  private void showExpenseDetails(ExpenseRecord expense) {
+    if (expenseDetails == null) {
+      expenseDetails = new MobileExpenseDetails(
+          new MobileExpenseDetails.Listener() {
+            public void onEditExpense(ExpenseRecord expense) {
+              showExpenseEntry(expense);
+            }
+          }, eventBus, requestFactory);
     }
 
-    curPage = idx;
-    pages[idx].onShow(this);
-    deck.showWidget(idx);
-    titleSpan.setInnerText(pages[idx].getPageTitle());
+    expenseDetails.show(expense);
+    pushPage(expenseDetails);
+  }
+
+  private void showExpenseEntry(ExpenseRecord expense) {
+    if (expenseEntry == null) {
+      expenseEntry = new MobileExpenseEntry(new MobileExpenseEntry.Listener() {
+        public void onExpenseUpdated() {
+          popPage();
+        }
+      }, requestFactory);
+    }
+
+    expenseEntry.show(expense);
+    pushPage(expenseEntry);
+  }
+
+  private void showExpenseList(ReportRecord report) {
+    if (expenseList == null) {
+      expenseList = new MobileExpenseList(new MobileExpenseList.Listener() {
+        public void onExpenseSelected(ExpenseRecord expense) {
+          showExpenseDetails(expense);
+        }
+      }, requestFactory);
+    }
+
+    expenseList.show(report);
+    pushPage(expenseList);
+  }
+
+  private void showPage(MobilePage page) {
+    Widget oldPage = container.getWidget();
+    if (oldPage != null) {
+      container.remove(oldPage);
+    }
+
+    container.add(page.asWidget());
+
+    titleSpan.setInnerText(page.getPageTitle());
+    backButton.setVisible(pages.size() > 1);
+    refreshButton.setVisible(page.needsRefreshButton());
+    addButton.setVisible(page.needsAddButton());
+
+    String custom = page.needsCustomButton();
+    if (custom != null) {
+      customButton.setText(custom);
+      customButton.setVisible(true);
+    } else {
+      customButton.setVisible(false);
+    }
+  }
+
+  // TODO: for whom?
+  private void showReportList() {
+    if (reportList == null) {
+      reportList = new MobileReportList(new MobileReportList.Listener() {
+        public void onReportSelected(ReportRecord report) {
+          showExpenseList(report);
+        }
+      }, requestFactory);
+    }
+
+    pushPage(reportList);
+  }
+
+  private MobilePage topPage() {
+    return pages.get(pages.size() - 1);
   }
 }

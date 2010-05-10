@@ -22,6 +22,7 @@ import com.google.gwt.sample.expenses.gwt.request.ExpenseRecord;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
 import com.google.gwt.sample.expenses.gwt.request.ReportRecord;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.valuestore.shared.Property;
 import com.google.gwt.view.client.ListViewAdapter;
 import com.google.gwt.view.client.SelectionModel;
@@ -36,7 +37,7 @@ import java.util.List;
  * TODO
  */
 public class MobileExpenseList extends Composite implements
-    Page, Receiver<List<ExpenseRecord>> {
+    MobilePage, Receiver<List<ExpenseRecord>> {
 
   /**
    * TODO
@@ -61,9 +62,9 @@ public class MobileExpenseList extends Composite implements
           @Override
           public void render(ExpenseRecord value, Object viewData,
               StringBuilder sb) {
-            sb.append("<div onclick='' class='item'>" + value.getDescription() + " " +
+            sb.append("<div onclick='' class='item'>" + value.getDescription() + " ($" +
                 ExpensesMobile.formatCurrency(value.getAmount().intValue())
-                + "</div>");
+                + ")</div>");
           }
         });
 
@@ -79,22 +80,38 @@ public class MobileExpenseList extends Composite implements
     initWidget(expenseList);
   }
 
+  public Widget asWidget() {
+    return this;
+  }
+
   public String getPageTitle() {
     return report != null ? report.getPurpose() : "";
+  }
+
+  public boolean needsAddButton() {
+    return true;
+  }
+
+  public String needsCustomButton() {
+    return null;
+  }
+
+  public boolean needsRefreshButton() {
+    return true;
   }
 
   public void onAdd() {
     // TODO Auto-generated method stub
   }
-  
+
+  public void onCustom() {
+  }
+
   public void onRefresh() {
+    expenseAdapter.getList().clear();
     requestFactory.expenseRequest().findExpensesByReport(
         report.getRef(ReportRecord.id)).forProperties(getExpenseColumns()).to(
         this).fire();
-  }
-
-  public void onShow(Controller controller) {
-    controller.showButtons(true, true, true);
   }
 
   public void onSuccess(List<ExpenseRecord> newValues) {

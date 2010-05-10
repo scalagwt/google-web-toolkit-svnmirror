@@ -19,7 +19,7 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
-import com.google.gwt.user.client.ui.RootLayoutPanel;
+import com.google.gwt.user.client.ui.RootPanel;
 
 /**
  * Entry point for the mobile version of the Expenses app.
@@ -42,7 +42,7 @@ public class ExpensesMobile implements EntryPoint {
     if (negative) {
       sb.append("-");
     }
-    sb.append("$");
+
     sb.append(dollars);
     sb.append('.');
     if (cents < 10) {
@@ -61,7 +61,8 @@ public class ExpensesMobile implements EntryPoint {
     final ExpensesRequestFactory requestFactory = GWT.create(ExpensesRequestFactory.class);
     requestFactory.init(eventBus);
 
-    final ExpensesMobileShell shell = new ExpensesMobileShell(requestFactory);
-    RootLayoutPanel.get().add(shell);
+    final ExpensesMobileShell shell = new ExpensesMobileShell(eventBus,
+        requestFactory);
+    RootPanel.get().add(shell);
   }
 }

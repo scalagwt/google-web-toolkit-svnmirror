@@ -21,6 +21,7 @@ import com.google.gwt.requestfactory.shared.Receiver;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
 import com.google.gwt.sample.expenses.gwt.request.ReportRecord;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.valuestore.shared.Property;
 import com.google.gwt.view.client.ListViewAdapter;
 import com.google.gwt.view.client.SelectionModel;
@@ -35,7 +36,7 @@ import java.util.List;
  * TODO
  */
 public class MobileReportList extends Composite implements
-    Page, Receiver<List<ReportRecord>> {
+    MobilePage, Receiver<List<ReportRecord>> {
 
   /**
    * TODO
@@ -77,22 +78,37 @@ public class MobileReportList extends Composite implements
     onRefresh();
   }
 
+  public Widget asWidget() {
+    return this;
+  }
+
   public String getPageTitle() {
     return "Expense Reports";
   }
 
+  public boolean needsAddButton() {
+    return true;
+  }
+
+  public String needsCustomButton() {
+    return null;
+  }
+
+  public boolean needsRefreshButton() {
+    return true;
+  }
+
   public void onAdd() {
-    // TODO Auto-generated method stub
+    // TODO: add a new report
+  }
+
+  public void onCustom() {
   }
 
   public void onRefresh() {
     requestFactory.reportRequest().findReportEntriesBySearch(new Long(-1),
         "", ReportRecord.created.getName(), 0, 25).forProperties(
         getReportColumns()).to(this).fire();
-  }
-
-  public void onShow(Controller controller) {
-    controller.showButtons(false, true, true);
   }
 
   public void onSuccess(List<ReportRecord> newValues) {
