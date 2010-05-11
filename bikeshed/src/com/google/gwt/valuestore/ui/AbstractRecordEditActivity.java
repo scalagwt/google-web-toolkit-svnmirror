@@ -34,13 +34,14 @@ import java.util.Set;
 public abstract class AbstractRecordEditActivity<R extends Record> implements
     Activity, RecordEditView.Delegate {
 
-  private String id;
   private final RequestFactory requests;
   private final boolean creating;
-  private String futureId;
+  private final RecordEditView<R> view;
 
-  private RecordEditView<R> view;
+  private String id;
+  private String futureId;
   private DeltaValueStore deltas;
+  private Display display;
 
   public AbstractRecordEditActivity(RecordEditView<R> view, String id,
       RequestFactory requests) {
@@ -53,7 +54,12 @@ public abstract class AbstractRecordEditActivity<R extends Record> implements
 
   public void cancelClicked() {
     if (willStop()) {
-      exit();
+      deltas = null; // silence the next willStop() call when place changes
+      if (creating) {
+        display.showActivityWidget(null);
+      } else {
+        exit();
+      }
     }
   }
 
@@ -62,7 +68,7 @@ public abstract class AbstractRecordEditActivity<R extends Record> implements
   }
 
   public void onStop() {
-    this.view = null;
+    this.display = null;
   }
 
   public void saveClicked() {
@@ -74,7 +80,7 @@ public abstract class AbstractRecordEditActivity<R extends Record> implements
 
       Receiver<Set<SyncResult>> receiver = new Receiver<Set<SyncResult>>() {
         public void onSuccess(Set<SyncResult> response) {
-          if (view == null) {
+          if (display == null) {
             return;
           }
           boolean hasViolations = false;
@@ -112,7 +118,9 @@ public abstract class AbstractRecordEditActivity<R extends Record> implements
   }
 
   @SuppressWarnings("unchecked")
-  public void start(final Display display) {
+  public void start(Display display) {
+    this.display = display;
+    
     view.setDelegate(this);
     view.setDeltaValueStore(deltas);
     view.setCreating(creating);
@@ -126,8 +134,8 @@ public abstract class AbstractRecordEditActivity<R extends Record> implements
     } else {
       fireFindRequest(Value.of(id), new Receiver<R>() {
         public void onSuccess(R record) {
-          if (view != null) {
-            doStart(display, record);
+          if (AbstractRecordEditActivity.this.display != null) {
+            doStart(AbstractRecordEditActivity.this.display, record);
           }
         }
       });
