@@ -34,10 +34,6 @@ import javax.persistence.Version;
 @Entity
 public class Expense {
 
-  public static final EntityManager entityManager() {
-    return EMF.get().createEntityManager();
-  }
-
   public static long countExpenses() {
     EntityManager em = entityManager();
     try {
@@ -45,6 +41,10 @@ public class Expense {
     } finally {
       em.close();
     }
+  }
+
+  public static final EntityManager entityManager() {
+    return EMF.get().createEntityManager();
   }
 
   @SuppressWarnings("unchecked")
@@ -91,29 +91,29 @@ public class Expense {
     return Collections.singletonList(findExpense(id));
   }
 
-  @Id
-  @Column(name = "id")
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
-
-  @Version
-  @Column(name = "version")
-  private Integer version;
-
   private Double amount;
 
   private String approval;
-  
+
   private String category;
-  
+
   private Date created;
   
   private String description;
   
+  @Id
+  @Column(name = "id")
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+  
   private String reasonDenied;
-
+  
   // @JoinColumn
   private Long reportId;
+
+  @Version
+  @Column(name = "version")
+  private Integer version;
 
   public Double getAmount() {
     return this.amount;

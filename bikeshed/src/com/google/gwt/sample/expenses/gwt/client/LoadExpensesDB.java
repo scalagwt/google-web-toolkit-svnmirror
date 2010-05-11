@@ -60,6 +60,8 @@ public class LoadExpensesDB implements EntryPoint {
     root.add(generateButton);
     root.add(amountTextBox);
     root.add(generateLabel);
+
+    // This button deletes the entire data store -- don't expose it by default
     // root.add(deleteButton);
 
     dataService.getNumReports(new AsyncCallback<Integer>() {
