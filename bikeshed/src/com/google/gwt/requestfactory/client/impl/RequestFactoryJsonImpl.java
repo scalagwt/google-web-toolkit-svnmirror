@@ -91,7 +91,7 @@ public abstract class RequestFactoryJsonImpl implements RequestFactory {
         assert null != receiver : "to(Receiver) was not called";
 
         RequestBuilder builder = new RequestBuilder(RequestBuilder.POST,
-            "/expenses/data");
+            RequestFactory.URL);
 
         builder.setRequestData(ClientRequestHelper.getRequestString(RequestDataManager.getRequestMap(
             RequestFactory.SYNC, null, jsonDeltas.toJson())));
