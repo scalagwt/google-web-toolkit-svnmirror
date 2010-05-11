@@ -44,6 +44,7 @@ public class MobileExpenseList extends Composite implements
    */
   public interface Listener {
     void onExpenseSelected(ExpenseRecord expense);
+    void onCreateExpense(String reportId);
   }
 
   private final ExpensesRequestFactory requestFactory;
@@ -51,9 +52,11 @@ public class MobileExpenseList extends Composite implements
   private final ListViewAdapter<ExpenseRecord> expenseAdapter;
   private final SingleSelectionModel<ExpenseRecord> expenseSelection;
   private ReportRecord report;
+  private final Listener listener;
 
   public MobileExpenseList(final Listener listener,
       final ExpensesRequestFactory requestFactory) {
+    this.listener = listener;
     this.requestFactory = requestFactory;
     expenseAdapter = new ListViewAdapter<ExpenseRecord>();
 
@@ -101,7 +104,7 @@ public class MobileExpenseList extends Composite implements
   }
 
   public void onAdd() {
-    // TODO Auto-generated method stub
+    listener.onCreateExpense(report.getId());
   }
 
   public void onCustom() {

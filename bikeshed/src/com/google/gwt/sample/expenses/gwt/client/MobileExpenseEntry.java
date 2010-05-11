@@ -54,6 +54,7 @@ public class MobileExpenseEntry extends Composite implements MobilePage {
   private ExpenseRecord expense;
   private final ExpensesRequestFactory requestFactory;
   private final Listener listener;
+  private DeltaValueStore deltas;
 
   public MobileExpenseEntry(Listener listener,
       ExpensesRequestFactory requestFactory) {
@@ -68,6 +69,14 @@ public class MobileExpenseEntry extends Composite implements MobilePage {
 
   public Widget asWidget() {
     return this;
+  }
+
+  public void create(String reportId) {
+    deltas = requestFactory.getValueStore().spawnDeltaView();
+
+    expense = (ExpenseRecord) deltas.create(ExpenseRecord.TOKEN);
+    deltas.set(ExpenseRecord.reportId, expense, reportId);
+    displayExpense();
   }
 
   public String getPageTitle() {
@@ -90,16 +99,13 @@ public class MobileExpenseEntry extends Composite implements MobilePage {
   }
 
   public void onCustom() {
-    // Create a delta and sync with the value store.
-    DeltaValueStore deltas = requestFactory.getValueStore().spawnDeltaView();
     deltas.set(ExpenseRecord.description, expense, nameText.getText());
     deltas.set(ExpenseRecord.category, expense, categoryText.getText());
 
-    // TODO: validate amount, store amount
-    // (currently writing doubles seems to be unimplemented)
-//    String amountText = priceText.getText();
-//    double amount = Double.parseDouble(amountText);
-//    deltas.set(ExpenseRecord.amount, expense, amount);
+    // TODO(jgw): validate amount (in dollars -- database is in pennies)
+    String amountText = priceText.getText();
+    double amount = Double.parseDouble(amountText);
+    deltas.set(ExpenseRecord.amount, expense, amount * 100);
 
     // TODO(jgw): Use non-deprecated date methods for this.
     Date date = new Date(
@@ -131,8 +137,12 @@ public class MobileExpenseEntry extends Composite implements MobilePage {
   }
 
   public void show(ExpenseRecord expense) {
+    deltas = requestFactory.getValueStore().spawnDeltaView();
     this.expense = expense;
-
+    displayExpense();
+  }
+  
+  private void displayExpense() {
     nameText.setText(expense.getDescription());
     categoryText.setText(expense.getCategory());
     priceText.setText(ExpensesMobile.formatCurrency(expense.getAmount().intValue()));
