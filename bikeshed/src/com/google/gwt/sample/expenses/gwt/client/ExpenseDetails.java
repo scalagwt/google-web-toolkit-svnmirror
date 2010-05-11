@@ -325,9 +325,9 @@ public class ExpenseDetails extends Composite implements
     TableStyle cellTableStyle();
   }
 
-  private static final GetValue<ExpenseRecord, Date> dateGetter = new GetValue<ExpenseRecord, Date>() {
+  private static final GetValue<ExpenseRecord, Date> createdGetter = new GetValue<ExpenseRecord, Date>() {
     public Date getValue(ExpenseRecord object) {
-      return object.getDate();
+      return object.getCreated();
     }
   };
 
@@ -371,7 +371,7 @@ public class ExpenseDetails extends Composite implements
   private List<SortableHeader> allHeaders = new ArrayList<SortableHeader>();
 
   private SortableColumn<ExpenseRecord, String> approvalColumn;
-  private SortableColumn<ExpenseRecord, Date> dateColumn;
+  private SortableColumn<ExpenseRecord, Date> createdColumn;
 
   /**
    * The popup used to display errors to the user.
@@ -511,7 +511,7 @@ public class ExpenseDetails extends Composite implements
     reportsLink.setText(ExpenseList.getBreadcrumb(department, employee));
 
     // Reset sorting state of table
-    lastComparator = dateColumn.getComparator(false);
+    lastComparator = createdColumn.getComparator(false);
     for (SortableHeader header : allHeaders) {
       header.setSorted(false);
       header.setReverseSort(true);
@@ -544,10 +544,10 @@ public class ExpenseDetails extends Composite implements
       }
     });
 
-    // Date column.
-    dateColumn = addColumn(view, "Date", new DateCell(
-        DateTimeFormat.getFormat("MMM dd yyyy")), dateGetter);
-    lastComparator = dateColumn.getComparator(false);
+    // Created column.
+    createdColumn = addColumn(view, "Created", new DateCell(
+        DateTimeFormat.getFormat("MMM dd yyyy")), createdGetter);
+    lastComparator = createdColumn.getComparator(false);
 
     // Description column.
     addColumn(view, "Description", new GetValue<ExpenseRecord, String>() {
@@ -717,7 +717,7 @@ public class ExpenseDetails extends Composite implements
     columns.add(ExpenseRecord.amount);
     columns.add(ExpenseRecord.approval);
     columns.add(ExpenseRecord.category);
-    columns.add(ExpenseRecord.date);
+    columns.add(ExpenseRecord.created);
     columns.add(ExpenseRecord.description);
     columns.add(ExpenseRecord.reasonDenied);
     return columns;

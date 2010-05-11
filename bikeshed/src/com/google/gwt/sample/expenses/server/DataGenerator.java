@@ -127,7 +127,7 @@ public class DataGenerator {
       Expense detail = new Expense();
       detail.setReportId(reportId);
       detail.setDescription(DESCRIPTIONS[index]);
-      detail.setDate(getDate());
+      detail.setCreated(getDate());
       detail.setAmount(rand.nextInt(25000) / 100.0);
       detail.setCategory(CATEGORIES[index]);
       detail.setApproval("");
@@ -178,7 +178,7 @@ public class DataGenerator {
     JSONObject jsonObject = new JSONObject();
     jsonObject.put("id", "" + expense.getId());
     jsonObject.put("description", expense.getDescription());
-    jsonObject.put("date", expense.getDate().getTime());
+    jsonObject.put("date", expense.getCreated().getTime());
     jsonObject.put("amount", expense.getAmount());
     jsonObject.put("category", expense.getCategory());
     return jsonObject;

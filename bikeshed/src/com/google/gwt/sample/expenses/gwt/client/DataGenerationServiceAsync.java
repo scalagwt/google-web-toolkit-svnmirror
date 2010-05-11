@@ -21,6 +21,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
  * Async counterpart of {@link DataGenerationService}.
  */
 public interface DataGenerationServiceAsync { 
-  void getNumReports(AsyncCallback<Integer> callback);
+  void delete(AsyncCallback<Void> callback);
   void generate(int millis, AsyncCallback<Integer> callback);
+  void getNumReports(AsyncCallback<Integer> callback);
 }

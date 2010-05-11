@@ -23,6 +23,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.TextBox;
 
 /**
  * Entry point to create database entries for the Expenses app.
@@ -33,21 +34,34 @@ public class LoadExpensesDB implements EntryPoint {
 
   private Label generateLabel;
   private Button generateButton;
+  private Button deleteButton;
+  private TextBox amountTextBox;
 
   public void onModuleLoad() {
     generateLabel = new Label("-- Expense Reports");
     generateButton = new Button("Generate Data");
-    
-    generateButton.addClickHandler(new ClickHandler() {      
+    deleteButton = new Button("Delete everything");
+    amountTextBox = new TextBox();
+
+    generateButton.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
-          generateData();
+        generateButton.setEnabled(false);
+        generateData(Integer.parseInt(amountTextBox.getText()));
       }
     });
     
+    deleteButton.addClickHandler(new ClickHandler() {      
+      public void onClick(ClickEvent event) {
+        deleteData();
+      }
+    });
+
     RootPanel root = RootPanel.get();
     root.add(generateButton);
+    root.add(amountTextBox);
     root.add(generateLabel);
-    
+    // root.add(deleteButton);
+
     dataService.getNumReports(new AsyncCallback<Integer>() {
       public void onFailure(Throwable caught) {
       }
@@ -57,15 +71,29 @@ public class LoadExpensesDB implements EntryPoint {
       }
     });
   }
-  
-  private void generateData() {
-    dataService.generate(5000, new AsyncCallback<Integer>() {
+
+  private void deleteData() {
+    dataService.delete(new AsyncCallback<Void>() {
       public void onFailure(Throwable caught) {
-        throw new RuntimeException("Data generation failed");
+        generateLabel.setText("Deletion failed");
+      }
+
+      public void onSuccess(Void result) {
+        generateLabel.setText("Deletion succeeded");
+      }
+    });
+  }
+
+  private void generateData(int amount) {
+    dataService.generate(amount, new AsyncCallback<Integer>() {
+      public void onFailure(Throwable caught) {
+        generateButton.setEnabled(true);
+        generateLabel.setText("Data generation failed");
       }
 
       public void onSuccess(Integer result) {
         generateLabel.setText("" + result + " Expense Reports");
+        generateButton.setEnabled(true);
       }
     });
   }

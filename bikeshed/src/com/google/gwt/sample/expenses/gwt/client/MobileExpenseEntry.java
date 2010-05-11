@@ -113,7 +113,7 @@ public class MobileExpenseEntry extends Composite implements MobilePage {
         dateMonth.getSelectedIndex(),
         dateDay.getSelectedIndex() + 1
     );
-    deltas.set(ExpenseRecord.date, expense, date);
+    deltas.set(ExpenseRecord.created, expense, date);
 
     // TODO: wait throbber
     requestFactory.syncRequest(deltas).to(
@@ -148,7 +148,7 @@ public class MobileExpenseEntry extends Composite implements MobilePage {
     priceText.setText(ExpensesMobile.formatCurrency(expense.getAmount().intValue()));
 
     // TODO(jgw): Use non-deprecated date methods for this.
-    Date d = expense.getDate();
+    Date d = expense.getCreated();
     dateYear.setSelectedIndex(d.getYear() - 100);
     dateMonth.setSelectedIndex(d.getMonth());
     dateDay.setSelectedIndex(d.getDate() - 1);

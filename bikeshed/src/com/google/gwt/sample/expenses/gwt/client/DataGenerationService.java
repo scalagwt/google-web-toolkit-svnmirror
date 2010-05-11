@@ -23,11 +23,18 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
  */
 @RemoteServiceRelativePath("dataGeneration")
 public interface DataGenerationService extends RemoteService {
-  int getNumReports();
   
   /**
-   * Generate reports for approximately the given number of milliseconds
+   * Delete the entire datastore.
+   */
+  void delete();
+  
+  /**
+   * Generate reports for approximately the given number of milliseconds.
+   * 
    * @return the number of reports in the data store following generation
    */
   int generate(int millis);
+  
+  int getNumReports();
 }

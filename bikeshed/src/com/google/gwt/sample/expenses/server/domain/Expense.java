@@ -34,6 +34,10 @@ import javax.persistence.Version;
 @Entity
 public class Expense {
 
+  public static final EntityManager entityManager() {
+    return EMF.get().createEntityManager();
+  }
+
   public static long countExpenses() {
     EntityManager em = entityManager();
     try {
@@ -41,10 +45,6 @@ public class Expense {
     } finally {
       em.close();
     }
-  }
-
-  public static final EntityManager entityManager() {
-    return EMF.get().createEntityManager();
   }
 
   @SuppressWarnings("unchecked")
@@ -106,7 +106,7 @@ public class Expense {
   
   private String category;
   
-  private Date date;
+  private Date created;
   
   private String description;
   
@@ -127,8 +127,8 @@ public class Expense {
     return this.category;
   }
 
-  public Date getDate() {
-    return this.date;
+  public Date getCreated() {
+    return this.created;
   }
 
   public String getDescription() {
@@ -182,8 +182,8 @@ public class Expense {
     this.category = category;
   }
 
-  public void setDate(Date date) {
-    this.date = date;
+  public void setCreated(Date created) {
+    this.created = created;
   }
 
   public void setDescription(String description) {
@@ -214,7 +214,7 @@ public class Expense {
     sb.append("Amount: ").append(getAmount()).append(", ");
     sb.append("Approval: ").append(getApproval()).append(", ");
     sb.append("Category: ").append(getCategory()).append(", ");
-    sb.append("Date: ").append(getDate()).append(", ");
+    sb.append("Created: ").append(getCreated()).append(", ");
     sb.append("Description: ").append(getDescription());
     return sb.toString();
   }
