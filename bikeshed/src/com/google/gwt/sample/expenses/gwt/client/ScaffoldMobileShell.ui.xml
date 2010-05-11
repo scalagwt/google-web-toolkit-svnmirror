@@ -12,7 +12,7 @@
 
     <div class='{mobile.error}' ui:field='error'/>
 
-    <a:ListBoxPlacePickerView width='100%' visibleItemCount='1' ui:field='placesBox'/>
+    <a:CellListPlacePickerView width='100%' pageSize='100' ui:field='placesBox'/>
 
     <g:SimplePanel width='100%' ui:field='body'/>
   </g:HTMLPanel>

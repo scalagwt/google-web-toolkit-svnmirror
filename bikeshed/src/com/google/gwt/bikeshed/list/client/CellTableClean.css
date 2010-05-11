@@ -55,11 +55,10 @@
 }
 
 .hoveredRow {
-  background-color: #88b0f2;
+  background-color: #eee;
 }
 
-@sprite .selectedRow {
-  gwt-image: 'cellTableSelectedBackground';
+.selectedRow {
   background-color: #628cd5;
   color: white;
   height: auto;

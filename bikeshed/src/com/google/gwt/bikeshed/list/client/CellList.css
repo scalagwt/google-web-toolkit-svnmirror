@@ -1,13 +1,12 @@
 .evenItem {
-  
+  cursor: pointer;
 }
 
 .oddItem {
-  
+  cursor: pointer;
 }
 
-@sprite .selectedItem {
-  gwt-image: 'cellListSelectedBackground';
+.selectedItem {
   background-color: #628cd5;
   color: white;
   height: auto;
