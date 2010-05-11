@@ -41,6 +41,10 @@ public interface EmployeeRecord extends Record {
   Property<String> supervisorKey = new Property<String>("supervisorKey",
       String.class);
 
+  Property<String> department = new Property<String>("department", String.class);
+
+  String getDepartment();
+
   String getDisplayName();
 
   String getPassword();

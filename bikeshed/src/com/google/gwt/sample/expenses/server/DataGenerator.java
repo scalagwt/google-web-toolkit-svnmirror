@@ -170,8 +170,7 @@ public class DataGenerator {
     jsonObject.put("id", "" + employee.getId());
     jsonObject.put("userName", employee.getUserName());
     jsonObject.put("displayName", employee.getDisplayName());
-    // EmployeeRecord needs to be updated
-    // jsonObject.put("department", employee.getDepartment());
+    jsonObject.put("department", employee.getDepartment());
     return jsonObject;
   }
 

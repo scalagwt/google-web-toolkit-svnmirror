@@ -65,7 +65,11 @@ public class SampleDataPopulator {
     HttpClient client = new HttpClient();
     int status = client.executeMethod(post);
     String response = post.getResponseBodyAsString();
-    System.out.println("status = " + status + ", response: " + response);
+    if (status == 200) {
+      System.out.println("SUCCESS: Put all the records in the datastore!");
+    } else {
+      System.err.println("Error: Status code " + status + " returned");
+    }
   }
 
   private JSONObject readAsJsonObject(String string) throws JSONException {
