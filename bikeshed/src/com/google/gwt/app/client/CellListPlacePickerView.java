@@ -53,7 +53,6 @@ public class CellListPlacePickerView<P extends Place> extends Composite
     initWidget(cellList);
     cellList.setSelectionModel(smodel);
     smodel.addSelectionChangeHandler(new SelectionChangeHandler() {
-      @Override
       public void onSelectionChange(SelectionChangeEvent event) {
         if (listener != null) {
           listener.placePicked(smodel.getSelectedObject());
@@ -80,7 +79,6 @@ public class CellListPlacePickerView<P extends Place> extends Composite
     cellList.setPageSize(size);
   }
 
-  @Override
   public void setValues(List<P> places, Renderer<P> renderer) {
     // Replace the current renderer.
     this.renderer = renderer;

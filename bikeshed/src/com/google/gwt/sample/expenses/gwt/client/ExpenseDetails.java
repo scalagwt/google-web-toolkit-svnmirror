@@ -29,8 +29,13 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.SelectElement;
+import com.google.gwt.event.dom.client.BlurEvent;
+import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -43,6 +48,7 @@ import com.google.gwt.sample.expenses.gwt.request.ExpenseRecord;
 import com.google.gwt.sample.expenses.gwt.request.ExpenseRecordChanged;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
 import com.google.gwt.sample.expenses.gwt.request.ReportRecord;
+import com.google.gwt.sample.expenses.gwt.request.ReportRecordChanged;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiFactory;
 import com.google.gwt.uibinder.client.UiField;
@@ -77,7 +83,7 @@ import java.util.Set;
  * including the list of expenses.
  */
 public class ExpenseDetails extends Composite implements
-    Receiver<List<ExpenseRecord>>, ExpenseRecordChanged.Handler {
+    ExpenseRecordChanged.Handler, ReportRecordChanged.Handler {
 
   /**
    * String indicating approval.
@@ -336,7 +342,19 @@ public class ExpenseDetails extends Composite implements
   ExpensesRequestFactory expensesRequestFactory;
 
   @UiField
+  Element notes;
+
+  @UiField
   TextBox notesBox;
+
+  @UiField
+  Anchor notesEditLink;
+
+  @UiField
+  Element notesEditLinkWrapper;
+
+  @UiField
+  Element notesPending;
 
   @UiField
   Element reportName;
@@ -373,6 +391,11 @@ public class ExpenseDetails extends Composite implements
   private Comparator<ExpenseRecord> lastComparator;
 
   /**
+   * Keep track of the last receiver so we can ignore stale responses.
+   */
+  private Receiver<List<ExpenseRecord>> lastReceiver;
+
+  /**
    * The current report being displayed.
    */
   private ReportRecord report;
@@ -389,6 +412,38 @@ public class ExpenseDetails extends Composite implements
     items.setKeyProvider(Expenses.EXPENSE_RECORD_KEY_PROVIDER);
     table.setKeyProvider(items);
     items.addView(table);
+
+    // Switch to edit notes.
+    notesEditLink.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        setNotesEditState(true, false, report.getNotes());
+      }
+    });
+
+    // Switch to view mode.
+    notesBox.addBlurHandler(new BlurHandler() {
+      public void onBlur(BlurEvent event) {
+        // The text box will be blurred on cancel, so only save the notes if
+        // it is visible.
+        if (notesBox.isVisible()) {
+          saveNotes();
+        }
+      }
+    });
+    notesBox.addKeyUpHandler(new KeyUpHandler() {
+      public void onKeyUp(KeyUpEvent event) {
+        int keyCode = event.getNativeKeyCode();
+        switch (keyCode) {
+          case KeyCodes.KEY_ENTER:
+            saveNotes();
+            break;
+          case KeyCodes.KEY_ESCAPE:
+            // Cancel the edit.
+            setNotesEditState(false, false, report.getNotes());
+            break;
+        }
+      }
+    });
   }
 
   public Anchor getReportsLink() {
@@ -397,13 +452,20 @@ public class ExpenseDetails extends Composite implements
 
   public void onExpenseRecordChanged(ExpenseRecordChanged event) {
     ExpenseRecord newRecord = event.getRecord();
-    String id = newRecord.getId();
+    Object newKey = items.getKey(newRecord);
 
     int index = 0;
     List<ExpenseRecord> list = items.getList();
     for (ExpenseRecord r : list) {
-      if (r.getId().equals(id)) {
+      if (items.getKey(r).equals(newKey)) {
         list.set(index, newRecord);
+
+        // Update the view data if the approval has been updated.
+        ApprovalViewData avd = (ApprovalViewData) approvalColumn.getViewData(newKey);
+        if (avd != null
+            && avd.getPendingApproval().equals(newRecord.getApproval())) {
+          syncCommit(newRecord, null);
+        }
       }
       index++;
     }
@@ -414,11 +476,12 @@ public class ExpenseDetails extends Composite implements
     }
   }
 
-  public void onSuccess(List<ExpenseRecord> newValues) {
-    List<ExpenseRecord> list = new ArrayList<ExpenseRecord>(newValues);
-    sortExpenses(list, lastComparator);
-    items.setList(list);
-    refreshCost();
+  public void onReportChanged(ReportRecordChanged event) {
+    ReportRecord changed = event.getRecord();
+    if (report != null && report.getId().equals(changed.getId())) {
+      report = changed;
+      setNotesEditState(false, false, changed.getNotes());
+    }
   }
 
   public void setExpensesRequestFactory(
@@ -437,10 +500,11 @@ public class ExpenseDetails extends Composite implements
       EmployeeRecord employee) {
     this.report = report;
     reportName.setInnerText(report.getPurpose());
-    notesBox.setText(report.getNotes());
     costLabel.setInnerText("");
     approvedLabel.setInnerText("");
     unreconciledLabel.setInnerText("");
+    setNotesEditState(false, false, report.getNotes());
+    items.getList().clear();
     totalApproved = 0;
 
     // Update the breadcrumb.
@@ -683,8 +747,63 @@ public class ExpenseDetails extends Composite implements
    * Request the expenses.
    */
   private void requestExpenses() {
+    lastReceiver = new Receiver<List<ExpenseRecord>>() {
+      public void onSuccess(List<ExpenseRecord> newValues) {
+        if (this == lastReceiver) {
+          List<ExpenseRecord> list = new ArrayList<ExpenseRecord>(newValues);
+          sortExpenses(list, lastComparator);
+          items.setList(list);
+          refreshCost();
+        }
+      }
+    };
     expensesRequestFactory.expenseRequest().findExpensesByReport(
-        report.getRef(Record.id)).forProperties(getExpenseColumns()).to(this).fire();
+        report.getRef(Record.id)).forProperties(getExpenseColumns()).to(
+        lastReceiver).fire();
+  }
+
+  /**
+   * Save the notes that the user entered in the notes box.
+   */
+  private void saveNotes() {
+    // Early exit if the notes haven't changed.
+    final String pendingNotes = notesBox.getText();
+    if (pendingNotes.equals(report.getNotes())) {
+      setNotesEditState(false, false, pendingNotes);
+      return;
+    }
+
+    // Switch to the pending view.
+    setNotesEditState(false, true, pendingNotes);
+
+    // Submit the delta.
+    DeltaValueStore deltas = expensesRequestFactory.getValueStore().spawnDeltaView();
+    deltas.set(ReportRecord.notes, report, pendingNotes);
+    expensesRequestFactory.syncRequest(deltas).to(
+        new Receiver<Set<SyncResult>>() {
+          public void onSuccess(Set<SyncResult> response) {
+            // We expect onReportChanged to be called.
+          }
+        }).fire();
+  }
+
+  /**
+   * Set the state of the notes section.
+   * 
+   * @param editable true for edit state, false for view state
+   * @param pending true if changes are pending, false if not
+   * @param notesText the current notes
+   */
+  private void setNotesEditState(boolean editable, boolean pending,
+      String notesText) {
+    notesBox.setText(notesText);
+    notes.setInnerText(notesText);
+
+    notesBox.setVisible(editable && !pending);
+    setVisible(notes, !editable);
+    setVisible(notesEditLinkWrapper, !editable && !pending);
+    setVisible(notesPending, pending);
+    notesBox.setFocus(editable);
   }
 
   private void sortExpenses(List<ExpenseRecord> list,
@@ -706,12 +825,12 @@ public class ExpenseDetails extends Composite implements
       if (avd != null) {
         avd.reject(message);
       }
-
-      // Redraw the table so the changes are applied.
-      table.redraw();
     } else {
       approvalColumn.setViewData(key, null);
     }
+
+    // Redraw the table so the changes are applied.
+    table.redraw();
   }
 
   private void updateExpenseRecord(final ExpenseRecord record, String approval,
@@ -748,9 +867,6 @@ public class ExpenseDetails extends Composite implements
               syncCommit(record, errorMessage.length() > 0 ? errorMessage
                   : null);
             }
-
-            // Request the updated expenses.
-            requestExpenses();
           }
         }).fire();
   }

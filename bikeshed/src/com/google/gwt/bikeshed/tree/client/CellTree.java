@@ -358,6 +358,9 @@ public class CellTree extends Composite implements HasAnimation {
     @Source("cellTreeClosedArrow.png")
     ImageResource cellTreeClosedItem();
 
+    @Source("cellTreeLoadingClean.gif")
+    ImageResource cellTreeLoading();
+
     @Source("cellTreeOpenArrow.png")
     ImageResource cellTreeOpenItem();
 

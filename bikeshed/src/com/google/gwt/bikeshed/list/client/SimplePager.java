@@ -22,10 +22,11 @@ import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.uibinder.client.UiConstructor;
+import com.google.gwt.user.client.ui.AbstractImagePrototype;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.view.client.PagingListView;
 
 /**
@@ -67,6 +68,11 @@ public class SimplePager<T> extends AbstractPager<T> {
      * The disabled last page image.
      */
     ImageResource simplePagerLastPageDisabled();
+
+    /**
+     * The icon to use while the page is loading.
+     */
+    ImageResource simplePagerLoading();
 
     /**
      * The image used to go to the next page.
@@ -126,8 +132,18 @@ public class SimplePager<T> extends AbstractPager<T> {
   }
 
   private final Image firstPage;
-  private final Label label = new Label();
+
+  /**
+   * We use an {@link HTML} so we can embed the loading image.
+   */
+  private final HTML label = new HTML();
+
   private final Image lastPage;
+
+  /**
+   * The html used to render the loading image.
+   */
+  private final String loadingImageHtml;
 
   /**
    * Set to true when the next and last buttons are disabled.
@@ -186,6 +202,10 @@ public class SimplePager<T> extends AbstractPager<T> {
     this.resources = resources;
     this.style = resources.simplePagerStyle();
     this.style.ensureInjected();
+
+    // Create the loading image.
+    AbstractImagePrototype loadingProto = AbstractImagePrototype.create(resources.simplePagerLoading());
+    loadingImageHtml = loadingProto.getHTML();
 
     // Create the buttons.
     firstPage = new Image(resources.simplePagerFirstPage());
@@ -287,6 +307,18 @@ public class SimplePager<T> extends AbstractPager<T> {
             style.disabledButton());
       }
     }
+  }
+
+  /**
+   * Let the page know that the table is loading. Call this method to clear all
+   * data from the table and hide the current range when new data is being
+   * loaded into the table.
+   */
+  public void startLoading() {
+    PagingListView<T> listView = getPagingListView();
+    listView.setDataSize(0, true);
+    onRangeOrSizeChanged(listView);
+    label.setHTML(loadingImageHtml);
   }
 
   /**

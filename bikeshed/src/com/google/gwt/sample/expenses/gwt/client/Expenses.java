@@ -91,6 +91,8 @@ public class Expenses implements EntryPoint {
     expenseList.setRequestFactory(requestFactory);
     eventBus.addHandler(ReportRecordChanged.TYPE, expenseList);
 
+    // Forward change events to the expense details.
     eventBus.addHandler(ExpenseRecordChanged.TYPE, expenseDetails);
+    eventBus.addHandler(ReportRecordChanged.TYPE, expenseDetails);
   }
 }

@@ -66,7 +66,7 @@ import java.util.List;
  * The list of expense reports on the left side of the app.
  */
 public class ExpenseList extends Composite implements
-    Receiver<List<ReportRecord>>, ReportRecordChanged.Handler {
+    ReportRecordChanged.Handler {
 
   private static ExpenseListUiBinder uiBinder = GWT.create(ExpenseListUiBinder.class);
 
@@ -232,6 +232,16 @@ public class ExpenseList extends Composite implements
    */
   private String orderBy = ReportRecord.purpose.getName();
 
+  /**
+   * Keep track of the last receiver so that we know if a response is stale.
+   */
+  private Receiver<List<ReportRecord>> lastDataReceiver;
+
+  /**
+   * Keep track of the last receiver so that we know if a response is stale.
+   */
+  private Receiver<Long> lastDataSizeReceiver;
+
   private Listener listener;
 
   /**
@@ -309,10 +319,6 @@ public class ExpenseList extends Composite implements
       }
       i++;
     }
-  }
-
-  public void onSuccess(List<ReportRecord> newValues) {
-    reports.updateViewData(table.getPageStart(), newValues.size(), newValues);
   }
 
   /**
@@ -492,17 +498,30 @@ public class ExpenseList extends Composite implements
     // Request the total data size.
     if (isCountStale) {
       isCountStale = false;
-      requestFactory.reportRequest().countReportsBySearch(employeeId,
-          startsWith).to(new Receiver<Long>() {
+      pager.startLoading();
+      lastDataSizeReceiver = new Receiver<Long>() {
         public void onSuccess(Long response) {
-          reports.updateDataSize(response.intValue(), true);
+          if (this == lastDataSizeReceiver) {
+            reports.updateDataSize(response.intValue(), true);
+          }
         }
-      }).fire();
+      };
+      requestFactory.reportRequest().countReportsBySearch(employeeId,
+          startsWith).to(lastDataSizeReceiver).fire();
     }
 
     // Request reports in the current range.
+    lastDataReceiver = new Receiver<List<ReportRecord>>() {
+      public void onSuccess(List<ReportRecord> newValues) {
+        if (this == lastDataReceiver) {
+          reports.updateViewData(table.getPageStart(), newValues.size(),
+              newValues);
+        }
+      }
+    };
+    // TODO(jlabanca): Pass the department into the query.
     requestFactory.reportRequest().findReportEntriesBySearch(employeeId,
         startsWith, orderBy, range.getStart(), range.getLength()).forProperties(
-        reportColumns).to(this).fire();
+        reportColumns).to(lastDataReceiver).fire();
   }
 }
