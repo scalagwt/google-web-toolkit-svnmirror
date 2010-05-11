@@ -18,24 +18,24 @@ package com.google.gwt.app.util;
 /**
  * A no-op renderer.
  */
-public class PassthroughRenderer implements Renderer<String> {
+public class PassthroughParser implements Parser<String> {
 
-  private static PassthroughRenderer INSTANCE;
+  private static PassthroughParser INSTANCE;
   
   /**
    * @return the instance of the no-op renderer
    */
-  public static Renderer<String> instance() {
+  public static Parser<String> instance() {
     if (INSTANCE == null) {
-      INSTANCE = new PassthroughRenderer();
+      INSTANCE = new PassthroughParser();
     }
     return INSTANCE;
   }
   
-  protected PassthroughRenderer() {
+  protected PassthroughParser() {
   }
 
-  public String render(String object) {
+  public String parse(String object) {
     return object;
   }
 }

@@ -18,24 +18,28 @@ package com.google.gwt.app.util;
 /**
  * A no-op renderer.
  */
-public class PassthroughRenderer implements Renderer<String> {
+public class IntegerParser implements Parser<Integer> {
 
-  private static PassthroughRenderer INSTANCE;
+  private static IntegerParser INSTANCE;
   
   /**
    * @return the instance of the no-op renderer
    */
-  public static Renderer<String> instance() {
+  public static Parser<Integer> instance() {
     if (INSTANCE == null) {
-      INSTANCE = new PassthroughRenderer();
+      INSTANCE = new IntegerParser();
     }
     return INSTANCE;
   }
   
-  protected PassthroughRenderer() {
+  protected IntegerParser() {
   }
 
-  public String render(String object) {
-    return object;
+  public Integer parse(String object) {
+    try {
+      return Integer.valueOf(object);
+    } catch (NumberFormatException e) { 
+      throw new ParseException(e);
+    }
   }
 }

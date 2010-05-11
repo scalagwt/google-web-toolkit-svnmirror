@@ -16,26 +16,10 @@
 package com.google.gwt.app.util;
 
 /**
- * A no-op renderer.
+ * An object that can parse text and return a value.
+ *
+ * @param <T> the type to parse
  */
-public class PassthroughRenderer implements Renderer<String> {
-
-  private static PassthroughRenderer INSTANCE;
-  
-  /**
-   * @return the instance of the no-op renderer
-   */
-  public static Renderer<String> instance() {
-    if (INSTANCE == null) {
-      INSTANCE = new PassthroughRenderer();
-    }
-    return INSTANCE;
-  }
-  
-  protected PassthroughRenderer() {
-  }
-
-  public String render(String object) {
-    return object;
-  }
+public interface Parser<T> {
+  T parse(String s) throws ParseException;
 }
