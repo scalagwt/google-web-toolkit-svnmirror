@@ -10,7 +10,6 @@
       right:0;
       top:0;
       height: 2em;
-      border-bottom: 1px solid #666;
       margin-left: 15em;
     }
     @sprite .createButton {
@@ -26,10 +25,12 @@
     .controls button {
        display:inline;       
      }
-
+     .listView table {
+       table-layout:fixed;
+     }
   </ui:style>
 
-  <g:HTMLPanel>
+  <g:HTMLPanel styleName="{style.listView}">
     <div style='height:3em;'></div>
     <b:CellTable width='100%' ui:field='table' pageSize='8'/>
     <div class='{style.controls}'>      

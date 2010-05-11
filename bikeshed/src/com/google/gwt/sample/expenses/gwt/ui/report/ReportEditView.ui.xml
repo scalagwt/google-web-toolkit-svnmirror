@@ -22,24 +22,26 @@
     .bar {
       float: right;
      }
-     .underlined {
-       border-bottom: 2px solid #666;
+     .header {
+       border-bottom: 2px solid #6F7277;
+       color: #4B4A4A;
+       text-shadow: #ddf 1px 1px 0;
      }
   </ui:style>
   <g:HTMLPanel>
-    <h3 ui:field='editTitle'>
+    <h3 class='{style.header}' ui:field='editTitle'>
       <ui:msg>Report <g:InlineLabel ui:field='id' /> (v<g:InlineLabel ui:field='version'/>)</ui:msg>
     </h3>
-    <h3 class='{style.underlined}' ui:field='createTitle'><ui:msg>New Report</ui:msg></h3>
+    <h3 class='{style.header}' ui:field='createTitle'><ui:msg>New Report</ui:msg></h3>
     <div ui:field='errors' style='background-color: red; '></div>
 
-    <div class='{style.fields}'>
-    <div><span class='{style.label}'>Purpose:</span> <g:TextBox ui:field='purpose'></g:TextBox></div>
-    <div><span class='{style.label}'>Notes:</span> <g:TextBox ui:field='notes'></g:TextBox></div>
-    <div><span class='{style.label}'>Created:</span> <d:DateBox ui:field='created'></d:DateBox></div>
-    <div><span class='{style.label}'>Reporter Key:</span> <g:TextBox ui:field='reporterKey'></g:TextBox></div>
-    <div><span class='{style.label}'>Approved Supervisor Key:</span> <g:TextBox ui:field='approvedSupervisorKey'></g:TextBox></div>
-    </div>
+    <table class='{style.fields}'>
+      <tr><td><span class='{style.label}'>Purpose:</span></td><td><g:TextBox ui:field='purpose'></g:TextBox></td></tr>
+      <tr><td><span class='{style.label}'>Notes:</span></td><td><g:TextBox ui:field='notes'></g:TextBox></td></tr>
+      <tr><td><span class='{style.label}'>Created:</span></td><td><d:DateBox ui:field='created'></d:DateBox></td></tr>
+      <tr><td><span class='{style.label}'>Reporter Key:</span></td><td><g:TextBox ui:field='reporterKey'></g:TextBox></td></tr>
+      <tr><td><span class='{style.label}'>Approved Supervisor Key:</span></td><td><g:TextBox ui:field='approvedSupervisorKey'></g:TextBox></td></tr>
+    </table>
 
     <div class='{style.bar}'>
     <g:Button addStyleNames='{style.button}' ui:field='save'>Save</g:Button>

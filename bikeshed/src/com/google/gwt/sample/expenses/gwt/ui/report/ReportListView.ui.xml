@@ -10,7 +10,6 @@
       right:0;
       top:0;
       height: 2em;
-      border-bottom: 1px solid #666;
       margin-left: 15em;
     }
     @sprite .createButton {

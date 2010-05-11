@@ -21,21 +21,23 @@
     .bar {
       float: right;
      }
-     .underlined {
-       border-bottom: 2px solid #666;
+     .header {
+       border-bottom: 2px solid #6F7277;
+       color: #4B4A4A;
+       text-shadow: #ddf 1px 1px 0;
      }
   </ui:style>
 
   <g:HTMLPanel>
-    <h3 class='{style.underlined}'><ui:msg>Report <span ui:field='idSpan' /> (v<span ui:field='versionSpan'/>)</ui:msg></h3>
+    <h3 class='{style.header}'><ui:msg>Report <span ui:field='idSpan' /> (v<span ui:field='versionSpan'/>)</ui:msg></h3>
 
-    <div class='{style.fields}'>
-    <div><span class='{style.label}'>Purpose:</span> <span ui:field='purpose'></span></div>
-    <div><span class='{style.label}'>Notes:</span> <span ui:field='notes'></span></div>
-    <div><span class='{style.label}'>Created:</span> <span ui:field='created'></span></div>
-    <div><span class='{style.label}'>Reporter Key:</span> <span ui:field='reporterKey'></span></div>
-    <div><span class='{style.label}'>Approved Supervisor Key:</span> <span ui:field='approvedSupervisorKey'></span></div>
-    </div>
+   <table class='{style.fields}'>
+      <tr><td><span class='{style.label}'>Purpose:</span></td><td><span ui:field='purpose'></span></td></tr>
+      <tr><td><span class='{style.label}'>Notes:</span></td><td><span ui:field='notes'></span></td></tr>
+      <tr><td><span class='{style.label}'>Created:</span></td><td><span ui:field='created'></span></td></tr>
+      <tr><td><span class='{style.label}'>Reporter Key:</span></td><td><span ui:field='reporterKey'></span></td></tr>
+      <tr><td><span class='{style.label}'>Approved Supervisor Key:</span></td><td><span ui:field='approvedSupervisorKey'></span></td></tr>
+    </table>
 
     <div class='{style.bar}'>
     <g:Button addStyleNames='{style.button}' ui:field='edit'>Edit</g:Button>

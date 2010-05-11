@@ -21,20 +21,22 @@
     .bar {
       float:right;
      }
-     .underlined {
-       border-bottom: 2px solid #666;
+     .header {
+       border-bottom: 2px solid #6F7277;
+       color: #4B4A4A;
+       text-shadow: #ddf 1px 1px 0;
      }
   </ui:style>
   
   <g:HTMLPanel>
-    <h3 class='{style.underlined}'><ui:msg>Employee <span ui:field='idSpan' /> (v<span ui:field='versionSpan'/>)</ui:msg></h3>
+    <h3 class='{style.header}'><ui:msg>Employee <span ui:field='idSpan' /> (v<span ui:field='versionSpan'/>)</ui:msg></h3>
 
-  <div class='{style.fields}'>
-  <div><span class='{style.label}'>Display Name:</span> <span ui:field='displayName'></span></div>
-  <div><span class='{style.label}'>User Name:</span> <span ui:field='userName'></span></div>
-  <div><span class='{style.label}'>Supervisor Key:</span> <span ui:field='supervisorKey'></span></div>
-  <div><span class='{style.label}'>Password:</span> <span ui:field='password'></span></div>
-  </div>
+  <table class='{style.fields}'>
+    <tr><td><span class='{style.label}'>Display Name:</span></td><td><span ui:field='displayName'></span></td></tr>
+    <tr><td><span class='{style.label}'>User Name:</span></td><td><span ui:field='userName'></span></td></tr>
+    <tr><td><span class='{style.label}'>Supervisor Key:</span></td><td><span ui:field='supervisorKey'></span></td></tr>
+    <tr><td><span class='{style.label}'>Password:</span></td><td><span ui:field='password'></span></td></tr>
+  </table>
 
   <div class='{style.bar}'>
   <g:Button addStyleNames='{style.button}' ui:field='edit'>Edit</g:Button>

@@ -16,18 +16,22 @@
 
     .banner {
        background-color: #777;
-       color: #fff;
-       width: 800px;
-       margin-left: auto;
-       margin-right: auto;
        -moz-border-radius: 10px;
        -webkit-border-radius: 10px;
        margin-top: 1.5em;
+       height: 4em;
      }
 
     .title {
-       text-align: left;
        margin-left: 1em;
+       padding: 1em;
+       color: black;
+       background-color: #D7DDE8;
+       position:absolute;
+     }
+
+     .title h2 {
+       margin:0;
      }
 
     .error {
@@ -65,7 +69,7 @@
      }
 
      .entitiesList {
-       border: none;
+       border:0;
        height: 100%;
        outline: none;
        font-weight: bold;
@@ -82,9 +86,11 @@
  
   <g:DockLayoutPanel unit='EM'>
     <g:north size='6'>
-      <g:HTML styleName='{style.banner}'>
-        <div class='{style.error}' ui:field='error'></div>
-        <h2 class='{style.title}'>Your Entities</h2>
+      <g:HTML styleName='{style.centered}'>
+        <div class='{style.banner}'>
+          <div class='{style.error}' ui:field='error'></div>
+          <span class='{style.title}'><h2>Your Entities</h2></span>
+        </div>
       </g:HTML>
     </g:north>
 
@@ -95,7 +101,7 @@
         </g:SimplePanel>
         <g:SimplePanel styleName="{style.master}" ui:field='master'>
           <g:HTML>
-            <h3>Welcome to Expenses</h3>
+            <h3>Welcome to the Entity Browser</h3>
             <span>Choose an entity set from the list on the left to get started</span>
           </g:HTML>
         </g:SimplePanel>
