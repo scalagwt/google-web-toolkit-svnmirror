@@ -34,6 +34,15 @@ import javax.persistence.Version;
 @Entity
 public class Expense {
 
+  public static long countExpenses() {
+    EntityManager em = entityManager();
+    try {
+      return ((Number) em.createQuery("select count(o) from Expense o").getSingleResult()).longValue();
+    } finally {
+      em.close();
+    }
+  }
+
   public static final EntityManager entityManager() {
     return EMF.get().createEntityManager();
   }
