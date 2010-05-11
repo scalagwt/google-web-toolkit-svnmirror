@@ -1,0 +1,3517 @@
+{"CREATE": [
+    {"EmployeeRecord": {
+        "id": "1",
+        "userName": "wbravo",
+        "displayName": "Wes Bravo"
+    }},
+    {"ReportRecord": {
+        "id": "2",
+        "created": 1267852773370,
+        "reporterKey": 1,
+        "purpose": "ISDN modem for telecommuting",
+        "notes": "High priority"
+    }},
+    {"ExpenseRecord": {
+        "amount": 189.32,
+        "id": "3",
+        "category": "Office Supplies",
+        "description": "Stapler",
+        "date": 1266470716374
+    }},
+    {"ExpenseRecord": {
+        "amount": 25.52,
+        "id": "4",
+        "category": "Dining",
+        "description": "Lunch",
+        "date": 1268210587374
+    }},
+    {"ExpenseRecord": {
+        "amount": 194.17,
+        "id": "5",
+        "category": "Lodging",
+        "description": "Hotel",
+        "date": 1266786906374
+    }},
+    {"ExpenseRecord": {
+        "amount": 156.13,
+        "id": "6",
+        "category": "Lodging",
+        "description": "Hotel",
+        "date": 1268959446374
+    }},
+    {"ExpenseRecord": {
+        "amount": 87.52,
+        "id": "7",
+        "category": "Office Supplies",
+        "description": "Scissors",
+        "date": 1267191907374
+    }},
+    {"ReportRecord": {
+        "id": "8",
+        "created": 1268209862374,
+        "reporterKey": 1,
+        "purpose": "Money laundering",
+        "notes": "Review A.S.A.P."
+    }},
+    {"ExpenseRecord": {
+        "amount": 234.34,
+        "id": "9",
+        "category": "Lodging",
+        "description": "Hotel",
+        "date": 1270867314374
+    }},
+    {"ExpenseRecord": {
+        "amount": 218.13,
+        "id": "10",
+        "category": "Office Supplies",
+        "description": "Scissors",
+        "date": 1272600382374
+    }},
+    {"ExpenseRecord": {
+        "amount": 154.04,
+        "id": "11",
+        "category": "Office Supplies",
+        "description": "Stapler",
+        "date": 1267142981374
+    }},
+    {"ExpenseRecord": {
+        "amount": 226.62,
+        "id": "12",
+        "category": "Dining",
+        "description": "Dinner",
+        "date": 1273441525374
+    }},
+    {"ExpenseRecord": {
+        "amount": 228.96,
+        "id": "13",
+        "category": "Dining",
+        "description": "Dinner",
+        "date": 1271324821374
+    }},
+    {"ReportRecord": {
+        "id": "14",
+        "created": 1265833470374,
+        "reporterKey": 1,
+        "purpose": "Team building diamond cutting offsite",
+        "notes": "Please bill to the Widgets project"
+    }},
+    {"ExpenseRecord": {
+        "amount": 158.02,
+        "id": "15",
+        "category": "Dining",
+        "description": "Dinner",
+        "date": 1273425206374
+    }},
+    {"ExpenseRecord": {
+        "amount": 221.02,
+        "id": "16",
+        "category": "Lodging",
+        "description": "Hotel",
+        "date": 1267464014374
+    }},
+    {"ExpenseRecord": {
+        "amount": 189.98,
+        "id": "17",
+        "category": "Lodging",
+        "description": "Hotel",
+        "date": 1272083626374
+    }},
+    {"ReportRecord": {
+        "id": "18",
+        "created": 1268564245374,
+        "reporterKey": 1,
+        "purpose": "Donut day",
+        "notes": "Show me the money"
+    }},
+    {"ExpenseRecord": {
+        "amount": 19.75,
+        "id": "19",
+        "category": "Lodging",
+        "description": "Hotel",
+        "date": 1268853105374
+    }},
+    {"ExpenseRecord": {
+        "amount": 182.66,
+        "id": "20",
+        "category": "Air Travel",
+        "description": "Flight from SFO to ATL",
+        "date": 1271978557374
+    }},
+    {"ReportRecord": {
+        "id": "21",
+        "created": 1266208924374,
+        "reporterKey": 1,
+        "purpose": "ISDN modem for telecommuting",
+        "notes": ""
+    }},
+    {"ExpenseRecord": {
+        "amount": 244.79,
+        "id": "22",
+        "category": "Local Transportation",
+        "description": "Bus ticket",
+        "date": 1267790633374
+    }},
+    {"ExpenseRecord": {
+        "amount": 93.78,
+        "id": "23",
+        "category": "Local Transportation",
+        "description": "Train fare",
+        "date": 1270054637374
+    }},
+    {"ReportRecord": {
+        "id": "24",
+        "created": 1269872504374,
+        "reporterKey": 1,
+        "purpose": "Spending lots of money",
+        "notes": ""
+    }},
+    {"ExpenseRecord": {
+        "amount": 26.75,
+        "id": "25",
+        "category": "Lodging",
+        "description": "Bed & Breakfast",
+        "date": 1265807159374
+    }},
+    {"ExpenseRecord": {
+        "amount": 91.67,
+        "id": "26",
+        "category": "Dining",
+        "description": "Breakfast",
+        "date": 1269889582374
+    }},
+    {"ExpenseRecord": {
+        "amount": 221.19,
+        "id": "27",
+        "category": "Local Transportation",
+        "description": "Train fare",
+        "date": 1269692202374
+    }},
+    {"ReportRecord": {
+        "id": "28",
+        "created": 1269114495374,
+        "reporterKey": 1,
+        "purpose": "Sushi offsite",
+        "notes": "Need approval by Monday"
+    }},
+    {"ExpenseRecord": {
+        "amount": 206.57,
+        "id": "29",
+        "category": "Dining",
+        "description": "Lunch",
+        "date": 1272042144374
+    }},
+    {"ExpenseRecord": {
+        "amount": 17.09,
+        "id": "30",
+        "category": "Office Supplies",
+        "description": "Paste",
+        "date": 1270553440374
+    }},
+    {"ExpenseRecord": {
+        "amount": 181.38,
+        "id": "31",
+        "category": "Local Transportation",
+        "description": "Train fare",
+        "date": 1268664435374
+    }},
+    {"ReportRecord": {
+        "id": "32",
+        "created": 1270942783374,
+        "reporterKey": 1,
+        "purpose": "ISDN modem for telecommuting",
+        "notes": "High priority"
+    }},
+    {"ExpenseRecord": {
+        "amount": 178.48,
+        "id": "33",
+        "category": "Air Travel",
+        "description": "Flight from ATL to SFO",
+        "date": 1269710070374
+    }},
+    {"ExpenseRecord": {
+        "amount": 135,
+        "id": "34",
+        "category": "Local Transportation",
+        "description": "Train fare",
+        "date": 1271663898374
+    }},
+    {"ExpenseRecord": {
+        "amount": 186.49,
+        "id": "35",
+        "category": "Lodging",
+        "description": "Bed & Breakfast",
+        "date": 1270107351374
+    }},
+    {"ExpenseRecord": {
+        "amount": 118.92,
+        "id": "36",
+        "category": "Local Transportation",
+        "description": "Taxi fare",
+        "date": 1265783900374
+    }},
+    {"EmployeeRecord": {
+        "id": "37",
+        "userName": "hfantastic",
+        "displayName": "Harriot Fantastic"
+    }},
+    {"ReportRecord": {
+        "id": "38",
+        "created": 1273510470374,
+        "reporterKey": 37,
+        "purpose": "Potato chip cooking offsite",
+        "notes": "High priority"
+    }},
+    {"ExpenseRecord": {
+        "amount": 129,
+        "id": "39",
+        "category": "Lodging",
+        "description": "Hotel",
+        "date": 1272154206374
+    }},
+    {"ExpenseRecord": {
+        "amount": 212.45,
+        "id": "40",
+        "category": "Local Transportation",
+        "description": "Train fare",
+        "date": 1268677693374
+    }},
+    {"ExpenseRecord": {
+        "amount": 56.69,
+        "id": "41",
+        "category": "Local Transportation",
+        "description": "Train fare",
+        "date": 1272477377374
+    }},
+    {"ExpenseRecord": {
+        "amount": 60.44,
+        "id": "42",
+        "category": "Lodging",
+        "description": "Hotel",
+        "date": 1268225800374
+    }},
+    {"ReportRecord": {
+        "id": "43",
+        "created": 1269907581374,
+        "reporterKey": 37,
+        "purpose": "Spending lots of money",
+        "notes": "Need approval by Monday"
+    }},
+    {"ExpenseRecord": {
+        "amount": 85.06,
+        "id": "44",
+        "category": "Dining",
+        "description": "Dinner",
+        "date": 1268639919374
+    }},
+    {"ExpenseRecord": {
+        "amount": 174.21,
+        "id": "45",
+        "category": "Local Transportation",
+        "description": "Bus ticket",
+        "date": 1269283098374
+    }},
+    {"ExpenseRecord": {
+        "amount": 231.45,
+        "id": "46",
+        "category": "Dining",
+        "description": "Breakfast",
+        "date": 1267771811374
+    }},
+    {"ReportRecord": {
+        "id": "47",
+        "created": 1272012116374,
+        "reporterKey": 37,
+        "purpose": "Money laundering",
+        "notes": "Review A.S.A.P."
+    }},
+    {"ExpenseRecord": {
+        "amount": 181.05,
+        "id": "48",
+        "category": "Office Supplies",
+        "description": "Paste",
+        "date": 1271431802374
+    }},
+    {"ReportRecord": {
+        "id": "49",
+        "created": 1267436713374,
+        "reporterKey": 37,
+        "purpose": "Potato chip cooking offsite",
+        "notes": "Review A.S.A.P."
+    }},
+    {"ExpenseRecord": {
+        "amount": 227.75,
+        "id": "50",
+        "category": "Local Transportation",
+        "description": "Taxi fare",
+        "date": 1270937208374
+    }},
+    {"ExpenseRecord": {
+        "amount": 71.11,
+        "id": "51",
+        "category": "Local Transportation",
+        "description": "Taxi fare",
+        "date": 1270182442374
+    }},
+    {"ExpenseRecord": {
+        "amount": 222.89,
+        "id": "52",
+        "category": "Dining",
+        "description": "Dinner",
+        "date": 1272242702374
+    }},
+    {"ReportRecord": {
+        "id": "53",
+        "created": 1267540548374,
+        "reporterKey": 37,
+        "purpose": "Visit to Istanbul",
+        "notes": "Review A.S.A.P."
+    }},
+    {"ExpenseRecord": {
+        "amount": 24.04,
+        "id": "54",
+        "category": "Local Transportation",
+        "description": "Taxi fare",
+        "date": 1269495400374
+    }},
+    {"ExpenseRecord": {
+        "amount": 171.71,
+        "id": "55",
+        "category": "Local Transportation",
+        "description": "Train fare",
+        "date": 1266226764374
+    }},
+    {"ExpenseRecord": {
+        "amount": 36.01,
+        "id": "56",
+        "category": "Local Transportation",
+        "description": "Taxi fare",
+        "date": 1268128238374
+    }},
+    {"ExpenseRecord": {
+        "amount": 195.04,
+        "id": "57",
+        "category": "Air Travel",
+        "description": "Flight from ATL to SFO",
+        "date": 1268532980374
+    }},
+    {"ExpenseRecord": {
+        "amount": 151.58,
+        "id": "58",
+        "category": "Office Supplies",
+        "description": "Scissors",
+        "date": 1268409886374
+    }},
+    {"ReportRecord": {
+        "id": "59",
+        "created": 1267003737374,
+        "reporterKey": 37,
+        "purpose": "Baseball card research",
+        "notes": ""
+    }},
+    {"ExpenseRecord": {
+        "amount": 20.42,
+        "id": "60",
+        "category": "Office Supplies",
+        "description": "Paste",
+        "date": 1266981785374
+    }},
+    {"ExpenseRecord": {
+        "amount": 247.44,
+        "id": "61",
+        "category": "Local Transportation",
+        "description": "Taxi fare",
+        "date": 1270084210374
+    }},
+    {"ReportRecord": {
+        "id": "62",
+        "created": 1270338068374,
+        "reporterKey": 37,
+        "purpose": "Donut day",
+        "notes": "High priority"
+    }},
+    {"ExpenseRecord": {
+        "amount": 81.2,
+        "id": "63",
+        "category": "Local Transportation",
+        "description": "Train fare",
+        "date": 1268439487374
+    }},
+    {"ReportRecord": {
+        "id": "64",
+        "created": 1270521902374,
+        "reporterKey": 37,
+        "purpose": "Money laundering",
+        "notes": "Show me the money"
+    }},
+    {"ExpenseRecord": {
+        "amount": 46.8,
+        "id": "65",
+        "category": "Office Supplies",
+        "description": "Paste",
+        "date": 1270716102374
+    }},
+    {"ExpenseRecord": {
+        "amount": 231.83,
+        "id": "66",
+        "category": "Lodging",
+        "description": "Bed & Breakfast",
+        "date": 1268424965374
+    }},
+    {"ReportRecord": {
+        "id": "67",
+        "created": 1265835996374,
+        "reporterKey": 37,
+        "purpose": "Sushi offsite",
+        "notes": "Show me the money"
+    }},
+    {"ExpenseRecord": {
+        "amount": 5.7,
+        "id": "68",
+        "category": "Lodging",
+        "description": "Bed & Breakfast",
+        "date": 1270816887374
+    }},
+    {"ReportRecord": {
+        "id": "69",
+        "created": 1270749085374,
+        "reporterKey": 37,
+        "purpose": "Team building diamond cutting offsite",
+        "notes": ""
+    }},
+    {"ExpenseRecord": {
+        "amount": 81.77,
+        "id": "70",
+        "category": "Local Transportation",
+        "description": "Train fare",
+        "date": 1273208634374
+    }},
+    {"ExpenseRecord": {
+        "amount": 203.11,
+        "id": "71",
+        "category": "Air Travel",
+        "description": "Flight from SFO to ATL",
+        "date": 1268459249374
+    }},
+    {"ExpenseRecord": {
+        "amount": 27.8,
+        "id": "72",
+        "category": "Office Supplies",
+        "description": "Stapler",
+        "date": 1271973448374
+    }},
+    {"EmployeeRecord": {
+        "id": "73",
+        "userName": "cstellar",
+        "displayName": "Catherine Stellar"
+    }},
+    {"ReportRecord": {
+        "id": "74",
+        "created": 1272117561374,
+        "reporterKey": 73,
+        "purpose": "Potato chip cooking offsite",
+        "notes": "Show me the money"
+    }},
+    {"ExpenseRecord": {
+        "amount": 22.24,
+        "id": "75",
+        "category": "Air Travel",
+        "description": "Flight from ATL to SFO",
+        "date": 1267562453374
+    }},
+    {"ExpenseRecord": {
+        "amount": 208.39,
+        "id": "76",
+        "category": "Dining",
+        "description": "Dinner",
+        "date": 1267290733374
+    }},
+    {"ReportRecord": {
+        "id": "77",
+        "created": 1273531636374,
+        "reporterKey": 73,
+        "purpose": "Team building diamond cutting offsite",
+        "notes": "Show me the money"
+    }},
+    {"ExpenseRecord": {
+        "amount": 168.65,
+        "id": "78",
+        "category": "Lodging",
+        "description": "Hotel",
+        "date": 1270088520374
+    }},
+    {"ExpenseRecord": {
+        "amount": 81.64,
+        "id": "79",
+        "category": "Dining",
+        "description": "Breakfast",
+        "date": 1269711353374
+    }},
+    {"ExpenseRecord": {
+        "amount": 247.54,
+        "id": "80",
+        "category": "Dining",
+        "description": "Lunch",
+        "date": 1269004306374
+    }},
+    {"ExpenseRecord": {
+        "amount": 21.98,
+        "id": "81",
+        "category": "Dining",
+        "description": "Lunch",
+        "date": 1268236879374
+    }},
+    {"ReportRecord": {
+        "id": "82",
+        "created": 1272148108374,
+        "reporterKey": 73,
+        "purpose": "Potato chip cooking offsite",
+        "notes": "Need approval by Monday"
+    }},
+    {"ExpenseRecord": {
+        "amount": 64.96,
+        "id": "83",
+        "category": "Dining",
+        "description": "Breakfast",
+        "date": 1269033119374
+    }},
+    {"ReportRecord": {
+        "id": "84",
+        "created": 1272284021374,
+        "reporterKey": 73,
+        "purpose": "Donut day",
+        "notes": "High priority"
+    }},
+    {"ExpenseRecord": {
+        "amount": 10.01,
+        "id": "85",
+        "category": "Office Supplies",
+        "description": "Stapler",
+        "date": 1268847774374
+    }},
+    {"ExpenseRecord": {
+        "amount": 127.44,
+        "id": "86",
+        "category": "Office Supplies",
+        "description": "Paperclips",
+        "date": 1272540193374
+    }},
+    {"ExpenseRecord": {
+        "amount": 41.98,
+        "id": "87",
+        "category": "Dining",
+        "description": "Dinner",
+        "date": 1270273451374
+    }},
+    {"ReportRecord": {
+        "id": "88",
+        "created": 1266256669374,
+        "reporterKey": 73,
+        "purpose": "ISDN modem for telecommuting",
+        "notes": "Show me the money"
+    }},
+    {"ExpenseRecord": {
+        "amount": 31.7,
+        "id": "89",
+        "category": "Office Supplies",
+        "description": "Paste",
+        "date": 1267259846374
+    }},
+    {"ExpenseRecord": {
+        "amount": 19.81,
+        "id": "90",
+        "category": "Office Supplies",
+        "description": "Scissors",
+        "date": 1272736396374
+    }},
+    {"ExpenseRecord": {
+        "amount": 206.86,
+        "id": "91",
+        "category": "Office Supplies",
+        "description": "Scissors",
+        "date": 1273397729374
+    }},
+    {"ExpenseRecord": {
+        "amount": 159.51,
+        "id": "92",
+        "category": "Lodging",
+        "description": "Hotel",
+        "date": 1271033196374
+    }},
+    {"ExpenseRecord": {
+        "amount": 209.97,
+        "id": "93",
+        "category": "Local Transportation",
+        "description": "Bus ticket",
+        "date": 1272904058374
+    }},
+    {"ReportRecord": {
+        "id": "94",
+        "created": 1266456130374,
+        "reporterKey": 73,
+        "purpose": "Potato chip cooking offsite",
+        "notes": "Need approval by Monday"
+    }},
+    {"ExpenseRecord": {
+        "amount": 16.82,
+        "id": "95",
+        "category": "Office Supplies",
+        "description": "Paperclips",
+        "date": 1273359359374
+    }},
+    {"ReportRecord": {
+        "id": "96",
+        "created": 1266537788374,
+        "reporterKey": 73,
+        "purpose": "Baseball card research",
+        "notes": "Please bill to the Widgets project"
+    }},
+    {"ExpenseRecord": {
+        "amount": 51.28,
+        "id": "97",
+        "category": "Local Transportation",
+        "description": "Train fare",
+        "date": 1266286134374
+    }},
+    {"ReportRecord": {
+        "id": "98",
+        "created": 1271280918374,
+        "reporterKey": 73,
+        "purpose": "Baseball card research",
+        "notes": "High priority"
+    }},
+    {"ExpenseRecord": {
+        "amount": 155.07,
+        "id": "99",
+        "category": "Office Supplies",
+        "description": "Paperclips",
+        "date": 1266387802375
+    }},
+    {"ExpenseRecord": {
+        "amount": 51.41,
+        "id": "100",
+        "category": "Air Travel",
+        "description": "Flight from SFO to ATL",
+        "date": 1271097648375
+    }},
+    {"ExpenseRecord": {
+        "amount": 45.23,
+        "id": "101",
+        "category": "Dining",
+        "description": "Dinner",
+        "date": 1268075347375
+    }},
+    {"ExpenseRecord": {
+        "amount": 127.52,
+        "id": "102",
+        "category": "Lodging",
+        "description": "Bed & Breakfast",
+        "date": 1273074532375
+    }},
+    {"ExpenseRecord": {
+        "amount": 102.04,
+        "id": "103",
+        "category": "Office Supplies",
+        "description": "Stapler",
+        "date": 1269511041375
+    }},
+    {"ReportRecord": {
+        "id": "104",
+        "created": 1272213771375,
+        "reporterKey": 73,
+        "purpose": "Team building diamond cutting offsite",
+        "notes": "Show me the money"
+    }},
+    {"ExpenseRecord": {
+        "amount": 119.41,
+        "id": "105",
+        "category": "Office Supplies",
+        "description": "Stapler",
+        "date": 1268813112375
+    }},
+    {"ExpenseRecord": {
+        "amount": 201.09,
+        "id": "106",
+        "category": "Office Supplies",
+        "description": "Stapler",
+        "date": 1266113463375
+    }},
+    {"ExpenseRecord": {
+        "amount": 196.78,
+        "id": "107",
+        "category": "Dining",
+        "description": "Breakfast",
+        "date": 1266956257375
+    }},
+    {"ExpenseRecord": {
+        "amount": 152.63,
+        "id": "108",
+        "category": "Office Supplies",
+        "description": "Stapler",
+        "date": 1266561425375
+    }},
+    {"ExpenseRecord": {
+        "amount": 145.83,
+        "id": "109",
+        "category": "Office Supplies",
+        "description": "Paperclips",
+        "date": 1269524253375
+    }},
+    {"ReportRecord": {
+        "id": "110",
+        "created": 1272436337375,
+        "reporterKey": 73,
+        "purpose": "Sushi offsite",
+        "notes": "Please bill to the Widgets project"
+    }},
+    {"ExpenseRecord": {
+        "amount": 55.84,
+        "id": "111",
+        "category": "Dining",
+        "description": "Breakfast",
+        "date": 1266725359375
+    }},
+    {"ExpenseRecord": {
+        "amount": 25.37,
+        "id": "112",
+        "category": "Local Transportation",
+        "description": "Taxi fare",
+        "date": 1268018428375
+    }},
+    {"ExpenseRecord": {
+        "amount": 136.21,
+        "id": "113",
+        "category": "Lodging",
+        "description": "Bed & Breakfast",
+        "date": 1266730566375
+    }},
+    {"ReportRecord": {
+        "id": "114",
+        "created": 1270773827375,
+        "reporterKey": 73,
+        "purpose": "Sushi offsite",
+        "notes": "Show me the money"
+    }},
+    {"ExpenseRecord": {
+        "amount": 148.38,
+        "id": "115",
+        "category": "Local Transportation",
+        "description": "Taxi fare",
+        "date": 1268028964375
+    }},
+    {"ExpenseRecord": {
+        "amount": 177.62,
+        "id": "116",
+        "category": "Local Transportation",
+        "description": "Train fare",
+        "date": 1270780060375
+    }},
+    {"ExpenseRecord": {
+        "amount": 40.71,
+        "id": "117",
+        "category": "Office Supplies",
+        "description": "Paste",
+        "date": 1271893732375
+    }},
+    {"ExpenseRecord": {
+        "amount": 81.11,
+        "id": "118",
+        "category": "Office Supplies",
+        "description": "Scissors",
+        "date": 1267201077375
+    }},
+    {"ReportRecord": {
+        "id": "119",
+        "created": 1272361861375,
+        "reporterKey": 73,
+        "purpose": "Donut day",
+        "notes": "Show me the money"
+    }},
+    {"ExpenseRecord": {
+        "amount": 249.71,
+        "id": "120",
+        "category": "Lodging",
+        "description": "Bed & Breakfast",
+        "date": 1265837567375
+    }},
+    {"ExpenseRecord": {
+        "amount": 210.15,
+        "id": "121",
+        "category": "Office Supplies",
+        "description": "Paste",
+        "date": 1270403008375
+    }},
+    {"ExpenseRecord": {
+        "amount": 20.31,
+        "id": "122",
+        "category": "Local Transportation",
+        "description": "Train fare",
+        "date": 1273492138375
+    }},
+    {"ReportRecord": {
+        "id": "123",
+        "created": 1271398513375,
+        "reporterKey": 73,
+        "purpose": "Team building diamond cutting offsite",
+        "notes": ""
+    }},
+    {"ExpenseRecord": {
+        "amount": 18.01,
+        "id": "124",
+        "category": "Office Supplies",
+        "description": "Scissors",
+        "date": 1273548084375
+    }},
+    {"ExpenseRecord": {
+        "amount": 45.05,
+        "id": "125",
+        "category": "Lodging",
+        "description": "Hotel",
+        "date": 1272415629375
+    }},
+    {"ExpenseRecord": {
+        "amount": 131.95,
+        "id": "126",
+        "category": "Lodging",
+        "description": "Hotel",
+        "date": 1272644540375
+    }},
+    {"ExpenseRecord": {
+        "amount": 35.75,
+        "id": "127",
+        "category": "Office Supplies",
+        "description": "Stapler",
+        "date": 1272043069375
+    }},
+    {"ExpenseRecord": {
+        "amount": 139.01,
+        "id": "128",
+        "category": "Air Travel",
+        "description": "Flight from SFO to ATL",
+        "date": 1273067259375
+    }},
+    {"ReportRecord": {
+        "id": "129",
+        "created": 1268200910375,
+        "reporterKey": 73,
+        "purpose": "Sushi offsite",
+        "notes": "Review A.S.A.P."
+    }},
+    {"ExpenseRecord": {
+        "amount": 168.9,
+        "id": "130",
+        "category": "Office Supplies",
+        "description": "Scissors",
+        "date": 1270609658375
+    }},
+    {"ExpenseRecord": {
+        "amount": 88.44,
+        "id": "131",
+        "category": "Dining",
+        "description": "Dinner",
+        "date": 1272347987375
+    }},
+    {"ExpenseRecord": {
+        "amount": 100.78,
+        "id": "132",
+        "category": "Dining",
+        "description": "Breakfast",
+        "date": 1268813932375
+    }},
+    {"ExpenseRecord": {
+        "amount": 35.31,
+        "id": "133",
+        "category": "Local Transportation",
+        "description": "Bus ticket",
+        "date": 1266879195375
+    }},
+    {"ReportRecord": {
+        "id": "134",
+        "created": 1265902168375,
+        "reporterKey": 73,
+        "purpose": "Sushi offsite",
+        "notes": "Need approval by Monday"
+    }},
+    {"ExpenseRecord": {
+        "amount": 4.18,
+        "id": "135",
+        "category": "Dining",
+        "description": "Dinner",
+        "date": 1271780176375
+    }},
+    {"ExpenseRecord": {
+        "amount": 247.56,
+        "id": "136",
+        "category": "Local Transportation",
+        "description": "Train fare",
+        "date": 1271082916375
+    }},
+    {"EmployeeRecord": {
+        "id": "137",
+        "userName": "fbravo",
+        "displayName": "Flin Bravo"
+    }},
+    {"ReportRecord": {
+        "id": "138",
+        "created": 1270744077375,
+        "reporterKey": 137,
+        "purpose": "Visit to Istanbul",
+        "notes": "Review A.S.A.P."
+    }},
+    {"ExpenseRecord": {
+        "amount": 215.96,
+        "id": "139",
+        "category": "Office Supplies",
+        "description": "Scissors",
+        "date": 1269326169375
+    }},
+    {"ExpenseRecord": {
+        "amount": 137.17,
+        "id": "140",
+        "category": "Dining",
+        "description": "Dinner",
+        "date": 1269914060375
+    }},
+    {"ExpenseRecord": {
+        "amount": 231.63,
+        "id": "141",
+        "category": "Office Supplies",
+        "description": "Stapler",
+        "date": 1271541605375
+    }},
+    {"ExpenseRecord": {
+        "amount": 173.54,
+        "id": "142",
+        "category": "Dining",
+        "description": "Dinner",
+        "date": 1272037501375
+    }},
+    {"ReportRecord": {
+        "id": "143",
+        "created": 1266072324375,
+        "reporterKey": 137,
+        "purpose": "Team building diamond cutting offsite",
+        "notes": ""
+    }},
+    {"ExpenseRecord": {
+        "amount": 72.9,
+        "id": "144",
+        "category": "Dining",
+        "description": "Breakfast",
+        "date": 1272692297375
+    }},
+    {"ExpenseRecord": {
+        "amount": 206.76,
+        "id": "145",
+        "category": "Air Travel",
+        "description": "Flight from ATL to SFO",
+        "date": 1267974753375
+    }},
+    {"ExpenseRecord": {
+        "amount": 55.91,
+        "id": "146",
+        "category": "Dining",
+        "description": "Dinner",
+        "date": 1272741199375
+    }},
+    {"ExpenseRecord": {
+        "amount": 164.35,
+        "id": "147",
+        "category": "Air Travel",
+        "description": "Flight from SFO to ATL",
+        "date": 1267717219375
+    }},
+    {"ExpenseRecord": {
+        "amount": 212.83,
+        "id": "148",
+        "category": "Office Supplies",
+        "description": "Scissors",
+        "date": 1272667431375
+    }},
+    {"ReportRecord": {
+        "id": "149",
+        "created": 1271007077375,
+        "reporterKey": 137,
+        "purpose": "Potato chip cooking offsite",
+        "notes": "Show me the money"
+    }},
+    {"ExpenseRecord": {
+        "amount": 109.94,
+        "id": "150",
+        "category": "Dining",
+        "description": "Breakfast",
+        "date": 1269250336375
+    }},
+    {"ExpenseRecord": {
+        "amount": 248.24,
+        "id": "151",
+        "category": "Office Supplies",
+        "description": "Paste",
+        "date": 1270005834375
+    }},
+    {"ExpenseRecord": {
+        "amount": 78.86,
+        "id": "152",
+        "category": "Dining",
+        "description": "Breakfast",
+        "date": 1271102480375
+    }},
+    {"ExpenseRecord": {
+        "amount": 22.08,
+        "id": "153",
+        "category": "Office Supplies",
+        "description": "Scissors",
+        "date": 1273219257375
+    }},
+    {"ExpenseRecord": {
+        "amount": 151.88,
+        "id": "154",
+        "category": "Dining",
+        "description": "Dinner",
+        "date": 1271527350375
+    }},
+    {"ReportRecord": {
+        "id": "155",
+        "created": 1273356189375,
+        "reporterKey": 137,
+        "purpose": "Donut day",
+        "notes": "High priority"
+    }},
+    {"ExpenseRecord": {
+        "amount": 51.69,
+        "id": "156",
+        "category": "Office Supplies",
+        "description": "Paperclips",
+        "date": 1273318939375
+    }},
+    {"ExpenseRecord": {
+        "amount": 5.28,
+        "id": "157",
+        "category": "Lodging",
+        "description": "Hotel",
+        "date": 1271885502375
+    }},
+    {"ExpenseRecord": {
+        "amount": 181.35,
+        "id": "158",
+        "category": "Office Supplies",
+        "description": "Stapler",
+        "date": 1268083747375
+    }},
+    {"ExpenseRecord": {
+        "amount": 205.3,
+        "id": "159",
+        "category": "Local Transportation",
+        "description": "Bus ticket",
+        "date": 1271643166375
+    }},
+    {"ExpenseRecord": {
+        "amount": 136.44,
+        "id": "160",
+        "category": "Dining",
+        "description": "Breakfast",
+        "date": 1270017154375
+    }},
+    {"ReportRecord": {
+        "id": "161",
+        "created": 1271011363375,
+        "reporterKey": 137,
+        "purpose": "Sushi offsite",
+        "notes": "High priority"
+    }},
+    {"ExpenseRecord": {
+        "amount": 206.77,
+        "id": "162",
+        "category": "Lodging",
+        "description": "Bed & Breakfast",
+        "date": 1267977477375
+    }},
+    {"ExpenseRecord": {
+        "amount": 211.43,
+        "id": "163",
+        "category": "Dining",
+        "description": "Breakfast",
+        "date": 1272628206375
+    }},
+    {"ExpenseRecord": {
+        "amount": 149.31,
+        "id": "164",
+        "category": "Local Transportation",
+        "description": "Bus ticket",
+        "date": 1271888831375
+    }},
+    {"ReportRecord": {
+        "id": "165",
+        "created": 1272418699375,
+        "reporterKey": 137,
+        "purpose": "Sushi offsite",
+        "notes": "Need approval by Monday"
+    }},
+    {"ExpenseRecord": {
+        "amount": 107,
+        "id": "166",
+        "category": "Dining",
+        "description": "Breakfast",
+        "date": 1266094508375
+    }},
+    {"ExpenseRecord": {
+        "amount": 18.9,
+        "id": "167",
+        "category": "Office Supplies",
+        "description": "Paste",
+        "date": 1267388641375
+    }},
+    {"ExpenseRecord": {
+        "amount": 80.45,
+        "id": "168",
+        "category": "Dining",
+        "description": "Lunch",
+        "date": 1271341952375
+    }},
+    {"ExpenseRecord": {
+        "amount": 4,
+        "id": "169",
+        "category": "Local Transportation",
+        "description": "Train fare",
+        "date": 1265938629375
+    }},
+    {"ExpenseRecord": {
+        "amount": 187.97,
+        "id": "170",
+        "category": "Air Travel",
+        "description": "Flight from SFO to ATL",
+        "date": 1267914432375
+    }},
+    {"ReportRecord": {
+        "id": "171",
+        "created": 1268468153375,
+        "reporterKey": 137,
+        "purpose": "Money laundering",
+        "notes": "Review A.S.A.P."
+    }},
+    {"ExpenseRecord": {
+        "amount": 115.14,
+        "id": "172",
+        "category": "Dining",
+        "description": "Lunch",
+        "date": 1269021098375
+    }},
+    {"ExpenseRecord": {
+        "amount": 41.93,
+        "id": "173",
+        "category": "Lodging",
+        "description": "Hotel",
+        "date": 1271447329375
+    }},
+    {"ExpenseRecord": {
+        "amount": 101.92,
+        "id": "174",
+        "category": "Office Supplies",
+        "description": "Stapler",
+        "date": 1271532224375
+    }},
+    {"ExpenseRecord": {
+        "amount": 243.04,
+        "id": "175",
+        "category": "Lodging",
+        "description": "Bed & Breakfast",
+        "date": 1266380290375
+    }},
+    {"ExpenseRecord": {
+        "amount": 181.38,
+        "id": "176",
+        "category": "Lodging",
+        "description": "Bed & Breakfast",
+        "date": 1270033404375
+    }},
+    {"ReportRecord": {
+        "id": "177",
+        "created": 1271382842375,
+        "reporterKey": 137,
+        "purpose": "Spending lots of money",
+        "notes": "High priority"
+    }},
+    {"ExpenseRecord": {
+        "amount": 247.92,
+        "id": "178",
+        "category": "Local Transportation",
+        "description": "Bus ticket",
+        "date": 1272121849375
+    }},
+    {"ExpenseRecord": {
+        "amount": 143.89,
+        "id": "179",
+        "category": "Local Transportation",
+        "description": "Train fare",
+        "date": 1273243547375
+    }},
+    {"ExpenseRecord": {
+        "amount": 189.35,
+        "id": "180",
+        "category": "Lodging",
+        "description": "Hotel",
+        "date": 1269653237375
+    }},
+    {"ExpenseRecord": {
+        "amount": 214.65,
+        "id": "181",
+        "category": "Lodging",
+        "description": "Bed & Breakfast",
+        "date": 1273425575375
+    }},
+    {"ExpenseRecord": {
+        "amount": 140.38,
+        "id": "182",
+        "category": "Dining",
+        "description": "Dinner",
+        "date": 1267550154375
+    }},
+    {"ReportRecord": {
+        "id": "183",
+        "created": 1272252150375,
+        "reporterKey": 137,
+        "purpose": "Team building diamond cutting offsite",
+        "notes": "Show me the money"
+    }},
+    {"ExpenseRecord": {
+        "amount": 83.03,
+        "id": "184",
+        "category": "Office Supplies",
+        "description": "Stapler",
+        "date": 1268402085375
+    }},
+    {"ExpenseRecord": {
+        "amount": 170.21,
+        "id": "185",
+        "category": "Local Transportation",
+        "description": "Taxi fare",
+        "date": 1269075045375
+    }},
+    {"ReportRecord": {
+        "id": "186",
+        "created": 1268267833375,
+        "reporterKey": 137,
+        "purpose": "Baseball card research",
+        "notes": "Review A.S.A.P."
+    }},
+    {"ExpenseRecord": {
+        "amount": 175.84,
+        "id": "187",
+        "category": "Lodging",
+        "description": "Bed & Breakfast",
+        "date": 1270956978375
+    }},
+    {"ReportRecord": {
+        "id": "188",
+        "created": 1271400679375,
+        "reporterKey": 137,
+        "purpose": "Donut day",
+        "notes": "Need approval by Monday"
+    }},
+    {"ExpenseRecord": {
+        "amount": 229.8,
+        "id": "189",
+        "category": "Local Transportation",
+        "description": "Train fare",
+        "date": 1272533168375
+    }},
+    {"ExpenseRecord": {
+        "amount": 11.79,
+        "id": "190",
+        "category": "Office Supplies",
+        "description": "Scissors",
+        "date": 1271129698375
+    }},
+    {"ExpenseRecord": {
+        "amount": 246.67,
+        "id": "191",
+        "category": "Air Travel",
+        "description": "Flight from SFO to ATL",
+        "date": 1265793045375
+    }},
+    {"ExpenseRecord": {
+        "amount": 163.18,
+        "id": "192",
+        "category": "Lodging",
+        "description": "Bed & Breakfast",
+        "date": 1268178735375
+    }},
+    {"ReportRecord": {
+        "id": "193",
+        "created": 1270313563375,
+        "reporterKey": 137,
+        "purpose": "ISDN modem for telecommuting",
+        "notes": ""
+    }},
+    {"ExpenseRecord": {
+        "amount": 90.78,
+        "id": "194",
+        "category": "Air Travel",
+        "description": "Flight from SFO to ATL",
+        "date": 1272481835375
+    }},
+    {"ExpenseRecord": {
+        "amount": 111.38,
+        "id": "195",
+        "category": "Dining",
+        "description": "Dinner",
+        "date": 1269648502375
+    }},
+    {"ExpenseRecord": {
+        "amount": 61.16,
+        "id": "196",
+        "category": "Air Travel",
+        "description": "Flight from SFO to ATL",
+        "date": 1271201041375
+    }},
+    {"ExpenseRecord": {
+        "amount": 41.42,
+        "id": "197",
+        "category": "Air Travel",
+        "description": "Flight from SFO to ATL",
+        "date": 1266629112375
+    }},
+    {"ReportRecord": {
+        "id": "198",
+        "created": 1272920929375,
+        "reporterKey": 137,
+        "purpose": "Spending lots of money",
+        "notes": ""
+    }},
+    {"ExpenseRecord": {
+        "amount": 188.35,
+        "id": "199",
+        "category": "Local Transportation",
+        "description": "Train fare",
+        "date": 1269902615375
+    }},
+    {"ExpenseRecord": {
+        "amount": 155.17,
+        "id": "200",
+        "category": "Local Transportation",
+        "description": "Bus ticket",
+        "date": 1272454028375
+    }},
+    {"ReportRecord": {
+        "id": "201",
+        "created": 1268680298375,
+        "reporterKey": 137,
+        "purpose": "Money laundering",
+        "notes": "Review A.S.A.P."
+    }},
+    {"ExpenseRecord": {
+        "amount": 0.4,
+        "id": "202",
+        "category": "Air Travel",
+        "description": "Flight from SFO to ATL",
+        "date": 1267353458375
+    }},
+    {"ExpenseRecord": {
+        "amount": 239.79,
+        "id": "203",
+        "category": "Air Travel",
+        "description": "Flight from ATL to SFO",
+        "date": 1272220627375
+    }},
+    {"ExpenseRecord": {
+        "amount": 220.73,
+        "id": "204",
+        "category": "Office Supplies",
+        "description": "Scissors",
+        "date": 1267677173375
+    }},
+    {"ExpenseRecord": {
+        "amount": 54.13,
+        "id": "205",
+        "category": "Lodging",
+        "description": "Hotel",
+        "date": 1268162248375
+    }},
+    {"ReportRecord": {
+        "id": "206",
+        "created": 1273330103375,
+        "reporterKey": 137,
+        "purpose": "Sushi offsite",
+        "notes": "Please bill to the Widgets project"
+    }},
+    {"ExpenseRecord": {
+        "amount": 198.28,
+        "id": "207",
+        "category": "Office Supplies",
+        "description": "Scissors",
+        "date": 1267071168375
+    }},
+    {"ExpenseRecord": {
+        "amount": 219.41,
+        "id": "208",
+        "category": "Office Supplies",
+        "description": "Paperclips",
+        "date": 1266877115375
+    }},
+    {"EmployeeRecord": {
+        "id": "209",
+        "userName": "dawesome",
+        "displayName": "Dave Awesome"
+    }},
+    {"ReportRecord": {
+        "id": "210",
+        "created": 1267911601375,
+        "reporterKey": 209,
+        "purpose": "Sushi offsite",
+        "notes": ""
+    }},
+    {"ExpenseRecord": {
+        "amount": 107.59,
+        "id": "211",
+        "category": "Air Travel",
+        "description": "Flight from ATL to SFO",
+        "date": 1271304783375
+    }},
+    {"ExpenseRecord": {
+        "amount": 102.54,
+        "id": "212",
+        "category": "Office Supplies",
+        "description": "Stapler",
+        "date": 1266655834375
+    }},
+    {"ReportRecord": {
+        "id": "213",
+        "created": 1273349754375,
+        "reporterKey": 209,
+        "purpose": "Donut day",
+        "notes": "Need approval by Monday"
+    }},
+    {"ExpenseRecord": {
+        "amount": 119.08,
+        "id": "214",
+        "category": "Local Transportation",
+        "description": "Bus ticket",
+        "date": 1268647172375
+    }},
+    {"ExpenseRecord": {
+        "amount": 32.25,
+        "id": "215",
+        "category": "Dining",
+        "description": "Lunch",
+        "date": 1267630986375
+    }},
+    {"ExpenseRecord": {
+        "amount": 10.84,
+        "id": "216",
+        "category": "Local Transportation",
+        "description": "Taxi fare",
+        "date": 1270722754375
+    }},
+    {"ExpenseRecord": {
+        "amount": 147.06,
+        "id": "217",
+        "category": "Office Supplies",
+        "description": "Paperclips",
+        "date": 1271446785375
+    }},
+    {"ExpenseRecord": {
+        "amount": 232.33,
+        "id": "218",
+        "category": "Local Transportation",
+        "description": "Taxi fare",
+        "date": 1268261797375
+    }},
+    {"ReportRecord": {
+        "id": "219",
+        "created": 1266944078375,
+        "reporterKey": 209,
+        "purpose": "Sushi offsite",
+        "notes": "High priority"
+    }},
+    {"ExpenseRecord": {
+        "amount": 202.16,
+        "id": "220",
+        "category": "Dining",
+        "description": "Dinner",
+        "date": 1266608817375
+    }},
+    {"ExpenseRecord": {
+        "amount": 28.69,
+        "id": "221",
+        "category": "Air Travel",
+        "description": "Flight from SFO to ATL",
+        "date": 1266993161375
+    }},
+    {"ExpenseRecord": {
+        "amount": 146.61,
+        "id": "222",
+        "category": "Dining",
+        "description": "Breakfast",
+        "date": 1270902215375
+    }},
+    {"ExpenseRecord": {
+        "amount": 150.13,
+        "id": "223",
+        "category": "Office Supplies",
+        "description": "Paste",
+        "date": 1267383570375
+    }},
+    {"ExpenseRecord": {
+        "amount": 150.92,
+        "id": "224",
+        "category": "Local Transportation",
+        "description": "Bus ticket",
+        "date": 1269227675375
+    }},
+    {"ReportRecord": {
+        "id": "225",
+        "created": 1271669068375,
+        "reporterKey": 209,
+        "purpose": "Donut day",
+        "notes": "Show me the money"
+    }},
+    {"ExpenseRecord": {
+        "amount": 65.2,
+        "id": "226",
+        "category": "Dining",
+        "description": "Lunch",
+        "date": 1273144723375
+    }},
+    {"ExpenseRecord": {
+        "amount": 247.09,
+        "id": "227",
+        "category": "Air Travel",
+        "description": "Flight from ATL to SFO",
+        "date": 1271210369375
+    }},
+    {"ReportRecord": {
+        "id": "228",
+        "created": 1272833230375,
+        "reporterKey": 209,
+        "purpose": "Potato chip cooking offsite",
+        "notes": "Need approval by Monday"
+    }},
+    {"ExpenseRecord": {
+        "amount": 56.65,
+        "id": "229",
+        "category": "Office Supplies",
+        "description": "Paste",
+        "date": 1270263435376
+    }},
+    {"ReportRecord": {
+        "id": "230",
+        "created": 1273187095376,
+        "reporterKey": 209,
+        "purpose": "Spending lots of money",
+        "notes": "High priority"
+    }},
+    {"ExpenseRecord": {
+        "amount": 99.17,
+        "id": "231",
+        "category": "Dining",
+        "description": "Lunch",
+        "date": 1269233020376
+    }},
+    {"ExpenseRecord": {
+        "amount": 195.13,
+        "id": "232",
+        "category": "Local Transportation",
+        "description": "Taxi fare",
+        "date": 1273356634376
+    }},
+    {"ReportRecord": {
+        "id": "233",
+        "created": 1271125206376,
+        "reporterKey": 209,
+        "purpose": "ISDN modem for telecommuting",
+        "notes": "High priority"
+    }},
+    {"ExpenseRecord": {
+        "amount": 108.9,
+        "id": "234",
+        "category": "Office Supplies",
+        "description": "Paperclips",
+        "date": 1266677463376
+    }},
+    {"ReportRecord": {
+        "id": "235",
+        "created": 1269643733376,
+        "reporterKey": 209,
+        "purpose": "ISDN modem for telecommuting",
+        "notes": "Need approval by Monday"
+    }},
+    {"ExpenseRecord": {
+        "amount": 62.82,
+        "id": "236",
+        "category": "Office Supplies",
+        "description": "Paperclips",
+        "date": 1269896180376
+    }},
+    {"ExpenseRecord": {
+        "amount": 15.88,
+        "id": "237",
+        "category": "Lodging",
+        "description": "Bed & Breakfast",
+        "date": 1270469260376
+    }},
+    {"ExpenseRecord": {
+        "amount": 103.04,
+        "id": "238",
+        "category": "Air Travel",
+        "description": "Flight from SFO to ATL",
+        "date": 1268864245376
+    }},
+    {"ExpenseRecord": {
+        "amount": 102.43,
+        "id": "239",
+        "category": "Office Supplies",
+        "description": "Stapler",
+        "date": 1270771646376
+    }},
+    {"ReportRecord": {
+        "id": "240",
+        "created": 1267287007376,
+        "reporterKey": 209,
+        "purpose": "Baseball card research",
+        "notes": ""
+    }},
+    {"ExpenseRecord": {
+        "amount": 155.57,
+        "id": "241",
+        "category": "Lodging",
+        "description": "Hotel",
+        "date": 1267731875376
+    }},
+    {"ExpenseRecord": {
+        "amount": 198.25,
+        "id": "242",
+        "category": "Local Transportation",
+        "description": "Train fare",
+        "date": 1269580962376
+    }},
+    {"ExpenseRecord": {
+        "amount": 82.32,
+        "id": "243",
+        "category": "Lodging",
+        "description": "Bed & Breakfast",
+        "date": 1268918857376
+    }},
+    {"ExpenseRecord": {
+        "amount": 193.17,
+        "id": "244",
+        "category": "Local Transportation",
+        "description": "Train fare",
+        "date": 1272172919376
+    }},
+    {"ReportRecord": {
+        "id": "245",
+        "created": 1269967973376,
+        "reporterKey": 209,
+        "purpose": "ISDN modem for telecommuting",
+        "notes": "Need approval by Monday"
+    }},
+    {"ExpenseRecord": {
+        "amount": 70.62,
+        "id": "246",
+        "category": "Office Supplies",
+        "description": "Paperclips",
+        "date": 1271254642376
+    }},
+    {"ExpenseRecord": {
+        "amount": 28.34,
+        "id": "247",
+        "category": "Air Travel",
+        "description": "Flight from ATL to SFO",
+        "date": 1273409834376
+    }},
+    {"ReportRecord": {
+        "id": "248",
+        "created": 1265905388376,
+        "reporterKey": 209,
+        "purpose": "Baseball card research",
+        "notes": "High priority"
+    }},
+    {"ExpenseRecord": {
+        "amount": 33.34,
+        "id": "249",
+        "category": "Office Supplies",
+        "description": "Scissors",
+        "date": 1270389631376
+    }},
+    {"ExpenseRecord": {
+        "amount": 76.9,
+        "id": "250",
+        "category": "Lodging",
+        "description": "Bed & Breakfast",
+        "date": 1266554401376
+    }},
+    {"ExpenseRecord": {
+        "amount": 242.48,
+        "id": "251",
+        "category": "Office Supplies",
+        "description": "Paperclips",
+        "date": 1273149566376
+    }},
+    {"ReportRecord": {
+        "id": "252",
+        "created": 1271742126376,
+        "reporterKey": 209,
+        "purpose": "Potato chip cooking offsite",
+        "notes": ""
+    }},
+    {"ExpenseRecord": {
+        "amount": 119.61,
+        "id": "253",
+        "category": "Air Travel",
+        "description": "Flight from SFO to ATL",
+        "date": 1272803277376
+    }},
+    {"ExpenseRecord": {
+        "amount": 203.3,
+        "id": "254",
+        "category": "Dining",
+        "description": "Breakfast",
+        "date": 1266715556376
+    }},
+    {"ExpenseRecord": {
+        "amount": 85.46,
+        "id": "255",
+        "category": "Dining",
+        "description": "Dinner",
+        "date": 1268249672376
+    }},
+    {"ExpenseRecord": {
+        "amount": 157.81,
+        "id": "256",
+        "category": "Local Transportation",
+        "description": "Bus ticket",
+        "date": 1269926593376
+    }},
+    {"ExpenseRecord": {
+        "amount": 143.93,
+        "id": "257",
+        "category": "Air Travel",
+        "description": "Flight from SFO to ATL",
+        "date": 1272025777376
+    }},
+    {"ReportRecord": {
+        "id": "258",
+        "created": 1270168418376,
+        "reporterKey": 209,
+        "purpose": "Team building diamond cutting offsite",
+        "notes": "High priority"
+    }},
+    {"ExpenseRecord": {
+        "amount": 185.74,
+        "id": "259",
+        "category": "Air Travel",
+        "description": "Flight from SFO to ATL",
+        "date": 1271037279376
+    }},
+    {"ExpenseRecord": {
+        "amount": 212.42,
+        "id": "260",
+        "category": "Local Transportation",
+        "description": "Taxi fare",
+        "date": 1273327876376
+    }},
+    {"ReportRecord": {
+        "id": "261",
+        "created": 1273133097376,
+        "reporterKey": 209,
+        "purpose": "Donut day",
+        "notes": ""
+    }},
+    {"ExpenseRecord": {
+        "amount": 196.87,
+        "id": "262",
+        "category": "Dining",
+        "description": "Lunch",
+        "date": 1268137248376
+    }},
+    {"ReportRecord": {
+        "id": "263",
+        "created": 1273394801376,
+        "reporterKey": 209,
+        "purpose": "Spending lots of money",
+        "notes": "Show me the money"
+    }},
+    {"ExpenseRecord": {
+        "amount": 37.18,
+        "id": "264",
+        "category": "Local Transportation",
+        "description": "Train fare",
+        "date": 1271208728376
+    }},
+    {"ReportRecord": {
+        "id": "265",
+        "created": 1271219408376,
+        "reporterKey": 209,
+        "purpose": "ISDN modem for telecommuting",
+        "notes": "Please bill to the Widgets project"
+    }},
+    {"ExpenseRecord": {
+        "amount": 122.48,
+        "id": "266",
+        "category": "Local Transportation",
+        "description": "Train fare",
+        "date": 1269778548376
+    }},
+    {"ExpenseRecord": {
+        "amount": 206.09,
+        "id": "267",
+        "category": "Air Travel",
+        "description": "Flight from ATL to SFO",
+        "date": 1267107410376
+    }},
+    {"ExpenseRecord": {
+        "amount": 168.28,
+        "id": "268",
+        "category": "Lodging",
+        "description": "Bed & Breakfast",
+        "date": 1273038345376
+    }},
+    {"ReportRecord": {
+        "id": "269",
+        "created": 1270877014376,
+        "reporterKey": 209,
+        "purpose": "Donut day",
+        "notes": "High priority"
+    }},
+    {"ExpenseRecord": {
+        "amount": 104.69,
+        "id": "270",
+        "category": "Dining",
+        "description": "Lunch",
+        "date": 1265865718376
+    }},
+    {"ReportRecord": {
+        "id": "271",
+        "created": 1268203286376,
+        "reporterKey": 209,
+        "purpose": "Spending lots of money",
+        "notes": "Need approval by Monday"
+    }},
+    {"ExpenseRecord": {
+        "amount": 206.15,
+        "id": "272",
+        "category": "Lodging",
+        "description": "Hotel",
+        "date": 1271654742376
+    }},
+    {"ExpenseRecord": {
+        "amount": 52.62,
+        "id": "273",
+        "category": "Air Travel",
+        "description": "Flight from SFO to ATL",
+        "date": 1270703761376
+    }},
+    {"ExpenseRecord": {
+        "amount": 68.28,
+        "id": "274",
+        "category": "Local Transportation",
+        "description": "Bus ticket",
+        "date": 1271168210376
+    }},
+    {"ExpenseRecord": {
+        "amount": 199.05,
+        "id": "275",
+        "category": "Office Supplies",
+        "description": "Paste",
+        "date": 1266791703376
+    }},
+    {"ExpenseRecord": {
+        "amount": 152.72,
+        "id": "276",
+        "category": "Lodging",
+        "description": "Hotel",
+        "date": 1270240112376
+    }},
+    {"EmployeeRecord": {
+        "id": "277",
+        "userName": "vmagnanimous",
+        "displayName": "Val Magnanimous"
+    }},
+    {"ReportRecord": {
+        "id": "278",
+        "created": 1268943911376,
+        "reporterKey": 277,
+        "purpose": "Sushi offsite",
+        "notes": "Show me the money"
+    }},
+    {"ExpenseRecord": {
+        "amount": 156.93,
+        "id": "279",
+        "category": "Dining",
+        "description": "Breakfast",
+        "date": 1272439076376
+    }},
+    {"ExpenseRecord": {
+        "amount": 97.28,
+        "id": "280",
+        "category": "Office Supplies",
+        "description": "Paste",
+        "date": 1269539826376
+    }},
+    {"ExpenseRecord": {
+        "amount": 52.71,
+        "id": "281",
+        "category": "Office Supplies",
+        "description": "Scissors",
+        "date": 1267334328376
+    }},
+    {"ExpenseRecord": {
+        "amount": 52.58,
+        "id": "282",
+        "category": "Dining",
+        "description": "Lunch",
+        "date": 1268832705376
+    }},
+    {"ExpenseRecord": {
+        "amount": 125.78,
+        "id": "283",
+        "category": "Dining",
+        "description": "Dinner",
+        "date": 1270875456376
+    }},
+    {"ReportRecord": {
+        "id": "284",
+        "created": 1272143240376,
+        "reporterKey": 277,
+        "purpose": "Sushi offsite",
+        "notes": "High priority"
+    }},
+    {"ExpenseRecord": {
+        "amount": 126.7,
+        "id": "285",
+        "category": "Local Transportation",
+        "description": "Bus ticket",
+        "date": 1268050468376
+    }},
+    {"ExpenseRecord": {
+        "amount": 49.12,
+        "id": "286",
+        "category": "Local Transportation",
+        "description": "Train fare",
+        "date": 1266464062376
+    }},
+    {"ExpenseRecord": {
+        "amount": 59.8,
+        "id": "287",
+        "category": "Office Supplies",
+        "description": "Paperclips",
+        "date": 1271288244376
+    }},
+    {"ExpenseRecord": {
+        "amount": 208.99,
+        "id": "288",
+        "category": "Office Supplies",
+        "description": "Scissors",
+        "date": 1272471515376
+    }},
+    {"ExpenseRecord": {
+        "amount": 184.69,
+        "id": "289",
+        "category": "Local Transportation",
+        "description": "Taxi fare",
+        "date": 1266122340376
+    }},
+    {"ReportRecord": {
+        "id": "290",
+        "created": 1272331775376,
+        "reporterKey": 277,
+        "purpose": "Donut day",
+        "notes": "High priority"
+    }},
+    {"ExpenseRecord": {
+        "amount": 59.03,
+        "id": "291",
+        "category": "Dining",
+        "description": "Dinner",
+        "date": 1268041906376
+    }},
+    {"ExpenseRecord": {
+        "amount": 79.48,
+        "id": "292",
+        "category": "Air Travel",
+        "description": "Flight from SFO to ATL",
+        "date": 1267202350376
+    }},
+    {"ExpenseRecord": {
+        "amount": 77.93,
+        "id": "293",
+        "category": "Office Supplies",
+        "description": "Paperclips",
+        "date": 1266703456376
+    }},
+    {"ExpenseRecord": {
+        "amount": 12.45,
+        "id": "294",
+        "category": "Lodging",
+        "description": "Bed & Breakfast",
+        "date": 1269816864376
+    }},
+    {"ReportRecord": {
+        "id": "295",
+        "created": 1271776236376,
+        "reporterKey": 277,
+        "purpose": "Potato chip cooking offsite",
+        "notes": "Review A.S.A.P."
+    }},
+    {"ExpenseRecord": {
+        "amount": 2.73,
+        "id": "296",
+        "category": "Office Supplies",
+        "description": "Scissors",
+        "date": 1269170662376
+    }},
+    {"ExpenseRecord": {
+        "amount": 52.89,
+        "id": "297",
+        "category": "Lodging",
+        "description": "Hotel",
+        "date": 1266017361376
+    }},
+    {"ReportRecord": {
+        "id": "298",
+        "created": 1268996226376,
+        "reporterKey": 277,
+        "purpose": "Donut day",
+        "notes": "Please bill to the Widgets project"
+    }},
+    {"ExpenseRecord": {
+        "amount": 103.55,
+        "id": "299",
+        "category": "Lodging",
+        "description": "Hotel",
+        "date": 1271368249376
+    }},
+    {"ExpenseRecord": {
+        "amount": 217.43,
+        "id": "300",
+        "category": "Local Transportation",
+        "description": "Taxi fare",
+        "date": 1270196502376
+    }},
+    {"ExpenseRecord": {
+        "amount": 147.53,
+        "id": "301",
+        "category": "Office Supplies",
+        "description": "Paste",
+        "date": 1268096012376
+    }},
+    {"ExpenseRecord": {
+        "amount": 12.4,
+        "id": "302",
+        "category": "Office Supplies",
+        "description": "Paste",
+        "date": 1272574490376
+    }},
+    {"ExpenseRecord": {
+        "amount": 72.31,
+        "id": "303",
+        "category": "Office Supplies",
+        "description": "Stapler",
+        "date": 1270564766376
+    }},
+    {"ReportRecord": {
+        "id": "304",
+        "created": 1269392150376,
+        "reporterKey": 277,
+        "purpose": "Spending lots of money",
+        "notes": "Please bill to the Widgets project"
+    }},
+    {"ExpenseRecord": {
+        "amount": 173.83,
+        "id": "305",
+        "category": "Office Supplies",
+        "description": "Stapler",
+        "date": 1268841229376
+    }},
+    {"ExpenseRecord": {
+        "amount": 53.66,
+        "id": "306",
+        "category": "Lodging",
+        "description": "Hotel",
+        "date": 1266213558376
+    }},
+    {"ExpenseRecord": {
+        "amount": 121.62,
+        "id": "307",
+        "category": "Dining",
+        "description": "Lunch",
+        "date": 1266212970376
+    }},
+    {"ReportRecord": {
+        "id": "308",
+        "created": 1268808054376,
+        "reporterKey": 277,
+        "purpose": "Spending lots of money",
+        "notes": "Review A.S.A.P."
+    }},
+    {"ExpenseRecord": {
+        "amount": 144.91,
+        "id": "309",
+        "category": "Office Supplies",
+        "description": "Stapler",
+        "date": 1268614029376
+    }},
+    {"ExpenseRecord": {
+        "amount": 6.62,
+        "id": "310",
+        "category": "Local Transportation",
+        "description": "Bus ticket",
+        "date": 1266378953376
+    }},
+    {"ExpenseRecord": {
+        "amount": 67.94,
+        "id": "311",
+        "category": "Office Supplies",
+        "description": "Scissors",
+        "date": 1270911699376
+    }},
+    {"ExpenseRecord": {
+        "amount": 114.27,
+        "id": "312",
+        "category": "Air Travel",
+        "description": "Flight from SFO to ATL",
+        "date": 1265935360376
+    }},
+    {"ReportRecord": {
+        "id": "313",
+        "created": 1268906005376,
+        "reporterKey": 277,
+        "purpose": "Spending lots of money",
+        "notes": ""
+    }},
+    {"ExpenseRecord": {
+        "amount": 94.52,
+        "id": "314",
+        "category": "Office Supplies",
+        "description": "Paperclips",
+        "date": 1268148349376
+    }},
+    {"ExpenseRecord": {
+        "amount": 115.02,
+        "id": "315",
+        "category": "Air Travel",
+        "description": "Flight from SFO to ATL",
+        "date": 1273076935376
+    }},
+    {"ExpenseRecord": {
+        "amount": 148.92,
+        "id": "316",
+        "category": "Dining",
+        "description": "Breakfast",
+        "date": 1269120695376
+    }},
+    {"ExpenseRecord": {
+        "amount": 34.74,
+        "id": "317",
+        "category": "Lodging",
+        "description": "Bed & Breakfast",
+        "date": 1269311356376
+    }},
+    {"ExpenseRecord": {
+        "amount": 20.13,
+        "id": "318",
+        "category": "Office Supplies",
+        "description": "Paste",
+        "date": 1272918606376
+    }},
+    {"ReportRecord": {
+        "id": "319",
+        "created": 1266376713376,
+        "reporterKey": 277,
+        "purpose": "Sushi offsite",
+        "notes": "Review A.S.A.P."
+    }},
+    {"ExpenseRecord": {
+        "amount": 41.54,
+        "id": "320",
+        "category": "Dining",
+        "description": "Dinner",
+        "date": 1266153314376
+    }},
+    {"ExpenseRecord": {
+        "amount": 106.62,
+        "id": "321",
+        "category": "Lodging",
+        "description": "Bed & Breakfast",
+        "date": 1268771603376
+    }},
+    {"ExpenseRecord": {
+        "amount": 42.87,
+        "id": "322",
+        "category": "Air Travel",
+        "description": "Flight from ATL to SFO",
+        "date": 1267069020376
+    }},
+    {"ExpenseRecord": {
+        "amount": 81.96,
+        "id": "323",
+        "category": "Local Transportation",
+        "description": "Train fare",
+        "date": 1271345442376
+    }},
+    {"ExpenseRecord": {
+        "amount": 33.32,
+        "id": "324",
+        "category": "Local Transportation",
+        "description": "Taxi fare",
+        "date": 1270304855376
+    }},
+    {"ReportRecord": {
+        "id": "325",
+        "created": 1267131396376,
+        "reporterKey": 277,
+        "purpose": "Potato chip cooking offsite",
+        "notes": "Show me the money"
+    }},
+    {"ExpenseRecord": {
+        "amount": 227.74,
+        "id": "326",
+        "category": "Lodging",
+        "description": "Bed & Breakfast",
+        "date": 1269545719376
+    }},
+    {"ExpenseRecord": {
+        "amount": 55.19,
+        "id": "327",
+        "category": "Air Travel",
+        "description": "Flight from SFO to ATL",
+        "date": 1273436418376
+    }},
+    {"ReportRecord": {
+        "id": "328",
+        "created": 1271264054376,
+        "reporterKey": 277,
+        "purpose": "Spending lots of money",
+        "notes": "Please bill to the Widgets project"
+    }},
+    {"ExpenseRecord": {
+        "amount": 40.58,
+        "id": "329",
+        "category": "Dining",
+        "description": "Dinner",
+        "date": 1270060517376
+    }},
+    {"ExpenseRecord": {
+        "amount": 168.32,
+        "id": "330",
+        "category": "Local Transportation",
+        "description": "Train fare",
+        "date": 1267626044376
+    }},
+    {"ExpenseRecord": {
+        "amount": 133.68,
+        "id": "331",
+        "category": "Local Transportation",
+        "description": "Bus ticket",
+        "date": 1269785814376
+    }},
+    {"ExpenseRecord": {
+        "amount": 155.3,
+        "id": "332",
+        "category": "Dining",
+        "description": "Dinner",
+        "date": 1269026987376
+    }},
+    {"ExpenseRecord": {
+        "amount": 117.96,
+        "id": "333",
+        "category": "Air Travel",
+        "description": "Flight from ATL to SFO",
+        "date": 1267314369376
+    }},
+    {"ReportRecord": {
+        "id": "334",
+        "created": 1268443251376,
+        "reporterKey": 277,
+        "purpose": "Money laundering",
+        "notes": "Please bill to the Widgets project"
+    }},
+    {"ExpenseRecord": {
+        "amount": 67.35,
+        "id": "335",
+        "category": "Office Supplies",
+        "description": "Scissors",
+        "date": 1270407315376
+    }},
+    {"ReportRecord": {
+        "id": "336",
+        "created": 1271470094376,
+        "reporterKey": 277,
+        "purpose": "Potato chip cooking offsite",
+        "notes": "Please bill to the Widgets project"
+    }},
+    {"ExpenseRecord": {
+        "amount": 137.97,
+        "id": "337",
+        "category": "Dining",
+        "description": "Lunch",
+        "date": 1270438867376
+    }},
+    {"ExpenseRecord": {
+        "amount": 68.94,
+        "id": "338",
+        "category": "Office Supplies",
+        "description": "Paste",
+        "date": 1267374689376
+    }},
+    {"ExpenseRecord": {
+        "amount": 248.81,
+        "id": "339",
+        "category": "Air Travel",
+        "description": "Flight from ATL to SFO",
+        "date": 1271458752376
+    }},
+    {"ReportRecord": {
+        "id": "340",
+        "created": 1269824703376,
+        "reporterKey": 277,
+        "purpose": "Baseball card research",
+        "notes": "Show me the money"
+    }},
+    {"ExpenseRecord": {
+        "amount": 49.01,
+        "id": "341",
+        "category": "Local Transportation",
+        "description": "Bus ticket",
+        "date": 1266692226376
+    }},
+    {"ExpenseRecord": {
+        "amount": 103.97,
+        "id": "342",
+        "category": "Office Supplies",
+        "description": "Paperclips",
+        "date": 1267907649376
+    }},
+    {"ExpenseRecord": {
+        "amount": 4.38,
+        "id": "343",
+        "category": "Office Supplies",
+        "description": "Paperclips",
+        "date": 1267734149376
+    }},
+    {"ExpenseRecord": {
+        "amount": 221.13,
+        "id": "344",
+        "category": "Dining",
+        "description": "Dinner",
+        "date": 1268980045376
+    }},
+    {"ReportRecord": {
+        "id": "345",
+        "created": 1269277175376,
+        "reporterKey": 277,
+        "purpose": "Sushi offsite",
+        "notes": "Need approval by Monday"
+    }},
+    {"ExpenseRecord": {
+        "amount": 226.31,
+        "id": "346",
+        "category": "Lodging",
+        "description": "Hotel",
+        "date": 1266623311376
+    }},
+    {"ReportRecord": {
+        "id": "347",
+        "created": 1269897306376,
+        "reporterKey": 277,
+        "purpose": "Potato chip cooking offsite",
+        "notes": "Please bill to the Widgets project"
+    }},
+    {"ExpenseRecord": {
+        "amount": 238.04,
+        "id": "348",
+        "category": "Local Transportation",
+        "description": "Train fare",
+        "date": 1272155357376
+    }},
+    {"ExpenseRecord": {
+        "amount": 165.08,
+        "id": "349",
+        "category": "Local Transportation",
+        "description": "Train fare",
+        "date": 1269088371376
+    }},
+    {"ExpenseRecord": {
+        "amount": 153.25,
+        "id": "350",
+        "category": "Air Travel",
+        "description": "Flight from SFO to ATL",
+        "date": 1267173238376
+    }},
+    {"ReportRecord": {
+        "id": "351",
+        "created": 1267475482376,
+        "reporterKey": 277,
+        "purpose": "Team building diamond cutting offsite",
+        "notes": "Please bill to the Widgets project"
+    }},
+    {"ExpenseRecord": {
+        "amount": 51.17,
+        "id": "352",
+        "category": "Local Transportation",
+        "description": "Train fare",
+        "date": 1268845902376
+    }},
+    {"ExpenseRecord": {
+        "amount": 89.33,
+        "id": "353",
+        "category": "Local Transportation",
+        "description": "Train fare",
+        "date": 1269827438376
+    }},
+    {"EmployeeRecord": {
+        "id": "354",
+        "userName": "jbravo",
+        "displayName": "John Bravo"
+    }},
+    {"ReportRecord": {
+        "id": "355",
+        "created": 1269842217376,
+        "reporterKey": 354,
+        "purpose": "Baseball card research",
+        "notes": "Show me the money"
+    }},
+    {"ExpenseRecord": {
+        "amount": 85.35,
+        "id": "356",
+        "category": "Dining",
+        "description": "Dinner",
+        "date": 1266485028376
+    }},
+    {"ExpenseRecord": {
+        "amount": 173.37,
+        "id": "357",
+        "category": "Lodging",
+        "description": "Hotel",
+        "date": 1271787181376
+    }},
+    {"ReportRecord": {
+        "id": "358",
+        "created": 1273136063376,
+        "reporterKey": 354,
+        "purpose": "Visit to Istanbul",
+        "notes": "Please bill to the Widgets project"
+    }},
+    {"ExpenseRecord": {
+        "amount": 65.23,
+        "id": "359",
+        "category": "Lodging",
+        "description": "Bed & Breakfast",
+        "date": 1268807664376
+    }},
+    {"ExpenseRecord": {
+        "amount": 62.93,
+        "id": "360",
+        "category": "Office Supplies",
+        "description": "Scissors",
+        "date": 1267828147376
+    }},
+    {"ExpenseRecord": {
+        "amount": 14.62,
+        "id": "361",
+        "category": "Local Transportation",
+        "description": "Taxi fare",
+        "date": 1267266843376
+    }},
+    {"ExpenseRecord": {
+        "amount": 113.78,
+        "id": "362",
+        "category": "Air Travel",
+        "description": "Flight from SFO to ATL",
+        "date": 1268048926376
+    }},
+    {"ExpenseRecord": {
+        "amount": 111.88,
+        "id": "363",
+        "category": "Office Supplies",
+        "description": "Scissors",
+        "date": 1269813140376
+    }},
+    {"ReportRecord": {
+        "id": "364",
+        "created": 1265937868376,
+        "reporterKey": 354,
+        "purpose": "Spending lots of money",
+        "notes": "Need approval by Monday"
+    }},
+    {"ExpenseRecord": {
+        "amount": 202.84,
+        "id": "365",
+        "category": "Dining",
+        "description": "Lunch",
+        "date": 1270872406376
+    }},
+    {"ExpenseRecord": {
+        "amount": 157.73,
+        "id": "366",
+        "category": "Dining",
+        "description": "Dinner",
+        "date": 1273205075376
+    }},
+    {"ExpenseRecord": {
+        "amount": 78.64,
+        "id": "367",
+        "category": "Dining",
+        "description": "Lunch",
+        "date": 1269909995376
+    }},
+    {"ReportRecord": {
+        "id": "368",
+        "created": 1272095873376,
+        "reporterKey": 354,
+        "purpose": "ISDN modem for telecommuting",
+        "notes": ""
+    }},
+    {"ExpenseRecord": {
+        "amount": 94.14,
+        "id": "369",
+        "category": "Office Supplies",
+        "description": "Paste",
+        "date": 1266498667377
+    }},
+    {"ExpenseRecord": {
+        "amount": 222.65,
+        "id": "370",
+        "category": "Lodging",
+        "description": "Bed & Breakfast",
+        "date": 1271044608377
+    }},
+    {"ReportRecord": {
+        "id": "371",
+        "created": 1266692102377,
+        "reporterKey": 354,
+        "purpose": "Money laundering",
+        "notes": "Please bill to the Widgets project"
+    }},
+    {"ExpenseRecord": {
+        "amount": 48.64,
+        "id": "372",
+        "category": "Dining",
+        "description": "Breakfast",
+        "date": 1272893884377
+    }},
+    {"ExpenseRecord": {
+        "amount": 84.04,
+        "id": "373",
+        "category": "Air Travel",
+        "description": "Flight from ATL to SFO",
+        "date": 1269104497377
+    }},
+    {"ExpenseRecord": {
+        "amount": 111.3,
+        "id": "374",
+        "category": "Air Travel",
+        "description": "Flight from SFO to ATL",
+        "date": 1272503196377
+    }},
+    {"ReportRecord": {
+        "id": "375",
+        "created": 1272690416377,
+        "reporterKey": 354,
+        "purpose": "Spending lots of money",
+        "notes": "Review A.S.A.P."
+    }},
+    {"ExpenseRecord": {
+        "amount": 0.29,
+        "id": "376",
+        "category": "Dining",
+        "description": "Lunch",
+        "date": 1269192252377
+    }},
+    {"ReportRecord": {
+        "id": "377",
+        "created": 1269717649377,
+        "reporterKey": 354,
+        "purpose": "Money laundering",
+        "notes": "High priority"
+    }},
+    {"ExpenseRecord": {
+        "amount": 71.13,
+        "id": "378",
+        "category": "Office Supplies",
+        "description": "Paste",
+        "date": 1273053452377
+    }},
+    {"ExpenseRecord": {
+        "amount": 177.88,
+        "id": "379",
+        "category": "Dining",
+        "description": "Lunch",
+        "date": 1272911168377
+    }},
+    {"ExpenseRecord": {
+        "amount": 133.54,
+        "id": "380",
+        "category": "Lodging",
+        "description": "Bed & Breakfast",
+        "date": 1269141463377
+    }},
+    {"ReportRecord": {
+        "id": "381",
+        "created": 1270649688377,
+        "reporterKey": 354,
+        "purpose": "Baseball card research",
+        "notes": "Need approval by Monday"
+    }},
+    {"ExpenseRecord": {
+        "amount": 71.05,
+        "id": "382",
+        "category": "Dining",
+        "description": "Lunch",
+        "date": 1267790834377
+    }},
+    {"ReportRecord": {
+        "id": "383",
+        "created": 1272842773377,
+        "reporterKey": 354,
+        "purpose": "Baseball card research",
+        "notes": "Need approval by Monday"
+    }},
+    {"ExpenseRecord": {
+        "amount": 99.31,
+        "id": "384",
+        "category": "Office Supplies",
+        "description": "Stapler",
+        "date": 1270336616377
+    }},
+    {"ReportRecord": {
+        "id": "385",
+        "created": 1271803236377,
+        "reporterKey": 354,
+        "purpose": "Visit to Istanbul",
+        "notes": "High priority"
+    }},
+    {"ExpenseRecord": {
+        "amount": 104.8,
+        "id": "386",
+        "category": "Lodging",
+        "description": "Hotel",
+        "date": 1270043723377
+    }},
+    {"ExpenseRecord": {
+        "amount": 81.62,
+        "id": "387",
+        "category": "Office Supplies",
+        "description": "Paperclips",
+        "date": 1268720411377
+    }},
+    {"ExpenseRecord": {
+        "amount": 205.53,
+        "id": "388",
+        "category": "Lodging",
+        "description": "Hotel",
+        "date": 1272605301377
+    }},
+    {"ExpenseRecord": {
+        "amount": 53.84,
+        "id": "389",
+        "category": "Lodging",
+        "description": "Bed & Breakfast",
+        "date": 1272808358377
+    }},
+    {"ReportRecord": {
+        "id": "390",
+        "created": 1269833618377,
+        "reporterKey": 354,
+        "purpose": "Sushi offsite",
+        "notes": "Please bill to the Widgets project"
+    }},
+    {"ExpenseRecord": {
+        "amount": 147.73,
+        "id": "391",
+        "category": "Local Transportation",
+        "description": "Taxi fare",
+        "date": 1266319065377
+    }},
+    {"ReportRecord": {
+        "id": "392",
+        "created": 1269194509377,
+        "reporterKey": 354,
+        "purpose": "Money laundering",
+        "notes": "Show me the money"
+    }},
+    {"ExpenseRecord": {
+        "amount": 248.92,
+        "id": "393",
+        "category": "Local Transportation",
+        "description": "Taxi fare",
+        "date": 1266952856377
+    }},
+    {"ExpenseRecord": {
+        "amount": 3.57,
+        "id": "394",
+        "category": "Office Supplies",
+        "description": "Scissors",
+        "date": 1268998264377
+    }},
+    {"ExpenseRecord": {
+        "amount": 188.7,
+        "id": "395",
+        "category": "Office Supplies",
+        "description": "Scissors",
+        "date": 1270016784377
+    }},
+    {"ExpenseRecord": {
+        "amount": 50.33,
+        "id": "396",
+        "category": "Office Supplies",
+        "description": "Paste",
+        "date": 1271885765377
+    }},
+    {"EmployeeRecord": {
+        "id": "397",
+        "userName": "vawesome",
+        "displayName": "Val Awesome"
+    }},
+    {"ReportRecord": {
+        "id": "398",
+        "created": 1268447935377,
+        "reporterKey": 397,
+        "purpose": "Spending lots of money",
+        "notes": "Show me the money"
+    }},
+    {"ExpenseRecord": {
+        "amount": 39.52,
+        "id": "399",
+        "category": "Lodging",
+        "description": "Bed & Breakfast",
+        "date": 1266712698377
+    }},
+    {"ExpenseRecord": {
+        "amount": 114.61,
+        "id": "400",
+        "category": "Office Supplies",
+        "description": "Stapler",
+        "date": 1269880599377
+    }},
+    {"EmployeeRecord": {
+        "id": "401",
+        "userName": "vfantastic",
+        "displayName": "Val Fantastic"
+    }},
+    {"ReportRecord": {
+        "id": "402",
+        "created": 1270461516377,
+        "reporterKey": 401,
+        "purpose": "Sushi offsite",
+        "notes": "Show me the money"
+    }},
+    {"ExpenseRecord": {
+        "amount": 47.72,
+        "id": "403",
+        "category": "Office Supplies",
+        "description": "Scissors",
+        "date": 1273348323377
+    }},
+    {"ExpenseRecord": {
+        "amount": 246.23,
+        "id": "404",
+        "category": "Office Supplies",
+        "description": "Stapler",
+        "date": 1268131530377
+    }},
+    {"ExpenseRecord": {
+        "amount": 66.53,
+        "id": "405",
+        "category": "Local Transportation",
+        "description": "Bus ticket",
+        "date": 1267855502377
+    }},
+    {"ExpenseRecord": {
+        "amount": 170.13,
+        "id": "406",
+        "category": "Local Transportation",
+        "description": "Bus ticket",
+        "date": 1273021514377
+    }},
+    {"ExpenseRecord": {
+        "amount": 46.87,
+        "id": "407",
+        "category": "Dining",
+        "description": "Lunch",
+        "date": 1266340267377
+    }},
+    {"ReportRecord": {
+        "id": "408",
+        "created": 1265886841377,
+        "reporterKey": 401,
+        "purpose": "Donut day",
+        "notes": "Show me the money"
+    }},
+    {"ExpenseRecord": {
+        "amount": 241.29,
+        "id": "409",
+        "category": "Dining",
+        "description": "Dinner",
+        "date": 1270924914377
+    }},
+    {"ReportRecord": {
+        "id": "410",
+        "created": 1269598579377,
+        "reporterKey": 401,
+        "purpose": "ISDN modem for telecommuting",
+        "notes": "Please bill to the Widgets project"
+    }},
+    {"ExpenseRecord": {
+        "amount": 86.65,
+        "id": "411",
+        "category": "Dining",
+        "description": "Lunch",
+        "date": 1272141990377
+    }},
+    {"ReportRecord": {
+        "id": "412",
+        "created": 1266821340377,
+        "reporterKey": 401,
+        "purpose": "Donut day",
+        "notes": "Review A.S.A.P."
+    }},
+    {"ExpenseRecord": {
+        "amount": 93.78,
+        "id": "413",
+        "category": "Lodging",
+        "description": "Bed & Breakfast",
+        "date": 1272392680377
+    }},
+    {"ReportRecord": {
+        "id": "414",
+        "created": 1268878978377,
+        "reporterKey": 401,
+        "purpose": "Donut day",
+        "notes": "Review A.S.A.P."
+    }},
+    {"ExpenseRecord": {
+        "amount": 147.52,
+        "id": "415",
+        "category": "Dining",
+        "description": "Lunch",
+        "date": 1272320337377
+    }},
+    {"ExpenseRecord": {
+        "amount": 154.01,
+        "id": "416",
+        "category": "Dining",
+        "description": "Breakfast",
+        "date": 1268637378377
+    }},
+    {"ExpenseRecord": {
+        "amount": 52.5,
+        "id": "417",
+        "category": "Dining",
+        "description": "Dinner",
+        "date": 1269219538377
+    }},
+    {"ExpenseRecord": {
+        "amount": 79.64,
+        "id": "418",
+        "category": "Office Supplies",
+        "description": "Paste",
+        "date": 1271254710377
+    }},
+    {"ReportRecord": {
+        "id": "419",
+        "created": 1270853449377,
+        "reporterKey": 401,
+        "purpose": "Spending lots of money",
+        "notes": ""
+    }},
+    {"ExpenseRecord": {
+        "amount": 237.5,
+        "id": "420",
+        "category": "Dining",
+        "description": "Breakfast",
+        "date": 1273199183377
+    }},
+    {"ExpenseRecord": {
+        "amount": 178.97,
+        "id": "421",
+        "category": "Dining",
+        "description": "Dinner",
+        "date": 1266919311377
+    }},
+    {"ExpenseRecord": {
+        "amount": 226.08,
+        "id": "422",
+        "category": "Dining",
+        "description": "Breakfast",
+        "date": 1267807102377
+    }},
+    {"ExpenseRecord": {
+        "amount": 203.1,
+        "id": "423",
+        "category": "Lodging",
+        "description": "Bed & Breakfast",
+        "date": 1272729131377
+    }},
+    {"ExpenseRecord": {
+        "amount": 148.86,
+        "id": "424",
+        "category": "Office Supplies",
+        "description": "Stapler",
+        "date": 1268196547377
+    }},
+    {"ReportRecord": {
+        "id": "425",
+        "created": 1269423193377,
+        "reporterKey": 401,
+        "purpose": "Visit to Istanbul",
+        "notes": ""
+    }},
+    {"ExpenseRecord": {
+        "amount": 147.39,
+        "id": "426",
+        "category": "Air Travel",
+        "description": "Flight from ATL to SFO",
+        "date": 1272881403377
+    }},
+    {"ExpenseRecord": {
+        "amount": 74.58,
+        "id": "427",
+        "category": "Local Transportation",
+        "description": "Train fare",
+        "date": 1271725572377
+    }},
+    {"ExpenseRecord": {
+        "amount": 45.96,
+        "id": "428",
+        "category": "Office Supplies",
+        "description": "Paste",
+        "date": 1268886329377
+    }},
+    {"ExpenseRecord": {
+        "amount": 83.26,
+        "id": "429",
+        "category": "Local Transportation",
+        "description": "Bus ticket",
+        "date": 1268069973377
+    }},
+    {"ExpenseRecord": {
+        "amount": 101.71,
+        "id": "430",
+        "category": "Lodging",
+        "description": "Bed & Breakfast",
+        "date": 1270739706377
+    }},
+    {"ReportRecord": {
+        "id": "431",
+        "created": 1271363425377,
+        "reporterKey": 401,
+        "purpose": "Team building diamond cutting offsite",
+        "notes": "Review A.S.A.P."
+    }},
+    {"ExpenseRecord": {
+        "amount": 68.4,
+        "id": "432",
+        "category": "Office Supplies",
+        "description": "Scissors",
+        "date": 1266737632377
+    }},
+    {"ExpenseRecord": {
+        "amount": 175.22,
+        "id": "433",
+        "category": "Office Supplies",
+        "description": "Stapler",
+        "date": 1272051505377
+    }},
+    {"ExpenseRecord": {
+        "amount": 43.76,
+        "id": "434",
+        "category": "Office Supplies",
+        "description": "Stapler",
+        "date": 1268185152377
+    }},
+    {"ExpenseRecord": {
+        "amount": 122.29,
+        "id": "435",
+        "category": "Dining",
+        "description": "Breakfast",
+        "date": 1272784534377
+    }},
+    {"ExpenseRecord": {
+        "amount": 18.41,
+        "id": "436",
+        "category": "Air Travel",
+        "description": "Flight from SFO to ATL",
+        "date": 1268352459377
+    }},
+    {"ReportRecord": {
+        "id": "437",
+        "created": 1266766562377,
+        "reporterKey": 401,
+        "purpose": "Spending lots of money",
+        "notes": "Please bill to the Widgets project"
+    }},
+    {"ExpenseRecord": {
+        "amount": 173.42,
+        "id": "438",
+        "category": "Air Travel",
+        "description": "Flight from ATL to SFO",
+        "date": 1267034564377
+    }},
+    {"ExpenseRecord": {
+        "amount": 76.12,
+        "id": "439",
+        "category": "Air Travel",
+        "description": "Flight from SFO to ATL",
+        "date": 1269767684377
+    }},
+    {"ExpenseRecord": {
+        "amount": 83.48,
+        "id": "440",
+        "category": "Office Supplies",
+        "description": "Scissors",
+        "date": 1265890658377
+    }},
+    {"ExpenseRecord": {
+        "amount": 192.96,
+        "id": "441",
+        "category": "Lodging",
+        "description": "Hotel",
+        "date": 1268533286377
+    }},
+    {"ReportRecord": {
+        "id": "442",
+        "created": 1267774616377,
+        "reporterKey": 401,
+        "purpose": "Spending lots of money",
+        "notes": "Review A.S.A.P."
+    }},
+    {"ExpenseRecord": {
+        "amount": 232.03,
+        "id": "443",
+        "category": "Dining",
+        "description": "Breakfast",
+        "date": 1266404869377
+    }},
+    {"ExpenseRecord": {
+        "amount": 62.87,
+        "id": "444",
+        "category": "Office Supplies",
+        "description": "Stapler",
+        "date": 1266060288377
+    }},
+    {"ExpenseRecord": {
+        "amount": 237.03,
+        "id": "445",
+        "category": "Local Transportation",
+        "description": "Taxi fare",
+        "date": 1266313441377
+    }},
+    {"ExpenseRecord": {
+        "amount": 22.18,
+        "id": "446",
+        "category": "Office Supplies",
+        "description": "Stapler",
+        "date": 1267018533377
+    }},
+    {"ExpenseRecord": {
+        "amount": 40.32,
+        "id": "447",
+        "category": "Office Supplies",
+        "description": "Scissors",
+        "date": 1271610431377
+    }},
+    {"ReportRecord": {
+        "id": "448",
+        "created": 1272457913377,
+        "reporterKey": 401,
+        "purpose": "Baseball card research",
+        "notes": "Please bill to the Widgets project"
+    }},
+    {"ExpenseRecord": {
+        "amount": 77.92,
+        "id": "449",
+        "category": "Office Supplies",
+        "description": "Paperclips",
+        "date": 1270676853377
+    }},
+    {"ReportRecord": {
+        "id": "450",
+        "created": 1273335190377,
+        "reporterKey": 401,
+        "purpose": "ISDN modem for telecommuting",
+        "notes": "Need approval by Monday"
+    }},
+    {"ExpenseRecord": {
+        "amount": 171.42,
+        "id": "451",
+        "category": "Dining",
+        "description": "Lunch",
+        "date": 1272517358377
+    }},
+    {"ExpenseRecord": {
+        "amount": 22.75,
+        "id": "452",
+        "category": "Local Transportation",
+        "description": "Train fare",
+        "date": 1270677995377
+    }},
+    {"ExpenseRecord": {
+        "amount": 3,
+        "id": "453",
+        "category": "Lodging",
+        "description": "Hotel",
+        "date": 1267062963377
+    }},
+    {"ReportRecord": {
+        "id": "454",
+        "created": 1271645406377,
+        "reporterKey": 401,
+        "purpose": "Donut day",
+        "notes": "High priority"
+    }},
+    {"ExpenseRecord": {
+        "amount": 13.41,
+        "id": "455",
+        "category": "Lodging",
+        "description": "Hotel",
+        "date": 1272098306377
+    }},
+    {"ExpenseRecord": {
+        "amount": 22.84,
+        "id": "456",
+        "category": "Dining",
+        "description": "Lunch",
+        "date": 1266481982377
+    }},
+    {"ExpenseRecord": {
+        "amount": 224.02,
+        "id": "457",
+        "category": "Dining",
+        "description": "Dinner",
+        "date": 1267231823377
+    }},
+    {"ExpenseRecord": {
+        "amount": 228.33,
+        "id": "458",
+        "category": "Dining",
+        "description": "Dinner",
+        "date": 1271061796377
+    }},
+    {"ReportRecord": {
+        "id": "459",
+        "created": 1272297791377,
+        "reporterKey": 401,
+        "purpose": "Donut day",
+        "notes": "Need approval by Monday"
+    }},
+    {"ExpenseRecord": {
+        "amount": 215.06,
+        "id": "460",
+        "category": "Lodging",
+        "description": "Bed & Breakfast",
+        "date": 1272964798377
+    }},
+    {"ExpenseRecord": {
+        "amount": 62.48,
+        "id": "461",
+        "category": "Dining",
+        "description": "Dinner",
+        "date": 1270943931377
+    }},
+    {"ReportRecord": {
+        "id": "462",
+        "created": 1272213337377,
+        "reporterKey": 401,
+        "purpose": "Money laundering",
+        "notes": "High priority"
+    }},
+    {"ExpenseRecord": {
+        "amount": 52.79,
+        "id": "463",
+        "category": "Local Transportation",
+        "description": "Train fare",
+        "date": 1268989557377
+    }},
+    {"ExpenseRecord": {
+        "amount": 17.23,
+        "id": "464",
+        "category": "Lodging",
+        "description": "Hotel",
+        "date": 1272932646377
+    }},
+    {"ExpenseRecord": {
+        "amount": 207.28,
+        "id": "465",
+        "category": "Local Transportation",
+        "description": "Taxi fare",
+        "date": 1267194380377
+    }},
+    {"ExpenseRecord": {
+        "amount": 230.97,
+        "id": "466",
+        "category": "Air Travel",
+        "description": "Flight from SFO to ATL",
+        "date": 1267505987377
+    }},
+    {"ExpenseRecord": {
+        "amount": 242.64,
+        "id": "467",
+        "category": "Dining",
+        "description": "Breakfast",
+        "date": 1271582849377
+    }},
+    {"EmployeeRecord": {
+        "id": "468",
+        "userName": "vperfect",
+        "displayName": "Val Perfect"
+    }},
+    {"ReportRecord": {
+        "id": "469",
+        "created": 1272773773377,
+        "reporterKey": 468,
+        "purpose": "Donut day",
+        "notes": ""
+    }},
+    {"ExpenseRecord": {
+        "amount": 112.69,
+        "id": "470",
+        "category": "Lodging",
+        "description": "Hotel",
+        "date": 1268125546377
+    }},
+    {"ExpenseRecord": {
+        "amount": 229.61,
+        "id": "471",
+        "category": "Office Supplies",
+        "description": "Paste",
+        "date": 1266497967377
+    }},
+    {"ReportRecord": {
+        "id": "472",
+        "created": 1269467751377,
+        "reporterKey": 468,
+        "purpose": "Potato chip cooking offsite",
+        "notes": "High priority"
+    }},
+    {"ExpenseRecord": {
+        "amount": 224.2,
+        "id": "473",
+        "category": "Office Supplies",
+        "description": "Paperclips",
+        "date": 1268472537377
+    }},
+    {"ReportRecord": {
+        "id": "474",
+        "created": 1271398466377,
+        "reporterKey": 468,
+        "purpose": "Sushi offsite",
+        "notes": "Show me the money"
+    }},
+    {"ExpenseRecord": {
+        "amount": 225.57,
+        "id": "475",
+        "category": "Office Supplies",
+        "description": "Stapler",
+        "date": 1268727708377
+    }},
+    {"ReportRecord": {
+        "id": "476",
+        "created": 1267193552377,
+        "reporterKey": 468,
+        "purpose": "Sushi offsite",
+        "notes": "Please bill to the Widgets project"
+    }},
+    {"ExpenseRecord": {
+        "amount": 151.51,
+        "id": "477",
+        "category": "Local Transportation",
+        "description": "Taxi fare",
+        "date": 1272648245377
+    }},
+    {"ExpenseRecord": {
+        "amount": 118.83,
+        "id": "478",
+        "category": "Air Travel",
+        "description": "Flight from ATL to SFO",
+        "date": 1267677229377
+    }},
+    {"ExpenseRecord": {
+        "amount": 54.07,
+        "id": "479",
+        "category": "Dining",
+        "description": "Lunch",
+        "date": 1272064938377
+    }},
+    {"ReportRecord": {
+        "id": "480",
+        "created": 1273472795377,
+        "reporterKey": 468,
+        "purpose": "Visit to Istanbul",
+        "notes": "High priority"
+    }},
+    {"ExpenseRecord": {
+        "amount": 224.17,
+        "id": "481",
+        "category": "Office Supplies",
+        "description": "Scissors",
+        "date": 1269551253377
+    }},
+    {"ExpenseRecord": {
+        "amount": 245.71,
+        "id": "482",
+        "category": "Office Supplies",
+        "description": "Paperclips",
+        "date": 1272649044377
+    }},
+    {"ExpenseRecord": {
+        "amount": 132.28,
+        "id": "483",
+        "category": "Dining",
+        "description": "Breakfast",
+        "date": 1272622684377
+    }},
+    {"ExpenseRecord": {
+        "amount": 107.53,
+        "id": "484",
+        "category": "Local Transportation",
+        "description": "Taxi fare",
+        "date": 1271212947377
+    }},
+    {"ReportRecord": {
+        "id": "485",
+        "created": 1269570907377,
+        "reporterKey": 468,
+        "purpose": "Potato chip cooking offsite",
+        "notes": "Please bill to the Widgets project"
+    }},
+    {"ExpenseRecord": {
+        "amount": 216.23,
+        "id": "486",
+        "category": "Lodging",
+        "description": "Bed & Breakfast",
+        "date": 1270700852377
+    }},
+    {"ExpenseRecord": {
+        "amount": 145.53,
+        "id": "487",
+        "category": "Office Supplies",
+        "description": "Paperclips",
+        "date": 1271203486377
+    }},
+    {"ExpenseRecord": {
+        "amount": 141.52,
+        "id": "488",
+        "category": "Air Travel",
+        "description": "Flight from ATL to SFO",
+        "date": 1266662015377
+    }},
+    {"ExpenseRecord": {
+        "amount": 92.36,
+        "id": "489",
+        "category": "Office Supplies",
+        "description": "Scissors",
+        "date": 1267281090377
+    }},
+    {"ExpenseRecord": {
+        "amount": 95.21,
+        "id": "490",
+        "category": "Dining",
+        "description": "Breakfast",
+        "date": 1268996410377
+    }},
+    {"ReportRecord": {
+        "id": "491",
+        "created": 1273185097377,
+        "reporterKey": 468,
+        "purpose": "Baseball card research",
+        "notes": "Please bill to the Widgets project"
+    }},
+    {"ExpenseRecord": {
+        "amount": 172.22,
+        "id": "492",
+        "category": "Local Transportation",
+        "description": "Taxi fare",
+        "date": 1270977252377
+    }},
+    {"ExpenseRecord": {
+        "amount": 198.92,
+        "id": "493",
+        "category": "Air Travel",
+        "description": "Flight from ATL to SFO",
+        "date": 1266773941377
+    }},
+    {"ExpenseRecord": {
+        "amount": 2.24,
+        "id": "494",
+        "category": "Dining",
+        "description": "Breakfast",
+        "date": 1267656572377
+    }},
+    {"ExpenseRecord": {
+        "amount": 109.08,
+        "id": "495",
+        "category": "Local Transportation",
+        "description": "Taxi fare",
+        "date": 1269180035377
+    }},
+    {"ReportRecord": {
+        "id": "496",
+        "created": 1268554859377,
+        "reporterKey": 468,
+        "purpose": "ISDN modem for telecommuting",
+        "notes": "Review A.S.A.P."
+    }},
+    {"ExpenseRecord": {
+        "amount": 2.7,
+        "id": "497",
+        "category": "Air Travel",
+        "description": "Flight from SFO to ATL",
+        "date": 1270394711377
+    }},
+    {"ExpenseRecord": {
+        "amount": 176.47,
+        "id": "498",
+        "category": "Lodging",
+        "description": "Bed & Breakfast",
+        "date": 1268408063377
+    }},
+    {"ExpenseRecord": {
+        "amount": 46.55,
+        "id": "499",
+        "category": "Office Supplies",
+        "description": "Scissors",
+        "date": 1268408935377
+    }},
+    {"ReportRecord": {
+        "id": "500",
+        "created": 1268591214377,
+        "reporterKey": 468,
+        "purpose": "ISDN modem for telecommuting",
+        "notes": "Need approval by Monday"
+    }},
+    {"ExpenseRecord": {
+        "amount": 88.9,
+        "id": "501",
+        "category": "Dining",
+        "description": "Lunch",
+        "date": 1272879516377
+    }},
+    {"ExpenseRecord": {
+        "amount": 171.9,
+        "id": "502",
+        "category": "Local Transportation",
+        "description": "Train fare",
+        "date": 1267639434377
+    }},
+    {"ExpenseRecord": {
+        "amount": 127.11,
+        "id": "503",
+        "category": "Lodging",
+        "description": "Hotel",
+        "date": 1268470587377
+    }},
+    {"ExpenseRecord": {
+        "amount": 173.6,
+        "id": "504",
+        "category": "Office Supplies",
+        "description": "Stapler",
+        "date": 1270877065377
+    }},
+    {"ExpenseRecord": {
+        "amount": 240.26,
+        "id": "505",
+        "category": "Local Transportation",
+        "description": "Taxi fare",
+        "date": 1273251321377
+    }}
+]}

@@ -14,6 +14,8 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
+# example invocation: ./dataPopulator http://127.0.0.1:8888/expenses/data $PWD/expensesJsonData.txt
+
 # the first argument should be the URL.
 # the second argument is the pathname of the file to be read.
 
