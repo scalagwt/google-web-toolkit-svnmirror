@@ -332,9 +332,11 @@ public class RequestFactoryServlet extends HttpServlet {
     byte contentBytes[] = new byte[contentLength];
     BufferedInputStream bis = new BufferedInputStream(request.getInputStream());
     try {
-      int readBytes = 0;
-      while (bis.read(contentBytes, readBytes, contentLength - readBytes) > 0) {
-        // read the contents
+      int contentBytesOffset = 0;
+      int readLen;
+      while ((readLen = bis.read(contentBytes, contentBytesOffset,
+          contentLength - contentBytesOffset)) > 0) {
+        contentBytesOffset += readLen;
       }
       // TODO: encoding issues?
       return new String(contentBytes);
