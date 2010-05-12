@@ -113,11 +113,12 @@ public class DataGenerator {
     String username = (firstName.charAt(0) + lastName).toLowerCase();
     abc.setUserName(username);
     abc.setDisplayName(firstName + " " + lastName);
-    abc.setDepartment(nextValue(DEPARTMENTS));
+    String department = nextValue(DEPARTMENTS); 
+    abc.setDepartment(department);
     abc.setId(id++);
     objectList.add(abc);
 
-    addReports(abc.getId());
+    addReports(abc.getId(), department);
   }
 
   private void addExpenses(Long reportId) {
@@ -142,12 +143,13 @@ public class DataGenerator {
    * 
    * @param employeeId the id of the employee who created the report
    */
-  private void addReports(Long employeeId) {
+  private void addReports(Long employeeId, String department) {
     // Add 1-20 expense reports.
     int reportCount = 1 + rand.nextInt(20);
     for (int i = 0; i < reportCount; i++) {
       Report report = new Report();
       report.setCreated(getDate());
+      report.setDepartment(department);
       report.setReporterKey(employeeId);
       report.setPurpose(nextValue(PURPOSES));
       report.setNotes(nextValue(NOTES));
@@ -178,7 +180,7 @@ public class DataGenerator {
     JSONObject jsonObject = new JSONObject();
     jsonObject.put("id", "" + expense.getId());
     jsonObject.put("description", expense.getDescription());
-    jsonObject.put("date", expense.getCreated().getTime());
+    jsonObject.put("created", expense.getCreated().getTime());
     jsonObject.put("amount", expense.getAmount());
     jsonObject.put("category", expense.getCategory());
     return jsonObject;
@@ -208,6 +210,7 @@ public class DataGenerator {
     JSONObject jsonObject = new JSONObject();
     jsonObject.put("id", "" + report.getId());
     jsonObject.put("created", report.getCreated().getTime());
+    jsonObject.put("department", report.getDepartment());
     jsonObject.put("reporterKey", report.getReporterKey());
     jsonObject.put("purpose", report.getPurpose());
     jsonObject.put("notes", report.getNotes());

@@ -185,7 +185,9 @@ public class Report {
   private Integer version;
 
   private Date created;
-  
+
+  private String department;
+
   private String notes;
 
   private String purpose;
@@ -213,6 +215,10 @@ public class Report {
 
   public Date getCreated() {
     return this.created;
+  }
+
+  public String getDepartment() {
+    return this.department;
   }
 
   public Long getId() {
@@ -262,6 +268,10 @@ public class Report {
     this.created = created;
   }
 
+  public void setDepartment(String department) {
+    this.department = department;
+  }
+
   public void setId(Long id) {
     this.id = id;
   }
@@ -288,6 +298,7 @@ public class Report {
     sb.append("Id: ").append(getId()).append(", ");
     sb.append("Version: ").append(getVersion()).append(", ");
     sb.append("Created: ").append(getCreated()).append(", ");
+    sb.append("Department: ").append(getDepartment()).append(", ");
     sb.append("Notes: ").append(getNotes()).append(", ");
     sb.append("Purpose: ").append(getPurpose()).append(", ");
     sb.append("Reporter: ").append(getReporterKey()).append(", ");

@@ -17,10 +17,13 @@ package com.google.gwt.requestfactory.server;
 
 import com.google.gwt.dev.util.Util;
 import com.google.gwt.requestfactory.shared.RequestFactory;
+import com.google.gwt.requestfactory.shared.RequestFactory.WriteOperation;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
+import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -32,13 +35,27 @@ import java.io.IOException;
  */
 public class SampleDataPopulator {
 
-  public static void main(String args[]) throws HttpException, JSONException, IOException {
+  public static void main(String args[]) throws HttpException, JSONException,
+      IOException {
+    // TODO: cleanup argument processing and error reporting.
     if (args.length < 2) {
-      System.err.println("Require two arguments: URL string and fileName");
+      printHelp();
       System.exit(-1);
     }
-    SampleDataPopulator populator = new SampleDataPopulator(args[0], args[1]);
-    populator.populate();
+    try {
+      SampleDataPopulator populator = new SampleDataPopulator(args[0], args[1]);
+      populator.populate();
+    } catch (Exception ex) {
+      ex.printStackTrace();
+      printHelp();
+    }
+  }
+
+  private static void printHelp() {
+    StringBuffer sb = new StringBuffer();
+    sb.append("\n");
+    sb.append("Requires two arguments: the URL to post the JSON data and the path to the JSON data file.");
+    System.err.println(sb.toString());
   }
 
   private final String url;
@@ -64,12 +81,15 @@ public class SampleDataPopulator {
     post.setRequestBody(request.toString());
     HttpClient client = new HttpClient();
     int status = client.executeMethod(post);
-    String response = post.getResponseBodyAsString();
-    if (status == 200) {
-      System.out.println("SUCCESS: Put all the records in the datastore!");
-    } else {
-      System.err.println("Error: Status code " + status + " returned");
+    JSONObject response = new JSONObject(post.getResponseBodyAsString());
+    JSONArray records = response.getJSONArray(WriteOperation.CREATE.name());
+    if (status == HttpStatus.SC_OK) {
+      System.out.println("SUCCESS: Put " + records.length()
+          + " records in the datastore!");
+      return;
     }
+    System.err.println("POST failed: Status line " + post.getStatusLine()
+        + ", please check your URL");
   }
 
   private JSONObject readAsJsonObject(String string) throws JSONException {

@@ -39,6 +39,7 @@ public interface ReportRecord extends Record {
   Property<String> approvedSupervisorKey = new Property<String>("approvedSupervisorKey",
       String.class);
   Property<Date> created = new Property<Date>("created", Date.class);
+  Property<String> department = new Property<String>("department", String.class);
   Property<String> notes = new Property<String>("notes", String.class);
   Property<String> purpose = new Property<String>("purpose", String.class);
   Property<String> reporterKey = new Property<String>("reporterKey",
@@ -47,7 +48,9 @@ public interface ReportRecord extends Record {
   String getApprovedSupervisorKey();
 
   Date getCreated();
-  
+
+  String getDepartment();
+
   String getNotes();
 
   String getPurpose();
