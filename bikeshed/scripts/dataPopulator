@@ -27,4 +27,6 @@ do
   NEW_CLASSPATH=$MAVEN_REPO/com/google/gwt/gwt-${i}/2.0.999/gwt-${i}-2.0.999.jar:$NEW_CLASSPATH
 done
 
-java -cp $NEW_CLASSPATH com.google.gwt.requestfactory.server.SampleDataPopulator "$@" 
+java -Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.SimpleLog\
+     -Dorg.apache.commons.logging.simplelog.defaultlog=ERROR\
+     -cp $NEW_CLASSPATH com.google.gwt.requestfactory.server.SampleDataPopulator "$@" 
