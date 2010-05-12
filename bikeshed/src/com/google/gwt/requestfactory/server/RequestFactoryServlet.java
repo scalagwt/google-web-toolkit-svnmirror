@@ -106,7 +106,6 @@ public class RequestFactoryServlet extends HttpServlet {
   protected void doPost(HttpServletRequest request, HttpServletResponse response)
       throws IOException {
 
-    initDb(); // temporary place-holder
     ensureConfig();
 
     RequestDefinition operation = null;
@@ -171,12 +170,6 @@ public class RequestFactoryServlet extends HttpServlet {
     } catch (InstantiationException e) {
       throw new RuntimeException(e);
     }
-  }
-
-  /**
-   * Allow subclass to initialize database.
-   */
-  protected void initDb() {
   }
 
   /**
