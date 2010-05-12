@@ -29,6 +29,7 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.SelectElement;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -57,8 +58,8 @@ import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -66,6 +67,7 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.FlexTable.FlexCellFormatter;
 import com.google.gwt.valuestore.shared.DeltaValueStore;
 import com.google.gwt.valuestore.shared.Property;
 import com.google.gwt.valuestore.shared.Record;
@@ -261,7 +263,7 @@ public class ExpenseDetails extends Composite implements
   /**
    * The popup used to enter the rejection reason.
    */
-  private class DenialPopup extends DialogBox {
+  private class DenialPopup extends PopupPanel {
     private Button cancelButton = new Button("Cancel", new ClickHandler() {
       public void onClick(ClickEvent event) {
         reasonDenied = "";
@@ -285,12 +287,22 @@ public class ExpenseDetails extends Composite implements
       setGlassEnabled(true);
       setWidget(layout);
 
+      confirmButton.setWidth("11ex");
+      cancelButton.setWidth("11ex");
+      reasonBox.getElement().getStyle().setMarginTop(8.0, Unit.PX);
+      reasonBox.getElement().getStyle().setMarginBottom(8.0, Unit.PX);
+
+      FlexCellFormatter formatter = layout.getFlexCellFormatter();
       layout.setHTML(0, 0, "Reason for denial:");
       layout.setWidget(1, 0, reasonBox);
       HorizontalPanel p = new HorizontalPanel();
       p.add(confirmButton);
+      p.add(new HTML("&nbsp;"));
       p.add(cancelButton);
       layout.setWidget(2, 0, p);
+      formatter.setHorizontalAlignment(2, 0,
+          HasHorizontalAlignment.ALIGN_CENTER);
+      setStyleName(Styles.common().popupPanel());
     }
 
     public ExpenseRecord getExpenseRecord() {
@@ -697,6 +709,7 @@ public class ExpenseDetails extends Composite implements
    */
   private void createErrorPopup() {
     errorPopup.setGlassEnabled(true);
+    errorPopup.setStyleName(Styles.common().popupPanel());
     errorPopupMessage.addStyleName(Styles.common().expenseDetailsErrorPopupMessage());
 
     Button closeButton = new Button("Dismiss", new ClickHandler() {

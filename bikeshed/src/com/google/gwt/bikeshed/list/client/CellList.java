@@ -101,6 +101,7 @@ public class CellList<T> extends Widget implements PagingListView<T> {
   private final Element childContainer;
   private final Element emptyMessageElem;
   private final CellListImpl<T> impl;
+  private String emptyListMessage = "";
   private final Style style;
   private ValueUpdater<T> valueUpdater;
 
@@ -129,7 +130,6 @@ public class CellList<T> extends Widget implements PagingListView<T> {
     childContainer = Document.get().createDivElement();
 
     emptyMessageElem = Document.get().createDivElement();
-    emptyMessageElem.setInnerHTML("<i>no data</i>");
     showOrHide(emptyMessageElem, false);
 
     // TODO: find some way for cells to communicate what they're interested in.
@@ -200,6 +200,15 @@ public class CellList<T> extends Widget implements PagingListView<T> {
     return new ArrayList<T>(impl.getData());
   }
 
+  /**
+   * Get the message that is displayed when there is no data.
+   * 
+   * @return the empty message
+   */
+  public String getEmptyListMessage() {
+    return emptyListMessage;
+  }
+
   public int getPageSize() {
     return impl.getPageSize();
   }
@@ -253,6 +262,20 @@ public class CellList<T> extends Widget implements PagingListView<T> {
     }
   }
 
+  /**
+   * Redraw the list using the existing data.
+   */
+  public void redraw() {
+    impl.redraw();
+  }
+
+  /**
+   * Redraw the list, requesting data from the delegate.
+   */
+  public void refresh() {
+    impl.refresh();
+  }
+
   public void setData(int start, int length, List<T> values) {
     impl.setData(values, start);
   }
@@ -263,6 +286,16 @@ public class CellList<T> extends Widget implements PagingListView<T> {
 
   public void setDelegate(Delegate<T> delegate) {
     impl.setDelegate(delegate);
+  }
+
+  /**
+   * Set the message to display when there is no data.
+   * 
+   * @param html the message to display when there are no results
+   */
+  public void setEmptyListMessage(String html) {
+    this.emptyListMessage = html;
+    emptyMessageElem.setInnerHTML(html);
   }
 
   public void setPager(Pager<T> pager) {

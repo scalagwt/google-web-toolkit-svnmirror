@@ -24,11 +24,12 @@ import com.google.gwt.sample.expenses.gwt.request.ExpenseRecord;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
 import com.google.gwt.sample.expenses.gwt.request.ReportRecord;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
+import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.valuestore.shared.Property;
-import com.google.gwt.view.client.ListViewAdapter;
+import com.google.gwt.view.client.AsyncListViewAdapter;
+import com.google.gwt.view.client.ListView;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.gwt.view.client.SelectionModel.SelectionChangeEvent;
@@ -109,7 +110,7 @@ public class MobileExpenseList extends Composite implements MobilePage {
 
   private final ExpensesRequestFactory requestFactory;
   private final CellList<ExpenseRecord> expenseList;
-  private final ListViewAdapter<ExpenseRecord> expenseAdapter;
+  private final AsyncListViewAdapter<ExpenseRecord> expenseAdapter;
   private final SingleSelectionModel<ExpenseRecord> expenseSelection;
 
   /**
@@ -140,7 +141,12 @@ public class MobileExpenseList extends Composite implements MobilePage {
       final ExpensesRequestFactory requestFactory) {
     this.listener = listener;
     this.requestFactory = requestFactory;
-    expenseAdapter = new ListViewAdapter<ExpenseRecord>();
+    expenseAdapter = new AsyncListViewAdapter<ExpenseRecord>() {
+      @Override
+      protected void onRangeChanged(ListView<ExpenseRecord> view) {
+        requestExpenses();
+      }
+    };
     expenseAdapter.setKeyProvider(Expenses.EXPENSE_RECORD_KEY_PROVIDER);
 
     expenseList = new CellList<ExpenseRecord>(new ExpenseCell());
@@ -186,9 +192,9 @@ public class MobileExpenseList extends Composite implements MobilePage {
 
   public void onRefresh(boolean clear) {
     if (clear) {
-      expenseAdapter.getList().clear();
+      expenseAdapter.updateDataSize(0, true);
     }
-    requestExpenses();
+    expenseList.refresh();
   }
 
   public void show(ReportRecord report) {
@@ -210,10 +216,15 @@ public class MobileExpenseList extends Composite implements MobilePage {
    */
   private void requestExpenses() {
     refreshTimer.cancel();
+    if (requestFactory == null || report == null) {
+      return;
+    }
     lastReceiver = new Receiver<List<ExpenseRecord>>() {
       public void onSuccess(List<ExpenseRecord> newValues) {
         if (this == lastReceiver) {
-          expenseAdapter.setList(newValues);
+          int size = newValues.size();
+          expenseAdapter.updateDataSize(size, true);
+          expenseAdapter.updateViewData(0, size, newValues);
 
           // Add the new keys to the known keys.
           boolean isInitialData = knownDeniedKeys == null;

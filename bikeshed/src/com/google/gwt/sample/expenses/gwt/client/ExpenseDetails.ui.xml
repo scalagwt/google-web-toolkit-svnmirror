@@ -50,7 +50,7 @@
     }
     
     .label {
-      width: 250px;
+      width: 150px;
       padding: 3px 0px 3px 9px;
     }
     
@@ -64,12 +64,12 @@
     }
     
     .notesColumn {
-      width: 400px;
-      padding-right: 100px;
+      width: 350px;
+      padding-right: 20px;
     }
     
     .notesTextBox {
-      width: 350px;
+      width: 300px;
       border: 1px solid #d7dde8;
       padding: 3px;
     }

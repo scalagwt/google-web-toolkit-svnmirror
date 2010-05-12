@@ -23,7 +23,8 @@ import com.google.gwt.sample.expenses.gwt.request.ReportRecord;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.valuestore.shared.Property;
-import com.google.gwt.view.client.ListViewAdapter;
+import com.google.gwt.view.client.AsyncListViewAdapter;
+import com.google.gwt.view.client.ListView;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.gwt.view.client.SelectionModel.SelectionChangeEvent;
@@ -35,8 +36,7 @@ import java.util.List;
 /**
  * TODO
  */
-public class MobileReportList extends Composite implements
-    MobilePage, Receiver<List<ReportRecord>> {
+public class MobileReportList extends Composite implements MobilePage {
 
   /**
    * TODO
@@ -45,25 +45,34 @@ public class MobileReportList extends Composite implements
     void onReportSelected(ReportRecord report);
   }
 
+  /**
+   * The receiver for the last request.
+   */
+  private Receiver<List<ReportRecord>> lastReceiver;
+
   private final CellList<ReportRecord> reportList;
-  private final ListViewAdapter<ReportRecord> reportAdapter;
+  private final AsyncListViewAdapter<ReportRecord> reportAdapter;
   private final SingleSelectionModel<ReportRecord> reportSelection;
   private final ExpensesRequestFactory requestFactory;
 
   public MobileReportList(final Listener listener,
       final ExpensesRequestFactory requestFactory) {
     this.requestFactory = requestFactory;
-    reportAdapter = new ListViewAdapter<ReportRecord>();
+    reportAdapter = new AsyncListViewAdapter<ReportRecord>() {
+      @Override
+      protected void onRangeChanged(ListView<ReportRecord> view) {
+        requestReports();
+      }
+    };
     reportAdapter.setKeyProvider(Expenses.REPORT_RECORD_KEY_PROVIDER);
 
-    reportList = new CellList<ReportRecord>(
-        new AbstractCell<ReportRecord>() {
-          @Override
-          public void render(ReportRecord value, Object viewData,
-              StringBuilder sb) {
-            sb.append("<div onclick='' class='item'>" + value.getPurpose() + "</div>");
-          }
-        });
+    reportList = new CellList<ReportRecord>(new AbstractCell<ReportRecord>() {
+      @Override
+      public void render(ReportRecord value, Object viewData, StringBuilder sb) {
+        sb.append("<div onclick='' class='item'>" + value.getPurpose()
+            + "</div>");
+      }
+    });
 
     reportSelection = new SingleSelectionModel<ReportRecord>();
     reportSelection.setKeyProvider(Expenses.REPORT_RECORD_KEY_PROVIDER);
@@ -109,16 +118,9 @@ public class MobileReportList extends Composite implements
 
   public void onRefresh(boolean clear) {
     if (clear) {
-      reportAdapter.getList().clear();
+      reportAdapter.updateDataSize(0, true);
     }
-
-    requestFactory.reportRequest().findReportEntriesBySearch(new Long(-1), "",
-        "", ReportRecord.created.getName(), 0, 25).forProperties(
-        getReportColumns()).to(this).fire();
-  }
-
-  public void onSuccess(List<ReportRecord> newValues) {
-    reportAdapter.setList(newValues);
+    reportList.refresh();
   }
 
   private Collection<Property<?>> getReportColumns() {
@@ -126,5 +128,21 @@ public class MobileReportList extends Composite implements
     columns.add(ReportRecord.created);
     columns.add(ReportRecord.purpose);
     return columns;
+  }
+
+  private void requestReports() {
+    if (requestFactory == null) {
+      return;
+    }
+    lastReceiver = new Receiver<List<ReportRecord>>() {
+      public void onSuccess(List<ReportRecord> newValues) {
+        int size = newValues.size();
+        reportAdapter.updateDataSize(size, true);
+        reportAdapter.updateViewData(0, size, newValues);
+      }
+    };
+    requestFactory.reportRequest().findReportEntriesBySearch(new Long(-1), "",
+        "", ReportRecord.created.getName(), 0, 25).forProperties(
+        getReportColumns()).to(lastReceiver).fire();
   }
 }

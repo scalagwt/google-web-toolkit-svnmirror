@@ -82,9 +82,18 @@ h1 {
   width: 250px;
 }
 .expenseDetailsErrorPopupMessage {
-  padding: 20px;
+  padding-bottom: 20px;
   font-size: 130%;
   color: red;
+}
+
+.popupPanel {
+  border: 8px solid white;
+  border-right: 11px solid white;
+  border-bottom: 11px solid white;
+  -webkit-border-image: url(blueborder.png) 8 11 11 8 round round;
+  -moz-border-image: url(blueborder.png) 8 11 11 8 round round;
+  padding: 10px;
 }
 
 @sprite .blankOption {
@@ -203,23 +212,6 @@ td.datePickerMonth {
   cursor: hand;
   cursor: pointer;
   padding: 0px 4px;
-}
-
-/* dialog box */
-.gwt-DialogBox {
-  border: 8px solid white;
-  border-right: 11px solid white;
-  border-bottom: 11px solid white;
-  -webkit-border-image: url(blueborder.png) 8 11 11 8 round round;
-  -moz-border-image: url(blueborder.png) 8 11 11 8 round round;
-}
-
-.gwt-DialogBox .Caption {
-  font-weight: light;
-  font-size: 12pt;
-  text-align: center;
-  margin-bottom: 0.5em;
-  border-bottom: 1px solid #ccc;
 }
 
 /* splitters */

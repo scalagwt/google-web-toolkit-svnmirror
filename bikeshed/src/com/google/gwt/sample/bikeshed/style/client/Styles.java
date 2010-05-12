@@ -88,6 +88,11 @@ public class Styles {
     String padded();
 
     /**
+     * Applied to popup panels.
+     */
+    String popupPanel();
+
+    /**
      * Applied to columns used as spacers.
      */
     String spacerColumn();

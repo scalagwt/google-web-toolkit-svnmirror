@@ -30,10 +30,11 @@
    .textBox {
       width: 250px;
       border: 0px;
-      padding: 0px;
-      height: 14px;
+      padding: 4px 0px 2px;
+      height: 16px;
       font-size: 12px;
       outline-width: 0px;
+      background: transparent;
     }
 
     .searchButton {
@@ -43,7 +44,7 @@
 
     @sprite .searchCenter {
       gwt-image: 'searchCenter';
-      padding-top: 4px;
+      padding-top: 1px;
     }
     
     @sprite .searchLeft {
