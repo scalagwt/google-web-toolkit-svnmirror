@@ -179,6 +179,7 @@ public class DataGenerator {
   private JSONObject getExpenseAsJson(Expense expense) throws JSONException {
     JSONObject jsonObject = new JSONObject();
     jsonObject.put("id", "" + expense.getId());
+    jsonObject.put("reportId", expense.getReportId());
     jsonObject.put("description", expense.getDescription());
     jsonObject.put("created", expense.getCreated().getTime());
     jsonObject.put("amount", expense.getAmount());
