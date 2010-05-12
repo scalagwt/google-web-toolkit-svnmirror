@@ -130,7 +130,7 @@ public class RequestFactoryServlet extends HttpServlet {
         Object args[] = RequestDataManager.getObjectsFromParameterMap(
             getParameterMap(topLevelJsonObject),
             domainMethod.getParameterTypes());
-        Object result = domainMethod.invoke(null, args);
+        Object result = invokeStaticDomainMethod(domainMethod, args);
 
         if ((result instanceof List<?>) != operation.isReturnTypeList()) {
           throw new IllegalArgumentException(String.format(
@@ -567,6 +567,11 @@ public class RequestFactoryServlet extends HttpServlet {
           violation.getMessage());
     }
     return violationsAsJson;
+  }
+
+  private Object invokeStaticDomainMethod(Method domainMethod,
+      Object args[]) throws IllegalAccessException, InvocationTargetException {
+    return domainMethod.invoke(null, args);
   }
 
   /**
