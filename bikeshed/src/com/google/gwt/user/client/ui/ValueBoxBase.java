@@ -15,6 +15,7 @@
  */
 package com.google.gwt.user.client.ui;
 
+import com.google.gwt.app.util.ParseException;
 import com.google.gwt.app.util.Parser;
 import com.google.gwt.app.util.Renderer;
 import com.google.gwt.core.client.GWT;
@@ -36,14 +37,14 @@ import com.google.gwt.user.client.ui.impl.TextBoxImpl;
  * @param <T> the value type
  */
 @SuppressWarnings("deprecation")
-public class ValueBoxBase<T> extends FocusWidget implements SourcesChangeEvents,
-    HasChangeHandlers, HasText, HasName, HasValue<T> {
+public class ValueBoxBase<T> extends FocusWidget implements
+    SourcesChangeEvents, HasChangeHandlers, HasText, HasName, HasValue<T> {
 
   private static TextBoxImpl impl = GWT.create(TextBoxImpl.class);
 
   private final Parser<T> parser;
   private final Renderer<T> renderer;
-  
+
   private Event currentEvent;
   private boolean valueChangeHandlerInitialized;
 
@@ -71,8 +72,7 @@ public class ValueBoxBase<T> extends FocusWidget implements SourcesChangeEvents,
     addChangeHandler(new ListenerWrapper.WrappedChangeListener(listener));
   }
 
-  public HandlerRegistration addValueChangeHandler(
-      ValueChangeHandler<T> handler) {
+  public HandlerRegistration addValueChangeHandler(ValueChangeHandler<T> handler) {
     // Initialization code
     if (!valueChangeHandlerInitialized) {
       valueChangeHandlerInitialized = true;
@@ -137,8 +137,30 @@ public class ValueBoxBase<T> extends FocusWidget implements SourcesChangeEvents,
     return DOM.getElementProperty(getElement(), "value");
   }
 
+  /**
+   * Return the parsed value, or null if the field is empty or parsing fails.
+   */
   public T getValue() {
-    return parser.parse(getText());
+    try {
+      return getValueOrThrow();
+    } catch (ParseException e) {
+      return null;
+    }
+  }
+
+  /**
+   * Return the parsed value, or null if the field is empty
+   * 
+   * @throws ParseException if the value cannot be parsed
+   */
+  public T getValueOrThrow() throws ParseException {
+    String text = getText().trim();
+    
+    if ("".equals(text)) {
+      return null;
+    }
+
+    return parser.parse(text);
   }
 
   /**
@@ -169,8 +191,8 @@ public class ValueBoxBase<T> extends FocusWidget implements SourcesChangeEvents,
   }
 
   /**
-   * @deprecated Use the {@link HandlerRegistration#removeHandler} method on 
-   * the object returned by {@link #addChangeHandler} instead
+   * @deprecated Use the {@link HandlerRegistration#removeHandler} method on the
+   *             object returned by {@link #addChangeHandler} instead
    */
   @Deprecated
   public void removeChangeListener(ChangeListener listener) {
@@ -265,10 +287,10 @@ public class ValueBoxBase<T> extends FocusWidget implements SourcesChangeEvents,
   }
 
   /**
-   * Sets this object's text.  Note that some browsers will manipulate the text
-   * before adding it to the widget.  For example, most browsers will strip all
+   * Sets this object's text. Note that some browsers will manipulate the text
+   * before adding it to the widget. For example, most browsers will strip all
    * <code>\r</code> from the text, except IE which will add a <code>\r</code>
-   * before each <code>\n</code>.  Use {@link #getText()} to get the text
+   * before each <code>\n</code>. Use {@link #getText()} to get the text
    * directly from the widget.
    * 
    * @param text the object's new text
