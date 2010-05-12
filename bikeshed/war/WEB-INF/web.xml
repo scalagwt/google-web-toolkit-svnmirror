@@ -13,8 +13,8 @@
 
   <!-- Servlets -->
   <servlet>
-    <servlet-name>expensesData</servlet-name>
-    <servlet-class>com.google.gwt.sample.expenses.server.ExpensesDataServlet</servlet-class>
+    <servlet-name>requestFactoryServlet</servlet-name>
+    <servlet-class>com.google.gwt.requestfactory.server.RequestFactoryServlet</servlet-class>
   </servlet>
 
   <servlet>
@@ -33,8 +33,8 @@
   </servlet>
 
   <servlet-mapping>
-    <servlet-name>expensesData</servlet-name>
-    <url-pattern>/expenses/data</url-pattern>
+    <servlet-name>requestFactoryServlet</servlet-name>
+    <url-pattern>gwtRequest</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>

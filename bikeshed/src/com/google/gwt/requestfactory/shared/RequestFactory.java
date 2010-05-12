@@ -94,7 +94,7 @@ public interface RequestFactory {
   }
 
   // TODO: this must be configurable
-  String URL = "/expenses/data";
+  String URL = "gwtRequest";
 
   String SYNC = "SYNC";
 

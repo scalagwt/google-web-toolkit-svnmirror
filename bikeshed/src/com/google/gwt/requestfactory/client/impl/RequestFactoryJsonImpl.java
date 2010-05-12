@@ -15,6 +15,7 @@
  */
 package com.google.gwt.requestfactory.client.impl;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
@@ -48,7 +49,7 @@ public abstract class RequestFactoryJsonImpl implements RequestFactory {
 
   public void fire(final RequestObject<?> requestObject) {
     RequestBuilder builder = new RequestBuilder(RequestBuilder.POST,
-        RequestFactory.URL);
+        GWT.getHostPageBaseURL() + RequestFactory.URL);
     builder.setRequestData(requestObject.getRequestData());
     builder.setCallback(new RequestCallback() {
 
@@ -91,7 +92,7 @@ public abstract class RequestFactoryJsonImpl implements RequestFactory {
         assert null != receiver : "to(Receiver) was not called";
 
         RequestBuilder builder = new RequestBuilder(RequestBuilder.POST,
-            RequestFactory.URL);
+            GWT.getHostPageBaseURL() + RequestFactory.URL);
 
         builder.setRequestData(ClientRequestHelper.getRequestString(RequestDataManager.getRequestMap(
             RequestFactory.SYNC, null, jsonDeltas.toJson())));
