@@ -89,6 +89,26 @@
   </filter-mapping>
   -->
 
+  <!-- Enable remote API on Java (for datastore bulkloader). -->
+  <!-- You also need to add appengine-tools-api.jar to war/WEB-INF/lib -->
+  <servlet>
+    <servlet-name>remoteapi</servlet-name>
+    <servlet-class>com.google.apphosting.utils.remoteapi.RemoteApiServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>remoteapi</servlet-name>
+    <url-pattern>/remote_api</url-pattern>
+  </servlet-mapping>
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>remoteapi</web-resource-name>
+      <url-pattern>/remote_api</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>admin</role-name>
+    </auth-constraint>
+  </security-constraint>
+
   <!-- Require login. -->
 <!--
   <security-constraint>

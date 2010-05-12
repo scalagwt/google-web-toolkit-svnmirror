@@ -37,5 +37,6 @@ bikeshed/war/stocksMobile/
   * Java Build Path > Libraries > Add Variable > GWT_TOOLS, Extend > lib/apache/commons/commons-httpclient-3.1.jar
 * Copy tools/redist/json/r2_20080312/json.jar to bikeshed/war/WEB_INF/lib
 * Copy all jars from  bikeshed/war/temp-lib to bikeshed/war/WEB-INF/lib
+* Copy appengine-tools-api.jar from your appengine sdk to bikeshed/war/WEB-INF/lib
 * Right click on the bikeshed project and choose Run as > Web Application. Choose from the various .html files
 
