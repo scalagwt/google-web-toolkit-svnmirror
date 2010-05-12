@@ -43,6 +43,11 @@ public class SampleDataPopulator {
       System.exit(-1);
     }
     try {
+      if (!args[0].endsWith(RequestFactory.URL)) {
+        System.err.println("Please check your URL string " + args[0]
+            + ", it should end with " + RequestFactory.URL + ", exiting");
+        System.exit(-1);
+      }
       SampleDataPopulator populator = new SampleDataPopulator(args[0], args[1]);
       populator.populate();
     } catch (Exception ex) {
