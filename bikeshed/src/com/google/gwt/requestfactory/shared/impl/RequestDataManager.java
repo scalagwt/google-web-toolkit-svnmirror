@@ -27,7 +27,6 @@ import java.util.Map;
 public class RequestDataManager {
 
   public static final String CONTENT_TOKEN = "contentData";
-  public static final String METHOD_TOKEN = "methodName";
   public static final String OPERATION_TOKEN = "operation";
   public static final String PARAM_TOKEN = "param";
 

@@ -35,6 +35,10 @@ import java.util.Random;
  *
  */
 public class DataGenerator {
+
+  // add support later. currently, it can be only zero.
+  private static final long ID_START = 0;
+
   // Must be in sync with DESCRIPTIONS
   private static final String[] CATEGORIES = {
       "Dining", "Dining", "Dining", "Lodging", "Lodging",
@@ -43,7 +47,7 @@ public class DataGenerator {
       "Office Supplies", "Office Supplies",};
 
   private static final String[] DEPARTMENTS = {
-      "Sales", "Marketing", "Engineering", "Operations"};
+      "Sales", "Marketing", "Engineering", "Operations", "Finance"};
 
   // Must be in sync with CATEGORIES
   private static final String[] DESCRIPTIONS = {
@@ -66,11 +70,15 @@ public class DataGenerator {
       "", "Need approval by Monday", "Show me the money",
       "Please bill to the Widgets project", "High priority", "Review A.S.A.P."};
 
-  private static final String[] PURPOSES = {
-      "Spending lots of money", "Team building diamond cutting offsite",
-      "Visit to Istanbul", "ISDN modem for telecommuting", "Sushi offsite",
-      "Baseball card research", "Potato chip cooking offsite",
-      "Money laundering", "Donut day"};
+  private static final String[] PURPOSES1 = {
+      "Visting", "Travelling to", "Having fun in", "Paid vacation in",
+      "Work related visit to"};
+
+  private static final String[] PURPOSES2 = {
+      "Istanbul", "Delhi", "Honolulu", "San Francisco", "Atlanta", "Miami",
+      "Los Angeles", "Sydney", "Dortmund", "Dusseldorf", "Melbourne",
+      "New York", "Chicago", "Mountain View", "Zurich", "Frankfurt",
+      "Bangalore"};
 
   public static void main(String args[]) throws JSONException {
     if (args.length < 2) {
@@ -93,7 +101,9 @@ public class DataGenerator {
   List<Object> objectList = new ArrayList<Object>();
 
   // TODO: hacky, assuming that id is assigned sequentially.
-  long id = 1;
+  long id = ID_START + 1;
+  int employeeCount = 0;
+  List<Long> supervisors = new ArrayList<Long>();
 
   List<Object> generateData(int numEmployees) {
     // Initialize the database.
@@ -113,16 +123,26 @@ public class DataGenerator {
     String username = (firstName.charAt(0) + lastName).toLowerCase();
     abc.setUserName(username);
     abc.setDisplayName(firstName + " " + lastName);
-    String department = nextValue(DEPARTMENTS); 
+    String department = DEPARTMENTS[employeeCount % DEPARTMENTS.length];
     abc.setDepartment(department);
-    abc.setId(id++);
+    long employeeId = id++;
+    abc.setId(employeeId);
     objectList.add(abc);
+    employeeCount++;
+    Long supervisorKey = nextValue(supervisors);
+    if (supervisorKey != null) {
+      abc.setSupervisorKey(supervisorKey);
+    }
 
-    addReports(abc.getId(), department);
+    if (supervisors.isEmpty() || rand.nextInt(3) == 0) {
+      supervisors.add(employeeId);
+    }
+
+    addReports(abc.getId(), department, supervisorKey);
   }
 
   private void addExpenses(Long reportId) {
-    int num = rand.nextInt(5) + 1;
+    int num = rand.nextInt(3) + 1;
     for (int i = 0; i < num; i++) {
       int index = rand.nextInt(DESCRIPTIONS.length);
       Expense detail = new Expense();
@@ -143,16 +163,19 @@ public class DataGenerator {
    * 
    * @param employeeId the id of the employee who created the report
    */
-  private void addReports(Long employeeId, String department) {
+  private void addReports(Long employeeId, String department, Long supervisorKey) {
     // Add 1-20 expense reports.
-    int reportCount = 1 + rand.nextInt(20);
+    int reportCount = 1 + rand.nextInt(2);
     for (int i = 0; i < reportCount; i++) {
       Report report = new Report();
       report.setCreated(getDate());
       report.setDepartment(department);
       report.setReporterKey(employeeId);
-      report.setPurpose(nextValue(PURPOSES));
+      report.setPurpose(nextValue(PURPOSES1) + " " + nextValue(PURPOSES2));
       report.setNotes(nextValue(NOTES));
+      if (supervisorKey != null) {
+        report.setApprovedSupervisorKey(supervisorKey);
+      }
       report.setId(id++);
       objectList.add(report);
 
@@ -173,6 +196,10 @@ public class DataGenerator {
     jsonObject.put("userName", employee.getUserName());
     jsonObject.put("displayName", employee.getDisplayName());
     jsonObject.put("department", employee.getDepartment());
+    Long supervisorKey = employee.getSupervisorKey();
+    if (supervisorKey != null) {
+      jsonObject.put("supervisorKey", "" + employee.getSupervisorKey());
+    }
     return jsonObject;
   }
 
@@ -215,7 +242,18 @@ public class DataGenerator {
     jsonObject.put("reporterKey", report.getReporterKey());
     jsonObject.put("purpose", report.getPurpose());
     jsonObject.put("notes", report.getNotes());
+    Long approvedSupervisorKey = report.getApprovedSupervisorKey();
+    if (approvedSupervisorKey != null) {
+      jsonObject.put("approvedSupervisorKey", "" + report.getApprovedSupervisorKey());
+    }
     return jsonObject;
+  }
+
+  private Long nextValue(List<Long> supervisors) {
+    if (supervisors.isEmpty()) {
+      return null;
+    }
+    return supervisors.get(rand.nextInt(supervisors.size()));
   }
 
   /**
