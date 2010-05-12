@@ -28,10 +28,13 @@ public class ExpensesMobile implements EntryPoint {
 
   /**
    * TODO(jgw): Put this some place more sensible.
+   * 
+   * @param amount the amount in dollars
    */
-  public static String formatCurrency(int price) {
+  public static String formatCurrency(double amount) {
     StringBuilder sb = new StringBuilder();
 
+    int price = (int) (amount * 100);
     boolean negative = price < 0;
     if (negative) {
       price = -price;

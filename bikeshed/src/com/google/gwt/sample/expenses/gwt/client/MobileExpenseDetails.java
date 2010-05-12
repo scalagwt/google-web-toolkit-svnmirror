@@ -119,6 +119,6 @@ public class MobileExpenseDetails extends Composite implements MobilePage {
     nameText.setInnerText(expense.getDescription());
     dateText.setInnerText(formatter.format(expense.getCreated()));
     categoryText.setInnerText(expense.getCategory());
-    priceText.setInnerText(ExpensesMobile.formatCurrency(expense.getAmount().intValue()));
+    priceText.setInnerText(ExpensesMobile.formatCurrency(expense.getAmount()));
   }
 }

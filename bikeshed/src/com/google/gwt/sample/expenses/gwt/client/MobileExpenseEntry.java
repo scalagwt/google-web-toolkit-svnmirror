@@ -105,7 +105,7 @@ public class MobileExpenseEntry extends Composite implements MobilePage {
     // TODO(jgw): validate amount (in dollars -- database is in pennies)
     String amountText = priceText.getText();
     double amount = Double.parseDouble(amountText);
-    deltas.set(ExpenseRecord.amount, expense, amount * 100);
+    deltas.set(ExpenseRecord.amount, expense, amount);
 
     // TODO(jgw): Use non-deprecated date methods for this.
     Date date = new Date(
@@ -145,7 +145,7 @@ public class MobileExpenseEntry extends Composite implements MobilePage {
   private void displayExpense() {
     nameText.setText(expense.getDescription());
     categoryText.setText(expense.getCategory());
-    priceText.setText(ExpensesMobile.formatCurrency(expense.getAmount().intValue()));
+    priceText.setText(ExpensesMobile.formatCurrency(expense.getAmount()));
 
     // TODO(jgw): Use non-deprecated date methods for this.
     Date d = expense.getCreated();

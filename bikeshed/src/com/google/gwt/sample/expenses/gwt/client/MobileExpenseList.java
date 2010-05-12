@@ -44,6 +44,7 @@ public class MobileExpenseList extends Composite implements
    */
   public interface Listener {
     void onExpenseSelected(ExpenseRecord expense);
+
     void onCreateExpense(String reportId);
   }
 
@@ -65,8 +66,8 @@ public class MobileExpenseList extends Composite implements
           @Override
           public void render(ExpenseRecord value, Object viewData,
               StringBuilder sb) {
-            sb.append("<div onclick='' class='item'>" + value.getDescription() + " ($" +
-                ExpensesMobile.formatCurrency(value.getAmount().intValue())
+            sb.append("<div onclick='' class='item'>" + value.getDescription()
+                + " ($" + ExpensesMobile.formatCurrency(value.getAmount())
                 + ")</div>");
           }
         });
