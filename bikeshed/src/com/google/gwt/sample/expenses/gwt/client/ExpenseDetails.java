@@ -52,6 +52,7 @@ import com.google.gwt.sample.expenses.gwt.request.ReportRecordChanged;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiFactory;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
@@ -75,6 +76,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -98,7 +100,12 @@ public class ExpenseDetails extends Composite implements
   /**
    * The maximum amount that can be approved for a given report.
    */
-  private static final int MAX_COST = 500;
+  private static final int MAX_COST = 250;
+
+  /**
+   * The auto refresh interval in milliseconds.
+   */
+  private static final int REFRESH_INTERVAL = 5000;
 
   /**
    * The ViewData associated with the {@link ApprovalCell}.
@@ -195,6 +202,7 @@ public class ExpenseDetails extends Composite implements
     public void render(String value, Object viewData, StringBuilder sb) {
       // Get the view data.
       boolean isRejected = false;
+      boolean isDisabled = false;
       String pendingValue = null;
       String renderValue = value;
       if (viewData != null) {
@@ -204,6 +212,9 @@ public class ExpenseDetails extends Composite implements
           pendingValue = avd.getPendingApproval();
           if (!isRejected) {
             renderValue = pendingValue;
+            // If there is a delta value that has not been rejected, then the
+            // combo box should remain disabled.
+            isDisabled = true;
           }
         }
       }
@@ -212,7 +223,11 @@ public class ExpenseDetails extends Composite implements
 
       // Create the select element.
       sb.append("<select style='background-color:white;");
-      sb.append("border:1px solid #707172;width:10em;margin-right:10px;'>");
+      sb.append("border:1px solid #707172;width:10em;margin-right:10px;'");
+      if (isDisabled) {
+        sb.append(" disabled='true'");
+      }
+      sb.append(">");
       sb.append("<option></option>");
 
       // Approved Option.
@@ -388,12 +403,28 @@ public class ExpenseDetails extends Composite implements
    */
   private final ListViewAdapter<ExpenseRecord> items;
 
+  /**
+   * The set of Expense keys that we have seen. When a new key is added, we
+   * compare it to the list of known keys to determine if it is new.
+   */
+  private Set<Object> knownExpenseKeys = null;
+
   private Comparator<ExpenseRecord> lastComparator;
 
   /**
    * Keep track of the last receiver so we can ignore stale responses.
    */
   private Receiver<List<ExpenseRecord>> lastReceiver;
+
+  /**
+   * The {@link Timer} used to periodically refresh the table.
+   */
+  private final Timer refreshTimer = new Timer() {
+    @Override
+    public void run() {
+      requestExpenses();
+    }
+  };
 
   /**
    * The current report being displayed.
@@ -499,6 +530,7 @@ public class ExpenseDetails extends Composite implements
   public void setReportRecord(ReportRecord report, String department,
       EmployeeRecord employee) {
     this.report = report;
+    knownExpenseKeys = null;
     reportName.setInnerText(report.getPurpose());
     costLabel.setInnerText("");
     approvedLabel.setInnerText("");
@@ -747,6 +779,8 @@ public class ExpenseDetails extends Composite implements
    * Request the expenses.
    */
   private void requestExpenses() {
+    // Cancel the timer since we are about to send a request.
+    refreshTimer.cancel();
     lastReceiver = new Receiver<List<ExpenseRecord>>() {
       public void onSuccess(List<ExpenseRecord> newValues) {
         if (this == lastReceiver) {
@@ -754,7 +788,24 @@ public class ExpenseDetails extends Composite implements
           sortExpenses(list, lastComparator);
           items.setList(list);
           refreshCost();
+
+          // Add the new keys to the known keys.
+          boolean isInitialData = knownExpenseKeys == null;
+          if (knownExpenseKeys == null) {
+            knownExpenseKeys = new HashSet<Object>();
+          }
+          for (ExpenseRecord value : newValues) {
+            Object key = items.getKey(value);
+            if (!isInitialData && !knownExpenseKeys.contains(key)) {
+              (new PhaseAnimation.CellTablePhaseAnimation<ExpenseRecord>(table,
+                  value, items)).run();
+            }
+            knownExpenseKeys.add(key);
+          }
         }
+
+        // Reschedule the timer.
+        refreshTimer.schedule(REFRESH_INTERVAL);
       }
     };
     expensesRequestFactory.expenseRequest().findExpensesByReport(

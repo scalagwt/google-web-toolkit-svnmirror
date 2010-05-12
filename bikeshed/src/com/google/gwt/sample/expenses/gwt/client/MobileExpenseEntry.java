@@ -133,7 +133,7 @@ public class MobileExpenseEntry extends Composite implements MobilePage {
         }).fire();
   }
 
-  public void onRefresh() {
+  public void onRefresh(boolean clear) {
   }
 
   public void show(ExpenseRecord expense) {

@@ -70,6 +70,11 @@ public class Styles {
     String expenseListCreatedColumn();
 
     /**
+     * Applied to the department column in ExpenseList.
+     */
+    String expenseListDepartmentColumn();
+
+    /**
      * Applied to the purpose column in ExpenseList.
      */
     String expenseListPurposeColumn();

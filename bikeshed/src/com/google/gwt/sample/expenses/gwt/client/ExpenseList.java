@@ -46,6 +46,7 @@ import com.google.gwt.sample.expenses.gwt.request.ReportRecordChanged;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiFactory;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.TextBox;
@@ -60,13 +61,20 @@ import com.google.gwt.view.client.SelectionModel.SelectionChangeHandler;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * The list of expense reports on the left side of the app.
  */
 public class ExpenseList extends Composite implements
     ReportRecordChanged.Handler {
+
+  /**
+   * The auto refresh interval in milliseconds.
+   */
+  private static final int REFRESH_INTERVAL = 5000;
 
   private static ExpenseListUiBinder uiBinder = GWT.create(ExpenseListUiBinder.class);
 
@@ -195,7 +203,7 @@ public class ExpenseList extends Composite implements
   private class ReportAdapter extends AsyncListViewAdapter<ReportRecord> {
     @Override
     protected void onRangeChanged(ListView<ReportRecord> view) {
-      requestReports();
+      requestReports(false);
     }
   }
 
@@ -218,6 +226,11 @@ public class ExpenseList extends Composite implements
   private List<SortableHeader> allHeaders = new ArrayList<SortableHeader>();
 
   /**
+   * The department being searched.
+   */
+  private String department;
+
+  /**
    * The employee being searched.
    */
   private EmployeeRecord employee;
@@ -233,6 +246,12 @@ public class ExpenseList extends Composite implements
   private String orderBy = ReportRecord.purpose.getName();
 
   /**
+   * The set of Report keys that we have seen. When a new key is added, we
+   * compare it to the list of known keys to determine if it is new.
+   */
+  private Set<Object> knownReportKeys = null;
+
+  /**
    * Keep track of the last receiver so that we know if a response is stale.
    */
   private Receiver<List<ReportRecord>> lastDataReceiver;
@@ -243,6 +262,17 @@ public class ExpenseList extends Composite implements
   private Receiver<Long> lastDataSizeReceiver;
 
   private Listener listener;
+
+  /**
+   * The {@link Timer} used to periodically refresh the table.
+   */
+  private final Timer refreshTimer = new Timer() {
+    @Override
+    public void run() {
+      isCountStale = true;
+      requestReports(true);
+    }
+  };
 
   /**
    * The columns to request with each report.
@@ -264,7 +294,13 @@ public class ExpenseList extends Composite implements
    */
   private RegExp searchRegExp;
 
+  /**
+   * The starts with search string.
+   */
+  private String startsWithSearch;
+
   public ExpenseList() {
+    reports.setKeyProvider(Expenses.REPORT_RECORD_KEY_PROVIDER);
     reportColumns = new ArrayList<Property<?>>();
     reportColumns.add(ReportRecord.created);
     reportColumns.add(ReportRecord.purpose);
@@ -283,8 +319,7 @@ public class ExpenseList extends Composite implements
       public void onKeyUp(KeyUpEvent event) {
         // Search on enter.
         if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-          isCountStale = true;
-          requestReports();
+          search();
           return;
         }
 
@@ -300,8 +335,7 @@ public class ExpenseList extends Composite implements
     });
     searchButton.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
-        isCountStale = true;
-        requestReports();
+        search();
       }
     });
   }
@@ -328,10 +362,13 @@ public class ExpenseList extends Composite implements
    * @param employee the employee, or null if none selected
    */
   public void setEmployee(String department, EmployeeRecord employee) {
+    this.department = department;
     this.employee = employee;
     isCountStale = true;
     searchBox.resetDefaultText();
+    startsWithSearch = null;
     breadcrumb.setInnerText(getBreadcrumb(department, employee));
+    searchRegExp = null;
 
     // Refresh the table.
     pager.setPageStart(0);
@@ -344,7 +381,7 @@ public class ExpenseList extends Composite implements
 
   public void setRequestFactory(ExpensesRequestFactory factory) {
     this.requestFactory = factory;
-    requestReports();
+    requestReports(false);
   }
 
   @UiFactory
@@ -397,7 +434,7 @@ public class ExpenseList extends Composite implements
         }
         searchBox.resetDefaultText();
         searchRegExp = null;
-        requestReports();
+        requestReports(false);
       }
     });
     table.addColumn(column, header);
@@ -413,8 +450,9 @@ public class ExpenseList extends Composite implements
     Styles.Common common = Styles.common();
     table.addColumnStyleName(0, common.spacerColumn());
     table.addColumnStyleName(1, common.expenseListPurposeColumn());
-    table.addColumnStyleName(3, common.expenseListCreatedColumn());
-    table.addColumnStyleName(4, common.spacerColumn());
+    table.addColumnStyleName(3, common.expenseListDepartmentColumn());
+    table.addColumnStyleName(4, common.expenseListCreatedColumn());
+    table.addColumnStyleName(5, common.spacerColumn());
 
     // Add a selection model.
     final SingleSelectionModel<ReportRecord> selectionModel = new SingleSelectionModel<ReportRecord>();
@@ -453,6 +491,14 @@ public class ExpenseList extends Composite implements
           }
         }, ReportRecord.notes);
 
+    // Department column.
+    addColumn("Department", new TextCell(),
+        new GetValue<ReportRecord, String>() {
+          public String getValue(ReportRecord object) {
+            return object.getDepartment();
+          }
+        }, ReportRecord.department);
+
     // Created column.
     addColumn("Created", new DateCell(DateTimeFormat.getFormat("MMM dd yyyy")),
         new GetValue<ReportRecord, Date>() {
@@ -472,19 +518,31 @@ public class ExpenseList extends Composite implements
 
   /**
    * Send a request for reports in the current range.
+   * 
+   * @param isPolling true if this request is caused by polling
    */
-  private void requestReports() {
+  private void requestReports(boolean isPolling) {
+    // Cancel the refresh timer.
+    refreshTimer.cancel();
+
+    // Early exit if we don't have a request factory to request from.
     if (requestFactory == null) {
       return;
     }
 
+    // Clear the known keys.
+    if (!isPolling) {
+      knownReportKeys = null;
+    }
+
     // Get the parameters.
-    String startsWith = searchBox.getText();
-    if (searchBox.getDefaultText().equals(startsWith)) {
+    String startsWith = startsWithSearch;
+    if (startsWith == null || searchBox.getDefaultText().equals(startsWith)) {
       startsWith = "";
     }
     Range range = table.getRange();
     Long employeeId = employee == null ? -1 : new Long(employee.getId());
+    String dept = department == null ? "" : department;
 
     // If a search string is specified, the results will not be sorted.
     if (startsWith.length() > 0) {
@@ -498,7 +556,9 @@ public class ExpenseList extends Composite implements
     // Request the total data size.
     if (isCountStale) {
       isCountStale = false;
-      pager.startLoading();
+      if (!isPolling) {
+        pager.startLoading();
+      }
       lastDataSizeReceiver = new Receiver<Long>() {
         public void onSuccess(Long response) {
           if (this == lastDataSizeReceiver) {
@@ -506,7 +566,7 @@ public class ExpenseList extends Composite implements
           }
         }
       };
-      requestFactory.reportRequest().countReportsBySearch(employeeId,
+      requestFactory.reportRequest().countReportsBySearch(employeeId, dept,
           startsWith).to(lastDataSizeReceiver).fire();
     }
 
@@ -516,12 +576,35 @@ public class ExpenseList extends Composite implements
         if (this == lastDataReceiver) {
           reports.updateViewData(table.getPageStart(), newValues.size(),
               newValues);
+
+          // Add the new keys to the known keys.
+          boolean isInitialData = knownReportKeys == null;
+          if (knownReportKeys == null) {
+            knownReportKeys = new HashSet<Object>();
+          }
+          for (ReportRecord value : newValues) {
+            Object key = reports.getKey(value);
+            if (!isInitialData && !knownReportKeys.contains(key)) {
+              (new PhaseAnimation.CellTablePhaseAnimation<ReportRecord>(table,
+                  value, reports)).run();
+            }
+            knownReportKeys.add(key);
+          }
         }
+        refreshTimer.schedule(REFRESH_INTERVAL);
       }
     };
-    // TODO(jlabanca): Pass the department into the query.
-    requestFactory.reportRequest().findReportEntriesBySearch(employeeId,
+    requestFactory.reportRequest().findReportEntriesBySearch(employeeId, dept,
         startsWith, orderBy, range.getStart(), range.getLength()).forProperties(
         reportColumns).to(lastDataReceiver).fire();
+  }
+
+  /**
+   * Search based on the search box text.
+   */
+  private void search() {
+    isCountStale = true;
+    startsWithSearch = searchBox.getText();
+    requestReports(false);
   }
 }

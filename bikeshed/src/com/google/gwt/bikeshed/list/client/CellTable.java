@@ -20,6 +20,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.EventTarget;
+import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.dom.client.TableCellElement;
 import com.google.gwt.dom.client.TableColElement;
 import com.google.gwt.dom.client.TableElement;
@@ -118,6 +119,11 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
     String lastColumnHeader();
 
     /**
+     * Applied to the loading indicator.
+     */
+    String loading();
+
+    /**
      * Applied to odd rows.
      */
     String oddRow();
@@ -145,6 +151,11 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
     @Source("cellTableHeaderBackground.png")
     @ImageOptions(repeatStyle = RepeatStyle.Horizontal)
     ImageResource cellTableFooterBackground();
+
+    /**
+     * The loading indicator used while the table is waiting for data.
+     */
+    ImageResource cellTableLoading();
 
     /**
      * The background used for selected cells.
@@ -213,6 +224,7 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
   private final Style style;
   private final TableElement table;
   private final TableSectionElement tbody;
+  private final TableSectionElement tbodyLoading;
   private final TableSectionElement tfoot;
   private TableSectionElement thead;
 
@@ -249,8 +261,19 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
     table.appendChild(colgroup);
     thead = table.createTHead();
     table.appendChild(tbody = Document.get().createTBodyElement());
+    table.appendChild(tbodyLoading = Document.get().createTBodyElement());
     tfoot = table.createTFoot();
     setStyleName(this.style.cellTable());
+
+    // Create the loading indicator.
+    {
+      TableCellElement td = Document.get().createTDElement();
+      TableRowElement tr = Document.get().createTRElement();
+      tbodyLoading.appendChild(tr);
+      tr.appendChild(td);
+      td.setAlign("center");
+      td.setInnerHTML("<div class='" + style.loading() + "'></div>");
+    }
 
     // Create the implementation.
     this.impl = new CellListImpl<T>(this, pageSize, tbody) {
@@ -282,6 +305,8 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
       @Override
       protected void emitHtml(StringBuilder sb, List<T> values, int start,
           SelectionModel<? super T> selectionModel) {
+        setLoadingIconVisible(false);
+
         String firstColumnStyle = style.firstColumn();
         String lastColumnStyle = style.lastColumn();
         int columnCount = columns.size();
@@ -360,6 +385,9 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
     // those events actually needed by cells.
     sinkEvents(Event.ONCLICK | Event.MOUSEEVENTS | Event.KEYEVENTS
         | Event.ONCHANGE | Event.FOCUSEVENTS);
+
+    // Show the loading indicator by default.
+    setLoadingIconVisible(true);
   }
 
   /**
@@ -384,7 +412,7 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
     footers.add(footer);
     columns.add(col);
     headersStale = true;
-    refresh();
+    redraw();
   }
 
   /**
@@ -425,9 +453,7 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
   }
 
   public T getDisplayedItem(int indexOnPage) {
-    if (indexOnPage < 0 || indexOnPage >= getNumDisplayedItems()) {
-      throw new IndexOutOfBoundsException("indexOnPage = " + indexOnPage);
-    }
+    checkRowBounds(indexOnPage);
     return impl.getData().get(indexOnPage);
   }
 
@@ -458,6 +484,21 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
 
   public Range getRange() {
     return impl.getRange();
+  }
+
+  /**
+   * Get the {@link TableRowElement} for the specified row. If the row element
+   * has not been created, null is returned.
+   * 
+   * @param row the row index
+   * @return the row element, or null if it doesn't exists
+   * @throws IndexOutOfBoundsException if the row index is outside of the
+   *           current page
+   */
+  public TableRowElement getRowElement(int row) {
+    checkRowBounds(row);
+    NodeList<TableRowElement> rows = tbody.getRows();
+    return rows.getLength() > row ? rows.getItem(row) : null;
   }
 
   public int getSize() {
@@ -534,6 +575,7 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
    * Redraw the table using the existing data.
    */
   public void redraw() {
+    setLoadingIconVisible(false);
     impl.redraw();
   }
 
@@ -541,6 +583,7 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
    * Redraw the table, requesting data from the delegate.
    */
   public void refresh() {
+    setLoadingIconVisible(true);
     impl.refresh();
   }
 
@@ -571,6 +614,11 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
 
   public void setDataSize(int size, boolean isExact) {
     impl.setDataSize(size);
+    
+    // If there is no data, then we are done loading.
+    if (size <= 0) {
+      setLoadingIconVisible(false);
+    }
   }
 
   public void setDelegate(Delegate<T> delegate) {
@@ -612,6 +660,7 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
    *          the page
    */
   public void setPageStart(int pageStart) {
+    setLoadingIconVisible(true);
     impl.setPageStart(pageStart);
   }
 
@@ -626,6 +675,20 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
 
   public void setSelectionModel(SelectionModel<? super T> selectionModel) {
     impl.setSelectionModel(selectionModel, true);
+  }
+
+  /**
+   * Checks that the row is within the correct bounds.
+   * 
+   * @param row row index to check
+   * @throws IndexOutOfBoundsException
+   */
+  protected void checkRowBounds(int row) {
+    int rowSize = impl.getDisplayedItemCount();
+    if ((row >= rowSize) || (row < 0)) {
+      throw new IndexOutOfBoundsException("Row index: " + row + ", Row size: "
+          + rowSize);
+    }
   }
 
   /**
@@ -711,4 +774,22 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
   private native int getClientHeight(Element element) /*-{
     return element.clientHeight;
   }-*/;
+
+  /**
+   * Show or hide the loading icon.
+   * 
+   * @param visible true to show, false to hide.
+   */
+  private void setLoadingIconVisible(boolean visible) {
+    // Clear the current data.
+    if (visible) {
+      tbody.setInnerText("");
+    }
+
+    // Update the colspan.
+    TableCellElement td = tbodyLoading.getRows().getItem(0).getCells().getItem(
+        0);
+    td.setColSpan(columns.size());
+    setVisible(tbodyLoading, visible);
+  }
 }

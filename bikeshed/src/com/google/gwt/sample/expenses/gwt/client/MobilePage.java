@@ -32,5 +32,11 @@ public interface MobilePage {
 
   void onAdd();
   void onCustom();
-  void onRefresh();
+
+  /**
+   * Refresh the page.
+   * 
+   * @param clear true to clear the data first
+   */
+  void onRefresh(boolean clear);
 }

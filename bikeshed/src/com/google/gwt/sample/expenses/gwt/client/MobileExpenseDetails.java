@@ -98,7 +98,7 @@ public class MobileExpenseDetails extends Composite implements MobilePage {
     listener.onEditExpense(expense);
   }
 
-  public void onRefresh() {
+  public void onRefresh(boolean clear) {
     PropertyReference<String> idRef = new PropertyReference<String>(expense,
         ExpenseRecord.id);
 

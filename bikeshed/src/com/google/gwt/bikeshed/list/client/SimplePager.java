@@ -22,7 +22,6 @@ import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.uibinder.client.UiConstructor;
-import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -68,11 +67,6 @@ public class SimplePager<T> extends AbstractPager<T> {
      * The disabled last page image.
      */
     ImageResource simplePagerLastPageDisabled();
-
-    /**
-     * The icon to use while the page is loading.
-     */
-    ImageResource simplePagerLoading();
 
     /**
      * The image used to go to the next page.
@@ -141,11 +135,6 @@ public class SimplePager<T> extends AbstractPager<T> {
   private final Image lastPage;
 
   /**
-   * The html used to render the loading image.
-   */
-  private final String loadingImageHtml;
-
-  /**
    * Set to true when the next and last buttons are disabled.
    */
   private boolean nextDisabled;
@@ -202,10 +191,6 @@ public class SimplePager<T> extends AbstractPager<T> {
     this.resources = resources;
     this.style = resources.simplePagerStyle();
     this.style.ensureInjected();
-
-    // Create the loading image.
-    AbstractImagePrototype loadingProto = AbstractImagePrototype.create(resources.simplePagerLoading());
-    loadingImageHtml = loadingProto.getHTML();
 
     // Create the buttons.
     firstPage = new Image(resources.simplePagerFirstPage());
@@ -315,10 +300,8 @@ public class SimplePager<T> extends AbstractPager<T> {
    * loaded into the table.
    */
   public void startLoading() {
-    PagingListView<T> listView = getPagingListView();
-    listView.setDataSize(0, true);
-    onRangeOrSizeChanged(listView);
-    label.setHTML(loadingImageHtml);
+    getPagingListView().setDataSize(0, true);
+    label.setHTML("");
   }
 
   /**

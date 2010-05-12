@@ -72,3 +72,8 @@
 
 .selectedRow {
 }
+
+@sprite .loading {
+  gwt-image: 'cellTableLoading';
+  margin: 30px;  
+}

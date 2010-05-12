@@ -34,6 +34,7 @@ import com.google.gwt.view.client.PagingListView;
 import com.google.gwt.view.client.Range;
 import com.google.gwt.view.client.SelectionModel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -97,6 +98,7 @@ public class CellList<T> extends Widget implements PagingListView<T> {
   }
 
   private final Cell<T> cell;
+  private final Element childContainer;
   private final Element emptyMessageElem;
   private final CellListImpl<T> impl;
   private final Style style;
@@ -124,7 +126,7 @@ public class CellList<T> extends Widget implements PagingListView<T> {
     this.style.ensureInjected();
 
     // Create the DOM hierarchy.
-    Element childContainer = Document.get().createDivElement();
+    childContainer = Document.get().createDivElement();
 
     emptyMessageElem = Document.get().createDivElement();
     emptyMessageElem.setInnerHTML("<i>no data</i>");
@@ -183,6 +185,21 @@ public class CellList<T> extends Widget implements PagingListView<T> {
     return impl.getDataSize();
   }
 
+  /**
+   * Get the value of a displayed item.
+   * 
+   * @param indexOnPage the index on the page
+   * @return the value
+   */
+  public T getDisplayedItem(int indexOnPage) {
+    checkRowBounds(indexOnPage);
+    return impl.getData().get(indexOnPage);
+  }
+
+  public List<T> getDisplayedItems() {
+    return new ArrayList<T>(impl.getData());
+  }
+
   public int getPageSize() {
     return impl.getPageSize();
   }
@@ -193,6 +210,23 @@ public class CellList<T> extends Widget implements PagingListView<T> {
 
   public Range getRange() {
     return impl.getRange();
+  }
+
+  /**
+   * Get the {@link Element} for the specified index. If the element has not
+   * been created, null is returned.
+   * 
+   * @param indexOnPage the index on the page
+   * @return the element, or null if it doesn't exists
+   * @throws IndexOutOfBoundsException if the index is outside of the current
+   *           page
+   */
+  public Element getRowElement(int indexOnPage) {
+    checkRowBounds(indexOnPage);
+    if (childContainer.getChildCount() > indexOnPage) {
+      return childContainer.getChild(indexOnPage).cast();
+    }
+    return null;
   }
 
   @Override
@@ -254,6 +288,20 @@ public class CellList<T> extends Widget implements PagingListView<T> {
    */
   public void setValueUpdater(ValueUpdater<T> valueUpdater) {
     this.valueUpdater = valueUpdater;
+  }
+
+  /**
+   * Checks that the row is within the correct bounds.
+   * 
+   * @param row row index to check
+   * @throws IndexOutOfBoundsException
+   */
+  protected void checkRowBounds(int row) {
+    int rowSize = impl.getDisplayedItemCount();
+    if ((row >= rowSize) || (row < 0)) {
+      throw new IndexOutOfBoundsException("Row index: " + row + ", Row size: "
+          + rowSize);
+    }
   }
 
   /**

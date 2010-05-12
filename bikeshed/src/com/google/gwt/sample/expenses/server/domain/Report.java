@@ -42,10 +42,12 @@ public class Report {
     }
   }
 
-  public static long countReportsBySearch(Long employeeId, String startsWith) {
+  public static long countReportsBySearch(Long employeeId, String department,
+      String startsWith) {
     EntityManager em = entityManager();
     try {
-      Query query = queryReportsBySearch(em, employeeId, startsWith, null, true);
+      Query query = queryReportsBySearch(em, employeeId, department,
+          startsWith, null, true);
       return ((Number) query.getSingleResult()).longValue();
     } finally {
       em.close();
@@ -97,11 +99,12 @@ public class Report {
 
   @SuppressWarnings("unchecked")
   public static List<Report> findReportEntriesBySearch(Long employeeId,
-      String startsWith, String orderBy, int firstResult, int maxResults) {
+      String department, String startsWith, String orderBy, int firstResult,
+      int maxResults) {
     EntityManager em = entityManager();
     try {
-      Query query = queryReportsBySearch(em, employeeId, startsWith, orderBy,
-          false);
+      Query query = queryReportsBySearch(em, employeeId, department,
+          startsWith, orderBy, false);
       query.setFirstResult(firstResult);
       query.setMaxResults(maxResults);
       List<Report> reportList = query.getResultList();
@@ -135,16 +138,18 @@ public class Report {
    * 
    * @param em the {@link EntityManager} to use
    * @param employeeId the employee id
+   * @param department the department to search
    * @param startsWith the starting string
    * @param orderBy the order of the results
    * @param isCount true to query on the count only
    * @return the query
    */
   private static Query queryReportsBySearch(EntityManager em, Long employeeId,
-      String startsWith, String orderBy, boolean isCount) {
+      String department, String startsWith, String orderBy, boolean isCount) {
     // Construct a query string.
     boolean isFirstStatement = true;
     boolean hasEmployee = employeeId != null && employeeId >= 0;
+    boolean hasDepartment = department != null && department.length() > 0;
     boolean hasStartsWith = startsWith != null && startsWith.length() > 0;
     String retValue = isCount ? "count(o)" : "o";
     String queryString = "select " + retValue + " from Report o";
@@ -152,6 +157,11 @@ public class Report {
       queryString += isFirstStatement ? " WHERE" : " AND";
       isFirstStatement = false;
       queryString += " o.reporterKey =:reporterKey";
+    }
+    if (hasDepartment) {
+      queryString += isFirstStatement ? " WHERE" : " AND";
+      isFirstStatement = false;
+      queryString += " o.department =:department";
     }
     if (hasStartsWith) {
       queryString += isFirstStatement ? " WHERE" : " AND";
@@ -168,9 +178,13 @@ public class Report {
     if (hasEmployee) {
       query.setParameter("reporterKey", employeeId);
     }
+    if (hasDepartment) {
+      query.setParameter("department", department);
+    }
     if (hasStartsWith) {
-      query.setParameter("startsWith", startsWith);
-      query.setParameter("startsWithZ", startsWith + "zzzzzz");
+      String startsWithLc = startsWith.toLowerCase();
+      query.setParameter("startsWith", startsWithLc);
+      query.setParameter("startsWithZ", startsWithLc + "zzzzzz");
     }
     return query;
   }

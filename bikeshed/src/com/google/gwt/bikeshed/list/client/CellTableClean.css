@@ -64,3 +64,8 @@
   height: auto;
   overflow: auto;
 }
+
+@sprite .loading {
+  gwt-image: 'cellTableLoading';
+  margin: 30px;  
+}

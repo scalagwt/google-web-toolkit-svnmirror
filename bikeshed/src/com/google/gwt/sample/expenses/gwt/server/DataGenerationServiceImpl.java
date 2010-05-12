@@ -1533,11 +1533,12 @@ public class DataGenerationServiceImpl extends RemoteServiceServlet implements
 //    log.info("Persisted employee in " + (System.currentTimeMillis() - start) + " millis");
 
     long id = employee.getId();
+    String dept = employee.getDepartment();
     
     if (makeExpenses) {
       int numExpenseReports = rand.nextInt(96) + 5;
       for (int i = 0; i < numExpenseReports; i++) {
-        if (!makeExpenseReport(id, supervisorId)) {
+        if (!makeExpenseReport(id, supervisorId, dept)) {
           return id;
         }
       }
@@ -1562,7 +1563,8 @@ public class DataGenerationServiceImpl extends RemoteServiceServlet implements
 //    log.info("Persisted expense in " + (System.currentTimeMillis() - start) + " millis");
   }
 
-  private boolean makeExpenseReport(long employeeId, long supervisorId) {
+  private boolean makeExpenseReport(long employeeId, long supervisorId,
+      String department) {
     long time = System.currentTimeMillis();
     if (time >= endTime) {
 //      log.info("Returning from makeExpenseReport at " + time + " (left = " + (endTime - time) + ")");
@@ -1576,9 +1578,9 @@ public class DataGenerationServiceImpl extends RemoteServiceServlet implements
 
     Report report = new Report();
     report.setReporterKey(employeeId);
+    report.setDepartment(department);
     report.setApprovedSupervisorKey(supervisorId);
     report.setCreated(createdDate);
-    report.setReporterKey(employeeId);
     boolean travel = rand.nextInt(4) == 0;
     int days = 1;
     

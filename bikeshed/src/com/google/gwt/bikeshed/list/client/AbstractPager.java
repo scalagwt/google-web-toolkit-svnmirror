@@ -174,7 +174,9 @@ public abstract class AbstractPager<T> extends Composite implements Pager<T> {
       index = Math.min(index, view.getDataSize() - view.getPageSize());
     }
     index = Math.max(0, index);
-    view.setPageStart(index);
+    if (index != view.getPageStart()) {
+      view.setPageStart(index);
+    }
   }
 
   /**

@@ -50,6 +50,15 @@ public class Expenses implements EntryPoint {
     }
   };
 
+  /**
+   * The key provider for {@link ReportRecord}s.
+   */
+  public static final ProvidesKey<ReportRecord> REPORT_RECORD_KEY_PROVIDER = new ProvidesKey<ReportRecord>() {
+    public Object getKey(ReportRecord item) {
+      return item == null ? null : item.getId();
+    }
+  };
+
   private String lastDepartment;
   private EmployeeRecord lastEmployee;
   private ExpensesRequestFactory requestFactory;

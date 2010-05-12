@@ -79,13 +79,15 @@ public class ExpensesMobileShell extends Composite {
 
   @UiHandler("refreshButton")
   void onRefresh(ClickEvent evt) {
-    topPage().onRefresh();
+    topPage().onRefresh(true);
   }
 
   private void popPage() {
     assert pages.size() > 1;
     pages.remove(topPage());
-    showPage(topPage());
+    MobilePage topPage = topPage();
+    showPage(topPage);
+    topPage.onRefresh(false);
   }
 
   private void pushPage(MobilePage page) {

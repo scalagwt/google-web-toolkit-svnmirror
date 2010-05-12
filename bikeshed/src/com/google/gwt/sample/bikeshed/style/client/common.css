@@ -59,7 +59,10 @@ h1 {
 
 /* ExpenseList */
 .expenseListCreatedColumn {
-  width: 35ex;
+  width: 25ex;
+}
+.expenseListDepartmentColumn {
+  width: 25ex;
 }
 .expenseListPurposeColumn {
   width: 50ex;

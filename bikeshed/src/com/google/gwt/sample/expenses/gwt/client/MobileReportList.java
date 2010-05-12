@@ -54,6 +54,7 @@ public class MobileReportList extends Composite implements
       final ExpensesRequestFactory requestFactory) {
     this.requestFactory = requestFactory;
     reportAdapter = new ListViewAdapter<ReportRecord>();
+    reportAdapter.setKeyProvider(Expenses.REPORT_RECORD_KEY_PROVIDER);
 
     reportList = new CellList<ReportRecord>(
         new AbstractCell<ReportRecord>() {
@@ -65,6 +66,7 @@ public class MobileReportList extends Composite implements
         });
 
     reportSelection = new SingleSelectionModel<ReportRecord>();
+    reportSelection.setKeyProvider(Expenses.REPORT_RECORD_KEY_PROVIDER);
     reportSelection.addSelectionChangeHandler(new SelectionModel.SelectionChangeHandler() {
       public void onSelectionChange(SelectionChangeEvent event) {
         listener.onReportSelected(reportSelection.getSelectedObject());
@@ -75,7 +77,7 @@ public class MobileReportList extends Composite implements
     reportAdapter.addView(reportList);
 
     initWidget(reportList);
-    onRefresh();
+    onRefresh(false);
   }
 
   public Widget asWidget() {
@@ -105,8 +107,12 @@ public class MobileReportList extends Composite implements
   public void onCustom() {
   }
 
-  public void onRefresh() {
-    requestFactory.reportRequest().findReportEntriesBySearch(new Long(-1),
+  public void onRefresh(boolean clear) {
+    if (clear) {
+      reportAdapter.getList().clear();
+    }
+
+    requestFactory.reportRequest().findReportEntriesBySearch(new Long(-1), "",
         "", ReportRecord.created.getName(), 0, 25).forProperties(
         getReportColumns()).to(this).fire();
   }
