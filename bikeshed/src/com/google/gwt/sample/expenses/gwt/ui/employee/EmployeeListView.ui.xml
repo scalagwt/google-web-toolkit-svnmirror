@@ -30,9 +30,14 @@
     .controls button {
        display:inline;       
      }
-     .listView table {
+     .listView > table {
        table-layout:fixed;
-       word-wrap: break-word;
+     }
+     .listView > table td {
+       text-overflow: ellipsis;
+       overflow: hidden;
+       white-space: nowrap;
+       cursor: pointer;
      }
   </ui:style>
 

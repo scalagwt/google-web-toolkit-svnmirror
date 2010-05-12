@@ -83,5 +83,6 @@ public class CellListPlacePickerView<P extends Place> extends Composite
     // Replace the current renderer.
     this.renderer = renderer;
     cellList.setData(0, places.size(), places);
+    smodel.setSelected(places.get(0), true);
   }
 }
