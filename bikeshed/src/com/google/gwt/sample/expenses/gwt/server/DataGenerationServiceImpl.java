@@ -15,6 +15,7 @@
  */
 package com.google.gwt.sample.expenses.gwt.server;
 
+import com.google.apphosting.api.DeadlineExceededException;
 import com.google.gwt.sample.expenses.gwt.client.DataGenerationService;
 import com.google.gwt.sample.expenses.server.domain.Employee;
 import com.google.gwt.sample.expenses.server.domain.Expense;
@@ -38,10 +39,6 @@ import java.util.logging.Logger;
 public class DataGenerationServiceImpl extends RemoteServiceServlet implements
     DataGenerationService {
   
-  private static final double AIRFARE = 600;
-
-  private static final double BREAKFAST = 15;
-
   // Must be in sync with DESCRIPTIONS
   private static String[] CATEGORIES = {
       "Local Transportation", "Local Transportation", "Local Transportation",
@@ -116,6 +113,18 @@ public class DataGenerationServiceImpl extends RemoteServiceServlet implements
       "Rochester, New York", "Winston-Salem, North Carolina",
       "Durham, North Carolina", "Reno, Nevada", "Laredo, Texas"};
 
+  private static final double COST_AIRFARE = 600;
+
+  private static final double COST_BREAKFAST = 15;
+
+  private static final double COST_DINNER = 60;
+
+  private static final double COST_HOTEL = 300;
+
+  private static final double COST_LUNCH = 25;
+
+  private static final double COST_SUNDRY = 100;
+
   private static final String[] DEPARTMENTS = {
       "Operations", "Engineering", "Finance", "Marketing", "Sales"};
 
@@ -149,16 +158,12 @@ public class DataGenerationServiceImpl extends RemoteServiceServlet implements
       "Outreach", "Training", "Self", "Co-Workers", "Customers", "Hotel",
       "Motel ", "Holiday Inn", "Private Apartment", "Corporate Apartment"};
 
-  private static final double DINNER = 60;
-
   // 11% of females hyphenate their last names
   private static final double FEMALE_HYPHENATE = 0.11;
 
   private static List<Double> femaleNameFreqs = new ArrayList<Double>();
 
   private static List<String> femaleNames = new ArrayList<String>();
-
-  private static final double HOTEL = 300;
 
   private static final DataGenerationServiceImpl instance = new DataGenerationServiceImpl();
 
@@ -167,8 +172,6 @@ public class DataGenerationServiceImpl extends RemoteServiceServlet implements
   private static List<String> lastNames = new ArrayList<String>();
 
   private static final Logger log = Logger.getLogger(DataGenerationServiceImpl.class.getName());
-
-  private static final double LUNCH = 25;
 
   // 2% of males hyphenate their last names
   private static final double MALE_HYPHENATE = 0.02;
@@ -1391,58 +1394,55 @@ public class DataGenerationServiceImpl extends RemoteServiceServlet implements
       "Lost, customer meeting", "Customer meeting, sales opportunity",
       "Sales opportunity, emergency", "Emergency, backup", "Backup, research"};
 
-  private static final double SUNDRY = 100;
-
   public static DataGenerationServiceImpl getInstance() {
     return instance;
   }
 
   private long endTime;
-  
-  // List<Object> toPersist = new ArrayList<Object>();
-  
+    
   private Random rand = new Random();
   
   public void delete() {
-    for (Employee e : Employee.findAllEmployees()) {
-      e.remove();
-    }
-    for (Report r : Report.findAllReports()) {
-      r.remove();
-    }
-    for (Expense e : Expense.findAllExpenses()) {
-      e.remove();
+    try {
+      log.info("Expenses before: " + Expense.countExpenses());
+      List<Expense> expenses = Expense.findAllExpenses();
+      log.info("ids from " + expenses.get(0).getId() + " to " +
+          expenses.get(expenses.size() - 1).getId());
+      for (Expense e : expenses) {
+        log.info("Deleting expense " + e.getId());
+        e.remove();
+      }
+      for (Report r : Report.findAllReports()) {
+        log.info("Deleting report " + r.getId());
+        r.remove();
+      }
+      for (Employee e : Employee.findAllEmployees()) {
+        log.info("Deleting employee " + e.getId());
+        e.remove();
+      }
+    } catch (DeadlineExceededException e) {
+      log.info("Expenses after: " + Expense.countExpenses());
+      return;
     }
   }
 
-  public int generate(int millis) {
+  public void generate(int millis) {
     long startTime = System.currentTimeMillis();
     endTime = startTime + millis;
-//    log.info("In generate(" + millis + ") at " + startTime + " (left = " + (endTime - startTime) + ")");
     int startEmployees = (int) Employee.countEmployees();
     int startReports = (int) Report.countReports();
     int numEmployees;
     
     synchronized (DataGenerationServiceImpl.class) {
-//      long start, end;
       try {
         if (lastNames.size() == 0) {
-//          start = System.currentTimeMillis();
           readFile("dist.all.last.txt", lastNames, lastNameFreqs);
-//          end = System.currentTimeMillis();
-//          log.info("Read dist.all.last.txt in " + (end - start) + " milliseconds");
         }
         if (femaleNames.size() == 0) {
-//          start = System.currentTimeMillis();
           readFile("dist.female.first.txt", femaleNames, femaleNameFreqs);
-//          end = System.currentTimeMillis();
-//          log.info("Read dist.female.first.txt in " + (end - start) + " milliseconds");
         }
         if (maleNames.size() == 0) {
-//          start = System.currentTimeMillis();
           readFile("dist.male.first.txt", maleNames, maleNameFreqs);
-//          end = System.currentTimeMillis();
-//          log.info("Read dist.male.first.txt in " + (end - start) + " milliseconds");
         }
       } catch (IOException e) {
         throw new RuntimeException(e.getMessage());
@@ -1451,15 +1451,9 @@ public class DataGenerationServiceImpl extends RemoteServiceServlet implements
 
     // Choose department and make a manager
     int department = rand.nextInt(DEPARTMENTS.length);
-//    long supervisorId = makeEmployee(department, 0, false);
-//    if (supervisorId == -1) {
-//      return startReports;
-//    }
     long supervisorId = 1;
     
-    long time;
-    while ((time = System.currentTimeMillis()) < endTime) {
-//      log.info("Calling makeEmployee from generate at " + time + " (left = " + (endTime - time) + ")");
+    while (System.currentTimeMillis() < endTime) {
       makeEmployee(department, supervisorId, true);
     }
     
@@ -1470,13 +1464,15 @@ public class DataGenerationServiceImpl extends RemoteServiceServlet implements
     log.info("Generated " + employeesCreated + " employees and " +
         reportsCreated + " reports in " +
         (System.currentTimeMillis() - startTime) + " milliseconds");
-    
-    return numReports;
   }
 
-  public int getNumReports() {
+  public List<Integer> getCounts() {
     synchronized (DataGenerationServiceImpl.class) {
-      return (int) Report.countReports();
+      List<Integer> counts = new ArrayList<Integer>(3);
+      counts.add((int) Employee.countEmployees());
+      counts.add((int) Report.countReports());
+      counts.add((int) Expense.countExpenses());
+      return counts;
     }
   }
 
@@ -1503,7 +1499,6 @@ public class DataGenerationServiceImpl extends RemoteServiceServlet implements
   private long makeEmployee(int department, long supervisorId, boolean makeExpenses) {
     long time = System.currentTimeMillis();
     if (time >= endTime) {
-//      log.info("Returning from makeEmployee at " + time + " (left = " + (endTime - time) + ")");
       return -1;
     }
     
@@ -1528,17 +1523,14 @@ public class DataGenerationServiceImpl extends RemoteServiceServlet implements
     employee.setDepartment(DEPARTMENTS[department]);
     employee.setPassword("");
     
-//    long start = System.currentTimeMillis();
     employee.persist();
-//    log.info("Persisted employee in " + (System.currentTimeMillis() - start) + " millis");
 
     long id = employee.getId();
-    String dept = employee.getDepartment();
     
     if (makeExpenses) {
       int numExpenseReports = rand.nextInt(96) + 5;
       for (int i = 0; i < numExpenseReports; i++) {
-        if (!makeExpenseReport(id, supervisorId, dept)) {
+        if (!makeExpenseReport(id, department, supervisorId)) {
           return id;
         }
       }
@@ -1558,16 +1550,12 @@ public class DataGenerationServiceImpl extends RemoteServiceServlet implements
     expense.setApproval("");
     expense.setReasonDenied("");
     
-//    long start = System.currentTimeMillis();
     expense.persist();
-//    log.info("Persisted expense in " + (System.currentTimeMillis() - start) + " millis");
   }
 
-  private boolean makeExpenseReport(long employeeId, long supervisorId,
-      String department) {
+  private boolean makeExpenseReport(long employeeId, int department, long supervisorId) {
     long time = System.currentTimeMillis();
     if (time >= endTime) {
-//      log.info("Returning from makeExpenseReport at " + time + " (left = " + (endTime - time) + ")");
       return false;
     }
     
@@ -1578,7 +1566,7 @@ public class DataGenerationServiceImpl extends RemoteServiceServlet implements
 
     Report report = new Report();
     report.setReporterKey(employeeId);
-    report.setDepartment(department);
+    report.setDepartment(DEPARTMENTS[department]);
     report.setApprovedSupervisorKey(supervisorId);
     report.setCreated(createdDate);
     boolean travel = rand.nextInt(4) == 0;
@@ -1600,10 +1588,7 @@ public class DataGenerationServiceImpl extends RemoteServiceServlet implements
       report.setNotes(NOTES[rand.nextInt(NOTES.length)]);
     }
 
-//    long start = System.currentTimeMillis();
-    report.persist();
-//    log.info("Persisted report in " + (System.currentTimeMillis() - start) + " millis");
-    
+    report.persist();    
     long id = report.getId();
     
     if (travel) {
@@ -1615,18 +1600,18 @@ public class DataGenerationServiceImpl extends RemoteServiceServlet implements
       }
 
       makeExpenseDetail(id, new Date(millis - days * MILLIS_PER_DAY),
-          "Air Travel", "Outbound flight", amount(AIRFARE));
+          "Air Travel", "Outbound flight", amount(COST_AIRFARE));
       makeExpenseDetail(id, new Date(millis - MILLIS_PER_DAY / 2),
-          "Air Travel", "Return flight", amount(AIRFARE));
+          "Air Travel", "Return flight", amount(COST_AIRFARE));
       for (int i = 0; i < days; i++) {
         makeExpenseDetail(id, new Date(millis - (days - i) * MILLIS_PER_DAY
-            - 10 * MILLIS_PER_HOUR), "Dining", "Breakfast", amount(BREAKFAST));
+            - 10 * MILLIS_PER_HOUR), "Dining", "Breakfast", amount(COST_BREAKFAST));
         makeExpenseDetail(id, new Date(millis - (days - i) * MILLIS_PER_DAY - 6
-            * MILLIS_PER_HOUR), "Dining", "Lunch", amount(LUNCH));
+            * MILLIS_PER_HOUR), "Dining", "Lunch", amount(COST_LUNCH));
         makeExpenseDetail(id, new Date(millis - (days - i) * MILLIS_PER_DAY - 2
-            * MILLIS_PER_HOUR), "Dining", "Dinner", amount(DINNER));
+            * MILLIS_PER_HOUR), "Dining", "Dinner", amount(COST_DINNER));
         makeExpenseDetail(id, new Date(millis - (days - i) * MILLIS_PER_DAY),
-            "Lodging", "Hotel", amount(HOTEL));
+            "Lodging", "Hotel", amount(COST_HOTEL));
       }
     } else {
       int numExpenses = rand.nextInt(5) + 1;
@@ -1635,11 +1620,10 @@ public class DataGenerationServiceImpl extends RemoteServiceServlet implements
         long detailOffset = rand.nextInt(60 * 60 * 24 * days) * 1000L;
         Date date = new Date(createdDate.getTime() - detailOffset);
         makeExpenseDetail(id, date, CATEGORIES[index], DESCRIPTIONS[index],
-            amount(SUNDRY));
+            amount(COST_SUNDRY));
       }
     }
     
-//    log.info("Made report in " + (System.currentTimeMillis() - time) + " millis");
     return true;
   }
 

@@ -18,6 +18,8 @@ package com.google.gwt.sample.expenses.gwt.client;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
+import java.util.List;
+
 /**
  * Generate random records.
  */
@@ -31,10 +33,11 @@ public interface DataGenerationService extends RemoteService {
   
   /**
    * Generate reports for approximately the given number of milliseconds.
-   * 
-   * @return the number of reports in the data store following generation
    */
-  int generate(int millis);
+  void generate(int millis);
   
-  int getNumReports();
+  /**
+   * @return the number of Employees, Reports, and Expenses.
+   */
+  List<Integer> getCounts();
 }

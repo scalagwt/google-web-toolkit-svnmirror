@@ -17,11 +17,13 @@ package com.google.gwt.sample.expenses.gwt.client;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
+import java.util.List;
+
 /**
  * Async counterpart of {@link DataGenerationService}.
  */
 public interface DataGenerationServiceAsync { 
   void delete(AsyncCallback<Void> callback);
-  void generate(int millis, AsyncCallback<Integer> callback);
-  void getNumReports(AsyncCallback<Integer> callback);
+  void generate(int millis, AsyncCallback<Void> callback);
+  void getCounts(AsyncCallback<List<Integer>> callback);
 }

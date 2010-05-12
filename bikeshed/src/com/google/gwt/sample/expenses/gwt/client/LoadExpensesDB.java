@@ -21,9 +21,12 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
+
+import java.util.List;
 
 /**
  * Entry point to create database entries for the Expenses app.
@@ -32,13 +35,20 @@ public class LoadExpensesDB implements EntryPoint {
 
   private final DataGenerationServiceAsync dataService = GWT.create(DataGenerationService.class);
 
-  private Label generateLabel;
+  private Label statusLabel;
+  private Label numEmployeesLabel;
+  private Label numReportsLabel;
+  private Label numExpensesLabel;
   private Button generateButton;
   private Button deleteButton;
   private TextBox amountTextBox;
 
   public void onModuleLoad() {
-    generateLabel = new Label("-- Expense Reports");
+    statusLabel = new Label("");
+    numEmployeesLabel = new Label("-- Employees");
+    numReportsLabel = new Label("-- Reports");
+    numExpensesLabel = new Label("-- Expenses");
+    
     generateButton = new Button("Generate Data");
     deleteButton = new Button("Delete everything");
     amountTextBox = new TextBox();
@@ -52,6 +62,7 @@ public class LoadExpensesDB implements EntryPoint {
     
     deleteButton.addClickHandler(new ClickHandler() {      
       public void onClick(ClickEvent event) {
+        deleteButton.setEnabled(false);
         deleteData();
       }
     });
@@ -59,43 +70,68 @@ public class LoadExpensesDB implements EntryPoint {
     RootPanel root = RootPanel.get();
     root.add(generateButton);
     root.add(amountTextBox);
-    root.add(generateLabel);
+    root.add(statusLabel);
+    root.add(numEmployeesLabel);
+    root.add(numReportsLabel);
+    root.add(numExpensesLabel);
+    
+    root.add(new HTML("<br>"));
+    root.add(new HTML("<br>"));
+    root.add(new HTML("<br>"));
+    root.add(new HTML("<br>"));
+    root.add(new HTML("<br>"));
+    root.add(new HTML("<br>"));
 
-    // This button deletes the entire data store -- don't expose it by default
-    // root.add(deleteButton);
+    // This button deletes the entire data store -- be careful
+    root.add(deleteButton);
 
-    dataService.getNumReports(new AsyncCallback<Integer>() {
-      public void onFailure(Throwable caught) {
-      }
-
-      public void onSuccess(Integer result) {
-        generateLabel.setText("" + result + " Expense Reports");
-      }
-    });
+    updateCounts();
   }
 
   private void deleteData() {
     dataService.delete(new AsyncCallback<Void>() {
       public void onFailure(Throwable caught) {
-        generateLabel.setText("Deletion failed");
+        statusLabel.setText("Deletion failed");
+        deleteButton.setEnabled(true);
+        updateCounts();
       }
 
       public void onSuccess(Void result) {
-        generateLabel.setText("Deletion succeeded");
+        statusLabel.setText("Deletion succeeded");
+        deleteButton.setEnabled(true);
+        updateCounts();
+      }
+    });
+  }
+  
+  private void updateCounts() {
+    dataService.getCounts(new AsyncCallback<List<Integer>>() {
+      public void onFailure(Throwable caught) {
+        numEmployeesLabel.setText("? Employees");
+        numReportsLabel.setText("? Reports");
+        numExpensesLabel.setText("? Expenses");
+      }
+
+      public void onSuccess(List<Integer> result) {
+        numEmployeesLabel.setText("" + result.get(0) + " Employees");
+        numReportsLabel.setText("" + result.get(1) + " Reports");
+        numExpensesLabel.setText("" + result.get(2) + " Expenses");
       }
     });
   }
 
   private void generateData(int amount) {
-    dataService.generate(amount, new AsyncCallback<Integer>() {
+    dataService.generate(amount, new AsyncCallback<Void>() {
       public void onFailure(Throwable caught) {
+        statusLabel.setText("Data generation failed");
         generateButton.setEnabled(true);
-        generateLabel.setText("Data generation failed");
+        updateCounts();
       }
 
-      public void onSuccess(Integer result) {
-        generateLabel.setText("" + result + " Expense Reports");
+      public void onSuccess(Void result) {
+        statusLabel.setText("Data generation succeeded");
         generateButton.setEnabled(true);
+        updateCounts();
       }
     });
   }
