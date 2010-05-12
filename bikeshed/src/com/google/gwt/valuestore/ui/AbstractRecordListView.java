@@ -93,7 +93,7 @@ public abstract class AbstractRecordListView<R extends Record> extends
     table.setSelectionEnabled(true);
 
     for (PropertyColumn<R, ?> column : columns) {
-      table.addColumn(column, column.getProperty().getName());
+      table.addColumn(column, column.getProperty().getDisplayName());
       properties.add(column.getProperty());
     }
     
