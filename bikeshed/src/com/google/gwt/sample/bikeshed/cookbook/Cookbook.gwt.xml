@@ -1,4 +1,5 @@
 <module rename-to='cookbook'>
+  <inherits name="com.google.gwt.requestfactory.RequestFactory"/>
   <inherits name='com.google.gwt.user.User'/>
   <inherits name='com.google.gwt.sample.bikeshed.style.Style'/>
   <inherits name='com.google.gwt.bikeshed.list.List'/>
