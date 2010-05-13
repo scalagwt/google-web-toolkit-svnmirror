@@ -36,9 +36,9 @@ import java.util.Map;
  * Subclasses must:
  * 
  * <ul>
- * <li>implement a method for creating request objects
+ * <li>implement methods to provide a full count, and request a specific 
  * <li>provide a {@link RecordListView}
- * <li>respond to "show" and "edit" requests
+ * <li>respond to "show details" commands 
  * </ul>
  * 
  * Only the properties required by the view will be requested.
@@ -147,7 +147,7 @@ public abstract class AbstractRecordListActivity<R extends Record> implements
         break;
 
       case DELETE:
-        delete(record);
+        init();
         break;
 
       case CREATE:
@@ -169,13 +169,6 @@ public abstract class AbstractRecordListActivity<R extends Record> implements
   protected abstract void fireCountRequest(Receiver<Long> callback);
 
   protected abstract void showDetails(R record);
-
-  private void delete(R record) {
-    Integer row = recordToRow.get(record.getId());
-    if (row != null) {
-      onRangeChanged(view.asPagingListView());
-    }
-  }
 
   private void getLastPage() {
     fireCountRequest(new Receiver<Long>() {
