@@ -15,7 +15,6 @@
  */
 package com.google.gwt.sample.expenses.gwt.ui;
 
-import com.google.gwt.app.place.Activity;
 import com.google.gwt.app.place.ActivityMapper;
 import com.google.gwt.app.place.PlaceController;
 import com.google.gwt.event.shared.HandlerManager;
