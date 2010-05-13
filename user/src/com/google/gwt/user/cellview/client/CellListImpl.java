@@ -62,6 +62,14 @@ public abstract class CellListImpl<T> {
   private boolean dataSizeInitialized;
 
   private Delegate<T> delegate;
+
+  /**
+   * As an optimization, keep track of the last HTML string that we rendered. If
+   * the contents do not change the next time we render, then we don't have to
+   * set inner html.
+   */
+  private String lastContents = null;
+
   private final PagingListView<T> listView;
   private Pager<T> pager;
 
@@ -267,8 +275,14 @@ public abstract class CellListImpl<T> {
     int childCount = childContainer.getChildCount();
     if (boundedStart == pageStart
         && (boundedSize >= childCount || boundedSize >= getDisplayedItemCount())) {
-      childContainer.setInnerHTML(sb.toString());
+      // If the contents have changed, we're done.
+      String newContents = sb.toString();
+      if (!newContents.equals(lastContents)) {
+        lastContents = newContents;
+        renderChildContents(newContents);
+      }
     } else {
+      lastContents = null;
       Element container = convertToElements(sb.toString());
       Element toReplace = null;
       int realStart = boundedStart - pageStart;
@@ -447,6 +461,15 @@ public abstract class CellListImpl<T> {
    */
   protected void removeLastItem() {
     childContainer.getLastChild().removeFromParent();
+  }
+
+  /**
+   * Set the contents of the child container.
+   * 
+   * @param html the html to render in the child
+   */
+  protected void renderChildContents(String html) {
+    childContainer.setInnerHTML(html);
   }
 
   /**

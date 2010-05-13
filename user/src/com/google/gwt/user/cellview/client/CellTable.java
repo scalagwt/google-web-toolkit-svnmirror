@@ -188,7 +188,80 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
     CleanStyle cellTableStyle();
   }
 
+  /**
+   * Implementation of {@link CellTable}.
+   */
+  private static class Impl {
+
+    final Element tmpElem = Document.get().createDivElement();
+
+    /**
+     * Convert the rowHtml into Elements wrapped by the specifeid table section.
+     * 
+     * @param sectionTag the table section tag
+     * @param rowHtml the Html for the rows
+     * @return the section element
+     */
+    protected TableSectionElement convertToSectionElement(String sectionTag,
+        String rowHtml) {
+      // Render the rows into a table.
+      // IE doesn't support innerHtml on a TableSection or Table element, so we
+      // generate the entire table.
+      sectionTag = sectionTag.toLowerCase();
+      String innerHtml = "<table><" + sectionTag + ">" + rowHtml + "</"
+          + sectionTag + "></table>";
+      tmpElem.setInnerHTML(innerHtml);
+      TableElement tableElem = tmpElem.getFirstChildElement().cast();
+
+      // Get the section out of the table.
+      if ("tbody".equals(sectionTag)) {
+        return tableElem.getTBodies().getItem(0);
+      } else if ("thead".equals(sectionTag)) {
+        return tableElem.getTHead();
+      } else if ("tfoot".equals(sectionTag)) {
+        return tableElem.getTFoot();
+      }
+      throw new IllegalArgumentException("Invalid table section tag: "
+          + sectionTag);
+    }
+
+    /**
+     * Render and replace a table section in the table.
+     * 
+     * @param section the {@link TableSectionElement} to replace
+     * @param html the html to render
+     * @return the new section element
+     */
+    protected TableSectionElement renderSectionContents(
+        TableSectionElement section, String html) {
+      section.setInnerHTML(html);
+      return section;
+    }
+  }
+
+  /**
+   * Implementation of {@link CellTable} used by IE. Table sections do not
+   * support setInnerHtml in IE, so we need to replace the entire elements.
+   */
+  @SuppressWarnings("unused")
+  private static class ImplTrident extends Impl {
+
+    @Override
+    protected TableSectionElement renderSectionContents(
+        TableSectionElement section, String html) {
+      TableSectionElement newSection = convertToSectionElement(
+          section.getTagName(), html);
+      section.getParentElement().replaceChild(newSection, section);
+      return newSection;
+    }
+  }
+
   private static Resources DEFAULT_RESOURCES;
+
+  /**
+   * The table specific {@link Impl}.
+   */
+  private static Impl TABLE_IMPL;
 
   private static Resources getDefaultResources() {
     if (DEFAULT_RESOURCES == null) {
@@ -222,9 +295,9 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
 
   private final Style style;
   private final TableElement table;
-  private final TableSectionElement tbody;
+  private TableSectionElement tbody;
   private final TableSectionElement tbodyLoading;
-  private final TableSectionElement tfoot;
+  private TableSectionElement tfoot;
   private TableSectionElement thead;
 
   /**
@@ -251,6 +324,9 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
    * @param resources the resources to use for this widget
    */
   public CellTable(final int pageSize, Resources resources) {
+    if (TABLE_IMPL == null) {
+      TABLE_IMPL = GWT.create(Impl.class);
+    }
     this.style = resources.cellTableStyle();
     this.style.ensureInjected();
 
@@ -277,8 +353,6 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
     // Create the implementation.
     this.impl = new CellListImpl<T>(this, pageSize, tbody) {
 
-      private final TableElement tmpElem = Document.get().createTableElement();
-
       @Override
       public void setData(List<T> values, int start) {
         createHeadersAndFooters();
@@ -287,8 +361,7 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
 
       @Override
       protected Element convertToElements(String html) {
-        tmpElem.setInnerHTML("<tbody>" + html + "</tbody>");
-        return tmpElem.getTBodies().getItem(0);
+        return TABLE_IMPL.convertToSectionElement("tbody", html);
       }
 
       @Override
@@ -348,6 +421,11 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
           }
           sb.append("</tr>");
         }
+      }
+
+      @Override
+      protected void renderChildContents(String html) {
+        tbody = TABLE_IMPL.renderSectionContents(tbody, html);
       }
 
       @Override
@@ -613,7 +691,7 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
 
   public void setDataSize(int size, boolean isExact) {
     impl.setDataSize(size);
-    
+
     // If there is no data, then we are done loading.
     if (size <= 0) {
       setLoadingIconVisible(false);
@@ -728,7 +806,13 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
     }
     sb.append("</tr>");
 
-    section.setInnerHTML(sb.toString());
+    // Render and replace the table section.
+    section = TABLE_IMPL.renderSectionContents(section, sb.toString());
+    if (isFooter) {
+      tfoot = section;
+    } else {
+      thead = section;
+    }
 
     // If the section isn't used, hide it.
     setVisible(section, hasHeader);
@@ -788,7 +872,7 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
     // Update the colspan.
     TableCellElement td = tbodyLoading.getRows().getItem(0).getCells().getItem(
         0);
-    td.setColSpan(columns.size());
+    td.setColSpan(Math.max(1, columns.size()));
     setVisible(tbodyLoading, visible);
   }
 }
