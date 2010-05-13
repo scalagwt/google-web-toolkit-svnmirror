@@ -23,6 +23,7 @@ import com.google.gwt.valuestore.shared.Record;
 import com.google.gwt.view.client.ListView;
 import com.google.gwt.view.client.PagingListView;
 import com.google.gwt.view.client.Range;
+import com.google.gwt.view.client.SingleSelectionModel;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -47,6 +48,8 @@ import java.util.Map;
 public abstract class AbstractRecordListActivity<R extends Record> implements
     Activity, RecordListView.Delegate<R>, ListView.Delegate<R> {
   private final Map<String, Integer> recordToRow = new HashMap<String, Integer>();
+  private final Map<String, R> idToRecord = new HashMap<String, R>();
+  private final SingleSelectionModel<R> selectionModel;
 
   private RecordListView<R> view;
   private Display display;
@@ -55,6 +58,18 @@ public abstract class AbstractRecordListActivity<R extends Record> implements
     this.view = view;
     view.setDelegate(this);
     view.asPagingListView().setDelegate(this);
+
+    selectionModel = new SingleSelectionModel<R>() {
+      @Override
+      public void setSelected(R newSelection, boolean selected) {
+        R wasSelected = this.getSelectedObject();
+        super.setSelected(newSelection, selected);
+        if (!newSelection.equals(wasSelected)) {
+          showDetails(newSelection);
+        }
+      }
+    };
+    view.asPagingListView().setSelectionModel(selectionModel);
   }
 
   public RecordListView<R> getView() {
@@ -78,10 +93,14 @@ public abstract class AbstractRecordListActivity<R extends Record> implements
           return;
         }
         recordToRow.clear();
-        for (int i = 0, r = range.getStart(); i < values.size(); i++, r++) {
-          recordToRow.put(values.get(i).getId(), r);
+        idToRecord.clear();
+        for (int i = 0, row = range.getStart(); i < values.size(); i++, row++) {
+          R record = values.get(i);
+          recordToRow.put(record.getId(), row);
+          idToRecord.put(record.getId(), record);
         }
-        getView().asPagingListView().setData(range.getStart(), range.getLength(), values);
+        getView().asPagingListView().setData(range.getStart(),
+            range.getLength(), values);
         if (display != null) {
           display.showActivityWidget(getView());
         }
@@ -96,6 +115,24 @@ public abstract class AbstractRecordListActivity<R extends Record> implements
     view.setDelegate(null);
     view.asPagingListView().setDelegate(null);
     view = null;
+  }
+
+  /**
+   * Select the record if it happens to be visible, or clear the selection if
+   * called with null or "".
+   */
+  public void select(String id) {
+    if (id == null || "".equals(id)) {
+      R selected = selectionModel.getSelectedObject();
+      if (selected != null) {
+        selectionModel.setSelected(selected, false);
+      }
+    } else {
+      R record = idToRecord.get(id);
+      if (record != null) {
+        selectionModel.setSelected(record, true);
+      }
+    }
   }
 
   public void start(Display display) {
@@ -115,8 +152,8 @@ public abstract class AbstractRecordListActivity<R extends Record> implements
 
       case CREATE:
         /*
-         * On create, we presume the new record is at the end of the list,
-         * so fetch the last page of items.
+         * On create, we presume the new record is at the end of the list, so
+         * fetch the last page of items.
          */
         getLastPage();
         break;
@@ -130,6 +167,8 @@ public abstract class AbstractRecordListActivity<R extends Record> implements
   protected abstract RecordListRequest<R> createRangeRequest(Range range);
 
   protected abstract void fireCountRequest(Receiver<Long> callback);
+
+  protected abstract void showDetails(R record);
 
   private void delete(R record) {
     Integer row = recordToRow.get(record.getId());
@@ -167,6 +206,7 @@ public abstract class AbstractRecordListActivity<R extends Record> implements
 
   private void update(R record) {
     Integer row = recordToRow.get(record.getId());
-    getView().asPagingListView().setData(row, 1, Collections.singletonList(record));
+    getView().asPagingListView().setData(row, 1,
+        Collections.singletonList(record));
   }
 }

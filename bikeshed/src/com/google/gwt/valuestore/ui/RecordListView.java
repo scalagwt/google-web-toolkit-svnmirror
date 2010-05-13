@@ -36,11 +36,6 @@ public interface RecordListView<R extends Record> extends IsWidget, PropertyView
    * @param<R> the type of the records to display
    */
   interface Delegate<R extends Record> {
-    /**
-     * @param record the record whose details the user wants to see
-     */
-    void showDetails(R record);
-    
     void createClicked();
   }
 
