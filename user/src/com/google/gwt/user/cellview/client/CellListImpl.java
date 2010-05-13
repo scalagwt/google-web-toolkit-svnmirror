@@ -501,10 +501,17 @@ public abstract class CellListImpl<T> {
           selectedRows.remove(row);
         }
         if (!dependsOnSelection) {
-          // The cell doesn't depend on selection, so we only need to update the
-          // style.
-          setSelected(cellElem, selected);
+          if (cellElem != null) {
+            // TODO: do a better check?
+            // The cell doesn't depend on selection, so we only need to update
+            // the style.
+            setSelected(cellElem, selected);
+          }
         }
+      }
+      if (cellElem == null) {
+        // TODO: do a better check?
+        break;
       }
       cellElem = cellElem.getNextSiblingElement();
       row++;
