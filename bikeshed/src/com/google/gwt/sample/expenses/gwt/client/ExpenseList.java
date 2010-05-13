@@ -326,7 +326,7 @@ public class ExpenseList extends Composite implements
         // Highlight as the user types.
         String text = searchBox.getText();
         if (text.length() > 0) {
-          searchRegExp = RegExp.compile("(" + text + ")", "i");
+          searchRegExp = RegExp.compile("(" + text + ")", "ig");
         } else {
           searchRegExp = null;
         }
@@ -413,6 +413,13 @@ public class ExpenseList extends Composite implements
     };
     final SortableHeader header = new SortableHeader(text);
     allHeaders.add(header);
+
+    // Sort created by default.
+    if (property == ReportRecord.created) {
+      header.setSorted(true);
+      header.setReverseSort(true);
+      orderBy = property.getName() + " DESC";
+    }
 
     header.setUpdater(new ValueUpdater<String>() {
       public void update(String value) {

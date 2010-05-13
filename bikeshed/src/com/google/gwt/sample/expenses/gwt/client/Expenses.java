@@ -18,12 +18,15 @@ package com.google.gwt.sample.expenses.gwt.client;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.sample.bikeshed.style.client.Styles;
 import com.google.gwt.sample.expenses.gwt.request.EmployeeRecord;
 import com.google.gwt.sample.expenses.gwt.request.ExpenseRecord;
 import com.google.gwt.sample.expenses.gwt.request.ExpenseRecordChanged;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
 import com.google.gwt.sample.expenses.gwt.request.ReportRecord;
 import com.google.gwt.sample.expenses.gwt.request.ReportRecordChanged;
+import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.view.client.ProvidesKey;
 
@@ -31,6 +34,56 @@ import com.google.gwt.view.client.ProvidesKey;
  * Entry point for the Expenses app.
  */
 public class Expenses implements EntryPoint {
+
+  /**
+   * An enum describing the approval status.
+   */
+  public static enum Approval {
+    BLANK("", "inherit", Styles.resources().blankIcon()), APPROVED("Approved",
+        "#00aa00", Styles.resources().approvedIcon()), DENIED("Denied",
+        "#ff0000", Styles.resources().deniedIcon());
+
+    /**
+     * Get the {@link Approval} from the specified string.
+     * 
+     * @param approval the approval string
+     * @return the {@link Approval}
+     */
+    public static Approval from(String approval) {
+      if (APPROVED.is(approval)) {
+        return APPROVED;
+      } else if (DENIED.is(approval)) {
+        return DENIED;
+      }
+      return BLANK;
+    }
+
+    private final String color;
+    private final String iconHtml;
+    private final String text;
+
+    private Approval(String text, String color, ImageResource res) {
+      this.text = text;
+      this.color = color;
+      this.iconHtml = AbstractImagePrototype.create(res).getHTML();
+    }
+
+    public String getColor() {
+      return color;
+    }
+
+    public String getIconHtml() {
+      return iconHtml;
+    }
+
+    public String getText() {
+      return text;
+    }
+
+    public boolean is(String compare) {
+      return text.equals(compare);
+    }
+  }
 
   /**
    * The key provider for {@link EmployeeRecord}s.

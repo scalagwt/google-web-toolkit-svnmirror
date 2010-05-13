@@ -33,7 +33,7 @@ public abstract class PhaseAnimation<T> extends Animation {
   /**
    * The duration of the animation used to phase in new rows.
    */
-  private static final int DEFAULT_DURATION = 2000;
+  private static final int DEFAULT_DURATION = 4000;
 
   /**
    * A {@link PhaseAnimation} for {@link CellList}.

@@ -17,6 +17,7 @@ package com.google.gwt.sample.expenses.gwt.client;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.requestfactory.shared.Receiver;
@@ -43,30 +44,35 @@ public class MobileExpenseDetails extends Composite implements MobilePage {
     void onEditExpense(ExpenseRecord expense);
   }
 
-  interface Binder extends UiBinder<Widget, MobileExpenseDetails> { }
+  interface Binder extends UiBinder<Widget, MobileExpenseDetails> {
+  }
+
   private static Binder BINDER = GWT.create(Binder.class);
 
-  @UiField Element nameText, dateText, categoryText, priceText;
+  @UiField
+  Element approvalText, nameText, dateText, categoryText, priceText, reasonRow,
+      reasonText;
 
   private ExpenseRecord expense;
   private final Listener listener;
   private final ExpensesRequestFactory requestFactory;
 
-  public MobileExpenseDetails(Listener listener,
-      HandlerManager eventBus, ExpensesRequestFactory requestFactory) {
+  public MobileExpenseDetails(Listener listener, HandlerManager eventBus,
+      ExpensesRequestFactory requestFactory) {
     this.listener = listener;
     this.requestFactory = requestFactory;
 
-    eventBus.addHandler(ExpenseRecordChanged.TYPE, new ExpenseRecordChanged.Handler() {
-      public void onExpenseRecordChanged(ExpenseRecordChanged event) {
-        if (expense != null) {
-          ExpenseRecord newRecord = event.getRecord();
-          if (newRecord.getId().equals(expense.getId())) {
-            show(newRecord);
+    eventBus.addHandler(ExpenseRecordChanged.TYPE,
+        new ExpenseRecordChanged.Handler() {
+          public void onExpenseRecordChanged(ExpenseRecordChanged event) {
+            if (expense != null) {
+              ExpenseRecord newRecord = event.getRecord();
+              if (newRecord.getId().equals(expense.getId())) {
+                show(newRecord);
+              }
+            }
           }
-        }
-      }
-    });
+        });
 
     initWidget(BINDER.createAndBindUi(this));
   }
@@ -116,9 +122,22 @@ public class MobileExpenseDetails extends Composite implements MobilePage {
 
     DateTimeFormat formatter = DateTimeFormat.getMediumDateFormat();
 
+    Expenses.Approval approval = Expenses.Approval.from(expense.getApproval());
     nameText.setInnerText(expense.getDescription());
     dateText.setInnerText(formatter.format(expense.getCreated()));
     categoryText.setInnerText(expense.getCategory());
     priceText.setInnerText(ExpensesMobile.formatCurrency(expense.getAmount()));
+    approvalText.setInnerHTML(Expenses.Approval.BLANK.equals(approval)
+        ? "Awaiting Review" : approval.getText());
+    approvalText.getStyle().setColor(approval.getColor());
+
+    reasonText.setInnerText(expense.getReasonDenied());
+    if (Expenses.Approval.DENIED.equals(approval)) {
+      // Show the reason denied.
+      reasonRow.getStyle().clearDisplay();
+    } else {
+      // Hide the reason denied.
+      reasonRow.getStyle().setDisplay(Display.NONE);
+    }
   }
 }

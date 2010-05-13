@@ -17,14 +17,11 @@ package com.google.gwt.sample.expenses.gwt.client;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.requestfactory.shared.Receiver;
-import com.google.gwt.resources.client.ImageResource;
-import com.google.gwt.sample.bikeshed.style.client.Styles;
 import com.google.gwt.sample.expenses.gwt.request.ExpenseRecord;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
 import com.google.gwt.sample.expenses.gwt.request.ReportRecord;
 import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.valuestore.shared.Property;
@@ -46,16 +43,6 @@ import java.util.Set;
 public class MobileExpenseList extends Composite implements MobilePage {
 
   /**
-   * String indicating approval.
-   */
-  private static final String APPROVED = "Approved";
-
-  /**
-   * String indicating denial.
-   */
-  private static final String DENIED = "Denied";
-
-  /**
    * The auto refresh interval in milliseconds.
    */
   private static final int REFRESH_INTERVAL = 5000;
@@ -75,23 +62,24 @@ public class MobileExpenseList extends Composite implements MobilePage {
   private class ExpenseCell extends AbstractCell<ExpenseRecord> {
 
     private final String approvedHtml;
+    private final String approvedText = Expenses.Approval.APPROVED.getText();
     private final String blankHtml;
     private final String deniedHtml;
+    private final String deniedText = Expenses.Approval.DENIED.getText();
 
     public ExpenseCell() {
-      Styles.Resources res = Styles.resources();
-      approvedHtml = getImageHtml(res.approvedIcon());
-      blankHtml = getImageHtml(res.blankIcon());
-      deniedHtml = getImageHtml(res.deniedIcon());
+      approvedHtml = Expenses.Approval.APPROVED.getIconHtml();
+      blankHtml = Expenses.Approval.BLANK.getIconHtml();
+      deniedHtml = Expenses.Approval.DENIED.getIconHtml();
     }
 
     @Override
     public void render(ExpenseRecord value, Object viewData, StringBuilder sb) {
       sb.append("<div onclick='' class='item'>");
       String approval = value.getApproval();
-      if (APPROVED.equals(approval)) {
+      if (approvedText.equals(approval)) {
         sb.append(approvedHtml);
-      } else if (DENIED.equals(approval)) {
+      } else if (deniedText.equals(approval)) {
         sb.append(deniedHtml);
       } else {
         sb.append(blankHtml);
@@ -100,11 +88,6 @@ public class MobileExpenseList extends Composite implements MobilePage {
       sb.append(" (");
       sb.append(ExpensesMobile.formatCurrency(value.getAmount()));
       sb.append(")</div>");
-    }
-
-    private String getImageHtml(ImageResource res) {
-      AbstractImagePrototype proto = AbstractImagePrototype.create(res);
-      return proto.getHTML();
     }
   }
 
@@ -234,7 +217,7 @@ public class MobileExpenseList extends Composite implements MobilePage {
           for (ExpenseRecord value : newValues) {
             Object key = expenseAdapter.getKey(value);
             String approval = value.getApproval();
-            if (DENIED.equals(approval)) {
+            if (Expenses.Approval.DENIED.getText().equals(approval)) {
               if (!isInitialData && !knownDeniedKeys.contains(key)) {
                 (new PhaseAnimation.CellListPhaseAnimation<ExpenseRecord>(
                     expenseList, value, expenseAdapter)).run();

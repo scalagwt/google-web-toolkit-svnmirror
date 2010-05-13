@@ -90,16 +90,6 @@ public class ExpenseDetails extends Composite implements
     ExpenseRecordChanged.Handler, ReportRecordChanged.Handler {
 
   /**
-   * String indicating approval.
-   */
-  private static final String APPROVED = "Approved";
-
-  /**
-   * String indicating denial.
-   */
-  private static final String DENIED = "Denied";
-
-  /**
    * The maximum amount that can be approved for a given report.
    */
   private static final int MAX_COST = 250;
@@ -142,6 +132,8 @@ public class ExpenseDetails extends Composite implements
    */
   private class ApprovalCell extends SelectionCell {
 
+    private final String approvedText = Expenses.Approval.APPROVED.getText();
+    private final String deniedText = Expenses.Approval.DENIED.getText();
     private final String errorIconHtml;
     private final String pendingIconHtml;
 
@@ -220,8 +212,8 @@ public class ExpenseDetails extends Composite implements
           }
         }
       }
-      boolean isApproved = APPROVED.equals(renderValue);
-      boolean isDenied = DENIED.equals(renderValue);
+      boolean isApproved = approvedText.equals(renderValue);
+      boolean isDenied = deniedText.equals(renderValue);
 
       // Create the select element.
       sb.append("<select style='background-color:white;");
@@ -237,14 +229,14 @@ public class ExpenseDetails extends Composite implements
       if (isApproved) {
         sb.append(" selected='selected'");
       }
-      sb.append(">").append(APPROVED).append("</option>");
+      sb.append(">").append(approvedText).append("</option>");
 
       // Denied Option.
       sb.append("<option");
       if (isDenied) {
         sb.append(" selected='selected'");
       }
-      sb.append(">").append(DENIED).append("</option>");
+      sb.append(">").append(deniedText).append("</option>");
 
       sb.append("</select>");
 
@@ -778,7 +770,7 @@ public class ExpenseDetails extends Composite implements
     for (ExpenseRecord record : records) {
       double cost = record.getAmount();
       totalCost += cost;
-      if (APPROVED.equals(record.getApproval())) {
+      if (Expenses.Approval.APPROVED.is(record.getApproval())) {
         totalApproved += cost;
       }
     }
@@ -900,7 +892,8 @@ public class ExpenseDetails extends Composite implements
   private void updateExpenseRecord(final ExpenseRecord record, String approval,
       String reasonDenied) {
     // Verify that the total is under the cap.
-    if (APPROVED.equals(approval) && !APPROVED.equals(record.getApproval())) {
+    if (Expenses.Approval.APPROVED.is(approval)
+        && !Expenses.Approval.APPROVED.is(record.getApproval())) {
       double amount = record.getAmount();
       if (amount + totalApproved > MAX_COST) {
         syncCommit(record,
