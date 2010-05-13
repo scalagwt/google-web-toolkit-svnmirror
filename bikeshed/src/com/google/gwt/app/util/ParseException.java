@@ -16,7 +16,7 @@
 package com.google.gwt.app.util;
 
 /**
- * Exception class indicating parsing errors
+ * Exception class indicating parsing errors.
  */
 public class ParseException extends RuntimeException {
 

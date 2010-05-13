@@ -32,12 +32,12 @@ import com.google.gwt.valuestore.shared.PropertyReference;
 import java.util.List;
 
 /**
- * TODO: doc
+ * TODO: doc.
  */
 public class MobileExpenseDetails extends Composite implements MobilePage {
 
   /**
-   * TODO: doc
+   * TODO: doc.
    */
   public interface Listener {
     void onEditExpense(ExpenseRecord expense);

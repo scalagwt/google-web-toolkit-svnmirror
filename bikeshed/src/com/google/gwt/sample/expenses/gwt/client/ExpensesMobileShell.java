@@ -33,7 +33,7 @@ import com.google.gwt.user.client.ui.Widget;
 import java.util.ArrayList;
 
 /**
- * TODO
+ * TODO.
  */
 public class ExpensesMobileShell extends Composite {
 
@@ -63,21 +63,25 @@ public class ExpensesMobileShell extends Composite {
   }
 
   @UiHandler("addButton")
+  @SuppressWarnings("unused")
   void onAdd(ClickEvent evt) {
     topPage().onAdd();
   }
 
   @UiHandler("backButton")
+  @SuppressWarnings("unused")
   void onBack(ClickEvent evt) {
     popPage();
   }
 
   @UiHandler("customButton")
+  @SuppressWarnings("unused")
   void onCustom(ClickEvent evt) {
     topPage().onCustom();
   }
 
   @UiHandler("refreshButton")
+  @SuppressWarnings("unused")
   void onRefresh(ClickEvent evt) {
     topPage().onRefresh(true);
   }

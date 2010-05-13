@@ -33,12 +33,12 @@ import java.util.Date;
 import java.util.Set;
 
 /**
- * TODO
+ * TODO: doc.
  */
 public class MobileExpenseEntry extends Composite implements MobilePage {
 
   /**
-   * TODO
+   * TODO: doc.
    */
   public interface Listener {
     void onExpenseUpdated();
@@ -98,6 +98,7 @@ public class MobileExpenseEntry extends Composite implements MobilePage {
   public void onAdd() {
   }
 
+  @SuppressWarnings("deprecation")
   public void onCustom() {
     deltas.set(ExpenseRecord.description, expense, nameText.getText());
     deltas.set(ExpenseRecord.category, expense, categoryText.getText());
@@ -142,6 +143,7 @@ public class MobileExpenseEntry extends Composite implements MobilePage {
     displayExpense();
   }
   
+  @SuppressWarnings("deprecation")
   private void displayExpense() {
     nameText.setText(expense.getDescription());
     categoryText.setText(expense.getCategory());

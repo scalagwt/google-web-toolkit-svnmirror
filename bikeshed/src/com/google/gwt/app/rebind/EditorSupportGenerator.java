@@ -177,10 +177,10 @@ public class EditorSupportGenerator extends Generator {
         String.class.getName());
 
     writeGetPropertiesMethod(sw, recordType);
-    writeInit(sw, viewType, recordType, logger);
-    writeIsChangedMethod(sw, recordType, viewType, logger);
+    writeInit(sw, viewType, recordType);
+    writeIsChangedMethod(sw, recordType, viewType);
     writeSetEnabledMethod(sw, viewType);
-    writeSetValueMethod(sw, recordType, viewType, generatorContext, logger);
+    writeSetValueMethod(sw, recordType, viewType, logger);
     writeShowErrorsMethod(sw, viewType);
 
     sw.outdent();
@@ -427,7 +427,7 @@ public class EditorSupportGenerator extends Generator {
   }
 
   private void writeInit(SourceWriter sw, JClassType viewType,
-      JClassType recordType, TreeLogger logger) {
+      JClassType recordType) {
     sw.indent();
     sw.println("public void init(final " + viewType.getName() + " view) {");
     sw.indent();
@@ -465,7 +465,7 @@ public class EditorSupportGenerator extends Generator {
   }
 
   private void writeIsChangedMethod(SourceWriter sw, JClassType recordType,
-      JClassType viewType, TreeLogger logger) {
+      JClassType viewType) {
     sw.indent();
     sw.println("public boolean isChanged(" + viewType.getName() + " view) {");
     sw.indent();
@@ -507,7 +507,7 @@ public class EditorSupportGenerator extends Generator {
   }
 
   private void writeSetValueMethod(SourceWriter sw, JClassType recordType,
-      JClassType viewType, GeneratorContext generatorContext, TreeLogger logger)
+      JClassType viewType, TreeLogger logger)
       throws UnableToCompleteException {
     // JClassType stringType = generatorContext.getTypeOracle().findType(
     // "java.lang.String");

@@ -18,7 +18,7 @@ package com.google.gwt.sample.expenses.gwt.client;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * TODO: doc
+ * TODO: doc.
  */
 public interface MobilePage {
 

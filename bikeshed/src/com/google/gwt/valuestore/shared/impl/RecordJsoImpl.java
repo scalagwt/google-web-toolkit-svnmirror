@@ -83,7 +83,7 @@ public class RecordJsoImpl extends JavaScriptObject implements Record {
       return (V) Double.valueOf(getDouble(property.getName()));
     }
     if (Date.class.equals(property.getType())) {
-      double millis = (double) new Date().getTime();
+      double millis = new Date().getTime();
       if (isDefined(property.getName())) {
         millis = getDouble(property.getName());
       }
@@ -159,7 +159,7 @@ public class RecordJsoImpl extends JavaScriptObject implements Record {
       return;
     }
     if (value instanceof Date) {
-      double millis = (double) ((Date) value).getTime();
+      double millis = ((Date) value).getTime();
       setDouble(property.getName(), millis);
       return;
     }

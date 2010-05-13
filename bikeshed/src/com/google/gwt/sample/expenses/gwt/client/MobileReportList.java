@@ -34,12 +34,12 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * TODO
+ * TODO: doc.
  */
 public class MobileReportList extends Composite implements MobilePage {
 
   /**
-   * TODO
+   * TODO: doc.
    */
   public interface Listener {
     void onReportSelected(ReportRecord report);

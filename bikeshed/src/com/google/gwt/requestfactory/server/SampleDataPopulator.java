@@ -36,8 +36,7 @@ import java.io.IOException;
  */
 public class SampleDataPopulator {
 
-  public static void main(String args[]) throws HttpException, JSONException,
-      IOException {
+  public static void main(String args[]) {
     // TODO: cleanup argument processing and error reporting.
     if (args.length < 2) {
       printHelp();
@@ -78,6 +77,7 @@ public class SampleDataPopulator {
     postJsonFile(jsonObject);
   }
 
+  @SuppressWarnings("deprecation")
   private void postJsonFile(JSONObject contentData) throws HttpException,
       IOException, JSONException {
     PostMethod post = new PostMethod(url);

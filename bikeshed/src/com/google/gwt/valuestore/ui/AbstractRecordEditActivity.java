@@ -163,7 +163,7 @@ public abstract class AbstractRecordEditActivity<R extends Record> implements
 
   /**
    * Called to fetch the string token needed to get a new record via
-   * {@link DeltaValueStore#create}
+   * {@link DeltaValueStore#create}.
    */
   protected abstract String getRecordToken();
 

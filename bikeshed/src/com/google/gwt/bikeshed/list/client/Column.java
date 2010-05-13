@@ -146,7 +146,7 @@ public abstract class Column<T, C> implements HasViewData, HasCell<T, C> {
     }
 
     // Call the FieldUpdater after setting the view data.
-    if (delayedValueUpdater.hasNewValue) {
+    if (delayedValueUpdater.hasNewValue()) {
       fieldUpdater.update(index, object, delayedValueUpdater.getNewValue());
     }
   }

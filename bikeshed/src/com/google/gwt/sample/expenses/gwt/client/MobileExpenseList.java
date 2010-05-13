@@ -41,7 +41,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * TODO
+ * TODO: doc.
  */
 public class MobileExpenseList extends Composite implements MobilePage {
 
@@ -61,7 +61,7 @@ public class MobileExpenseList extends Composite implements MobilePage {
   private static final int REFRESH_INTERVAL = 5000;
 
   /**
-   * TODO
+   * TODO: doc.
    */
   public interface Listener {
     void onExpenseSelected(ExpenseRecord expense);

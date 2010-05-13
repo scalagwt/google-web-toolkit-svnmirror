@@ -28,8 +28,8 @@ import com.google.gwt.sample.expenses.gwt.ui.report.ReportListActivity;
 import com.google.gwt.valuestore.ui.AbstractRecordListActivity;
 
 /**
- * The class that knows what {@link Activity} to run when the user goes to a
- * particular {@link ListScaffoldPlace}.
+ * The class that knows what {@link com.google.gwt.app.place.Activity} to run
+ * when the user goes to a particular {@link ListScaffoldPlace}.
  */
 public class ListActivitiesMapper implements ActivityMapper<ListScaffoldPlace> {
   private final ExpensesRequestFactory requests;

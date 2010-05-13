@@ -20,7 +20,7 @@ import com.google.gwt.app.util.DoubleRenderer;
 import com.google.gwt.dom.client.Document;
 
 /**
- * A ValueBox that uses {@link DoubleParser} and {@link DoubleRenderer}
+ * A ValueBox that uses {@link DoubleParser} and {@link DoubleRenderer}.
  */
 public class DoubleBox extends ValueBox<Double> {
 

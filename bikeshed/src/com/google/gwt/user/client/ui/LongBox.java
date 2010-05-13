@@ -20,7 +20,7 @@ import com.google.gwt.app.util.LongRenderer;
 import com.google.gwt.dom.client.Document;
 
 /**
- * A ValueBox that uses {@link LongParser} and {@link LongRenderer}
+ * A ValueBox that uses {@link LongParser} and {@link LongRenderer}.
  */
 public class LongBox extends ValueBox<Long> {
 

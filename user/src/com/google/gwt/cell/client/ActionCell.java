@@ -31,7 +31,7 @@ import com.google.gwt.dom.client.NativeEvent;
 public class ActionCell<C> extends AbstractCell<C> {
 
   /**
-   * TODO: doc
+   * TODO: doc.
    * 
    * @param <T> the type that this delegate acts on
    */
@@ -43,7 +43,7 @@ public class ActionCell<C> extends AbstractCell<C> {
   private final Delegate<C> delegate;
 
   /**
-   * TODO: doc
+   * TODO: doc.
    * 
    * @param message
    * @param delegate

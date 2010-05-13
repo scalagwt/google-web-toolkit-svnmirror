@@ -85,7 +85,6 @@ public final class ReportListActivity extends
     placeController.goTo(new ReportScaffoldPlace(record, Operation.DETAILS));
   }
 
-  
   @Override
   public void start(Display display) {
     this.registration = eventBus.addHandler(ReportRecordChanged.TYPE, new ReportRecordChanged.Handler() {
