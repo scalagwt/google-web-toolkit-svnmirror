@@ -789,7 +789,7 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
     // Update the colspan.
     TableCellElement td = tbodyLoading.getRows().getItem(0).getCells().getItem(
         0);
-    td.setColSpan(columns.size());
+    td.setColSpan(Math.max(1, columns.size()));
     setVisible(tbodyLoading, visible);
   }
 }
