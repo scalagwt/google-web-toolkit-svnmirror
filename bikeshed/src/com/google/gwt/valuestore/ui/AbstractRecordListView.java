@@ -15,9 +15,9 @@
  */
 package com.google.gwt.valuestore.ui;
 
-import com.google.gwt.bikeshed.list.client.CellTable;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;

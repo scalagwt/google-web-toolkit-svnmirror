@@ -21,7 +21,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
@@ -52,6 +51,7 @@ public class LoadExpensesDB implements EntryPoint {
     generateButton = new Button("Generate Data");
     deleteButton = new Button("Delete everything");
     amountTextBox = new TextBox();
+    amountTextBox.setText("20000");
 
     generateButton.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
@@ -74,16 +74,10 @@ public class LoadExpensesDB implements EntryPoint {
     root.add(numEmployeesLabel);
     root.add(numReportsLabel);
     root.add(numExpensesLabel);
-    
-    root.add(new HTML("<br>"));
-    root.add(new HTML("<br>"));
-    root.add(new HTML("<br>"));
-    root.add(new HTML("<br>"));
-    root.add(new HTML("<br>"));
-    root.add(new HTML("<br>"));
 
-    // This button deletes the entire data store -- be careful
-    root.add(deleteButton);
+    // This button deletes a random chunk from the data store -- be careful!
+//    root.add(new HTML("<br><br><br><br><br><br><br><br><br>"));
+//    root.add(deleteButton);
 
     updateCounts();
   }

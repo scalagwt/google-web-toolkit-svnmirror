@@ -15,7 +15,6 @@
  */
 package com.google.gwt.sample.expenses.gwt.client;
 
-import com.google.gwt.bikeshed.tree.client.CellTree;
 import com.google.gwt.dom.client.Style.Overflow;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.Cell;
@@ -26,6 +25,7 @@ import com.google.gwt.requestfactory.shared.Receiver;
 import com.google.gwt.sample.bikeshed.style.client.Styles;
 import com.google.gwt.sample.expenses.gwt.request.EmployeeRecord;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
+import com.google.gwt.user.cellview.client.CellTree;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.valuestore.shared.Property;
 import com.google.gwt.view.client.AsyncListViewAdapter;

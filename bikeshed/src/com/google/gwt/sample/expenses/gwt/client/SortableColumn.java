@@ -15,8 +15,8 @@
  */
 package com.google.gwt.sample.expenses.gwt.client;
 
-import com.google.gwt.bikeshed.list.client.Column;
 import com.google.gwt.cell.client.Cell;
+import com.google.gwt.user.cellview.client.Column;
 
 import java.util.Comparator;
 

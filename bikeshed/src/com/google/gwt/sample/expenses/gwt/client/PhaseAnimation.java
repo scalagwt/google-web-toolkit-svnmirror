@@ -16,9 +16,9 @@
 package com.google.gwt.sample.expenses.gwt.client;
 
 import com.google.gwt.animation.client.Animation;
-import com.google.gwt.bikeshed.list.client.CellList;
-import com.google.gwt.bikeshed.list.client.CellTable;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.user.cellview.client.CellList;
+import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.view.client.ProvidesKey;
 
 import java.util.List;

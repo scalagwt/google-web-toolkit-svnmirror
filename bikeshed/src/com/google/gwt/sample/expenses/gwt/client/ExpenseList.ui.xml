@@ -2,7 +2,7 @@
 <ui:UiBinder
   xmlns:ui="urn:ui:com.google.gwt.uibinder"
   xmlns:g="urn:import:com.google.gwt.user.client.ui"
-  xmlns:l='urn:import:com.google.gwt.bikeshed.list.client'>
+  xmlns:c='urn:import:com.google.gwt.user.cellview.client'>
 
   <ui:with
     field='styles'
@@ -169,7 +169,7 @@
     <g:center>
       <g:ScrollPanel
         styleName='{style.center}'>
-        <l:CellTable
+        <c:CellTable
           addStyleNames='{desktop.table}'
           width='100%'
           ui:field='table' />
@@ -181,7 +181,7 @@
       <g:HTMLPanel>
         <div
           style='position:absolute;right:30px;'>
-          <l:SimplePager
+          <c:SimplePager
             ui:field='pager' />
         </div>
       </g:HTMLPanel>

@@ -1,8 +1,7 @@
 <ui:UiBinder
   xmlns:ui='urn:ui:com.google.gwt.uibinder'
   xmlns:g='urn:import:com.google.gwt.user.client.ui'
-  xmlns:l='urn:import:com.google.gwt.bikeshed.list.client'
-  xmlns:t='urn:import:com.google.gwt.bikeshed.tree.client'
+  xmlns:c='urn:import:com.google.gwt.user.cellview.client'
   xmlns:s='urn:import:com.google.gwt.sample.bikeshed.stocks.client'>
 
   <ui:with field='styles'
@@ -15,7 +14,7 @@
 
     <g:center>
       <g:ScrollPanel styleName="{styles.common.padded}">
-        <l:CellList ui:field='cellList'/>
+        <c:CellList ui:field='cellList'/>
       </g:ScrollPanel>
     </g:center>
   </g:DockLayoutPanel>

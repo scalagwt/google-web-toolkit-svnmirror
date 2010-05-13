@@ -15,13 +15,13 @@
  */
 package com.google.gwt.sample.bikeshed.stocks.client;
 
-import com.google.gwt.bikeshed.list.client.Column;
 import com.google.gwt.cell.client.ButtonCell;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.CurrencyCell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.sample.bikeshed.stocks.shared.StockQuote;
 import com.google.gwt.sample.bikeshed.stocks.shared.Transaction;
+import com.google.gwt.user.cellview.client.Column;
 
 /**
  * Column definitions for the stock demo.
