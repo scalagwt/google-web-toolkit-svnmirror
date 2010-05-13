@@ -500,27 +500,32 @@ public class RequestFactoryServlet extends HttpServlet {
       Set<ConstraintViolation<Object>> violations) throws SecurityException,
       JSONException, IllegalAccessException, InvocationTargetException,
       NoSuchMethodException {
-
+    // id/futureId, the identifying field is sent back from the incoming record.
     JSONObject returnObject = new JSONObject();
-    if (writeOperation == WriteOperation.CREATE && violations != null
-        && !violations.isEmpty()) {
-      // don't send anything back
-    } else {
-      // currently sending back only two properties.
-      for (String propertyName : new String[] {"id", "version"}) {
-        if ("version".equals(propertyName) && violations != null
-            && !violations.isEmpty()) {
-          continue;
-        }
-        returnObject.put(propertyName, getPropertyValueFromDataStore(
-            entityInstance, propertyName));
-      }
-    }
-    if (violations != null && !violations.isEmpty()) {
+    final boolean hasViolations = violations != null && !violations.isEmpty();
+    if (hasViolations) {
       returnObject.put("violations", getViolationsAsJson(violations));
     }
-    if (writeOperation == WriteOperation.CREATE) {
-      returnObject.put("futureId", recordObject.getString("id"));
+    switch (writeOperation) {
+      case CREATE:
+        returnObject.put("futureId", recordObject.getString("id"));
+        if (!hasViolations) {
+          returnObject.put("id", getPropertyValueFromDataStore(entityInstance,
+              "id"));
+          returnObject.put("version", getPropertyValueFromDataStore(
+              entityInstance, "version"));
+        }
+        break;
+      case DELETE:
+        returnObject.put("id", recordObject.getString("id"));
+        break;
+      case UPDATE:
+        returnObject.put("id", recordObject.getString("id"));
+        if (!hasViolations) {
+          returnObject.put("version", getPropertyValueFromDataStore(
+              entityInstance, "version"));
+        }
+        break;
     }
     return returnObject;
   }
@@ -562,8 +567,8 @@ public class RequestFactoryServlet extends HttpServlet {
     return violationsAsJson;
   }
 
-  private Object invokeStaticDomainMethod(Method domainMethod,
-      Object args[]) throws IllegalAccessException, InvocationTargetException {
+  private Object invokeStaticDomainMethod(Method domainMethod, Object args[])
+      throws IllegalAccessException, InvocationTargetException {
     return domainMethod.invoke(null, args);
   }
 
