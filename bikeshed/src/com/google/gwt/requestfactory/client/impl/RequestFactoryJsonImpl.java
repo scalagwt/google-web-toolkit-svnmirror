@@ -23,9 +23,11 @@ import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.requestfactory.shared.Receiver;
+import com.google.gwt.requestfactory.shared.RequestEvent;
 import com.google.gwt.requestfactory.shared.RequestFactory;
 import com.google.gwt.requestfactory.shared.SyncRequest;
 import com.google.gwt.requestfactory.shared.SyncResult;
+import com.google.gwt.requestfactory.shared.RequestEvent.State;
 import com.google.gwt.requestfactory.shared.impl.RequestDataManager;
 import com.google.gwt.valuestore.client.DeltaValueStoreJsonImpl;
 import com.google.gwt.valuestore.client.ValueStoreJsonImpl;
@@ -39,12 +41,14 @@ import java.util.Set;
 public abstract class RequestFactoryJsonImpl implements RequestFactory {
 
   private ValueStoreJsonImpl valueStore;
+  private HandlerManager handlerManager;
 
   /**
    * @param handlerManager
    */
   protected void init(HandlerManager handlerManager, RecordToTypeMap map) {
     this.valueStore = new ValueStoreJsonImpl(handlerManager, map);
+    this.handlerManager = handlerManager;
   }
 
   public void fire(final RequestObject<?> requestObject) {
@@ -54,6 +58,7 @@ public abstract class RequestFactoryJsonImpl implements RequestFactory {
     builder.setCallback(new RequestCallback() {
 
       public void onError(Request request, Throwable exception) {
+        postRequestEvent(State.RECEIVED);
         // shell.error.setInnerText(SERVER_ERROR);
       }
 
@@ -65,12 +70,14 @@ public abstract class RequestFactoryJsonImpl implements RequestFactory {
           // shell.error.setInnerText(SERVER_ERROR + " ("
           // + response.getStatusText() + ")");
         }
+        postRequestEvent(State.RECEIVED);
       }
 
     });
 
     try {
       builder.send();
+      postRequestEvent(State.SENT);
     } catch (RequestException e) {
       // shell.error.setInnerText(SERVER_ERROR + " (" + e.getMessage() +
       // ")");
@@ -99,6 +106,7 @@ public abstract class RequestFactoryJsonImpl implements RequestFactory {
         builder.setCallback(new RequestCallback() {
 
           public void onError(Request request, Throwable exception) {
+            postRequestEvent(State.RECEIVED);
             // shell.error.setInnerText(SERVER_ERROR);
           }
 
@@ -110,11 +118,13 @@ public abstract class RequestFactoryJsonImpl implements RequestFactory {
               // shell.error.setInnerText(SERVER_ERROR + " ("
               // + response.getStatusText() + ")");
             }
+            postRequestEvent(State.RECEIVED);
           }
         });
 
         try {
           builder.send();
+          postRequestEvent(State.SENT);
         } catch (RequestException e) {
           // shell.error.setInnerText(SERVER_ERROR + " (" + e.getMessage() +
           // ")");
@@ -126,5 +136,9 @@ public abstract class RequestFactoryJsonImpl implements RequestFactory {
         return this;
       }
     };
+  }
+
+  private void postRequestEvent(State received) {
+    handlerManager.fireEvent(new RequestEvent(received));
   }
 }

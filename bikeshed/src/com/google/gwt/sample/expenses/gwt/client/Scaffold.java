@@ -25,6 +25,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.requestfactory.shared.RequestEvent;
+import com.google.gwt.requestfactory.shared.RequestEvent.State;
 import com.google.gwt.sample.expenses.gwt.client.place.ListScaffoldPlace;
 import com.google.gwt.sample.expenses.gwt.client.place.ScaffoldPlace;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesEntityTypesProcessor;
@@ -38,11 +40,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+
 /**
  * Application for browsing the entities of the Expenses app.
  */
 public class Scaffold implements EntryPoint {
-
   public void onModuleLoad() {
 
     /* App controllers and services */
@@ -53,6 +55,16 @@ public class Scaffold implements EntryPoint {
     final PlaceController<ScaffoldPlace> placeController = new PlaceController<ScaffoldPlace>(
         eventBus);
 
+    eventBus.addHandler(RequestEvent.TYPE, new RequestEvent.Handler() {      
+      public void onRequestEvent(RequestEvent requestEvent) {
+        if (requestEvent.getState() == State.SENT) {
+          // TODO jaimeyap
+        } else {
+          // TODO jaimeyap
+        }
+      }
+    });
+    
     /* Top level UI */
 
     final ScaffoldShell shell = new ScaffoldShell();
