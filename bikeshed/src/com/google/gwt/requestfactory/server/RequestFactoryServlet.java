@@ -188,53 +188,55 @@ public class RequestFactoryServlet extends HttpServlet {
    * </ol>
    */
   JSONObject updateRecordInDataStore(String recordToken,
-      JSONObject recordObject, WriteOperation writeOperation)
-      throws SecurityException, NoSuchMethodException, IllegalAccessException,
-      InvocationTargetException, JSONException, InstantiationException {
+      JSONObject recordObject, WriteOperation writeOperation) {
 
-    Class<?> entity = tokenToEntityRecord.get(recordToken).entity;
-    Class<? extends Record> record = tokenToEntityRecord.get(recordToken).record;
-    Map<String, Class<?>> propertiesInRecord = getPropertiesFromRecord(record);
-    validateKeys(recordObject, propertiesInRecord.keySet());
-    updatePropertyTypes(propertiesInRecord, entity);
+    try {
+      Class<?> entity = tokenToEntityRecord.get(recordToken).entity;
+      Class<? extends Record> record = tokenToEntityRecord.get(recordToken).record;
+      Map<String, Class<?>> propertiesInRecord = getPropertiesFromRecord(record);
+      validateKeys(recordObject, propertiesInRecord.keySet());
+      updatePropertyTypes(propertiesInRecord, entity);
 
-    // get entityInstance
-    Object entityInstance = getEntityInstance(writeOperation, entity,
-        recordObject.get("id"), propertiesInRecord.get("id"));
+      // get entityInstance
+      Object entityInstance = getEntityInstance(writeOperation, entity,
+          recordObject.get("id"), propertiesInRecord.get("id"));
 
-    // persist
-    Set<ConstraintViolation<Object>> violations = null;
-    if (writeOperation == WriteOperation.DELETE) {
-      entity.getMethod("remove").invoke(entityInstance);
-    } else {
-      Iterator<?> keys = recordObject.keys();
-      while (keys.hasNext()) {
-        String key = (String) keys.next();
-        Class<?> propertyType = propertiesInRecord.get(key);
-        if (writeOperation == WriteOperation.CREATE && ("id".equals(key))) {
-          // ignored. id is assigned by default.
-        } else {
-          Object propertyValue = getPropertyValueFromRequest(recordObject, key,
-              propertyType);
-          propertyValue = getSwizzledObject(propertyValue, propertyType);
-          entity.getMethod(getMethodNameFromPropertyName(key, "set"),
-              propertyType).invoke(entityInstance, propertyValue);
+      // persist
+      Set<ConstraintViolation<Object>> violations = null;
+      if (writeOperation == WriteOperation.DELETE) {
+        entity.getMethod("remove").invoke(entityInstance);
+      } else {
+        Iterator<?> keys = recordObject.keys();
+        while (keys.hasNext()) {
+          String key = (String) keys.next();
+          Class<?> propertyType = propertiesInRecord.get(key);
+          if (writeOperation == WriteOperation.CREATE && ("id".equals(key))) {
+            // ignored. id is assigned by default.
+          } else {
+            Object propertyValue = getPropertyValueFromRequest(recordObject,
+                key, propertyType);
+            propertyValue = getSwizzledObject(propertyValue, propertyType);
+            entity.getMethod(getMethodNameFromPropertyName(key, "set"),
+                propertyType).invoke(entityInstance, propertyValue);
+          }
+        }
+
+        // validations check..
+        ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
+        Validator validator = validatorFactory.getValidator();
+
+        violations = validator.validate(entityInstance);
+        if (violations.isEmpty()) {
+          entity.getMethod("persist").invoke(entityInstance);
         }
       }
 
-      // validations check..
-      ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
-      Validator validator = validatorFactory.getValidator();
-
-      violations = validator.validate(entityInstance);
-      if (violations.isEmpty()) {
-        entity.getMethod("persist").invoke(entityInstance);
-      }
+      // return data back.
+      return getReturnRecord(writeOperation, entityInstance, recordObject,
+          violations);
+    } catch (Exception ex) {
+      return getReturnRecordForException(writeOperation, recordObject, ex);
     }
-
-    // return data back.
-    return getReturnRecord(writeOperation, entityInstance, recordObject,
-        violations);
   }
 
   private Collection<Property<?>> allProperties(Class<? extends Record> clazz) {
@@ -526,6 +528,31 @@ public class RequestFactoryServlet extends HttpServlet {
               entityInstance, "version"));
         }
         break;
+    }
+    return returnObject;
+  }
+
+  private JSONObject getReturnRecordForException(WriteOperation writeOperation,
+      JSONObject recordObject, Exception ex) {
+    JSONObject returnObject = new JSONObject();
+    try {
+      if (writeOperation == WriteOperation.DELETE
+          || writeOperation == WriteOperation.UPDATE) {
+        returnObject.put("id", recordObject.getString("id"));
+      } else {
+        returnObject.put("futureId", recordObject.getString("id"));
+      }
+      // expecting violations to be a JSON object.
+      JSONObject violations = new JSONObject();
+      if (ex instanceof NumberFormatException) {
+        violations.put("Expected a number instead of String", ex.getMessage());
+      } else {
+        violations.put(ex.toString(), ex.getMessage());
+      }
+      returnObject.put("violations", violations);
+    } catch (JSONException e) {
+      // ignore.
+      e.printStackTrace();
     }
     return returnObject;
   }
