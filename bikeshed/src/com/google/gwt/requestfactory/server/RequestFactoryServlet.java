@@ -547,7 +547,7 @@ public class RequestFactoryServlet extends HttpServlet {
       if (ex instanceof NumberFormatException) {
         violations.put("Expected a number instead of String", ex.getMessage());
       } else {
-        violations.put(ex.toString(), ex.getMessage());
+        violations.put("", "unexpected server error");
       }
       returnObject.put("violations", violations);
     } catch (JSONException e) {
