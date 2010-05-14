@@ -18,6 +18,7 @@ package com.google.gwt.user.cellview.client;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.ImageResource;
@@ -311,12 +312,14 @@ public class SimplePager<T> extends AbstractPager<T> {
    */
   protected String createText() {
     // Default text is 1 based.
+    NumberFormat formatter = NumberFormat.getFormat("#,###");
     PagingListView<T> view = getPagingListView();
     int pageStart = view.getPageStart() + 1;
     int pageSize = view.getPageSize();
     int dataSize = view.getDataSize();
     int endIndex = Math.min(dataSize, pageStart + pageSize - 1);
     endIndex = Math.max(pageStart, endIndex);
-    return pageStart + "-" + endIndex + " of " + dataSize;
+    return formatter.format(pageStart) + "-" + formatter.format(endIndex)
+        + " of " + formatter.format(dataSize);
   }
 }

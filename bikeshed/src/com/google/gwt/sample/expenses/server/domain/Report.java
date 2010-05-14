@@ -33,6 +33,11 @@ import javax.persistence.Version;
 @Entity
 public class Report {
 
+  /**
+   * The total number of reports in the database.
+   */
+  private static long REPORT_COUNT = 3750243;
+
   public static long countReports() {
     EntityManager em = entityManager();
     try {
@@ -48,6 +53,9 @@ public class Report {
     try {
       Query query = queryReportsBySearch(em, employeeId, department,
           startsWith, null, true);
+      if (query == null) {
+        return REPORT_COUNT;
+      }
       return ((Number) query.getSingleResult()).longValue();
     } finally {
       em.close();
@@ -142,16 +150,24 @@ public class Report {
    * @param startsWith the starting string
    * @param orderBy the order of the results
    * @param isCount true to query on the count only
-   * @return the query
+   * @return the query, or null to return full report count.
    */
   private static Query queryReportsBySearch(EntityManager em, Long employeeId,
       String department, String startsWith, String orderBy, boolean isCount) {
-    // Construct a query string.
+    // Determine which parameters to include.
     boolean isFirstStatement = true;
     boolean hasEmployee = employeeId != null && employeeId >= 0;
     boolean hasDepartment = !hasEmployee && department != null &&
         department.length() > 0;
     boolean hasStartsWith = startsWith != null && startsWith.length() > 0;
+
+    // If we are counting and we don't have any query parameters, return null
+    // to force #countReportsBySearch to return the full Report count.
+    if (isCount && !hasEmployee && !hasDepartment && !hasStartsWith) {
+      return null;
+    }
+
+    // Construct the query string.
     String retValue = isCount ? "count(o)" : "o";
     String queryString = "select " + retValue + " from Report o";
     if (hasEmployee) {
