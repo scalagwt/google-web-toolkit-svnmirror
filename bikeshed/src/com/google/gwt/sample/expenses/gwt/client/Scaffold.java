@@ -33,6 +33,7 @@ import com.google.gwt.sample.expenses.gwt.request.ExpensesEntityTypesProcessor;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
 import com.google.gwt.sample.expenses.gwt.ui.ListActivitiesMapper;
 import com.google.gwt.sample.expenses.gwt.ui.ScaffoldListPlaceRenderer;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.valuestore.shared.Record;
 
@@ -55,19 +56,25 @@ public class Scaffold implements EntryPoint {
     final PlaceController<ScaffoldPlace> placeController = new PlaceController<ScaffoldPlace>(
         eventBus);
 
-    eventBus.addHandler(RequestEvent.TYPE, new RequestEvent.Handler() {      
-      public void onRequestEvent(RequestEvent requestEvent) {
-        if (requestEvent.getState() == State.SENT) {
-          // TODO jaimeyap
-        } else {
-          // TODO jaimeyap
-        }
-      }
-    });
-    
+
     /* Top level UI */
 
     final ScaffoldShell shell = new ScaffoldShell();
+
+    /* Display loading notifications when we touch the network. */
+
+    eventBus.addHandler(RequestEvent.TYPE, new RequestEvent.Handler() {
+      // Only show loading status if a request isn't serviced in 250ms.
+      private static final int LOADING_TIMEOUT = 250;
+
+      public void onRequestEvent(RequestEvent requestEvent) {
+        if (requestEvent.getState() == State.SENT) {
+          shell.getMole().showDelayed(LOADING_TIMEOUT);
+        } else {
+          shell.getMole().hide();
+        }
+      }
+    });
 
     /* Left side lets us pick from all the types of entities */
 
