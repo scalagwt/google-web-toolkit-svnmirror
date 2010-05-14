@@ -424,8 +424,8 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
       }
 
       @Override
-      protected void renderChildContents(String html) {
-        tbody = TABLE_IMPL.renderSectionContents(tbody, html);
+      protected Element renderChildContents(String html) {
+        return (tbody = TABLE_IMPL.renderSectionContents(tbody, html));
       }
 
       @Override

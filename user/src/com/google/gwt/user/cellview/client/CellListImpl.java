@@ -44,7 +44,7 @@ public abstract class CellListImpl<T> {
   /**
    * The Element that holds the rendered child items.
    */
-  private final Element childContainer;
+  private Element childContainer;
 
   /**
    * The local cache of data in the view. The 0th index in the list corresponds
@@ -279,7 +279,7 @@ public abstract class CellListImpl<T> {
       String newContents = sb.toString();
       if (!newContents.equals(lastContents)) {
         lastContents = newContents;
-        renderChildContents(newContents);
+        childContainer = renderChildContents(newContents);
       }
     } else {
       lastContents = null;
@@ -316,6 +316,7 @@ public abstract class CellListImpl<T> {
     }
     dataSizeInitialized = true;
     this.dataSize = size;
+    this.lastContents = null;
     updateDataAndView();
     onSizeChanged();
   }
@@ -467,9 +468,11 @@ public abstract class CellListImpl<T> {
    * Set the contents of the child container.
    * 
    * @param html the html to render in the child
+   * @return the new child container
    */
-  protected void renderChildContents(String html) {
+  protected Element renderChildContents(String html) {
     childContainer.setInnerHTML(html);
+    return childContainer;
   }
 
   /**
