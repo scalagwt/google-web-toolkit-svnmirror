@@ -69,8 +69,7 @@ public class MobileReportList extends Composite implements MobilePage {
     reportList = new CellList<ReportRecord>(new AbstractCell<ReportRecord>() {
       @Override
       public void render(ReportRecord value, Object viewData, StringBuilder sb) {
-        sb.append("<div onclick='' class='item'>" + value.getPurpose()
-            + "</div>");
+        sb.append("<div class='item'>" + value.getPurpose() + "</div>");
       }
     });
 

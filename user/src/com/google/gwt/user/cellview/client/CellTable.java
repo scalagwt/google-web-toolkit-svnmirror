@@ -388,7 +388,7 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
           T value = values.get(i - start);
           boolean isSelected = (selectionModel == null || value == null)
               ? false : selectionModel.isSelected(value);
-          sb.append("<tr __idx='").append(i).append("'");
+          sb.append("<tr onclick='' __idx='").append(i).append("'");
           sb.append(" class='");
           sb.append(i % 2 == 0 ? style.evenRow() : style.oddRow());
           if (isSelected) {
@@ -639,7 +639,7 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
           providesKey);
 
       // Update selection.
-      if (isSelectionEnabled && event.getTypeInt() == Event.ONMOUSEDOWN) {
+      if (isSelectionEnabled && event.getTypeInt() == Event.ONCLICK) {
         SelectionModel<? super T> selectionModel = impl.getSelectionModel();
         if (selectionModel != null) {
           selectionModel.setSelected(value, true);

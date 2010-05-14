@@ -1,19 +1,26 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder
   xmlns:ui='urn:ui:com.google.gwt.uibinder'
+  xmlns:m='urn:import:com.google.gwt.mobile.client'
   xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
   <ui:style field='mobile' src='mobile.css'/>
 
-  <g:HTMLPanel>
-    <div class='{mobile.bar}'>
-      <g:HTML ui:field='backButton' styleName='{mobile.backButton}'><div>Back</div></g:HTML>
-      <g:HTML ui:field='addButton' styleName='{mobile.button}'><img src='images/add.png'/></g:HTML>
-      <g:HTML ui:field='customButton' styleName='{mobile.customButton}'/>
-      <g:HTML ui:field='refreshButton' styleName='{mobile.button}'><img src='images/refresh.png'/></g:HTML>
-      <div class='{mobile.title}' ui:field='titleSpan'>Expenses</div>
-    </div>
+  <g:DockLayoutPanel unit='PX'>
+    <g:north size='44'>
+      <g:HTMLPanel>
+        <div class='{mobile.bar}'>
+          <g:HTML ui:field='backButton' styleName='{mobile.backButton}'><div>Back</div></g:HTML>
+          <g:HTML ui:field='addButton' styleName='{mobile.button}'><img src='images/add.png'/></g:HTML>
+          <g:HTML ui:field='customButton' styleName='{mobile.customButton}'/>
+          <g:HTML ui:field='refreshButton' styleName='{mobile.button}'><img src='images/refresh.png'/></g:HTML>
+          <div class='{mobile.title}' ui:field='titleSpan'>Expenses</div>
+        </div>
+      </g:HTMLPanel>
+    </g:north>
 
-    <g:SimplePanel ui:field='container'/>
-  </g:HTMLPanel>
+    <g:center>
+      <m:MobileScrollPanel ui:field='container'/>
+    </g:center>
+  </g:DockLayoutPanel>
 </ui:UiBinder>

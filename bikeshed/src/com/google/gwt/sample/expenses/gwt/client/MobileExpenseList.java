@@ -75,7 +75,7 @@ public class MobileExpenseList extends Composite implements MobilePage {
 
     @Override
     public void render(ExpenseRecord value, Object viewData, StringBuilder sb) {
-      sb.append("<div onclick='' class='item'>");
+      sb.append("<div class='item'>");
       String approval = value.getApproval();
       if (approvedText.equals(approval)) {
         sb.append(approvedHtml);

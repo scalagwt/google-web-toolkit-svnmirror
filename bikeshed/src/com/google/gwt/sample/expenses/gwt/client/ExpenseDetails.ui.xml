@@ -1,6 +1,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM 'http://dl.google.com/gwt/DTD/xhtml.ent'>
 <ui:UiBinder
   xmlns:ui='urn:ui:com.google.gwt.uibinder'
+  xmlns:m='urn:import:com.google.gwt.mobile.client'
   xmlns:g='urn:import:com.google.gwt.user.client.ui'
   xmlns:c='urn:import:com.google.gwt.user.cellview.client'>
 
@@ -256,12 +257,12 @@
     </g:north>
 
     <g:center>
-      <g:ScrollPanel>
+      <m:MobileScrollPanel>
         <c:CellTable
           addStyleNames='{desktop.table}'
           width='100%'
           ui:field='table' />
-      </g:ScrollPanel>
+      </m:MobileScrollPanel>
     </g:center>
   </g:DockLayoutPanel>
 

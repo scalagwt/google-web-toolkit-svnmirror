@@ -19,7 +19,7 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
-import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.RootLayoutPanel;
 
 /**
  * Entry point for the mobile version of the Expenses app.
@@ -66,6 +66,6 @@ public class ExpensesMobile implements EntryPoint {
 
     final ExpensesMobileShell shell = new ExpensesMobileShell(eventBus,
         requestFactory);
-    RootPanel.get().add(shell);
+    RootLayoutPanel.get().add(shell);
   }
 }

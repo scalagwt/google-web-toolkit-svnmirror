@@ -2,14 +2,12 @@
 <ui:UiBinder
   xmlns:ui='urn:ui:com.google.gwt.uibinder'
   xmlns:g='urn:import:com.google.gwt.user.client.ui'
+  xmlns:m='urn:import:com.google.gwt.mobile.client'
   xmlns:e='urn:import:com.google.gwt.sample.expenses.gwt.client'>
 
-  <ui:with
-    field='styles'
-    type='com.google.gwt.sample.bikeshed.style.client.Styles' />
+  <ui:with field='styles' type='com.google.gwt.sample.bikeshed.style.client.Styles' />
 
-  <ui:image
-    field='logo' />
+  <ui:image field='logo' />
 
   <ui:style>
     @sprite .logo {
@@ -33,24 +31,15 @@
     }
   </ui:style>
 
-  <g:DockLayoutPanel
-    unit='PX'>
-    <g:north
-      size='96'>
-      <g:HTMLPanel
-        styleName='{style.title}'>
-        <table
-          height='100%'
-          cellpadding='8'
-          cellspacing='0'>
+  <g:DockLayoutPanel unit='PX'>
+    <g:north size='96'>
+      <g:HTMLPanel styleName='{style.title}'>
+        <table height='100%' cellpadding='8' cellspacing='0'>
           <tr>
             <td>
-              <div
-                class='{style.logo}' />
+              <div class='{style.logo}' />
             </td>
-            <td
-              class='{style.titleText}'
-              valign='middle'>
+            <td class='{style.titleText}' valign='middle'>
               Expense Reports
             </td>
           </tr>
@@ -58,26 +47,22 @@
       </g:HTMLPanel>
     </g:north>
 
-    <g:center>
-      <g:DockLayoutPanel
-        ui:field='dockLayout'>
-        <g:west
-          size='225'>
-          <e:ExpenseTree
-            addStyleNames='{style.expenseTree}'
-            ui:field='expenseTree' />
-        </g:west>
-        <g:center>
-          <g:LayoutPanel
-            ui:field='layoutPanel'>
-            <g:layer>
-              <e:ExpenseList
-                ui:field='expenseList' />
-            </g:layer>
-          </g:LayoutPanel>
-        </g:center>
-      </g:DockLayoutPanel>
-    </g:center>
+  <g:center>
+    <g:DockLayoutPanel ui:field='dockLayout'>
+      <g:west size='225'>
+        <m:MobileScrollPanel addStyleNames='{style.expenseTree}'>
+          <e:ExpenseTree ui:field='expenseTree' />
+        </m:MobileScrollPanel>
+      </g:west>
+      <g:center>
+        <g:LayoutPanel ui:field='layoutPanel'>
+          <g:layer>
+            <e:ExpenseList ui:field='expenseList' />
+          </g:layer>
+        </g:LayoutPanel>
+      </g:center>
+    </g:DockLayoutPanel>
+  </g:center>
   </g:DockLayoutPanel>
 
 </ui:UiBinder>

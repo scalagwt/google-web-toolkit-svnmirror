@@ -155,7 +155,7 @@ public class CellList<T> extends Widget implements PagingListView<T> {
           T value = values.get(i - start);
           boolean isSelected = selectionModel == null ? false
               : selectionModel.isSelected(value);
-          sb.append("<div __idx='").append(i).append("'");
+          sb.append("<div onclick='' __idx='").append(i).append("'");
           sb.append(" class='");
           sb.append(i % 2 == 0 ? style.evenItem() : style.oddItem());
           if (isSelected) {
@@ -252,7 +252,7 @@ public class CellList<T> extends Widget implements PagingListView<T> {
       int idx = Integer.parseInt(idxString);
       T value = impl.getData().get(idx - impl.getPageStart());
       cell.onBrowserEvent(target, value, null, event, valueUpdater);
-      if (event.getTypeInt() == Event.ONMOUSEDOWN && !cell.consumesEvents()) {
+      if (event.getTypeInt() == Event.ONCLICK && !cell.consumesEvents()) {
         SelectionModel<? super T> selectionModel = impl.getSelectionModel();
         if (selectionModel != null) {
           selectionModel.setSelected(value, true);

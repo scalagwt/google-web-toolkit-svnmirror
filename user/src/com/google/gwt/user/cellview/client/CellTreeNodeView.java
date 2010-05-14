@@ -256,7 +256,7 @@ class CellTreeNodeView<T> extends UIObject {
             sb.append("'>");
 
             // Inner div contains image and value.
-            sb.append("<div style='position:relative;padding-left:");
+            sb.append("<div onclick='' style='position:relative;padding-left:");
             sb.append(imageWidth);
             sb.append("px;' class='").append(itemImageValueStyle);
             if (isRootNode) {
