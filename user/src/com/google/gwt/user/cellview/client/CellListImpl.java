@@ -201,6 +201,7 @@ public abstract class CellListImpl<T> {
    * Redraw the list with the current data.
    */
   public void redraw() {
+    lastContents = null;
     scheduleRefresh(true);
   }
 

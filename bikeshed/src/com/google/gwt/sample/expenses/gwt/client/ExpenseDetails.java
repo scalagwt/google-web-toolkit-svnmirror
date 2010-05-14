@@ -58,16 +58,15 @@ import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.client.ui.FlexTable.FlexCellFormatter;
 import com.google.gwt.valuestore.shared.DeltaValueStore;
 import com.google.gwt.valuestore.shared.Property;
 import com.google.gwt.valuestore.shared.Record;
@@ -270,31 +269,27 @@ public class ExpenseDetails extends Composite implements
     });
 
     private ExpenseRecord expenseRecord;
-    private FlexTable layout = new FlexTable();
     private TextBox reasonBox = new TextBox();
     private String reasonDenied;
 
     public DenialPopup() {
       super(false, true);
+      setStyleName(Styles.common().popupPanel());
       setGlassEnabled(true);
-      setWidget(layout);
-
       confirmButton.setWidth("11ex");
       cancelButton.setWidth("11ex");
-      reasonBox.getElement().getStyle().setMarginTop(8.0, Unit.PX);
-      reasonBox.getElement().getStyle().setMarginBottom(8.0, Unit.PX);
+      reasonBox.getElement().getStyle().setMarginLeft(10.0, Unit.PX);
+      reasonBox.getElement().getStyle().setMarginRight(10.0, Unit.PX);
 
-      FlexCellFormatter formatter = layout.getFlexCellFormatter();
-      layout.setHTML(0, 0, "Reason for denial:");
-      layout.setWidget(1, 0, reasonBox);
-      HorizontalPanel p = new HorizontalPanel();
-      p.add(confirmButton);
-      p.add(new HTML("&nbsp;"));
-      p.add(cancelButton);
-      layout.setWidget(2, 0, p);
-      formatter.setHorizontalAlignment(2, 0,
-          HasHorizontalAlignment.ALIGN_CENTER);
-      setStyleName(Styles.common().popupPanel());
+      HorizontalPanel hPanel = new HorizontalPanel();
+      hPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+      hPanel.add(new HTML("<b>Reason:</b>"));
+      hPanel.add(reasonBox);
+      hPanel.add(confirmButton);
+      hPanel.add(cancelButton);
+      setWidget(hPanel);
+      cancelButton.getElement().getParentElement().getStyle().setPaddingLeft(
+          5.0, Unit.PX);
     }
 
     public ExpenseRecord getExpenseRecord() {
@@ -897,8 +892,8 @@ public class ExpenseDetails extends Composite implements
       double amount = record.getAmount();
       if (amount + totalApproved > MAX_COST) {
         syncCommit(record,
-            "The total approved amount for an Expense Report cannot exceed $"
-                + MAX_COST);
+            "The total approved amount for an expense report cannot exceed $"
+                + MAX_COST + ".");
         return;
       }
     }

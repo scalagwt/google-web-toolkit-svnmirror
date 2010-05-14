@@ -82,17 +82,19 @@ h1 {
   width: 250px;
 }
 .expenseDetailsErrorPopupMessage {
-  padding-bottom: 20px;
+  width: 300px;
+  padding-bottom: 10px;
   font-size: 130%;
   color: red;
+  text-align: center;
 }
 
 .popupPanel {
-  border: 8px solid white;
+  border: 3px solid white;
   border-right: 11px solid white;
   border-bottom: 11px solid white;
-  -webkit-border-image: url(blueborder.png) 8 11 11 8 round round;
-  -moz-border-image: url(blueborder.png) 8 11 11 8 round round;
+  -webkit-border-image: url(blueborder.png) 3 11 11 3 round round;
+  -moz-border-image: url(blueborder.png) 3 11 11 3 round round;
   padding: 10px;
 }
 
