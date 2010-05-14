@@ -149,7 +149,8 @@ public class Report {
     // Construct a query string.
     boolean isFirstStatement = true;
     boolean hasEmployee = employeeId != null && employeeId >= 0;
-    boolean hasDepartment = department != null && department.length() > 0;
+    boolean hasDepartment = !hasEmployee && department != null &&
+        department.length() > 0;
     boolean hasStartsWith = startsWith != null && startsWith.length() > 0;
     String retValue = isCount ? "count(o)" : "o";
     String queryString = "select " + retValue + " from Report o";
