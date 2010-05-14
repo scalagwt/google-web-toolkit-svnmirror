@@ -46,40 +46,6 @@ import com.google.gwt.user.client.Window;
 public class TouchHandler implements EventListener {
 
   /**
-   * This would not be safe on all browsers, but none of the WebKit browsers
-   * that actually support touch events have the kinds of memory leak problems
-   * that this would trigger. And they all support event capture.
-   */
-  private static native void addEventListener(Element elem, String name,
-      EventListener listener, boolean capture) /*-{
-    elem.addEventListener(name, function(e) {
-      listener.@com.google.gwt.user.client.EventListener::onBrowserEvent(Lcom/google/gwt/user/client/Event;)(e);
-    }, capture);
-  }-*/;
-
-  /**
-   * Delegate to receive touch events.
-   */
-  public interface TouchDelegate {
-
-    /**
-     * The object has received a touchend event.
-     *
-     * @param e The touchend event.
-     */
-    void onTouchEnd(TouchEvent e);
-
-    /**
-     * The object has received a touchstart event.
-     *
-     * @param e The touchstart event.
-     * @return true if you want to allow a drag sequence to begin,
-     *      false you want to disable dragging for the duration of this touch.
-     */
-    boolean onTouchStart(TouchEvent e);
-  }
-
-  /**
    * Delegate to receive drag events.
    */
   public interface DragDelegate {
@@ -107,28 +73,26 @@ public class TouchHandler implements EventListener {
   }
 
   /**
-   * Threshold in pixels within which to bust clicks.
+   * Delegate to receive touch events.
    */
-  private static final int CLICK_BUST_THRESHOLD = 25;
+  public interface TouchDelegate {
 
-  /**
-   * Minimum movement of touch required to be considered a drag.
-   */
-  private static final double MIN_TRACKING_FOR_DRAG = 5;
+    /**
+     * The object has received a touchend event.
+     *
+     * @param e The touchend event.
+     */
+    void onTouchEnd(TouchEvent e);
 
-  /**
-   * The number of ms to wait during a drag before updating the reported start
-   * position of the drag.
-   */
-  private static final double MAX_TRACKING_TIME = 200;
-
-  /**
-   * The threshold for when to start tracking whether a touch has left the
-   * bottom of the browser window. Used to implement a workaround for a mobile
-   * safari bug on the iPhone where a touchend event will never be fired if the
-   * touch goes past the bottom of the window.
-   */
-  private static final double TOUCH_END_WORKAROUND_THRESHOLD = 20;
+    /**
+     * The object has received a touchstart event.
+     *
+     * @param e The touchstart event.
+     * @return true if you want to allow a drag sequence to begin,
+     *      false you want to disable dragging for the duration of this touch.
+     */
+    boolean onTouchStart(TouchEvent e);
+  }
 
   /**
    * Whether or not the browser supports touches.
@@ -136,16 +100,14 @@ public class TouchHandler implements EventListener {
   private static final boolean SUPPORTS_TOUCHES = supportsTouch();
 
   /**
-   * Start event name.
+   * Cancel event name.
    */
-  private static final String START_EVENT = SUPPORTS_TOUCHES ? "touchstart"
-      : "mousedown";
+  private static final String CANCEL_EVENT = "touchcancel";
 
   /**
-   * Move event name.
+   * Threshold in pixels within which to bust clicks.
    */
-  private static final String MOVE_EVENT = SUPPORTS_TOUCHES ? "touchmove"
-      : "mousemove";
+  private static final int CLICK_BUST_THRESHOLD = 25;
 
   /**
    * End event name.
@@ -154,9 +116,35 @@ public class TouchHandler implements EventListener {
       : "mouseup";
 
   /**
-   * Cancel event name.
+   * The number of ms to wait during a drag before updating the reported start
+   * position of the drag.
    */
-  private static final String CANCEL_EVENT = "touchcancel";
+  private static final double MAX_TRACKING_TIME = 200;
+
+  /**
+   * Minimum movement of touch required to be considered a drag.
+   */
+  private static final double MIN_TRACKING_FOR_DRAG = 5;
+
+  /**
+   * Move event name.
+   */
+  private static final String MOVE_EVENT = SUPPORTS_TOUCHES ? "touchmove"
+      : "mousemove";
+
+  /**
+   * Start event name.
+   */
+  private static final String START_EVENT = SUPPORTS_TOUCHES ? "touchstart"
+      : "mousedown";
+
+  /**
+   * The threshold for when to start tracking whether a touch has left the
+   * bottom of the browser window. Used to implement a workaround for a mobile
+   * safari bug on the iPhone where a touchend event will never be fired if the
+   * touch goes past the bottom of the window.
+   */
+  private static final double TOUCH_END_WORKAROUND_THRESHOLD = 20;
 
   /**
    * Get touch from event. Supports desktop events by returning the event that
@@ -186,35 +174,34 @@ public class TouchHandler implements EventListener {
     return android || !!('createTouch' in document);
   }-*/;
 
+  /**
+   * This would not be safe on all browsers, but none of the WebKit browsers
+   * that actually support touch events have the kinds of memory leak problems
+   * that this would trigger. And they all support event capture.
+   */
+  private static native void addEventListener(Element elem, String name,
+      EventListener listener, boolean capture) /*-{
+    elem.addEventListener(name, function(e) {
+      listener.@com.google.gwt.user.client.EventListener::onBrowserEvent(Lcom/google/gwt/user/client/Event;)(e);
+    }, capture);
+  }-*/;
+
+  private boolean bustNextClick;
+  private DragDelegate dragDelegate;
+
   private Element element;
-  private Timer scrollOffTimer;
-
-  /**
-   * The absolute sum of all touch x/y deltas.
-   */
-  private double totalMoveX, totalMoveY = 0;
-
-  private boolean touching, tracking, dragging;
-  private TouchEvent lastEvent;
-  private Point startTouchPosition;
-
-  /**
-   * The coordinate of the most recent relevant touch event. For most drag
-   * sequences this will be the same as the startCoordinate. If the touch
-   * gesture changes direction significantly or pauses for a while this
-   * coordinate will be updated to the coordinate of the last touchmove event.
-   */
-  private Point recentTouchPosition;
-
-  /**
-   * The touch position of the last event before the touchend event.
-   */
-  private Point endTouchPosition;
 
   /**
    * Start/end time of the touchstart event.
    */
   private double endTime;
+  /**
+   * The touch position of the last event before the touchend event.
+   */
+  private Point endTouchPosition;
+  private TouchEvent lastEvent;
+
+  private Point lastTouchPosition;
 
   /**
    * The time of the most recent relevant occurence. For most drag sequences
@@ -224,29 +211,28 @@ public class TouchHandler implements EventListener {
    */
   private double recentTime;
 
-  private Point lastTouchPosition;
-  private DragDelegate dragDelegate;
+  /**
+   * The coordinate of the most recent relevant touch event. For most drag
+   * sequences this will be the same as the startCoordinate. If the touch
+   * gesture changes direction significantly or pauses for a while this
+   * coordinate will be updated to the coordinate of the last touchmove event.
+   */
+  private Point recentTouchPosition;
+
+  private Timer scrollOffTimer;
+
+  private Point startTouchPosition;
+  /**
+   * The absolute sum of all touch x/y deltas.
+   */
+  private double totalMoveX, totalMoveY = 0;
   private TouchDelegate touchDelegate;
-  private boolean bustNextClick;
+  private boolean touching, tracking, dragging;
 
   public TouchHandler(Element elem) {
     this.element = elem;
     this.totalMoveY = 0;
     this.totalMoveX = 0;
-  }
-
-  /**
-   * Sets the delegate to receive drag events.
-   */
-  public void setDragDelegate(DragDelegate dragDelegate) {
-    this.dragDelegate = dragDelegate;
-  }
-
-  /**
-   * Sets the delegate to receive touch events.
-   */
-  public void setTouchDelegate(TouchDelegate touchDelegate) {
-    this.touchDelegate = touchDelegate;
   }
 
   /**
@@ -307,6 +293,20 @@ public class TouchHandler implements EventListener {
         bustNextClick = false;
       }
     }
+  }
+
+  /**
+   * Sets the delegate to receive drag events.
+   */
+  public void setDragDelegate(DragDelegate dragDelegate) {
+    this.dragDelegate = dragDelegate;
+  }
+
+  /**
+   * Sets the delegate to receive touch events.
+   */
+  public void setTouchDelegate(TouchDelegate touchDelegate) {
+    this.touchDelegate = touchDelegate;
   }
 
   /**

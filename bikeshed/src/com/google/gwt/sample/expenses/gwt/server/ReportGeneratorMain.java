@@ -25,76 +25,111 @@ import java.util.Date;
  */
 public class ReportGeneratorMain {
 
-  protected static final int MAX_REPORTS = 100000;
+  protected static final int MAX_REPORTS = 18000000;
+  protected static final int REPORTS_PER_DIR = 1000000;
   protected static final int VERSION = 1;
+  
+  static int index = 0;
+  static PrintWriter empWriter;
+  static PrintWriter repWriter;
+  static PrintWriter expWriter;
+  static String startDate = null;
+  
+  static void makeOutputDir() {
+    try {
+      if (startDate == null) {
+        startDate = dateToString(new Date());
+      }
+      String dir = "/auto/gwt/io-expenses-" + MAX_REPORTS + "-" + twoDigit(index++) + "-" + startDate;
+      new File(dir).mkdirs();
+      if (empWriter != null) {
+        empWriter.close();
+      }
+      if (repWriter != null) {
+        repWriter.close();
+      }
+      if (expWriter != null) {
+        expWriter.close();
+      }
+      empWriter = new PrintWriter(dir + "/Employee.csv");
+      repWriter = new PrintWriter(dir + "/Report.csv");
+      expWriter = new PrintWriter(dir + "/Expense.csv");
+      empWriter.println("userName,displayName,supervisorKey,VERSION,key,department,password");
+      repWriter.println("created,notes,VERSION,approvedSupervisorKey,key,reporterKey,purposeLowerCase,purpose,department");
+      expWriter.println("category,description,reasonDenied,amount,VERSION,reportId,key,created,approval");
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
   
   /**
    * @param args
    */
-  public static void main(String[] args) throws IOException {
-    String dir = "io-expenses-" + MAX_REPORTS + dateToString(new Date());
-    new File("/home/rice/www/" + dir).mkdir();
-    final PrintWriter empWriter = new PrintWriter("/home/rice/www/" + dir + "/employees.csv");
-    final PrintWriter repWriter = new PrintWriter("/home/rice/www/" + dir + "/reports.csv");
-    final PrintWriter expWriter = new PrintWriter("/home/rice/www/" + dir + "/expenses.csv");
-    
-    ReportGenerator reportGenerator = new ReportGenerator() {
-      long empids = 1L;
-      long expids = 1000000000L;
-      long repids = 2000000000L;
-      
-      @Override
-      public boolean shouldContinue() {
-        return getNumReports() < MAX_REPORTS;
-      }
-      
-      @Override
-      public long storeEmployee(EmployeeDTO employee) {
-        long id = empids++;
-        // userName,displayName,supervisorKey,VERSION,key,department,password
-        empWriter.println(employee.userName + "," + employee.displayName + ","
-            + employee.supervisorKey + "," + VERSION + "," + id + ","
-            + employee.department + ",");
-        return id;
-      }
-      
-      @Override
-      public long storeExpense(ExpenseDTO expense) {
-        long id = expids++;
-        // category,description,reasonDenied,amount,VERSION,reportId,key,created,approval"
-        expWriter.println(expense.category + "," + expense.description + ",," + expense.amount + ","
-            + VERSION + "," + expense.reportId + "," + id + "," + dateToString(expense.created)
-            + ",");
-        return id;
+  public static void main(String[] args) throws Exception {
+    try {
+      makeOutputDir();
+
+      ReportGenerator reportGenerator = new ReportGenerator() {
+        long allids = 10684381L;
+
+        @Override
+        public boolean shouldContinue() {
+          return getNumReports() < MAX_REPORTS;
+        }
+
+        @Override
+        public long storeEmployee(EmployeeDTO employee) {
+          // Start a new output directory every 1M reports
+          if (getNumReports() >= REPORTS_PER_DIR * index) {
+            ReportGeneratorMain.makeOutputDir();
+          }
+          
+          long id = allids++;
+          // userName,displayName,supervisorKey,VERSION,key,department,password
+          empWriter.println(employee.userName + "," + employee.displayName + ","
+              + employee.supervisorKey + "," + VERSION + "," + id + ","
+              + employee.department + ",");
+          return id;
+        }
+
+        @Override
+        public long storeExpense(ExpenseDTO expense) {
+          long id = allids++;
+          // category,description,reasonDenied,amount,VERSION,reportId,key,created,approval"
+          expWriter.println(expense.category + "," + expense.description + ",," + expense.amount + ","
+              + VERSION + "," + expense.reportId + "," + id + "," + dateToString(expense.created)
+              + ",");
+          return id;
+        }
+
+        @Override
+        public long storeReport(ReportDTO report) {          
+          long id = allids++;
+          // created,notes,VERSION,approvedSupervisorKey,key,reporterKey,purposeLowerCase,purpose,department
+          repWriter.println(dateToString(report.created) + ",\"" + report.notes + "\"," + VERSION + ","
+              + report.approvedSupervisorKey + "," + id + "," + report.reporterKey + ",\""
+              + report.purpose.toLowerCase() + "\",\"" + report.purpose + "\"," + report.department);
+          return id;
+        }
+      };
+
+      reportGenerator.init("/home/rice/www/dist.all.last.txt",
+          "/home/rice/www/dist.female.first.txt",
+      "/home/rice/www/dist.male.first.txt");
+
+      // Use same manager for everyone
+      long supervisorId = 1;
+      while (reportGenerator.shouldContinue()) {
+        int department = reportGenerator.getDepartment();
+        reportGenerator.makeEmployee(department, supervisorId);
       }
 
-      @Override
-      public long storeReport(ReportDTO report) {
-        long id = repids++;
-        // created,notes,VERSION,approvedSupervisorKey,key,reporterKey,purposeLowerCase,purpose,department
-        repWriter.println(dateToString(report.created) + ",\"" + report.notes + "\"," + VERSION + ","
-            + report.approvedSupervisorKey + "," + id + "," + report.reporterKey + ",\""
-            + report.purpose.toLowerCase() + "\",\"" + report.purpose + "\"," + report.department);
-        return id;
-      }
-    };
-
-    empWriter.println("userName,displayName,supervisorKey,VERSION,key,department,password");
-    repWriter.println("created,notes,VERSION,approvedSupervisorKey,key,reporterKey,purposeLowerCase,purpose,department");
-    expWriter.println("category,description,reasonDenied,amount,VERSION,reportId,key,created,approval");
-
-    reportGenerator.init("/home/rice/www/dist.all.last.txt",
-        "/home/rice/www/dist.female.first.txt",
-        "/home/rice/www/dist.male.first.txt");
-
-    reportGenerator.makeEmployee(0, 0, false, 0, false);
-    while (reportGenerator.shouldContinue()) {
-      reportGenerator.makeEmployee(reportGenerator.getDepartment(), 1, true, 1, true);
+      empWriter.close();
+      repWriter.close();
+      expWriter.close();
+    } catch (Exception e) {
+      throw e;
     }
-
-    empWriter.close();
-    repWriter.close();
-    expWriter.close();
   }
 
   @SuppressWarnings("deprecation")

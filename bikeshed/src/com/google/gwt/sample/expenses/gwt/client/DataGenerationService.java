@@ -26,6 +26,12 @@ import java.util.List;
 @RemoteServiceRelativePath("dataGeneration")
 public interface DataGenerationService extends RemoteService {
   
+  long countEmployees();
+  
+  long countExpenses();
+  
+  long countReports();
+  
   /**
    * Delete the entire datastore.
    */
@@ -40,4 +46,6 @@ public interface DataGenerationService extends RemoteService {
    * @return the number of Employees, Reports, and Expenses.
    */
   List<Integer> getCounts();
+  
+  void resetCounters();
 }

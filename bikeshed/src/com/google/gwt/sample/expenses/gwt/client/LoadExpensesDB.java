@@ -21,6 +21,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
@@ -32,15 +33,25 @@ import java.util.List;
  */
 public class LoadExpensesDB implements EntryPoint {
 
+  private TextBox amountTextBox;
+
+  private Button countEmployeesButton;
+  private Label countEmployeesLabel;
+  private Button countExpensesButton;
+  private Label countExpensesLabel;
+  private Button countReportsButton;
+  private Label countReportsLabel;
   private final DataGenerationServiceAsync dataService = GWT.create(DataGenerationService.class);
 
-  private Label statusLabel;
-  private Label numEmployeesLabel;
-  private Label numReportsLabel;
-  private Label numExpensesLabel;
-  private Button generateButton;
   private Button deleteButton;
-  private TextBox amountTextBox;
+  private Button generateButton;
+  
+  private Label numEmployeesLabel;
+  private Label numExpensesLabel;
+  private Label numReportsLabel;
+  private Button resetCountsButton;
+  private Label resetCountsLabel;
+  private Label statusLabel;
 
   public void onModuleLoad() {
     statusLabel = new Label("");
@@ -52,6 +63,18 @@ public class LoadExpensesDB implements EntryPoint {
     deleteButton = new Button("Delete everything");
     amountTextBox = new TextBox();
     amountTextBox.setText("20000");
+    
+    countEmployeesButton = new Button("Count Employees");
+    countEmployeesLabel = new Label("-- Employees");
+    
+    countExpensesButton = new Button("Count Expenses");
+    countExpensesLabel = new Label("-- Expenses");
+    
+    countReportsButton = new Button("Count Reports");
+    countReportsLabel = new Label("-- Reports");
+    
+    resetCountsButton = new Button("Reset Counts");
+    resetCountsLabel = new Label("");
 
     generateButton.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
@@ -66,8 +89,57 @@ public class LoadExpensesDB implements EntryPoint {
         deleteData();
       }
     });
+    
+    resetCountsButton.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        resetCountsButton.setEnabled(false);
+        resetCounts();
+      }
+    });
+    
+    countEmployeesButton.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        countEmployeesButton.setEnabled(false);
+        countEmployees();
+      }
+    });
+    
+    countExpensesButton.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        countExpensesButton.setEnabled(false);
+        countExpenses();
+      }
+    });
+    
+    countReportsButton.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        countReportsButton.setEnabled(false);
+        countReports();
+      }
+    });
 
     RootPanel root = RootPanel.get();
+    
+    root.add(resetCountsButton);
+    root.add(resetCountsLabel);
+    
+    root.add(new HTML("<br><br>"));
+    
+    root.add(countEmployeesButton);
+    root.add(countEmployeesLabel);
+    
+    root.add(new HTML("<br><br>"));
+    
+    root.add(countExpensesButton);
+    root.add(countExpensesLabel);
+    
+    root.add(new HTML("<br><br>"));
+    
+    root.add(countReportsButton);
+    root.add(countReportsLabel);
+    
+    root.add(new HTML("<br><br>"));
+    
     root.add(generateButton);
     root.add(amountTextBox);
     root.add(statusLabel);
@@ -76,12 +148,57 @@ public class LoadExpensesDB implements EntryPoint {
     root.add(numExpensesLabel);
 
     // This button deletes a random chunk from the data store -- be careful!
-//    root.add(new HTML("<br><br><br><br><br><br><br><br><br>"));
-//    root.add(deleteButton);
+    // root.add(new HTML("<br><br><br><br><br><br><br><br><br>"));
+    // root.add(deleteButton);
 
     updateCounts();
   }
 
+  private void countEmployees() {
+    countEmployeesLabel.setText("Counting...");
+    dataService.countEmployees(new AsyncCallback<Long>() {
+      public void onFailure(Throwable caught) {
+        countEmployeesButton.setEnabled(true);
+        countEmployeesLabel.setText("Failed");
+      }
+
+      public void onSuccess(Long result) {
+        countEmployeesButton.setEnabled(true);
+        countEmployeesLabel.setText("" + result);
+      }
+    });
+  }
+
+  private void countExpenses() {
+    countExpensesLabel.setText("Counting...");
+    dataService.countExpenses(new AsyncCallback<Long>() {
+      public void onFailure(Throwable caught) {
+        countExpensesButton.setEnabled(true);
+        countExpensesLabel.setText("Failed");
+      }
+
+      public void onSuccess(Long result) {
+        countExpensesButton.setEnabled(true);
+        countExpensesLabel.setText("" + result);
+      }
+    });
+  }
+  
+  private void countReports() {
+    countReportsLabel.setText("Counting...");
+    dataService.countReports(new AsyncCallback<Long>() {
+      public void onFailure(Throwable caught) {
+        countReportsButton.setEnabled(true);
+        countReportsLabel.setText("Failed");
+      }
+
+      public void onSuccess(Long result) {
+        countReportsButton.setEnabled(true);
+        countReportsLabel.setText("" + result);
+      }
+    });
+  }
+  
   private void deleteData() {
     dataService.delete(new AsyncCallback<Void>() {
       public void onFailure(Throwable caught) {
@@ -94,22 +211,6 @@ public class LoadExpensesDB implements EntryPoint {
         statusLabel.setText("Deletion succeeded");
         deleteButton.setEnabled(true);
         updateCounts();
-      }
-    });
-  }
-  
-  private void updateCounts() {
-    dataService.getCounts(new AsyncCallback<List<Integer>>() {
-      public void onFailure(Throwable caught) {
-        numEmployeesLabel.setText("? Employees");
-        numReportsLabel.setText("? Reports");
-        numExpensesLabel.setText("? Expenses");
-      }
-
-      public void onSuccess(List<Integer> result) {
-        numEmployeesLabel.setText("" + result.get(0) + " Employees");
-        numReportsLabel.setText("" + result.get(1) + " Reports");
-        numExpensesLabel.setText("" + result.get(2) + " Expenses");
       }
     });
   }
@@ -126,6 +227,37 @@ public class LoadExpensesDB implements EntryPoint {
         statusLabel.setText("Data generation succeeded");
         generateButton.setEnabled(true);
         updateCounts();
+      }
+    });
+  }
+  
+  private void resetCounts() {
+    resetCountsLabel.setText("Resetting counts...");
+    dataService.resetCounters(new AsyncCallback<Void>() {
+      public void onFailure(Throwable caught) {
+        resetCountsButton.setEnabled(true);
+        resetCountsLabel.setText("Resetting counts failed");
+      }
+
+      public void onSuccess(Void result) {
+        resetCountsButton.setEnabled(true);
+        resetCountsLabel.setText("Resetting counts succeeded");
+      }
+    });
+  }
+
+  private void updateCounts() {
+    dataService.getCounts(new AsyncCallback<List<Integer>>() {
+      public void onFailure(Throwable caught) {
+        numEmployeesLabel.setText("? Employees");
+        numReportsLabel.setText("? Reports");
+        numExpensesLabel.setText("? Expenses");
+      }
+
+      public void onSuccess(List<Integer> result) {
+        numEmployeesLabel.setText("" + result.get(0) + " Employees");
+        numReportsLabel.setText("" + result.get(1) + " Reports");
+        numExpensesLabel.setText("" + result.get(2) + " Expenses");
       }
     });
   }

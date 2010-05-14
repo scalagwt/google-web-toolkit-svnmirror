@@ -18,6 +18,7 @@ package com.google.gwt.sample.expenses.gwt.server;
 import com.google.apphosting.api.DeadlineExceededException;
 import com.google.gwt.sample.expenses.gwt.client.DataGenerationService;
 import com.google.gwt.sample.expenses.server.domain.Employee;
+import com.google.gwt.sample.expenses.server.domain.EntityCounter;
 import com.google.gwt.sample.expenses.server.domain.Expense;
 import com.google.gwt.sample.expenses.server.domain.Report;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -35,9 +36,21 @@ public class DataGenerationServiceImpl extends RemoteServiceServlet implements
 
   private static final Logger log = Logger.getLogger(DataGenerationServiceImpl.class.getName());
 
-  private long endTime;
+//  private long endTime;
 
   private ReportGenerator reportGenerator;
+  
+  public long countEmployees() {
+    return EntityCounter.updateEmployeeCount();
+  }
+  
+  public long countExpenses() {
+    return EntityCounter.updateExpenseCount();
+  }
+  
+  public long countReports() {
+    return EntityCounter.updateReportCount();
+  }
   
   public void delete() {
     try {
@@ -63,11 +76,12 @@ public class DataGenerationServiceImpl extends RemoteServiceServlet implements
     }
   }
 
-  public void generate(int millis) {
+  public void generate(final int amount) {
     long startTime = System.currentTimeMillis();
-    endTime = startTime + millis;
-    int startEmployees = (int) Employee.countEmployees();
-    int startReports = (int) Report.countReports();
+//    endTime = startTime + amount;
+    final int startEmployees = (int) Employee.countEmployees();
+    final int startReports = (int) Report.countReports();
+    final int startExpenses = (int) Expense.countExpenses();
     int numEmployees;
     
     synchronized (DataGenerationServiceImpl.class) {
@@ -75,7 +89,9 @@ public class DataGenerationServiceImpl extends RemoteServiceServlet implements
         reportGenerator = new ReportGenerator() {
           @Override
           public boolean shouldContinue() {
-            return System.currentTimeMillis() < endTime;
+            // return System.currentTimeMillis() < endTime;
+            int numReports = getNumReports();
+            return numReports <= amount;
           }
           
           @Override
@@ -126,20 +142,23 @@ public class DataGenerationServiceImpl extends RemoteServiceServlet implements
       }
     }
     
-    // Choose department and make a manager
-    int department = reportGenerator.getDepartment();
-    long supervisorId = 1;
+    reportGenerator.reset();
     
-    while (System.currentTimeMillis() < endTime) {
-      reportGenerator.makeEmployee(department, supervisorId, true, 0, false);
+    // Use same manager for everyone
+    long supervisorId = 1;
+    while (reportGenerator.shouldContinue()) {
+      int department = reportGenerator.getDepartment();
+      reportGenerator.makeEmployee(department, supervisorId);
     }
     
     numEmployees = (int) Employee.countEmployees();
     int numReports = (int) Report.countReports();
+    int numExpenses = (int) Expense.countExpenses();
     int reportsCreated = numReports - startReports;
     int employeesCreated = numEmployees - startEmployees;
-    log.info("Generated " + employeesCreated + " employees and " +
-        reportsCreated + " reports in " +
+    int expensesCreated = numExpenses - startExpenses;
+    log.info("Generated " + employeesCreated + " employees, " +
+        reportsCreated + " reports, and " + expensesCreated + " expenses in " +
         (System.currentTimeMillis() - startTime) + " milliseconds");
   }
 
@@ -151,5 +170,9 @@ public class DataGenerationServiceImpl extends RemoteServiceServlet implements
       counts.add((int) Expense.countExpenses());
       return counts;
     }
+  }
+  
+  public void resetCounters() {
+    EntityCounter.reset();
   }
 }

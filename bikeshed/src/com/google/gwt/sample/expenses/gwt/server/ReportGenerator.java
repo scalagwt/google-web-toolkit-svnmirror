@@ -333,8 +333,6 @@ public abstract class ReportGenerator {
   // 2% of males hyphenate their last names
   private static final double MALE_HYPHENATE_PROBABILITY = 0.02;
 
-  private static final double MANAGER_PROBABILITY = 0.1;
-
   private static final long MILLIS_PER_DAY = 24L * 60L * 60L * 1000L;
 
   private static final long MILLIS_PER_HOUR = 60L * 60L * 1000L;
@@ -453,8 +451,7 @@ public abstract class ReportGenerator {
     }
   }
 
-  public long makeEmployee(int department, long supervisorKey,
-      boolean makeExpenses, int level, boolean allowRecursion) {
+  public long makeEmployee(int department, long supervisorKey) {
     if (!shouldContinue()) {
       return -1;
     }
@@ -473,22 +470,16 @@ public abstract class ReportGenerator {
     employee.password = "";
     long id = storeEmployee(employee);
 
-    if (makeExpenses) {
-      int numExpenseReports = rand.nextInt(96) + 5;
-      for (int i = 0; i < numExpenseReports; i++) {
-        makeExpenseReport(id, department, supervisorKey);
-      }
-    }
-
-    if (allowRecursion
-        && (level < 2 || rand.nextDouble() < MANAGER_PROBABILITY)) {
-      int directs = rand.nextInt(6) + 5;
-      for (int i = 0; i < directs; i++) {
-        makeEmployee(department, id, true, level + 1, true);
-      }
+    int numExpenseReports = rand.nextInt(96) + 5;
+    for (int i = 0; i < numExpenseReports; i++) {
+      makeExpenseReport(id, department, supervisorKey);
     }
 
     return id;
+  }
+
+  public void reset() {
+    this.numReports = 0;
   }
 
   public abstract boolean shouldContinue();

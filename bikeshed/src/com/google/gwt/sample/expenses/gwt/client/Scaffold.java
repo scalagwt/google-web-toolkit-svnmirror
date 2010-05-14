@@ -33,7 +33,6 @@ import com.google.gwt.sample.expenses.gwt.request.ExpensesEntityTypesProcessor;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
 import com.google.gwt.sample.expenses.gwt.ui.ListActivitiesMapper;
 import com.google.gwt.sample.expenses.gwt.ui.ScaffoldListPlaceRenderer;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.valuestore.shared.Record;
 

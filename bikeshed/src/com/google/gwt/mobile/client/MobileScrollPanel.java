@@ -19,11 +19,11 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Overflow;
 import com.google.gwt.user.client.ui.RequiresResize;
-import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 
 /**
- * A panel implementation that behaves like a {@link ScrollPanel} by default,
+ * A panel implementation that behaves like a
+ * {@link com.google.gwt.user.client.ui.ScrollPanel ScrollPanel} by default,
  * but switches to a manual drag-scroll implementation on browsers that support
  * touch events.
  * 

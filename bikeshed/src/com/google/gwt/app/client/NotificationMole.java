@@ -45,8 +45,8 @@ public class NotificationMole extends Composite {
   }
 
   private class MoleAnimation extends Animation {
-    private int startSize;
     private int endSize;
+    private int startSize;
 
     @Override
     protected void onComplete() {
@@ -77,18 +77,14 @@ public class NotificationMole extends Composite {
 
   private static final Binder BINDER = GWT.create(Binder.class);
 
-  private final MoleAnimation animation = new MoleAnimation();
-
-  private int animationDuration;
-
   @UiField()
   DivElement borderElement;
 
-  @UiField()
-  SpanElement notificationText;
-
   @UiField
   DivElement heightMeasure;
+
+  @UiField()
+  SpanElement notificationText;
 
   int showAttempts = 0;
 
@@ -100,6 +96,10 @@ public class NotificationMole extends Composite {
       }
     }
   };
+
+  private final MoleAnimation animation = new MoleAnimation();
+
+  private int animationDuration;
 
   public NotificationMole() {
     initWidget(BINDER.createAndBindUi(this));

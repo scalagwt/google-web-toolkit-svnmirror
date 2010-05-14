@@ -23,7 +23,11 @@ import java.util.List;
  * Async counterpart of {@link DataGenerationService}.
  */
 public interface DataGenerationServiceAsync { 
+  void countEmployees(AsyncCallback<Long> callback);
+  void countExpenses(AsyncCallback<Long> callback);
+  void countReports(AsyncCallback<Long> callback);
   void delete(AsyncCallback<Void> callback);
   void generate(int millis, AsyncCallback<Void> callback);
   void getCounts(AsyncCallback<List<Integer>> callback);
+  void resetCounters(AsyncCallback<Void> callback);
 }

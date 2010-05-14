@@ -29,13 +29,16 @@ public class RequestEvent extends GwtEvent<RequestEvent.Handler> {
     void onRequestEvent(RequestEvent requestEvent);
   }
   
+  /**
+   * The request state.
+   */
   public enum State {
     SENT, RECEIVED
   }
   
-  private final State state;
-
   public static final Type<Handler> TYPE = new Type<Handler>();
+
+  private final State state;
 
   public RequestEvent(State state) {
     this.state = state;

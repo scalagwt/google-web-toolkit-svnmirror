@@ -271,25 +271,25 @@ class Momentum {
   private double adjustInitialVelocityForDirection(double originalVelocity,
       double offset, double min, double max) {
     // Convert from pixels/ms to pixels/frame
-    double velocity = originalVelocity * MS_PER_FRAME
+    double vel = originalVelocity * MS_PER_FRAME
         * INITIAL_VELOCITY_BOOST_FACTOR;
 
     // If the initial velocity is below the minimum threshold, it is possible
     // that we need to bounce back depending on where the element is.
-    if (Math.abs(velocity) < MIN_START_VELOCITY) {
+    if (Math.abs(vel) < MIN_START_VELOCITY) {
       // If either of these cases are true, then the element is outside of its
       // allowable region and we need to apply a bounce back acceleration to
       // bring it back to rest in its defined area.
       if (offset < min) {
-        velocity = (min - offset) * POST_BOUNCE_COEFFICIENT;
-        velocity = Math.max(velocity, MIN_START_VELOCITY);
+        vel = (min - offset) * POST_BOUNCE_COEFFICIENT;
+        vel = Math.max(vel, MIN_START_VELOCITY);
       } else if (offset > max) {
-        velocity = (offset - max) * POST_BOUNCE_COEFFICIENT;
-        velocity = -Math.max(velocity, MIN_START_VELOCITY);
+        vel = (offset - max) * POST_BOUNCE_COEFFICIENT;
+        vel = -Math.max(vel, MIN_START_VELOCITY);
       }
     }
 
-    return velocity;
+    return vel;
   }
 
   /**
@@ -297,10 +297,10 @@ class Momentum {
    */
   private void adjustVelocity() {
     adjustVelocityComponent(currentOffset.x, minCoord.x, maxCoord.x,
-        velocity.x, bouncingX, false /** horizontal */
+        velocity.x, bouncingX, false /* horizontal */
     );
     adjustVelocityComponent(currentOffset.y, minCoord.y, maxCoord.y,
-        velocity.y, bouncingY, true /** vertical */
+        velocity.y, bouncingY, true /* vertical */
     );
   }
 
