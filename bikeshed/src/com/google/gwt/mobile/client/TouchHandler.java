@@ -181,8 +181,9 @@ public class TouchHandler implements EventListener {
    * TODO(jgw): This should probably be implemented using deferred binding.
    */
   public static native boolean supportsTouch() /*-{
-    // TODO(jgw): This doesn't return true on Android, even though touch works.
-    return true;//!!('createTouch' in document);
+    // document.createTouch doesn't exist on Android, even though touch works.
+    var android = navigator.userAgent.indexOf('Android') != -1;
+    return android || !!('createTouch' in document);
   }-*/;
 
   private Element element;
