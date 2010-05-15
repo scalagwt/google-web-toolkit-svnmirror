@@ -39,6 +39,11 @@ import java.util.List;
 public class MobileReportList extends Composite implements MobilePage {
 
   /**
+   * The ID of the employee.
+   */
+  private static final Long EMPLOYEE_ID = new Long(2517);
+
+  /**
    * TODO: doc.
    */
   public interface Listener {
@@ -140,8 +145,8 @@ public class MobileReportList extends Composite implements MobilePage {
         reportAdapter.updateViewData(0, size, newValues);
       }
     };
-    requestFactory.reportRequest().findReportEntriesBySearch(new Long(-1), "",
-        "", ReportRecord.created.getName(), 0, 25).forProperties(
+    requestFactory.reportRequest().findReportEntriesBySearch(EMPLOYEE_ID, "",
+        "", ReportRecord.created.getName() + " DESC", 0, 25).forProperties(
         getReportColumns()).to(lastReceiver).fire();
   }
 }

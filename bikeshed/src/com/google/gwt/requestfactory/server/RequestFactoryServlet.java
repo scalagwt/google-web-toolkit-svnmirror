@@ -15,6 +15,8 @@
  */
 package com.google.gwt.requestfactory.server;
 
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.KeyRange;
 import com.google.gwt.requestfactory.shared.RequestFactory;
 import com.google.gwt.requestfactory.shared.ServerType;
 import com.google.gwt.requestfactory.shared.RequestFactory.Config;
@@ -212,6 +214,12 @@ public class RequestFactoryServlet extends HttpServlet {
           Class<?> propertyType = propertiesInRecord.get(key);
           if (writeOperation == WriteOperation.CREATE && ("id".equals(key))) {
             // ignored. id is assigned by default.
+            // TODO(jlabanca): Automatic IDs are being duplicated.  Assigning an
+            // ID manually for now.
+            KeyRange range = DatastoreServiceFactory.getDatastoreService().allocateIds(key, 1);
+            Long id = range.getStart().getId();
+            entity.getMethod(getMethodNameFromPropertyName(key, "set"),
+                propertyType).invoke(entityInstance, id);
           } else {
             Object propertyValue = getPropertyValueFromRequest(recordObject,
                 key, propertyType);

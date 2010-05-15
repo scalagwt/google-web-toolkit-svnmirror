@@ -145,6 +145,7 @@ public class MobileExpenseEntry extends Composite implements MobilePage {
   
   @SuppressWarnings("deprecation")
   private void displayExpense() {
+    errorText.setInnerText("");
     nameText.setText(expense.getDescription());
     categoryText.setText(expense.getCategory());
     priceText.setText(ExpensesMobile.formatCurrency(expense.getAmount()));
