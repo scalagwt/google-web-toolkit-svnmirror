@@ -77,8 +77,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -406,7 +407,7 @@ public class ExpenseDetails extends Composite implements
    * The set of Expense keys that we have seen. When a new key is added, we
    * compare it to the list of known keys to determine if it is new.
    */
-  private Set<Object> knownExpenseKeys = null;
+  private Map<Object, ExpenseRecord> knownExpenseKeys = null;
 
   private Comparator<ExpenseRecord> lastComparator;
 
@@ -789,18 +790,24 @@ public class ExpenseDetails extends Composite implements
           items.setList(list);
           refreshCost();
 
-          // Add the new keys to the known keys.
+          // Add the new keys and changed values to the known keys.
           boolean isInitialData = knownExpenseKeys == null;
           if (knownExpenseKeys == null) {
-            knownExpenseKeys = new HashSet<Object>();
+            knownExpenseKeys = new HashMap<Object, ExpenseRecord>();
           }
           for (ExpenseRecord value : newValues) {
             Object key = items.getKey(value);
-            if (!isInitialData && !knownExpenseKeys.contains(key)) {
-              (new PhaseAnimation.CellTablePhaseAnimation<ExpenseRecord>(table,
-                  value, items)).run();
+            if (!isInitialData) {
+              ExpenseRecord existing = knownExpenseKeys.get(key);
+              if (existing == null
+                  || !value.getAmount().equals(existing.getAmount())
+                  || !value.getDescription().equals(existing.getDescription())
+                  || !value.getCategory().equals(existing.getCategory())) {
+                (new PhaseAnimation.CellTablePhaseAnimation<ExpenseRecord>(
+                    table, value, items)).run();
+              }
             }
-            knownExpenseKeys.add(key);
+            knownExpenseKeys.put(key, value);
           }
         }
 
