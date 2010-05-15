@@ -122,6 +122,7 @@ public class RequestFactoryServlet extends HttpServlet {
     whiteList.add("rdayal@google.com");
     whiteList.add("rice@google.com");
     whiteList.add("zundel@google.com");
+    whiteList.add("ben.alex@gmail.com");
     return Collections.unmodifiableSet(whiteList);
   }
 
