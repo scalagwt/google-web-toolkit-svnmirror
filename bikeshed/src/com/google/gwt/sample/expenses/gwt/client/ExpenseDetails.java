@@ -179,8 +179,7 @@ public class ExpenseDetails extends Composite implements
         if (anchor.isOrHasChild(Element.as(event.getEventTarget().cast()))) {
           // Alert the user of the error.
           ApprovalViewData avd = (ApprovalViewData) viewData;
-          errorPopupMessage.setText(avd.getRejectionText());
-          errorPopup.center();
+          showErrorPopup(avd.getRejectionText());
 
           // Clear the view data now that we've viewed the message.
           viewData = null;
@@ -743,6 +742,25 @@ public class ExpenseDetails extends Composite implements
   }
 
   /**
+   * Get the error message from a sync operation.
+   * 
+   * @param response the response of the operation
+   * @return the error message, or an empty string if no error.
+   */
+  private String getErrorMessageFromSync(Set<SyncResult> response) {
+    String errorMessage = "";
+    for (SyncResult result : response) {
+      if (result.hasViolations()) {
+        Map<String, String> violations = result.getViolations();
+        for (String message : violations.values()) {
+          errorMessage += message + " ";
+        }
+      }
+    }
+    return errorMessage;
+  }
+
+  /**
    * Get the columns displayed in the expense table.
    */
   private Collection<Property<?>> getExpenseColumns() {
@@ -840,7 +858,12 @@ public class ExpenseDetails extends Composite implements
     expensesRequestFactory.syncRequest(deltas).to(
         new Receiver<Set<SyncResult>>() {
           public void onSuccess(Set<SyncResult> response) {
-            // We expect onReportChanged to be called.
+            // We expect onReportChanged to be called if there are no errors.
+            String errorMessage = getErrorMessageFromSync(response);
+            if (errorMessage.length() > 0) {
+              showErrorPopup(errorMessage);
+              setNotesEditState(false, false, report.getNotes());
+            }
           }
         }).fire();
   }
@@ -862,6 +885,16 @@ public class ExpenseDetails extends Composite implements
     setVisible(notesEditLinkWrapper, !editable && !pending);
     setVisible(notesPending, pending);
     notesBox.setFocus(editable);
+  }
+
+  /**
+   * Show the error popup.
+   * 
+   * @param errorMessage the error message
+   */
+  private void showErrorPopup(String errorMessage) {
+    errorPopupMessage.setText(errorMessage);
+    errorPopup.center();
   }
 
   private void sortExpenses(List<ExpenseRecord> list,
@@ -912,16 +945,7 @@ public class ExpenseDetails extends Composite implements
     expensesRequestFactory.syncRequest(deltas).to(
         new Receiver<Set<SyncResult>>() {
           public void onSuccess(Set<SyncResult> response) {
-            // Check for commit errors.
-            String errorMessage = "";
-            for (SyncResult result : response) {
-              if (result.hasViolations()) {
-                // TODO(jlabanca): Get the error messages from the violations.
-                errorMessage = "Could not commit change";
-              }
-            }
-
-            // Sync the view data.
+            String errorMessage = getErrorMessageFromSync(response);
             if (errorMessage.length() > 0) {
               syncCommit(record, errorMessage.length() > 0 ? errorMessage
                   : null);

@@ -17,6 +17,8 @@ package com.google.gwt.requestfactory.server;
 
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.KeyRange;
+import com.google.appengine.api.users.User;
+import com.google.appengine.api.users.UserServiceFactory;
 import com.google.gwt.requestfactory.shared.RequestFactory;
 import com.google.gwt.requestfactory.shared.ServerType;
 import com.google.gwt.requestfactory.shared.RequestFactory.Config;
@@ -91,12 +93,47 @@ public class RequestFactoryServlet extends HttpServlet {
 
   private static final String SERVER_OPERATION_CONTEXT_PARAM = "servlet.serverOperation";
 
+  private static final Set<String> USER_WHITE_LIST = initUserWhiteList();
+
+  private static final String WHITELIST_MESSAGE =
+      "The datastore cannot be modified until after Google I/O.";
+
   private static Set<String> initBlackList() {
     Set<String> blackList = new HashSet<String>();
     for (String str : new String[] {"password"}) {
       blackList.add(str);
     }
     return Collections.unmodifiableSet(blackList);
+  }
+
+  private static Set<String> initUserWhiteList() {
+    Set<String> whiteList = new HashSet<String>();
+    whiteList.add("jlabanca@google.com");
+    whiteList.add("bruce@google.com");
+    whiteList.add("amitmanjhi@google.com");
+    whiteList.add("cramsdale@google.com");
+    whiteList.add("jgw@google.com");
+    whiteList.add("rjrjr@google.com");
+    whiteList.add("cromwellian@google.com");
+    whiteList.add("knorton@google.com");
+    whiteList.add("scottb@google.com");
+    whiteList.add("jaimeyap@google.com");
+    whiteList.add("jasonparekh@google.com");
+    whiteList.add("rdayal@google.com");
+    whiteList.add("rice@google.com");
+    whiteList.add("zundel@google.com");
+    return Collections.unmodifiableSet(whiteList);
+  }
+
+  /**
+   * Check if the user is whitelisted to edit data..
+   * 
+   * @return true if white listed.
+   */
+  private static boolean isUserWhiteListed() {
+    User curUser = UserServiceFactory.getUserService().getCurrentUser();
+    return curUser != null
+        && USER_WHITE_LIST.contains(curUser.getEmail().toLowerCase());
   }
 
   private Config config = null;
@@ -191,6 +228,13 @@ public class RequestFactoryServlet extends HttpServlet {
    */
   JSONObject updateRecordInDataStore(String recordToken,
       JSONObject recordObject, WriteOperation writeOperation) {
+
+    // Ensure that the user is white listed.
+    // TODO(jlabanca): Remove this after Google I/O.
+    if (!isUserWhiteListed()) {
+      return getReturnRecordForException(writeOperation, recordObject,
+          new IllegalAccessException(WHITELIST_MESSAGE));
+    }
 
     try {
       Class<?> entity = tokenToEntityRecord.get(recordToken).entity;
@@ -554,6 +598,8 @@ public class RequestFactoryServlet extends HttpServlet {
       JSONObject violations = new JSONObject();
       if (ex instanceof NumberFormatException) {
         violations.put("Expected a number instead of String", ex.getMessage());
+      } else if (WHITELIST_MESSAGE.equals(ex.getMessage())) {
+        violations.put("", ex.getMessage());
       } else {
         violations.put("", "unexpected server error");
       }

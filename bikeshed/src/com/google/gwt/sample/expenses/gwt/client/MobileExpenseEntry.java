@@ -30,6 +30,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.valuestore.shared.DeltaValueStore;
 
 import java.util.Date;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -121,15 +122,20 @@ public class MobileExpenseEntry extends Composite implements MobilePage {
         new Receiver<Set<SyncResult>>() {
           public void onSuccess(Set<SyncResult> response) {
             // Check for commit errors.
+            String errorMessage = "";
             for (SyncResult result : response) {
               if (result.hasViolations()) {
-                // TODO(jgw): Get the error messages from the violations.
-                errorText.setInnerText("Could not commit change");
-                return;
+                Map<String, String> violations = result.getViolations();
+                for (String message : violations.values()) {
+                  errorMessage += message + " ";
+                }
               }
             }
-
-            listener.onExpenseUpdated();
+            if (errorMessage.length() > 0) {
+              errorText.setInnerText(errorMessage);
+            } else {
+              listener.onExpenseUpdated();
+            }
           }
         }).fire();
   }
