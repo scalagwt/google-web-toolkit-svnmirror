@@ -57,8 +57,25 @@ public abstract class SortableColumn<T, C> extends Column<T, C> {
     Comparator<T> comparator = new Comparator<T>() {
       @SuppressWarnings("unchecked")
       public int compare(T o1, T o2) {
+        // Null check the row object.
+        if (o1 == null && o2 == null) {
+          return 0;
+        } else if (o1 == null) {
+          return reverse ? 1 : -1;
+        } else if (o2 == null) {
+          return reverse ? -1 : 1;
+        }
+
+        // Compare the column value.
         C c1 = getValue(o1);
         C c2 = getValue(o2);
+        if (c1 == null && c2 == null) {
+          return 0;
+        } else if (c1 == null) {
+          return reverse ? 1 : -1;
+        } else if (c2 == null) {
+          return reverse ? -1 : 1;
+        }
         int comparison = ((Comparable<C>) c1).compareTo(c2);
         return reverse ? -comparison : comparison;
       }
