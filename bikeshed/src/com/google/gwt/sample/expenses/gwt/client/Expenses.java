@@ -85,6 +85,9 @@ public class Expenses implements EntryPoint {
     }
   }
 
+  public static final String[] DEPARTMENTS = {
+      "Engineering", "Finance", "Marketing", "Operations", "Sales"};
+
   /**
    * The key provider for {@link EmployeeRecord}s.
    */

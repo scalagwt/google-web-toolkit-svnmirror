@@ -48,6 +48,7 @@ public class ExpensesMobileShell extends ResizeComposite {
   private MobileExpenseList expenseList;
   private MobileExpenseDetails expenseDetails;
   private MobileExpenseEntry expenseEntry;
+  private MobileReportEntry reportEntry;
 
   private final HandlerManager eventBus;
   private final ExpensesRequestFactory requestFactory;
@@ -126,11 +127,28 @@ public class ExpensesMobileShell extends ResizeComposite {
     pushPage(expenseEntry);
   }
 
+  private void showReportEntry(ReportRecord report) {
+    if (reportEntry == null) {
+      reportEntry = new MobileReportEntry(new MobileReportEntry.Listener() {
+        public void onReportUpdated() {
+          popPage();
+        }
+      }, requestFactory);
+    }
+
+    reportEntry.show(report);
+    pushPage(reportEntry);
+  }
+
   private void showExpenseList(ReportRecord report) {
     if (expenseList == null) {
       expenseList = new MobileExpenseList(new MobileExpenseList.Listener() {
         public void onCreateExpense(String reportId) {
           showNewExpenseEntry(reportId);
+        }
+
+        public void onEditReport(ReportRecord report) {
+          showReportEntry(report);
         }
 
         public void onExpenseSelected(ExpenseRecord expense) {
@@ -154,6 +172,19 @@ public class ExpensesMobileShell extends ResizeComposite {
 
     expenseEntry.create(reportId);
     pushPage(expenseEntry);
+  }
+
+  private void showNewReportEntry(Long reporterId) {
+    if (reportEntry == null) {
+      reportEntry = new MobileReportEntry(new MobileReportEntry.Listener() {
+        public void onReportUpdated() {
+          popPage();
+        }
+      }, requestFactory);
+    }
+
+    reportEntry.create(reporterId);
+    pushPage(reportEntry);
   }
 
   private void showPage(MobilePage page) {
@@ -183,6 +214,10 @@ public class ExpensesMobileShell extends ResizeComposite {
   private void showReportList() {
     if (reportList == null) {
       reportList = new MobileReportList(new MobileReportList.Listener() {
+        public void onCreateReport(Long reporterId) {
+          showNewReportEntry(reporterId);
+        }
+
         public void onReportSelected(ReportRecord report) {
           showExpenseList(report);
         }

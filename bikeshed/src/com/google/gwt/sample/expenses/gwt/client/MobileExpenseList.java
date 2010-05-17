@@ -51,9 +51,11 @@ public class MobileExpenseList extends Composite implements MobilePage {
    * TODO: doc.
    */
   public interface Listener {
-    void onExpenseSelected(ExpenseRecord expense);
-
     void onCreateExpense(String reportId);
+
+    void onEditReport(ReportRecord report);
+
+    void onExpenseSelected(ExpenseRecord expense);
   }
 
   /**
@@ -159,7 +161,7 @@ public class MobileExpenseList extends Composite implements MobilePage {
   }
 
   public String needsCustomButton() {
-    return null;
+    return "Edit";
   }
 
   public boolean needsRefreshButton() {
@@ -171,6 +173,7 @@ public class MobileExpenseList extends Composite implements MobilePage {
   }
 
   public void onCustom() {
+    listener.onEditReport(report);
   }
 
   public void onRefresh(boolean clear) {

@@ -47,6 +47,8 @@ public class MobileReportList extends Composite implements MobilePage {
    * TODO: doc.
    */
   public interface Listener {
+    void onCreateReport(Long reporterId);
+
     void onReportSelected(ReportRecord report);
   }
 
@@ -55,6 +57,7 @@ public class MobileReportList extends Composite implements MobilePage {
    */
   private Receiver<List<ReportRecord>> lastReceiver;
 
+  private final Listener listener;
   private final CellList<ReportRecord> reportList;
   private final AsyncListViewAdapter<ReportRecord> reportAdapter;
   private final SingleSelectionModel<ReportRecord> reportSelection;
@@ -62,6 +65,7 @@ public class MobileReportList extends Composite implements MobilePage {
 
   public MobileReportList(final Listener listener,
       final ExpensesRequestFactory requestFactory) {
+    this.listener = listener;
     this.requestFactory = requestFactory;
     reportAdapter = new AsyncListViewAdapter<ReportRecord>() {
       @Override
@@ -114,7 +118,7 @@ public class MobileReportList extends Composite implements MobilePage {
   }
 
   public void onAdd() {
-    // TODO: add a new report
+    listener.onCreateReport(EMPLOYEE_ID);
   }
 
   public void onCustom() {

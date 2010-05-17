@@ -227,12 +227,9 @@ public class ExpenseTree extends Composite {
     // Initialize the departments.
     List<String> departmentList = departments.getList();
     departmentList.add("All");
-    departmentList.add("Engineering");
-    // The Finance department is empty.
-    departmentList.add("Finance");
-    departmentList.add("Marketing");
-    departmentList.add("Operations");
-    departmentList.add("Sales");
+    for (String department : Expenses.DEPARTMENTS) {
+      departmentList.add(department);
+    }
 
     // Initialize the widget.
     createTree();
