@@ -36,7 +36,7 @@ public class Report {
   /**
    * The total number of reports in the database.
    */
-  private static long REPORT_COUNT = 3750243;
+  private static long REPORT_COUNT = 5080388;
 
   public static long countReports() {
     EntityManager em = entityManager();
