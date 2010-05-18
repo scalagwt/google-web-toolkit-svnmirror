@@ -19,15 +19,15 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.mobile.client.MobileScrollPanel;
 import com.google.gwt.sample.expenses.gwt.request.ExpenseRecord;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
 import com.google.gwt.sample.expenses.gwt.request.ReportRecord;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.ResizeComposite;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import java.util.ArrayList;
@@ -35,12 +35,12 @@ import java.util.ArrayList;
 /**
  * TODO.
  */
-public class ExpensesMobileShell extends ResizeComposite {
+public class ExpensesMobileShell extends Composite {
 
   interface ShellUiBinder extends UiBinder<Widget, ExpensesMobileShell> { }
   private static ShellUiBinder BINDER = GWT.create(ShellUiBinder.class);
 
-  @UiField MobileScrollPanel container;
+  @UiField SimplePanel container;
   @UiField HTML backButton, addButton, refreshButton, customButton;
   @UiField Element titleSpan;
 
@@ -194,7 +194,6 @@ public class ExpensesMobileShell extends ResizeComposite {
     }
 
     container.add(page.asWidget());
-    container.setScrollTop(0);
 
     titleSpan.setInnerText(page.getPageTitle());
     backButton.setVisible(pages.size() > 1);

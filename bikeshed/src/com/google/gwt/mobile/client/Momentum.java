@@ -221,7 +221,7 @@ class Momentum {
 
     currentOffset = new Point(initialOffset);
     previousOffset = new Point(initialOffset);
-    velocity = adjustInitialVelocity(velocity);
+    this.velocity = adjustInitialVelocity(velocity);
 
     if (isVelocityAboveThreshold(MIN_START_VELOCITY)) {
       decelerating = true;

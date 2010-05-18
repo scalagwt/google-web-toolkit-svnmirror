@@ -1,10 +1,4 @@
 /* global */
-body {
-  color: black;
-  margin: 8px;
-  margin-top: 3px;
-}
-
 body, table, td {
   font-family: Arial, sans-serif;
   font-weight: light;
