@@ -723,7 +723,7 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
    * 
    * @param pageSize the page size
    * 
-   * @throw {@link IllegalArgumentException} if pageSize is negative or 0
+   * @throws IllegalArgumentException if pageSize is negative or 0
    */
   public void setPageSize(int pageSize) {
     impl.setPageSize(pageSize);
