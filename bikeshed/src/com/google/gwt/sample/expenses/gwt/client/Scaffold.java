@@ -40,7 +40,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-
 /**
  * Application for browsing the entities of the Expenses app.
  */
@@ -54,7 +53,6 @@ public class Scaffold implements EntryPoint {
     requestFactory.init(eventBus);
     final PlaceController<ScaffoldPlace> placeController = new PlaceController<ScaffoldPlace>(
         eventBus);
-
 
     /* Top level UI */
 

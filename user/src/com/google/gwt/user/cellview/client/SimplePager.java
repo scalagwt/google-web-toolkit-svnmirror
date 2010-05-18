@@ -38,17 +38,20 @@ import com.google.gwt.view.client.PagingListView;
 public class SimplePager<T> extends AbstractPager<T> {
 
   /**
-   * The location of the text relative to the paging buttons.
-   */
-  public static enum TextLocation {
-    LEFT, RIGHT, CENTER;
-  }
-
-  /**
    * A ClientBundle that provides images for this widget.
    */
   public static interface Resources extends ClientBundle {
 
+    /**
+     * The image used to skip ahead multiple pages.
+     */
+    ImageResource simplePagerFastForward();
+
+    /**
+     * The disabled "fast forward" image.
+     */
+    ImageResource simplePagerFastForwardDisabled();
+    
     /**
      * The image used to go to the first page.
      */
@@ -117,6 +120,13 @@ public class SimplePager<T> extends AbstractPager<T> {
     String pageDetails();
   }
 
+  /**
+   * The location of the text relative to the paging buttons.
+   */
+  public static enum TextLocation {
+    CENTER, LEFT, RIGHT;
+  }
+
   private static Resources DEFAULT_RESOURCES;
 
   private static Resources getDefaultResources() {
@@ -125,6 +135,10 @@ public class SimplePager<T> extends AbstractPager<T> {
     }
     return DEFAULT_RESOURCES;
   }
+  
+  private final Image fastForward;
+
+  private final int fastForwardPages;
 
   private final Image firstPage;
 
@@ -154,6 +168,10 @@ public class SimplePager<T> extends AbstractPager<T> {
    */
   private final Resources resources;
 
+  private boolean showLastPageButton;
+
+  private boolean showFastForwardButton;
+
   /**
    * The {@link Style} used by this widget.
    */
@@ -175,8 +193,10 @@ public class SimplePager<T> extends AbstractPager<T> {
    * @param location the location of the text relative to the buttons
    */
   @UiConstructor
+  // Hack for Google I/O demo
   public SimplePager(PagingListView<T> view, TextLocation location) {
-    this(view, location, getDefaultResources());
+    this(view, location, getDefaultResources(), true,
+        1000 / view.getPageSize(), false);
   }
 
   /**
@@ -185,21 +205,36 @@ public class SimplePager<T> extends AbstractPager<T> {
    * @param view the {@link PagingListView} to page
    * @param location the location of the text relative to the buttons
    * @param resources the {@link Resources} to use
+   * @param showFastForwardButton if true, show a fast-forward button that
+   *          advances by a larger increment than a single page
+   * @param fastForwardPages the number of pages to fast forward
+   * @param showLastPageButton if true, show a button to go the the last page
    */
   public SimplePager(PagingListView<T> view, TextLocation location,
-      Resources resources) {
+      Resources resources, boolean showFastForwardButton,
+      final int fastForwardPages,
+      boolean showLastPageButton) {
     super(view);
     this.resources = resources;
+    this.showFastForwardButton = showFastForwardButton;
+    this.fastForwardPages = fastForwardPages;
+    this.showLastPageButton = showLastPageButton;
     this.style = resources.simplePagerStyle();
     this.style.ensureInjected();
 
     // Create the buttons.
+    fastForward = new Image(resources.simplePagerFastForward());
     firstPage = new Image(resources.simplePagerFirstPage());
     lastPage = new Image(resources.simplePagerLastPage());
     nextPage = new Image(resources.simplePagerNextPage());
     prevPage = new Image(resources.simplePagerPreviousPage());
 
     // Add handlers.
+    fastForward.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        setPage(getPage() + fastForwardPages);
+      }
+    });
     firstPage.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         firstPage();
@@ -234,12 +269,18 @@ public class SimplePager<T> extends AbstractPager<T> {
       layout.add(label);
     }
     layout.add(nextPage);
-    layout.add(lastPage);
+    if (showFastForwardButton) {
+      layout.add(fastForward);
+    }
+    if (showLastPageButton) {
+      layout.add(lastPage);
+    }
     if (location == TextLocation.LEFT) {
       layout.add(label);
     }
 
     // Add style names to the cells.
+    fastForward.getElement().getParentElement().addClassName(style.button());
     firstPage.getElement().getParentElement().addClassName(style.button());
     prevPage.getElement().getParentElement().addClassName(style.button());
     label.getElement().getParentElement().addClassName(style.pageDetails());
@@ -281,16 +322,32 @@ public class SimplePager<T> extends AbstractPager<T> {
         lastPage.setResource(resources.simplePagerLastPage());
         nextPage.getElement().getParentElement().removeClassName(
             style.disabledButton());
-        lastPage.getElement().getParentElement().removeClassName(
-            style.disabledButton());
+        if (showLastPageButton) {
+          lastPage.getElement().getParentElement().removeClassName(
+              style.disabledButton());
+        }
       } else if (!hasNext && !nextDisabled) {
         nextDisabled = true;
         nextPage.setResource(resources.simplePagerNextPageDisabled());
         lastPage.setResource(resources.simplePagerLastPageDisabled());
         nextPage.getElement().getParentElement().addClassName(
             style.disabledButton());
-        lastPage.getElement().getParentElement().addClassName(
-            style.disabledButton());
+        if (showLastPageButton) {
+          lastPage.getElement().getParentElement().addClassName(
+              style.disabledButton());
+        }
+      }
+      
+      if (showFastForwardButton) {
+        if (hasNextPages(fastForwardPages)) {
+          fastForward.setResource(resources.simplePagerFastForward()); 
+          fastForward.getElement().getParentElement().removeClassName(
+              style.disabledButton()); 
+        } else {
+          fastForward.setResource(resources.simplePagerFastForwardDisabled()); 
+          fastForward.getElement().getParentElement().addClassName(
+              style.disabledButton());
+        }
       }
     }
   }

@@ -80,7 +80,7 @@ public abstract class AbstractPager<T> extends Composite implements Pager<T> {
   public PagingListView<T> getPagingListView() {
     return view;
   }
-
+  
   /**
    * Returns true if there is enough data such that a call to
    * {@link #nextPage()} will succeed in moving the starting point of the table
@@ -88,6 +88,14 @@ public abstract class AbstractPager<T> extends Composite implements Pager<T> {
    */
   public boolean hasNextPage() {
     return view.getPageStart() + view.getPageSize() < view.getDataSize();
+  }
+
+  /**
+   * Returns true if there is enough data to display a given number of
+   * additional pages.
+   */
+  public boolean hasNextPages(int pages) {
+    return view.getPageStart() + pages * view.getPageSize() < view.getDataSize();
   }
 
   /**

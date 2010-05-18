@@ -362,7 +362,7 @@ public abstract class ReportGenerator {
       "Conference", "Sales opportunity", "Sales opprtunity with COMPANY",
       "Maintenance", "Supplies", "Emergency", "Backup", "Research",
       "CITY breakfast", "CITY lunch", "CITY dinner", "CITY conference",
-      "Conference in CITY", "Conferend in FULLCITY", "Meals with FIRSTNAME",
+      "Conference in CITY", "Conference in FULLCITY", "Meals with FIRSTNAME",
       "Meet with FULLNAME", "Meet with FIRSTNAME",
       "Meet with FIRSTNAME in CITY", "Meet with FIRSTNAME in FULLCITY",
       "FULLCITY meetings", "Visit to FULLCITY", "Visit to CITY",

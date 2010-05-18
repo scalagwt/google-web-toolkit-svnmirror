@@ -19,7 +19,7 @@ import com.google.gwt.core.client.JsArray;
 import com.google.gwt.dom.client.NativeEvent;
 
 /**
- * TODO: doc
+ * TODO: doc.
  */
 public class TouchEvent extends NativeEvent {
 

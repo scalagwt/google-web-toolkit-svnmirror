@@ -441,6 +441,9 @@ public class ExpenseList extends Composite implements
         }
         searchBox.resetDefaultText();
         searchRegExp = null;
+        
+        // Go to the first page of the newly-sorted results
+        pager.firstPage();
         requestReports(false);
       }
     });
@@ -601,6 +604,7 @@ public class ExpenseList extends Composite implements
         refreshTimer.schedule(REFRESH_INTERVAL);
       }
     };
+
     requestFactory.reportRequest().findReportEntriesBySearch(employeeId, dept,
         startsWith, orderBy, range.getStart(), range.getLength()).forProperties(
         reportColumns).to(lastDataReceiver).fire();

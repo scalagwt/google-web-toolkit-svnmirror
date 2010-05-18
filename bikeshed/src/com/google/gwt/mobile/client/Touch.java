@@ -19,7 +19,7 @@ import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.EventTarget;
 
 /**
- * TODO: doc
+ * TODO: doc.
  */
 public class Touch extends JavaScriptObject {
 
