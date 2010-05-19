@@ -49,9 +49,9 @@ import java.util.Set;
 import java.util.Map.Entry;
 
 /**
- * Generates implementations of
- * {@link com.google.gwt.requestfactory.shared.RequestFactory RequestFactory}
- * and its nested interfaces.
+ * Generates implementations of {@link
+ * com.google.gwt.app.client.EditorSupport EditorSupport} and its
+ * nested interfaces.
  */
 public class EditorSupportGenerator extends Generator {
 
