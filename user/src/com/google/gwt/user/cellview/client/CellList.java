@@ -44,9 +44,22 @@ import java.util.List;
 public class CellList<T> extends Widget implements PagingListView<T> {
 
   /**
-   * The default page size.
+   * A ClientBundle that provides images for this widget.
    */
-  private static final int DEFAULT_PAGE_SIZE = 25;
+  public static interface Resources extends ClientBundle {
+
+    /**
+     * The background used for selected items.
+     */
+    @ImageOptions(repeatStyle = RepeatStyle.Horizontal)
+    ImageResource cellListSelectedBackground();
+
+    /**
+     * The styles used in this widget.
+     */
+    @Source("CellList.css")
+    Style cellListStyle();
+  }
 
   /**
    * Styles used by this widget.
@@ -70,22 +83,9 @@ public class CellList<T> extends Widget implements PagingListView<T> {
   }
 
   /**
-   * A ClientBundle that provides images for this widget.
+   * The default page size.
    */
-  public static interface Resources extends ClientBundle {
-
-    /**
-     * The background used for selected items.
-     */
-    @ImageOptions(repeatStyle = RepeatStyle.Horizontal)
-    ImageResource cellListSelectedBackground();
-
-    /**
-     * The styles used in this widget.
-     */
-    @Source("CellList.css")
-    Style cellListStyle();
-  }
+  private static final int DEFAULT_PAGE_SIZE = 25;
 
   private static Resources DEFAULT_RESOURCES;
 
@@ -98,9 +98,9 @@ public class CellList<T> extends Widget implements PagingListView<T> {
 
   private final Cell<T> cell;
   private final Element childContainer;
+  private String emptyListMessage = "";
   private final Element emptyMessageElem;
   private final CellListImpl<T> impl;
-  private String emptyListMessage = "";
   private final Style style;
   private ValueUpdater<T> valueUpdater;
 
@@ -178,6 +178,10 @@ public class CellList<T> extends Widget implements PagingListView<T> {
         setStyleName(elem, style.selectedItem(), selected);
       }
     };
+  }
+
+  public boolean dataSizeIsExact() {
+    return impl.dataSizeIsExact();
   }
 
   public int getDataSize() {
@@ -280,7 +284,7 @@ public class CellList<T> extends Widget implements PagingListView<T> {
   }
 
   public void setDataSize(int size, boolean isExact) {
-    impl.setDataSize(size);
+    impl.setDataSize(size, isExact);
   }
 
   public void setDelegate(Delegate<T> delegate) {

@@ -40,7 +40,7 @@ public abstract class AbstractPager<T> extends Composite implements Pager<T> {
     this.view = view;
     view.setPager(this);
   }
-
+  
   /**
    * Go to the first page.
    */
@@ -87,6 +87,9 @@ public abstract class AbstractPager<T> extends Composite implements Pager<T> {
    * forward.
    */
   public boolean hasNextPage() {
+    if (!view.dataSizeIsExact()) {
+      return true;
+    }
     return view.getPageStart() + view.getPageSize() < view.getDataSize();
   }
 
@@ -165,7 +168,7 @@ public abstract class AbstractPager<T> extends Composite implements Pager<T> {
    * @param index the page index
    */
   public void setPage(int index) {
-    if (!isRangeLimited || hasPage(index)) {
+    if (!isRangeLimited || !view.dataSizeIsExact() || hasPage(index)) {
       // We don't use the local version of setPageStart because the user
       // probably wants to use absolute page indexes.
       view.setPageStart(view.getPageSize() * index);
@@ -178,7 +181,7 @@ public abstract class AbstractPager<T> extends Composite implements Pager<T> {
    * @param index the index
    */
   public void setPageStart(int index) {
-    if (isRangeLimited) {
+    if (isRangeLimited && view.dataSizeIsExact()) {
       index = Math.min(index, view.getDataSize() - view.getPageSize());
     }
     index = Math.max(0, index);

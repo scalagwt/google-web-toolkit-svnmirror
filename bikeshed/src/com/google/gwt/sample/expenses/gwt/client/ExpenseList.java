@@ -66,7 +66,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * The list of expense reports on the left side of the app.
+ * The list of expense reports on the right side of the app.
  */
 public class ExpenseList extends Composite implements
     ReportRecordChanged.Handler {
@@ -572,7 +572,9 @@ public class ExpenseList extends Composite implements
       lastDataSizeReceiver = new Receiver<Long>() {
         public void onSuccess(Long response) {
           if (this == lastDataSizeReceiver) {
-            reports.updateDataSize(response.intValue(), true);
+            int count = response.intValue();
+            // Treat count == 1000 as inexact due to AppEngine limitation
+            reports.updateDataSize(count, count != 1000);
           }
         }
       };
@@ -584,8 +586,14 @@ public class ExpenseList extends Composite implements
     lastDataReceiver = new Receiver<List<ReportRecord>>() {
       public void onSuccess(List<ReportRecord> newValues) {
         if (this == lastDataReceiver) {
-          reports.updateViewData(table.getPageStart(), newValues.size(),
-              newValues);
+          int size = newValues.size();
+          if (size < table.getPageSize()) {
+            // Now we know the exact data size
+            reports.updateDataSize(table.getPageStart() + size, true);
+          }
+          if (size > 0) {
+            reports.updateViewData(table.getPageStart(), size, newValues);
+          }
 
           // Add the new keys to the known keys.
           boolean isInitialData = knownReportKeys == null;

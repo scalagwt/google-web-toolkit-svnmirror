@@ -682,6 +682,10 @@ public class CellBrowser extends Composite implements ProvidesResize,
 
     // Create a delegate list view so we can trap data changes.
     ListView<C> listViewDelegate = new ListView<C>() {
+      public boolean dataSizeIsExact() {
+        return listView.dataSizeIsExact();
+      }
+
       public Range getRange() {
         return listView.getRange();
       }

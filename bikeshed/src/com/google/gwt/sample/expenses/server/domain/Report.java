@@ -1,12 +1,12 @@
 /*
  * Copyright 2010 Google Inc.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -17,12 +17,16 @@ package com.google.gwt.sample.expenses.server.domain;
 
 import com.google.appengine.api.datastore.Cursor;
 
+import net.sf.jsr107cache.Cache;
+import net.sf.jsr107cache.CacheException;
+import net.sf.jsr107cache.CacheFactory;
+import net.sf.jsr107cache.CacheManager;
+
 import org.datanucleus.store.appengine.query.JPACursorHelper;
 
+import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 
 import javax.persistence.Column;
@@ -39,22 +43,16 @@ import javax.persistence.Version;
  */
 @Entity
 public class Report {
-  
-  private static Map<Integer, String> cursorsByFirstResult = new HashMap<Integer, String>();
+
+  private static Cache cache;
 
   private static final Logger log = Logger.getLogger(Report.class.getName());
 
   /**
    * The total number of reports in the database.
    */
-  private static long REPORT_COUNT = 5080388;
-  private static String searchedDepartment;
-  private static Long searchedEmployeeId = -9999L;
-  private static String searchedOrderBy;
-  private static Query searchedQuery;
-  
-  private static String searchedStartsWith;
-  
+  private static long REPORT_COUNT = 5952180;
+
   public static long countReports() {
     EntityManager em = entityManager();
     try {
@@ -63,7 +61,7 @@ public class Report {
       em.close();
     }
   }
-  
+
   public static long countReportsBySearch(Long employeeId, String department,
       String startsWith) {
     EntityManager em = entityManager();
@@ -73,14 +71,17 @@ public class Report {
       if (query == null) {
         return REPORT_COUNT;
       }
-      return ((Number) query.getSingleResult()).longValue();
+      long count = ((Number) query.getSingleResult()).longValue();
+      return count;
     } finally {
       em.close();
     }
   }
+
   public static final EntityManager entityManager() {
     return EMF.get().createEntityManager();
   }
+
   @SuppressWarnings("unchecked")
   public static List<Report> findAllReports() {
     EntityManager em = entityManager();
@@ -93,7 +94,7 @@ public class Report {
       em.close();
     }
   }
-  
+
   public static Report findReport(Long id) {
     if (id == null) {
       return null;
@@ -105,7 +106,7 @@ public class Report {
       em.close();
     }
   }
-  
+
   @SuppressWarnings("unchecked")
   public static List<Report> findReportEntries(int firstResult, int maxResults) {
     EntityManager em = entityManager();
@@ -119,46 +120,104 @@ public class Report {
       em.close();
     }
   }
-  
+
   @SuppressWarnings("unchecked")
   public static List<Report> findReportEntriesBySearch(Long employeeId,
       String department, String startsWith, String orderBy, int firstResult,
-      int maxResults) {    
+      int maxResults) {
     EntityManager em = entityManager();
     try {
       Query query = queryReportsBySearch(em, employeeId, department,
           startsWith, orderBy, false);
-      searchedQuery = query;
-      
-      if (firstResult > 0 && equals(employeeId, searchedEmployeeId)
-          && equals(department, searchedDepartment)
-          && equals(startsWith, searchedStartsWith)
-          && equals(orderBy, searchedOrderBy)) {
-        log.info("findReportEntriesBySearch: Existing query with firstResult = " + firstResult);
-        skipTo(firstResult);
-      } else {
-        log.info("findReportEntriesBySearch: New query with firstResult = " + firstResult);
-        searchedEmployeeId = employeeId;
-        searchedDepartment = department;
-        searchedStartsWith = startsWith;
-        searchedOrderBy = orderBy;
-        cursorsByFirstResult.clear();
-        
-        if (firstResult + maxResults > 1000) {
-          skipTo(firstResult);
-        } else {
-          query.setFirstResult(firstResult);
+
+      // Try to get the memcache
+      if (cache == null) {
+        try {
+          CacheFactory cacheFactory = CacheManager.getInstance().getCacheFactory();
+          cache = cacheFactory.createCache(Collections.emptyMap());
+        } catch (CacheException e) {
+          log.warning("Exception retrieving memcache instance: " + e);
         }
       }
 
-      searchedQuery.setMaxResults(maxResults);
-      List<Report> reportList = searchedQuery.getResultList();
+      // Try to get a cursor for the current query
+      String encodedCursor = null;
+      if (cache != null) {
+        String key = createKey(employeeId, department, startsWith, orderBy,
+            firstResult);
+        encodedCursor = (String) cache.get(key);
+      }
+
+      if (encodedCursor != null) {
+        // Got a cursor, use it
+        Cursor cursor = Cursor.fromWebSafeString(encodedCursor);
+        query.setHint(JPACursorHelper.CURSOR_HINT, cursor);
+        query.setFirstResult(0);
+      } else if (firstResult + maxResults < 1000) {
+        // Results may be retrieved directly using "OFFSET"
+        query.setHint(JPACursorHelper.CURSOR_HINT, null);
+        query.setFirstResult(firstResult);
+      } else {
+        // Skip results
+        int pos = (firstResult / 1000) * 1000;
+        Cursor trialCursor = null;
+        while (pos > 0) {
+          String trialKey = createKey(employeeId, department, startsWith,
+              orderBy, pos);
+          String trialEncodedCursor = (String) cache.get(trialKey);
+          if (trialEncodedCursor != null) {
+            trialCursor = Cursor.fromWebSafeString(trialEncodedCursor);
+            break;
+          }
+          pos -= 1000;
+        }
+
+        // If trialCursor is null, we'll start searching from result 0
+        query.setHint(JPACursorHelper.CURSOR_HINT, trialCursor);
+        while (firstResult > pos) {
+          int min = Math.min(firstResult - pos, 1000);
+          
+          // If we need to skip more than 1000 records, ensure the
+          // breaks occur at multiples of 1000 in order to increase the
+          // chances of reusing cursors from the memcache
+          if (pos + min < firstResult) {
+            int mod = (pos + min) % 1000;
+            min -= mod;
+          }
+          
+          query.setMaxResults(min);
+          List<Report> results = query.getResultList();
+          int count = results.size();
+          if (count == 0) {
+            break;
+          }
+          pos += count;
+          
+          // Save the cursor for later
+          Cursor cursor = JPACursorHelper.getCursor(results);
+          if (cache != null) {
+            String key = createKey(employeeId, department, startsWith, orderBy,
+                pos);
+            cache.put(key, cursor.toWebSafeString());
+          }
+          
+          query.setHint(JPACursorHelper.CURSOR_HINT, cursor);
+        }
+      }
+      
+      query.setMaxResults(maxResults);
+
+      List<Report> reportList = query.getResultList();
       // force it to materialize
       reportList.size();
       
       Cursor cursor = JPACursorHelper.getCursor(reportList);
-      String encodedCursor = cursor.toWebSafeString();
-      cursorsByFirstResult.put(firstResult + reportList.size(), encodedCursor);
+      if (cache != null) {
+        int pos = firstResult + reportList.size();
+        String key = createKey(employeeId, department, startsWith, orderBy, pos);
+        cache.put(key, cursor.toWebSafeString());
+      }
+      
       return reportList;
     } finally {
       em.close();
@@ -180,10 +239,36 @@ public class Report {
     }
   }
 
-  private static boolean equals(Object a, Object b) {
-    return a == null ? b == null : a.equals(b);
+  private static String createKey(Long employeeId, String department,
+      String startsWith, String orderBy, int firstResult) {
+    return "" + employeeId + "+" + encode(department) + "+"
+        + encode(startsWith) + "+" + encode(orderBy) + "+" + firstResult;
   }
-  
+
+  /**
+   * Returns a String based on an input String that provides the following
+   * guarantees.
+   * 
+   * <ol>
+   * <li>The result contains no '+' characters
+   * <li>Distinct inputs always produce distinct results
+   * </ol>
+   * 
+   * <p>
+   * Note that the transformation is not required to be reversible.
+   * 
+   * @param s the input String
+   * @return a String suitable for use as part of a a memcache key
+   */
+  private static String encode(String s) {
+    if (s == null) {
+      return "";
+    }
+    s = s.replace("@", "@@");
+    s = s.replace("+", "@");
+    return s;
+  }
+
   /**
    * Query for reports based on the search parameters. If startsWith is
    * specified, the results will not be ordered.
@@ -201,8 +286,8 @@ public class Report {
     // Determine which parameters to include.
     boolean isFirstStatement = true;
     boolean hasEmployee = employeeId != null && employeeId >= 0;
-    boolean hasDepartment = !hasEmployee && department != null &&
-        department.length() > 0;
+    boolean hasDepartment = !hasEmployee && department != null
+        && department.length() > 0;
     boolean hasStartsWith = startsWith != null && startsWith.length() > 0;
 
     // If we are counting and we don't have any query parameters, return null
@@ -249,36 +334,7 @@ public class Report {
     }
     return query;
   }
-  
-  @SuppressWarnings("unchecked")
-  private static void skipTo(int firstResult) {
-    String encodedCursor = cursorsByFirstResult.get(firstResult);
-    if (encodedCursor != null) {
-      log.info("skipTo: Using cursor");
-      Cursor cursor = Cursor.fromWebSafeString(encodedCursor);
-      searchedQuery.setHint(JPACursorHelper.CURSOR_HINT, cursor);
-      searchedQuery.setFirstResult(0);
-      return;
-    } else {
-      // TODO - start at closest known position
-      log.info("skipTo: Counting up from 0");
-      searchedQuery.setHint(JPACursorHelper.CURSOR_HINT, null);
-      searchedQuery.setFirstResult(0);
-      while (firstResult > 0) {
-        searchedQuery.setMaxResults(Math.min(firstResult, 1000));
-        List<Report> results = searchedQuery.getResultList();
-        int count = results.size();
-        if (count == 0) {
-          break;
-        }
-        
-        Cursor cursor = JPACursorHelper.getCursor(results);
-        searchedQuery.setHint(JPACursorHelper.CURSOR_HINT, cursor);
-        firstResult -= count;
-      }
-    }
-  }
-  
+
   // @JoinColumn
   private Long approvedSupervisorKey;
 
@@ -302,7 +358,7 @@ public class Report {
   private String purposeLowerCase;
 
   /**
-   * Store reporter's key instead of reporter.  See:
+   * Store reporter's key instead of reporter. See:
    * http://code.google.com/appengine
    * /docs/java/datastore/relationships.html#Unowned_Relationships
    */
@@ -328,7 +384,7 @@ public class Report {
   public Long getId() {
     return this.id;
   }
-  
+
   public String getNotes() {
     return this.notes;
   }
@@ -379,7 +435,7 @@ public class Report {
   public void setId(Long id) {
     this.id = id;
   }
-  
+
   public void setNotes(String notes) {
     this.notes = notes;
   }

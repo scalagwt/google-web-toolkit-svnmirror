@@ -61,6 +61,8 @@ public abstract class CellListImpl<T> {
    */
   private boolean dataSizeInitialized;
 
+  private boolean dataSizeIsExact;
+
   private Delegate<T> delegate;
 
   /**
@@ -69,8 +71,8 @@ public abstract class CellListImpl<T> {
    * set inner html.
    */
   private String lastContents = null;
-
   private final PagingListView<T> listView;
+
   private Pager<T> pager;
 
   /**
@@ -119,8 +121,6 @@ public abstract class CellListImpl<T> {
    */
   private boolean refreshScheduled;
 
-  private HandlerRegistration selectionHandler;
-
   /**
    * A local cache of the currently selected rows. We cannot track selected keys
    * instead because we might end up in an inconsistent state where we render a
@@ -128,6 +128,8 @@ public abstract class CellListImpl<T> {
    * not styling the duplicate value outside of the subset.
    */
   private final Set<Integer> selectedRows = new HashSet<Integer>();
+
+  private HandlerRegistration selectionHandler;
 
   private SelectionModel<? super T> selectionModel;
 
@@ -142,6 +144,10 @@ public abstract class CellListImpl<T> {
     this.listView = listView;
     this.pageSize = pageSize;
     tmpElem = Document.get().createDivElement();
+  }
+
+  public boolean dataSizeIsExact() {
+    return dataSizeIsExact;
   }
 
   /**
@@ -311,12 +317,13 @@ public abstract class CellListImpl<T> {
    * 
    * @param size the overall size
    */
-  public void setDataSize(int size) {
+  public void setDataSize(int size, boolean isExact) {
     if (dataSizeInitialized && size == this.dataSize) {
       return;
     }
     dataSizeInitialized = true;
     this.dataSize = size;
+    this.dataSizeIsExact = isExact;
     this.lastContents = null;
     updateDataAndView();
     onSizeChanged();

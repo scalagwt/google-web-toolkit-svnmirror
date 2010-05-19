@@ -48,9 +48,59 @@ import java.util.List;
 public class CellTable<T> extends Widget implements PagingListView<T> {
 
   /**
-   * The default page size.
+   * A cleaner version of the table that uses less graphics.
    */
-  private static final int DEFAULT_PAGESIZE = 15;
+  public static interface CleanResources extends Resources {
+
+    @Source("CellTableClean.css")
+    CleanStyle cellTableStyle();
+  }
+
+  /**
+   * A cleaner version of the table that uses less graphics.
+   */
+  public static interface CleanStyle extends Style {
+    String footer();
+
+    String header();
+  }
+
+  /**
+   * A ClientBundle that provides images for this widget.
+   */
+  public static interface Resources extends ClientBundle {
+
+    /**
+     * The background used for footer cells.
+     */
+    @Source("cellTableHeaderBackground.png")
+    @ImageOptions(repeatStyle = RepeatStyle.Horizontal)
+    ImageResource cellTableFooterBackground();
+
+    /**
+     * The background used for header cells.
+     */
+    @ImageOptions(repeatStyle = RepeatStyle.Horizontal)
+    ImageResource cellTableHeaderBackground();
+
+    /**
+     * The loading indicator used while the table is waiting for data.
+     */
+    ImageResource cellTableLoading();
+
+    /**
+     * The background used for selected cells.
+     */
+    @Source("cellListSelectedBackground.png")
+    @ImageOptions(repeatStyle = RepeatStyle.Horizontal)
+    ImageResource cellTableSelectedBackground();
+
+    /**
+     * The styles used in this widget.
+     */
+    @Source("CellTable.css")
+    Style cellTableStyle();
+  }
 
   /**
    * Styles used by this widget.
@@ -134,61 +184,6 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
   }
 
   /**
-   * A ClientBundle that provides images for this widget.
-   */
-  public static interface Resources extends ClientBundle {
-
-    /**
-     * The background used for header cells.
-     */
-    @ImageOptions(repeatStyle = RepeatStyle.Horizontal)
-    ImageResource cellTableHeaderBackground();
-
-    /**
-     * The background used for footer cells.
-     */
-    @Source("cellTableHeaderBackground.png")
-    @ImageOptions(repeatStyle = RepeatStyle.Horizontal)
-    ImageResource cellTableFooterBackground();
-
-    /**
-     * The loading indicator used while the table is waiting for data.
-     */
-    ImageResource cellTableLoading();
-
-    /**
-     * The background used for selected cells.
-     */
-    @Source("cellListSelectedBackground.png")
-    @ImageOptions(repeatStyle = RepeatStyle.Horizontal)
-    ImageResource cellTableSelectedBackground();
-
-    /**
-     * The styles used in this widget.
-     */
-    @Source("CellTable.css")
-    Style cellTableStyle();
-  }
-
-  /**
-   * A cleaner version of the table that uses less graphics.
-   */
-  public static interface CleanStyle extends Style {
-    String footer();
-
-    String header();
-  }
-
-  /**
-   * A cleaner version of the table that uses less graphics.
-   */
-  public static interface CleanResources extends Resources {
-
-    @Source("CellTableClean.css")
-    CleanStyle cellTableStyle();
-  }
-
-  /**
    * Implementation of {@link CellTable}.
    */
   private static class Impl {
@@ -256,6 +251,11 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
     }
   }
 
+  /**
+   * The default page size.
+   */
+  private static final int DEFAULT_PAGESIZE = 15;
+
   private static Resources DEFAULT_RESOURCES;
 
   /**
@@ -284,14 +284,14 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
   private final CellListImpl<T> impl;
 
   /**
-   * If null, each T will be used as its own key.
-   */
-  private ProvidesKey<T> providesKey;
-
-  /**
    * If true, enable selection via the mouse.
    */
   private boolean isSelectionEnabled;
+
+  /**
+   * If null, each T will be used as its own key.
+   */
+  private ProvidesKey<T> providesKey;
 
   private final Style style;
   private final TableElement table;
@@ -520,6 +520,10 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
     ensureTableColElement(index).addClassName(styleName);
   }
 
+  public boolean dataSizeIsExact() {
+    return impl.dataSizeIsExact();
+  }
+
   public int getBodyHeight() {
     int height = getClientHeight(tbody);
     return height;
@@ -690,7 +694,7 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
   }
 
   public void setDataSize(int size, boolean isExact) {
-    impl.setDataSize(size);
+    impl.setDataSize(size, isExact);
 
     // If there is no data, then we are done loading.
     if (size <= 0) {

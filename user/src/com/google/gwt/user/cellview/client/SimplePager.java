@@ -210,7 +210,7 @@ public class SimplePager<T> extends AbstractPager<T> {
    * @param fastForwardPages the number of pages to fast forward
    * @param showLastPageButton if true, show a button to go the the last page
    */
-  public SimplePager(PagingListView<T> view, TextLocation location,
+  public SimplePager(final PagingListView<T> view, TextLocation location,
       Resources resources, boolean showFastForwardButton,
       final int fastForwardPages,
       boolean showLastPageButton) {
@@ -232,7 +232,7 @@ public class SimplePager<T> extends AbstractPager<T> {
     // Add handlers.
     fastForward.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
-        setPage(getPage() + fastForwardPages);
+        setPageStart(view.getPageStart() + view.getPageSize() * fastForwardPages);
       }
     });
     firstPage.addClickHandler(new ClickHandler() {
@@ -314,7 +314,7 @@ public class SimplePager<T> extends AbstractPager<T> {
     }
 
     // Update the next and last buttons.
-    if (isRangeLimited()) {
+    if (isRangeLimited() || !listView.dataSizeIsExact()) {
       boolean hasNext = hasNextPage();
       if (hasNext && nextDisabled) {
         nextDisabled = false;
@@ -376,7 +376,8 @@ public class SimplePager<T> extends AbstractPager<T> {
     int dataSize = view.getDataSize();
     int endIndex = Math.min(dataSize, pageStart + pageSize - 1);
     endIndex = Math.max(pageStart, endIndex);
+    boolean exact = view.dataSizeIsExact();
     return formatter.format(pageStart) + "-" + formatter.format(endIndex)
-        + " of " + formatter.format(dataSize);
+        + (exact ? " of " : " of over ") + formatter.format(dataSize);
   }
 }

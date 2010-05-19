@@ -47,6 +47,8 @@ public class EntityCounter {
 
   private static final Long ZERO = Long.valueOf(0L);
 
+  private static final boolean DENSE_IDS = false;
+
   public static final EntityManager entityManager() {
     return EMF.get().createEntityManager();
   }
@@ -137,11 +139,12 @@ public class EntityCounter {
     log.info("Starting at getNumExpenses() = " + counter.getNumExpenses());
     log.info("Starting at getNumReports() = " + counter.getNumReports());
     
+    long endTime = System.currentTimeMillis() + 20000;
     EntityTransaction transaction = em.getTransaction();
     transaction.begin();
 
     try {
-      while (true) {
+      while (System.currentTimeMillis() < endTime) {
         Long min;
         switch (kind) {
           case KIND_EMPLOYEE:
@@ -164,7 +167,8 @@ public class EntityCounter {
             + mmin + " and id < " + mmax;
         Number count = (Number) em.createQuery(query).getSingleResult();
         long value = count.longValue();
-        if (value == 0) {
+        if (value == 0 && DENSE_IDS) {
+          log.info("Got 0 results between " + mmin + " and " + mmax);
           break;
         }
 
@@ -220,8 +224,8 @@ public class EntityCounter {
       log.warning("Got exception " + e.getMessage());
       throw e;
     } finally {
-      log.warning("Rolling back transaction");
       if (transaction != null) {
+        log.warning("Rolling back transaction");
         transaction.rollback();
       }
       transaction = null;
