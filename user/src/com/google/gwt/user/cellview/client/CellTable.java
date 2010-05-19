@@ -520,10 +520,6 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
     ensureTableColElement(index).addClassName(styleName);
   }
 
-  public boolean dataSizeIsExact() {
-    return impl.dataSizeIsExact();
-  }
-
   public int getBodyHeight() {
     int height = getClientHeight(tbody);
     return height;
@@ -584,6 +580,10 @@ public class CellTable<T> extends Widget implements PagingListView<T> {
 
   public int getSize() {
     return impl.getDataSize();
+  }
+
+  public boolean isDataSizeExact() {
+    return impl.dataSizeIsExact();
   }
 
   /**

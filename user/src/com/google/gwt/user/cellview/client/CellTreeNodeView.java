@@ -317,10 +317,6 @@ class CellTreeNodeView<T> extends UIObject {
       impl.setSelectionModel(null, false);
     }
     
-    public boolean dataSizeIsExact() {
-      return impl.dataSizeIsExact();
-    }
-
     public int getDataSize() {
       return impl.getDataSize();
     }
@@ -339,6 +335,10 @@ class CellTreeNodeView<T> extends UIObject {
 
     public Range getRange() {
       return impl.getRange();
+    }
+
+    public boolean isDataSizeExact() {
+      return impl.dataSizeIsExact();
     }
 
     public void setData(int start, int length, List<C> values) {

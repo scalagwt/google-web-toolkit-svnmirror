@@ -180,10 +180,6 @@ public class CellList<T> extends Widget implements PagingListView<T> {
     };
   }
 
-  public boolean dataSizeIsExact() {
-    return impl.dataSizeIsExact();
-  }
-
   public int getDataSize() {
     return impl.getDataSize();
   }
@@ -239,6 +235,10 @@ public class CellList<T> extends Widget implements PagingListView<T> {
       return childContainer.getChild(indexOnPage).cast();
     }
     return null;
+  }
+
+  public boolean isDataSizeExact() {
+    return impl.dataSizeIsExact();
   }
 
   @Override

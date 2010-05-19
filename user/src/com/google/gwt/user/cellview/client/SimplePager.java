@@ -314,7 +314,7 @@ public class SimplePager<T> extends AbstractPager<T> {
     }
 
     // Update the next and last buttons.
-    if (isRangeLimited() || !listView.dataSizeIsExact()) {
+    if (isRangeLimited() || !listView.isDataSizeExact()) {
       boolean hasNext = hasNextPage();
       if (hasNext && nextDisabled) {
         nextDisabled = false;
@@ -376,7 +376,7 @@ public class SimplePager<T> extends AbstractPager<T> {
     int dataSize = view.getDataSize();
     int endIndex = Math.min(dataSize, pageStart + pageSize - 1);
     endIndex = Math.max(pageStart, endIndex);
-    boolean exact = view.dataSizeIsExact();
+    boolean exact = view.isDataSizeExact();
     return formatter.format(pageStart) + "-" + formatter.format(endIndex)
         + (exact ? " of " : " of over ") + formatter.format(dataSize);
   }

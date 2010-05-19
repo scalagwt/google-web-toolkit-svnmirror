@@ -41,7 +41,7 @@ public interface ListView<T> {
    * Returns the value of the 'isExact' parameter of the most recent call
    * to {@link #setDataSize(int, boolean)}.
    */
-  boolean dataSizeIsExact();
+  boolean isDataSizeExact();
 
   /**
    * TODO: doc.
