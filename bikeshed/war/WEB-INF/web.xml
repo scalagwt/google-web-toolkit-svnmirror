@@ -14,7 +14,7 @@
   <!-- Servlets -->
   <servlet>
     <servlet-name>requestFactoryServlet</servlet-name>
-    <servlet-class>com.google.gwt.sample.expenses.gwt.server.ExpenseRequestFactoryServlet</servlet-class>
+    <servlet-class> com.google.gwt.requestfactory.server.RequestFactoryServlet</servlet-class>
   </servlet>
 
   <servlet>
