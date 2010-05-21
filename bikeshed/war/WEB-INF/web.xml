@@ -109,6 +109,7 @@
   </security-constraint>
 
   <!-- Require login. -->
+  <!--
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>Access</web-resource-name>
@@ -118,5 +119,5 @@
       <role-name>admin</role-name>
     </auth-constraint>
   </security-constraint>
-
+  -->
 </web-app>
