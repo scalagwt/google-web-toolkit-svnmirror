@@ -1279,6 +1279,7 @@ public class CfgBuilderTest extends OptimizerTestBase {
         "9: END"
     );
   }
+  
   public void testSwitchWithLoopAndBreak() throws Exception {
     assertCfg("void",
         "switch(i) {",
@@ -1315,7 +1316,89 @@ public class CfgBuilderTest extends OptimizerTestBase {
             "3: END"
     );
   }
+  
+  public void testBreakStatement1() throws Exception {
+    assertCfg("void",
+        "lbl: {",
+        "  break lbl;",
+        "}"
+        ).is(
+            "BLOCK -> [*]",
+            "BLOCK -> [*]",
+            "STMT -> [*]",
+            "GOTO -> [*]",
+            "END");
+  }
 
+  public void testBreakStatement2() throws Exception {
+    assertCfg("void",
+        "lbl: break lbl;"
+        ).is(
+            "BLOCK -> [*]",
+            "STMT -> [*]",
+            "GOTO -> [*]",
+            "END");
+  }
+
+  public void testBreakStatement3() throws Exception {
+    assertCfg("void",
+        "lbl: {",
+        "  i = 1;",
+        "  if (b) break lbl;",
+        "  i = 2;",
+        "}"
+        ).is(
+            "BLOCK -> [*]",
+            "BLOCK -> [*]",
+            "STMT -> [*]",
+            "WRITE(i, 1) -> [*]",
+            "STMT -> [*]",
+            "READ(b) -> [*]",
+            "COND (EntryPoint.b) -> [THEN=*, ELSE=1]",
+            "STMT -> [*]",
+            "GOTO -> [2]",
+            "1: STMT -> [*]",
+            "WRITE(i, 2) -> [*]",
+            "2: END");
+  }
+
+  public void testBreakStatement4() throws Exception {
+    assertCfg("void",
+        "lbl1: {",
+        "  i = 1;",
+        "  lbl2: {",
+        "    j = 1;",
+        "    if (b) break lbl1;",
+        "    j = 2;",
+        "    if (b) break lbl2;",
+        "  }",
+        "  i = 2;",
+        "}"
+        ).is(
+            "BLOCK -> [*]",
+            "BLOCK -> [*]",
+            "STMT -> [*]",
+            "WRITE(i, 1) -> [*]",
+            "BLOCK -> [*]",
+            "STMT -> [*]",
+            "WRITE(j, 1) -> [*]",
+            "STMT -> [*]",
+            "READ(b) -> [*]",
+            "COND (EntryPoint.b) -> [THEN=*, ELSE=1]",
+            "STMT -> [*]",
+            "GOTO -> [3]",
+            "1: STMT -> [*]",
+            "WRITE(j, 2) -> [*]",
+            "STMT -> [*]",
+            "READ(b) -> [*]",
+            "COND (EntryPoint.b) -> [THEN=*, ELSE=2]",
+            "STMT -> [*]",
+            "GOTO -> [*]",
+            "2: STMT -> [*]",
+            "WRITE(i, 2) -> [*]",
+            "3: END");
+  }
+  
   private CfgBuilderResult assertCfg(String returnType, String ...codeSnippet)
       throws UnableToCompleteException {
     JProgram program = compileSnippet(returnType, 
