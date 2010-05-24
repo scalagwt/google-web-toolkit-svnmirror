@@ -15,9 +15,9 @@
  */
 package com.google.gwt.sample.expenses.gwt.ui.report;
 
-import com.google.gwt.app.util.DateTimeFormatRenderer;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.input.shared.DateTimeFormatRenderer;
 import com.google.gwt.sample.expenses.gwt.request.ReportRecord;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;

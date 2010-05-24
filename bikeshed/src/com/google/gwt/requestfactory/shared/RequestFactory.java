@@ -103,11 +103,4 @@ public interface RequestFactory {
   void init(HandlerManager eventBus);
 
   SyncRequest syncRequest(DeltaValueStore deltaValueStore);
-
-  /**
-   * The write operation enum used in DeltaValueStore.
-   */
-  enum WriteOperation {
-    CREATE, UPDATE, DELETE
-  }
 }

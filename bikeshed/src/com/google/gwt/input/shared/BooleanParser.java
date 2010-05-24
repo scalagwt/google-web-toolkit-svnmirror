@@ -13,28 +13,29 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.gwt.app.util;
+package com.google.gwt.input.shared;
 
 /**
- * Renderer of Long values.
+ * A no-op renderer.
  */
-public class LongRenderer implements Renderer<Long> {
-  private static LongRenderer INSTANCE;
+public class BooleanParser implements Parser<Boolean> {
+
+  private static BooleanParser INSTANCE;
 
   /**
-   * @return the instance
+   * @return the instance of the no-op renderer
    */
-  public static Renderer<Long> instance() {
+  public static Parser<Boolean> instance() {
     if (INSTANCE == null) {
-      INSTANCE = new LongRenderer();
+      INSTANCE = new BooleanParser();
     }
     return INSTANCE;
   }
 
-  protected LongRenderer() {
+  protected BooleanParser() {
   }
 
-  public String render(Long object) {
-    return String.valueOf(object);
+  public Boolean parse(String object) {
+    return Boolean.valueOf(object);
   }
 }

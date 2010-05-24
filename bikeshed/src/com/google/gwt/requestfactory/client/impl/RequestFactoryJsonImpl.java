@@ -41,15 +41,8 @@ import java.util.Set;
 public abstract class RequestFactoryJsonImpl implements RequestFactory {
 
   private ValueStoreJsonImpl valueStore;
-  private HandlerManager handlerManager;
 
-  /**
-   * @param handlerManager
-   */
-  protected void init(HandlerManager handlerManager, RecordToTypeMap map) {
-    this.valueStore = new ValueStoreJsonImpl(handlerManager, map);
-    this.handlerManager = handlerManager;
-  }
+  private HandlerManager handlerManager;
 
   public void fire(final RequestObject<?> requestObject) {
     RequestBuilder builder = new RequestBuilder(RequestBuilder.POST,
@@ -136,6 +129,14 @@ public abstract class RequestFactoryJsonImpl implements RequestFactory {
         return this;
       }
     };
+  }
+
+  /**
+   * @param handlerManager
+   */
+  protected void init(HandlerManager handlerManager, RecordToTypeMap map) {
+    this.valueStore = new ValueStoreJsonImpl(handlerManager, map);
+    this.handlerManager = handlerManager;
   }
 
   private void postRequestEvent(State received) {

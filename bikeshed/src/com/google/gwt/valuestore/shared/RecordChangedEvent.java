@@ -17,7 +17,6 @@ package com.google.gwt.valuestore.shared;
 
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
-import com.google.gwt.requestfactory.shared.RequestFactory.WriteOperation;
 
 /**
  * Abstract base class for an event announcing changes to a {@link Record}.

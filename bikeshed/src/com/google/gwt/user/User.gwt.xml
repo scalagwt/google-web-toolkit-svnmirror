@@ -18,8 +18,7 @@
 <!-- Most new code should inherit this module.                              -->
 <!--                                                                        -->
 <module>
-   <!-- TODO  this is backward, app should depend upon user. Need to move parser, renderer here -->
-   <inherits name="com.google.gwt.app.App"/>
+   <inherits name="com.google.gwt.input.Input"/>
    <inherits name="com.google.gwt.core.Core"/>
    <inherits name="com.google.gwt.event.Event"/>
    <inherits name="com.google.gwt.animation.Animation"/>

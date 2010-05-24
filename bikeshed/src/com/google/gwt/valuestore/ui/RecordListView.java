@@ -15,7 +15,7 @@
  */
 package com.google.gwt.valuestore.ui;
 
-import com.google.gwt.app.util.IsWidget;
+import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.valuestore.shared.Record;
 import com.google.gwt.view.client.PagingListView;
 

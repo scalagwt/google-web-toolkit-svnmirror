@@ -15,9 +15,9 @@
  */
 package com.google.gwt.user.client.ui;
 
-import com.google.gwt.app.util.LongParser;
-import com.google.gwt.app.util.LongRenderer;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.input.shared.LongParser;
+import com.google.gwt.input.shared.LongRenderer;
 
 /**
  * A ValueBox that uses {@link LongParser} and {@link LongRenderer}.

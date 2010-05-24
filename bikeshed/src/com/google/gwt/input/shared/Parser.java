@@ -13,29 +13,13 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.gwt.app.util;
+package com.google.gwt.input.shared;
 
 /**
- * A no-op renderer.
+ * An object that can parse text and return a value.
+ *
+ * @param <T> the type to parse
  */
-public class PassthroughParser implements Parser<String> {
-
-  private static PassthroughParser INSTANCE;
-  
-  /**
-   * @return the instance of the no-op renderer
-   */
-  public static Parser<String> instance() {
-    if (INSTANCE == null) {
-      INSTANCE = new PassthroughParser();
-    }
-    return INSTANCE;
-  }
-  
-  protected PassthroughParser() {
-  }
-
-  public String parse(String object) {
-    return object;
-  }
+public interface Parser<T> {
+  T parse(String s) throws ParseException;
 }

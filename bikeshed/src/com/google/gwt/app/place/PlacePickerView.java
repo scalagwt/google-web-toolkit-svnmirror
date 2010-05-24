@@ -15,8 +15,8 @@
  */
 package com.google.gwt.app.place;
 
-import com.google.gwt.app.util.IsWidget;
-import com.google.gwt.app.util.Renderer;
+import com.google.gwt.input.shared.Renderer;
+import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 
 import java.util.List;

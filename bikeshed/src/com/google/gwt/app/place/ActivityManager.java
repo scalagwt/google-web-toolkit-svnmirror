@@ -16,8 +16,8 @@
 package com.google.gwt.app.place;
 
 import com.google.gwt.app.place.Activity.Display;
-import com.google.gwt.app.util.IsWidget;
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.ui.IsWidget;
 
 /**
  * Manages {@link Activity} objects that should be kicked off in response to

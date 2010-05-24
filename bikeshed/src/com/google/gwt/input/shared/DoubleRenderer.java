@@ -13,28 +13,28 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.gwt.app.util;
+package com.google.gwt.input.shared;
 
 /**
- * Renderer of Boolean values.
+ * Renderer of Long values.
  */
-public class BooleanRenderer implements Renderer<Boolean> {
-  private static BooleanRenderer INSTANCE;
+public class DoubleRenderer implements Renderer<Double> {
+  private static DoubleRenderer INSTANCE;
 
   /**
    * @return the instance
    */
-  public static Renderer<Boolean> instance() {
+  public static Renderer<Double> instance() {
     if (INSTANCE == null) {
-      INSTANCE = new BooleanRenderer();
+      INSTANCE = new DoubleRenderer();
     }
     return INSTANCE;
   }
 
-  protected BooleanRenderer() {
+  protected DoubleRenderer() {
   }
 
-  public String render(Boolean object) {
+  public String render(Double object) {
     return String.valueOf(object);
   }
 }

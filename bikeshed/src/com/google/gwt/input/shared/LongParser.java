@@ -13,29 +13,33 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.gwt.app.util;
+package com.google.gwt.input.shared;
 
 /**
  * A no-op renderer.
  */
-public class PassthroughRenderer implements Renderer<String> {
+public class LongParser implements Parser<Long> {
 
-  private static PassthroughRenderer INSTANCE;
+  private static LongParser INSTANCE;
   
   /**
    * @return the instance of the no-op renderer
    */
-  public static Renderer<String> instance() {
+  public static Parser<Long> instance() {
     if (INSTANCE == null) {
-      INSTANCE = new PassthroughRenderer();
+      INSTANCE = new LongParser();
     }
     return INSTANCE;
   }
   
-  protected PassthroughRenderer() {
+  protected LongParser() {
   }
 
-  public String render(String object) {
-    return object;
+  public Long parse(String object) {
+    try {
+      return Long.valueOf(object);
+    } catch (NumberFormatException e) { 
+      throw new ParseException(e);
+    }
   }
 }

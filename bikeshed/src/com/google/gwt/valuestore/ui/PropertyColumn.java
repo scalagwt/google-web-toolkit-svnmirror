@@ -15,8 +15,8 @@
  */
 package com.google.gwt.valuestore.ui;
 
-import com.google.gwt.app.util.PassthroughRenderer;
-import com.google.gwt.app.util.Renderer;
+import com.google.gwt.input.shared.PassthroughRenderer;
+import com.google.gwt.input.shared.Renderer;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.valuestore.shared.Property;
 import com.google.gwt.valuestore.shared.Record;

@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.gwt.app.util;
+package com.google.gwt.input.shared;
 
 /**
  * Exception class indicating parsing errors.
@@ -22,10 +22,6 @@ public class ParseException extends RuntimeException {
 
   private final String rawInput;
   private final int offset;
-
-  public ParseException() {
-    this("", "", 0, null);
-  }
 
   public ParseException(Throwable e) {
     this("", "", 0, e);

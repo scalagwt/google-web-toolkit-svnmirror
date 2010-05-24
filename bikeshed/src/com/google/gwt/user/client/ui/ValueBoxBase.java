@@ -15,9 +15,6 @@
  */
 package com.google.gwt.user.client.ui;
 
-import com.google.gwt.app.util.ParseException;
-import com.google.gwt.app.util.Parser;
-import com.google.gwt.app.util.Renderer;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -26,6 +23,9 @@ import com.google.gwt.event.dom.client.HasChangeHandlers;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.input.shared.ParseException;
+import com.google.gwt.input.shared.Parser;
+import com.google.gwt.input.shared.Renderer;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.TextBoxBase.TextAlignConstant;

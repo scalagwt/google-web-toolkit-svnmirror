@@ -15,9 +15,9 @@
  */
 package com.google.gwt.user.client.ui;
 
-import com.google.gwt.app.util.PassthroughParser;
-import com.google.gwt.app.util.PassthroughRenderer;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.input.shared.PassthroughParser;
+import com.google.gwt.input.shared.PassthroughRenderer;
 
 /**
  * Legacy abstract base class for all text entry widgets.

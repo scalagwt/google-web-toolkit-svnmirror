@@ -18,8 +18,8 @@ package com.google.gwt.valuestore.client;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.requestfactory.client.impl.RecordToTypeMap;
-import com.google.gwt.requestfactory.shared.RequestFactory.WriteOperation;
 import com.google.gwt.valuestore.shared.ValueStore;
+import com.google.gwt.valuestore.shared.WriteOperation;
 import com.google.gwt.valuestore.shared.impl.RecordJsoImpl;
 
 import java.util.HashMap;

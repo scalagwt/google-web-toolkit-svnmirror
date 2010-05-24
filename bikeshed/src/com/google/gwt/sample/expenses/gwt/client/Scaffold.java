@@ -19,7 +19,6 @@ import com.google.gwt.app.place.Activity;
 import com.google.gwt.app.place.ActivityManager;
 import com.google.gwt.app.place.PlaceController;
 import com.google.gwt.app.place.PlacePicker;
-import com.google.gwt.app.util.IsWidget;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
@@ -33,6 +32,7 @@ import com.google.gwt.sample.expenses.gwt.request.ExpensesEntityTypesProcessor;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
 import com.google.gwt.sample.expenses.gwt.ui.ListActivitiesMapper;
 import com.google.gwt.sample.expenses.gwt.ui.ScaffoldListPlaceRenderer;
+import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.valuestore.shared.Record;
 

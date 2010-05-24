@@ -13,27 +13,33 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.gwt.valuestore.ui;
-
-import com.google.gwt.user.client.ui.IsWidget;
-import com.google.gwt.user.client.ui.TakesValue;
+package com.google.gwt.input.shared;
 
 /**
- * Implemented by views that show the details of an object.
- *
- * @param <R> the type of object to show
+ * A no-op renderer.
  */
-public interface RecordDetailsView<R> extends TakesValue<R>, IsWidget {
+public class IntegerParser implements Parser<Integer> {
 
+  private static IntegerParser INSTANCE;
+  
   /**
-   * Implemented by the owner of the view.
+   * @return the instance of the no-op renderer
    */
-  interface Delegate {
-    void deleteClicked();
-    void editClicked();
+  public static Parser<Integer> instance() {
+    if (INSTANCE == null) {
+      INSTANCE = new IntegerParser();
+    }
+    return INSTANCE;
   }
   
-  boolean confirm(String msg);
-  
-  void setDelegate(Delegate delegate);
+  protected IntegerParser() {
+  }
+
+  public Integer parse(String object) {
+    try {
+      return Integer.valueOf(object);
+    } catch (NumberFormatException e) { 
+      throw new ParseException(e);
+    }
+  }
 }

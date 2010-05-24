@@ -15,9 +15,9 @@
  */
 package com.google.gwt.user.client.ui;
 
-import com.google.gwt.app.util.DoubleParser;
-import com.google.gwt.app.util.DoubleRenderer;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.input.shared.DoubleParser;
+import com.google.gwt.input.shared.DoubleRenderer;
 
 /**
  * A ValueBox that uses {@link DoubleParser} and {@link DoubleRenderer}.

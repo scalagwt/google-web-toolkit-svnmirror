@@ -15,13 +15,13 @@
  */
 package com.google.gwt.user.client.ui;
 
-import com.google.gwt.app.util.Parser;
-import com.google.gwt.app.util.Renderer;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.i18n.client.BidiUtils;
 import com.google.gwt.i18n.client.HasDirection;
+import com.google.gwt.input.shared.Parser;
+import com.google.gwt.input.shared.Renderer;
 
 /**
  * A standard single-line text box.
