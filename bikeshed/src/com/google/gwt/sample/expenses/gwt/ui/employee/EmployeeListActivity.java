@@ -15,6 +15,7 @@
  */
 package com.google.gwt.sample.expenses.gwt.ui.employee;
 
+import com.google.gwt.app.place.AbstractRecordListActivity;
 import com.google.gwt.app.place.PlaceController;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -26,7 +27,6 @@ import com.google.gwt.sample.expenses.gwt.client.place.ScaffoldRecordPlace.Opera
 import com.google.gwt.sample.expenses.gwt.request.EmployeeRecord;
 import com.google.gwt.sample.expenses.gwt.request.EmployeeRecordChanged;
 import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
-import com.google.gwt.valuestore.ui.AbstractRecordListActivity;
 import com.google.gwt.valuestore.ui.RecordListView;
 import com.google.gwt.view.client.Range;
 

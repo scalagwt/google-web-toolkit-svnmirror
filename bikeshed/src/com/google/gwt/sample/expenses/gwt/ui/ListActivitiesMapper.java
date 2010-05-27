@@ -15,6 +15,7 @@
  */
 package com.google.gwt.sample.expenses.gwt.ui;
 
+import com.google.gwt.app.place.AbstractRecordListActivity;
 import com.google.gwt.app.place.ActivityMapper;
 import com.google.gwt.app.place.PlaceController;
 import com.google.gwt.event.shared.HandlerManager;
@@ -25,7 +26,6 @@ import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
 import com.google.gwt.sample.expenses.gwt.request.ReportRecord;
 import com.google.gwt.sample.expenses.gwt.ui.employee.EmployeeListActivity;
 import com.google.gwt.sample.expenses.gwt.ui.report.ReportListActivity;
-import com.google.gwt.valuestore.ui.AbstractRecordListActivity;
 
 /**
  * The class that knows what {@link com.google.gwt.app.place.Activity} to run

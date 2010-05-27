@@ -15,6 +15,7 @@
  */
 package com.google.gwt.sample.expenses.gwt.ui.report;
 
+import com.google.gwt.app.place.AbstractRecordEditActivity;
 import com.google.gwt.app.place.PlaceController;
 import com.google.gwt.requestfactory.shared.Receiver;
 import com.google.gwt.sample.expenses.gwt.client.place.ReportScaffoldPlace;
@@ -23,7 +24,6 @@ import com.google.gwt.sample.expenses.gwt.client.place.ScaffoldRecordPlace.Opera
 import com.google.gwt.sample.expenses.gwt.request.ExpensesRequestFactory;
 import com.google.gwt.sample.expenses.gwt.request.ReportRecord;
 import com.google.gwt.valuestore.shared.Value;
-import com.google.gwt.valuestore.ui.AbstractRecordEditActivity;
 import com.google.gwt.valuestore.ui.RecordEditView;
 
 /**

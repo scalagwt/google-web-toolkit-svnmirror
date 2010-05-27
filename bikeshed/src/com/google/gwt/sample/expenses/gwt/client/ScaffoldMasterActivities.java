@@ -15,6 +15,7 @@
  */
 package com.google.gwt.sample.expenses.gwt.client;
 
+import com.google.gwt.app.place.AbstractRecordListActivity;
 import com.google.gwt.app.place.Activity;
 import com.google.gwt.app.place.ActivityMapper;
 import com.google.gwt.sample.expenses.gwt.client.place.ListScaffoldPlace;
@@ -23,7 +24,6 @@ import com.google.gwt.sample.expenses.gwt.client.place.ScaffoldPlaceToRecordType
 import com.google.gwt.sample.expenses.gwt.client.place.ScaffoldRecordPlace;
 import com.google.gwt.sample.expenses.gwt.ui.ListActivitiesMapper;
 import com.google.gwt.valuestore.shared.Record;
-import com.google.gwt.valuestore.ui.AbstractRecordListActivity;
 
 /**
  * Finds the activity to run for a particular {@link ScaffoldPlace} in the top
