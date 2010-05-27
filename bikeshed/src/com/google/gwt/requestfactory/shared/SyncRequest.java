@@ -15,6 +15,8 @@
  */
 package com.google.gwt.requestfactory.shared;
 
+import com.google.gwt.valuestore.shared.SyncResult;
+
 import java.util.Set;
 
 /**

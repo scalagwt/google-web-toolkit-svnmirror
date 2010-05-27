@@ -34,7 +34,6 @@ import com.google.gwt.requestfactory.client.impl.AbstractJsonListRequest;
 import com.google.gwt.requestfactory.client.impl.AbstractJsonObjectRequest;
 import com.google.gwt.requestfactory.client.impl.AbstractLongRequest;
 import com.google.gwt.requestfactory.client.impl.ClientRequestHelper;
-import com.google.gwt.requestfactory.client.impl.RecordToTypeMap;
 import com.google.gwt.requestfactory.client.impl.RequestFactoryJsonImpl;
 import com.google.gwt.requestfactory.shared.RecordListRequest;
 import com.google.gwt.requestfactory.shared.RecordRequest;
@@ -50,6 +49,7 @@ import com.google.gwt.valuestore.shared.WriteOperation;
 import com.google.gwt.valuestore.shared.impl.RecordImpl;
 import com.google.gwt.valuestore.shared.impl.RecordJsoImpl;
 import com.google.gwt.valuestore.shared.impl.RecordSchema;
+import com.google.gwt.valuestore.shared.impl.RecordToTypeMap;
 
 import java.io.PrintWriter;
 import java.util.Collections;

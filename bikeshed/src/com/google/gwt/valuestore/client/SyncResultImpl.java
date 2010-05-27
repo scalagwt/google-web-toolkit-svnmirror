@@ -15,8 +15,8 @@
  */
 package com.google.gwt.valuestore.client;
 
-import com.google.gwt.requestfactory.shared.SyncResult;
 import com.google.gwt.valuestore.shared.Record;
+import com.google.gwt.valuestore.shared.SyncResult;
 
 import java.util.Map;
 

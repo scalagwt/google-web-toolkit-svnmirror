@@ -18,10 +18,10 @@ package com.google.gwt.valuestore.ui;
 import com.google.gwt.app.place.Activity;
 import com.google.gwt.requestfactory.shared.Receiver;
 import com.google.gwt.requestfactory.shared.RequestFactory;
-import com.google.gwt.requestfactory.shared.SyncResult;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.valuestore.shared.DeltaValueStore;
 import com.google.gwt.valuestore.shared.Record;
+import com.google.gwt.valuestore.shared.SyncResult;
 import com.google.gwt.valuestore.shared.Value;
 
 import java.util.Set;
