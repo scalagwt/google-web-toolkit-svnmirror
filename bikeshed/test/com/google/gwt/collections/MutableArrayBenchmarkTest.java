@@ -49,7 +49,8 @@ public class MutableArrayBenchmarkTest extends Benchmark {
   }
   
   public void testGwtCollectionsArraySetSizeGrowth(@RangeField("elemRange") Integer numElements) {
-    MutableArray<Integer> ma = CollectionFactory.createMutableArray();
+    MutableArray<Integer> ma = 
+      CollectionFactory.createMutableArray(numElements);
     
     ma.setSize(numElements, null);
     for (int i = 0; i < numElements; i++) {
@@ -62,9 +63,9 @@ public class MutableArrayBenchmarkTest extends Benchmark {
   
   public void testGwtCollectionsArraySetSizeInitGrowth(
       @RangeField("elemRange") Integer numElements) {
-    MutableArray<Integer> ma = CollectionFactory.createMutableArray();
+    MutableArray<Integer> ma = 
+      CollectionFactory.createMutableArray(numElements, new Integer(0));
     
-    ma.setSize(numElements, new Integer(0));
     for (int i = 0; i < numElements; i++) {
       ma.set(i, i);
     }    

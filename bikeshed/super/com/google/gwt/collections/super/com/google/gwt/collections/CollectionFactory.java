@@ -15,22 +15,29 @@
  */
 package com.google.gwt.collections;
 
-import com.google.gwt.core.client.JavaScriptObject;
-
 /**
  * Made to be switched out using super source even while Collections itself isn't.
  */
 public class CollectionFactory {
 
-  public static <E> MutableArray<E> createMutableArray() {
-    return JavaScriptObject.createArray().<MutableArray<E>>cast();
-  }
+  public static native <E> MutableArray<E> createMutableArray() /*-{
+    return Array();
+  }-*/;
   
-  public static <E> MutableArray<E> createMutableArray(int size, E fillValue) {
-    MutableArray<E> r = createMutableArray();
-    r.setSize(size, fillValue);
+  public static native <E> MutableArray<E> createMutableArray(int size) /*-{
+    return Array(size);
+  }-*/;
+  
+  public static native <E> MutableArray<E> createMutableArray(int size, 
+      E fillValue) /*-{
+    var r = Array(size);
+    if (fillValue != null) {
+      for (i = 0; i < size; ++i) {
+        r[i] = fillValue;
+      }
+    }
     return r;
-  }
+  }-*/;
   
   public static <V> MutableStringMap<V> createMutableStringMap() {
     return new MutableStringMap<V>();

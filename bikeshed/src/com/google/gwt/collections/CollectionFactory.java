@@ -31,6 +31,18 @@ public class CollectionFactory {
   }
   
   /**
+   * Creates a {@link MutableArray} with an initial {@code size} and null 
+   * elements.
+   * 
+   * @param <E> type of elements in the array
+   * @param size size of the array
+   * @return a {@code MutableArray}
+   */
+  public static <E> MutableArray<E> createMutableArray(Integer size) {
+    return createMutableArray(size, null);
+  }
+  
+  /**
    * Creates a {@link MutableArray} with {@code size} references to {@code
    * fillValue}.
    * 
