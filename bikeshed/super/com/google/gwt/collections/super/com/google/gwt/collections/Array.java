@@ -15,29 +15,33 @@
  */
 package com.google.gwt.collections;
 
+import com.google.gwt.core.client.JavaScriptObject;
+
 /**
- * The standard byte code implementation of an immutable array.
+ * The root Array type that provides read-access to an array that might still
+ * be mutable by another actor.
  * 
  * @param <E> The type stored in the array elements
  */
-public class ImmutableArrayImpl<E> extends ImmutableArray<E> {
+public abstract class Array<E> extends JavaScriptObject {
 
-  final E[] elems;
-
-  ImmutableArrayImpl(E[] elems) {
-    Assertions.assertNotNull(elems);
-    this.elems = elems;
+  protected Array() {
   }
 
-  @Override
+  @ConstantTime
   public final E get(int index) {
-    Assertions.assertIndexInRange(index, 0, elems.length);
-    return elems[index];
+    Assertions.assertIndexInRange(index, 0, size());
+    return jsniGet(index);
   }
 
-  @Override
-  public final int size() {
-    return elems.length;
-  }
-
+  @ConstantTime
+  public final native int size() /*-{
+    return this.length;
+  }-*/;
+  
+  @ConstantTime
+  private native E jsniGet(int index) /*-{
+    return this[index];
+  }-*/;
+  
 }

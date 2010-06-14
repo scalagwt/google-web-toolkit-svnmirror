@@ -23,13 +23,14 @@ package com.google.gwt.collections;
 class ImmutableArrayEmptyImpl<E> extends ImmutableArray<E> {
 
   @Override
-  public E get(int index) {
-    Assertions.assertGetFromImmutableEmpty();
+  public final E get(int index) {
+    // Get always fails for an empty array
+    Assertions.assertIndexInRange(index, 0, 0);
     return null;
   }
 
   @Override
-  public int size() {
+  public final int size() {
     return 0;
   }
 

@@ -15,26 +15,18 @@
  */
 package com.google.gwt.collections;
 
-import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.core.client.JsArray;
-
 /**
  * An array whose content and length can change over time. This implementation
  * is used in web mode.
  * 
  * @param <E> The type stored in the array elements
  */
-public class MutableArray<E> extends Array<E> {
-
-  JsArray elems;
-
-  private boolean frozen;
+public final class MutableArray<E> extends Array<E> {
 
   /**
    * Can only be constructed via {@link CollectionFactory}.
    */
-  MutableArray() {
-    elems = (JsArray) JavaScriptObject.createArray();
+  protected MutableArray() {
   }
 
   @ConstantTime
@@ -46,33 +38,22 @@ public class MutableArray<E> extends Array<E> {
   @ConstantTime
   public void clear() {
     Assertions.assertNotFrozen(this);
-    elems.setLength(0);
+    jsniClear();
   }
 
   /**
-   * Creates an immutable array based on this one. Also marks this object as
-   * read-only. After calling {@code freeze()}, only use methods from
-   * {@link Array} or the returned {@link ImmutableArray} should be to access
-   * the elements of the array is preferred.
+   * Creates an {@link ImmutableArray} with the contents of this {@code
+   * MutableArray}. Also marks this {@link MutableArray} as read-only. After
+   * calling {@code freeze()}, only use read-only methods to access the elements
+   * in the array.
    */
   public ImmutableArray<E> freeze() {
     Assertions.markFrozen(this);
-    if (size() != 0) {
-      return new ImmutableArrayImpl(elems);
-    } else {
-      return ImmutableArray.getEmptyInstance();
-    }
-  }
-
-  @Override
-  @ConstantTime
-  public E get(int index) {
-    Assertions.assertIndexInRange(index, 0, size());
-    return jsniGet(index);
+    return this.<ImmutableArray<E>>cast();
   }
 
   /**
-   * Inserts {@code element} before the element residing at {@code index}.
+   * Inserts {@code elem} before the element residing at {@code index}.
    * 
    * @param index in the range [0, this.size()], inclusive; if index is equal to
    *          the array's current size, the result is equivalent to calling
@@ -82,7 +63,9 @@ public class MutableArray<E> extends Array<E> {
   @LinearTime
   public void insert(int index, E elem) {
     Assertions.assertNotFrozen(this);
-    Assertions.assertIndexInRange(index, 0, size() + 1);
+    // TODO: fix gwtc to optimize away Assertions.assertIndexInRange  
+    assert (index >= 0 && index < size() + 1) : "Index " + index 
+        + " was not in the acceptable range [" + 0 + ", " + (size() + 1) + ")";
     jsniInsert(index, elem);
   }
 
@@ -92,7 +75,10 @@ public class MutableArray<E> extends Array<E> {
   @LinearTime
   public void remove(int index) {
     Assertions.assertNotFrozen(this);
-    Assertions.assertIndexInRange(index, 0, size());
+    // TODO: fix gwtc to optimize away Assertions.assertIndexInRange  
+    assert 0 < size() : Assertions.ACCESS_EMPTY_ARRAY_MESSAGE;
+    assert (index >= 0 && index < size()) : "Index " + index 
+        + " was not in the acceptable range [" + 0 + ", " + size() + ")";
     jsniRemove(index);
   }
 
@@ -105,7 +91,10 @@ public class MutableArray<E> extends Array<E> {
   @ConstantTime
   public void set(int index, E elem) {
     Assertions.assertNotFrozen(this);
-    Assertions.assertIndexInRange(index, 0, size());
+    // TODO: fix gwtc to optimize away Assertions.assertIndexInRange  
+    assert 0 < size() : Assertions.ACCESS_EMPTY_ARRAY_MESSAGE;
+    assert (index >= 0 && index < size()) : "Index " + index 
+        + " was not in the acceptable range [" + 0 + ", " + size() + ")";
 
     jsniSet(index, elem);
   }
@@ -122,43 +111,24 @@ public class MutableArray<E> extends Array<E> {
     jsniSetSize(newSize, fillValue);
   }
 
-  @Override
-  @ConstantTime
-  public int size() {
-    return elems.length();
-  }
+  // Only meant to be called from within Assertions
+  native boolean isFrozen() /*-{
+    return !!this.frozen;
+  }-*/;
 
   // Only meant to be called from within Assertions
-  boolean isFrozen() {
-    return frozen;
-  }
-
-  // Only meant to be called from within Assertions
-  void markFrozen() {
-    frozen = true;
-  }
-
-  private Object[] copyNativeArray(JsArray jsElems) {
-    if (jsElems == null) {
-      return null;
-    }
-
-    Object[] jreElems = new Object[jsElems.length()];
-
-    for (int i = 0; i < jsElems.length(); ++i) {
-      jreElems[i] = jsElems.get(i);
-    }
-    return jreElems;
-  }
-
-  @ConstantTime
-  private native void jsniAdd(E elem) /*-{
-    this.@com.google.gwt.collections.MutableArray::elems.push(elem);
+  native void markFrozen() /*-{
+    this.frozen = true;
   }-*/;
 
   @ConstantTime
-  private native E jsniGet(int index) /*-{
-    return this.@com.google.gwt.collections.MutableArray::elems[index];
+  private native void jsniAdd(E elem) /*-{
+    this.push(elem);
+  }-*/;
+
+  @ConstantTime
+  private native void jsniClear() /*-{
+    this.length = 0;
   }-*/;
 
   /**
@@ -171,7 +141,7 @@ public class MutableArray<E> extends Array<E> {
    */
   @LinearTime
   private native void jsniInsert(int index, E elem) /*-{
-    this.@com.google.gwt.collections.MutableArray::elems.splice(index, 0, elem);
+    this.splice(index, 0, elem);
   }-*/;
 
   /**
@@ -179,7 +149,7 @@ public class MutableArray<E> extends Array<E> {
    */
   @LinearTime
   private native void jsniRemove(int index) /*-{
-    this.@com.google.gwt.collections.MutableArray::elems.splice(index, 1);
+    this.splice(index, 1);
   }-*/;
 
   /**
@@ -190,7 +160,7 @@ public class MutableArray<E> extends Array<E> {
    */
   @ConstantTime
   private native void jsniSet(int index, E elem) /*-{
-    this.@com.google.gwt.collections.MutableArray::elems[index] = elem;
+    this[index] = elem;
   }-*/;
 
   /**
@@ -201,16 +171,11 @@ public class MutableArray<E> extends Array<E> {
    */
   @LinearTime
   private native void jsniSetSize(int newSize, E fillValue) /*-{
-    var fillStart;
-    var i;
-
-    fillStart = this.@com.google.gwt.collections.MutableArray::elems.length;
-
-    this.@com.google.gwt.collections.MutableArray::elems.length = newSize;
-
-    if (fillValue != null) {
-      for (i = fillStart; i < newSize; ++i) {
-        this.@com.google.gwt.collections.MutableArray::elems[i] = fillValue;
+    if (fillValue == null) {
+      this.length = newSize;
+    } else {  
+      for (var i = this.length; i < newSize; ++i) {
+        this[i] = fillValue;
       }
     }
   }-*/;

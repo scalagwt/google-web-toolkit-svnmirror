@@ -15,8 +15,6 @@
  */
 package com.google.gwt.collections;
 
-import com.google.gwt.core.client.JsArray;
-
 /**
  * The standard JSNI implementation of an immutable array.
  * 
@@ -24,26 +22,7 @@ import com.google.gwt.core.client.JsArray;
  */
 public class ImmutableArrayImpl<E> extends ImmutableArray<E> {
 
-  final JsArray elems;
-
-  ImmutableArrayImpl(JsArray elems) {
-    Assertions.assertNotNull(elems);
-    this.elems = elems;
+  protected ImmutableArrayImpl() {
   }
-
-  @Override
-  public E get(int index) {
-    Assertions.assertIndexInRange(index, 0, size());
-    return jsniGet(index);
-  }
-
-  @Override
-  public int size() {
-    return elems.length();
-  }
-
-  private native E jsniGet(int index) /*-{
-    return this.@com.google.gwt.collections.ImmutableArrayImpl::elems[index];
-  }-*/;
 
 }

@@ -15,29 +15,25 @@
  */
 package com.google.gwt.collections;
 
+import com.google.gwt.core.client.JavaScriptObject;
+
 /**
- * The standard byte code implementation of an immutable array.
- * 
- * @param <E> The type stored in the array elements
+ * Made to be switched out using super source even while Collections itself isn't.
  */
-public class ImmutableArrayImpl<E> extends ImmutableArray<E> {
+public class CollectionFactory {
 
-  final E[] elems;
-
-  ImmutableArrayImpl(E[] elems) {
-    Assertions.assertNotNull(elems);
-    this.elems = elems;
+  public static <E> MutableArray<E> createMutableArray() {
+    return JavaScriptObject.createArray().<MutableArray<E>>cast();
   }
-
-  @Override
-  public final E get(int index) {
-    Assertions.assertIndexInRange(index, 0, elems.length);
-    return elems[index];
+  
+  public static <E> MutableArray<E> createMutableArray(int size, E fillValue) {
+    MutableArray<E> r = createMutableArray();
+    r.setSize(size, fillValue);
+    return r;
   }
-
-  @Override
-  public final int size() {
-    return elems.length;
+  
+  public static <V> MutableStringMap<V> createMutableStringMap() {
+    return new MutableStringMap<V>();
   }
 
 }

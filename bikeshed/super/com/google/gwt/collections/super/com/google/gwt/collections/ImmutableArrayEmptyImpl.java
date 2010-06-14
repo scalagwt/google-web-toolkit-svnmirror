@@ -16,28 +16,13 @@
 package com.google.gwt.collections;
 
 /**
- * The standard byte code implementation of an immutable array.
+ * Blank super implementation. This class is unused in JSNI version.
  * 
- * @param <E> The type stored in the array elements
+ * @param <E> unused.
  */
-public class ImmutableArrayImpl<E> extends ImmutableArray<E> {
+class ImmutableArrayEmptyImpl<E> extends ImmutableArray<E> {
 
-  final E[] elems;
-
-  ImmutableArrayImpl(E[] elems) {
-    Assertions.assertNotNull(elems);
-    this.elems = elems;
-  }
-
-  @Override
-  public final E get(int index) {
-    Assertions.assertIndexInRange(index, 0, elems.length);
-    return elems[index];
-  }
-
-  @Override
-  public final int size() {
-    return elems.length;
+  protected ImmutableArrayEmptyImpl() {
   }
 
 }

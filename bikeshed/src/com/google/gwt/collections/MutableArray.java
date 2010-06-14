@@ -22,7 +22,7 @@ import java.util.Arrays;
  * 
  * @param <E> The type stored in the array elements
  */
-public class MutableArray<E> extends Array<E> {
+public final class MutableArray<E> extends Array<E> {
 
   // TODO: refactor the unchecked elems construction into a separate method
   // The elements in the array
@@ -34,7 +34,7 @@ public class MutableArray<E> extends Array<E> {
   /**
    * Can only be constructed via {@link CollectionFactory}.
    */
-  MutableArray() {
+  protected MutableArray() {
   }
 
   @ConstantTime
@@ -49,10 +49,10 @@ public class MutableArray<E> extends Array<E> {
   }
   
   /**
-   * Creates an immutable array based on this one. Also marks this object as read-only. 
-   * After calling {@code freeze()}, only use methods from {@link Array} or the returned 
-   * {@link ImmutableArray} should be to access the elements 
-   * of the array is preferred.
+   * Creates an {@link ImmutableArray} with the contents of this {@code
+   * MutableArray}. Also marks this {@link MutableArray} as read-only. After
+   * calling {@code freeze()}, only use read-only methods to access the elements
+   * in the array.
    */
   public ImmutableArray<E> freeze() {
     Assertions.markFrozen(this);
@@ -79,7 +79,7 @@ public class MutableArray<E> extends Array<E> {
   }
 
   /**
-   * Inserts {@code element} before the element residing at {@code index}.
+   * Inserts {@code elem} before the element residing at {@code index}.
    * 
    * @param index in the range [0, this.size()], inclusive; if index is equal
    *          to the array's current size, the result is equivalent to calling

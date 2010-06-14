@@ -20,13 +20,17 @@ package com.google.gwt.collections;
  */
 class Assertions {
   
-  static void assertGetFromImmutableEmpty() {
-    assert false : "Attempt to get an element from an immutable empty array";
-  }
+  /**
+   * Message for asserting that access to an empty array is an illegal operation.
+   */
+  public static final String ACCESS_EMPTY_ARRAY_MESSAGE = 
+    "Attempt to access an element in an empty array";
 
   static void assertIndexInRange(int index, int minInclusive, int maxExclusive) {
+    assert minInclusive < maxExclusive : ACCESS_EMPTY_ARRAY_MESSAGE;
     assert (index >= minInclusive && index < maxExclusive) : "Index " + index 
-        + " was not in the acceptable range [" + minInclusive + ", " + maxExclusive + ")";
+        + " was not in the acceptable range [" + minInclusive + ", " 
+        + maxExclusive + ")";
   }
 
   static <E> void assertNotFrozen(MutableArray<E> a) {

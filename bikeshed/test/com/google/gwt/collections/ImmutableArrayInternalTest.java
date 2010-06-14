@@ -1,12 +1,12 @@
 /*
  * Copyright 2009 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -15,29 +15,29 @@
  */
 package com.google.gwt.collections;
 
+import com.google.gwt.junit.client.GWTTestCase;
+
 /**
- * The standard byte code implementation of an immutable array.
- * 
- * @param <E> The type stored in the array elements
+ * Tests mutable array implementation internal details.
  */
-public class ImmutableArrayImpl<E> extends ImmutableArray<E> {
-
-  final E[] elems;
-
-  ImmutableArrayImpl(E[] elems) {
-    Assertions.assertNotNull(elems);
-    this.elems = elems;
-  }
+public class ImmutableArrayInternalTest extends GWTTestCase {
 
   @Override
-  public final E get(int index) {
-    Assertions.assertIndexInRange(index, 0, elems.length);
-    return elems[index];
+  public String getModuleName() {
+    return null;
   }
 
-  @Override
-  public final int size() {
-    return elems.length;
+  public void testImmutableNoCopy() {
+    MutableArray<String> ma = CollectionFactory.createMutableArray();
+    ma.add("pear");
+    ma.add("apple");
+    ImmutableArrayImpl<String> ia1 = (ImmutableArrayImpl<String>) ma.freeze();
+    
+    assertTrue(ma.elems == ia1.elems);
+  
+    ImmutableArrayImpl<String> ia2 = (ImmutableArrayImpl<String>) ma.freeze();
+    
+    assertTrue(ia1.elems == ia2.elems);
   }
 
 }

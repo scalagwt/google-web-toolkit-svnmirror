@@ -15,10 +15,6 @@
  */
 package com.google.gwt.collections;
 
-import static com.google.gwt.collections.CollectionFactory.createMutableArray;
-
-import com.google.gwt.junit.client.GWTTestCase;
-
 /**
  * Tests mutable array implementation internal details.
  */
@@ -29,18 +25,8 @@ public class MutableArrayInternalTest extends GWTTestCase {
     return null;
   }
 
-  public native boolean hasElems(MutableArray ma) /*-{
-    return !(ma.elems === undefined) 
-  }-*/;
-
   public void testSetSizeNullElems() {
-    MutableArray<String> b = createMutableArray();
-    
-    b.setSize(1, "fillValue");
-    assertTrue(hasElems(b));
-
-    b.setSize(0, null);
-    assertFalse(hasElems(b));
+    // Not necessary in JSNI implementation
   }
 
 }

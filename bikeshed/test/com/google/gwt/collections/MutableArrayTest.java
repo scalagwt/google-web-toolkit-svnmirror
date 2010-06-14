@@ -1,12 +1,12 @@
 /*
  * Copyright 2009 Google Inc.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -182,23 +182,23 @@ public class MutableArrayTest extends GWTTestCase {
     b.setSize(0, null);
     assertEquals(0, b.size());
   }
-  
+
   public void testSingleElementAddAndRemove() {
-      MutableArray<String> a = createMutableArray();
+    MutableArray<String> a = createMutableArray();
 
-      a.add("foo");
+    a.add("foo");
 
-      assertEquals(1, a.size());
-      assertEquals("foo", a.get(0));
+    assertEquals(1, a.size());
+    assertEquals("foo", a.get(0));
 
-      a.remove(0);
+    a.remove(0);
 
-      assertEquals(0, a.size());
+    assertEquals(0, a.size());
 
-      a.add("bar");
+    a.add("bar");
 
-      assertEquals(1, a.size());
-      assertEquals("bar", a.get(0));
+    assertEquals(1, a.size());
+    assertEquals("bar", a.get(0));
   }
 
   public void testSingleElementNull() {
@@ -236,8 +236,8 @@ public class MutableArrayTest extends GWTTestCase {
       a.get(1);
       fail("That should have failed");
     } catch (AssertionError e) {
-      assertEquals(("Index " + 1 + " was not in the acceptable range [" + 0 + ", " + 1 + ")"),
-          e.getMessage());
+      assertEquals(("Index " + 1 + " was not in the acceptable range [" + 0
+          + ", " + 1 + ")"), e.getMessage());
     }
   }
 
@@ -265,8 +265,7 @@ public class MutableArrayTest extends GWTTestCase {
           fail("Should have triggered an assertion");
         } catch (AssertionError e) {
           // Good
-          assertEquals(("Index " + i + " was not in the acceptable range [" + 0 + ", "
-          + 0 + ")"), e.getMessage());
+          assertEquals(Assertions.ACCESS_EMPTY_ARRAY_MESSAGE, e.getMessage());
         }
       }
     }
@@ -281,8 +280,7 @@ public class MutableArrayTest extends GWTTestCase {
           fail("Should have triggered an assertion");
         } catch (AssertionError e) {
           // Good
-          assertEquals(("Index " + i + " was not in the acceptable range [" + 0 + ", "
-          + 0 + ")"), e.getMessage());
+          assertEquals(Assertions.ACCESS_EMPTY_ARRAY_MESSAGE, e.getMessage());
         }
       }
     }

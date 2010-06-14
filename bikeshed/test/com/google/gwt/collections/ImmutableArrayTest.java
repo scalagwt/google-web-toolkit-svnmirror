@@ -66,7 +66,7 @@ public class ImmutableArrayTest extends GWTTestCase {
       ia.get(ia.size());
       fail("Expected an assertion failure");
     } catch (AssertionError e) {
-      assertEquals("Attempt to get an element from an immutable empty array", e.getMessage());
+      assertEquals("Attempt to access an element in an empty array", e.getMessage());
     }
   }
   
@@ -96,19 +96,6 @@ public class ImmutableArrayTest extends GWTTestCase {
     
     assertEquals(1, ia.size());
     assertEquals("pear", ia.get(0));
-  }
-  
-  public void testImmutableNoCopy() {
-    MutableArray<String> ma = CollectionFactory.createMutableArray();
-    ma.add("pear");
-    ma.add("apple");
-    ImmutableArrayImpl<String> ia1 = (ImmutableArrayImpl<String>) ma.freeze();
-    
-    assertTrue(ma.elems == ia1.elems);
-  
-    ImmutableArrayImpl<String> ia2 = (ImmutableArrayImpl<String>) ma.freeze();
-    
-    assertTrue(ia1.elems == ia2.elems);
   }
   
   public void testModifyFrozenMutable() {    

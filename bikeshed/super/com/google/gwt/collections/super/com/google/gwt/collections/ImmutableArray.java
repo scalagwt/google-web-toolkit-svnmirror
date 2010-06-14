@@ -16,28 +16,15 @@
 package com.google.gwt.collections;
 
 /**
- * The standard byte code implementation of an immutable array.
+ * An array that is guaranteed not to change, thus making it safe for disparate
+ * portions of code to maintain references to a shared instance, rather than
+ * feeling the need to make defensive copies.
  * 
  * @param <E> The type stored in the array elements
  */
-public class ImmutableArrayImpl<E> extends ImmutableArray<E> {
-
-  final E[] elems;
-
-  ImmutableArrayImpl(E[] elems) {
-    Assertions.assertNotNull(elems);
-    this.elems = elems;
-  }
-
-  @Override
-  public final E get(int index) {
-    Assertions.assertIndexInRange(index, 0, elems.length);
-    return elems[index];
-  }
-
-  @Override
-  public final int size() {
-    return elems.length;
+public abstract class ImmutableArray<E> extends Array<E> {
+  
+  protected ImmutableArray() {
   }
 
 }
