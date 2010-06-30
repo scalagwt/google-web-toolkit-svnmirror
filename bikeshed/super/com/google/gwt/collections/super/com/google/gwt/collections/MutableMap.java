@@ -15,8 +15,6 @@
  */
 package com.google.gwt.collections;
 
-import java.util.HashMap;
-
 /**
  * A Map whose contents may be modified.
  * 
@@ -57,34 +55,16 @@ import java.util.HashMap;
  */
 public final class MutableMap<K, V> extends Map<K, V> {
   
-  /**
-   * Backing store for the map key value pairs.
-   */
-  HashMap<String, V> entries;
-
-  // Tracks when this map is frozen (for assertion enforcement only)
-  private boolean frozen;
-
   protected MutableMap() {
   }
 
   /**
    * Removes all entries from this map.
    */
-  @ConstantTime
+  @LinearTime
   public void clear() {
     Assertions.assertNotFrozen(this);
-    entries = null;
-  }
-
-  @ConstantTime
-  public boolean containsKey(K key) {
-    if (isEmpty()) {
-      return false;
-    }
-    
-    String index = adapt(key);
-    return index != null && entries.containsKey(index);
+    jsniClear();
   }
 
   /**
@@ -95,34 +75,18 @@ public final class MutableMap<K, V> extends Map<K, V> {
   @ConstantTime
   public ImmutableMap<K, V> freeze() {
     Assertions.markFrozen(this);
-    if (!isEmpty()) {
-      return new ImmutableMapImpl<K, V>(this);
-    } else {
-      return ImmutableMap.getEmptyInstance();
-    }
-  }
-
-  @Override
-  @ConstantTime
-  public V get(K key) {
-    return isEmpty() ? null : entries.get(adapt(key));
-  }
-
-  @Override
-  @ConstantTime
-  public boolean isEmpty() {
-    return entries == null;
+    return this.<ImmutableMap<K,V>>cast();
   }
 
   // Only meant to be called from within Assertions
-  public boolean isFrozen() {
-    return frozen;
-  }
+  public native boolean isFrozen() /*-{
+    return !!this.frozen;
+  }-*/;
   
   // Only meant to be called from within Assertions
-  public void markFrozen() {
-    frozen = true;
-  }
+  public native void markFrozen() /*-{
+    this.frozen = true;
+  }-*/;
   
   /**
    * Put the value in the map at the given key. {@code key} must be a value
@@ -135,12 +99,9 @@ public final class MutableMap<K, V> extends Map<K, V> {
   @ConstantTime
   public void put(K key, V value) {
     Assertions.assertNotFrozen(this);
-    if (entries == null) {
-      entries = new HashMap<String, V>();
-    }
     String index = adapt(key);
     assert index != null : Assertions.ACCESS_UNSUPPORTED_VALUE;
-    entries.put(index, value);      
+    jsniPut(index, value);      
   }
 
   /**
@@ -153,12 +114,9 @@ public final class MutableMap<K, V> extends Map<K, V> {
   @ConstantTime
   public void remove(K key) {
     Assertions.assertNotFrozen(this);
-    if (isEmpty()) {
-      return;
-    }
-    entries.remove(adapt(key));
-    if (entries.isEmpty()) {
-      entries = null;
+    String index = adapt(key);
+    if (index != null) {
+      jsniRemove(index);
     }
   }
 
@@ -174,9 +132,29 @@ public final class MutableMap<K, V> extends Map<K, V> {
     // TODO Consider allow re-indexing the map
     assert adapter != null : Assertions.ADAPTER_NULL;
     assert isEmpty() : Assertions.INIT_ADAPTER_NON_EMPTY;
-    assert this.adapter == null : Assertions.INIT_ADAPTER_TWICE;
+    assert !jsniIsAdapterPresent() : Assertions.INIT_ADAPTER_TWICE;
     
-    this.adapter = adapter;
+    jsniSetAdapter(adapter);
   }
+  
+  private native void jsniClear() /*-{
+    for (k in this) {
+      if (k != "adapter" && k != "frozen") {
+        delete this[k];
+      }
+    }
+  }-*/;
+  
+  private native void jsniPut(String index, V value) /*-{
+    this[index] = value;
+  }-*/;
+  
+  private native void jsniRemove(String index) /*-{
+    delete this[index];
+  }-*/;
+  
+  private native <K,V> void jsniSetAdapter(Relation<K,V> a) /*-{
+    this.adapter = a;
+  }-*/;
 
 }

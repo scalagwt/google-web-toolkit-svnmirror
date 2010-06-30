@@ -28,6 +28,13 @@ public class CollectionsTestSuite extends GWTTestSuite {
     
     suite.addTestSuite(ClientMutableArrayTest.class);
     suite.addTestSuite(GwtImmutableArrayTest.class);
+    suite.addTestSuite(ClientMutableSetStringTest.class);
+    suite.addTestSuite(ClientMutableSetCustomAdapterTest.class);
+    suite.addTestSuite(ClientImmutableSetStringTest.class);
+    suite.addTestSuite(ClientImmutableSetAdapterTest.class);
+    suite.addTestSuite(ClientMutableStringMapTest.class);
+    suite.addTestSuite(ClientMutableMapAdapterTest.class);
+    suite.addTestSuite(ClientImmutableStringMapTest.class);
     
     return suite;
   }

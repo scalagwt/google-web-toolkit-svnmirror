@@ -29,6 +29,7 @@ public class ImmutableArrayTest extends GWTTestCase {
     return null;
   }
   
+  @Override
   public void gwtSetUp() {
     assertionsEnabled = this.getClass().desiredAssertionStatus();
   }

@@ -15,286 +15,118 @@
  */
 package com.google.gwt.collections;
 
-import com.google.gwt.junit.client.GWTTestCase;
-
 /**
  * Tests MutableSet when used providing a {@link Relation} with
  * custom {@link MutableSet#setAdapter(Relation)} adapters.
+ * 
+ * @param <E> type of elements to test
  */
-public class MutableSetAdapterTest extends GWTTestCase {
+public class MutableSetAdapterTest<E> extends MutableSetTest<E> {
   
-  private boolean assertionsEnabled;
-  
-  private Relation<Object, String> adapter1 = new Relation<Object, String>() {
-    public String applyTo(Object element) {
-      if (!(element instanceof Integer) || (Integer) element >= 0) {
-        return null;
-      }
-      return "__" + ((Integer) element).toString();
-    }
-  };
+  protected Relation<Object, String> adapter1;
 
-  private Relation<Object, String> adapter2 = new Relation<Object, String>() {
-    public String applyTo(Object element) {
-      if (!(element instanceof Integer) || (Integer) element >= 0) {
-        return null;
-      }
-      return "_$_" + ((Integer) element).toString();
-    }
-  };
+  protected Relation<Object, String> adapter2;
   
   public void gwtSetUp() {
     assertionsEnabled = this.getClass().desiredAssertionStatus();
   }
 
-  public void testAdd() {
-    MutableSet<Integer> ms = CollectionFactory.createMutableSet(adapter1);
+  public void testAddAllCrossAdapter() {
+    MutableSet<E> msA = getSet();
 
-    ms.add(-1);
-    assertTrue(ms.contains(-1));
-    
-    // Do not test undefined behavior without assertions
-    if (!assertionsEnabled) {
-      return;
-    }
-    try {
-      ms.add(null);
-      fail("Should have triggered an assertion");
-    } catch (AssertionError e) {
-      // Good
-      assertEquals(Assertions.ACCESS_UNSUPPORTED_VALUE, e.getMessage());
-    }
-    try {
-      ms.add(1);
-      fail("Should have triggered an assertion");
-    } catch (AssertionError e) {
-      // Good
-      assertEquals(Assertions.ACCESS_UNSUPPORTED_VALUE, e.getMessage());
-    }
-  }
+    msA.add(element1);
+    msA.add(element2);
+    msA.add(element3);
 
-  public void testAddAll() {
-    MutableSet<Integer> msA = CollectionFactory.createMutableSet(adapter1);
-    MutableSet<Integer> msB = CollectionFactory.createMutableSet(adapter1);
-
-    msA.add(-1);
-    msA.add(-2);
-    msA.add(-3);
-
-    msB.addAll(msA);
-
-    assertTrue(msB.isEqual(msA));
-    try {
-      msA.addAll(null);
-      fail();
-    } catch (NullPointerException e) {
-      // Expected behavior
-    }
-    
-    // Test different adapters
-    MutableSet<Integer> msC = CollectionFactory.createMutableSet(adapter2);
+    MutableSet<E> msC = getSetAdapter2();
     msC.addAll(msA);
 
     assertTrue(msC.isEqual(msA));
   }
 
-  public void testContains() {
-    MutableSet<Integer> ms = CollectionFactory.createMutableSet(adapter1);
-    ms.add(-1);
+  public void testContainsAllCrossAdapter() {
+    MutableSet<E> msA = getSet();
 
-    assertTrue(ms.contains(-1));
-    assertFalse(ms.contains(-2));
-    
-    assertFalse(ms.contains(null));
-  }
+    msA.add(element1);
+    msA.add(element2);
+    msA.add(element3);
 
-  public void testContainsAll() {
-    MutableSet<Integer> msA = CollectionFactory.createMutableSet(adapter1);
-    MutableSet<Integer> msB = CollectionFactory.createMutableSet(adapter1);
-    MutableSet<Integer> msEmpty = CollectionFactory.createMutableSet(adapter1);
+    MutableSet<E> msC = getSetAdapter2();
 
-    msA.add(-1);
-    msA.add(-2);
-    msA.add(-3);
-
-    msB.add(-1);
-    msB.add(-2);
-
-    assertTrue(msA.containsAll(msB));
-    assertFalse(msB.containsAll(msA));
-    assertTrue(msA.containsAll(msEmpty));
-    try {
-      msA.containsAll(null);
-      fail();
-    } catch (NullPointerException e) {
-      // Expected behavior
-    }
-    
-    // Test different adapters
-    MutableSet<Integer> msC = CollectionFactory.createMutableSet(adapter2);
-
-    msC.add(-1);
-    msC.add(-2);
+    msC.add(element1);
+    msC.add(element2);
     
     assertTrue(msA.containsAll(msC));
     assertFalse(msC.containsAll(msA));
   }
 
-  public void testContainsSome() {
-    MutableSet<Integer> msA = CollectionFactory.createMutableSet(adapter1);
-    MutableSet<Integer> msB = CollectionFactory.createMutableSet(adapter1);
-    MutableSet<Integer> msEmpty = CollectionFactory.createMutableSet(adapter1);
+  public void testContainsSomeCrossAdapter() {
+    MutableSet<E> msA = getSet();
 
-    msA.add(-1);
-    msA.add(-2);
-    msA.add(-3);
+    msA.add(element1);
+    msA.add(element2);
+    msA.add(element3);
 
-    msB.add(-4);
-    msB.add(-5);
-    msB.add(-1);
-
-    assertTrue(msA.containsSome(msB));
-    msB.remove(-1);
-    assertFalse(msB.containsSome(msA));
-    assertFalse(msA.containsSome(msEmpty));
-    try {
-      msA.containsSome(null);
-      fail();
-    } catch (NullPointerException e) {
-      // Expected behavior
-    }
-    
-    // Test different adapters
-    MutableSet<Integer> msC = CollectionFactory.createMutableSet(adapter2);
-    msC.add(-4);
-    msC.add(-5);
-    msC.add(-1);
+    MutableSet<E> msC = getSetAdapter2();
+    msC.add(element4);
+    msC.add(element5);
+    msC.add(element1);
 
     assertTrue(msA.containsSome(msC));
-    msC.remove(-1);
+    msC.remove(element1);
     assertFalse(msC.containsSome(msA));
   }
 
-  public void testIsEmpty() {
-    MutableSet<Integer> ms = CollectionFactory.createMutableSet(adapter1);
-
-    assertTrue(ms.isEmpty());
-    ms.add(-1);
-    assertFalse(ms.isEmpty());
-  }
-
-  public void testIsEqual() {
-    MutableSet<Integer> msA = CollectionFactory.createMutableSet(adapter1);
-    MutableSet<Integer> msB = CollectionFactory.createMutableSet(adapter1);
-
-    assertTrue(msA.isEqual(msB));
-    msA.add(-1);
-    assertFalse(msA.isEqual(msB));
-    msB.add(-1);
-    assertTrue(msA.isEqual(msB));
-    msB.add(-2);
-    assertFalse(msA.isEqual(msB));
-    assertFalse(msA.isEqual(null));
-    
-    // Test different adapters
-    MutableSet<Integer> msC = CollectionFactory.createMutableSet(adapter1);
-    MutableSet<Integer> msD = CollectionFactory.createMutableSet(adapter2);
+  public void testIsEqualCrossAdapter() {
+    MutableSet<E> msC = getSet();
+    MutableSet<E> msD = getSetAdapter2();
 
     assertTrue(msC.isEqual(msD));
-    msC.add(-1);
+    msC.add(element1);
     assertFalse(msC.isEqual(msD));
-    msD.add(-1);
+    msD.add(element1);
     assertTrue(msC.isEqual(msD));
-    msD.add(-2);
+    msD.add(element2);
     assertFalse(msC.isEqual(msD));
   }
 
-  public void testKeepAll() {
-    MutableSet<Integer> msA = CollectionFactory.createMutableSet(adapter1);
-    MutableSet<Integer> msB = CollectionFactory.createMutableSet(adapter1);
-    MutableSet<Integer> msC = CollectionFactory.createMutableSet(adapter1);
+  public void testKeepAllCrossAdapter() {
+    MutableSet<E> msB = getSet();
+    MutableSet<E> msC = getSet();
 
-    msA.add(-1);
-    msA.add(-2);
-    msA.add(-3);
+    msB.add(element1);
+    msB.add(element2);
+    msB.add(element4);
 
-    msB.add(-1);
-    msB.add(-2);
-    msB.add(-4);
+    msC.add(element1);
+    msC.add(element2);
 
-    msC.add(-1);
-    msC.add(-2);
+    MutableSet<E> msD = getSetAdapter2();
 
-    msA.keepAll(msB);
-    assertTrue(msC.isEqual(msA));
-    try {
-      msA.keepAll(null);
-      fail();
-    } catch (NullPointerException e) {
-      // Expected behavior
-    }
-    
-    // Test different adapters
-    MutableSet<Integer> msD = CollectionFactory.createMutableSet(adapter2);
-
-    msD.add(-1);
-    msD.add(-2);
-    msD.add(-3);
+    msD.add(element1);
+    msD.add(element2);
+    msD.add(element3);
 
     msD.keepAll(msB);
     
     assertTrue(msC.isEqual(msD));
   }
 
-  public void testRemove() {
-    MutableSet<Integer> msA = CollectionFactory.createMutableSet(adapter1);
-    MutableSet<Integer> msB = CollectionFactory.createMutableSet(adapter1);
+  public void testRemoveAllCrossAdapter() {
+    MutableSet<E> msB = getSet();
+    MutableSet<E> msC = getSet();
 
-    msA.add(-1);
-    msA.add(-2);
-    msA.remove(-1);
-    msB.add(-2);
-    assertTrue(msA.isEqual(msB));
-    msA.remove(-3);
-    assertTrue(msA.isEqual(msB));
-    msA.remove(null);
-    assertTrue(msA.isEqual(msB));
-    msA.remove(-2);
-    assertTrue(msA.isEmpty());
-  }
+    msB.add(element1);
+    msB.add(element3);
+    msB.add(element4);
 
-  public void testRemoveAll() {
-    MutableSet<Integer> msA = CollectionFactory.createMutableSet(adapter1);
-    MutableSet<Integer> msB = CollectionFactory.createMutableSet(adapter1);
-    MutableSet<Integer> msC = CollectionFactory.createMutableSet(adapter1);
+    msC.add(element2);
 
-    msA.add(-1);
-    msA.add(-2);
-    msA.add(-3);
+    MutableSet<E> msD = getSetAdapter2();
 
-    msB.add(-1);
-    msB.add(-3);
-    msB.add(-4);
-
-    msC.add(-2);
-
-    msA.removeAll(msB);
-    assertTrue(msC.isEqual(msA));
-    msA.removeAll(msC);
-    assertTrue(msA.isEmpty());
-    try {
-      msA.removeAll(null);
-      fail();
-    } catch (NullPointerException e) {
-      // Expected behavior
-    }
-    
-    // Test different adapters
-    MutableSet<Integer> msD = CollectionFactory.createMutableSet(adapter2);
-
-    msD.add(-1);
-    msD.add(-2);
-    msD.add(-3);
+    msD.add(element1);
+    msD.add(element2);
+    msD.add(element3);
     
     msD.removeAll(msB);
     assertTrue(msC.isEqual(msD));
@@ -305,6 +137,15 @@ public class MutableSetAdapterTest extends GWTTestCase {
   @Override
   public String getModuleName() {
     return null;
+  }
+
+  @Override
+  public MutableSet<E> getSet() {
+    return CollectionFactory.createMutableSet(adapter1);
+  }
+  
+  public MutableSet<E> getSetAdapter2() {
+    return CollectionFactory.createMutableSet(adapter2);
   }
 
 }

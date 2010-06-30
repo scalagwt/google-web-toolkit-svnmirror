@@ -16,26 +16,23 @@
 package com.google.gwt.collections;
 
 /**
- * Tests {@link MutableMap} behavior.
+ * A set that is guaranteed not to change, thus making it safe for disparate
+ * portions of code to maintain references to a shared instance, rather than
+ * feeling the need to make defensive copies.
+ * 
+ * @param <E> the type stored in the set elements
  */
-public class MutableStringMapTest extends MutableMapTest<String> {
+public abstract class ImmutableSet<E> extends Set<E> {
   
-  @Override
-  protected void gwtSetUp() throws Exception {
-    super.gwtSetUp();
-    keyA = "foo";
-    keyB = "";
-    keyUnsupported = null;
-  }
-
-  @Override
-  protected MutableMap<String, Integer> getMap() {
-    return CollectionFactory.createMutableMap();
-  }
-
-  @Override
-  public void testNullKey() {
-    // Raw String Maps do not support null keys
+  @SuppressWarnings("unchecked")
+  private static final ImmutableSet EMPTY = new ImmutableEmptySetImpl();
+  
+  /**
+   * Provides an empty set of type {@code T}.
+   */
+  @SuppressWarnings("unchecked")
+  static <T> ImmutableSet<T> getEmptyInstance() {
+    return EMPTY;
   }
 
 }

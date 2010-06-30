@@ -16,26 +16,24 @@
 package com.google.gwt.collections;
 
 /**
- * Tests {@link MutableMap} behavior.
+ * Tests a MutableSet with String elements.
  */
-public class MutableStringMapTest extends MutableMapTest<String> {
-  
+public class MutableSetStringTest extends MutableSetTest<String> {
+
   @Override
-  protected void gwtSetUp() throws Exception {
+  public MutableSet<String> getSet() {
+    return CollectionFactory.createMutableSet();
+  }
+
+  @Override
+  public void gwtSetUp() {
     super.gwtSetUp();
-    keyA = "foo";
-    keyB = "";
-    keyUnsupported = null;
-  }
-
-  @Override
-  protected MutableMap<String, Integer> getMap() {
-    return CollectionFactory.createMutableMap();
-  }
-
-  @Override
-  public void testNullKey() {
-    // Raw String Maps do not support null keys
+    element1 = "peach";
+    element2 = "apricot";
+    element3 = "prune";
+    element4 = "lemon";
+    element5 = "orange";
+    elementUnsupported = null;
   }
 
 }

@@ -39,6 +39,12 @@ class Assertions {
   public static final String INIT_ADAPTER_TWICE = "Attempt to call " +
     "setAdapter(Relation) a second time";
 
+  public static final String INIT_ADAPTER_NON_EMPTY = "Attempt to call " +
+    "setAdapter(Relation) with non-empty collection";
+
+  public static final String ADAPTER_NULL = "Attempt to call " +
+  "setAdapter(Relation) with null parameter";
+
   static void assertIndexInRange(int index, int minInclusive, int maxExclusive) {
     assert minInclusive < maxExclusive : ACCESS_EMPTY_ARRAY_MESSAGE;
     assert (index >= minInclusive && index < maxExclusive) : "Index " + index 
@@ -50,6 +56,14 @@ class Assertions {
     assert !a.isFrozen() :  "This operation is illegal on a frozen collection";
   }
 
+  static <K,V> void assertNotFrozen(MutableMap<K,V> a) {
+    assert !a.isFrozen() :  "This operation is illegal on a frozen collection";
+  }
+  
+  static <E> void assertNotFrozen(MutableSet<E> s) {
+    assert !s.isFrozen() :  "This operation is illegal on a frozen collection";
+  }
+  
   static void assertNotNull(Object ref) {
     assert (ref != null) : "A null reference is not allowed here";
   }
@@ -59,5 +73,16 @@ class Assertions {
       a.markFrozen();
     }
   }
+  
+  static <K,V> void markFrozen(MutableMap<K,V> a) {
+    if (Assertions.class.desiredAssertionStatus()) {
+      a.markFrozen();
+    }
+  }
 
+  static <E> void markFrozen(MutableSet<E> s) {
+    if (Assertions.class.desiredAssertionStatus()) {
+      s.markFrozen();
+    }
+  }
 }

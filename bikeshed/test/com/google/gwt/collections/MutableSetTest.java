@@ -20,27 +20,41 @@ import com.google.gwt.junit.client.GWTTestCase;
 /**
  * Tests MutableSet when used without providing a {@link Relation} with
  * {@link MutableSet#setAdapter(Relation)}.
+ * 
+ * @param <E> type of elements to test
  */
-public class MutableSetTest extends GWTTestCase {
+public abstract class MutableSetTest<E> extends GWTTestCase {
   
-  private boolean assertionsEnabled;
+  protected E element1;
+  
+  protected E element2;
 
+  protected E element3;
+
+  protected E element4;
+
+  protected E element5;
+  
+  protected E elementUnsupported;
+
+  protected boolean assertionsEnabled;
+  
   public void gwtSetUp() {
     assertionsEnabled = this.getClass().desiredAssertionStatus();
   }
 
   public void testAdd() {
-    MutableSet<String> ms = CollectionFactory.createMutableSet();
+    MutableSet<E> ms = getSet();
 
-    ms.add("peach");
-    assertTrue(ms.contains("peach"));
+    ms.add(element1);
+    assertTrue(ms.contains(element1));
     
     // Do not test undefined behavior without assertions
     if (!assertionsEnabled) {
       return;
     }
     try {
-      ms.add(null);
+      ms.add(elementUnsupported);
       fail("Should have triggered an assertion");
     } catch (AssertionError e) {
       // Good
@@ -49,12 +63,12 @@ public class MutableSetTest extends GWTTestCase {
   }
 
   public void testAddAll() {
-    MutableSet<String> msA = CollectionFactory.createMutableSet();
-    MutableSet<String> msB = CollectionFactory.createMutableSet();
+    MutableSet<E> msA = getSet();
+    MutableSet<E> msB = getSet();
 
-    msA.add("peach");
-    msA.add("apricot");
-    msA.add("prune");
+    msA.add(element1);
+    msA.add(element2);
+    msA.add(element3);
 
     msB.addAll(msA);
 
@@ -69,26 +83,26 @@ public class MutableSetTest extends GWTTestCase {
   }
 
   public void testContains() {
-    MutableSet<String> ms = CollectionFactory.createMutableSet();
-    ms.add("peach");
+    MutableSet<E> ms = getSet();
+    ms.add(element1);
 
-    assertTrue(ms.contains("peach"));
-    assertFalse(ms.contains("lemon"));
+    assertTrue(ms.contains(element1));
+    assertFalse(ms.contains(element4));
     
-    assertFalse(ms.contains(null));
+    assertFalse(ms.contains(elementUnsupported));
   }
 
   public void testContainsAll() {
-    MutableSet<String> msA = CollectionFactory.createMutableSet();
-    MutableSet<String> msB = CollectionFactory.createMutableSet();
-    MutableSet<String> msEmpty = CollectionFactory.createMutableSet();
+    MutableSet<E> msA = getSet();
+    MutableSet<E> msB = getSet();
+    MutableSet<E> msEmpty = getSet();
 
-    msA.add("peach");
-    msA.add("apricot");
-    msA.add("prune");
+    msA.add(element1);
+    msA.add(element2);
+    msA.add(element3);
 
-    msB.add("peach");
-    msB.add("prune");
+    msB.add(element1);
+    msB.add(element3);
 
     assertTrue(msA.containsAll(msB));
     assertFalse(msB.containsAll(msA));
@@ -102,20 +116,20 @@ public class MutableSetTest extends GWTTestCase {
   }
 
   public void testContainsSome() {
-    MutableSet<String> msA = CollectionFactory.createMutableSet();
-    MutableSet<String> msB = CollectionFactory.createMutableSet();
-    MutableSet<String> msEmpty = CollectionFactory.createMutableSet();
+    MutableSet<E> msA = getSet();
+    MutableSet<E> msB = getSet();
+    MutableSet<E> msEmpty = getSet();
 
-    msA.add("peach");
-    msA.add("apricot");
-    msA.add("prune");
+    msA.add(element1);
+    msA.add(element2);
+    msA.add(element3);
 
-    msB.add("lemon");
-    msB.add("orange");
-    msB.add("peach");
+    msB.add(element4);
+    msB.add(element5);
+    msB.add(element1);
 
     assertTrue(msA.containsSome(msB));
-    msB.remove("peach");
+    msB.remove(element1);
     assertFalse(msB.containsSome(msA));
     assertFalse(msA.containsSome(msEmpty));
     try {
@@ -127,42 +141,42 @@ public class MutableSetTest extends GWTTestCase {
   }
 
   public void testIsEmpty() {
-    MutableSet<String> ms = CollectionFactory.createMutableSet();
+    MutableSet<E> ms = getSet();
 
     assertTrue(ms.isEmpty());
-    ms.add("peach");
+    ms.add(element1);
     assertFalse(ms.isEmpty());
   }
 
   public void testIsEqual() {
-    MutableSet<String> msA = CollectionFactory.createMutableSet();
-    MutableSet<String> msB = CollectionFactory.createMutableSet();
+    MutableSet<E> msA = getSet();
+    MutableSet<E> msB = getSet();
 
     assertTrue(msA.isEqual(msB));
-    msA.add("peach");
+    msA.add(element1);
     assertFalse(msA.isEqual(msB));
-    msB.add("peach");
+    msB.add(element1);
     assertTrue(msA.isEqual(msB));
-    msB.add("apricot");
+    msB.add(element2);
     assertFalse(msA.isEqual(msB));
     assertFalse(msA.isEqual(null));
   }
 
   public void testKeepAll() {
-    MutableSet<String> msA = CollectionFactory.createMutableSet();
-    MutableSet<String> msB = CollectionFactory.createMutableSet();
-    MutableSet<String> msC = CollectionFactory.createMutableSet();
+    MutableSet<E> msA = getSet();
+    MutableSet<E> msB = getSet();
+    MutableSet<E> msC = getSet();
 
-    msA.add("peach");
-    msA.add("apricot");
-    msA.add("prune");
+    msA.add(element1);
+    msA.add(element2);
+    msA.add(element3);
 
-    msB.add("peach");
-    msB.add("prune");
-    msB.add("orange");
+    msB.add(element1);
+    msB.add(element3);
+    msB.add(element5);
 
-    msC.add("peach");
-    msC.add("prune");
+    msC.add(element1);
+    msC.add(element3);
 
     msA.keepAll(msB);
     assertTrue(msC.isEqual(msA));
@@ -175,36 +189,36 @@ public class MutableSetTest extends GWTTestCase {
   }
 
   public void testRemove() {
-    MutableSet<String> msA = CollectionFactory.createMutableSet();
-    MutableSet<String> msB = CollectionFactory.createMutableSet();
+    MutableSet<E> msA = getSet();
+    MutableSet<E> msB = getSet();
 
-    msA.add("peach");
-    msA.add("apricot");
-    msA.remove("peach");
-    msB.add("apricot");
+    msA.add(element1);
+    msA.add(element2);
+    msA.remove(element1);
+    msB.add(element2);
     assertTrue(msA.isEqual(msB));
-    msA.remove("blue_berry");
+    msA.remove(element3);
     assertTrue(msA.isEqual(msB));
-    msA.remove(null);
+    msA.remove(elementUnsupported);
     assertTrue(msA.isEqual(msB));
-    msA.remove("apricot");
+    msA.remove(element2);
     assertTrue(msA.isEmpty());
   }
 
   public void testRemoveAll() {
-    MutableSet<String> msA = CollectionFactory.createMutableSet();
-    MutableSet<String> msB = CollectionFactory.createMutableSet();
-    MutableSet<String> msC = CollectionFactory.createMutableSet();
+    MutableSet<E> msA = getSet();
+    MutableSet<E> msB = getSet();
+    MutableSet<E> msC = getSet();
 
-    msA.add("peach");
-    msA.add("apricot");
-    msA.add("prune");
+    msA.add(element1);
+    msA.add(element2);
+    msA.add(element3);
 
-    msB.add("peach");
-    msB.add("prune");
-    msB.add("orange");
+    msB.add(element1);
+    msB.add(element3);
+    msB.add(element5);
 
-    msC.add("apricot");
+    msC.add(element2);
 
     msA.removeAll(msB);
     assertTrue(msC.isEqual(msA));
@@ -222,5 +236,7 @@ public class MutableSetTest extends GWTTestCase {
   public String getModuleName() {
     return null;
   }
-
+  
+  public abstract MutableSet<E> getSet();
+  
 }

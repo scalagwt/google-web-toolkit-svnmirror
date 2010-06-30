@@ -15,9 +15,6 @@
  */
 package com.google.gwt.collections;
 
-import java.util.HashMap;
-import java.util.Iterator;
-
 /**
  * A {@link Set} whose content can change over time.
  * 
@@ -75,9 +72,25 @@ import java.util.Iterator;
  * @param <E> The type stored in the set elements
  */
 public final class MutableSet<E> extends Set<E> {
+  
+  /**
+   * This is necessary to reach the non-static method contains
+   * in the overlay type Set class.
+   */ 
+  protected static <T> void staticAdd(MutableSet that, T element) {
+    that.add(element);
+  }
+  
+  /**
+   * This is necessary to reach the non-static method contains
+   * in the overlay type Set class.
+   */ 
+  protected static <T> void staticRemove(MutableSet that, T element) {
+    that.remove(element);
+  }
 
-  // Tracks when this map is frozen (for assertion enforcement only)
-  private boolean frozen;
+  protected MutableSet() {
+  }
 
   /**
    * Adds an {@code element} to this set. {@code element} must be a value
@@ -90,7 +103,7 @@ public final class MutableSet<E> extends Set<E> {
     Assertions.assertNotFrozen(this);
     String key = adapt(element);
     assert key != null : Assertions.ACCESS_UNSUPPORTED_VALUE;
-    elements.put(key, element);
+    jsniAdd(key, element);
   }
 
   /**
@@ -105,56 +118,7 @@ public final class MutableSet<E> extends Set<E> {
     if (source == null) {
       throw new NullPointerException("source == null");
     }
-
-    HashMap<String, E> sourceElems = source.elements;
-    Iterator<String> i = sourceElems.keySet().iterator();
-    
-    while (i.hasNext()) {
-      add(sourceElems.get(i.next()));
-    }
-  }
-
-  @Override
-  public boolean contains(Object element) {
-    String key = adapt(element);
-    if (key == null) {
-      return false;
-    }
-    return elements.containsKey(key);
-  }
-
-  @Override
-  public boolean containsAll(Set<E> source) {
-    if (source == null) {
-      throw new NullPointerException("source == null");
-    }
-
-    HashMap<String, E> sourceElems = source.elements;
-    Iterator<String> i = sourceElems.keySet().iterator();
-    
-    while (i.hasNext()) {
-      if (!contains(sourceElems.get(i.next()))) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  @Override
-  public boolean containsSome(Set<E> source) {
-    if (source == null) {
-      throw new NullPointerException("source == null");
-    }
-
-    HashMap<String, E> sourceElems = source.elements;
-    Iterator<String> i = sourceElems.keySet().iterator();
-    
-    while (i.hasNext()) {
-      if (contains(sourceElems.get(i.next()))) {
-        return true;
-      }
-    }
-    return false;
+    jsniAddAll(source);
   }
 
   /**
@@ -165,23 +129,7 @@ public final class MutableSet<E> extends Set<E> {
   @ConstantTime
   public ImmutableSet<E> freeze() {
     Assertions.markFrozen(this);
-    if (!isEmpty() && elements.size() != 1) {
-      return new ImmutableSetImpl<E>(this);
-    } else {
-      return ImmutableSet.getEmptyInstance();
-    }
-  }
-
-  @Override
-  public boolean isEmpty() {
-    return elements.isEmpty();
-  }
-
-  @Override
-  public boolean isEqual(Set<E> source) {
-    return source != null 
-      && source.elements.size() == elements.size() 
-      && containsAll(source);
+    return this.<ImmutableSet<E>>cast();
   }
 
   /**
@@ -196,14 +144,7 @@ public final class MutableSet<E> extends Set<E> {
     if (source == null) {
       throw new NullPointerException("source == null");
     }
-
-    Iterator<String> i = elements.keySet().iterator();
-    
-    while (i.hasNext()) {
-      if (!source.contains(elements.get(i.next()))) {
-        i.remove();
-      }
-    }
+    jsniKeepAll(source);
   }
 
   /**
@@ -219,7 +160,7 @@ public final class MutableSet<E> extends Set<E> {
     if (key == null) {
       return;
     }
-    elements.remove(key);
+    jsniRemove(key);
   }
 
   /**
@@ -234,38 +175,69 @@ public final class MutableSet<E> extends Set<E> {
     if (source == null) {
       throw new NullPointerException("source == null");
     }
-    
-    HashMap<String, E> sourceElems = source.elements;
-    Iterator<String> i = sourceElems.keySet().iterator();
-    
-    while (i.hasNext()) {
-      remove(sourceElems.get(i.next()));
-    }
+    jsniRemoveAll(source);
   }
   
   // Only meant to be called from within Assertions
-  boolean isFrozen() {
-    return frozen;
-  }
+  native boolean isFrozen() /*-{
+    return !!this.frozen;
+  }-*/;
   
   // Only meant to be called from within Assertions
-  void markFrozen() {
-    frozen = true;
-  }
-
+  native void markFrozen() /*-{
+    this.frozen = true;
+  }-*/;
+  
   /**
    * Sets the {@link Relation} to use to translate elements of the Set into
    * Strings.
-   *
+   * 
    * @param adapter non-null {@link Relation} to translate from Object to String
    */
   void setAdapter(Relation<Object, String> adapter) {
-    // TODO Consider allowing re-indexing the set
+    // TODO Consider allow re-indexing the set
     assert adapter != null : Assertions.ADAPTER_NULL;
-    assert this.adapter == null : Assertions.INIT_ADAPTER_TWICE;
     assert isEmpty() : Assertions.INIT_ADAPTER_NON_EMPTY;
+    assert !jsniIsAdapterPresent() : Assertions.INIT_ADAPTER_TWICE;
     
-    this.adapter = adapter;
+    jsniSetAdapter(adapter);
   }
+  
+  private native void jsniAdd(String key, E value) /*-{
+    this[key] = value;
+  }-*/;
+  
+  private native void jsniAddAll(Set<E> source) /*-{
+    for (var k in source ) {
+      if (k != "adapter" && k != "frozen") {
+        @com.google.gwt.collections.MutableSet::staticAdd(Lcom/google/gwt/collections/MutableSet;Ljava/lang/Object;)(this, source[k]);
+      }
+    }
+  }-*/;
+  
+  private native void jsniKeepAll(Set<E> source) /*-{
+    for (var k in this) {
+      if (k != "adapter" && k != "frozen" && 
+          !@com.google.gwt.collections.Set::staticContains(Lcom/google/gwt/collections/Set;Ljava/lang/Object;)(source, this[k])) {
+        delete this[k];
+      }
+    }
+  }-*/;
+  
+  private native void jsniRemove(String key) /*-{
+    delete this[key];
+  }-*/;
+  
+  private native void jsniRemoveAll(Set<E> source) /*-{
+    for (var k in source ) {
+      if (k != "adapter" && k != "frozen") {
+        @com.google.gwt.collections.MutableSet::staticRemove(Lcom/google/gwt/collections/MutableSet;Ljava/lang/Object;)(this, source[k]);
+      }
+    }
+  }-*/;
+
+  private native <K,V> void jsniSetAdapter(Relation<K,V> a) /*-{
+    this.adapter = a;
+  }-*/;
 
 }

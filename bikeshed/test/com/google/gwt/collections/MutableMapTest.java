@@ -32,6 +32,10 @@ public abstract class MutableMapTest<K> extends GWTTestCase {
 
   protected K keyB;
 
+  protected K keyUnsupported;
+  
+  protected boolean assertionsEnabled;
+
   @Override
   public String getModuleName() {
     return null;
@@ -128,6 +132,32 @@ public abstract class MutableMapTest<K> extends GWTTestCase {
     assertNull(msm.get(keyA));
   }
   
+  public void testUnsupportedValue() {
+    MutableMap<K, Integer> mm = getMap();
+    
+    assertNull(mm.get(keyUnsupported));
+    
+    // This should just complete successfully
+    mm.remove(keyUnsupported);
+    
+    // Do not test undefined behavior without assertions
+    if (!assertionsEnabled) {
+      return;
+    }
+    
+    try {
+      mm.put(keyUnsupported, 1);
+      fail("Should have triggered an assertion");
+    } catch (AssertionError e) {
+      // Good
+      assertEquals(Assertions.ACCESS_UNSUPPORTED_VALUE, e.getMessage());
+    }
+  }
+  
   protected abstract MutableMap<K, Integer> getMap();
+  
+  protected void gwtSetup() {
+    assertionsEnabled = this.getClass().desiredAssertionStatus();
+  }
 
 }

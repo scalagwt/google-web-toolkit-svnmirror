@@ -19,6 +19,16 @@ package com.google.gwt.collections;
  * Made to be switched out using super source even while Collections itself isn't.
  */
 public class CollectionFactory {
+  
+  static final Relation<Object, String> defaultAdapter = 
+      new Relation<Object, String>() {
+    public String applyTo(Object value) {
+      if (value == null) {
+        return null;
+      }
+      return (String) value;
+    }
+  };
 
   public static native <E> MutableArray<E> createMutableArray() /*-{
     return Array();
@@ -38,9 +48,34 @@ public class CollectionFactory {
     }
     return r;
   }-*/;
-  
-  public static <V> MutableStringMap<V> createMutableStringMap() {
-    return new MutableStringMap<V>();
-  }
 
+  public static native <K,V> MutableMap<K,V> createMutableMap() /*-{
+    return Object();
+  }-*/;
+
+  public static <K,V> MutableMap<K,V> createMutableMap(
+      Relation<Object, String> adapter) {
+    if (adapter == null) {
+      throw new NullPointerException("adapter == null");
+    }
+    MutableMap<K,V> result = createMutableMap();
+    result.setAdapter(adapter);
+    return result;
+  }
+  
+  public static native <E> MutableSet<E> createMutableSet() /*-{
+    return Object();
+  }-*/;
+
+  public static <E> MutableSet<E> createMutableSet(
+      Relation<Object, String> adapter) {
+    
+    if (adapter == null) {
+      throw new NullPointerException("adapter == null");
+    }
+    MutableSet<E> set = createMutableSet();
+    set.setAdapter(adapter);
+    return set;
+  }
+  
 }

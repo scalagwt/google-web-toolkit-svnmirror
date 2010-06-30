@@ -16,26 +16,16 @@
 package com.google.gwt.collections;
 
 /**
- * Tests {@link MutableMap} behavior.
+ * An map that is guaranteed not to change, thus making it safe for disparate
+ * portions of code to maintain references to a shared instance, rather than
+ * feeling the need to make defensive copies.
+ * 
+ * @param <K> the type used to access values stored in the Map
+ * @param <V> the type of values stored in the Map
  */
-public class MutableStringMapTest extends MutableMapTest<String> {
+public abstract class ImmutableMap<K, V> extends Map<K, V> {
+
+  protected ImmutableMap() {
+  }
   
-  @Override
-  protected void gwtSetUp() throws Exception {
-    super.gwtSetUp();
-    keyA = "foo";
-    keyB = "";
-    keyUnsupported = null;
-  }
-
-  @Override
-  protected MutableMap<String, Integer> getMap() {
-    return CollectionFactory.createMutableMap();
-  }
-
-  @Override
-  public void testNullKey() {
-    // Raw String Maps do not support null keys
-  }
-
 }

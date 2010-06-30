@@ -16,26 +16,13 @@
 package com.google.gwt.collections;
 
 /**
- * Tests {@link MutableMap} behavior.
+ * Tests MutableStringMapTest in the client.
  */
-public class MutableStringMapTest extends MutableMapTest<String> {
+public class ClientMutableStringMapTest extends MutableStringMapTest {
   
   @Override
-  protected void gwtSetUp() throws Exception {
-    super.gwtSetUp();
-    keyA = "foo";
-    keyB = "";
-    keyUnsupported = null;
-  }
-
-  @Override
-  protected MutableMap<String, Integer> getMap() {
-    return CollectionFactory.createMutableMap();
-  }
-
-  @Override
-  public void testNullKey() {
-    // Raw String Maps do not support null keys
+  public String getModuleName() {
+    return "com.google.gwt.collections.Collections";
   }
 
 }

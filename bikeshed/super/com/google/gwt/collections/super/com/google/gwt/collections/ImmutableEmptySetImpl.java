@@ -16,26 +16,13 @@
 package com.google.gwt.collections;
 
 /**
- * Tests {@link MutableMap} behavior.
+ * A set that is always empty. Client side implementation.
+ * 
+ * @param <E> type of elements contained in the set
  */
-public class MutableStringMapTest extends MutableMapTest<String> {
-  
-  @Override
-  protected void gwtSetUp() throws Exception {
-    super.gwtSetUp();
-    keyA = "foo";
-    keyB = "";
-    keyUnsupported = null;
-  }
+public final class ImmutableEmptySetImpl<E> extends ImmutableSet<E> {
 
-  @Override
-  protected MutableMap<String, Integer> getMap() {
-    return CollectionFactory.createMutableMap();
-  }
-
-  @Override
-  public void testNullKey() {
-    // Raw String Maps do not support null keys
+  protected ImmutableEmptySetImpl() {
   }
 
 }

@@ -30,8 +30,14 @@ public class CollectionsServerSideTestSuite extends TestSuite {
     suite.addTestSuite(MutableArrayInternalTest.class);
     suite.addTestSuite(ImmutableArrayTest.class);
     suite.addTestSuite(ImmutableArrayInternalTest.class);
-    suite.addTestSuite(MutableSetTest.class);
-    suite.addTestSuite(MutableSetAdapterTest.class);
+    suite.addTestSuite(MutableSetStringTest.class);
+    suite.addTestSuite(MutableSetCustomAdapterTest.class);
+    suite.addTestSuite(ImmutableSetStringTest.class);
+    suite.addTestSuite(ImmutableSetAdapterTest.class);
+    suite.addTestSuite(MutableStringMapTest.class);
+    suite.addTestSuite(ImmutableStringMapTest.class);
+    suite.addTestSuite(MutableStringMapInternalTest.class);
+    suite.addTestSuite(MutableMapAdapterTest.class);
 
     return suite;
   }

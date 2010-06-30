@@ -15,6 +15,8 @@
  */
 package com.google.gwt.collections;
 
+import com.google.gwt.core.client.JavaScriptObject;
+
 /**
  * The root Map type that provides read-access to a dictionary that might still
  * be mutable by another actor.
@@ -25,15 +27,9 @@ package com.google.gwt.collections;
  * @param <K> the type used to access values stored in the Map
  * @param <V> the type of values stored in the Map
  */
-public abstract class Map<K, V> {
+public abstract class Map<K, V> extends JavaScriptObject {
 
-  /**
-   * Encapsulates the logic to transform <K> typed keys into String. This is
-   * used to index into the map elements into the underlying String indexed Map.
-   */
-  protected Relation<Object, String> adapter;
-
-  Map() {
+  protected Map() {
   }
 
   /**
@@ -44,7 +40,11 @@ public abstract class Map<K, V> {
    * @param key to use for testing membership
    * @return {@code true} if the key is contained in the map
    */
-  public abstract boolean containsKey(K key);
+  @ConstantTime
+  public final boolean containsKey(K key) {
+    String index = adapt(key);
+    return index != null && jsniContainsKey(index);
+  }
 
   /**
    * Get a value indexed by a key.
@@ -58,14 +58,26 @@ public abstract class Map<K, V> {
    * @param key index to use for retrieval
    * @return value associated to the key or {@code null} otherwise
    */
-  public abstract V get(K key);
+  @ConstantTime
+  public final V get(K key) {
+    String index = adapt(key);
+    return index == null ? null : jsniGet(adapt(key));
+  }
 
   /**
    * Tests whether this Map contains any element.
    * 
    * @return {@code true} if the map contains no entries
    */
-  public abstract boolean isEmpty();
+  @ConstantTime
+  public final native boolean isEmpty() /*-{
+    for (var k in this) {
+      if (k != "adapter" && k != "frozen") {
+        return false;
+      }
+    }
+    return true;
+  }-*/;
   
   /**
    * Translates the Map key set domain into String. Actually calls
@@ -76,7 +88,26 @@ public abstract class Map<K, V> {
    * if the {@code value} cannot be represented as a String
    */
   protected final String adapt(Object key) {
-    return adapter.applyTo(key);
+    if (!jsniIsAdapterPresent()) {
+      return key == null ? null : (String) key;
+    }
+    return jsniGetAdapter().applyTo(key);
   }
+  
+  protected final native boolean jsniIsAdapterPresent() /*-{
+    return Boolean(this.adapter);
+  }-*/;
+
+  private native boolean jsniContainsKey(String index) /*-{
+    return this[index] !== undefined;
+  }-*/;
+  
+  private native V jsniGet(String index) /*-{
+    return this[index];
+  }-*/;
+  
+  private native Relation<Object,String> jsniGetAdapter() /*-{
+    return this.adapter;
+  }-*/;
 
 }

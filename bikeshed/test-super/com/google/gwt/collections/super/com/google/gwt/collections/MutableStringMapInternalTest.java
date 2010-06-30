@@ -1,12 +1,12 @@
 /*
  * Copyright 2010 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -15,27 +15,20 @@
  */
 package com.google.gwt.collections;
 
+import com.google.gwt.junit.client.GWTTestCase;
+
 /**
- * Tests {@link MutableMap} behavior.
+ * Tests {@link ImmutableStringMapTest} implementation behavior.
  */
-public class MutableStringMapTest extends MutableMapTest<String> {
+public class MutableStringMapInternalTest extends GWTTestCase {
+
+  @Override
+  public String getModuleName() {
+    return null;
+  }
   
-  @Override
-  protected void gwtSetUp() throws Exception {
-    super.gwtSetUp();
-    keyA = "foo";
-    keyB = "";
-    keyUnsupported = null;
-  }
-
-  @Override
-  protected MutableMap<String, Integer> getMap() {
-    return CollectionFactory.createMutableMap();
-  }
-
-  @Override
-  public void testNullKey() {
-    // Raw String Maps do not support null keys
+  public void testBackendNullOnEmpty() {
+    // Not used in client code
   }
 
 }

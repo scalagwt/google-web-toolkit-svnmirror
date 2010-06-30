@@ -68,6 +68,39 @@ public class CollectionFactory {
   }
   
   /**
+   * Creates an empty {@link MutableMap}.
+   * 
+   * @param <K> type of keys in the map
+   * @param <V> type of elements in the map
+   * @return an empty {@code MutableStringMap}
+   */
+  public static <K,V> MutableMap<K,V> createMutableMap() {
+    MutableMap<K,V> result = new MutableMap<K,V>();
+    result.setAdapter(defaultAdapter);
+    return result;
+  }
+
+  /**
+   * Creates an empty {@link MutableMap} that uses a provided adapter.
+   * 
+   * @param adapter Relation<Object, String> to use to convert the map domain to
+   *        strings
+   * @param <K> type of keys in the map
+   * @param <V> type of elements in the map
+   * @return an empty {@code MutableStringMap}
+   * @throws NullPointerException if {@code adapter == null}
+   */
+  public static <K,V> MutableMap<K,V> createMutableMap(
+      Relation<Object, String> adapter) {
+    if (adapter == null) {
+      throw new NullPointerException("adapter == null");
+    }
+    MutableMap<K,V> result = new MutableMap<K,V>();
+    result.setAdapter(adapter);
+    return result;
+  }
+
+  /**
    * Creates an empty {@link MutableSet}.
    * @param <E> type of elements in the map
    * @return an empty {@code MutableSet}
@@ -80,21 +113,16 @@ public class CollectionFactory {
    * Creates an empty {@link MutableSet} that uses a specific adapter.
    * @param <E> type of elements in the map
    * @return an empty {@code MutableSet}
+   * @throws NullPointerException if {@code adapter == null}
    */
   public static <E> MutableSet<E> createMutableSet(
       Relation<Object, String> adapter) {
+    if (adapter == null) {
+      throw new NullPointerException("adapter == null");
+    }
     MutableSet<E> set = new MutableSet<E>();
     set.setAdapter(adapter);
     return set;
   }
   
-  /**
-   * Creates an empty {@link MutableStringMap}.
-   * @param <V> type of elements in the map
-   * @return an empty {@code MutableStringMap}
-   */
-  public static <V> MutableStringMap<V> createMutableStringMap() {
-    return new MutableStringMap<V>();
-  }
-
 }
