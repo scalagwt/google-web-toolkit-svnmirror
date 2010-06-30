@@ -21,10 +21,23 @@ package com.google.gwt.collections;
 class Assertions {
   
   /**
+   * Message produced when asserting that access into a set or map  uses a value
+   * not in the domain. 
+   */
+  static final String ACCESS_UNSUPPORTED_VALUE = "Unsupported value";
+  
+  /**
    * Message for asserting that access to an empty array is an illegal operation.
    */
   public static final String ACCESS_EMPTY_ARRAY_MESSAGE = 
     "Attempt to access an element in an empty array";
+
+  /**
+   * Message for asserting that adapters can only be set inly once after 
+   * creation. 
+   */
+  public static final String INIT_ADAPTER_TWICE = "Attempt to call " +
+    "setAdapter(Relation) a second time";
 
   static void assertIndexInRange(int index, int minInclusive, int maxExclusive) {
     assert minInclusive < maxExclusive : ACCESS_EMPTY_ARRAY_MESSAGE;

@@ -20,6 +20,16 @@ package com.google.gwt.collections;
  * isn't.
  */
 public class CollectionFactory {
+  
+  static final Relation<Object, String> defaultAdapter = 
+      new Relation<Object, String>() {
+    public String applyTo(Object value) {
+      if (value == null) {
+        return null;
+      }
+      return (String) value;
+    }
+  };
 
   /**
    * Creates an empty {@link MutableArray}.
@@ -55,6 +65,27 @@ public class CollectionFactory {
     MutableArray<E> r = new MutableArray<E>();
     r.setSize(size, fillValue);
     return r;
+  }
+  
+  /**
+   * Creates an empty {@link MutableSet}.
+   * @param <E> type of elements in the map
+   * @return an empty {@code MutableSet}
+   */
+  public static <E> MutableSet<E> createMutableSet() {
+    return createMutableSet(defaultAdapter);
+  }
+
+  /**
+   * Creates an empty {@link MutableSet} that uses a specific adapter.
+   * @param <E> type of elements in the map
+   * @return an empty {@code MutableSet}
+   */
+  public static <E> MutableSet<E> createMutableSet(
+      Relation<Object, String> adapter) {
+    MutableSet<E> set = new MutableSet<E>();
+    set.setAdapter(adapter);
+    return set;
   }
   
   /**

@@ -39,7 +39,7 @@ public abstract class Map<K, V> {
    * Determines if a key is in the set of keys contained in the map.
    * 
    * @param key to use for testing membership
-   * @return <code>true</code> if the key is contained in the map
+   * @return {@code true} if the key is contained in the map
    */
   public abstract boolean containsKey(K key);
 
@@ -51,12 +51,12 @@ public abstract class Map<K, V> {
    * containsKey(K)} to determine key membership.
    * 
    * @param key index to use for retrieval.
-   * @return value associated to the key or <code>null</code> otherwise.
+   * @return value associated to the key or {@code null} otherwise.
    */
   public abstract V get(K key);
 
   /**
-   * @return <code>true</code> if the map contains no entries.
+   * @return {@code true} if the map contains no entries.
    */
   public abstract boolean isEmpty();
 
