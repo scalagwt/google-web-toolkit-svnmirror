@@ -5,3 +5,8 @@ See: http://code.google.com/p/google-web-toolkit/wiki/ManagingMerges
 
 Copies:
 /branches/2.1M2/ was created (r8330) as a straight copy from /trunk/@r8329
+
+Merge:
+'svn merge -r8311:8310 .' was done, r8311 was dropped because it caused 
+http://jira.springframework.org/browse/ROO-1060
+http://jira.springframework.org/browse/ROO-1073
