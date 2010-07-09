@@ -15,7 +15,6 @@
  */
 package com.google.gwt.user.client.rpc.impl;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.UnsafeNativeLong;
 import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
@@ -33,11 +32,6 @@ public final class ClientSerializationStreamReader extends
 
   private static native int getLength(JavaScriptObject array) /*-{
     return array.length;
-  }-*/;
-
-  @UnsafeNativeLong
-  private static native long readLong0(double low, double high) /*-{
-    return [low, high];
   }-*/;
 
   int index;
@@ -90,14 +84,12 @@ public final class ClientSerializationStreamReader extends
   public native int readInt() /*-{
     return this.@com.google.gwt.user.client.rpc.impl.ClientSerializationStreamReader::results[--this.@com.google.gwt.user.client.rpc.impl.ClientSerializationStreamReader::index];
   }-*/;
-
-  public long readLong() {
-    if (GWT.isScript()) {
-      return readLong0(readDouble(), readDouble());
-    } else {
-      return (long) readDouble() + (long) readDouble();
-    }
-  }
+  
+  @UnsafeNativeLong
+  public native long readLong() /*-{
+    var s = this.@com.google.gwt.user.client.rpc.impl.ClientSerializationStreamReader::results[--this.@com.google.gwt.user.client.rpc.impl.ClientSerializationStreamReader::index];
+    return @com.google.gwt.lang.LongLib::longFromBase64(Ljava/lang/String;)(s);
+  }-*/;
 
   public native short readShort() /*-{
     return this.@com.google.gwt.user.client.rpc.impl.ClientSerializationStreamReader::results[--this.@com.google.gwt.user.client.rpc.impl.ClientSerializationStreamReader::index];

@@ -480,6 +480,43 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
     return FocusPanel.impl.getTabIndex(focusable);
   }
 
+  /**
+   * Inserts a child tree item at the specified index containing the specified
+   * text.
+   * 
+   * @param beforeIndex the index where the item will be inserted
+   * @param itemText the text to be added
+   * @return the item that was added
+   * @throws IndexOutOfBoundsException if the index is out of range
+   */
+  public TreeItem insertItem(int beforeIndex, String itemText) {
+    return root.insertItem(beforeIndex, itemText);
+  }
+
+  /**
+   * Inserts an item into the root level of this tree.
+   * 
+   * @param beforeIndex the index where the item will be inserted
+   * @param item the item to be added
+   * @throws IndexOutOfBoundsException if the index is out of range
+   */
+  public void insertItem(int beforeIndex, TreeItem item) {
+    root.insertItem(beforeIndex, item);
+  }
+
+  /**
+   * Inserts a child tree item at the specified index containing the specified
+   * widget.
+   * 
+   * @param beforeIndex the index where the item will be inserted
+   * @param widget the widget to be added
+   * @return the item that was added
+   * @throws IndexOutOfBoundsException if the index is out of range
+   */
+  public TreeItem insertItem(int beforeIndex, Widget widget) {
+    return root.insertItem(beforeIndex, widget);
+  }
+
   public boolean isAnimationEnabled() {
     return isAnimationEnabled;
   }
@@ -962,44 +999,7 @@ public class Tree extends Widget implements HasWidgets, SourcesTreeEvents,
 
     // The 'root' item is invisible and serves only as a container
     // for all top-level items.
-    root = new TreeItem() {
-      @Override
-      public void addItem(TreeItem item) {
-        // If this element already belongs to a tree or tree item, remove it.
-        if ((item.getParentItem() != null) || (item.getTree() != null)) {
-          item.remove();
-        }
-        DOM.appendChild(Tree.this.getElement(), item.getElement());
-
-        item.setTree(this.getTree());
-
-        // Explicitly set top-level items' parents to null.
-        item.setParentItem(null);
-        getChildren().add(item);
-
-        // Use no margin on top-most items.
-        if (LocaleInfo.getCurrentLocale().isRTL()) {
-          DOM.setIntStyleAttribute(item.getElement(), "marginRight", 0);
-        } else {
-          DOM.setIntStyleAttribute(item.getElement(), "marginLeft", 0);
-        }
-      }
-
-      @Override
-      public void removeItem(TreeItem item) {
-        if (!getChildren().contains(item)) {
-          return;
-        }
-
-        // Update Item state.
-        item.setTree(null);
-        item.setParentItem(null);
-        getChildren().remove(item);
-
-        DOM.removeChild(Tree.this.getElement(), item.getElement());
-      }
-    };
-    root.initChildren();
+    root = new TreeItem(true);
     root.setTree(this);
     setStyleName("gwt-Tree");
 

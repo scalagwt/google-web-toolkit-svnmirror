@@ -15,9 +15,8 @@
  */
 package com.google.gwt.user.client.rpc.impl;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.core.client.UnsafeNativeLong;
+import com.google.gwt.lang.LongLib;
 import com.google.gwt.user.client.rpc.SerializationException;
 
 import java.util.List;
@@ -102,12 +101,6 @@ public final class ClientSerializationStreamWriter extends
     }
   }-*/;
 
-  @UnsafeNativeLong
-  // Keep synchronized with LongLib
-  private static native double[] makeLongComponents0(long value) /*-{
-    return value;
-  }-*/;
-
   private StringBuffer encodeBuffer;
 
   private final String moduleBaseURL;
@@ -156,21 +149,8 @@ public final class ClientSerializationStreamWriter extends
   }
 
   @Override
-  public void writeLong(long fieldValue) {
-    /*
-     * Client code represents longs internally as an array of two Numbers. In
-     * order to make serialization of longs faster, we'll send the component
-     * parts so that the value can be directly reconstituted on the server.
-     */
-    double[] parts;
-    if (GWT.isScript()) {
-      parts = makeLongComponents0(fieldValue);
-    } else {
-      parts = makeLongComponents((int) (fieldValue >> 32), (int) fieldValue);
-    }
-    assert parts.length == 2;
-    writeDouble(parts[0]);
-    writeDouble(parts[1]);
+  public void writeLong(long value) {
+    append(LongLib.toBase64(value));
   }
 
   /**
@@ -185,7 +165,7 @@ public final class ClientSerializationStreamWriter extends
   protected String getObjectTypeSignature(Object o) {
     Class<?> clazz = o.getClass();
 
-    if (o instanceof Enum) {
+    if (o instanceof Enum<?>) {
       Enum<?> e = (Enum<?>) o;
       clazz = e.getDeclaringClass();
     }

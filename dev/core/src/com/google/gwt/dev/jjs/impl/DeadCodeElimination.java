@@ -259,11 +259,6 @@ public class DeadCodeElimination {
     }
 
     @Override
-    public void endVisit(JClassType x, Context ctx) {
-      // previously set currentClass = null;
-    }
-
-    @Override
     public void endVisit(JConditional x, Context ctx) {
       JExpression updated = simplifier.conditional(x, x.getSourceInfo(),
           x.getType(), x.getIfTest(), x.getThenExpr(), x.getElseExpr());
@@ -614,8 +609,8 @@ public class DeadCodeElimination {
 
     @Override
     public boolean visit(JClassType x, Context ctx) {
-      // previously set currentClass = x;
-      return true;
+      // We can't eliminate code from an external type
+      return !x.isExternal();
     }
 
     @Override
@@ -1463,8 +1458,8 @@ public class DeadCodeElimination {
     /**
      * Simplify the expression <code>-exp</code>.
      * 
+     * @param original An expression equivalent to <code>-exp</code>.
      * @param exp The expression to negate.
-     * @param An expression equivalent to <code>-exp</code>.
      * 
      * @return A simplified expression equivalent to <code>- exp</code>.
      */
@@ -1490,7 +1485,7 @@ public class DeadCodeElimination {
         ctx.replaceMe(simplifier.cast(type, lhs));
         return true;
       }
-      if (isLiteralZero(lhs)) {
+      if (isLiteralZero(lhs) && !isTypeFloatOrDouble(type)) {
         ctx.replaceMe(simplifyNegate(simplifier.cast(type, rhs)));
         return true;
       }

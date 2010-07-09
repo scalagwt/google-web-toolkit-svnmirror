@@ -396,7 +396,7 @@ public final class ServerSerializationStreamWriter extends
   private static Class<?> getClassForSerialization(Object instance) {
     assert (instance != null);
 
-    if (instance instanceof Enum) {
+    if (instance instanceof Enum<?>) {
       Enum<?> e = (Enum<?>) instance;
       return e.getDeclaringClass();
     } else {
@@ -555,18 +555,22 @@ public final class ServerSerializationStreamWriter extends
 
     return stream.toString();
   }
-
-  public void writeLong(long fieldValue) {
-    /*
-     * Client code represents longs internally as an array of two Numbers. In
-     * order to make serialization of longs faster, we'll send the component
-     * parts so that the value can be directly reconstituted on the client.
-     */
-    double[] parts = makeLongComponents((int) (fieldValue >> 32),
-        (int) fieldValue);
-    assert parts.length == 2;
-    writeDouble(parts[0]);
-    writeDouble(parts[1]);
+  
+  @Override
+  public void writeLong(long value) {
+    if (getVersion() == SERIALIZATION_STREAM_MIN_VERSION) {
+      // Write longs as a pair of doubles for backwards compatibility
+      double[] parts = getAsDoubleArray(value);
+      assert parts != null && parts.length == 2;
+      writeDouble(parts[0]);
+      writeDouble(parts[1]);
+    } else {
+      StringBuilder sb = new StringBuilder();
+      sb.append('\'');
+      sb.append(Base64Utils.toBase64(value));
+      sb.append('\'');
+      append(sb.toString());
+    }
   }
 
   @Override

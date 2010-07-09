@@ -57,7 +57,8 @@ public class JavaAstConstructor {
       StringBuffer code = new StringBuffer();
       code.append("package com.google.gwt.lang;\n");
       code.append("public final class Array {\n");
-      code.append("  public int length;\n");
+      code.append("  public int length = 0;\n");
+      code.append("  protected Class<?> arrayClass = null;\n");
       code.append("}\n");
       return code;
     }
@@ -72,11 +73,12 @@ public class JavaAstConstructor {
       code.append("public final class Class<T> {\n");
       code.append("  static <T> Class<T> createForArray(String packageName, String className, String seedName, Class<?> componentType) { return new Class<T>(); }\n");
       code.append("  static <T> Class<T> createForClass(String packageName, String className, String seedName, Class<? super T> superclass) { return new Class<T>(); }\n");
-      code.append("  static <T> Class<T> createForEnum(String packageName, String className, String seedName, Class<? super T> superclass, JavaScriptObject enumConstantsFunc) { return new Class<T>(); }\n");
+      code.append("  static <T> Class<T> createForEnum(String packageName, String className, String seedName, Class<? super T> superclass, JavaScriptObject enumConstantsFunc, JavaScriptObject enumValueOfFunc) { return new Class<T>(); }\n");
       code.append("  static <T> Class<T> createForInterface(String packageName, String className) { return new Class<T>(); }\n");
       code.append("  static <T> Class<T> createForPrimitive(String packageName, String className, String jni) { return new Class<T>(); }\n");
       code.append("  static boolean isClassMetadataEnabled() { return true; }\n");
       code.append("  public boolean desiredAssertionStatus() { return true; }\n");
+      code.append("  public String getName() { return null; }\n");
       code.append("}\n");
       return code;
     }
@@ -88,6 +90,22 @@ public class JavaAstConstructor {
       StringBuffer code = new StringBuffer();
       code.append("package com.google.gwt.lang;\n");
       code.append("final class ClassLiteralHolder {\n");
+      code.append("}\n");
+      return code;
+    }
+  };
+  public static final MockJavaResource ENUM = new MockJavaResource(
+      "java.lang.Enum") {
+    @Override
+    protected CharSequence getContent() {
+      StringBuffer code = new StringBuffer();
+      code.append("package java.lang;\n");
+      code.append("import java.io.Serializable;\n");
+      code.append("import com.google.gwt.core.client.JavaScriptObject;\n");
+      code.append("public abstract class Enum<E extends Enum<E>> implements Serializable {\n");
+      code.append("  protected Enum(String name, int ordinal) {}\n");
+      code.append("  protected static <T extends Enum<T>> JavaScriptObject createValueOfMap(T[] enumConstants) { return null; }\n");
+      code.append("  protected static <T extends Enum<T>> T valueOf(JavaScriptObject map, String name) { return null; }\n");
       code.append("}\n");
       return code;
     }
@@ -155,7 +173,7 @@ public class JavaAstConstructor {
     }
 
     JavaToJavaScriptCompiler.checkForErrors(logger, goldenCuds, true);
-    
+
     CorrelationFactory correlator = new DummyCorrelationFactory();
     JProgram jprogram = new JProgram(correlator);
     JsProgram jsProgram = new JsProgram(correlator);
@@ -208,9 +226,10 @@ public class JavaAstConstructor {
   public static MockJavaResource[] getCompilerTypes() {
     List<MockJavaResource> result = new ArrayList<MockJavaResource>();
     Collections.addAll(result, JavaResourceBase.getStandardResources());
-    // Replace the basic Class with a compiler-specific one.
+    // Replace the basic Class and Enum with a compiler-specific one.
     result.remove(JavaResourceBase.CLASS);
-    Collections.addAll(result, ARRAY, CLASS, CLASSLITERALHOLDER, GWT,
+    result.remove(JavaResourceBase.ENUM);
+    Collections.addAll(result, ARRAY, CLASS, CLASSLITERALHOLDER, ENUM, GWT,
         RUNASYNCCALLBACK);
     return result.toArray(new MockJavaResource[result.size()]);
   }

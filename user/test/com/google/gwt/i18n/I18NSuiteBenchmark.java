@@ -15,7 +15,7 @@
  */
 package com.google.gwt.i18n;
 
-import com.google.gwt.i18n.client.NumberFormatBenchmark;
+import com.google.gwt.i18n.benchmarks.NumberFormatBenchmark;
 import com.google.gwt.junit.tools.GWTTestSuite;
 
 import junit.framework.Test;

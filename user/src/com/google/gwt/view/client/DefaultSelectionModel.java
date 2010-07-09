@@ -73,12 +73,11 @@ public abstract class DefaultSelectionModel<T> extends
    */
   public void setSelected(T object, boolean selected) {
     Object key = getKey(object);
-    Boolean currentlySelected = exceptions.get(key);
-    if (currentlySelected != null
-        && currentlySelected.booleanValue() != selected) {
-      exceptions.remove(key);
-    } else {
+    if (isDefaultSelected(object) != selected) {
+      // If the state is different than the default state, add an exception.
       exceptions.put(key, selected);
+    } else {
+      exceptions.remove(key);
     }
 
     scheduleSelectionChangeEvent();
@@ -86,9 +85,13 @@ public abstract class DefaultSelectionModel<T> extends
 
   /**
    * Copies the exceptions map into a user-supplied map.
+   * 
+   * @param output the user supplied map
+   * @return the user supplied map
    */
-  protected void getExceptions(Map<Object, Boolean> output) {
+  protected Map<Object, Boolean> getExceptions(Map<Object, Boolean> output) {
     output.clear();
     output.putAll(exceptions);
+    return output;
   }
 }

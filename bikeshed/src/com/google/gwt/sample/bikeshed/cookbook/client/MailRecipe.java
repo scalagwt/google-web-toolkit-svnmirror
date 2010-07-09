@@ -342,12 +342,11 @@ public class MailRecipe extends Recipe implements ClickHandler {
     });
     table.addColumn(selectedColumn, selectedHeader);
 
-    addColumn(table, "ID", new TextCell(),
-        new GetValue<Message, String>() {
-          public String getValue(Message object) {
-            return "" + object.id;
-          }
-        }, idComparator);
+    addColumn(table, "ID", new TextCell(), new GetValue<Message, String>() {
+      public String getValue(Message object) {
+        return "" + object.id;
+      }
+    }, idComparator);
 
     addColumn(table, "Read", new GetValue<Message, String>() {
       public String getValue(Message object) {
@@ -365,7 +364,7 @@ public class MailRecipe extends Recipe implements ClickHandler {
       public void update(int index, Message object, Date value) {
         Window.alert("Changed date from " + object.date + " to " + value);
         object.date = value;
-        table.refresh();
+        table.redraw();
       }
     });
 
@@ -434,9 +433,8 @@ public class MailRecipe extends Recipe implements ClickHandler {
   }
 
   private <C extends Comparable<C>> Column<Message, C> addColumn(
-      CellTable<Message> table, final String text,
-      final Cell<C> cell, final GetValue<Message, C> getter,
-      final Comparator<Message> comparator) {
+      CellTable<Message> table, final String text, final Cell<C> cell,
+      final GetValue<Message, C> getter, final Comparator<Message> comparator) {
     Column<Message, C> column = new Column<Message, C>(cell) {
       @Override
       public C getValue(Message object) {
@@ -469,9 +467,8 @@ public class MailRecipe extends Recipe implements ClickHandler {
     return column;
   }
 
-  private Column<Message, String> addColumn(
-      CellTable<Message> table, final String text,
-      final GetValue<Message, String> getter) {
+  private Column<Message, String> addColumn(CellTable<Message> table,
+      final String text, final GetValue<Message, String> getter) {
     return addColumn(table, text, new TextCell(), getter, null);
   }
 
