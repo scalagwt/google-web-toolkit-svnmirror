@@ -15,6 +15,7 @@
 
   <property name="gwt.junit.testcase.dev.includes" value="${gwt.junit.testcase.includes}" />
   <property name="gwt.junit.testcase.dev.excludes" value="" />
+	<property name="app.gwt.args" value="" />
 
   <!--
     Classpaths added for test cases
@@ -22,14 +23,16 @@
   <path id="test.extraclasspath">
     <pathelement location="${gwt.build}/out/dev/bin-test" />
     <pathelement location="test-super" />
-    <pathelement location="${gwt.tools.lib}/cglib/cglib-2.2.jar"/>
-    <pathelement location="${gwt.tools.lib}/easymock/easymock.jar"/>
-    <pathelement location="${gwt.tools.lib}/easymock/easymockclassextension.jar"/>
-    <pathelement location="${gwt.tools.lib}/objectweb/asm-3.1.jar"/>
     <pathelement location="${gwt.user.jar}" />
   </path>
 
-
+  <path id="app.project.class.path">
+    <pathelement location="war/WEB-INF/classes"/>
+    <pathelement location="${gwt.user.jar}" />
+    <pathelement location="${gwt.dev.jar}" />
+    <!-- Add any additional non-server libs (such as JUnit) -->
+    <fileset dir="war/WEB-INF/lib" includes="**/*.jar"/>
+  </path>
 
   <target name="checkstyle" description="Static analysis of source">
     <gwt.checkstyle>
@@ -587,7 +590,7 @@
     </emma>
   </target>
 
-  <target name="clean"
+  <target name="clean" depends="clean-app"
       description="Cleans this project's intermediate and output files">
     <delete dir="${project.build}" />
     <delete file="${project.lib}" />
@@ -596,6 +599,69 @@
   <target name="presubmit" depends="test, checkstyle"
       description="runs the gwt api checker, user checkstyle, and user tests">
     <gwt.ant dir=".." target="apicheck-nobuild"/>
+  </target>
+	
+  <target name="libs-app" description="Copy libs to WEB-INF/lib">
+    <mkdir dir="war/WEB-INF/lib" />
+    <copy todir="war/WEB-INF/lib" file="${gwt.build.lib}/gwt-servlet.jar" />
+    <!-- Add any additional server libs that need to be copied -->
+  </target>
+
+  <target name="javac-app" depends="libs-app,build" description="Compile java source to bytecode">
+    <mkdir dir="war/WEB-INF/classes"/>
+    <javac srcdir="src" includes="**/sample/**/*.java" encoding="utf-8"
+        destdir="war/WEB-INF/classes"
+        source="1.5" target="1.5" nowarn="true"
+        debug="true" debuglevel="lines,vars,source">
+      <classpath refid="app.project.class.path"/>
+    </javac>
+    <copy todir="war/WEB-INF/classes">
+      <fileset dir="src" includes="**/sample/**/*.java"/>
+    </copy>
+  </target>
+
+  <target name="gwtc-app" depends="javac-app" description="GWT compile to JavaScript (production mode)">
+    <java failonerror="true" fork="true" classname="com.google.gwt.dev.Compiler">
+      <classpath>
+        <pathelement location="src"/>
+        <path refid="app.project.class.path"/>
+      </classpath>
+      <!-- add jvmarg -Xss16M or similar if you see a StackOverflowError -->
+      <jvmarg value="-Xmx256M"/>
+      <arg line="-war"/>
+      <arg value="war"/>
+      <!-- Additional arguments like -style PRETTY or -logLevel DEBUG -->
+      <arg line="${app.gwt.args}"/>
+      <arg value="com.google.gwt.sample.collections.gwt.Lwc_sample"/>
+    </java>
+  </target>
+
+  <target name="devmode-app" depends="javac-app" description="Run development mode">
+    <java failonerror="true" fork="true" classname="com.google.gwt.dev.DevMode">
+      <classpath>
+        <pathelement location="src"/>
+        <path refid="app.project.class.path"/>
+      </classpath>
+      <jvmarg value="-Xmx256M"/>
+      <arg value="-startupUrl"/>
+      <arg value="Lwc_sample.html"/>
+      <arg line="-war"/>
+      <arg value="war"/>
+      <!-- Additional arguments like -style PRETTY or -logLevel DEBUG -->
+      <arg line="${app.gwt.args}"/>
+      <arg value="com.google.gwt.sample.collections.gwt.Lwc_sample"/>
+    </java>
+  </target>
+
+  <target name="build-app" depends="gwtc-app" description="Build this project app" />
+
+  <target name="dist-app" depends="build-app" description="Create a war file">
+    <zip destfile="Lwc_sample.war" basedir="war"/>
+  </target>
+	
+  <target name="clean-app" description="Cleans this project app">
+    <delete dir="war/WEB-INF/classes" failonerror="false" />
+    <delete dir="war/lwc_sample" failonerror="false" />
   </target>
 
 </project>
