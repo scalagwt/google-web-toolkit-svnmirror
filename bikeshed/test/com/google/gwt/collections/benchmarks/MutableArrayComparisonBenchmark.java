@@ -13,12 +13,14 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.gwt.collections;
+package com.google.gwt.collections.benchmarks;
 
 import com.google.gwt.benchmarks.client.Benchmark;
 import com.google.gwt.benchmarks.client.IntRange;
 import com.google.gwt.benchmarks.client.Operator;
 import com.google.gwt.benchmarks.client.RangeField;
+import com.google.gwt.collections.CollectionFactory;
+import com.google.gwt.collections.MutableArray;
 
 import java.util.ArrayList;
 
@@ -49,7 +51,7 @@ public class MutableArrayComparisonBenchmark extends Benchmark {
 
   @Override
   public String getModuleName() {
-    return "com.google.gwt.collections.Collections";
+    return "com.google.gwt.collections.benchmarks.CollectionsBenchmarks";
   }
   
   /**

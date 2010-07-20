@@ -15,6 +15,8 @@
  */
 package com.google.gwt.collections;
 
+import com.google.gwt.junit.client.GWTTestCase;
+
 /**
  * Tests mutable array implementation internal details.
  */

@@ -15,9 +15,7 @@
 -->
 <module>
   <inherits name='com.google.gwt.user.User'/>
-  <source path="" >
-    <exclude name='benchmarks/*.java'/>
-    <exclude name='*Suite.java'/>
-  </source>
-  <super-source path="super"/>
+  <inherits name='com.google.gwt.benchmarks.Benchmarks'/>
+  <inherits name='com.google.gwt.collections.Collections'/>
+  <source path="" />
 </module>

@@ -15,6 +15,7 @@
  */
 package com.google.gwt.collections;
 
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
