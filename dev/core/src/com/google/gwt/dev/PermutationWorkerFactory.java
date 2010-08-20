@@ -1,12 +1,12 @@
 /*
  * Copyright 2008 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -20,6 +20,9 @@ import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.dev.jjs.PermutationResult;
 import com.google.gwt.dev.jjs.UnifiedAst;
 import com.google.gwt.dev.util.FileBackedObject;
+import com.google.gwt.dev.util.log.speedtracer.CompilerEventType;
+import com.google.gwt.dev.util.log.speedtracer.SpeedTracerLogger;
+import com.google.gwt.dev.util.log.speedtracer.SpeedTracerLogger.Event;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -58,6 +61,8 @@ public abstract class PermutationWorkerFactory {
       }
 
       public void run() {
+        Event permutationWorkerEvent =
+            SpeedTracerLogger.start(CompilerEventType.PERMUTATION_WORKER, "name", worker.getName());
         Result threadDeathResult = Result.FAIL;
         try {
           while (true) {
@@ -85,6 +90,7 @@ public abstract class PermutationWorkerFactory {
         } catch (InterruptedException e) {
           return;
         } finally {
+          permutationWorkerEvent.end();
           // Record why I died.
           try {
             resultsQueue.put(threadDeathResult);
@@ -124,7 +130,7 @@ public abstract class PermutationWorkerFactory {
       List<Thread> threads = new ArrayList<Thread>(workers.size());
       try {
         for (PermutationWorker worker : workers) {
-          Thread thread = new Thread(new WorkerThread(worker));
+          Thread thread = new Thread(new WorkerThread(worker), worker.getName());
           threads.add(thread);
           thread.start();
         }
@@ -132,7 +138,9 @@ public abstract class PermutationWorkerFactory {
         int workToDo = work.size();
         int aliveWorkers = workers.size();
         waitForWorkers : while (workToDo > 0 && aliveWorkers > 0) {
+          Event blockedEvent = SpeedTracerLogger.start(CompilerEventType.BLOCKED);
           Result take = resultsQueue.take();
+          blockedEvent.end();
           switch (take) {
             case SUCCESS:
               --workToDo;
@@ -228,7 +236,7 @@ public abstract class PermutationWorkerFactory {
    * Compiles a subset of the Permutations in a Precompilation and returns an
    * array of Files that can be consumed by Link using the system-default
    * PermutationWorkersFactories.
-   * 
+   *
    * @param localWorkers Set the maximum number of workers that should be
    *          executed on the local system by the PermutationWorkerFactory. The
    *          value {@link #WORKERS_AUTO} will allow the
@@ -249,7 +257,7 @@ public abstract class PermutationWorkerFactory {
     List<Work> work = new ArrayList<Work>(permutations.length);
     for (int i = 0; i < permutations.length; ++i) {
       Permutation perm = permutations[i];
-      logger.log(TreeLogger.DEBUG, 
+      logger.log(TreeLogger.DEBUG,
           "Creating worker permutation " + perm.getId() + " of " + permutations.length);
       work.add(new Work(logger, perm, resultFiles.get(i)));
     }
@@ -370,7 +378,7 @@ public abstract class PermutationWorkerFactory {
 
   /**
    * Return some number of PermutationWorkers.
-   * 
+   *
    * @param unifiedAst a UnifiedAst
    * @param numWorkers the desired number of workers
    * @return a collection of PermutationWorkers, the size of which may be less

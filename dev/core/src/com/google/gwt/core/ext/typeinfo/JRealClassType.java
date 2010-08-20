@@ -43,8 +43,6 @@ public class JRealClassType extends JClassType {
 
   private final boolean isInterface;
 
-  private final boolean isLocalType;
-
   private String lazyQualifiedBinaryName;
 
   private String lazyQualifiedName;
@@ -73,12 +71,10 @@ public class JRealClassType extends JClassType {
    * @param name
    * @param isInterface
    */
-  public JRealClassType(TypeOracle oracle, JPackage declaringPackage,
-      String enclosingTypeName, boolean isLocalType, String name,
-      boolean isInterface) {
+  JRealClassType(TypeOracle oracle, JPackage declaringPackage,
+      String enclosingTypeName, String name, boolean isInterface) {
     this.oracle = oracle;
     this.declaringPackage = declaringPackage;
-    this.isLocalType = isLocalType;
     this.name = name;
     this.isInterface = isInterface;
     if (enclosingTypeName == null) {
@@ -97,17 +93,6 @@ public class JRealClassType extends JClassType {
       // setEnclosingType().
     }
     oracle.addNewType(this);
-  }
-
-  public void addAnnotations(
-      Map<Class<? extends Annotation>, Annotation> declaredAnnotations) {
-    annotations.addAnnotations(declaredAnnotations);
-  }
-
-  @Override
-  public void addImplementedInterface(JClassType intf) {
-    assert (intf != null);
-    interfaces = Lists.add(interfaces, intf);
   }
 
   @Override
@@ -314,9 +299,6 @@ public class JRealClassType extends JClassType {
     if (isMemberType() && !isStatic()) {
       return false;
     }
-    if (isLocalType()) {
-      return false;
-    }
     if (getConstructors().length == 0) {
       return true;
     }
@@ -345,17 +327,6 @@ public class JRealClassType extends JClassType {
   @Override
   public JClassType isInterface() {
     return isInterface ? this : null;
-  }
-
-  /**
-   * Tests if this type is a local type (within a method).
-   * 
-   * @return true if this type is a local type, whether it is named or
-   *         anonymous.
-   */
-  @Override
-  public boolean isLocalType() {
-    return isLocalType;
   }
 
   /**
@@ -410,45 +381,6 @@ public class JRealClassType extends JClassType {
   @Override
   public JWildcardType isWildcard() {
     return null;
-  }
-
-  /**
-   * INTERNAL METHOD -- this should only be called by TypeOracleMediator.
-   * 
-   * TODO: reduce visibility.
-   * 
-   * @param enclosingType
-   */
-  public void setEnclosingType(JClassType enclosingType) {
-    assert this.enclosingType == null;
-    assert enclosingType != null;
-
-    this.enclosingType = enclosingType;
-
-    // Add myself to my enclosing type.
-    JRawType rawType = enclosingType.isRawType();
-    if (rawType != null) {
-      enclosingType = rawType.getGenericType();
-    }
-    enclosingType.addNestedType(this);
-  }
-
-  @Override
-  public void setSuperclass(JClassType type) {
-    assert (type != null);
-    assert (isInterface() == null);
-    this.superclass = type;
-    JRealClassType realSuperType;
-    if (type.isParameterized() != null) {
-      realSuperType = type.isParameterized().getBaseType();
-    } else if (type.isRawType() != null) {
-      realSuperType = type.isRawType().getGenericType();
-    } else if (type instanceof JRealClassType) {
-      realSuperType = (JRealClassType) type;
-    } else {
-      throw new IllegalArgumentException("Unknown type for " + type);
-    }
-    annotations.setParent(realSuperType.annotations);
   }
 
   @Override
@@ -546,6 +478,17 @@ public class JRealClassType extends JClassType {
     }
   }
 
+  void addAnnotations(
+      Map<Class<? extends Annotation>, Annotation> declaredAnnotations) {
+    annotations.addAnnotations(declaredAnnotations);
+  }
+
+  @Override
+  void addImplementedInterface(JClassType intf) {
+    assert (intf != null);
+    interfaces = Lists.add(interfaces, intf);
+  }
+
   /**
    * NOTE: This method is for testing purposes only.
    */
@@ -578,5 +521,37 @@ public class JRealClassType extends JClassType {
   @Override
   void removeFromSupertypes() {
     removeSubtype(this);
+  }
+
+  void setEnclosingType(JClassType enclosingType) {
+    assert this.enclosingType == null;
+    assert enclosingType != null;
+
+    this.enclosingType = enclosingType;
+
+    // Add myself to my enclosing type.
+    JRawType rawType = enclosingType.isRawType();
+    if (rawType != null) {
+      enclosingType = rawType.getGenericType();
+    }
+    enclosingType.addNestedType(this);
+  }
+
+  @Override
+  void setSuperclass(JClassType type) {
+    assert (type != null);
+    assert (isInterface() == null);
+    this.superclass = type;
+    JRealClassType realSuperType;
+    if (type.isParameterized() != null) {
+      realSuperType = type.isParameterized().getBaseType();
+    } else if (type.isRawType() != null) {
+      realSuperType = type.isRawType().getGenericType();
+    } else if (type instanceof JRealClassType) {
+      realSuperType = (JRealClassType) type;
+    } else {
+      throw new IllegalArgumentException("Unknown type for " + type);
+    }
+    annotations.setParent(realSuperType.annotations);
   }
 }

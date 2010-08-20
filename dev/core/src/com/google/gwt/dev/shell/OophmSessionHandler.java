@@ -21,7 +21,9 @@ import com.google.gwt.dev.shell.BrowserChannel.Value;
 import com.google.gwt.dev.shell.BrowserChannelServer.SessionHandlerServer;
 import com.google.gwt.dev.shell.JsValue.DispatchMethod;
 import com.google.gwt.dev.shell.JsValue.DispatchObject;
-import com.google.gwt.dev.util.PerfLogger;
+import com.google.gwt.dev.util.log.speedtracer.DevModeEventType;
+import com.google.gwt.dev.util.log.speedtracer.SpeedTracerLogger;
+import com.google.gwt.dev.util.log.speedtracer.SpeedTracerLogger.Event;
 
 import java.lang.reflect.Member;
 import java.util.Collections;
@@ -61,8 +63,8 @@ public class OophmSessionHandler extends SessionHandlerServer {
   }
 
   @Override
-  public ExceptionOrReturnValue getProperty(BrowserChannelServer channel, int refId,
-      int dispId) {
+  public ExceptionOrReturnValue getProperty(BrowserChannelServer channel,
+      int refId, int dispId) {
     ModuleSpace moduleSpace = moduleMap.get(channel);
     ModuleHandle moduleHandle = moduleHandleMap.get(channel);
     assert moduleSpace != null && moduleHandle != null;
@@ -95,8 +97,9 @@ public class OophmSessionHandler extends SessionHandlerServer {
    * Invoke a method on a server object in from client code.
    */
   @Override
-  public ExceptionOrReturnValue invoke(BrowserChannelServer channel, Value thisVal,
-      int methodDispatchId, Value[] args) {
+  public ExceptionOrReturnValue invoke(BrowserChannelServer channel,
+      Value thisVal, int methodDispatchId, Value[] args) {
+    Event jsToJavaCallEvent = SpeedTracerLogger.start(DevModeEventType.JS_TO_JAVA_CALL);
     ServerObjectsTable localObjects = channel.getJavaObjectsExposedInBrowser();
     ModuleSpace moduleSpace = moduleMap.get(channel);
     ModuleHandle moduleHandle = moduleHandleMap.get(channel);
@@ -158,6 +161,7 @@ public class OophmSessionHandler extends SessionHandlerServer {
           t.getClass(), t);
     }
     Value retVal = channel.convertFromJsValue(localObjects, jsRetVal);
+    jsToJavaCallEvent.end();
     return new ExceptionOrReturnValue(exception, retVal);
   }
 
@@ -165,7 +169,7 @@ public class OophmSessionHandler extends SessionHandlerServer {
   public synchronized TreeLogger loadModule(BrowserChannelServer channel,
       String moduleName, String userAgent, String url, String tabKey,
       String sessionKey, byte[] userAgentIcon) {
-    PerfLogger.start("OophmSessionHandler.loadModule " + moduleName);
+    Event moduleInit = SpeedTracerLogger.start(DevModeEventType.MODULE_INIT, "Module Name", moduleName);
     ModuleHandle moduleHandle = host.createModuleLogger(moduleName, userAgent,
         url, tabKey, sessionKey, channel, userAgentIcon);
     TreeLogger logger = moduleHandle.getLogger();
@@ -173,11 +177,9 @@ public class OophmSessionHandler extends SessionHandlerServer {
     ModuleSpace moduleSpace = null;
     try {
       // Attach a new ModuleSpace to make it programmable.
-      ModuleSpaceHost msh = host.createModuleSpaceHost(moduleHandle,
-          moduleName);
+      ModuleSpaceHost msh = host.createModuleSpaceHost(moduleHandle, moduleName);
       moduleSpace = new ModuleSpaceOOPHM(msh, moduleName, channel);
       moduleMap.put(channel, moduleSpace);
-      PerfLogger.start("ModuleSpace.onLoad");
       moduleSpace.onLoad(logger);
       moduleHandle.getLogger().log(TreeLogger.INFO,
           "Module " + moduleName + " has been loaded");
@@ -186,26 +188,26 @@ public class OophmSessionHandler extends SessionHandlerServer {
       // that can go wrong trying to load a module, including Error-derived
       // things like NoClassDefFoundError.
       // 
-      moduleHandle.getLogger().log(TreeLogger.ERROR, "Failed to load module '"
-          + moduleName + "' from user agent '" + userAgent + "' at "
-          + channel.getRemoteEndpoint(), e);
+      moduleHandle.getLogger().log(
+          TreeLogger.ERROR,
+          "Failed to load module '" + moduleName + "' from user agent '"
+              + userAgent + "' at " + channel.getRemoteEndpoint(), e);
       if (moduleSpace != null) {
-        moduleSpace.dispose();        
+        moduleSpace.dispose();
       }
       moduleHandle.unload();
       moduleMap.remove(channel);
       moduleHandleMap.remove(channel);
       return null;
     } finally {
-      PerfLogger.end();
-      PerfLogger.end();
+      moduleInit.end();
     }
     return moduleHandle.getLogger();
   }
 
   @Override
-  public ExceptionOrReturnValue setProperty(BrowserChannelServer channel, int refId,
-      int dispId, Value newValue) {
+  public ExceptionOrReturnValue setProperty(BrowserChannelServer channel,
+      int refId, int dispId, Value newValue) {
     ModuleSpace moduleSpace = moduleMap.get(channel);
     ModuleHandle moduleHandle = moduleHandleMap.get(channel);
     assert moduleSpace != null && moduleHandle != null;

@@ -16,20 +16,19 @@
 package com.google.gwt.valuestore;
 
 import com.google.gwt.junit.tools.GWTTestSuite;
-import com.google.gwt.valuestore.client.DeltaValueStoreJsonImplTest;
-import com.google.gwt.valuestore.shared.impl.RecordJsoImplTest;
+import com.google.gwt.valuestore.client.RequestFactoryTest;
 
 import junit.framework.Test;
 
 /**
- *
+ * Tests of the valuestore package that require GWT.
+ * @see com.google.gwt.requestfactory.RequestFactorySuite
  */
 public class ValueStoreSuite {
   public static Test suite() {
     GWTTestSuite suite = new GWTTestSuite(
         "Test suite for all valuestore code.");
-    suite.addTestSuite(DeltaValueStoreJsonImplTest.class);
-    suite.addTestSuite(RecordJsoImplTest.class);
+    suite.addTestSuite(RequestFactoryTest.class);
     return suite;
   }
 }

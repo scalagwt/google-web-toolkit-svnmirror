@@ -58,7 +58,7 @@ import java.util.Map;
  * TODO(rjrjr): Line numbers in error messages.
  */
 @SuppressWarnings("deprecation")
-public class UiBinderWriter {
+public class UiBinderWriter implements Statements {
   private static final String PACKAGE_URI_SCHEME = "urn:import:";
 
   // TODO(rjrjr) Another place that we need a general anonymous field
@@ -171,6 +171,7 @@ public class UiBinderWriter {
   private final List<String> statements = new ArrayList<String>();
   private final HandlerEvaluator handlerEvaluator;
   private final MessagesWriter messages;
+  private final DesignTimeUtils designTime;
   private final Tokenator tokenator = new Tokenator();
 
   private final String templatePath;
@@ -222,8 +223,8 @@ public class UiBinderWriter {
 
   public UiBinderWriter(JClassType baseClass, String implClassName,
       String templatePath, TypeOracle oracle, MortalLogger logger,
-      FieldManager fieldManager, MessagesWriter messagesWriter)
-      throws UnableToCompleteException {
+      FieldManager fieldManager, MessagesWriter messagesWriter,
+      DesignTimeUtils designTime) throws UnableToCompleteException {
     this.baseClass = baseClass;
     this.implClassName = implClassName;
     this.oracle = oracle;
@@ -231,6 +232,7 @@ public class UiBinderWriter {
     this.templatePath = templatePath;
     this.fieldManager = fieldManager;
     this.messages = messagesWriter;
+    this.designTime = designTime;
 
     // Check for possible misuse 'GWT.create(UiBinder.class)'
     JClassType uibinderItself = oracle.findType(UiBinder.class.getCanonicalName());
@@ -369,7 +371,7 @@ public class UiBinderWriter {
       // also a worry in HandlerEvaluator. Need a general scheme for
       // anonymous fields. See the note in HandlerEvaluator and do
       // something like that, but in FieldManager.
-      fieldName = ("f_" + elem.getLocalName() + (++fieldIndex));
+      fieldName = "f_" + elem.getLocalName() + ++fieldIndex;
     }
     fieldName = normalizeFieldName(fieldName);
     fieldManager.registerField(type, fieldName);
@@ -542,6 +544,13 @@ public class UiBinderWriter {
   }
 
   /**
+   * @return the {@link DesignTimeUtils}, not <code>null</code>.
+   */
+  public DesignTimeUtils getDesignTime() {
+    return designTime;
+  }
+
+  /**
    * @return The logger, at least until we get get it handed off to parsers via
    *         constructor args.
    */
@@ -637,8 +646,10 @@ public class UiBinderWriter {
    */
   public void setFieldInitializerAsConstructor(String fieldName,
       JClassType type, String... args) {
-    setFieldInitializer(fieldName, formatCode("new %s(%s)",
-        type.getQualifiedSourceName(), asCommaSeparatedList(args)));
+    setFieldInitializer(
+        fieldName,
+        formatCode("new %s(%s)", type.getQualifiedSourceName(),
+            asCommaSeparatedList(args)));
   }
 
   /**
@@ -694,7 +705,7 @@ public class UiBinderWriter {
     gwtPrefix = documentElement.lookupPrefix(UiBinderGenerator.BINDER_URI);
 
     XMLElement elem = new XMLElementProviderImpl(attributeParsers,
-        bundleParsers, oracle, logger).get(documentElement);
+        bundleParsers, oracle, logger, designTime).get(documentElement);
     this.rendered = tokenator.detokenate(parseDocumentElement(elem));
     printWriter.print(rendered);
   }
@@ -873,8 +884,7 @@ public class UiBinderWriter {
        * the @UiField annotated field in the owning class
        */
       if (!templateClass.isAssignableTo(fieldType)) {
-        die(
-            "In @UiField %s, template field and owner field types don't match: %s is not assignable to %s",
+        die("In @UiField %s, template field and owner field types don't match: %s is not assignable to %s",
             ownerField.getName(), templateClass.getQualifiedSourceName(),
             fieldType.getQualifiedSourceName());
       }
@@ -889,9 +899,8 @@ public class UiBinderWriter {
        * direction of the assignability check and do no init.
        */
       if (!fieldType.isAssignableTo(templateClass)) {
-        die(
-            "In UiField(provided = true) %s, template field and field types don't match: "
-                + "@UiField(provided=true)%s is not assignable to %s",
+        die("In UiField(provided = true) %s, template field and field types don't match: "
+            + "@UiField(provided=true)%s is not assignable to %s",
             ownerField.getName(), fieldType.getQualifiedSourceName(),
             templateClass.getQualifiedSourceName());
       }
@@ -965,6 +974,7 @@ public class UiBinderWriter {
     addWidgetParser("HasHTML");
     addWidgetParser("HasWidgets");
     addWidgetParser("HTMLPanel");
+    addWidgetParser("AbsolutePanel");
     addWidgetParser("DockPanel");
     addWidgetParser("StackPanel");
     addWidgetParser("DisclosurePanel");
@@ -980,6 +990,7 @@ public class UiBinderWriter {
     addWidgetParser("TabLayoutPanel");
     addWidgetParser("Image");
     addWidgetParser("ListBox");
+    addWidgetParser("Grid");
   }
 
   /**
@@ -1017,6 +1028,7 @@ public class UiBinderWriter {
     writeGwtFields(w);
     w.newline();
 
+    designTime.writeAttributes(this);
     writeAddedStatements(w);
     w.newline();
 
@@ -1180,5 +1192,6 @@ public class UiBinderWriter {
   private void writeStatics(IndentedWriter w) {
     writeStaticMessagesInstance(w);
     writeStaticBundleInstances(w);
+    designTime.addDeclarations(w);
   }
 }

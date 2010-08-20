@@ -116,6 +116,7 @@
   </target>
 
   <target name="checkstyle" description="[action] Does static analysis of GWT source">
+    <call-subproject subproject="bikeshed" subtarget="checkstyle" />
     <call-subproject subproject="buildtools" subtarget="checkstyle" />
     <call-subproject subproject="dev" subtarget="checkstyle" />
     <call-subproject subproject="user" subtarget="checkstyle" />
@@ -187,6 +188,7 @@
       <classpath>
         <pathelement location="${gwt.build.out}/tools/api-checker/bin"/>
         <fileset dir="${gwt.build.lib}" includes="gwt-user.jar,gwt-dev.jar" />
+        <pathelement location="${gwt.tools.lib}/javax/validation/validation-api-1.0.0.GA.jar" />
         <pathelement path="${java.class.path}"/>
         <pathelement location="${gwt.tools.lib}/apache/ant-1.6.5.jar" />
       </classpath>

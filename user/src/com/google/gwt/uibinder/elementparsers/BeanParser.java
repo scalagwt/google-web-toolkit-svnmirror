@@ -25,6 +25,7 @@ import com.google.gwt.uibinder.rebind.UiBinderWriter;
 import com.google.gwt.uibinder.rebind.XMLAttribute;
 import com.google.gwt.uibinder.rebind.XMLElement;
 import com.google.gwt.uibinder.rebind.messages.AttributeMessage;
+import com.google.gwt.uibinder.rebind.model.OwnerField;
 import com.google.gwt.uibinder.rebind.model.OwnerFieldClass;
 
 import java.util.Collection;
@@ -57,16 +58,25 @@ public class BeanParser implements ElementParser {
     final OwnerFieldClass ownerFieldClass = OwnerFieldClass.getFieldClass(type,
         writer.getLogger());
 
-    // See if there's a factory method
-    JAbstractMethod creator = writer.getOwnerClass().getUiFactoryMethod(type);
-    if (creator == null) {
-      // If not, see if there's a @UiConstructor
-      creator = ownerFieldClass.getUiConstructor();
-    }
+    /*
+     * Handle @UiFactory and @UiConstructor, but only if the user
+     * hasn't provided an instance via @UiField(provided = true) 
+     */
+    
+    JAbstractMethod creator = null;
+    OwnerField uiField = writer.getOwnerClass().getUiField(fieldName);
+    if ((uiField == null) || (!uiField.isProvided())) {
+      // See if there's a factory method
+      creator = writer.getOwnerClass().getUiFactoryMethod(type);
+      if (creator == null) {
+        // If not, see if there's a @UiConstructor
+        creator = ownerFieldClass.getUiConstructor();
+      }
 
-    if (creator != null) {
-      for (JParameter param : creator.getParameters()) {
-        unfilledRequiredParams.put(param.getName(), param.getType());
+      if (creator != null) {
+        for (JParameter param : creator.getParameters()) {
+          unfilledRequiredParams.put(param.getName(), param.getType());
+        }
       }
     }
 
@@ -95,8 +105,7 @@ public class BeanParser implements ElementParser {
 
         if (setter == null || !(params.length == 1)
             || !isString(writer, params[0].getType())) {
-          writer.die(elem, "No method found to apply message attribute %s",
-              key);
+          writer.die(elem, "No method found to apply message attribute %s", key);
         } else {
           setterValues.put(key, value);
         }
@@ -168,9 +177,11 @@ public class BeanParser implements ElementParser {
       }
     }
 
-    for (String propertyName : setterValues.keySet()) {
+    for (Map.Entry<String, String> entry : setterValues.entrySet()) {
+      String propertyName = entry.getKey();
+      String value = entry.getValue();
       writer.addStatement("%s.set%s(%s);", fieldName, initialCap(propertyName),
-          setterValues.get(propertyName));
+          value);
     }
   }
 

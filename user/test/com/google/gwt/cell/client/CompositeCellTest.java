@@ -1,12 +1,12 @@
 /*
  * Copyright 2010 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -31,37 +31,13 @@ import java.util.List;
 public class CompositeCellTest extends CellTestBase<String> {
 
   /**
-   * Test consumesEvent when one inner cell consumes events.
-   */
-  public void testConsumesEventTrue() {
-    // Add one cell that consumes events.
-    List<HasCell<String, ?>> cells = createHasCells(3);
-    final MockCell<String> mock = new MockCell<String>(true, false, null);
-    cells.add(new HasCell<String, String>() {
-      public Cell<String> getCell() {
-        return mock;
-      }
-
-      public FieldUpdater<String, String> getFieldUpdater() {
-        return null;
-      }
-
-      public String getValue(String object) {
-        return object;
-      }
-    });
-    CompositeCell<String> cell = new CompositeCell<String>(cells);
-    assertTrue(cell.consumesEvents());
-    assertFalse(cell.dependsOnSelection());
-  }
-
-  /**
-   * Test dependsOnSelection when one inner cell dependsOnSelection.
+   * Test dependsOnSelection and handlesSelection when one inner cell returns
+   * true for each of these.
    */
   public void testDependsOnSelectionTrue() {
     // Add one cell that consumes events.
     List<HasCell<String, ?>> cells = createHasCells(3);
-    final MockCell<String> mock = new MockCell<String>(false, true, null);
+    final MockCell<String> mock = new MockCell<String>(true, null);
     cells.add(new HasCell<String, String>() {
       public Cell<String> getCell() {
         return mock;
@@ -76,8 +52,34 @@ public class CompositeCellTest extends CellTestBase<String> {
       }
     });
     CompositeCell<String> cell = new CompositeCell<String>(cells);
-    assertFalse(cell.consumesEvents());
+    assertNull(cell.getConsumedEvents());
     assertTrue(cell.dependsOnSelection());
+  }
+
+  /**
+   * Test getConsumedEvents when one inner cell consumes events.
+   */
+  public void testGetConsumedEventsTrue() {
+    // Add one cell that consumes events.
+    List<HasCell<String, ?>> cells = createHasCells(3);
+    final MockCell<String> mock = new MockCell<String>(false, null, "click");
+    cells.add(new HasCell<String, String>() {
+      public Cell<String> getCell() {
+        return mock;
+      }
+
+      public FieldUpdater<String, String> getFieldUpdater() {
+        return null;
+      }
+
+      public String getValue(String object) {
+        return object;
+      }
+    });
+    CompositeCell<String> cell = new CompositeCell<String>(cells);
+    assertEquals(1, cell.getConsumedEvents().size());
+    assertTrue(cell.getConsumedEvents().contains("click"));
+    assertFalse(cell.dependsOnSelection());
   }
 
   /**
@@ -85,7 +87,7 @@ public class CompositeCellTest extends CellTestBase<String> {
    */
   public void testOnBrowserEventNoCell() {
     NativeEvent event = Document.get().createChangeEvent();
-    testOnBrowserEvent(getExpectedInnerHtml(), event, null, "test", null);
+    testOnBrowserEvent(getExpectedInnerHtml(), event, "test", null);
   }
 
   /**
@@ -106,15 +108,15 @@ public class CompositeCellTest extends CellTestBase<String> {
     // Add an event listener.
     EventListener listener = new EventListener() {
       public void onBrowserEvent(Event event) {
-        cell.onBrowserEvent(parent, "test", null, event, null);
+        cell.onBrowserEvent(parent, "test", DEFAULT_KEY, event, null);
       }
     };
     DOM.sinkEvents(parent, Event.ONCLICK);
     DOM.setEventListener(parent, listener);
 
     // Fire the event on one of the inner cells.
-    NativeEvent event = Document.get().createClickEvent(0, 0, 0, 0, 0, false,
-        false, false, false);
+    NativeEvent event = Document.get().createClickEvent(
+        0, 0, 0, 0, 0, false, false, false, false);
     Element.as(parent.getChild(1)).dispatchEvent(event);
     innerCell.assertLastEventValue("test-1");
 
@@ -136,11 +138,6 @@ public class CompositeCellTest extends CellTestBase<String> {
   }
 
   @Override
-  protected boolean consumesEvents() {
-    return false;
-  }
-
-  @Override
   protected CompositeCell<String> createCell() {
     return new CompositeCell<String>(createHasCells(3));
   }
@@ -156,6 +153,11 @@ public class CompositeCellTest extends CellTestBase<String> {
   }
 
   @Override
+  protected String[] getConsumedEvents() {
+    return null;
+  }
+
+  @Override
   protected String getExpectedInnerHtml() {
     return "<span>helloworld-0</span><span>helloworld-1</span><span>helloworld-2</span>";
   }
@@ -167,7 +169,7 @@ public class CompositeCellTest extends CellTestBase<String> {
 
   /**
    * Create an array of {@link HasCell}.
-   * 
+   *
    * @param count the number of cells to create
    * @return the list of cells
    */
@@ -175,8 +177,8 @@ public class CompositeCellTest extends CellTestBase<String> {
     List<HasCell<String, ?>> cells = new ArrayList<HasCell<String, ?>>();
     for (int i = 0; i < count; i++) {
       final int index = i;
-      final MockCell<String> inner = new MockCell<String>(false, false,
-          "fromCell" + i);
+      final MockCell<String> inner = new MockCell<String>(
+          false, "fromCell" + i);
       cells.add(new HasCell<String, String>() {
         public Cell<String> getCell() {
           return inner;

@@ -17,26 +17,24 @@ package com.google.gwt.requestfactory.client.impl;
 
 import com.google.gwt.requestfactory.shared.RecordRequest;
 import com.google.gwt.valuestore.shared.Record;
-import com.google.gwt.valuestore.shared.impl.RecordJsoImpl;
-import com.google.gwt.valuestore.shared.impl.RecordSchema;
+import com.google.gwt.valuestore.shared.SyncResult;
+
+import java.util.Set;
 
 /**
- * <p>
- * <span style="color:red">Experimental API: This class is still under rapid
+ * <p> <span style="color:red">Experimental API: This class is still under rapid
  * development, and is very likely to be deleted. Use it at your own risk.
- * </span>
- * </p>
- * Abstract implementation of
- * {@link com.google.gwt.requestfactory.shared.RequestFactory.RequestObject
+ * </span> </p> Abstract implementation of {@link com.google.gwt.requestfactory.shared.RequestObject
  * RequestFactory.RequestObject} for requests that return single instances of
  * {@link Record}.
- * 
+ *
  * @param <T> the type of entities returned
  * @param <R> this request type
  */
 public abstract class //
-AbstractJsonObjectRequest<T extends Record, R extends AbstractJsonObjectRequest<T, R>> //
+    AbstractJsonObjectRequest<T extends Record, R extends AbstractJsonObjectRequest<T, R>> //
     extends AbstractRequest<T, R> implements RecordRequest<T> {
+
   protected final RecordSchema<? extends T> schema;
 
   public AbstractJsonObjectRequest(RecordSchema<? extends T> schema,
@@ -45,11 +43,15 @@ AbstractJsonObjectRequest<T extends Record, R extends AbstractJsonObjectRequest<
     this.schema = schema;
   }
 
-  public void handleResponseText(String text) {
-    RecordJsoImpl jso = RecordJsoImpl.fromJson(text);
+  @Override
+  public void handleResult(Object jsoResult, Set<SyncResult> syncResults) {
+
+    RecordJsoImpl jso = (RecordJsoImpl) jsoResult;
     jso.setSchema(schema);
 
-    requestFactory.getValueStore().setRecord(jso);
-    receiver.onSuccess(schema.create(jso));
+    requestFactory.getValueStore().setRecord(jso, requestFactory);
+
+    receiver.onSuccess(schema.create(jso), syncResults);
   }
+
 }

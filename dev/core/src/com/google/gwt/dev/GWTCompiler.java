@@ -1,12 +1,12 @@
 /*
  * Copyright 2008 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -27,11 +27,13 @@ import com.google.gwt.dev.jjs.PermutationResult;
 import com.google.gwt.dev.shell.CheckForUpdates;
 import com.google.gwt.dev.shell.CheckForUpdates.UpdateResult;
 import com.google.gwt.dev.util.FileBackedObject;
-import com.google.gwt.dev.util.PerfLogger;
 import com.google.gwt.dev.util.Util;
 import com.google.gwt.dev.util.arg.ArgHandlerLocalWorkers;
 import com.google.gwt.dev.util.arg.ArgHandlerOutDir;
 import com.google.gwt.dev.util.arg.ArgHandlerWorkDirOptional;
+import com.google.gwt.dev.util.log.speedtracer.CompilerEventType;
+import com.google.gwt.dev.util.log.speedtracer.SpeedTracerLogger;
+import com.google.gwt.dev.util.log.speedtracer.SpeedTracerLogger.Event;
 import com.google.gwt.util.tools.ToolBase;
 import com.google.gwt.util.tools.Utility;
 
@@ -42,7 +44,7 @@ import java.util.concurrent.FutureTask;
 
 /**
  * The main executable entry point for the GWT Java to JavaScript compiler.
- * 
+ *
  * @deprecated Use {@link Compiler} instead
  */
 @Deprecated
@@ -107,6 +109,8 @@ public class GWTCompiler {
 
   public static void main(String[] args) {
     ToolBase.legacyWarn(GWTCompiler.class, Compiler.class);
+    SpeedTracerLogger.init();
+    Event compileEvent = SpeedTracerLogger.start(CompilerEventType.COMPILE);
 
     /*
      * NOTE: main always exits with a call to System.exit to terminate any
@@ -115,6 +119,7 @@ public class GWTCompiler {
      * still implementation-dependent.
      */
     final LegacyCompilerOptions options = new GWTCompilerOptionsImpl();
+    boolean success = false;
     if (new ArgProcessor(options).processArgs(args)) {
       CompileTask task = new CompileTask() {
         public boolean run(TreeLogger logger) throws UnableToCompleteException {
@@ -132,11 +137,13 @@ public class GWTCompiler {
       };
       if (CompileTaskRunner.runWithAppropriateLogger(options, task)) {
         // Exit w/ success code.
-        System.exit(0);
+        success = true;
       }
     }
+
+    compileEvent.end();
     // Exit w/ non-success code.
-    System.exit(1);
+    System.exit(success ? 0 : 1);
   }
 
   private final GWTCompilerOptionsImpl options;
@@ -162,7 +169,7 @@ public class GWTCompiler {
    */
   public boolean run(TreeLogger logger, ModuleDef... modules)
       throws UnableToCompleteException {
-    PerfLogger.start("compile");
+    Event compileEvent = SpeedTracerLogger.start(CompilerEventType.COMPILE);
     boolean tempWorkDir = false;
     try {
       if (options.getWorkDir() == null) {
@@ -213,13 +220,12 @@ public class GWTCompiler {
               + String.format("%.3f", delta / 1000d) + "s");
         }
       }
-
     } catch (IOException e) {
       logger.log(TreeLogger.ERROR, "Unable to create compiler work directory",
           e);
       return false;
     } finally {
-      PerfLogger.end();
+      compileEvent.end();
       if (tempWorkDir) {
         Util.recursiveDelete(options.getWorkDir(), false);
       }

@@ -36,6 +36,7 @@ import com.google.gwt.user.client.ui.TakesValue;
 import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.user.rebind.SourceWriter;
 import com.google.gwt.valuestore.shared.Property;
+import com.google.gwt.valuestore.shared.Record;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -54,8 +55,7 @@ import java.util.Map.Entry;
  * </span>
  * </p>
  * Generates implementations of {@link
- * com.google.gwt.app.client.EditorSupport EditorSupport} and its
- * nested interfaces.
+ * com.google.gwt.app.client.EditorSupport EditorSupport}.
  */
 public class EditorSupportGenerator extends Generator {
 
@@ -90,7 +90,12 @@ public class EditorSupportGenerator extends Generator {
   JClassType takesValueType;
   JClassType hasTextType;
 
+  JClassType jrecordType;
   JClassType stringType;
+
+  private String capitalize(String name) {
+    return name.substring(0, 1).toUpperCase() + name.substring(1);
+  }
 
   @Override
   public String generate(TreeLogger logger, GeneratorContext generatorContext,
@@ -176,9 +181,10 @@ public class EditorSupportGenerator extends Generator {
         HasText.class.getName());
     stringType = generatorContext.getTypeOracle().findType(
         String.class.getName());
-
-    writeGetPropertiesMethod(sw, recordType);
-    writeInit(sw, viewType, recordType);
+    jrecordType = generatorContext.getTypeOracle().findType(
+        Record.class.getName());
+    writeGetPathsMethod(sw, recordType);
+    writeInit(sw, viewType);
     writeIsChangedMethod(sw, recordType, viewType);
     writeSetEnabledMethod(sw, viewType);
     writeSetValueMethod(sw, recordType, viewType, logger);
@@ -299,6 +305,9 @@ public class EditorSupportGenerator extends Generator {
     if (returnType.isAssignableTo(stringType)) {
       return "";
     }
+    if (returnType.isAssignableTo(jrecordType)) {
+      return ".getId()+\"\"";
+    }
     return ".toString()";
   }
 
@@ -408,28 +417,27 @@ public class EditorSupportGenerator extends Generator {
   }
 
   /**
-   * Write the implementation for the getProperties() method.
+   * Write the implementation for the getPaths() method.
    */
-  private void writeGetPropertiesMethod(SourceWriter sw, JClassType recordType) {
+  private void writeGetPathsMethod(SourceWriter sw, JClassType recordType) {
     sw.indent();
-    sw.println("public Set<Property<?>> getProperties() {");
+    sw.println("public String[] getPaths() {");
     sw.indent();
-    sw.println("Set<Property<?>> rtn = new HashSet<Property<?>>();");
+    sw.println("Set<String> rtn = new HashSet<String>();");
     for (JField field : recordType.getFields()) {
       if (field.getType().getQualifiedSourceName().equals(
           Property.class.getName())) {
         sw.println("rtn.add(" + recordType.getName() + "." + field.getName()
-            + ");");
+            + ".getName());");
       }
     }
-    sw.println("return rtn;");
+    sw.println("return rtn.toArray(new String[rtn.size()]);");
     sw.outdent();
     sw.println("}");
     sw.outdent();
   }
 
-  private void writeInit(SourceWriter sw, JClassType viewType,
-      JClassType recordType) {
+  private void writeInit(SourceWriter sw, JClassType viewType) {
     sw.indent();
     sw.println("public void init(final " + viewType.getName() + " view) {");
     sw.indent();
@@ -450,12 +458,8 @@ public class EditorSupportGenerator extends Generator {
           + "> event) {");
       sw.indent();
       // recordField and uiFieldEntry have the same name
-      String recordFieldName = uiFieldEntry.getKey().getName();
-      sw.println("view.getDeltaValueStore().set(" + recordType.getName() + "."
-          + recordFieldName + ", view.getValue(),");
-      sw.indent();
-      sw.println("event.getValue());");
-      sw.outdent();
+      sw.println("view.getValue().set"
+          + capitalize(uiFieldEntry.getKey().getName()) + "(event.getValue());");
       sw.outdent();
       sw.println("}");
       sw.outdent();
@@ -479,12 +483,12 @@ public class EditorSupportGenerator extends Generator {
           getter = "getText";
         }
         sw.println(String.format(
-            "view.getDeltaValueStore().set(%s.%s, view.getValue(), view.%s.%s());",
-            recordType.getName(), property.getName(),
+            "view.getValue().set%s(view.%s.%s());",
+            capitalize(property.getName()),
             uiFieldEntry.getKey().getName(), getter));
       }
     }
-    sw.println("return view.getDeltaValueStore().isChanged();");
+    sw.println("return view.getValue().isChanged();");
     sw.outdent();
     sw.println("}");
     sw.outdent();

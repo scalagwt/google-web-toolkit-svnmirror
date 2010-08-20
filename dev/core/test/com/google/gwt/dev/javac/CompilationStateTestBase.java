@@ -84,7 +84,6 @@ public abstract class CompilationStateTestBase extends TestCase {
 
   static void assertUnitsChecked(Collection<CompilationUnit> units) {
     for (CompilationUnit unit : units) {
-      assertTrue(unit.isCompiled());
       assertFalse(unit.isError());
       assertTrue(unit.getCompiledClasses().size() > 0);
     }
@@ -115,6 +114,10 @@ public abstract class CompilationStateTestBase extends TestCase {
     // Save off the reflected collections.
     Map<String, CompilationUnit> unitMap = state.getCompilationUnitMap();
     Collection<CompilationUnit> units = state.getCompilationUnits();
+
+    // Validate that we have as many units as resources.
+    assertEquals(oracle.getResources().size() + generatedTypeNames.length,
+        units.size());
 
     // Validate that the collections are consistent with each other.
     assertEquals(new HashSet<CompilationUnit>(unitMap.values()),

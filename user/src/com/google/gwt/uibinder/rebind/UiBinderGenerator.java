@@ -32,6 +32,7 @@ import com.google.gwt.uibinder.rebind.model.ImplicitClientBundle;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXParseException;
 
+import java.beans.Beans;
 import java.io.PrintWriter;
 
 /**
@@ -98,7 +99,16 @@ public class UiBinderGenerator extends Generator {
       throw new RuntimeException(e);
     }
 
+    DesignTimeUtils designTime;
+    if (Beans.isDesignTime()) {
+      designTime = new DesignTimeUtilsImpl();
+    } else {
+      designTime = DesignTimeUtilsStub.EMPTY;
+    }
+
     String implName = interfaceType.getName().replace('.', '_') + "Impl";
+    implName = designTime.getImplName(implName);
+
     String packageName = interfaceType.getPackage().getName();
     PrintWriterManager writers = new PrintWriterManager(genCtx, logger,
         packageName);
@@ -106,15 +116,15 @@ public class UiBinderGenerator extends Generator {
 
     if (printWriter != null) {
       generateOnce(interfaceType, implName, printWriter, logger, oracle,
-          resourceOracle, writers);
+          resourceOracle, writers, designTime);
     }
     return packageName + "." + implName;
   }
 
   private void generateOnce(JClassType interfaceType, String implName,
       PrintWriter binderPrintWriter, TreeLogger treeLogger, TypeOracle oracle,
-      ResourceOracle resourceOracle, PrintWriterManager writerManager)
-      throws UnableToCompleteException {
+      ResourceOracle resourceOracle, PrintWriterManager writerManager,
+      DesignTimeUtils designTime) throws UnableToCompleteException {
 
     MortalLogger logger = new MortalLogger(treeLogger);
     String templatePath = deduceTemplateFile(logger, interfaceType);
@@ -123,9 +133,10 @@ public class UiBinderGenerator extends Generator {
 
     UiBinderWriter uiBinderWriter = new UiBinderWriter(interfaceType, implName,
         templatePath, oracle, logger, new FieldManager(oracle, logger),
-        messages);
+        messages, designTime);
 
-    Document doc = getW3cDoc(logger, resourceOracle, templatePath);
+    Document doc = getW3cDoc(logger, designTime, resourceOracle, templatePath);
+    designTime.rememberPathForElements(doc);
 
     uiBinderWriter.parseDocument(doc, binderPrintWriter);
 
@@ -139,24 +150,27 @@ public class UiBinderGenerator extends Generator {
     writerManager.commit();
   }
 
-  private Document getW3cDoc(MortalLogger logger,
+  private Document getW3cDoc(MortalLogger logger, DesignTimeUtils designTime,
       ResourceOracle resourceOracle, String templatePath)
       throws UnableToCompleteException {
 
     Resource resource = resourceOracle.getResourceMap().get(templatePath);
-
     if (null == resource) {
       logger.die("Unable to find resource: " + templatePath);
     }
 
     Document doc = null;
     try {
-      String content = Util.readStreamAsString(resource.openContents());
-      doc = new W3cDomHelper(logger.getTreeLogger(), resourceOracle).documentFor(content,
-          resource.getPath());
+      String content = designTime.getTemplateContent(templatePath);
+      if (content == null) {
+        content = Util.readStreamAsString(resource.openContents());
+      }
+      doc = new W3cDomHelper(logger.getTreeLogger(), resourceOracle).documentFor(
+          content, resource.getPath());
     } catch (SAXParseException e) {
-      logger.die("Error parsing XML (line " + e.getLineNumber() + "): "
-          + e.getMessage(), e);
+      logger.die(
+          "Error parsing XML (line " + e.getLineNumber() + "): "
+              + e.getMessage(), e);
     }
     return doc;
   }

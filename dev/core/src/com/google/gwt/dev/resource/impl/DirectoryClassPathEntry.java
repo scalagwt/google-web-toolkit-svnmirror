@@ -23,7 +23,7 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 
 /**
- * TODO(bruce): write me.
+ * A {@link ClassPathEntry} for a directory on the file system.
  */
 public class DirectoryClassPathEntry extends ClassPathEntry {
 
@@ -41,10 +41,20 @@ public class DirectoryClassPathEntry extends ClassPathEntry {
         TreeLogger.DEBUG, "Including file: $0");
   }
 
+  /**
+   * Absolute directory.
+   */
   private final File dir;
 
+  private final String location;
+
+  /**
+   * @param dir an absolute directory
+   */
   public DirectoryClassPathEntry(File dir) {
+    assert (dir.isAbsolute());
     this.dir = dir;
+    this.location = dir.toURI().toString();
   }
 
   @Override
@@ -57,7 +67,7 @@ public class DirectoryClassPathEntry extends ClassPathEntry {
 
   @Override
   public String getLocation() {
-    return dir.getAbsoluteFile().toURI().toString();
+    return location;
   }
 
   /**
@@ -71,7 +81,7 @@ public class DirectoryClassPathEntry extends ClassPathEntry {
   private void descendToFindResources(TreeLogger logger,
       PathPrefixSet pathPrefixSet, Map<AbstractResource, PathPrefix> resources,
       File dir, String dirPath) {
-    assert (dir.isDirectory());
+    assert (dir.isDirectory()) : dir + " is not a directory";
 
     // Assert: this directory is included in the path prefix set.
 
@@ -89,7 +99,7 @@ public class DirectoryClassPathEntry extends ClassPathEntry {
           Messages.NOT_DESCENDING_INTO_DIR.log(logger, child.getAbsolutePath(),
               null);
         }
-      } else {
+      } else if (child.isFile()) {
         PathPrefix prefix = null;
         if ((prefix = pathPrefixSet.includesResource(childPath)) != null) {
           Messages.INCLUDING_FILE.log(logger, childPath, null);
@@ -98,6 +108,8 @@ public class DirectoryClassPathEntry extends ClassPathEntry {
         } else {
           Messages.EXCLUDING_FILE.log(logger, childPath, null);
         }
+      } else {
+        Messages.EXCLUDING_FILE.log(logger, childPath, null);
       }
     }
   }

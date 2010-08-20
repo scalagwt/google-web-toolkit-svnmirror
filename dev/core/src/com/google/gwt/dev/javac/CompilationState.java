@@ -18,6 +18,9 @@ package com.google.gwt.dev.javac;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.dev.javac.CompilationStateBuilder.CompileMoreLater;
+import com.google.gwt.dev.util.log.speedtracer.DevModeEventType;
+import com.google.gwt.dev.util.log.speedtracer.SpeedTracerLogger;
+import com.google.gwt.dev.util.log.speedtracer.SpeedTracerLogger.Event;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -81,11 +84,19 @@ public class CompilationState {
 
   public void addGeneratedCompilationUnits(TreeLogger logger,
       Collection<GeneratedUnit> generatedUnits) {
-    logger = logger.branch(TreeLogger.DEBUG, "Adding '" + generatedUnits.size()
-        + "' new generated units");
-    Collection<CompilationUnit> newUnits = compileMoreLater.addGeneratedTypes(
-        logger, generatedUnits);
-    assimilateUnits(logger, newUnits);
+    Event generatedUnitsAddEvent = SpeedTracerLogger.start(
+        DevModeEventType.GENERATED_UNITS_ADD);
+
+    try {
+      logger = logger.branch(TreeLogger.DEBUG, "Adding '"
+          + generatedUnits.size() + "' new generated units");
+      generatedUnitsAddEvent.addData("# new generated units", "" + generatedUnits.size());
+      Collection<CompilationUnit> newUnits = compileMoreLater.addGeneratedTypes(
+          logger, generatedUnits);
+      assimilateUnits(logger, newUnits);
+    } finally {
+      generatedUnitsAddEvent.end();
+    }
   }
 
   /**
@@ -121,17 +132,24 @@ public class CompilationState {
     return mediator.getTypeOracle();
   }
 
+  /**
+   * For testing.
+   */
+  TypeOracleMediator getMediator() {
+    return mediator;
+  }
+
   private void assimilateUnits(TreeLogger logger,
       Collection<CompilationUnit> units) {
     for (CompilationUnit unit : units) {
       unitMap.put(unit.getTypeName(), unit);
-      if (unit.isCompiled()) {
-        for (CompiledClass compiledClass : unit.getCompiledClasses()) {
-          classFileMap.put(compiledClass.getInternalName(), compiledClass);
-          classFileMapBySource.put(compiledClass.getSourceName(), compiledClass);
-        }
+      for (CompiledClass compiledClass : unit.getCompiledClasses()) {
+        classFileMap.put(compiledClass.getInternalName(), compiledClass);
+        classFileMapBySource.put(compiledClass.getSourceName(), compiledClass);
       }
     }
+    CompilationUnitInvalidator.retainValidUnits(logger, units,
+        compileMoreLater.getValidClasses());
     mediator.addNewUnits(logger, units);
   }
 }

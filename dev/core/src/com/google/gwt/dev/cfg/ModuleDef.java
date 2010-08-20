@@ -1,12 +1,12 @@
 /*
  * Copyright 2008 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -28,10 +28,13 @@ import com.google.gwt.dev.resource.ResourceOracle;
 import com.google.gwt.dev.resource.impl.DefaultFilters;
 import com.google.gwt.dev.resource.impl.PathPrefix;
 import com.google.gwt.dev.resource.impl.PathPrefixSet;
+import com.google.gwt.dev.resource.impl.ResourceFilter;
 import com.google.gwt.dev.resource.impl.ResourceOracleImpl;
 import com.google.gwt.dev.util.Empty;
-import com.google.gwt.dev.util.PerfLogger;
 import com.google.gwt.dev.util.Util;
+import com.google.gwt.dev.util.log.speedtracer.CompilerEventType;
+import com.google.gwt.dev.util.log.speedtracer.SpeedTracerLogger;
+import com.google.gwt.dev.util.log.speedtracer.SpeedTracerLogger.Event;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -50,8 +53,13 @@ import java.util.Map.Entry;
  * Represents a module specification. In principle, this could be built without
  * XML for unit tests.
  */
-@SuppressWarnings("deprecation")
-public class ModuleDef implements PublicOracle {
+public class ModuleDef {
+
+  private static final ResourceFilter NON_JAVA_RESOURCES = new ResourceFilter() {
+    public boolean allows(String path) {
+      return !path.endsWith(".java") && !path.endsWith(".class");
+    }
+  };
 
   private static final Comparator<Map.Entry<String, ?>> REV_NAME_CMP = new Comparator<Map.Entry<String, ?>>() {
     public int compare(Map.Entry<String, ?> entry1, Map.Entry<String, ?> entry2) {
@@ -114,6 +122,7 @@ public class ModuleDef implements PublicOracle {
   private final Map<String, String> servletClassNamesByPath = new HashMap<String, String>();
 
   private PathPrefixSet sourcePrefixSet = new PathPrefixSet();
+
   private final Styles styles = new Styles();
 
   public ModuleDef(String name) {
@@ -145,40 +154,41 @@ public class ModuleDef implements PublicOracle {
   }
 
   public synchronized void addPublicPackage(String publicPackage,
-      String[] includeList, String[] excludeList, boolean defaultExcludes,
-      boolean caseSensitive) {
+      String[] includeList, String[] excludeList, String[] skipList,
+      boolean defaultExcludes, boolean caseSensitive) {
 
     if (lazyPublicOracle != null) {
       throw new IllegalStateException("Already normalized");
     }
     publicPrefixSet.add(new PathPrefix(publicPackage,
         defaultFilters.customResourceFilter(includeList, excludeList,
-            defaultExcludes, caseSensitive), true));
+            skipList, defaultExcludes, caseSensitive), true, excludeList));
   }
 
   public void addSourcePackage(String sourcePackage, String[] includeList,
-      String[] excludeList, boolean defaultExcludes, boolean caseSensitive) {
+      String[] excludeList, String[] skipList, boolean defaultExcludes,
+      boolean caseSensitive) {
     addSourcePackageImpl(sourcePackage, includeList, excludeList,
-        defaultExcludes, caseSensitive, false);
+        skipList, defaultExcludes, caseSensitive, false);
   }
 
   public void addSourcePackageImpl(String sourcePackage, String[] includeList,
-      String[] excludeList, boolean defaultExcludes, boolean caseSensitive,
-      boolean isSuperSource) {
+      String[] excludeList, String[] skipList, boolean defaultExcludes,
+      boolean caseSensitive, boolean isSuperSource) {
     if (lazySourceOracle != null) {
       throw new IllegalStateException("Already normalized");
     }
     PathPrefix pathPrefix = new PathPrefix(sourcePackage,
-        defaultFilters.customJavaFilter(includeList, excludeList,
-            defaultExcludes, caseSensitive), isSuperSource);
+        defaultFilters.customJavaFilter(includeList, excludeList, skipList,
+            defaultExcludes, caseSensitive), isSuperSource, excludeList);
     sourcePrefixSet.add(pathPrefix);
   }
 
   public void addSuperSourcePackage(String superSourcePackage,
-      String[] includeList, String[] excludeList, boolean defaultExcludes,
-      boolean caseSensitive) {
+      String[] includeList, String[] excludeList, String[] skipList,
+      boolean defaultExcludes, boolean caseSensitive) {
     addSourcePackageImpl(superSourcePackage, includeList, excludeList,
-        defaultExcludes, caseSensitive, true);
+        skipList, defaultExcludes, caseSensitive, true);
   }
 
   /**
@@ -244,7 +254,7 @@ public class ModuleDef implements PublicOracle {
       /*
        * Ensure that URLs that match the servlet mapping, including those that
        * have additional path_info, get routed to the correct servlet.
-       * 
+       *
        * See "Inside Servlets", Second Edition, pg. 208
        */
       if (actual.equals(mapping) || actual.startsWith(mapping + "/")) {
@@ -326,8 +336,8 @@ public class ModuleDef implements PublicOracle {
       PathPrefixSet pathPrefixes = lazySourceOracle.getPathPrefixes();
       PathPrefixSet newPathPrefixes = new PathPrefixSet();
       for (PathPrefix pathPrefix : pathPrefixes.values()) {
-        newPathPrefixes.add(new PathPrefix(pathPrefix.getPrefix(), null,
-            pathPrefix.shouldReroot()));
+        newPathPrefixes.add(new PathPrefix(pathPrefix.getPrefix(),
+            NON_JAVA_RESOURCES, pathPrefix.shouldReroot()));
       }
       lazyResourcesOracle.setPathPrefixes(newPathPrefixes);
       lazyResourcesOracle.refresh(TreeLogger.NULL);
@@ -378,7 +388,7 @@ public class ModuleDef implements PublicOracle {
    * For convenience in hosted mode, servlets can be automatically loaded and
    * delegated to via {@link com.google.gwt.dev.shell.GWTShellServlet}. If a
    * servlet is already mapped to the specified path, it is replaced.
-   * 
+   *
    * @param path the url path at which the servlet resides
    * @param servletClassName the name of the servlet to publish
    */
@@ -387,7 +397,7 @@ public class ModuleDef implements PublicOracle {
   }
 
   public synchronized void refresh(TreeLogger logger) {
-    PerfLogger.start("ModuleDef.refresh");
+    Event moduleDefEvent = SpeedTracerLogger.start(CompilerEventType.MODULE_DEF, "phase", "refresh", "module", getName());
     logger = logger.branch(TreeLogger.DEBUG, "Refreshing module '" + getName()
         + "'");
 
@@ -398,7 +408,7 @@ public class ModuleDef implements PublicOracle {
     if (lazyResourcesOracle != null) {
       lazyResourcesOracle.refresh(logger);
     }
-    PerfLogger.end();
+    moduleDefEvent.end();
   }
 
   /**
@@ -407,7 +417,7 @@ public class ModuleDef implements PublicOracle {
   public void setCollapseAllProperties(boolean collapse) {
     collapseAllProperties = collapse;
   }
-  
+
   /**
    * Override the module's apparent name. Setting this value to
    * <code>null<code> will disable the name override.
@@ -419,9 +429,9 @@ public class ModuleDef implements PublicOracle {
   /**
    * Returns the URL for a source file if it is found; <code>false</code>
    * otherwise.
-   * 
+   *
    * NOTE: this method is for testing only.
-   * 
+   *
    * @param partialPath the partial path of the source file
    * @return the resource for the requested source file
    */
@@ -433,18 +443,18 @@ public class ModuleDef implements PublicOracle {
    * The final method to call when everything is setup. Before calling this
    * method, several of the getter methods may not be called. After calling this
    * method, the add methods may not be called.
-   * 
+   *
    * @param logger Logs the activity.
    */
   synchronized void normalize(TreeLogger logger) {
-    PerfLogger.start("ModuleDef.normalize");
-
+    Event moduleDefNormalize =
+        SpeedTracerLogger.start(CompilerEventType.MODULE_DEF, "phase", "normalize");
     // Normalize property providers.
     //
     for (Property current : getProperties()) {
       if (current instanceof BindingProperty) {
         BindingProperty prop = (BindingProperty) current;
-        
+
         if (collapseAllProperties) {
           prop.addCollapsedValues("*");
         }
@@ -484,7 +494,7 @@ public class ModuleDef implements PublicOracle {
           "No source path entries; expect subsequent failures", null);
     }
 
-    PerfLogger.end();
+    moduleDefNormalize.end();
   }
 
   private void checkForSeedTypes(TreeLogger logger,

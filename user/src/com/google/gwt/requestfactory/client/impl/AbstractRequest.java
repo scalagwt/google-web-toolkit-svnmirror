@@ -15,9 +15,12 @@
  */
 package com.google.gwt.requestfactory.client.impl;
 
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.requestfactory.shared.Receiver;
-import com.google.gwt.requestfactory.shared.RequestFactory;
+import com.google.gwt.requestfactory.shared.RequestObject;
 import com.google.gwt.valuestore.shared.Property;
+import com.google.gwt.valuestore.shared.Record;
+import com.google.gwt.valuestore.shared.SyncResult;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -25,52 +28,98 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * <p>
- * <span style="color:red">Experimental API: This class is still under rapid
+ * <p> <span style="color:red">Experimental API: This class is still under rapid
  * development, and is very likely to be deleted. Use it at your own risk.
  * </span>
  * </p>
- * Abstract implementation of {@link RequestFactory.RequestObject}.
+ * Abstract implementation of {@link RequestObject}. Each request stores a
+ * {@link DeltaValueStoreJsonImpl}.
  * 
  * @param <T> return type
  * @param <R> type of this request object
  */
 public abstract class AbstractRequest<T, R extends AbstractRequest<T, R>>
-    implements RequestFactory.RequestObject<T> {
+    implements RequestObject<T> {
 
   protected final RequestFactoryJsonImpl requestFactory;
+  protected DeltaValueStoreJsonImpl deltaValueStore;
   protected Receiver<T> receiver;
 
-  private final Set<Property<?>> properties = new HashSet<Property<?>>();
+  private final Set<String> propertyRefs = new HashSet<String>();
 
   public AbstractRequest(RequestFactoryJsonImpl requestFactory) {
     this.requestFactory = requestFactory;
+    ValueStoreJsonImpl valueStore = requestFactory.getValueStore();
+    this.deltaValueStore = new DeltaValueStoreJsonImpl(valueStore,
+        requestFactory);
   }
 
-  public void fire() {
-    assert null != receiver : "to(Receiver) was not called";
+  protected String asString(Object jso) {
+    return String.valueOf(jso);
+  }
+
+  public void clearUsed() {
+    deltaValueStore.clearUsed();
+  }
+
+  @SuppressWarnings("unchecked")
+  public <P extends Record> P edit(P record) {
+    P returnRecordImpl = (P) ((RecordImpl) record).getSchema().create(
+        ((RecordImpl) record).asJso(), ((RecordImpl) record).isFuture());
+    ((RecordImpl) returnRecordImpl).setDeltaValueStore(deltaValueStore);
+    return returnRecordImpl;
+  }
+
+  public void fire(Receiver<T> receiver) {
+    assert null != receiver : "receiver cannot be null";
+    this.receiver = receiver;
     requestFactory.fire(this);
   }
 
+  /**
+   * @deprecated use {@link #with(String...)} instead.
+   * @param properties
+   * @return
+   */
   public R forProperties(Collection<Property<?>> properties) {
-    this.properties.addAll(properties);
-    return getThis();
-  }
-
-  public R forProperty(Property<?> property) {
-    this.properties.add(property);
+    for (Property p : properties) {
+      with(p.getName());
+    }
     return getThis();
   }
 
   /**
    * @return the properties
    */
-  public Set<Property<?>> getProperties() {
-    return Collections.unmodifiableSet(properties);
+  public Set<String> getPropertyRefs() {
+    return Collections.unmodifiableSet(propertyRefs);
   }
 
-  public R to(Receiver<T> target) {
-    this.receiver = target;
+  public void handleResponseText(String responseText) {
+    RecordJsoImpl.JsonResults results = RecordJsoImpl.fromResults(responseText);
+    processRelated(results.getRelated());
+    handleResult(results.getResult(),
+        deltaValueStore.commit(results.getSideEffects()));
+  }
+  
+  public boolean isChanged() {
+    return deltaValueStore.isChanged();
+  }
+
+  public void reset() {
+    ValueStoreJsonImpl valueStore = requestFactory.getValueStore();
+    deltaValueStore = new DeltaValueStoreJsonImpl(valueStore, requestFactory);
+  }
+
+  public void setSchemaAndRecord(String schemaToken, RecordJsoImpl jso) {
+    jso.setSchema(requestFactory.getSchema(schemaToken));
+    requestFactory.getValueStore().setRecord(jso, requestFactory);
+  }
+
+  public R with(String... propertyRef) {
+    for (String ref : propertyRef) {
+      propertyRefs.add(ref);
+    }
     return getThis();
   }
 
@@ -80,4 +129,14 @@ public abstract class AbstractRequest<T, R extends AbstractRequest<T, R>>
    */
   protected abstract R getThis();
 
+  protected abstract void handleResult(Object result,
+      Set<SyncResult> syncResults);
+
+  protected native void processRelated(JavaScriptObject related) /*-{
+    for(var recordKey in related) {
+      var schemaAndId = recordKey.split(/-/, 2);
+      var jso = related[recordKey];
+      this.@com.google.gwt.requestfactory.client.impl.AbstractRequest::setSchemaAndRecord(Ljava/lang/String;Lcom/google/gwt/requestfactory/client/impl/RecordJsoImpl;)(schemaAndId[0], jso);
+    }
+  }-*/;
 }

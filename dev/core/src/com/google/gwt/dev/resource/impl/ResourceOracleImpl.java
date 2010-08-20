@@ -1,12 +1,12 @@
 /*
  * Copyright 2008 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -18,7 +18,9 @@ package com.google.gwt.dev.resource.impl;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.dev.resource.Resource;
 import com.google.gwt.dev.resource.ResourceOracle;
-import com.google.gwt.dev.util.PerfLogger;
+import com.google.gwt.dev.util.log.speedtracer.CompilerEventType;
+import com.google.gwt.dev.util.log.speedtracer.SpeedTracerLogger;
+import com.google.gwt.dev.util.log.speedtracer.SpeedTracerLogger.Event;
 import com.google.gwt.dev.util.msg.Message0;
 import com.google.gwt.dev.util.msg.Message1String;
 
@@ -40,8 +42,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
-import java.util.jar.JarFile;
-import java.util.zip.ZipFile;
 
 /**
  * The normal implementation of {@link ResourceOracle}.
@@ -104,11 +104,6 @@ public class ResourceOracleImpl implements ResourceOracle {
     }
 
     @Override
-    public boolean isStale() {
-      return resource.isStale();
-    }
-
-    @Override
     public InputStream openContents() {
       return resource.openContents();
     }
@@ -137,7 +132,7 @@ public class ResourceOracleImpl implements ResourceOracle {
       // Compare priorities of the path prefixes, high number == high priority.
       return this.pathPrefix.getPriority() - other.pathPrefix.getPriority();
     }
-    
+
     @Override
     public boolean equals(Object o) {
       if (!(o instanceof ResourceData)) {
@@ -147,7 +142,7 @@ public class ResourceOracleImpl implements ResourceOracle {
       return this.pathPrefix.getPriority() == other.pathPrefix.getPriority()
           && this.resource.wasRerooted() == other.resource.wasRerooted();
     }
-    
+
     @Override
     public int hashCode() {
       return (pathPrefix.getPriority() << 1) + (resource.wasRerooted() ? 1 : 0);
@@ -169,18 +164,14 @@ public class ResourceOracleImpl implements ResourceOracle {
       if (f.isDirectory()) {
         return new DirectoryClassPathEntry(f);
       } else if (f.isFile() && lowerCaseFileName.endsWith(".jar")) {
-        return new ZipFileClassPathEntry(new JarFile(f));
+        return new ZipFileClassPathEntry(f);
       } else if (f.isFile() && lowerCaseFileName.endsWith(".zip")) {
-        return new ZipFileClassPathEntry(new ZipFile(f));
+        return new ZipFileClassPathEntry(f);
       } else {
         // It's a file ending in neither jar nor zip, speculatively try to
         // open as jar/zip anyway.
         try {
-          return new ZipFileClassPathEntry(new JarFile(f));
-        } catch (Exception ignored) {
-        }
-        try {
-          return new ZipFileClassPathEntry(new ZipFile(f));
+          return new ZipFileClassPathEntry(f);
         } catch (Exception ignored) {
         }
         logger.log(TreeLogger.TRACE, "Unexpected entry in classpath; " + f
@@ -257,8 +248,6 @@ public class ResourceOracleImpl implements ResourceOracle {
 
   private Set<Resource> exposedResources = Collections.emptySet();
 
-  private Map<String, ResourceData> internalMap = Collections.emptyMap();
-
   private PathPrefixSet pathPrefixSet = new PathPrefixSet();
 
   /**
@@ -294,7 +283,6 @@ public class ResourceOracleImpl implements ResourceOracle {
     exposedPathNames = Collections.emptySet();
     exposedResourceMap = Collections.emptyMap();
     exposedResources = Collections.emptySet();
-    internalMap = Collections.emptyMap();
   }
 
   public Set<String> getPathNames() {
@@ -315,11 +303,12 @@ public class ResourceOracleImpl implements ResourceOracle {
 
   /**
    * Rescans the associated paths to recompute the available resources.
-   * 
+   *
    * @param logger status and error details are written here
    */
   public void refresh(TreeLogger logger) {
-    PerfLogger.start("ResourceOracleImpl.refresh");
+    Event resourceOracle =
+        SpeedTracerLogger.start(CompilerEventType.RESOURCE_ORACLE, "phase", "refresh");
     TreeLogger refreshBranch = Messages.REFRESHING_RESOURCES.branch(logger,
         null);
 
@@ -336,7 +325,7 @@ public class ResourceOracleImpl implements ResourceOracle {
      * a resource that has already been added to the new map under construction
      * to create the effect that resources founder earlier on the classpath take
      * precedence.
-     * 
+     *
      * Exceptions: super has priority over non-super; and if there are two super
      * resources with the same path, the one with the higher-priority path
      * prefix wins.
@@ -362,39 +351,9 @@ public class ResourceOracleImpl implements ResourceOracle {
       }
     }
 
-    /*
-     * Update the newInternalMap to preserve identity for any resources that
-     * have not changed; also record whether or not there are ANY changes.
-     * 
-     * There's definitely a change if the sizes don't match; even if the sizes
-     * do match, every new resource must match an old resource for there to be
-     * no changes.
-     */
-    boolean didChange = internalMap.size() != newInternalMap.size();
-    for (Map.Entry<String, ResourceData> entry : newInternalMap.entrySet()) {
-      String resourcePath = entry.getKey();
-      ResourceData newData = entry.getValue();
-      ResourceData oldData = internalMap.get(resourcePath);
-      if (shouldUseNewResource(logger, oldData, newData)) {
-        didChange = true;
-      } else {
-        if (oldData.resource != newData.resource) {
-          newInternalMap.put(resourcePath, oldData);
-        }
-      }
-    }
-
-    if (!didChange) {
-      // Nothing to do, keep the same identities.
-      PerfLogger.end();
-      return;
-    }
-
-    internalMap = newInternalMap;
-
     Map<String, Resource> externalMap = new HashMap<String, Resource>();
     Set<Resource> externalSet = new HashSet<Resource>();
-    for (Entry<String, ResourceData> entry : internalMap.entrySet()) {
+    for (Entry<String, ResourceData> entry : newInternalMap.entrySet()) {
       String path = entry.getKey();
       ResourceData data = entry.getValue();
       externalMap.put(path, data.resource);
@@ -405,7 +364,7 @@ public class ResourceOracleImpl implements ResourceOracle {
     exposedResources = Collections.unmodifiableSet(externalSet);
     exposedResourceMap = Collections.unmodifiableMap(externalMap);
     exposedPathNames = Collections.unmodifiableSet(externalMap.keySet());
-    PerfLogger.end();
+    resourceOracle.end();
   }
 
   public void setPathPrefixes(PathPrefixSet pathPrefixSet) {
@@ -415,32 +374,5 @@ public class ResourceOracleImpl implements ResourceOracle {
   // @VisibleForTesting
   List<ClassPathEntry> getClassPath() {
     return classPath;
-  }
-
-  private boolean shouldUseNewResource(TreeLogger logger, ResourceData oldData,
-      ResourceData newData) {
-    AbstractResource newResource = newData.resource;
-    String resourcePath = newResource.getPath();
-    if (oldData != null) {
-      // Test 1: Is the resource found in a different location than before?
-      AbstractResource oldResource = oldData.resource;
-      if (oldResource.getClassPathEntry() == newResource.getClassPathEntry()) {
-        // Test 2: Has the resource changed since we last found it?
-        if (!oldResource.isStale()) {
-          // The resource has not changed.
-          return false;
-        } else {
-          Messages.RESOURCE_BECAME_INVALID_BECAUSE_IT_IS_STALE.log(logger,
-              resourcePath, null);
-        }
-      } else {
-        Messages.RESOURCE_BECAME_INVALID_BECAUSE_IT_MOVED.log(logger,
-            resourcePath, null);
-      }
-    } else {
-      Messages.NEW_RESOURCE_FOUND.log(logger, resourcePath, null);
-    }
-
-    return true;
   }
 }

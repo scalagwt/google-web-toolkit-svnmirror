@@ -30,10 +30,11 @@ import com.google.gwt.resources.client.CssResource.Shared;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiFactory;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DisclosurePanel;
-import com.google.gwt.user.client.ui.DockPanel;
+import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasHTML;
@@ -100,7 +101,8 @@ public class WidgetBasedUi extends Composite {
   @UiField Widget myDisclosurePanelItem;
   @UiField Tree myTree;
   @UiField Element nonStandardElement;
-  @UiField DockPanel root;
+  @SuppressWarnings("deprecation")
+  @UiField com.google.gwt.user.client.ui.DockPanel root;
   @UiField Widget sideBarWidget;
   @UiField DivElement sideBar;
   @UiField SpanElement spanInMsg;
@@ -109,6 +111,9 @@ public class WidgetBasedUi extends Composite {
   @UiField SpanElement trimmedMessage;
   @UiField NeedlesslyAnnotatedLabel needlessLabel;
   @UiField AnnotatedStrictLabel strictLabel;
+  @UiField(provided = true)
+  AnnotatedStrictLabel providedStrictLabel = new AnnotatedStrictLabel(
+      "likewise");
   @UiField AnnotatedStrictLabel translatedStrictLabel;
   @UiField StrictLabel veryStrictLabel;
   @UiField StrictLabel translatedVeryStrictLabel;
@@ -157,6 +162,11 @@ public class WidgetBasedUi extends Composite {
   @UiField HTML styleLess;
   @UiField FooDialog fooDialog;
   @UiField ListBox fooListBox;
+  @UiField Grid fooGrid;
+  @UiField AbsolutePanel myAbsolutePanel;
+  @UiField Widget myAbsolutePanelItemA;
+  @UiField Widget myAbsolutePanelItemB;
+  @UiField Widget myAbsolutePanelItemC;
 
   public WidgetBasedUi() {
     external.style().ensureInjected();

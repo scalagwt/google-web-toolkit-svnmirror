@@ -26,14 +26,13 @@ package com.google.gwt.app.place;
  */
 public abstract class AbstractActivity implements Activity {
 
+  public String mayStop() {
+    return null;
+  }
+
   public void onCancel() {
   }
 
   public void onStop() {
   }
-
-  public boolean willStop() {
-    return true;
-  }
-
 }

@@ -56,9 +56,26 @@ public class RpcServlet extends AbstractRemoteServiceServlet {
   private final Map<String, SoftReference<ClientOracle>> clientOracleCache = new HashMap<String, SoftReference<ClientOracle>>();
 
   /**
-   * The default constructor.
+   * The implementation of the service.
+   */
+  private final Object delegate;
+
+  /**
+   * The default constructor used by service implementations that
+   * extend this class.  The servlet will delegate AJAX requests to
+   * the appropriate method in the subclass.
    */
   public RpcServlet() {
+    this.delegate = this;
+  }
+
+  /**
+   * The wrapping constructor used by service implementations that are
+   * separate from this class.  The servlet will delegate AJAX
+   * requests to the appropriate method in the given object.
+   */
+  public RpcServlet(Object delegate) {
+    this.delegate = delegate;
   }
 
   /**
@@ -138,10 +155,10 @@ public class RpcServlet extends AbstractRemoteServiceServlet {
     assert stream != null : "stream";
 
     try {
-      RPCRequest rpcRequest = RPC.decodeRequest(payload, this.getClass(),
+      RPCRequest rpcRequest = RPC.decodeRequest(payload, delegate.getClass(),
           clientOracle);
       onAfterRequestDeserialized(rpcRequest);
-      RPC.invokeAndStreamResponse(this, rpcRequest.getMethod(),
+      RPC.invokeAndStreamResponse(delegate, rpcRequest.getMethod(),
           rpcRequest.getParameters(), clientOracle, stream);
     } catch (RemoteException ex) {
       throw new SerializationException("An exception was sent from the client",
@@ -186,12 +203,14 @@ public class RpcServlet extends AbstractRemoteServiceServlet {
     response.setCharacterEncoding("UTF-8");
 
     // Configure the OutputStream based on configuration and capabilities
+    boolean canCompress = RPCServletUtils.acceptsGzipEncoding(request)
+        && shouldCompressResponse(request, response);
+
     OutputStream out;
     if (DUMP_PAYLOAD) {
       out = new ByteArrayOutputStream();
 
-    } else if (RPCServletUtils.acceptsGzipEncoding(request)
-        && shouldCompressResponse(request, response)) {
+    } else if (canCompress) {
       RPCServletUtils.setGzipEncodingHeader(response);
       out = new GZIPOutputStream(response.getOutputStream());
 
@@ -201,12 +220,18 @@ public class RpcServlet extends AbstractRemoteServiceServlet {
 
     // Invoke the core dispatching logic, which returns the serialized result.
     processCall(clientOracle, requestPayload, out);
-    out.close();
 
     if (DUMP_PAYLOAD) {
       byte[] bytes = ((ByteArrayOutputStream) out).toByteArray();
       System.out.println(new String(bytes, "UTF-8"));
       response.getOutputStream().write(bytes);
+    } else if (canCompress) {
+      /*
+       * We want to write the end of the gzip data, but not close the underlying
+       * OutputStream in case there are servlet filters that want to write
+       * headers after processPost().
+       */
+      ((GZIPOutputStream) out).finish();
     }
   }
 

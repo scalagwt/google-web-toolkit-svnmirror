@@ -1,12 +1,12 @@
 /*
  * Copyright 2010 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -21,16 +21,18 @@ import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment.VerticalAlignmentConstant;
 
+import java.util.Set;
+
 /**
  * A {@link Cell} decorator that adds an icon to another {@link Cell}.
- * 
+ *
  * <p>
  * Note: This class is new and its interface subject to change.
  * </p>
- * 
+ *
  * @param <C> the type that this Cell represents
  */
-public class IconCellDecorator<C> extends AbstractCell<C> {
+public class IconCellDecorator<C> implements Cell<C> {
 
   private final Cell<C> cell;
   private final String iconHtml;
@@ -40,7 +42,7 @@ public class IconCellDecorator<C> extends AbstractCell<C> {
   /**
    * Construct a new {@link IconCellDecorator}. The icon and the content will be
    * middle aligned by default.
-   * 
+   *
    * @param icon the icon to use
    * @param cell the cell to decorate
    */
@@ -50,7 +52,7 @@ public class IconCellDecorator<C> extends AbstractCell<C> {
 
   /**
    * Construct a new {@link IconCellDecorator}.
-   * 
+   *
    * @param icon the icon to use
    * @param cell the cell to decorate
    * @param valign the vertical alignment attribute of the contents
@@ -64,25 +66,28 @@ public class IconCellDecorator<C> extends AbstractCell<C> {
     this.placeHolderHtml = getImageHtml(icon, valign, true);
   }
 
-  @Override
-  public boolean consumesEvents() {
-    return cell.consumesEvents();
-  }
-
-  @Override
   public boolean dependsOnSelection() {
     return cell.dependsOnSelection();
   }
 
-  @Override
-  public Object onBrowserEvent(Element parent, C value, Object viewData,
-      NativeEvent event, ValueUpdater<C> valueUpdater) {
-    return cell.onBrowserEvent(getCellParent(parent), value, viewData, event,
-        valueUpdater);
+  public Set<String> getConsumedEvents() {
+    return cell.getConsumedEvents();
   }
 
-  @Override
-  public void render(C value, Object viewData, StringBuilder sb) {
+  public boolean handlesSelection() {
+    return cell.handlesSelection();
+  }
+  
+  public boolean isEditing(Element element, C value, Object key) {
+    return cell.isEditing(element, value, key);
+  }
+
+  public void onBrowserEvent(Element parent, C value, Object key,
+      NativeEvent event, ValueUpdater<C> valueUpdater) {
+    cell.onBrowserEvent(getCellParent(parent), value, key, event, valueUpdater);
+  }
+
+  public void render(C value, Object key, StringBuilder sb) {
     sb.append("<div style='position:relative;padding-left:");
     sb.append(imageWidth);
     sb.append("px;'>");
@@ -92,19 +97,18 @@ public class IconCellDecorator<C> extends AbstractCell<C> {
       sb.append(placeHolderHtml);
     }
     sb.append("<div>");
-    cell.render(value, viewData, sb);
+    cell.render(value, key, sb);
     sb.append("</div></div>");
   }
 
-  @Override
-  public void setValue(Element parent, C value, Object viewData) {
-    cell.setValue(getCellParent(parent), value, viewData);
+  public void setValue(Element parent, C value, Object key) {
+    cell.setValue(getCellParent(parent), value, key);
   }
 
   /**
    * Get the HTML string that represents the icon. Override this method to
    * change the icon based on the value.
-   * 
+   *
    * @param value the value being rendered
    * @return the HTML string that represents the icon
    */
@@ -116,7 +120,7 @@ public class IconCellDecorator<C> extends AbstractCell<C> {
    * Check if the icon should be used for the value. If the icon should not be
    * used, a placeholder of the same size will be used instead. The default
    * implementations returns true.
-   * 
+   *
    * @param value the value being rendered
    * @return true to use the icon, false to use a placeholder
    */
@@ -126,28 +130,29 @@ public class IconCellDecorator<C> extends AbstractCell<C> {
 
   /**
    * Get the HTML representation of an image. Visible for testing.
-   * 
+   *
    * @param res the {@link ImageResource} to render as HTML
    * @param valign the vertical alignment
    * @param isPlaceholder if true, do not include the background image
    * @return the rendered HTML
    */
   // TODO(jlabanca): Move this to a Utility class.
-  String getImageHtml(ImageResource res,
-      VerticalAlignmentConstant valign, boolean isPlaceholder) {
+  String getImageHtml(ImageResource res, VerticalAlignmentConstant valign,
+      boolean isPlaceholder) {
     // Add the position and dimensions.
     StringBuilder sb = new StringBuilder();
     sb.append("<div style=\"position:absolute;left:0px;top:0px;height:100%;");
     sb.append("width:").append(res.getWidth()).append("px;");
-  
+
     // Add the background, vertically centered.
     if (!isPlaceholder) {
-      String vert = valign == HasVerticalAlignment.ALIGN_MIDDLE ? "center"
-          : valign.getVerticalAlignString();
+      String vert = valign == HasVerticalAlignment.ALIGN_MIDDLE
+          ? "center" : valign.getVerticalAlignString();
       sb.append("background:url('").append(res.getURL()).append("') ");
-      sb.append("no-repeat scroll ").append(vert).append(" center transparent;");
+      sb.append("no-repeat scroll ").append(vert).append(
+          " center transparent;");
     }
-  
+
     // Close the div and return.
     sb.append("\"></div>");
     return sb.toString();
@@ -155,7 +160,7 @@ public class IconCellDecorator<C> extends AbstractCell<C> {
 
   /**
    * Get the parent element of the decorated cell.
-   * 
+   *
    * @param parent the parent of this cell
    * @return the decorated cell's parent
    */

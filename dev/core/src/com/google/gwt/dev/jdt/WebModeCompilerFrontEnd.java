@@ -1,12 +1,12 @@
 /*
  * Copyright 2008 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -20,7 +20,11 @@ import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.dev.javac.ArtificialRescueChecker;
 import com.google.gwt.dev.jdt.FindDeferredBindingSitesVisitor.MessageSendSite;
 import com.google.gwt.dev.jjs.impl.FragmentLoaderCreator;
+import com.google.gwt.dev.jjs.impl.TypeLinker;
 import com.google.gwt.dev.util.Empty;
+import com.google.gwt.dev.util.log.speedtracer.CompilerEventType;
+import com.google.gwt.dev.util.log.speedtracer.SpeedTracerLogger;
+import com.google.gwt.dev.util.log.speedtracer.SpeedTracerLogger.Event;
 
 import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
@@ -40,12 +44,16 @@ import java.util.Set;
  */
 public class WebModeCompilerFrontEnd extends BasicWebModeCompiler {
 
-  public static CompilationUnitDeclaration[] getCompilationUnitDeclarations(
+  public static CompilationResults getCompilationUnitDeclarations(
       TreeLogger logger, String[] seedTypeNames,
-      RebindPermutationOracle rebindPermOracle)
+      RebindPermutationOracle rebindPermOracle, TypeLinker linker)
       throws UnableToCompleteException {
-    return new WebModeCompilerFrontEnd(rebindPermOracle).getCompilationUnitDeclarations(
-        logger, seedTypeNames);
+    Event getCompilationUnitsEvent =
+        SpeedTracerLogger.start(CompilerEventType.GET_COMPILATION_UNITS);
+    CompilationResults results = new WebModeCompilerFrontEnd(rebindPermOracle,
+        linker).getCompilationUnitDeclarations(logger, seedTypeNames);
+    getCompilationUnitsEvent.end();
+    return results;
   }
 
   private final FragmentLoaderCreator fragmentLoaderCreator;
@@ -57,8 +65,9 @@ public class WebModeCompilerFrontEnd extends BasicWebModeCompiler {
    * generator infrastructure, and therefore needs access to more parts of the
    * compiler than WebModeCompilerFrontEnd currently has.
    */
-  private WebModeCompilerFrontEnd(RebindPermutationOracle rebindPermOracle) {
-    super(rebindPermOracle.getCompilationState());
+  private WebModeCompilerFrontEnd(RebindPermutationOracle rebindPermOracle,
+      TypeLinker linker) {
+    super(rebindPermOracle.getCompilationState(), linker);
     this.rebindPermOracle = rebindPermOracle;
     this.fragmentLoaderCreator = new FragmentLoaderCreator(
         rebindPermOracle.getGeneratorContext());
@@ -143,7 +152,7 @@ public class WebModeCompilerFrontEnd extends BasicWebModeCompiler {
       }
     }
 
-    return dependentTypeNames.toArray(Empty.STRINGS);
+    return dependentTypeNames.toArray(new String[dependentTypeNames.size()]);
   }
 
   private void checkRebindResultInstantiable(MessageSendSite site,

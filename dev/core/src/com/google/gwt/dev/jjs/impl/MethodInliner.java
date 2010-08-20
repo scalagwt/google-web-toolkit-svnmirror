@@ -1,12 +1,12 @@
 /*
  * Copyright 2007 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -36,7 +36,9 @@ import com.google.gwt.dev.jjs.ast.JThisRef;
 import com.google.gwt.dev.jjs.ast.JType;
 import com.google.gwt.dev.jjs.ast.JVisitor;
 import com.google.gwt.dev.jjs.ast.js.JMultiExpression;
-import com.google.gwt.dev.util.PerfCounter;
+import com.google.gwt.dev.util.log.speedtracer.CompilerEventType;
+import com.google.gwt.dev.util.log.speedtracer.SpeedTracerLogger;
+import com.google.gwt.dev.util.log.speedtracer.SpeedTracerLogger.Event;
 
 import java.util.HashSet;
 import java.util.List;
@@ -46,7 +48,7 @@ import java.util.Set;
  * Inline methods that can be inlined. The current implementation limits the
  * methods that can be inlined to those that are composed of at most two
  * top-level expressions.
- * 
+ *
  * Future improvements will allow more complex methods to be inlined based on
  * the number of call sites, as well as adding support for more complex target
  * method expressions.
@@ -93,7 +95,7 @@ public class MethodInliner {
     public void endVisit(JNewInstance x, Context ctx) {
       // Do not inline new operations.
     }
-    
+
     @Override
     public void endVisit(JMethodCall x, Context ctx) {
       JMethod method = x.getTarget();
@@ -201,7 +203,7 @@ public class MethodInliner {
      * Creates a JMultiExpression from a set of JExpressionStatements,
      * optionally terminated by a JReturnStatement. If the method doesn't match
      * this pattern, it returns <code>null</code>.
-     * 
+     *
      * If a method has a non-void return statement and can be represented as a
      * multi-expression, the output of the multi-expression will be the return
      * expression of the method. If the method is void, the output of the
@@ -278,7 +280,7 @@ public class MethodInliner {
        * Limit inlined methods to multiexpressions of length 2 for now. This
        * handles the simple { return JVariableRef; } or { expression; return
        * something; } cases.
-       * 
+       *
        * TODO: add an expression complexity analyzer.
        */
       if (targetExpr.exprs.size() > 2) {
@@ -310,7 +312,7 @@ public class MethodInliner {
       /*
        * There are a different number of parameters than args - this is likely a
        * result of parameter pruning. Don't consider this call site a candidate.
-       * 
+       *
        * TODO: would this be possible in the trivial delegation case?
        */
       if (x.getTarget().getParams().size() != x.getArgs().size()) {
@@ -380,7 +382,7 @@ public class MethodInliner {
    * Verifies that all the parameters are referenced once and only once, not
    * within a conditionally-executing expression, and any before trouble some
    * expressions evaluate. Examples of troublesome expressions include:
-   * 
+   *
    * <ul>
    * <li>assignments to any variable</li>
    * <li>expressions that throw exceptions</li>
@@ -489,12 +491,10 @@ public class MethodInliner {
   }
 
   public static boolean exec(JProgram program) {
-    PerfCounter.start("MethodInliner.exec");
+    Event optimizeEvent = SpeedTracerLogger.start(
+        CompilerEventType.OPTIMIZE, "optimizer", "MethodInliner");
     boolean didChange = new MethodInliner(program).execImpl();
-    PerfCounter.end("MethodInliner.exec");
-    if (didChange) {
-      PerfCounter.inc("MethodInliner.exec.didChange");
-    }
+    optimizeEvent.end("didChange", "" + didChange);
     return didChange;
   }
 

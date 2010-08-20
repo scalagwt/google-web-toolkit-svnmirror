@@ -50,7 +50,7 @@ import com.google.gwt.layout.client.Layout.Layer;
  * 
  * <p>
  * Precisely zero or two constraints are required for each axis (horizontal and
- * vertial). Specifying no constraints implies that the child should fill that
+ * vertical). Specifying no constraints implies that the child should fill that
  * axis completely.
  * 
  * <p>
@@ -123,12 +123,13 @@ public class LayoutPanel extends ComplexPanel implements AnimatedLayout,
    * <p>
    * By default, each child will fill the panel. To build more interesting
    * layouts, set child widgets' layout constraints using
-   * {@link #setWidgetLeftRight(Widget, double, Unit, double, Unit)} and related
-   * methods.
+   * {@link #setWidgetLeftRight(Widget, double, Style.Unit, double, Style.Unit)}
+   * and related methods.
    * </p>
    * 
    * @param widget the widget to be added
    */
+  @Override
   public void add(Widget widget) {
     insert(widget, getWidgetCount());
   }
@@ -164,8 +165,8 @@ public class LayoutPanel extends ComplexPanel implements AnimatedLayout,
    * <p>
    * By default, each child will fill the panel. To build more interesting
    * layouts, set child widgets' layout constraints using
-   * {@link #setWidgetLeftRight(Widget, double, Unit, double, Unit)} and related
-   * methods.
+   * {@link #setWidgetLeftRight(Widget, double, Style.Unit, double, Style.Unit)}
+   * and related methods.
    * </p>
    * 
    * <p>

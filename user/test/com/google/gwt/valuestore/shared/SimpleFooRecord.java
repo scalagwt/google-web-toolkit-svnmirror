@@ -15,8 +15,8 @@
  */
 package com.google.gwt.valuestore.shared;
 
-import com.google.gwt.requestfactory.server.SimpleFoo;
 import com.google.gwt.requestfactory.shared.DataTransferObject;
+import com.google.gwt.valuestore.server.SimpleFoo;
 
 import java.util.Date;
 
@@ -27,20 +27,48 @@ import java.util.Date;
 @DataTransferObject(SimpleFoo.class)
 public interface SimpleFooRecord extends Record {
 
-  String TOKEN = "SimpleFooRecord";
-
   Property<String> userName = new Property<String>("userName", "User Name",
       String.class);
   Property<String> password = new Property<String>("password", "Password",
       String.class);
+  Property<Boolean> boolField = new Property<Boolean>("boolField", Boolean.class);
   Property<Integer> intId = new Property<Integer>("intId", Integer.class);
   Property<Date> created = new Property<Date>("created", Date.class);
+  Property<Long> longField = new Property<Long>("longField", Long.class);
+  Property<com.google.gwt.valuestore.shared.SimpleEnum> enumField =
+      new EnumProperty<com.google.gwt.valuestore.shared.SimpleEnum>("enumField",
+          com.google.gwt.valuestore.shared.SimpleEnum.class, SimpleEnum.values());
 
+  Property<SimpleBarRecord> barField = new Property<SimpleBarRecord>("barField",
+      SimpleBarRecord.class);
+
+  SimpleBarRecord getBarField();
+
+  Boolean getBoolField();
+  
   Date getCreated();
 
+  SimpleEnum getEnumField();
+
   Integer getIntId();
+
+  Long getLongField();
 
   String getPassword();
 
   String getUserName();
+
+  void setBarField(SimpleBarRecord barField);
+
+  void setBoolField(Boolean boolField);
+
+  void setCreated(Date created);
+
+  void setIntId(Integer intId);
+
+  void setLongField(Long longField);
+
+  void setPassword(String password);
+
+  void setUserName(String userName);
 }

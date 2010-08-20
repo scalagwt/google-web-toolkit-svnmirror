@@ -1,12 +1,12 @@
 /*
  * Copyright 2010 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -17,7 +17,7 @@ package com.google.gwt.view.client;
 
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.cell.client.ValueUpdater;
-import com.google.gwt.view.client.AbstractListViewAdapterTest.MockListViewAdapter;
+import com.google.gwt.view.client.AbstractDataProviderTest.MockDataProvider;
 import com.google.gwt.view.client.TreeViewModel.DefaultNodeInfo;
 
 import junit.framework.TestCase;
@@ -28,42 +28,43 @@ import junit.framework.TestCase;
 public class DefaultNodeInfoTest extends TestCase {
 
   public void testAccessors() {
-    ListViewAdapter<String> adapter = new ListViewAdapter<String>();
+    ListDataProvider<String> provider = new ListDataProvider<String>();
     TextCell cell = new TextCell();
-    SingleSelectionModel<String> selectionModel = new SingleSelectionModel<String>();
+    SingleSelectionModel<String> selectionModel = new SingleSelectionModel<
+        String>();
     ValueUpdater<String> valueUpdater = new ValueUpdater<String>() {
       public void update(String value) {
       }
     };
-    DefaultNodeInfo<String> nodeInfo = new DefaultNodeInfo<String>(adapter,
-        cell, selectionModel, valueUpdater);
+    DefaultNodeInfo<String> nodeInfo = new DefaultNodeInfo<String>(
+        provider, cell, selectionModel, valueUpdater);
 
-    assertEquals(adapter, nodeInfo.getProvidesKey());
+    assertEquals(provider, nodeInfo.getProvidesKey());
     assertEquals(cell, nodeInfo.getCell());
     assertEquals(selectionModel, nodeInfo.getSelectionModel());
     assertEquals(valueUpdater, nodeInfo.getValueUpdater());
   }
 
-  public void testSetView() {
-    MockListViewAdapter<String> adapter = new MockListViewAdapter<String>();
-    DefaultNodeInfo<String> nodeInfo = new DefaultNodeInfo<String>(adapter,
-        new TextCell());
-    MockPagingListView<String> view = new MockPagingListView<String>();
-    view.setRange(0, 10);
-    view.clearLastDataAndRange();
+  public void testSetDataDisplay() {
+    MockDataProvider<String> provider = new MockDataProvider<String>();
+    DefaultNodeInfo<String> nodeInfo = new DefaultNodeInfo<String>(
+        provider, new TextCell());
+    MockHasData<String> display = new MockHasData<String>();
+    display.setVisibleRange(0, 10);
+    display.clearLastRowDataAndRange();
 
-    // setView.
-    nodeInfo.setView(view);
-    adapter.assertLastRangeChanged(view);
-    adapter.clearLastRangeChanged();
+    // setDataDisplay.
+    nodeInfo.setDataDisplay(display);
+    provider.assertLastRangeChanged(display);
+    provider.clearLastRangeChanged();
 
-    view.setRange(0, 5);
-    adapter.assertLastRangeChanged(view);
-    adapter.clearLastRangeChanged();
+    display.setVisibleRange(0, 5);
+    provider.assertLastRangeChanged(display);
+    provider.clearLastRangeChanged();
 
-    // unsetView.
-    nodeInfo.unsetView();
-    view.setRange(0, 5);
-    adapter.assertLastRangeChanged(null);
+    // unsetDataDisplay.
+    nodeInfo.unsetDataDisplay();
+    display.setVisibleRange(0, 5);
+    provider.assertLastRangeChanged(null);
   }
 }

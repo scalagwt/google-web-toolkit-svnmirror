@@ -15,6 +15,7 @@
  */
 package com.google.gwt.user.client.ui;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 
@@ -33,6 +34,26 @@ import com.google.gwt.user.client.Element;
  * "owns" the positioning of the widget. Any existing positioning attributes on
  * the widget may be modified by the panel.
  * </p>
+ * 
+ * <h3>Use in UiBinder Templates</h3>
+ * <p>
+ * AbsolutePanel elements in {@link com.google.gwt.uibinder.client.UiBinder
+ * UiBinder} templates lay out their children with absolute position, using
+ * &lt;g:at> elements. Each at element should have <code>left</code> and
+ * <code>top</code> attributes in pixels. They also can contain
+ * widget children directly, with no position specified.
+ * 
+ * <p>
+ * For example:
+ * 
+ * <pre>
+ * &lt;g:AbsolutePanel>
+ *   &lt;g:at left='10' top='20'>
+ *     &lt;g:Label>Lorem ipsum...&lt;/g:Label>
+ *   &lt;/g:at>
+ *   &lt;g:Label>...dolores est.&lt;/g:Label>
+ * &lt;/g:AbsolutePanel>
+ * </pre>
  */
 public class AbsolutePanel extends ComplexPanel implements InsertPanel {
 
@@ -93,6 +114,7 @@ public class AbsolutePanel extends ComplexPanel implements InsertPanel {
     int beforeIndex = getWidgetCount();
     setWidgetPositionImpl(w, left, top);
     insert(w, beforeIndex);
+    verifyPositionNotStatic(w);
   }
 
   /**
@@ -146,6 +168,7 @@ public class AbsolutePanel extends ComplexPanel implements InsertPanel {
     w.removeFromParent();
     setWidgetPositionImpl(w, left, top);
     insert(w, beforeIndex);
+    verifyPositionNotStatic(w);
   }
 
   /**
@@ -175,11 +198,12 @@ public class AbsolutePanel extends ComplexPanel implements InsertPanel {
   public void setWidgetPosition(Widget w, int left, int top) {
     checkWidgetParent(w);
     setWidgetPositionImpl(w, left, top);
+    verifyPositionNotStatic(w);
   }
 
   protected void setWidgetPositionImpl(Widget w, int left, int top) {
     Element h = w.getElement();
-    if ((left == -1) && (top == -1)) {
+    if (left == -1 && top == -1) {
       changeToStaticPositioning(h);
     } else {
       DOM.setStyleAttribute(h, "position", "absolute");
@@ -192,6 +216,22 @@ public class AbsolutePanel extends ComplexPanel implements InsertPanel {
     if (w.getParent() != this) {
       throw new IllegalArgumentException(
           "Widget must be a child of this panel.");
+    }
+  }
+
+  private void verifyPositionNotStatic(Widget w) {
+    if (!GWT.isProdMode()) {
+      if (w.getElement().getOffsetParent() != getElement()) {
+        String className = getClass().getName();
+        GWT.log("Warning: " + className + " descendants will be incorrectly "
+            + "positioned, i.e. not relative to their parent element, when "
+            + "'position:static', which is the CSS default, is in effect. One "
+            + "possible fix is to call "
+            + "'panel.getElement().getStyle().setPosition(Position.RELATIVE)'.",
+            // Stack trace provides context for the developer
+            new IllegalStateException(className
+                + " is missing CSS 'position:{relative,absolute,fixed}'"));
+      }
     }
   }
 }

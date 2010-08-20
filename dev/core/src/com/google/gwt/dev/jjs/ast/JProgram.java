@@ -63,18 +63,20 @@ public class JProgram extends JNode {
   }
 
   public static final Set<String> CODEGEN_TYPES_SET = new LinkedHashSet<String>(
-      Arrays.asList(new String[] {
+      Arrays.asList(
           "com.google.gwt.lang.Array", "com.google.gwt.lang.Cast",
           "com.google.gwt.lang.CollapsedPropertyHolder",
           "com.google.gwt.lang.Exceptions", "com.google.gwt.lang.LongLib",
-          "com.google.gwt.lang.Stats",}));
+          "com.google.gwt.lang.Stats", "com.google.gwt.lang.Util"));
 
   public static final Set<String> INDEX_TYPES_SET = new LinkedHashSet<String>(
-      Arrays.asList(new String[] {
+      Arrays.asList(
           "java.io.Serializable", "java.lang.Object", "java.lang.String",
           "java.lang.Class", "java.lang.CharSequence", "java.lang.Cloneable",
           "java.lang.Comparable", "java.lang.Enum", "java.lang.Iterable",
-          "java.util.Iterator", "java.lang.AssertionError",
+          "java.util.Iterator", "java.lang.AssertionError", "java.lang.Boolean",
+          "java.lang.Byte", "java.lang.Character", "java.lang.Short",
+          "java.lang.Integer", "java.lang.Float", "java.lang.Double",
           "com.google.gwt.core.client.GWT",
           "com.google.gwt.core.client.JavaScriptObject",
           "com.google.gwt.lang.ClassLiteralHolder",
@@ -82,7 +84,7 @@ public class JProgram extends JNode {
           "com.google.gwt.core.client.impl.AsyncFragmentLoader",
           "com.google.gwt.core.client.impl.Impl",
           "com.google.gwt.lang.EntryMethodHolder",
-          "com.google.gwt.core.client.prefetch.RunAsyncCode",}));
+          "com.google.gwt.core.client.prefetch.RunAsyncCode"));
 
   /**
    * Only annotations defined in the following packages or sub-packages thereof
@@ -316,7 +318,7 @@ public class JProgram extends JNode {
    */
   private final SourceInfo intrinsic;
 
-  private List<JsonObject> jsonTypeTable;
+  private List<JsonObject> jsonCastableTypeMaps;
 
   private Map<JReferenceType, JNonNullType> nonNullTypes = new IdentityHashMap<JReferenceType, JNonNullType>();
 
@@ -764,6 +766,20 @@ public class JProgram extends JNode {
     return allEntryMethods;
   }
 
+  public JsonObject getCastableTypeMap(int typeId) {
+    // ensure jsonCastableTypeMaps has been initialized
+    // it might not have been if the CastNormalizer has not been run
+    if (jsonCastableTypeMaps == null) {
+      jsonCastableTypeMaps = new ArrayList<JsonObject>();
+      // ensure the always-false (typeId == 0) entry is present
+      jsonCastableTypeMaps.add(new JsonObject(createSourceInfoSynthetic(
+          JProgram.class, "always-false typeinfo entry"),
+          getJavaScriptObject()));
+    }
+    
+    return jsonCastableTypeMaps.get(typeId); 
+  }
+
   public CorrelationFactory getCorrelator() {
     return correlator;
   }
@@ -825,10 +841,6 @@ public class JProgram extends JNode {
     return typeSpecialJavaScriptObject;
   }
 
-  public List<JsonObject> getJsonTypeTable() {
-    return jsonTypeTable;
-  }
-
   public JExpression getLiteralAbsentArrayDimension() {
     return JAbsentArrayDimension.INSTANCE;
   }
@@ -858,8 +870,9 @@ public class JProgram extends JNode {
 
       // Create the allocation expression FIRST since this may be recursive on
       // super type (this forces the super type classLit to be created first).
-      JExpression alloc = JClassLiteral.computeClassObjectAllocation(this,
-          info, type);
+      boolean isObjectExternal = getTypeJavaLangObject().isExternal();
+      JExpression alloc = isObjectExternal ? null :
+          JClassLiteral.computeClassObjectAllocation(this,info, type);
 
       // Create a field in the class literal holder to hold the object.
       JField field = new JField(info, type.getJavahSignatureName()
@@ -868,13 +881,15 @@ public class JProgram extends JNode {
       typeSpecialClassLiteralHolder.addField(field);
 
       // Initialize the field.
-      JFieldRef fieldRef = new JFieldRef(info, null, field,
-          typeSpecialClassLiteralHolder);
-      JDeclarationStatement decl = new JDeclarationStatement(info, fieldRef,
-          alloc);
-      JMethodBody clinitBody = (JMethodBody) typeSpecialClassLiteralHolder.getMethods().get(
-          0).getBody();
-      clinitBody.getBlock().addStmt(decl);
+      if (alloc != null) {
+        JFieldRef fieldRef = new JFieldRef(info, null, field,
+            typeSpecialClassLiteralHolder);
+        JDeclarationStatement decl = new JDeclarationStatement(info, fieldRef,
+            alloc);
+        JMethodBody clinitBody = (JMethodBody)
+            typeSpecialClassLiteralHolder.getMethods().get(0).getBody();
+        clinitBody.getBlock().addStmt(decl);
+      }
 
       SourceInfo literalInfo = createSourceInfoSynthetic(JProgram.class,
           "class literal for " + type.getName());
@@ -1025,8 +1040,8 @@ public class JProgram extends JNode {
       } else {
         elementType = getTypeArray(leafType, dimensions - 1);
       }
-      arrayType = new JArrayType(elementType, leafType, dimensions);
-      arrayType.setSuperClass(typeJavaLangObject);
+      arrayType = new JArrayType(elementType, leafType, dimensions,
+          typeJavaLangObject);
       allArrayTypes.add(arrayType);
 
       /*
@@ -1156,7 +1171,7 @@ public class JProgram extends JNode {
     for (int i = 0, c = types.size(); i < c; ++i) {
       typeIdMap.put(types.get(i), Integer.valueOf(i));
     }
-    this.jsonTypeTable = jsonObjects;
+    this.jsonCastableTypeMaps = jsonObjects;
   }
 
   public boolean isJavaLangString(JType type) {

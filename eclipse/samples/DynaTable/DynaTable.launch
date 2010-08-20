@@ -13,5 +13,4 @@
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="com.google.gwt.dev.HostedMode"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-startupUrl DynaTable.html&#13;&#10;com.google.gwt.sample.dynatable.DynaTable"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="DynaTable"/>
-<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-ea&#13;&#10;-Xmx256M&#13;&#10;-Dgwt.devjar=${gwt_devjar}"/>
 </launchConfiguration>

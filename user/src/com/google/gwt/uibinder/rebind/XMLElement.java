@@ -115,7 +115,7 @@ public class XMLElement {
 
   private static final Set<String> NO_END_TAG = new HashSet<String>();
 
-  private static final String[] EMPTY = new String[] {};
+  private static final String[] EMPTY = new String[]{};
 
   private static void clearChildren(Element elem) {
     // TODO(rjrjr) I'm nearly positive that anywhere this is called
@@ -136,11 +136,14 @@ public class XMLElement {
   private final MortalLogger logger;
   private final String debugString;
 
+  private final DesignTimeUtils designTime;
+
   private final XMLElementProvider provider;
 
   private JType booleanType;
   private JType imageResourceType;
   private JType doubleType;
+  private JType intType;
   private JType stringType;
 
   {
@@ -167,12 +170,14 @@ public class XMLElement {
       Element elem,
       AttributeParsers attributeParsers,
       com.google.gwt.uibinder.attributeparsers.BundleAttributeParsers bundleParsers,
-      TypeOracle oracle, MortalLogger logger, XMLElementProvider provider) {
+      TypeOracle oracle, MortalLogger logger, DesignTimeUtils designTime,
+      XMLElementProvider provider) {
     this.elem = elem;
     this.attributeParsers = attributeParsers;
     this.bundleParsers = bundleParsers;
-    this.logger = logger;
     this.oracle = oracle;
+    this.logger = logger;
+    this.designTime = designTime;
     this.provider = provider;
 
     this.debugString = getOpeningTag();
@@ -257,12 +262,12 @@ public class XMLElement {
    */
   public String consumeAttributeWithDefault(String name, String defaultValue,
       JType type) throws UnableToCompleteException {
-    return consumeAttributeWithDefault(name, defaultValue, new JType[] {type});
+    return consumeAttributeWithDefault(name, defaultValue, new JType[]{type});
   }
 
   /**
    * Like {@link #consumeAttributeWithDefault(String, String, JType)}, but
-   * accomodates more complex type signatures.
+   * accommodates more complex type signatures.
    */
   public String consumeAttributeWithDefault(String name, String defaultValue,
       JType[] types) throws UnableToCompleteException {
@@ -273,16 +278,21 @@ public class XMLElement {
      */
     XMLAttribute attribute = getAttribute(name);
     if (attribute == null) {
+      if (defaultValue != null) {
+        designTime.putAttribute(this, name + ".default", defaultValue);
+      }
       return defaultValue;
     }
-    String value = attribute.consumeRawValue();
+    String rawValue = attribute.consumeRawValue();
     AttributeParser parser = getParser(attribute, types);
     if (parser == null) {
       logger.die(this, "No such attribute %s", name);
     }
 
     try {
-      return parser.parse(value);
+      String value = parser.parse(rawValue);
+      designTime.putAttribute(this, name, value);
+      return value;
     } catch (UnableToCompleteException e) {
       logger.die(this, "Cannot parse attribute %s", name);
       throw e;
@@ -390,7 +400,7 @@ public class XMLElement {
    * Convenience method for parsing the named attribute as an ImageResource
    * value or reference.
    * 
-   * @return an expression that will evaluate toan ImageResource value in the
+   * @return an expression that will evaluate to an ImageResource value in the
    *         generated code, or null if there is no such attribute
    * @throws UnableToCompleteException on unparseable value
    */
@@ -475,7 +485,9 @@ public class XMLElement {
     // Make sure there are no children left but empty husks
     for (XMLElement child : consumeChildElementsNoEmptyCheck()) {
       if (child.hasChildNodes() || child.getAttributeCount() > 0) {
-        logger.die(this, "Element has illegal child %s", child);
+        logger.die(this, "Illegal child %s in a text-only context. "
+                   + "Perhaps you are trying to use unescaped HTML "
+                   + "where text is required, as in a HasText widget?", child);
       }
     }
 
@@ -494,7 +506,7 @@ public class XMLElement {
    */
   public String consumeLengthAttribute(String name)
       throws UnableToCompleteException {
-    return consumeAttributeWithDefault(name, null, new JType[] {
+    return consumeAttributeWithDefault(name, null, new JType[]{
         getDoubleType(), getUnitType()});
   }
 
@@ -582,12 +594,14 @@ public class XMLElement {
       failRequired(name);
     }
     AttributeParser parser = getParser(attribute, types);
-    String value = consumeRequiredRawAttribute(name);
+    String rawValue = consumeRequiredRawAttribute(name);
 
     try {
-      return parser.parse(value);
+      String value = parser.parse(rawValue);
+      designTime.putAttribute(this, name, value);
+      return value;
     } catch (UnableToCompleteException e) {
-      logger.die(this, "Cannot parse attribute " + name);
+      logger.die(this, "Cannot parse attribute \"%s\"", name);
       throw e;
     }
   }
@@ -605,6 +619,21 @@ public class XMLElement {
   public String consumeRequiredDoubleAttribute(String name)
       throws UnableToCompleteException {
     return consumeRequiredAttribute(name, getDoubleType());
+  }
+
+  /**
+   * Convenience method for parsing the named required attribute as a integer
+   * value or reference.
+   * 
+   * @return a integer literal, an expression that will evaluate to a integer
+   *         value in the generated code
+   * 
+   * @throws UnableToCompleteException on unparseable value, or if the attribute
+   *           is empty or unspecified
+   */
+  public String consumeRequiredIntAttribute(String name)
+      throws UnableToCompleteException {
+    return consumeRequiredAttribute(name, getIntType());
   }
 
   /**
@@ -666,6 +695,7 @@ public class XMLElement {
         throw e;
       }
     }
+    designTime.putAttribute(this, name, strings);
     return strings;
   }
 
@@ -752,6 +782,14 @@ public class XMLElement {
       return "";
     }
     return String.format("</%s>", elem.getTagName());
+  }
+
+  /**
+   * @return the design time path of this element, in form of indexes from root,
+   *         such as "0/0/1/0".
+   */
+  public String getDesignTimePath() {
+    return designTime.getPath(elem);
   }
 
   /**
@@ -858,6 +896,17 @@ public class XMLElement {
       imageResourceType = oracle.findType(ImageResource.class.getCanonicalName());
     }
     return imageResourceType;
+  }
+
+  private JType getIntType() {
+    if (intType == null) {
+      try {
+        intType = oracle.parse("int");
+      } catch (TypeOracleException e) {
+        throw new RuntimeException(e);
+      }
+    }
+    return intType;
   }
 
   private String getOpeningTag() {

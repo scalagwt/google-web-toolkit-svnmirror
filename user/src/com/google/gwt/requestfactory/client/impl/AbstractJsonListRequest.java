@@ -18,11 +18,11 @@ package com.google.gwt.requestfactory.client.impl;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.requestfactory.shared.RecordListRequest;
 import com.google.gwt.valuestore.shared.Record;
-import com.google.gwt.valuestore.shared.impl.RecordJsoImpl;
-import com.google.gwt.valuestore.shared.impl.RecordSchema;
+import com.google.gwt.valuestore.shared.SyncResult;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * <p>
@@ -31,7 +31,7 @@ import java.util.List;
  * </span>
  * </p>
  * Abstract implementation of
- * {@link com.google.gwt.requestfactory.shared.RequestFactory.RequestObject
+ * {@link com.google.gwt.requestfactory.shared.RequestObject
  * RequestFactory.RequestObject} for requests that return lists of
  * {@link Record}.
  * 
@@ -49,8 +49,10 @@ AbstractJsonListRequest<T extends Record, R extends AbstractJsonListRequest<T, R
     this.schema = schema;
   }
 
-  public void handleResponseText(String text) {
-    JsArray<RecordJsoImpl> valueJsos = RecordJsoImpl.arrayFromJson(text);
+  @Override
+  public void handleResult(Object jsoResult, Set<SyncResult> syncResults) {
+
+    JsArray<RecordJsoImpl> valueJsos = (JsArray<RecordJsoImpl>) jsoResult;
     List<T> valueList = new ArrayList<T>(valueJsos.length());
     for (int i = 0; i < valueJsos.length(); i++) {
       RecordJsoImpl jso = valueJsos.get(i);
@@ -58,7 +60,8 @@ AbstractJsonListRequest<T extends Record, R extends AbstractJsonListRequest<T, R
       valueList.add(schema.create(jso));
     }
 
-    requestFactory.getValueStore().setRecords(valueJsos);
-    receiver.onSuccess(valueList);
+    requestFactory.getValueStore().setRecords(valueJsos, requestFactory);
+
+    receiver.onSuccess(valueList, syncResults);
   }
 }

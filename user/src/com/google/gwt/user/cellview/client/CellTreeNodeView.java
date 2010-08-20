@@ -1,12 +1,12 @@
 /*
  * Copyright 2010 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -23,13 +23,21 @@ import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.dom.client.Style.Overflow;
 import com.google.gwt.dom.client.Style.Position;
-import com.google.gwt.user.cellview.client.PagingListViewPresenter.LoadingState;
+import com.google.gwt.event.shared.EventHandler;
+import com.google.gwt.event.shared.GwtEvent;
+import com.google.gwt.event.shared.GwtEvent.Type;
+import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.cellview.client.HasDataPresenter.ElementIterator;
+import com.google.gwt.user.cellview.client.HasDataPresenter.LoadingState;
 import com.google.gwt.user.client.ui.UIObject;
-import com.google.gwt.view.client.TreeViewModel;
-import com.google.gwt.view.client.PagingListView;
+import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.Range;
+import com.google.gwt.view.client.RangeChangeEvent;
+import com.google.gwt.view.client.RowCountChangeEvent;
 import com.google.gwt.view.client.SelectionModel;
+import com.google.gwt.view.client.TreeViewModel;
 import com.google.gwt.view.client.TreeViewModel.NodeInfo;
 
 import java.util.ArrayList;
@@ -41,79 +49,48 @@ import java.util.Set;
 
 /**
  * A view of a tree node.
- * 
+ *
  * @param <T> the type that this view contains
  */
 class CellTreeNodeView<T> extends UIObject {
 
   /**
-   * The element used in place of an image when a node has no children.
-   */
-  private static final String LEAF_IMAGE = "<div style='position:absolute;display:none;'></div>";
-
-  /**
-   * Returns the element that parents the cell contents of the node.
-   * 
-   * @param nodeElem the element that represents the node
-   * @return the cell parent within the node
-   */
-  private static Element getCellParent(Element nodeElem) {
-    return getSelectionElement(nodeElem).getFirstChildElement().getChild(1).cast();
-  }
-
-  /**
-   * Returns the element that selection is applied to.
-   * 
-   * @param nodeElem the element that represents the node
-   * @return the cell parent within the node
-   */
-  private static Element getImageElement(Element nodeElem) {
-    return getSelectionElement(nodeElem).getFirstChildElement().getFirstChildElement();
-  }
-
-  /**
-   * Returns the element that selection is applied to.
-   * 
-   * @param nodeElem the element that represents the node
-   * @return the cell parent within the node
-   */
-  private static Element getSelectionElement(Element nodeElem) {
-    return nodeElem.getFirstChildElement();
-  }
-
-  /**
-   * Show or hide an element.
-   * 
-   * @param element the element to show or hide
-   * @param show true to show, false to hide
-   */
-  private static void showOrHide(Element element, boolean show) {
-    if (show) {
-      element.getStyle().clearDisplay();
-    } else {
-      element.getStyle().setDisplay(Display.NONE);
-    }
-  }
-
-  /**
-   * The {@link com.google.gwt.view.client.ListView ListView} used to show
-   * children.
-   * 
+   * The {@link com.google.gwt.view.client.HasData} used to show children.
+   *
    * @param <C> the child item type
    */
-  private static class NodeCellList<C> implements PagingListView<C> {
+  private static class NodeCellList<C> implements HasData<C> {
 
     /**
      * The view used by the NodeCellList.
      */
-    private class View extends PagingListViewPresenter.DefaultView<C> {
+    private class View implements HasDataPresenter.View<C> {
+
+      private final Element childContainer;
 
       public View(Element childContainer) {
-        super(childContainer);
+        this.childContainer = childContainer;
+      }
+
+      public <H extends EventHandler> HandlerRegistration addHandler(H handler,
+          Type<H> type) {
+        return handlerManger.addHandler(type, handler);
       }
 
       public boolean dependsOnSelection() {
         return cell.dependsOnSelection();
+      }
+
+      public int getChildCount() {
+        return childContainer.getChildCount();
+      }
+
+      public ElementIterator getChildIterator() {
+        return new HasDataPresenter.DefaultElementIterator(this,
+            childContainer.getFirstChildElement());
+      }
+
+      public void onUpdateSelection() {
       }
 
       public void render(StringBuilder sb, List<C> values, int start,
@@ -195,7 +172,6 @@ class CellTreeNodeView<T> extends UIObject {
         }
       }
 
-      @Override
       public void replaceAllChildren(List<C> values, String html) {
         // Hide the child container so we can animate it.
         if (nodeView.tree.isAnimationEnabled()) {
@@ -204,7 +180,7 @@ class CellTreeNodeView<T> extends UIObject {
 
         // Replace the child nodes.
         Map<Object, CellTreeNodeView<?>> savedViews = saveChildState(values, 0);
-        super.replaceAllChildren(values, html);
+        AbstractHasData.replaceAllChildren(nodeView.tree, childContainer, html);
         loadChildState(values, 0, savedViews);
 
         // Animate the child container open.
@@ -213,11 +189,22 @@ class CellTreeNodeView<T> extends UIObject {
         }
       }
 
-      @Override
       public void replaceChildren(List<C> values, int start, String html) {
         Map<Object, CellTreeNodeView<?>> savedViews = saveChildState(values, 0);
-        super.replaceChildren(values, start, html);
+
+        Element newChildren = AbstractHasData.convertToElements(nodeView.tree,
+            getTmpElem(), html);
+        AbstractHasData.replaceChildren(nodeView.tree, childContainer,
+            newChildren, start, html);
+
         loadChildState(values, 0, savedViews);
+      }
+
+      public void resetFocus() {
+        if (nodeView.keyboardSelectedIndex != -1) {
+          nodeView.keyboardEnter(nodeView.keyboardSelectedIndex,
+              nodeView.keyboardFocused);
+        }
       }
 
       public void setLoadingState(LoadingState state) {
@@ -225,15 +212,14 @@ class CellTreeNodeView<T> extends UIObject {
         showOrHide(nodeView.emptyMessageElem, state == LoadingState.EMPTY);
       }
 
-      @Override
-      protected void setSelected(Element elem, boolean selected) {
+      public void setSelected(Element elem, boolean selected) {
         setStyleName(getSelectionElement(elem),
             nodeView.tree.getStyle().selectedItem(), selected);
       }
 
       /**
        * Reload the open children after rendering new items in this node.
-       * 
+       *
        * @param values the values being replaced
        * @param start the start index
        * @param savedViews the open nodes
@@ -244,12 +230,14 @@ class CellTreeNodeView<T> extends UIObject {
         int end = start + len;
         int childCount = nodeView.getChildCount();
         ProvidesKey<C> providesKey = nodeInfo.getProvidesKey();
-        Element childElem = nodeView.ensureChildContainer().getFirstChildElement();
+        Element childElem =
+          nodeView.ensureChildContainer().getFirstChildElement();
         for (int i = start; i < end; i++) {
           C childValue = values.get(i - start);
           CellTreeNodeView<C> child = nodeView.createTreeNodeView(nodeInfo,
               childElem, childValue, null);
-          CellTreeNodeView<?> savedChild = savedViews.remove(providesKey.getKey(childValue));
+          CellTreeNodeView<?> savedChild =
+            savedViews.remove(providesKey.getKey(childValue));
           // Copy the saved child's state into the new child
           if (savedChild != null) {
             child.animationFrame = savedChild.animationFrame;
@@ -288,7 +276,7 @@ class CellTreeNodeView<T> extends UIObject {
        * Save the state of the open child nodes within the range of the
        * specified values. Use {@link #loadChildState(List, int, Map)} to
        * re-attach the open nodes after they have been replaced.
-       * 
+       *
        * @param values the values being replaced
        * @param start the start index
        * @return the map of open nodes
@@ -304,7 +292,8 @@ class CellTreeNodeView<T> extends UIObject {
         int len = values.size();
         int end = start + len;
         int childCount = nodeView.getChildCount();
-        Map<Object, CellTreeNodeView<?>> openNodes = new HashMap<Object, CellTreeNodeView<?>>();
+        Map<Object, CellTreeNodeView<?>> openNodes =
+          new HashMap<Object, CellTreeNodeView<?>>();
         for (int i = start; i < end && i < childCount; i++) {
           CellTreeNodeView<?> child = nodeView.getChildNode(i);
           // Ignore child nodes that are closed.
@@ -315,7 +304,8 @@ class CellTreeNodeView<T> extends UIObject {
 
         // Trim the saved views down to the children that still exists.
         ProvidesKey<C> providesKey = nodeInfo.getProvidesKey();
-        Map<Object, CellTreeNodeView<?>> savedViews = new HashMap<Object, CellTreeNodeView<?>>();
+        Map<Object, CellTreeNodeView<?>> savedViews =
+          new HashMap<Object, CellTreeNodeView<?>>();
         for (C childValue : values) {
           // Remove any child elements that correspond to prior children
           // so the call to setInnerHtml will not destroy them
@@ -331,10 +321,12 @@ class CellTreeNodeView<T> extends UIObject {
     }
 
     private final Cell<C> cell;
+
     private final int defaultPageSize;
+    private HandlerManager handlerManger = new HandlerManager(this);
     private final NodeInfo<C> nodeInfo;
     private CellTreeNodeView<?> nodeView;
-    private final PagingListViewPresenter<C> presenter;
+    private final HasDataPresenter<C> presenter;
 
     public NodeCellList(final NodeInfo<C> nodeInfo,
         final CellTreeNodeView<?> nodeView, int pageSize) {
@@ -343,18 +335,28 @@ class CellTreeNodeView<T> extends UIObject {
       this.nodeView = nodeView;
       cell = nodeInfo.getCell();
 
-      presenter = new PagingListViewPresenter<C>(this, new View(
+      presenter = new HasDataPresenter<C>(this, new View(
           nodeView.ensureChildContainer()), pageSize);
 
       // Use a pager to update buttons.
-      presenter.setPager(new Pager<C>() {
-        public void onRangeOrSizeChanged(PagingListView<C> listView) {
-          // Assumes a page start of 0.
-          int dataSize = presenter.getDataSize();
-          int pageSize = getRange().getLength();
-          showOrHide(nodeView.showMoreElem, dataSize > pageSize);
+      presenter.addRowCountChangeHandler(new RowCountChangeEvent.Handler() {
+        public void onRowCountChange(RowCountChangeEvent event) {
+          int rowCount = event.getNewRowCount();
+          boolean isExact = event.isNewRowCountExact();
+          int pageSize = getVisibleRange().getLength();
+          showOrHide(nodeView.showMoreElem, isExact && rowCount > pageSize);
         }
       });
+    }
+
+    public HandlerRegistration addRangeChangeHandler(
+        RangeChangeEvent.Handler handler) {
+      return presenter.addRangeChangeHandler(handler);
+    }
+
+    public HandlerRegistration addRowCountChangeHandler(
+        RowCountChangeEvent.Handler handler) {
+      return presenter.addRowCountChangeHandler(handler);
     }
 
     /**
@@ -364,55 +366,133 @@ class CellTreeNodeView<T> extends UIObject {
       presenter.clearSelectionModel();
     }
 
-    public int getDataSize() {
-      return presenter.getDataSize();
+    public void fireEvent(GwtEvent<?> event) {
+      handlerManger.fireEvent(event);
     }
 
     public int getDefaultPageSize() {
       return defaultPageSize;
     }
 
-    public Range getRange() {
-      return presenter.getRange();
+    public int getRowCount() {
+      return presenter.getRowCount();
     }
 
-    public boolean isDataSizeExact() {
-      return presenter.isDataSizeExact();
+    public SelectionModel<? super C> getSelectionModel() {
+      return presenter.getSelectionModel();
     }
 
-    public void setData(int start, int length, List<C> values) {
-      presenter.setData(start, length, values);
+    public Range getVisibleRange() {
+      return presenter.getVisibleRange();
     }
 
-    public void setDataSize(int size, boolean isExact) {
-      presenter.setDataSize(size, isExact);
+    public boolean isRowCountExact() {
+      return presenter.isRowCountExact();
     }
 
-    public void setDelegate(Delegate<C> delegate) {
-      presenter.setDelegate(delegate);
+    public final void setRowCount(int count) {
+      setRowCount(count, true);
     }
 
-    public void setPager(Pager<C> pager) {
-      presenter.setPager(pager);
+    public void setRowCount(int size, boolean isExact) {
+      presenter.setRowCount(size, isExact);
     }
 
-    public void setRange(int start, int length) {
-      presenter.setRange(start, length);
+    public void setRowData(int start, List<C> values) {
+      presenter.setRowData(start, values);
     }
 
-    public void setSelectionModel(final SelectionModel<? super C> selectionModel) {
+    public void setSelectionModel(
+        final SelectionModel<? super C> selectionModel) {
       presenter.setSelectionModel(selectionModel);
     }
 
+    public final void setVisibleRange(int start, int length) {
+      setVisibleRange(new Range(start, length));
+    }
+
+    public void setVisibleRange(Range range) {
+      presenter.setVisibleRange(range);
+    }
+
+    public void setVisibleRangeAndClearData(
+        Range range, boolean forceRangeChangeEvent) {
+      presenter.setVisibleRangeAndClearData(range, forceRangeChangeEvent);
+    }
+
     /**
-     * Assign this {@link PagingListView} to a new {@link CellTreeNodeView}.
-     * 
+     * Assign this {@link HasData} to a new {@link CellTreeNodeView}.
+     *
      * @param nodeView the new node view
      */
     private void setNodeView(CellTreeNodeView<?> nodeView) {
       this.nodeView.listView = null;
       this.nodeView = nodeView;
       nodeView.listView = this;
+    }
+  }
+
+  /**
+   * The element used in place of an image when a node has no children.
+   */
+  private static final String LEAF_IMAGE = "<div style='position:absolute;display:none;'></div>";
+
+  /**
+   * The temporary element used to render child items.
+   */
+  private static com.google.gwt.user.client.Element tmpElem;
+
+  /**
+   * Returns the element that parents the cell contents of the node.
+   *
+   * @param nodeElem the element that represents the node
+   * @return the cell parent within the node
+   */
+  private static Element getCellParent(Element nodeElem) {
+    return getSelectionElement(nodeElem).getFirstChildElement().getChild(1).cast();
+  }
+
+  /**
+   * Returns the element that selection is applied to.
+   *
+   * @param nodeElem the element that represents the node
+   * @return the cell parent within the node
+   */
+  private static Element getImageElement(Element nodeElem) {
+    return getSelectionElement(nodeElem).getFirstChildElement().getFirstChildElement();
+  }
+
+  /**
+   * Returns the element that selection is applied to.
+   *
+   * @param nodeElem the element that represents the node
+   * @return the cell parent within the node
+   */
+  private static Element getSelectionElement(Element nodeElem) {
+    return nodeElem.getFirstChildElement();
+  }
+
+  /**
+   * @return the temporary element used to create elements
+   */
+  private static com.google.gwt.user.client.Element getTmpElem() {
+    if (tmpElem == null) {
+      tmpElem = Document.get().createDivElement().cast();
+    }
+    return tmpElem;
+  }
+
+  /**
+   * Show or hide an element.
+   *
+   * @param element the element to show or hide
+   * @param show true to show, false to hide
+   */
+  private static void showOrHide(Element element, boolean show) {
+    if (show) {
+      element.getStyle().clearDisplay();
+    } else {
+      element.getStyle().setDisplay(Display.NONE);
     }
   }
 
@@ -453,6 +533,21 @@ class CellTreeNodeView<T> extends UIObject {
    * The element used when there are no children to display.
    */
   private Element emptyMessageElem;
+
+  /**
+   * True if the keyboard selection has focus.
+   */
+  private boolean keyboardFocused;
+
+  /**
+   * The index of the keyboard selection within this node's children.
+   */
+  private int keyboardSelectedIndex = -1;
+
+  /**
+   * The parent element of the current keyboard selection, or null.
+   */
+  private Element keyboardSelection;
 
   /**
    * The list view used to display the nodes.
@@ -501,7 +596,7 @@ class CellTreeNodeView<T> extends UIObject {
 
   /**
    * Construct a {@link CellTreeNodeView}.
-   * 
+   *
    * @param tree the parent {@link CellTreeNodeView}
    * @param parent the parent {@link CellTreeNodeView}
    * @param parentNodeInfo the {@link NodeInfo} of the parent
@@ -526,9 +621,13 @@ class CellTreeNodeView<T> extends UIObject {
     return children.get(childIndex);
   }
 
+  public boolean isLeaf() {
+    return tree.getTreeViewModel().isLeaf(value);
+  }
+
   /**
    * Check whether or not this node is open.
-   * 
+   *
    * @return true if open, false if closed
    */
   public boolean isOpen() {
@@ -536,18 +635,8 @@ class CellTreeNodeView<T> extends UIObject {
   }
 
   /**
-   * Select this node.
-   */
-  public void select() {
-    SelectionModel<? super T> selectionModel = parentNodeInfo.getSelectionModel();
-    if (selectionModel != null) {
-      selectionModel.setSelected(value, true);
-    }
-  }
-
-  /**
    * Sets whether this item's children are displayed.
-   * 
+   *
    * @param open whether the item is open
    */
   public void setOpen(boolean open) {
@@ -562,6 +651,20 @@ class CellTreeNodeView<T> extends UIObject {
       if (!nodeInfoLoaded) {
         nodeInfoLoaded = true;
         nodeInfo = tree.getTreeViewModel().getNodeInfo(value);
+
+        // Sink events for the new node.
+        if (nodeInfo != null) {
+          Set<String> eventsToSink = new HashSet<String>();
+          // Listen for focus and blur for keyboard navigation
+          eventsToSink.add("focus");
+          eventsToSink.add("blur");
+
+          Set<String> consumedEvents = nodeInfo.getCell().getConsumedEvents();
+          if (consumedEvents != null) {
+            eventsToSink.addAll(consumedEvents);
+          }
+          CellBasedWidgetImpl.get().sinkEvents(tree, eventsToSink);
+        }
       }
 
       // If we don't have any nodeInfo, we must be a leaf node.
@@ -583,6 +686,7 @@ class CellTreeNodeView<T> extends UIObject {
       cleanup();
       tree.maybeAnimateTreeNode(this);
       updateImage(false);
+      keyboardExit();
     }
   }
 
@@ -593,7 +697,7 @@ class CellTreeNodeView<T> extends UIObject {
     // Unregister the list handler.
     if (listView != null) {
       listView.cleanup();
-      nodeInfo.unsetView();
+      nodeInfo.unsetDataDisplay();
       listView = null;
     }
 
@@ -615,7 +719,7 @@ class CellTreeNodeView<T> extends UIObject {
   /**
    * Returns an instance of TreeNodeView of the same subclass as the calling
    * object.
-   * 
+   *
    * @param <C> the data type of the node's children
    * @param nodeInfo a NodeInfo object describing the child nodes
    * @param childElem the DOM element used to parent the new TreeNodeView
@@ -630,19 +734,32 @@ class CellTreeNodeView<T> extends UIObject {
 
   /**
    * Fire an event to the {@link com.google.gwt.cell.client.AbstractCell}.
-   * 
+   *
    * @param event the native event
-   * @return true if the cell consumes the event, false if not
    */
-  protected boolean fireEventToCell(NativeEvent event) {
+  protected void fireEventToCell(NativeEvent event) {
     if (parentNodeInfo != null) {
-      Element cellParent = getCellParent();
       Cell<T> parentCell = parentNodeInfo.getCell();
-      parentCell.onBrowserEvent(cellParent, value, null, event,
-          parentNodeInfo.getValueUpdater());
-      return parentCell.consumesEvents();
+      String eventType = event.getType();
+      SelectionModel<? super T> selectionModel =
+        parentNodeInfo.getSelectionModel();
+
+      // Update selection.
+      if (selectionModel != null && "click".equals(eventType)
+          && !parentCell.handlesSelection()) {
+        // TODO(jlabanca): Should we toggle? Only when ctrl is pressed?
+        selectionModel.setSelected(value, true);
+      }
+
+      // Forward the event to the cell.
+      Element cellParent = getCellParent();
+      Object key = getValueKey();
+      Set<String> consumedEvents = parentCell.getConsumedEvents();
+      if (consumedEvents != null && consumedEvents.contains(eventType)) {
+        parentCell.onBrowserEvent(cellParent, value, key, event,
+            parentNodeInfo.getValueUpdater());
+      }
     }
-    return false;
   }
 
   /**
@@ -654,7 +771,7 @@ class CellTreeNodeView<T> extends UIObject {
 
   /**
    * Returns the element corresponding to the open/close image.
-   * 
+   *
    * @return the open/close image element
    */
   protected Element getImageElement() {
@@ -671,7 +788,7 @@ class CellTreeNodeView<T> extends UIObject {
 
   /**
    * Set up the node when it is opened.
-   * 
+   *
    * @param nodeInfo the {@link NodeInfo} that provides information about the
    *          child values
    * @param <C> the child data type of the node
@@ -681,12 +798,12 @@ class CellTreeNodeView<T> extends UIObject {
         tree.getDefaultNodeSize());
     listView = view;
     view.setSelectionModel(nodeInfo.getSelectionModel());
-    nodeInfo.setView(view);
+    nodeInfo.setDataDisplay(view);
   }
 
   /**
    * Ensure that the animation frame exists and return it.
-   * 
+   *
    * @return the animation frame
    */
   Element ensureAnimationFrame() {
@@ -702,7 +819,7 @@ class CellTreeNodeView<T> extends UIObject {
 
   /**
    * Ensure that the child container exists and return it.
-   * 
+   *
    * @return the child container
    */
   Element ensureChildContainer() {
@@ -715,7 +832,7 @@ class CellTreeNodeView<T> extends UIObject {
 
   /**
    * Ensure that the content container exists and return it.
-   * 
+   *
    * @return the content container
    */
   Element ensureContentContainer() {
@@ -740,36 +857,173 @@ class CellTreeNodeView<T> extends UIObject {
     return contentContainer;
   }
 
+  int getKeyboardSelectedIndex() {
+    return keyboardSelectedIndex;
+  }
+
+  /**
+   * Return the parent node, or null if this node is the root.
+   */
+  CellTreeNodeView<?> getParentNode() {
+    return parentNode;
+  }
+
   Element getShowMoreElement() {
     return showMoreElem;
   }
 
+  int indexOf(CellTreeNodeView<?> child) {
+    return children.indexOf(child);
+  }
+
   /**
    * Check if this node is a root node.
-   * 
+   *
    * @return true if a root node
    */
   boolean isRootNode() {
     return parentNode == null;
   }
 
+  /**
+   * The user has "tabbed" away from the node -- don't force refocus when
+   * re-rendering.
+   */
+  void keyboardBlur() {
+    keyboardFocused = false;
+  }
+
+  /**
+   * Handle a keyboard navigation event to move down one item. Returns true if
+   * movement was possible (the current item was not the last child of its
+   * parent).
+   *
+   * @return true if the selection moved
+   */
+  boolean keyboardDown() {
+    Element next = keyboardSelection.getNextSiblingElement();
+    if (next != null) {
+      keyboardExit();
+      keyboardEnterAtElement(next, true);
+      keyboardSelectedIndex++;
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Handle a keyboard event to move focus into the current item list at the
+   * child that contains the given Element.
+   *
+   * @param focus if true, focus on the element
+   */
+  void keyboardEnter(Element element, boolean focus) {
+    Element item = ensureChildContainer().getFirstChildElement();
+    int index = 0;
+    boolean found = false;
+    for (int i = 0; i < getChildCount(); i++) {
+      if (item.isOrHasChild(element)) {
+        found = true;
+        break;
+      }
+      item = item.getNextSiblingElement();
+      index++;
+    }
+    if (found) {
+      keyboardEnterAtElement(item, focus);
+      keyboardSelectedIndex = index;
+    }
+  }
+
+  /**
+   * Handle a keyboard event to move focus into the current item list at the
+   * given child index.
+   *
+   * @param focus if true, focus on the element
+   */
+  void keyboardEnter(int index, boolean focus) {
+    if (index < 0 || index >= getChildCount()) {
+      throw new IllegalArgumentException("Index out of range: " + index);
+    }
+    Element item = ensureChildContainer().getChild(index).cast();
+    keyboardEnterAtElement(item, focus);
+    keyboardSelectedIndex = index;
+  }
+
+  /**
+   * Handle a keyboard event to move focus away from the current item.
+   */
+  void keyboardExit() {
+    if (keyboardSelection == null) {
+      return;
+    }
+    Element child =
+      keyboardSelection.getFirstChildElement().getFirstChildElement();
+    child.removeAttribute("tabIndex");
+    child.removeClassName(tree.getStyle().keyboardSelectedItem());
+    keyboardSelection = null;
+    keyboardFocused = false;
+  }
+
+  void keyboardFocus() {
+    keyboardFocused = true;
+  }
+
+  /**
+   * Handle a keyboard navigation event to move up one item. Returns true if
+   * movement was possible (the current item was not the first child of its
+   * parent).
+   *
+   * @return true if the selection moved
+   */
+  boolean keyboardUp() {
+    Element prev =
+      keyboardSelection.getParentElement().getFirstChildElement();
+    Element next = prev.getNextSiblingElement();
+    while (next != null && next != keyboardSelection) {
+      prev = next;
+      next = next.getNextSiblingElement();
+    }
+    if (next == keyboardSelection) {
+      int index = keyboardSelectedIndex;
+      keyboardExit();
+      keyboardEnterAtElement(prev, true);
+      keyboardSelectedIndex = index - 1;
+      return true;
+    }
+    return false;
+  }
+
   void showFewer() {
-    Range range = listView.getRange();
+    Range range = listView.getVisibleRange();
     int defaultPageSize = listView.getDefaultPageSize();
-    int maxSize = Math.max(defaultPageSize, range.getLength() - defaultPageSize);
-    listView.setRange(range.getStart(), maxSize);
+    int maxSize = Math.max(defaultPageSize,
+        range.getLength() - defaultPageSize);
+    listView.setVisibleRange(range.getStart(), maxSize);
   }
 
   void showMore() {
-    Range range = listView.getRange();
-    int pageSize = listView.getRange().getLength()
-        + listView.getDefaultPageSize();
-    listView.setRange(range.getStart(), pageSize);
+    Range range = listView.getVisibleRange();
+    int pageSize = range.getLength() + listView.getDefaultPageSize();
+    listView.setVisibleRange(range.getStart(), pageSize);
+  }
+
+  private void keyboardEnterAtElement(Element item, boolean focus) {
+    if (item != null) {
+      Element child = item.getFirstChildElement().getFirstChildElement();
+      child.addClassName(tree.getStyle().keyboardSelectedItem());
+      child.setTabIndex(0);
+      if (focus) {
+        child.focus();
+      }
+      keyboardSelection = item;
+      keyboardFocused = focus;
+    }
   }
 
   /**
    * Update the image based on the current state.
-   * 
+   *
    * @param isLoading true if still loading data
    */
   private void updateImage(boolean isLoading) {

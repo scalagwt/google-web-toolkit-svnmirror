@@ -21,25 +21,33 @@ import org.eclipse.jdt.core.compiler.CategorizedProblem;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 abstract class CompilationUnitImpl extends CompilationUnit {
 
-  private final Set<ContentId> dependencies;
+  private final Dependencies dependencies;
   private final List<CompiledClass> exposedCompiledClasses;
+  private final boolean hasErrors;
   private final List<JsniMethod> jsniMethods;
-  private final CategorizedProblem[] problems;
   private final MethodArgNamesLookup methodArgs;
+  private final CategorizedProblem[] problems;
 
   public CompilationUnitImpl(List<CompiledClass> compiledClasses,
-      Set<ContentId> dependencies,
-      Collection<? extends JsniMethod> jsniMethods,
+      Dependencies dependencies, Collection<? extends JsniMethod> jsniMethods,
       MethodArgNamesLookup methodArgs, CategorizedProblem[] problems) {
     this.exposedCompiledClasses = Lists.normalizeUnmodifiable(compiledClasses);
     this.dependencies = dependencies;
     this.jsniMethods = Lists.create(jsniMethods.toArray(new JsniMethod[jsniMethods.size()]));
     this.methodArgs = methodArgs;
     this.problems = problems;
+    boolean hasAnyErrors = false;
+    if (problems != null) {
+      for (CategorizedProblem problem : problems) {
+        if (problem.isError()) {
+          hasAnyErrors = true;
+        }
+      }
+    }
+    this.hasErrors = hasAnyErrors;
     for (CompiledClass cc : compiledClasses) {
       cc.initUnit(this);
     }
@@ -55,6 +63,11 @@ abstract class CompilationUnitImpl extends CompilationUnit {
     return methodArgs;
   }
 
+  @Override
+  public boolean isError() {
+    return hasErrors;
+  }
+
   /**
    * Returns all contained classes.
    */
@@ -64,7 +77,7 @@ abstract class CompilationUnitImpl extends CompilationUnit {
   }
 
   @Override
-  Set<ContentId> getDependencies() {
+  Dependencies getDependencies() {
     return dependencies;
   }
 

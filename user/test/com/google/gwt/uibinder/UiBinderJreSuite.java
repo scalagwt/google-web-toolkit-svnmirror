@@ -25,15 +25,20 @@ import com.google.gwt.uibinder.attributeparsers.StrictAttributeParserTest;
 import com.google.gwt.uibinder.attributeparsers.StringAttributeParserTest;
 import com.google.gwt.uibinder.attributeparsers.TextAlignConstantParserTest;
 import com.google.gwt.uibinder.attributeparsers.VerticalAlignmentConstantParserTest;
+import com.google.gwt.uibinder.elementparsers.AbsolutePanelParserTest;
 import com.google.gwt.uibinder.elementparsers.DialogBoxParserTest;
 import com.google.gwt.uibinder.elementparsers.DockLayoutPanelParserTest;
+import com.google.gwt.uibinder.elementparsers.GridParserTest;
 import com.google.gwt.uibinder.elementparsers.ImageParserTest;
 import com.google.gwt.uibinder.elementparsers.IsEmptyParserTest;
 import com.google.gwt.uibinder.elementparsers.LayoutPanelParserTest;
 import com.google.gwt.uibinder.elementparsers.ListBoxParserTest;
+import com.google.gwt.uibinder.elementparsers.MenuBarParserTest;
+import com.google.gwt.uibinder.elementparsers.MenuItemParserTest;
 import com.google.gwt.uibinder.elementparsers.StackLayoutPanelParserTest;
 import com.google.gwt.uibinder.elementparsers.TabLayoutPanelParserTest;
 import com.google.gwt.uibinder.elementparsers.UIObjectParserTest;
+import com.google.gwt.uibinder.rebind.DesignTimeUtilsTest;
 import com.google.gwt.uibinder.rebind.FieldWriterOfGeneratedCssResourceTest;
 import com.google.gwt.uibinder.rebind.GwtResourceEntityResolverTest;
 import com.google.gwt.uibinder.rebind.HandlerEvaluatorTest;
@@ -59,6 +64,7 @@ public class UiBinderJreSuite {
     suite.addTestSuite(HandlerEvaluatorTest.class);
     suite.addTestSuite(TokenatorTest.class);
     suite.addTestSuite(XMLElementTest.class);
+    suite.addTestSuite(DesignTimeUtilsTest.class);
 
     // model
     suite.addTestSuite(OwnerClassTest.class);
@@ -78,12 +84,16 @@ public class UiBinderJreSuite {
     suite.addTestSuite(TextAlignConstantParserTest.class);
 
     // elementparsers
+    suite.addTestSuite(AbsolutePanelParserTest.class);
     suite.addTestSuite(DialogBoxParserTest.class);
     suite.addTestSuite(DockLayoutPanelParserTest.class);
+    suite.addTestSuite(GridParserTest.class);
     suite.addTestSuite(ImageParserTest.class);
     suite.addTestSuite(IsEmptyParserTest.class);
     suite.addTestSuite(LayoutPanelParserTest.class);
     suite.addTestSuite(ListBoxParserTest.class);
+    suite.addTestSuite(MenuBarParserTest.class);
+    suite.addTestSuite(MenuItemParserTest.class);
     suite.addTestSuite(StackLayoutPanelParserTest.class);
     suite.addTestSuite(TabLayoutPanelParserTest.class);
     suite.addTestSuite(UIObjectParserTest.class);

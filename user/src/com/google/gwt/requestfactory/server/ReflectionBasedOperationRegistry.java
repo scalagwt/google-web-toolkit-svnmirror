@@ -16,7 +16,8 @@
 package com.google.gwt.requestfactory.server;
 
 import com.google.gwt.requestfactory.shared.DataTransferObject;
-import com.google.gwt.requestfactory.shared.RequestFactory;
+import com.google.gwt.requestfactory.shared.Instance;
+import com.google.gwt.requestfactory.shared.RequestObject;
 import com.google.gwt.requestfactory.shared.Service;
 import com.google.gwt.valuestore.shared.Record;
 
@@ -34,12 +35,12 @@ import java.util.List;
  * </p>
  * OperationRegistry which uses the operation name as a convention for
  * reflection to a method on a class, and returns an appropriate {@link
- * com.google.gwt.requestfactory.shared.RequestFactory.RequestDefinition}.
+ * com.google.gwt.requestfactory.server.RequestDefinition}.
  */
 public class ReflectionBasedOperationRegistry implements OperationRegistry {
 
   class ReflectiveRequestDefinition
-      implements RequestFactory.RequestDefinition {
+      implements RequestDefinition {
 
     private Class<?> requestClass;
 
@@ -49,12 +50,15 @@ public class ReflectionBasedOperationRegistry implements OperationRegistry {
 
     private Method domainMethod;
 
+    private boolean isInstance;
+
     public ReflectiveRequestDefinition(Class<?> requestClass,
-        Method requestMethod, Class<?> domainClass, Method domainMethod) {
+        Method requestMethod, Class<?> domainClass, Method domainMethod, boolean isInstance) {
       this.requestClass = requestClass;
       this.requestMethod = requestMethod;
       this.domainClass = domainClass;
       this.domainMethod = domainMethod;
+      this.isInstance = isInstance;
     }
 
     public String getDomainClassName() {
@@ -67,6 +71,10 @@ public class ReflectionBasedOperationRegistry implements OperationRegistry {
 
     public Class<?>[] getParameterTypes() {
       return domainMethod.getParameterTypes();
+    }
+
+    public Type[] getRequestParameterTypes() {
+      return requestMethod.getGenericParameterTypes();
     }
 
     public Class<?> getReturnType() {
@@ -96,6 +104,10 @@ public class ReflectionBasedOperationRegistry implements OperationRegistry {
       return requestReturnType;
     }
 
+    public boolean isInstance() {
+      return isInstance;
+    }
+
     public boolean isReturnTypeList() {
       return List.class.isAssignableFrom(domainMethod.getReturnType());
     }
@@ -110,7 +122,7 @@ public class ReflectionBasedOperationRegistry implements OperationRegistry {
         ParameterizedType pType = (ParameterizedType) type;
         Class<?> rawType = (Class<?>) pType.getRawType();
         if (List.class.isAssignableFrom(rawType)
-            || RequestFactory.RequestObject.class.isAssignableFrom(rawType)) {
+            || RequestObject.class.isAssignableFrom(rawType)) {
           Class<?> rType = getTypeArgument(pType);
           if (rType != null) {
             if (List.class.isAssignableFrom(rType)) {
@@ -151,10 +163,11 @@ public class ReflectionBasedOperationRegistry implements OperationRegistry {
   }
 
   /**
+
    * Turns an operation in the form of package.requestClass::method into a
    * RequestDefinition via reflection.
    */
-  public RequestFactory.RequestDefinition getOperation(String operationName) {
+  public RequestDefinition getOperation(String operationName) {
     String decodedOperationName = securityProvider.mapOperation(operationName);
     String parts[] = decodedOperationName.split(SCOPE_SEPARATOR);
     final String reqClassName = parts[0];
@@ -170,9 +183,15 @@ public class ReflectionBasedOperationRegistry implements OperationRegistry {
         Class<?> domainClass = domainClassAnnotation.value();
         Method requestMethod = findMethod(requestClass, domainMethodName);
         Method domainMethod = findMethod(domainClass, domainMethodName);
+        boolean isInstance = (requestMethod.getAnnotation(Instance.class) != null);
         if (requestMethod != null && domainMethod != null) {
+          if (isInstance == Modifier.isStatic(domainMethod.getModifiers())) {
+            throw new IllegalArgumentException("domain method " + domainMethod
+                + " and interface method " + requestMethod
+                + " don't match wrt instance/static");
+          }
           return new ReflectiveRequestDefinition(requestClass, requestMethod,
-              domainClass, domainMethod);
+              domainClass, domainMethod, isInstance);
         }
       }
       return null;
@@ -180,6 +199,10 @@ public class ReflectionBasedOperationRegistry implements OperationRegistry {
       throw new SecurityException(
           "Access to non-existent class " + reqClassName);
     }
+  }
+
+  public RequestSecurityProvider getSecurityProvider() {
+    return securityProvider;
   }
 
   private Method findMethod(Class<?> clazz, String methodName) {

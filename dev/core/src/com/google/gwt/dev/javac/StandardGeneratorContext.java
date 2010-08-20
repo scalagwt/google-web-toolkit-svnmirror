@@ -1,12 +1,12 @@
 /*
  * Copyright 2007 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -29,10 +29,12 @@ import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.dev.cfg.ModuleDef;
 import com.google.gwt.dev.resource.ResourceOracle;
 import com.google.gwt.dev.util.DiskCache;
-import com.google.gwt.dev.util.PerfLogger;
 import com.google.gwt.dev.util.Util;
 import com.google.gwt.dev.util.collect.HashSet;
 import com.google.gwt.dev.util.collect.IdentityHashMap;
+import com.google.gwt.dev.util.log.speedtracer.CompilerEventType;
+import com.google.gwt.dev.util.log.speedtracer.SpeedTracerLogger;
+import com.google.gwt.dev.util.log.speedtracer.SpeedTracerLogger.Event;
 import com.google.gwt.util.tools.Utility;
 
 import java.io.ByteArrayOutputStream;
@@ -150,6 +152,7 @@ public class StandardGeneratorContext implements GeneratorContext {
       this.file = file;
     }
 
+    @Override
     public void commit() {
       super.commit();
       FileOutputStream fos = null;
@@ -164,6 +167,7 @@ public class StandardGeneratorContext implements GeneratorContext {
       }
     }
 
+    @Override
     public String optionalFileLocation() {
       return file.getAbsolutePath();
     }
@@ -195,6 +199,7 @@ public class StandardGeneratorContext implements GeneratorContext {
       return result;
     }
 
+    @Override
     public void write(byte[] b) throws IOException {
       if (baos == null) {
         throw new IOException("stream closed");
@@ -202,6 +207,7 @@ public class StandardGeneratorContext implements GeneratorContext {
       baos.write(b);
     }
 
+    @Override
     public void write(byte[] b, int off, int len) throws IOException {
       if (baos == null) {
         throw new IOException("stream closed");
@@ -209,6 +215,7 @@ public class StandardGeneratorContext implements GeneratorContext {
       baos.write(b, off, len);
     }
 
+    @Override
     public void write(int b) throws IOException {
       if (baos == null) {
         throw new IOException("stream closed");
@@ -318,7 +325,7 @@ public class StandardGeneratorContext implements GeneratorContext {
    * Call this whenever generators are known to not be running to clear out
    * uncommitted compilation units and to force committed compilation units to
    * be parsed and added to the type oracle.
-   * 
+   *
    * @return any newly generated artifacts since the last call
    */
   public final ArtifactSet finish(TreeLogger logger)
@@ -422,8 +429,8 @@ public class StandardGeneratorContext implements GeneratorContext {
     setCurrentGenerator(generatorClass);
 
     long before = System.currentTimeMillis();
-    PerfLogger.start("Generator '" + generator.getClass().getName()
-        + "' produced '" + typeName + "'");
+    Event generatorEvent = SpeedTracerLogger.start(CompilerEventType.GENERATOR, "class",
+        generator.getClass().getName(), "type", typeName);
     try {
       String className = generator.generate(logger, this, typeName);
       long after = System.currentTimeMillis();
@@ -445,7 +452,7 @@ public class StandardGeneratorContext implements GeneratorContext {
           + "' threw an exception while rebinding '" + typeName + "'", e);
       throw new UnableToCompleteException();
     } finally {
-      PerfLogger.end();
+      generatorEvent.end();
     }
   }
 

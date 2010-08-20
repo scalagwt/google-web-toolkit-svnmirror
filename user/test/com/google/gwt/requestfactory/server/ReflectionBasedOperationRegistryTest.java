@@ -15,7 +15,6 @@
  */
 package com.google.gwt.requestfactory.server;
 
-import com.google.gwt.requestfactory.shared.RequestFactory;
 import com.google.gwt.valuestore.shared.SimpleFooRecord;
 
 import junit.framework.TestCase;
@@ -29,15 +28,16 @@ public class ReflectionBasedOperationRegistryTest extends TestCase {
 
   private ReflectionBasedOperationRegistry registry;
 
+  @Override
   public void setUp() {
     registry = new ReflectionBasedOperationRegistry(
         new DefaultSecurityProvider());
   }
 
   public void testGetOperationListNoArgs() {
-    RequestFactory.RequestDefinition request = registry.getOperation("com.google.gwt.requestfactory.server.SimpleFooRequest::findAll");
+    RequestDefinition request = registry.getOperation("com.google.gwt.valuestore.shared.SimpleFooRequest::findAll");
     assert request != null;
-    assertEquals("com.google.gwt.requestfactory.server.SimpleFoo",
+    assertEquals("com.google.gwt.valuestore.server.SimpleFoo",
         request.getDomainClassName());
     assertEquals("findAll", request.getDomainMethodName());
     assertEquals(SimpleFooRecord.class, request.getReturnType());
@@ -46,9 +46,9 @@ public class ReflectionBasedOperationRegistryTest extends TestCase {
   }
 
   public void testGetOperationScalarNoArgs() {
-    RequestFactory.RequestDefinition request = registry.getOperation("com.google.gwt.requestfactory.server.SimpleFooRequest::countSimpleFoo");
+    RequestDefinition request = registry.getOperation("com.google.gwt.valuestore.shared.SimpleFooRequest::countSimpleFoo");
     assert request != null;
-    assertEquals("com.google.gwt.requestfactory.server.SimpleFoo",
+    assertEquals("com.google.gwt.valuestore.server.SimpleFoo",
         request.getDomainClassName());
     assertEquals("countSimpleFoo", request.getDomainMethodName());
     assertEquals(Long.class, request.getReturnType());
@@ -57,9 +57,9 @@ public class ReflectionBasedOperationRegistryTest extends TestCase {
   }
 
   public void testGetOpertionScalarWithArgs() {
-    RequestFactory.RequestDefinition request = registry.getOperation("com.google.gwt.requestfactory.server.SimpleFooRequest::findSimpleFooById");
+    RequestDefinition request = registry.getOperation("com.google.gwt.valuestore.shared.SimpleFooRequest::findSimpleFooById");
     assert request != null;
-    assertEquals("com.google.gwt.requestfactory.server.SimpleFoo",
+    assertEquals("com.google.gwt.valuestore.server.SimpleFoo",
         request.getDomainClassName());
     assertEquals("findSimpleFooById", request.getDomainMethodName());
     assertEquals(SimpleFooRecord.class, request.getReturnType());
@@ -86,7 +86,7 @@ public class ReflectionBasedOperationRegistryTest extends TestCase {
   }
 
   public void testPrivateMethodFails() {
-    RequestFactory.RequestDefinition request = registry.getOperation("com.google.gwt.requestfactory.server.SimpleFooRequest::privateMethod");
+    RequestDefinition request = registry.getOperation("com.google.gwt.valuestore.shared.SimpleFooRequest::privateMethod");
     assert request == null;
   }
 }

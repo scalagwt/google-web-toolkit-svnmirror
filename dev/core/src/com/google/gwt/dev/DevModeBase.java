@@ -42,6 +42,9 @@ import com.google.gwt.dev.util.arg.ArgHandlerGenDir;
 import com.google.gwt.dev.util.arg.ArgHandlerLogLevel;
 import com.google.gwt.dev.util.arg.OptionGenDir;
 import com.google.gwt.dev.util.arg.OptionLogLevel;
+import com.google.gwt.dev.util.log.speedtracer.SpeedTracerLogger;
+import com.google.gwt.dev.util.log.speedtracer.DevModeEventType;
+import com.google.gwt.dev.util.log.speedtracer.SpeedTracerLogger.Event;
 import com.google.gwt.util.tools.ArgHandlerFlag;
 import com.google.gwt.util.tools.ArgHandlerString;
 
@@ -87,6 +90,8 @@ public abstract class DevModeBase implements DoneCallback {
 
     public ModuleSpaceHost createModuleSpaceHost(ModuleHandle module,
         String moduleName) throws UnableToCompleteException {
+      Event moduleSpaceHostCreateEvent =
+          SpeedTracerLogger.start(DevModeEventType.MODULE_SPACE_HOST_CREATE, "Module Name", moduleName);
       // TODO(jat): add support for closing an active module
       TreeLogger logger = module.getLogger();
       try {
@@ -101,6 +106,8 @@ public abstract class DevModeBase implements DoneCallback {
         logger.log(TreeLogger.ERROR, "Exception initializing module", e);
         module.unload();
         throw e;
+      } finally {
+        moduleSpaceHostCreateEvent.end();
       }
     }
   }
@@ -710,19 +717,6 @@ public abstract class DevModeBase implements DoneCallback {
     return buf.toString();
   }
   
-  /**
-   * Set up the system to use a DevModeLogManager, which will delegate to
-   * different LogManager instances for client and server code.
-   */
-  protected static void setLogManager() {
-    String oldLogManager = System.getProperty("java.util.logging.manager");
-    if (oldLogManager != null) {
-      System.setProperty("java.util.logging.oldLogManager", oldLogManager);
-    }
-    System.setProperty("java.util.logging.manager",
-        "com.google.gwt.dev.shell.DevModeLogManager");
-  }
-
   protected TreeLogger.Type baseLogLevelForUI = null;
 
   protected String bindAddress;
@@ -797,9 +791,6 @@ public abstract class DevModeBase implements DoneCallback {
     try {
       // Eager AWT init for OS X to ensure safe coexistence with SWT.
       BootStrapPlatform.initGui();
-
-      // Ensure that client and server logging does not share a root logger
-      setLogManager();
 
       boolean success = startUp();
 
@@ -1041,60 +1032,66 @@ public abstract class DevModeBase implements DoneCallback {
       throw new IllegalStateException("Startup code has already been run");
     }
 
-    // See if there was a UI specified by command-line args
-    ui = createUI();
-
-    started = true;
-
-    if (!doStartup()) {
-      /*
-       * TODO (amitmanjhi): Adding this redundant logging to narrow down a
-       * failure. Remove soon.
-       */
-      getTopLogger().log(TreeLogger.ERROR, "shell failed in doStartup method");
-      return false;
-    }
-
-    if (!options.isNoServer()) {
-      int resultPort = doStartUpServer();
-      if (resultPort < 0) {
+    Event startupEvent = SpeedTracerLogger.start(DevModeEventType.STARTUP);
+    try {
+      boolean result = false;
+      // See if there was a UI specified by command-line args
+      ui = createUI();
+  
+      started = true;
+  
+      if (!doStartup()) {
+        /*
+         * TODO (amitmanjhi): Adding this redundant logging to narrow down a
+         * failure. Remove soon.
+         */
+        getTopLogger().log(TreeLogger.ERROR, "shell failed in doStartup method");
+        return false;
+      }
+  
+      if (!options.isNoServer()) {
+        int resultPort = doStartUpServer();
+        if (resultPort < 0) {
+          /*
+           * TODO (amitmanjhi): Adding this redundant logging to narrow down a
+           * failure. Remove soon.
+           */
+          getTopLogger().log(TreeLogger.ERROR,
+              "shell failed in doStartupServer method");
+          return false;
+        }
+        options.setPort(resultPort);
+        getTopLogger().log(TreeLogger.TRACE,
+            "Started web server on port " + resultPort);
+      }
+  
+      if (options.getStartupURLs().isEmpty()) {
+        // if no URLs were supplied, try and find plausible ones
+        inferStartupUrls();
+      }
+  
+      if (options.getStartupURLs().isEmpty()) {
+        // TODO(jat): we could walk public resources to find plausible URLs
+        // after the module(s) are loaded
+        warnAboutNoStartupUrls();
+      }
+  
+      setStartupUrls(getTopLogger());
+  
+      if (!doSlowStartup()) {
         /*
          * TODO (amitmanjhi): Adding this redundant logging to narrow down a
          * failure. Remove soon.
          */
         getTopLogger().log(TreeLogger.ERROR,
-            "shell failed in doStartupServer method");
+            "shell failed in doSlowStartup method");
         return false;
       }
-      options.setPort(resultPort);
-      getTopLogger().log(TreeLogger.TRACE,
-          "Started web server on port " + resultPort);
+      
+      return true;
+    } finally {
+      startupEvent.end();
     }
-
-    if (options.getStartupURLs().isEmpty()) {
-      // if no URLs were supplied, try and find plausible ones
-      inferStartupUrls();
-    }
-
-    if (options.getStartupURLs().isEmpty()) {
-      // TODO(jat): we could walk public resources to find plausible URLs
-      // after the module(s) are loaded
-      warnAboutNoStartupUrls();
-    }
-
-    setStartupUrls(getTopLogger());
-
-    if (!doSlowStartup()) {
-      /*
-       * TODO (amitmanjhi): Adding this redundant logging to narrow down a
-       * failure. Remove soon.
-       */
-      getTopLogger().log(TreeLogger.ERROR,
-          "shell failed in doSlowStartup method");
-      return false;
-    }
-
-    return true;
   }
 
   /**
@@ -1120,6 +1117,8 @@ public abstract class DevModeBase implements DoneCallback {
   private DevModeUI createUI() {
     DevModeUI newUI = null;
 
+    Event createUIEvent = SpeedTracerLogger.start(DevModeEventType.CREATE_UI);
+
     if (headlessMode) {
       newUI = new HeadlessUI(options);
     } else {
@@ -1144,6 +1143,7 @@ public abstract class DevModeBase implements DoneCallback {
       baseLogLevelForUI = TreeLogger.Type.INFO;
     }
 
+    createUIEvent.end();
     return newUI;
   }
 

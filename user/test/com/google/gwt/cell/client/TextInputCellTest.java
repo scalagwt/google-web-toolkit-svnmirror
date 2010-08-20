@@ -1,12 +1,12 @@
 /*
  * Copyright 2010 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -21,20 +21,23 @@ import com.google.gwt.dom.client.NativeEvent;
 /**
  * Tests for {@link TextInputCell}.
  */
-public class TextInputCellTest extends CellTestBase<String> {
+public class TextInputCellTest extends EditableCellTestBase<String, String> {
 
-  public void testOnBrowserEvent() {
+  public void testOnBrowserEventChange() {
     NativeEvent event = Document.get().createChangeEvent();
-    testOnBrowserEvent(getExpectedInnerHtml(), event, null, "oldValue", "hello");
+    testOnBrowserEvent(
+        getExpectedInnerHtml(), event, "oldValue", null, "hello", "hello");
+  }
+
+  public void testOnBrowserEventKeyUp() {
+    NativeEvent event = Document.get().createKeyUpEvent(
+        false, false, false, false, 0);
+    testOnBrowserEvent(
+        getExpectedInnerHtml(), event, "oldValue", null, null, "hello");
   }
 
   @Override
-  protected boolean consumesEvents() {
-    return true;
-  }
-
-  @Override
-  protected Cell<String> createCell() {
+  protected TextInputCell createCell() {
     return new TextInputCell();
   }
 
@@ -44,8 +47,18 @@ public class TextInputCellTest extends CellTestBase<String> {
   }
 
   @Override
+  protected String createCellViewData() {
+    return "newValue";
+  }
+
+  @Override
   protected boolean dependsOnSelection() {
     return false;
+  }
+
+  @Override
+  protected String[] getConsumedEvents() {
+    return new String[]{"change", "keyup"};
   }
 
   @Override
@@ -56,5 +69,10 @@ public class TextInputCellTest extends CellTestBase<String> {
   @Override
   protected String getExpectedInnerHtmlNull() {
     return "<input type='text'></input>";
+  }
+
+  @Override
+  protected String getExpectedInnerHtmlViewData() {
+    return "<input type='text' value='newValue'></input>";
   }
 }

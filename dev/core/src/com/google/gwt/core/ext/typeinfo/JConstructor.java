@@ -24,11 +24,16 @@ import java.util.Map;
 public class JConstructor extends JAbstractMethod {
   private final JClassType enclosingType;
 
-  public JConstructor(JClassType enclosingType, String name) {
+  JConstructor(JClassType enclosingType, JConstructor ctor) {
+    super(ctor);
+    this.enclosingType = enclosingType;
+  }
+
+  JConstructor(JClassType enclosingType, String name) {
     this(enclosingType, name, null, null);
   }
 
-  public JConstructor(JClassType enclosingType, String name,
+  JConstructor(JClassType enclosingType, String name,
       Map<Class<? extends Annotation>, Annotation> declaredAnnotations,
       JTypeParameter[] jtypeParameters) {
     super(name, declaredAnnotations, jtypeParameters);
@@ -37,16 +42,12 @@ public class JConstructor extends JAbstractMethod {
     enclosingType.addConstructor(this);
   }
 
-  JConstructor(JClassType enclosingType, JConstructor ctor) {
-    super(ctor);
-    this.enclosingType = enclosingType;
-  }
-
   @Override
   public JClassType getEnclosingType() {
     return enclosingType;
   }
 
+  @Override
   public String getJsniSignature() {
     StringBuilder sb = new StringBuilder("@");
     sb.append(getEnclosingType().getQualifiedSourceName());

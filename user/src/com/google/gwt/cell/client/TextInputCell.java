@@ -1,12 +1,12 @@
 /*
  * Copyright 2010 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -21,35 +21,49 @@ import com.google.gwt.dom.client.NativeEvent;
 
 /**
  * A {@link AbstractCell} used to render a text input.
- * 
+ *
  * <p>
  * Note: This class is new and its interface subject to change.
  * </p>
  */
-public class TextInputCell extends AbstractCell<String> {
+public class TextInputCell extends AbstractEditableCell<String, String> {
 
-  @Override
-  public boolean consumesEvents() {
-    return true;
+  public TextInputCell() {
+    super("change", "keyup");
   }
 
   @Override
-  public Object onBrowserEvent(Element parent, String value, Object viewData,
+  public void onBrowserEvent(Element parent, String value, Object key,
       NativeEvent event, ValueUpdater<String> valueUpdater) {
-    if (valueUpdater != null && "change".equals(event.getType())) {
+    String eventType = event.getType();
+    if ("change".equals(eventType)) {
       InputElement input = parent.getFirstChild().cast();
-      valueUpdater.update(input.getValue());
+      String newValue = input.getValue();
+      setViewData(key, newValue);
+      if (valueUpdater != null) {
+        valueUpdater.update(newValue);
+      }
+    } else if ("keyup".equals(eventType)) {
+      // Record keys as they are typed.
+      InputElement input = parent.getFirstChild().cast();
+      setViewData(key, input.getValue());
     }
-
-    return viewData;
   }
 
   @Override
-  public void render(String data, Object viewData, StringBuilder sb) {
-    sb.append("<input type='text'");
-    if (data != null) {
-      sb.append(" value='" + data + "'");
+  public void render(String value, Object key, StringBuilder sb) {
+    // Get the view data.
+    String viewData = getViewData(key);
+    if (viewData != null && viewData.equals(value)) {
+      clearViewData(key);
+      viewData = null;
     }
-    sb.append("></input>");
+
+    String s = (viewData != null) ? viewData : (value != null ? value : null);
+    if (s != null) {
+      sb.append("<input type='text' value='").append(s).append("'></input>");
+    } else {
+      sb.append("<input type='text'></input>");
+    }
   }
 }

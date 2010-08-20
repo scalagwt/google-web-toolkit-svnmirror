@@ -1,12 +1,12 @@
 /*
  * Copyright 2008 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -24,7 +24,9 @@ import com.google.gwt.dev.jjs.ast.Context;
 import com.google.gwt.dev.jjs.ast.HasAnnotations;
 import com.google.gwt.dev.jjs.ast.HasEnclosingType;
 import com.google.gwt.dev.jjs.ast.JAnnotation;
+import com.google.gwt.dev.jjs.ast.JAnnotation.Property;
 import com.google.gwt.dev.jjs.ast.JAnnotationArgument;
+import com.google.gwt.dev.jjs.ast.JArrayLength;
 import com.google.gwt.dev.jjs.ast.JArrayRef;
 import com.google.gwt.dev.jjs.ast.JArrayType;
 import com.google.gwt.dev.jjs.ast.JAssertStatement;
@@ -49,6 +51,7 @@ import com.google.gwt.dev.jjs.ast.JEnumType;
 import com.google.gwt.dev.jjs.ast.JExpression;
 import com.google.gwt.dev.jjs.ast.JExpressionStatement;
 import com.google.gwt.dev.jjs.ast.JField;
+import com.google.gwt.dev.jjs.ast.JField.Disposition;
 import com.google.gwt.dev.jjs.ast.JFieldRef;
 import com.google.gwt.dev.jjs.ast.JFloatLiteral;
 import com.google.gwt.dev.jjs.ast.JForStatement;
@@ -90,8 +93,6 @@ import com.google.gwt.dev.jjs.ast.JUnaryOperator;
 import com.google.gwt.dev.jjs.ast.JVariable;
 import com.google.gwt.dev.jjs.ast.JVariableRef;
 import com.google.gwt.dev.jjs.ast.JWhileStatement;
-import com.google.gwt.dev.jjs.ast.JAnnotation.Property;
-import com.google.gwt.dev.jjs.ast.JField.Disposition;
 import com.google.gwt.dev.jjs.ast.js.JsniFieldRef;
 import com.google.gwt.dev.jjs.ast.js.JsniMethodBody;
 import com.google.gwt.dev.jjs.ast.js.JsniMethodRef;
@@ -102,6 +103,10 @@ import com.google.gwt.dev.js.ast.JsNameRef;
 import com.google.gwt.dev.js.ast.JsProgram;
 import com.google.gwt.dev.util.JsniRef;
 import com.google.gwt.dev.util.collect.Lists;
+import com.google.gwt.dev.util.collect.Maps;
+import com.google.gwt.dev.util.log.speedtracer.CompilerEventType;
+import com.google.gwt.dev.util.log.speedtracer.SpeedTracerLogger;
+import com.google.gwt.dev.util.log.speedtracer.SpeedTracerLogger.Event;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ast.AND_AND_Expression;
@@ -213,14 +218,14 @@ public class GenerateJavaAST {
    * JProgram. By the end of this pass, the produced AST should contain every
    * piece of information we'll ever need about the code. The JDT nodes should
    * never again be referenced after this.
-   * 
+   *
    * This is implemented as a reflective visitor for JDT's AST. The advantage of
    * doing it reflectively is that if we run into any JDT nodes we can't handle,
    * we'll automatically throw an exception. If we had subclassed
    * {@link org.eclipse.jdt.internal.compiler.ast.ASTNode} we'd have to override
    * every single method and explicitly throw an exception to get the same
    * behavior.
-   * 
+   *
    * NOTE ON JDT FORCED OPTIMIZATIONS - If JDT statically determines that a
    * section of code in unreachable, it won't fully resolve that section of
    * code. This invalid-state code causes us major problems. As a result, we
@@ -230,6 +235,13 @@ public class GenerateJavaAST {
   // Reflective invocation causes unused warnings.
   @SuppressWarnings("unused")
   private static class JavaASTGenerationVisitor {
+
+    /**
+     * The literal for the JLS identifier that represents the length
+     * field on an array.
+     */
+    private static final String ARRAY_LENGTH_FIELD = "length";
+
     private static InternalCompilerException translateException(JNode node,
         Throwable e) {
       if (e instanceof VirtualMachineError) {
@@ -260,6 +272,8 @@ public class GenerateJavaAST {
     private JMethodBody currentMethodBody;
 
     private MethodScope currentMethodScope;
+
+    private Map<JField, JParameter> currentOuterThisRefParams;
 
     private int[] currentSeparatorPositions;
 
@@ -295,7 +309,7 @@ public class GenerateJavaAST {
      * inherits that implements an interface method but that has a different
      * erased signature from the interface method.
      * </p>
-     * 
+     *
      * <p>
      * The need for these bridges was pointed out in issue 3064. The goal is
      * that virtual method calls through an interface type are translated to
@@ -310,7 +324,7 @@ public class GenerateJavaAST {
      * case, a bridge method should be added that overrides the interface method
      * and then calls the implementation method.
      * </p>
-     * 
+     *
      * <p>
      * This method should only be called once all regular, non-bridge methods
      * have been installed on the GWT types.
@@ -341,7 +355,7 @@ public class GenerateJavaAST {
     }
 
     public void processEnumType(JEnumType type) {
-      // Generate the synthetic values() and valueOf() methods.
+      // Generate the synthetic values() method.
       JField valuesField = null;
       for (JMethod method : type.getMethods()) {
         currentMethod = method;
@@ -355,21 +369,23 @@ public class GenerateJavaAST {
         currentMethodBody = null;
         currentMethod = null;
       }
-      // Generate the synthetic values() and valueOf() methods.
-      for (JMethod method : type.getMethods()) {
-        currentMethod = method;
-        if ("valueOf".equals(method.getName())) {
-          if (method.getParams().size() != 1) {
-            continue;
+      // Generate the synthetic valueOf() method.
+      if (isScript(program)) {
+        for (JMethod method : type.getMethods()) {
+          currentMethod = method;
+          if ("valueOf".equals(method.getName())) {
+            if (method.getParams().size() != 1) {
+              continue;
+            }
+            if (method.getParams().get(0).getType() != program.getTypeJavaLangString()) {
+              continue;
+            }
+            currentMethodBody = (JMethodBody) method.getBody();
+            writeEnumValueOfMethod(type, valuesField);
           }
-          if (method.getParams().get(0).getType() != program.getTypeJavaLangString()) {
-            continue;
-          }
-          currentMethodBody = (JMethodBody) method.getBody();
-          writeEnumValueOfMethod(type, valuesField);
+          currentMethodBody = null;
+          currentMethod = null;
         }
-        currentMethodBody = null;
-        currentMethod = null;
       }
     }
 
@@ -461,7 +477,7 @@ public class GenerateJavaAST {
             currentClass.getMethods().remove(2);
           } else {
             tryFindUpRefs(method);
-            if (currentClass == program.getIndexedType("Array")) {
+            if (isScript(program) && currentClass == program.getIndexedType("Array")) {
               // Special implementation: return this.arrayClass
               SourceInfo info = method.getSourceInfo();
               implementMethod(method, new JFieldRef(info, new JThisRef(info,
@@ -473,13 +489,16 @@ public class GenerateJavaAST {
           }
         }
 
-        // Reimplement GWT.isClient() and GWT.isScript() to return true
+        // Reimplement GWT.isClient(), GWT.isProdMode(), GWT.isScript().
         if (currentClass == program.getIndexedType("GWT")) {
           JMethod method = program.getIndexedMethod("GWT.isClient");
           implementMethod(method, program.getLiteralBoolean(true));
 
-          method = program.getIndexedMethod("GWT.isScript");
+          method = program.getIndexedMethod("GWT.isProdMode");
           implementMethod(method, program.getLiteralBoolean(true));
+
+          method = program.getIndexedMethod("GWT.isScript");
+          implementMethod(method, program.getLiteralBoolean(isScript(program)));
         }
 
         // Implement various methods on Class
@@ -517,6 +536,7 @@ public class GenerateJavaAST {
       }
 
       try {
+        // TODO: This is really slow! Cache or otherwise fix.
         Method method = getClass().getDeclaredMethod(name, child.getClass());
         return (JNode) method.invoke(this, child);
       } catch (Throwable e) {
@@ -640,7 +660,7 @@ public class GenerateJavaAST {
      * Java that glue code is a semantic error, because a this/super call must
      * be the first statement of your constructor. On the upside, optimizations
      * work the same on our synthetic fields as with any user fields.
-     * 
+     *
      * The order of emulation is: - assign all synthetic fields from synthetic
      * args - call our super constructor emulation method - call our instance
      * initializer emulation method - run user code
@@ -655,13 +675,6 @@ public class GenerateJavaAST {
         currentMethodBody = ctor.getBody();
         currentMethodScope = x.scope;
 
-        JMethodCall superOrThisCall = null;
-        ExplicitConstructorCall ctorCall = x.constructorCall;
-        if (ctorCall != null) {
-          superOrThisCall = (JMethodCall) dispatch("processExpression",
-              ctorCall);
-        }
-
         /*
          * Determine if we have an explicit this call. The presence of an
          * explicit this call indicates we can skip certain initialization steps
@@ -669,11 +682,12 @@ public class GenerateJavaAST {
          * steps are 1) assigning synthetic args to fields and 2) running
          * initializers.
          */
-        boolean hasExplicitThis = (ctorCall != null)
-            && !ctorCall.isSuperAccess();
+        boolean hasExplicitThis = (x.constructorCall != null)
+            && !x.constructorCall.isSuperAccess();
 
         JClassType enclosingType = ctor.getEnclosingType();
         JBlock block = currentMethodBody.getBlock();
+        currentOuterThisRefParams = Maps.create();
 
         /*
          * All synthetic fields must be assigned, unless we have an explicit
@@ -693,6 +707,8 @@ public class GenerateJavaAST {
                   block.addStmt(JProgram.createAssignmentStmt(info,
                       createVariableRef(info, field), createVariableRef(info,
                           param)));
+                  currentOuterThisRefParams = Maps.put(
+                      currentOuterThisRefParams, field, param);
                 }
               }
             }
@@ -710,19 +726,20 @@ public class GenerateJavaAST {
           }
         }
 
-        // Enums: wire up synthetic name/ordinal params to the super method.
-        if (enclosingType.isEnumOrSubclass() != null) {
-          assert (superOrThisCall != null);
-          JVariableRef enumNameRef = createVariableRef(
-              superOrThisCall.getSourceInfo(), ctor.getParams().get(0));
-          superOrThisCall.addArg(0, enumNameRef);
-          JVariableRef enumOrdinalRef = createVariableRef(
-              superOrThisCall.getSourceInfo(), ctor.getParams().get(1));
-          superOrThisCall.addArg(1, enumOrdinalRef);
-        }
-
         // optional this or super constructor call
-        if (superOrThisCall != null) {
+        if (x.constructorCall != null) {
+          JMethodCall superOrThisCall = (JMethodCall) dispatch(
+              "processExpression", x.constructorCall);
+          // Enums: wire up synthetic name/ordinal params to the super method.
+          if (enclosingType.isEnumOrSubclass() != null) {
+            JVariableRef enumNameRef = createVariableRef(
+                superOrThisCall.getSourceInfo(), ctor.getParams().get(0));
+            superOrThisCall.addArg(0, enumNameRef);
+            JVariableRef enumOrdinalRef = createVariableRef(
+                superOrThisCall.getSourceInfo(), ctor.getParams().get(1));
+            superOrThisCall.addArg(1, enumOrdinalRef);
+          }
+
           superOrThisCall.setStaticDispatchOnly();
           block.addStmt(superOrThisCall.makeStatement());
         }
@@ -743,6 +760,7 @@ public class GenerateJavaAST {
         // user code (finally!)
         block.addStmts(processStatements(x.statements));
 
+        currentOuterThisRefParams = null;
         currentMethodScope = null;
         currentMethod = null;
       } catch (Throwable e) {
@@ -752,7 +770,7 @@ public class GenerateJavaAST {
 
     JExpression processExpression(AllocationExpression x) {
       SourceInfo info = makeSourceInfo(x);
-      SourceTypeBinding typeBinding = erasure(x.resolvedType);
+      TypeBinding typeBinding = erasure(x.resolvedType);
       if (typeBinding.constantPoolName() == null) {
         /*
          * Weird case: if JDT determines that this local class is totally
@@ -765,7 +783,7 @@ public class GenerateJavaAST {
       JConstructor ctor = (JConstructor) typeMap.get(b);
       JMethodCall call;
       JClassType javaLangString = program.getTypeJavaLangString();
-      if (newType == javaLangString) {
+      if (newType == javaLangString && !newType.isExternal()) {
         /*
          * MAGIC: java.lang.String is implemented as a JavaScript String
          * primitive with a modified prototype. This requires funky handling of
@@ -1071,19 +1089,18 @@ public class GenerateJavaAST {
 
     JExpression processExpression(FieldReference x) {
       FieldBinding fieldBinding = x.binding;
-      JField field;
-      if (fieldBinding.declaringClass == null) {
-        // probably array.length
-        field = program.getIndexedField("Array.length");
-        if (!field.getName().equals(String.valueOf(fieldBinding.name))) {
-          throw new InternalCompilerException("Error matching fieldBinding.");
-        }
-      } else {
-        field = (JField) typeMap.get(fieldBinding);
-      }
       SourceInfo info = makeSourceInfo(x);
       JExpression instance = dispProcessExpression(x.receiver);
-      JExpression fieldRef = new JFieldRef(info, instance, field, currentClass);
+      JExpression expr;
+      if (fieldBinding.declaringClass == null) {
+        if (!ARRAY_LENGTH_FIELD.equals(String.valueOf(fieldBinding.name))) {
+          throw new InternalCompilerException("Expected [array].length.");
+        }
+        expr = new JArrayLength(info, instance);
+      } else {
+        JField field = (JField) typeMap.get(fieldBinding);
+        expr = new JFieldRef(info, instance, field, currentClass);
+      }
 
       if (x.genericCast != null) {
         JType castType = (JType) typeMap.get(x.genericCast);
@@ -1091,9 +1108,9 @@ public class GenerateJavaAST {
          * Note, this may result in an invalid AST due to an LHS cast operation.
          * We fix this up in FixAssignmentToUnbox.
          */
-        return maybeCast(castType, fieldRef);
+        return maybeCast(castType, expr);
       }
-      return fieldRef;
+      return expr;
     }
 
     JExpression processExpression(InstanceOfExpression x) {
@@ -1288,18 +1305,16 @@ public class GenerateJavaAST {
       if (x.otherBindings != null) {
         for (int i = 0; i < x.otherBindings.length; ++i) {
           FieldBinding fieldBinding = x.otherBindings[i];
-          JField field;
           if (fieldBinding.declaringClass == null) {
             // probably array.length
-            field = program.getIndexedField("Array.length");
-            if (!field.getName().equals(String.valueOf(fieldBinding.name))) {
-              throw new InternalCompilerException(
-                  "Error matching fieldBinding.");
+            if (!ARRAY_LENGTH_FIELD.equals(String.valueOf(fieldBinding.name))) {
+              throw new InternalCompilerException("Expected [array].length.");
             }
+            curRef = new JArrayLength(info, curRef);
           } else {
-            field = (JField) typeMap.get(fieldBinding);
+            JField field = (JField) typeMap.get(fieldBinding);
+            curRef = new JFieldRef(info, curRef, field, currentClass);
           }
-          curRef = new JFieldRef(info, curRef, field, currentClass);
           if (x.otherGenericCasts != null && x.otherGenericCasts[i] != null) {
             JType castType = (JType) typeMap.get(x.otherGenericCasts[i]);
             curRef = maybeCast(castType, curRef);
@@ -1612,9 +1627,8 @@ public class GenerateJavaAST {
         initializers.add(createDeclaration(info, indexVar,
             program.getLiteralInt(0)));
         // int i$max = i$array.length
-        initializers.add(createDeclaration(info, maxVar, new JFieldRef(info,
-            createVariableRef(info, arrayVar),
-            program.getIndexedField("Array.length"), currentClass)));
+        initializers.add(createDeclaration(info, maxVar, new JArrayLength(info,
+            new JLocalRef(info, arrayVar))));
 
         // i$index < i$max
         JExpression condition = new JBinaryOperation(info,
@@ -1666,6 +1680,7 @@ public class GenerateJavaAST {
         if (elementVar.getType() != program.getTypeJavaLangObject()) {
           TypeBinding collectionType;
           try {
+            // TODO: This is slow! Cache lookup.
             Field privateField = ForeachStatement.class.getDeclaredField("collectionElementType");
             privateField.setAccessible(true);
             collectionType = (TypeBinding) privateField.get(x);
@@ -1871,7 +1886,7 @@ public class GenerateJavaAST {
                * Got to be one of my params; it would be illegal to use a this
                * ref at this moment-- we would most likely be passing in a
                * supertype field that HASN'T BEEN INITIALIZED YET.
-               * 
+               *
                * Unfortunately, my params might not work as-is, so we have to
                * check each one to see if any will make a suitable this ref.
                */
@@ -1955,18 +1970,21 @@ public class GenerateJavaAST {
       return call;
     }
 
-    private void addAllOuterThisRefs(List<? super JFieldRef> list,
+    private void addAllOuterThisRefs(List<? super JVariableRef> list,
         JExpression expr, JClassType classType) {
-      if (classType.getFields().size() > 0) {
-        JField field = classType.getFields().get(0);
-        /*
-         * In some circumstances, the outer this ref can be captured as a local
-         * value (val$this), in other cases, as a this ref (this$).
-         * 
-         * TODO: investigate using more JDT node information as an alternative
-         */
-        if (field.getName().startsWith("this$")
-            || field.getName().startsWith("val$this$")) {
+      for (JField field : classType.getFields()) {
+        // This fields are always first.
+        if (!field.isThisRef()) {
+          break;
+        }
+        // In a constructor, use the local param instead of the field.
+        JParameter param = null;
+        if (currentOuterThisRefParams != null && expr instanceof JThisRef) {
+          param = currentOuterThisRefParams.get(field);
+        }
+        if (param != null) {
+          list.add(new JParameterRef(expr.getSourceInfo(), param));
+        } else {
           list.add(new JFieldRef(expr.getSourceInfo(), expr, field,
               currentClass));
         }
@@ -1974,7 +1992,8 @@ public class GenerateJavaAST {
     }
 
     private void addAllOuterThisRefsPlusSuperChain(
-        List<? super JFieldRef> workList, JExpression expr, JClassType classType) {
+        List<? super JVariableRef> workList, JExpression expr,
+        JClassType classType) {
       for (; classType != null; classType = classType.getSuperClass()) {
         addAllOuterThisRefs(workList, expr, classType);
       }
@@ -2040,7 +2059,7 @@ public class GenerateJavaAST {
     /**
      * Create a bridge method. It calls a same-named method with the same
      * arguments, but with a different type signature.
-     * 
+     *
      * @param clazz The class to put the bridge method in
      * @param jdtBridgeMethod The corresponding bridge method added in the JDT
      * @param implmeth The implementation method to bridge to
@@ -2150,13 +2169,13 @@ public class GenerateJavaAST {
      * refs up an arbitrarily big tree of enclosing classes and
      * supertypes-with-enclosing-classes until we find something that's the
      * right type.
-     * 
+     *
      * We have this implemented as a Breadth-First Search to minimize the number
      * of derefs required, and this seems to be correct. Note that we explicitly
      * prefer the current expression as one of its supertypes over a synthetic
      * this ref rooted off the current expression that happens to be the correct
      * type. We have observed this to be consistent with how Java handles it.
-     * 
+     *
      * TODO(scottb): could we get this info directly from JDT?
      */
     private JExpression createThisRef(JReferenceType qualType,
@@ -2249,11 +2268,11 @@ public class GenerateJavaAST {
       return createVariableRef(info, variable);
     }
 
-    private SourceTypeBinding erasure(TypeBinding typeBinding) {
+    private TypeBinding erasure(TypeBinding typeBinding) {
       if (typeBinding instanceof ParameterizedTypeBinding) {
-        typeBinding = ((ParameterizedTypeBinding) typeBinding).erasure();
+        typeBinding = typeBinding.erasure();
       }
-      return (SourceTypeBinding) typeBinding;
+      return typeBinding;
     }
 
     private JInterfaceType getOrCreateExternalType(SourceInfo info,
@@ -2378,7 +2397,7 @@ public class GenerateJavaAST {
 
     /**
      * Check whether the specified type is definitely for an enum class.
-     * 
+     *
      * @param type The type being tested
      * @return whether it is certainly an enum
      */
@@ -2425,7 +2444,7 @@ public class GenerateJavaAST {
      * obvious way to tell, but the clue we can get from JDT is that the local's
      * containing method won't be the same as the method we're currently
      * processing.
-     * 
+     *
      * Once we have this clue, we can use getEmulationPath to compute the
      * current class's binding for that field.
      */
@@ -2597,7 +2616,7 @@ public class GenerateJavaAST {
        * innermost type (in other words, a needless qualifier), it must refer to
        * that innermost type, because a class can never be nested inside of
        * itself. In this case, we must treat it as if it were not qualified.
-       * 
+       *
        * In all other cases, the qualified thisref or superref cannot possibly
        * refer to the innermost type (even if the innermost type could be cast
        * to a compatible type), so we must create a reference to some outer
@@ -2769,7 +2788,7 @@ public class GenerateJavaAST {
         /*
          * Make an inner class to hold a lazy-init name-value map. We use a
          * class to take advantage of its clinit.
-         * 
+         *
          * class Map { $MAP = Enum.createValueOfMap($VALUES); }
          */
         SourceInfo sourceInfo = type.getSourceInfo().makeChild(
@@ -2957,7 +2976,8 @@ public class GenerateJavaAST {
             JsniCollector.reportJsniError(info, methodDecl,
                 "Cannot make a qualified reference to the static method "
                     + method.getName());
-          } else if (method.needsVtable() && nameRef.getQualifier() == null) {
+          } else if (method.needsVtable() && nameRef.getQualifier() == null
+              && !(method instanceof JConstructor)) {
             JsniCollector.reportJsniError(info, methodDecl,
                 "Cannot make an unqualified reference to the instance method "
                     + method.getName());
@@ -3051,6 +3071,7 @@ public class GenerateJavaAST {
    */
   public static void exec(TypeDeclaration[] types, TypeMap typeMap,
       JProgram jprogram, JsProgram jsProgram, JJSOptions options) {
+    Event generateJavaAstEvent = SpeedTracerLogger.start(CompilerEventType.GENERATE_JAVA_AST);
     // Construct the basic AST.
     JavaASTGenerationVisitor v = new JavaASTGenerationVisitor(typeMap,
         jprogram, options);
@@ -3065,6 +3086,7 @@ public class GenerateJavaAST {
     // Process JSNI.
     Map<JsniMethodBody, AbstractMethodDeclaration> jsniMethodMap = v.getJsniMethodMap();
     new JsniRefGenerationVisitor(jprogram, jsProgram, jsniMethodMap).accept(jprogram);
+    generateJavaAstEvent.end();
   }
 
   /**
@@ -3091,11 +3113,15 @@ public class GenerateJavaAST {
     if (condition != null) {
       Constant cst = condition.optimizedBooleanConstant();
       if (cst != Constant.NotAConstant) {
-        if (cst.booleanValue() == true) {
+        if (cst.booleanValue()) {
           return true;
         }
       }
     }
     return false;
+  }
+
+  private static boolean isScript(JProgram program) {
+    return !program.getTypeJavaLangObject().isExternal();
   }
 }

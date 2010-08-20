@@ -15,9 +15,6 @@
  */
 package com.google.gwt.view.client;
 
-import com.google.gwt.view.client.SelectionModel.SelectionChangeEvent;
-import com.google.gwt.view.client.SelectionModel.SelectionChangeHandler;
-
 import java.util.HashSet;
 import java.util.Set;
 
@@ -46,7 +43,7 @@ public class MultiSelectionModelTest extends AbstractSelectionModelTest {
 
   public void testSelectedChangeEvent() {
     MultiSelectionModel<String> model = createSelectionModel();
-    SelectionChangeHandler handler = new SelectionChangeHandler() {
+    SelectionChangeEvent.Handler handler = new SelectionChangeEvent.Handler() {
       public void onSelectionChange(SelectionChangeEvent event) {
         finishTest();
       }
@@ -55,6 +52,35 @@ public class MultiSelectionModelTest extends AbstractSelectionModelTest {
 
     delayTestFinish(2000);
     model.setSelected("test", true);
+  }
+  
+  public void testNoDuplicateChangeEvent() {
+    MultiSelectionModel<String> model = createSelectionModel();
+    SelectionChangeEvent.Handler handler = new SelectionChangeEvent.Handler() {
+      public void onSelectionChange(SelectionChangeEvent event) {
+        fail();
+      }
+    };
+
+    model.setSelected("test", true);
+    model.addSelectionChangeHandler(handler);
+    model.setSelected("test", true); // Should not fire change event
+    model.setSelected("test", true); // Should not fire change event
+  }
+  
+  public void testNoDuplicateChangeEvent2() {
+    MultiSelectionModel<String> model = createSelectionModel();
+    SelectionChangeEvent.Handler handler = new SelectionChangeEvent.Handler() {
+      public void onSelectionChange(SelectionChangeEvent event) {
+        fail();
+      }
+    };
+
+    model.setSelected("test", true);
+    model.setSelected("test", false);
+    model.addSelectionChangeHandler(handler);
+    model.setSelected("test", false); // Should not fire change event
+    model.setSelected("test", false); // Should not fire change event
   }
 
   public void testSetSelected() {

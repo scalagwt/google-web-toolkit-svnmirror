@@ -15,6 +15,10 @@
  */
 package com.google.gwt.requestfactory.client.impl;
 
+import com.google.gwt.valuestore.shared.SyncResult;
+
+import java.util.Set;
+
 /**
  * <p>
  * <span style="color:red">Experimental API: This class is still under rapid
@@ -22,18 +26,20 @@ package com.google.gwt.requestfactory.client.impl;
  * </span>
  * </p>
  * Abstract implementation of
- * {@link com.google.gwt.requestfactory.shared.RequestFactory.RequestObject
+ * {@link com.google.gwt.requestfactory.shared.RequestObject
  * RequestFactory.RequestObject} for requests that return Integer.
  */
 public abstract class AbstractIntegerRequest extends
-    AbstractRequest<Integer, AbstractIntegerRequest> {
+    AbstractPrimitiveRequest<Integer, AbstractIntegerRequest> {
 
   public AbstractIntegerRequest(RequestFactoryJsonImpl requestFactory) {
     super(requestFactory);
   }
 
-  public void handleResponseText(String responseText) {
-    receiver.onSuccess(Integer.valueOf(responseText));
+  @Override
+  public void handlePrimitiveResult(String responseText,
+      Set<SyncResult> syncResults) {
+    receiver.onSuccess(Integer.valueOf(responseText), syncResults);
   }
 
   @Override

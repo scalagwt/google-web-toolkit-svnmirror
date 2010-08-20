@@ -17,6 +17,7 @@ package com.google.gwt.requestfactory.shared;
 
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
+import com.google.gwt.http.client.Response;
 
 /**
  * <p>
@@ -44,9 +45,14 @@ public class RequestEvent extends GwtEvent<RequestEvent.Handler> {
   public static final Type<Handler> TYPE = new Type<Handler>();
 
   private final State state;
+  
+  // Will only be non-null if this is an event of type RECIEVED, and the
+  // RPC was successful
+  private final Response response;
 
-  public RequestEvent(State state) {
+  public RequestEvent(State state, Response response) {
     this.state = state;
+    this.response = response;
   }
   
   @Override
@@ -54,6 +60,10 @@ public class RequestEvent extends GwtEvent<RequestEvent.Handler> {
     return TYPE;
   }
 
+  public Response getResponse() {
+    return response;
+  }
+  
   public State getState() {
     return state;
   }

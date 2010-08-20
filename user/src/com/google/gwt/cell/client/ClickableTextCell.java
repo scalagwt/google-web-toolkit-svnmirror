@@ -19,32 +19,30 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 
 /**
- * A {@link Cell} used to render text. Clicking on the call causes its
+ * A {@link Cell} used to render text. Clicking on the cell causes its
  * {@link ValueUpdater} to be called.
- * 
+ *
  * <p>
  * Note: This class is new and its interface subject to change.
  * </p>
  */
 public class ClickableTextCell extends AbstractCell<String> {
 
-  @Override
-  public boolean consumesEvents() {
-    return true;
+  public ClickableTextCell() {
+    super("click");
   }
 
   @Override
-  public Object onBrowserEvent(Element parent, String value, Object viewData,
+  public void onBrowserEvent(Element parent, String value, Object key,
       NativeEvent event, ValueUpdater<String> valueUpdater) {
     String type = event.getType();
     if (valueUpdater != null && type.equals("click")) {
       valueUpdater.update(value);
     }
-    return null;
   }
 
   @Override
-  public void render(String value, Object viewData, StringBuilder sb) {
+  public void render(String value, Object key, StringBuilder sb) {
     if (value != null) {
       sb.append(value);
     }

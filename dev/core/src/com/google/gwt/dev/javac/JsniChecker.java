@@ -16,6 +16,7 @@
 package com.google.gwt.dev.javac;
 
 import com.google.gwt.core.client.UnsafeNativeLong;
+import com.google.gwt.dev.jdt.SafeASTVisitor;
 import com.google.gwt.dev.jjs.InternalCompilerException;
 import com.google.gwt.dev.jjs.SourceInfo;
 import com.google.gwt.dev.js.ast.JsContext;
@@ -28,7 +29,6 @@ import com.google.gwt.dev.util.JsniRef;
 import com.google.gwt.dev.util.collect.Sets;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
-import org.eclipse.jdt.internal.compiler.ASTVisitor;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.Annotation;
@@ -83,7 +83,7 @@ public class JsniChecker {
     ReferenceBinding resolveType(String typeName);
   }
 
-  private class JsniDeclChecker extends ASTVisitor implements
+  private class JsniDeclChecker extends SafeASTVisitor implements
       ClassFileConstants {
     @Override
     public void endVisit(MethodDeclaration meth, ClassScope scope) {
@@ -100,16 +100,19 @@ public class JsniChecker {
       suppressWarningsStack.pop();
     }
 
-    public void endVisit(TypeDeclaration typeDeclaration, BlockScope scope) {
-      suppressWarningsStack.pop();
-    }
-
+    @Override
     public void endVisit(TypeDeclaration typeDeclaration, ClassScope scope) {
       suppressWarningsStack.pop();
     }
 
+    @Override
     public void endVisit(TypeDeclaration typeDeclaration,
         CompilationUnitScope scope) {
+      suppressWarningsStack.pop();
+    }
+
+    @Override
+    public void endVisitValid(TypeDeclaration typeDeclaration, BlockScope scope) {
       suppressWarningsStack.pop();
     }
 
@@ -119,19 +122,21 @@ public class JsniChecker {
       return true;
     }
 
-    public boolean visit(TypeDeclaration typeDeclaration, BlockScope scope) {
-      suppressWarningsStack.push(getSuppressedWarnings(typeDeclaration.annotations));
-      return true;
-    }
-
     @Override
     public boolean visit(TypeDeclaration typeDeclaration, ClassScope scope) {
       suppressWarningsStack.push(getSuppressedWarnings(typeDeclaration.annotations));
       return true;
     }
 
+    @Override
     public boolean visit(TypeDeclaration typeDeclaration,
         CompilationUnitScope scope) {
+      suppressWarningsStack.push(getSuppressedWarnings(typeDeclaration.annotations));
+      return true;
+    }
+
+    @Override
+    public boolean visitValid(TypeDeclaration typeDeclaration, BlockScope scope) {
       suppressWarningsStack.push(getSuppressedWarnings(typeDeclaration.annotations));
       return true;
     }
@@ -495,8 +500,8 @@ public class JsniChecker {
   }
 
   /**
-   * Check whether the argument type is the <code>long</code> primitive type.
-   * If the argument is <code>null</code>, returns <code>false</code>.
+   * Check whether the argument type is the <code>long</code> primitive type. If
+   * the argument is <code>null</code>, returns <code>false</code>.
    */
   private boolean containsLong(TypeBinding type) {
     if (type instanceof BaseTypeBinding) {

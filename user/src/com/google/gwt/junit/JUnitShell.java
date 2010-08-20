@@ -58,9 +58,8 @@ import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 import junit.framework.TestResult;
 
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.jetty.webapp.WebAppContext;
+import org.mortbay.jetty.Server;
+import org.mortbay.jetty.webapp.WebAppContext;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
@@ -531,7 +530,6 @@ public class JUnitShell extends DevMode {
      * system classloader to dominate. This makes JUnitHostImpl live in the
      * right classloader (mine).
      */
-    @SuppressWarnings("unchecked")
     @Override
     protected WebAppContext createWebAppContext(TreeLogger logger,
         File appRootDir) {
@@ -539,7 +537,7 @@ public class JUnitShell extends DevMode {
         {
           // Prevent file locking on Windows; pick up file changes.
           getInitParams().put(
-              "org.eclipse.jetty.servlet.Default.useFileMappedBuffer", "false");
+              "org.mortbay.jetty.servlet.Default.useFileMappedBuffer", "false");
 
           // Prefer the parent class loader so that JUnit works.
           setParentLoaderPriority(true);
@@ -706,10 +704,6 @@ public class JUnitShell extends DevMode {
     } else if (unit.isError()) {
       errMsg = "The test class '" + typeName
           + "' had compile errors; check log for details";
-    } else if (!unit.isCompiled()) {
-      errMsg = "The test class '"
-          + typeName
-          + "' depends on a unit that had compile errors; check log for details";
     } else {
       errMsg = "Unexpected error: the test class '"
           + typeName
@@ -881,8 +875,8 @@ public class JUnitShell extends DevMode {
   private int tries;
 
   /**
-   * Enforce the singleton pattern. The call to GWTShell's ctor forces server
-   * mode and disables processing extra arguments as URLs to be shown.
+   * Enforce the singleton pattern. The call to {@link GWTShell}'s ctor forces
+   * server mode and disables processing extra arguments as URLs to be shown.
    */
   private JUnitShell() {
     setRunTomcat(true);
@@ -1017,7 +1011,8 @@ public class JUnitShell extends DevMode {
                 + testBatchingMethodTimeoutMillis
                 + "ms.\n  We have no results from:\n"
                 + messageQueue.getWorkingClients(currentTestInfo)
-                + "Actual time elapsed: " + elapsed + " seconds.\n");
+                + "Actual time elapsed: " + elapsed + " seconds.\n"
+                + "Try increasing this timeout using the '-testMethodTimeout minutes' option\n");
       }
     } else if (testBeginTimeout < currentTimeMillis) {
       double elapsed = (currentTimeMillis - testBeginTime) / 1000.0;
@@ -1025,7 +1020,9 @@ public class JUnitShell extends DevMode {
           "The browser did not contact the server within "
               + baseTestBeginTimeoutMillis + "ms.\n"
               + messageQueue.getUnretrievedClients(currentTestInfo)
-              + "\n Actual time elapsed: " + elapsed + " seconds.\n");
+              + "\n Actual time elapsed: " + elapsed + " seconds.\n"
+              + "Try increasing this timeout using the '-testBeginTimeout minutes' option\n"
+              + "The default value of minutes is 1, i.e., the server waits 1 minute or 60 seconds.\n");
     }
 
     // Check that we haven't lost communication with a remote host.
@@ -1082,22 +1079,29 @@ public class JUnitShell extends DevMode {
       String servletClass = module.findServletForPath(path);
       path = '/' + module.getName() + path;
       if (!servletClass.equals(loadedServletsByPath.get(path))) {
-        ServletHolder holder = wac.addServlet(servletClass, path);
-        if (holder.isAvailable()) {
+        try {
+          Class<?> clazz = wac.loadClass(servletClass);
+          wac.addServlet(clazz, path);
           loadedServletsByPath.put(path, servletClass);
-        } else {
+        } catch (ClassNotFoundException e) {
           getTopLogger().log(
               TreeLogger.WARN,
               "Failed to load servlet class '" + servletClass
-                  + "' declared in '" + module.getName() + "'");
+                  + "' declared in '" + module.getName() + "'", e);
         }
       }
     }
     if (developmentMode) {
-      // BACKWARDS COMPATIBILITY: most linkers currently fail in dev mode.
-      if (module.getLinker("std") != null) {
-        // TODO: unfortunately, this could be race condition between dev/prod
-        module.addLinker("std");
+      // BACKWARDS COMPATIBILITY: many linkers currently fail in dev mode.
+      try {
+        if (!module.getActivePrimaryLinker().newInstance().supportsDevMode()) {
+          if (module.getLinker("std") != null) {
+            // TODO: unfortunately, this could be race condition between dev/prod
+            module.addLinker("std");
+          }
+        }
+      } catch (Exception e) {
+        getTopLogger().log(TreeLogger.WARN, "Failed to instantiate linker: " + e);
       }
       super.link(getTopLogger(), module);
     } else {

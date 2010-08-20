@@ -18,8 +18,6 @@ package com.google.gwt.view.client;
 import com.google.gwt.junit.client.GWTTestCase;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.view.client.SelectionModel.AbstractSelectionModel;
-import com.google.gwt.view.client.SelectionModel.SelectionChangeEvent;
-import com.google.gwt.view.client.SelectionModel.SelectionChangeHandler;
 
 /**
  * Tests for {@link AbstractSelectionModel}.
@@ -27,10 +25,10 @@ import com.google.gwt.view.client.SelectionModel.SelectionChangeHandler;
 public class AbstractSelectionModelTest extends GWTTestCase {
 
   /**
-   * A mock {@link SelectionChangeHandler} used for testing.
+   * A mock {@link SelectionChangeEvent.Handler} used for testing.
    */
   private static class MockSelectionChangeHandler implements
-      SelectionChangeHandler {
+      SelectionChangeEvent.Handler {
 
     private boolean eventFired;
 
@@ -67,6 +65,7 @@ public class AbstractSelectionModelTest extends GWTTestCase {
     MockSelectionChangeHandler handler = new MockSelectionChangeHandler();
     model.addSelectionChangeHandler(handler);
 
+    model.setSelected("test", true);
     model.fireSelectionChangeEvent();
     handler.assertEventFired(true);
   }
@@ -85,11 +84,17 @@ public class AbstractSelectionModelTest extends GWTTestCase {
 
     // Schedule the event multiple times.
     delayTestFinish(2000);
+    model.setSelected("test1", true);
     model.scheduleSelectionChangeEvent();
+    model.setSelected("test2", true);
     model.scheduleSelectionChangeEvent();
+    model.setSelected("test3", true);
     model.scheduleSelectionChangeEvent();
+    model.setSelected("test4", true);
     model.scheduleSelectionChangeEvent();
+    model.setSelected("test5", true);
     model.scheduleSelectionChangeEvent();
+    model.setSelected("test6", true);
     model.scheduleSelectionChangeEvent();
     handler.assertEventFired(false);
 

@@ -196,13 +196,15 @@ public class ValueBoxBase<T> extends FocusWidget implements
    * @throws ParseException if the value cannot be parsed
    */
   public T getValueOrThrow() throws ParseException {
-    String text = getText().trim();
+    String text = getText();
+    
+    T parseResult = parser.parse(text);
 
     if ("".equals(text)) {
       return null;
     }
 
-    return parser.parse(text);
+    return parseResult;
   }
 
   /**
@@ -363,9 +365,10 @@ public class ValueBoxBase<T> extends FocusWidget implements
   /**
    * Sets the alignment of the text in the text box.
    * 
-   * @param align the text alignment (as specified by {@link #ALIGN_CENTER},
-   *          {@link #ALIGN_JUSTIFY}, {@link #ALIGN_LEFT}, and
-   *          {@link #ALIGN_RIGHT})
+   * @param align the text alignment (as specified by
+   *          {@link TextBoxBase#ALIGN_CENTER},
+   *          {@link TextBoxBase#ALIGN_JUSTIFY}, {@link TextBoxBase#ALIGN_LEFT},
+   *          and {@link TextBoxBase#ALIGN_RIGHT})
    */
   public void setTextAlignment(TextAlignConstant align) {
     DOM.setStyleAttribute(getElement(), "textAlign", align.getTextAlignString());

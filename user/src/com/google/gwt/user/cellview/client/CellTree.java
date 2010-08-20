@@ -1,12 +1,12 @@
 /*
  * Copyright 2010 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -21,6 +21,7 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.ImageResource;
@@ -38,6 +39,33 @@ import java.util.ArrayList;
  * A view of a tree.
  */
 public class CellTree extends Composite implements HasAnimation {
+
+  /**
+   * A cleaner version of the table that uses less graphics.
+   */
+  public static interface CleanResources extends Resources {
+
+    @Source("cellTreeClosedArrow.png")
+    ImageResource cellTreeClosedItem();
+
+    @Source("cellTreeLoadingClean.gif")
+    ImageResource cellTreeLoading();
+
+    @Source("cellTreeOpenArrow.png")
+    ImageResource cellTreeOpenItem();
+
+    @Source("CellTreeClean.css")
+    CleanStyle cellTreeStyle();
+  }
+
+  /**
+   * A cleaner version of the table that uses less graphics.
+   */
+  public static interface CleanStyle extends Style {
+    String topItem();
+
+    String topItemImageValue();
+  }
 
   /**
    * A node animation.
@@ -67,7 +95,7 @@ public class CellTree extends Composite implements HasAnimation {
 
     /**
      * Animate a tree node into its new state.
-     * 
+     *
      * @param node the node to animate
      * @param isAnimationEnabled true to animate
      */
@@ -114,7 +142,7 @@ public class CellTree extends Composite implements HasAnimation {
 
     /**
      * Create a new {@link RevealAnimation}.
-     * 
+     *
      * @return the new animation
      */
     public static RevealAnimation create() {
@@ -181,7 +209,7 @@ public class CellTree extends Composite implements HasAnimation {
 
     /**
      * Animate a {@link CellTreeNodeView} into its new state.
-     * 
+     *
      * @param node the {@link CellTreeNodeView} to animate
      * @param isAnimationEnabled true to animate
      */
@@ -235,7 +263,7 @@ public class CellTree extends Composite implements HasAnimation {
   public static class SlideAnimation extends RevealAnimation {
     /**
      * Create a new {@link RevealAnimation}.
-     * 
+     *
      * @return the new animation
      */
     public static SlideAnimation create() {
@@ -311,6 +339,11 @@ public class CellTree extends Composite implements HasAnimation {
     String itemValue();
 
     /**
+     * Applied to the keyboard selected item.
+     */
+    String keyboardSelectedItem();
+
+    /**
      * Applied to open tree items.
      */
     String openItem();
@@ -342,33 +375,6 @@ public class CellTree extends Composite implements HasAnimation {
   }
 
   /**
-   * A cleaner version of the table that uses less graphics.
-   */
-  public static interface CleanStyle extends Style {
-    String topItem();
-
-    String topItemImageValue();
-  }
-
-  /**
-   * A cleaner version of the table that uses less graphics.
-   */
-  public static interface CleanResources extends Resources {
-
-    @Source("cellTreeClosedArrow.png")
-    ImageResource cellTreeClosedItem();
-
-    @Source("cellTreeLoadingClean.gif")
-    ImageResource cellTreeLoading();
-
-    @Source("cellTreeOpenArrow.png")
-    ImageResource cellTreeOpenItem();
-
-    @Source("CellTreeClean.css")
-    CleanStyle cellTreeStyle();
-  }
-
-  /**
    * The default number of children to show under a tree node.
    */
   private static final int DEFAULT_LIST_SIZE = 25;
@@ -386,6 +392,8 @@ public class CellTree extends Composite implements HasAnimation {
    * The animation.
    */
   private NodeAnimation animation;
+
+  private boolean cellIsEditing;
 
   /**
    * The HTML used to generate the closed image.
@@ -411,6 +419,12 @@ public class CellTree extends Composite implements HasAnimation {
    * Indicates whether or not animations are enabled.
    */
   private boolean isAnimationEnabled;
+
+  /**
+   * The {@link CellTreeNodeView} whose children are currently being selected
+   * using the keyboard.
+   */
+  private CellTreeNodeView<?> keyboardSelectedNode;
 
   /**
    * The HTML used to generate the loading image.
@@ -444,7 +458,7 @@ public class CellTree extends Composite implements HasAnimation {
 
   /**
    * Construct a new {@link CellTree}.
-   * 
+   *
    * @param <T> the type of data in the root node
    * @param viewModel the {@link TreeViewModel} that backs the tree
    * @param rootValue the hidden root value of the tree
@@ -455,13 +469,14 @@ public class CellTree extends Composite implements HasAnimation {
 
   /**
    * Construct a new {@link CellTree}.
-   * 
+   *
    * @param <T> the type of data in the root node
    * @param viewModel the {@link TreeViewModel} that backs the tree
    * @param rootValue the hidden root value of the tree
    * @param resources the resources used to render the tree
    */
-  public <T> CellTree(TreeViewModel viewModel, T rootValue, Resources resources) {
+  public <T> CellTree(TreeViewModel viewModel, T rootValue,
+      Resources resources) {
     this.viewModel = viewModel;
     this.style = resources.cellTreeStyle();
     this.style.ensureInjected();
@@ -484,19 +499,20 @@ public class CellTree extends Composite implements HasAnimation {
     setAnimation(SlideAnimation.create());
 
     // Add event handlers.
-    sinkEvents(Event.ONCLICK | Event.ONCHANGE | Event.MOUSEEVENTS);
+    sinkEvents(Event.ONCLICK | Event.ONKEYDOWN | Event.ONKEYUP);
 
     // Associate a view with the item.
     CellTreeNodeView<T> root = new CellTreeNodeView<T>(this, null, null,
         getElement(), rootValue);
-    rootNode = root;
+    keyboardSelectedNode = rootNode = root;
     root.setOpen(true);
+    keyboardSelectedNode.keyboardEnter(0, false);
   }
 
   /**
    * Get the animation used to open and close nodes in this tree if animations
    * are enabled.
-   * 
+   *
    * @return the animation
    * @see #isAnimationEnabled()
    */
@@ -506,7 +522,7 @@ public class CellTree extends Composite implements HasAnimation {
 
   /**
    * Get the default maximum number of children to display under each tree node.
-   * 
+   *
    * @return the default node size
    */
   public int getDefaultNodeSize() {
@@ -523,10 +539,35 @@ public class CellTree extends Composite implements HasAnimation {
 
   @Override
   public void onBrowserEvent(Event event) {
+    CellBasedWidgetImpl.get().onBrowserEvent(this, event);
     super.onBrowserEvent(event);
 
-    Element target = event.getEventTarget().cast();
+    String eventType = event.getType();
 
+    // Keep track of whether the user has focused on the widget
+    if ("blur".equals(eventType)) {
+      keyboardSelectedNode.keyboardBlur();
+      return;
+    }
+    if ("focus".equals(eventType)) {
+      keyboardSelectedNode.keyboardFocus();
+      return;
+    }
+
+    boolean keyUp = "keyup".equals(eventType);
+    boolean keyDown = "keydown".equals(eventType);
+
+    // Ignore keydown events unless the cell is in edit mode
+    if (keyDown && !cellIsEditing) {
+      return;
+    }
+    if (keyUp && !cellIsEditing) {
+      if (handleKey(event)) {
+        return;
+      }
+    }
+
+    Element target = event.getEventTarget().cast();
     ArrayList<Element> chain = new ArrayList<Element>();
     collectElementChain(chain, getElement(), target);
 
@@ -542,14 +583,18 @@ public class CellTree extends Composite implements HasAnimation {
           nodeView.showMore();
           return;
         }
+
+        // Move the keyboard focus to the clicked item
+        keyboardSelectedNode.keyboardExit();
+        keyboardSelectedNode = nodeView.getParentNode();
+        keyboardSelectedNode.keyboardEnter(target, true);
       }
 
-      // Forward the event to the cell.
-      if (nodeView.getCellParent().isOrHasChild(target)) {
-        boolean consumesEvent = nodeView.fireEventToCell(event);
-        if (!consumesEvent && "click".equals(event.getType())) {
-          nodeView.select();
-        }
+      // Forward the event to the cell
+      if (nodeView.getCellParent().isOrHasChild(target)
+          || (eventType.startsWith("key")
+              && nodeView.getCellParent().getParentElement() == target)) {
+        nodeView.fireEventToCell(event);
       }
     }
   }
@@ -557,7 +602,7 @@ public class CellTree extends Composite implements HasAnimation {
   /**
    * Set the animation used to open and close nodes in this tree. You must call
    * {@link #setAnimationEnabled(boolean)} to enable or disable animation.
-   * 
+   *
    * @param animation a {@link NodeAnimation}
    * @see #setAnimationEnabled(boolean)
    */
@@ -578,7 +623,7 @@ public class CellTree extends Composite implements HasAnimation {
    * more nodes are available, a button will appear at the end of the list
    * allowing the user to show more items. Changing this value will not affect
    * tree nodes that are already open.
-   * 
+   *
    * @param defaultNodeSize the max
    */
   public void setDefaultNodeSize(int defaultNodeSize) {
@@ -587,7 +632,7 @@ public class CellTree extends Composite implements HasAnimation {
 
   /**
    * Get the HTML to render the closed image.
-   * 
+   *
    * @param isTop true if the top element, false if not
    * @return the HTML string
    */
@@ -597,7 +642,7 @@ public class CellTree extends Composite implements HasAnimation {
 
   /**
    * Get the width required for the images.
-   * 
+   *
    * @return the maximum width required for images.
    */
   int getImageWidth() {
@@ -613,7 +658,7 @@ public class CellTree extends Composite implements HasAnimation {
 
   /**
    * Get the HTML to render the open image.
-   * 
+   *
    * @param isTop true if the top element, false if not
    * @return the HTML string
    */
@@ -630,7 +675,7 @@ public class CellTree extends Composite implements HasAnimation {
 
   /**
    * Animate the current state of a {@link CellTreeNodeView} in this tree.
-   * 
+   *
    * @param node the node to animate
    */
   void maybeAnimateTreeNode(CellTreeNodeView<?> node) {
@@ -676,7 +721,7 @@ public class CellTree extends Composite implements HasAnimation {
 
   /**
    * Get the HTML representation of an image.
-   * 
+   *
    * @param res the {@link ImageResource} to render as HTML
    * @param isTop true if the image is for a top level element.
    * @return the rendered HTML
@@ -701,5 +746,81 @@ public class CellTree extends Composite implements HasAnimation {
     // Close the div and return.
     sb.append("\"></div>");
     return sb.toString();
+  }
+
+  /**
+   * @return true if the key event was consumed by navigation, false if it
+   *         should be passed on to the underlying Cell.
+   */
+  private boolean handleKey(Event event) {
+    int keyCode = event.getKeyCode();
+
+    CellTreeNodeView<?> child = null;
+    int keyboardSelectedIndex = keyboardSelectedNode.getKeyboardSelectedIndex();
+    if (keyboardSelectedIndex != -1
+        && keyboardSelectedNode.getChildCount() > keyboardSelectedIndex) {
+      child = keyboardSelectedNode.getChildNode(keyboardSelectedIndex);
+    }
+
+    CellTreeNodeView<?> parent = keyboardSelectedNode.getParentNode();
+    switch (keyCode) {
+      case KeyCodes.KEY_UP:
+        if (keyboardSelectedNode.getKeyboardSelectedIndex() == 0) {
+          if (!keyboardSelectedNode.isRootNode()) {
+            if (parent != null) {
+              keyboardSelectedNode.keyboardExit();
+              parent.keyboardEnter(parent.indexOf(keyboardSelectedNode), true);
+              keyboardSelectedNode = parent;
+            }
+          }
+        } else {
+          keyboardSelectedNode.keyboardUp();
+          // Descend into open nodes, go to bottom of leaf node
+          int index = keyboardSelectedNode.getKeyboardSelectedIndex();
+          while ((child = keyboardSelectedNode.getChildNode(index)).isOpen()) {
+            keyboardSelectedNode.keyboardExit();
+            index = child.getChildCount() - 1;
+            child.keyboardEnter(index, true);
+            keyboardSelectedNode = child;
+          }
+        }
+        return true;
+
+      case KeyCodes.KEY_DOWN:
+        if (child != null && child.isOpen()) {
+          keyboardSelectedNode.keyboardExit();
+          child.keyboardEnter(0, true);
+          keyboardSelectedNode = child;
+        } else if (!keyboardSelectedNode.keyboardDown()) {
+          if (parent != null) {
+            keyboardSelectedNode.keyboardExit();
+            parent.keyboardEnter(parent.indexOf(keyboardSelectedNode), true);
+            // If already at last node of a given level, go up
+            while (!parent.keyboardDown()) {
+              CellTreeNodeView<?> newParent = parent.getParentNode();
+              if (newParent != null) {
+                parent.keyboardExit();
+                newParent.keyboardEnter(newParent.indexOf(parent) + 1, true);
+                parent = newParent;
+              }
+            }
+            keyboardSelectedNode = parent;
+          }
+        }
+        return true;
+
+      case KeyCodes.KEY_LEFT:
+      case KeyCodes.KEY_RIGHT:
+      case KeyCodes.KEY_ENTER:
+        // TODO(rice) - try different key bahavior mappings such as
+        // left=close, right=open, enter=toggle.
+        if (child != null && !child.isLeaf()) {
+          child.setOpen(!child.isOpen());
+          return true;
+        }
+        break;
+    }
+
+    return false;
   }
 }

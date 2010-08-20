@@ -55,12 +55,28 @@ public abstract class Linker {
   public abstract String getDescription();
 
   /**
-   * Check whether this class has the {@link Shardable} annotation.
+   * Check whether this class is considered a shardable linker. A linker is
+   * shardable if it either implements the {@link Shardable} annotation or it
+   * has a field named <code>gwtIsShardable</code>. If such a field is present,
+   * it doesn't matter what value the field holds. The latter mechanism is only
+   * intended to support linkers that must compile against older versions of
+   * GWT.
    */
   public final boolean isShardable() {
-    return getClass().isAnnotationPresent(Shardable.class);
-  }
+    if (getClass().isAnnotationPresent(Shardable.class)) {
+      return true;
+    }
 
+    try {
+      getClass().getDeclaredField("gwtIsShardable");
+      return true;
+    } catch (NoSuchFieldException e) {
+      // The field does not exist; fall through
+    }
+
+    return false;
+  }
+  
   /**
    * This method is invoked for linkers not annotated with {@link Shardable}. It
    * sees all artifacts across the whole compile and can modify them
@@ -133,5 +149,13 @@ public abstract class Linker {
   public ArtifactSet relink(TreeLogger logger, LinkerContext context,
       ArtifactSet newArtifacts) throws UnableToCompleteException {
     return newArtifacts;
+  }
+
+  /**
+   * Does this linker support DevMode?
+   */
+  public boolean supportsDevMode() {
+    // By default, linkers do not support Dev Mode
+    return false;
   }
 }

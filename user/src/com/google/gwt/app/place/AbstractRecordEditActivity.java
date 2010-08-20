@@ -15,10 +15,12 @@
  */
 package com.google.gwt.app.place;
 
+import com.google.gwt.app.place.ProxyPlace.Operation;
+import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.requestfactory.shared.Receiver;
 import com.google.gwt.requestfactory.shared.RequestFactory;
+import com.google.gwt.requestfactory.shared.RequestObject;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.valuestore.shared.DeltaValueStore;
 import com.google.gwt.valuestore.shared.Record;
 import com.google.gwt.valuestore.shared.SyncResult;
 import com.google.gwt.valuestore.shared.Value;
@@ -38,35 +40,58 @@ import java.util.Set;
 public abstract class AbstractRecordEditActivity<R extends Record> implements
     Activity, RecordEditView.Delegate {
 
-  private final RequestFactory requests;
+  private RequestObject<Void> requestObject;
+
   private final boolean creating;
   private final RecordEditView<R> view;
+  private final Class<R> proxyType;
+  private final RequestFactory requests;
+  private final PlaceController placeController;
 
-  private String id;
-  private String futureId;
-  private DeltaValueStore deltas;
+  private R record;
+  private Long futureId;
   private Display display;
 
-  public AbstractRecordEditActivity(RecordEditView<R> view, String id,
-      RequestFactory requests) {
+  public AbstractRecordEditActivity(RecordEditView<R> view, R record,
+      Class<R> proxyType, boolean creating, RequestFactory requests,
+      PlaceController placeController) {
+
     this.view = view;
-    this.creating = "".equals(id);
-    this.id = id;
+    this.record = record;
+    this.proxyType = proxyType;
+    this.placeController = placeController;
+    this.creating = creating;
     this.requests = requests;
-    this.deltas = requests.getValueStore().spawnDeltaView();
   }
 
   public void cancelClicked() {
-    if (willStop()) {
-      deltas = null; // silence the next willStop() call when place changes
-      if (creating) {
-        display.showActivityWidget(null);
-      } else {
-        exit();
+    String unsavedChangesWarning = mayStop();
+    if ((unsavedChangesWarning == null)
+        || Window.confirm(unsavedChangesWarning)) {
+      if (requestObject != null) {
+        // silence the next mayStop() call when place changes
+        requestObject.reset();
       }
+      exit(false);
     }
   }
 
+  public R getRecord() {
+    return record;
+  }
+
+  public RecordEditView<R> getView() {
+    return view;
+  }
+
+  public String mayStop() {
+    if (requestObject != null && requestObject.isChanged()) {
+      return "Are you sure you want to abandon your changes?";
+    }
+
+    return null;
+  }
+  
   public void onCancel() {
     onStop();
   }
@@ -76,68 +101,65 @@ public abstract class AbstractRecordEditActivity<R extends Record> implements
   }
 
   public void saveClicked() {
-    if (deltas.isChanged()) {
-      view.setEnabled(false);
+    assert requestObject != null;
+    if (!requestObject.isChanged()) {
+      return;
+    }
+    view.setEnabled(false);
 
-      final DeltaValueStore toCommit = deltas;
-      deltas = null;
+    final RequestObject<Void> toCommit = requestObject;
+    requestObject = null;
 
-      Receiver<Set<SyncResult>> receiver = new Receiver<Set<SyncResult>>() {
-        public void onSuccess(Set<SyncResult> response) {
-          if (display == null) {
-            return;
-          }
-          boolean hasViolations = false;
-          for (SyncResult syncResult : response) {
-            Record syncRecord = syncResult.getRecord();
-            if (creating) {
-              if (futureId == null
-                  || !futureId.equals(syncResult.getFutureId())) {
-                continue;
-              }
-              id = syncRecord.getId();
-            } else {
-              if (!syncRecord.getId().equals(id)) {
-                continue;
-              }
+    Receiver<Void> receiver = new Receiver<Void>() {
+      public void onSuccess(Void ignore, Set<SyncResult> response) {
+        if (display == null) {
+          return;
+        }
+        boolean hasViolations = false;
+
+         for (SyncResult syncResult : response) {
+          Record syncRecord = syncResult.getRecord();
+          if (creating) {
+            if (futureId == null || !futureId.equals(syncResult.getFutureId())) {
+              continue;
             }
-            if (syncResult.hasViolations()) {
-              hasViolations = true;
-              view.showErrors(syncResult.getViolations());
-            }
-          }
-          if (!hasViolations) {
-            exit();
+            record = cast(syncRecord);
           } else {
-            deltas = toCommit;
-            deltas.clearUsed();
-            view.setEnabled(true);
-            deltas.clearUsed();
+            if (!syncRecord.getId().equals(record.getId())) {
+              continue;
+            }
+          }
+          if (syncResult.hasViolations()) {
+            hasViolations = true;
+            view.showErrors(syncResult.getViolations());
           }
         }
-
-      };
-      requests.syncRequest(toCommit).to(receiver).fire();
-    }
+        if (!hasViolations) {
+          exit(true);
+        } else {
+          requestObject = toCommit;
+          requestObject.clearUsed();
+          view.setEnabled(true);
+        }
+      }
+    };
+    toCommit.fire(receiver);
   }
 
   @SuppressWarnings("unchecked")
-  public void start(Display display) {
+  public void start(Display display, EventBus eventBus) {
     this.display = display;
-    
+
     view.setDelegate(this);
-    view.setDeltaValueStore(deltas);
     view.setCreating(creating);
 
     if (creating) {
-      // TODO shouldn't have to cast like this. Let's get something better than
-      // a string token
-      R tempRecord = (R) deltas.create(getRecordClass());
+      R tempRecord = (R) requests.create(proxyType);
       futureId = tempRecord.getId();
       doStart(display, tempRecord);
     } else {
-      fireFindRequest(Value.of(id), new Receiver<R>() {
-        public void onSuccess(R record) {
+      fireFindRequest(Value.of(getRecord().getId()), new Receiver<R>() {
+        public void onSuccess(R record, Set<SyncResult> syncResults) {
           if (AbstractRecordEditActivity.this.display != null) {
             doStart(AbstractRecordEditActivity.this.display, record);
           }
@@ -146,34 +168,41 @@ public abstract class AbstractRecordEditActivity<R extends Record> implements
     }
   }
 
-  public boolean willStop() {
-    return deltas == null || !deltas.isChanged()
-        || Window.confirm("Are you sure you want to abandon your changes?");
-  }
-
   /**
-   * Called when the user has clicked Cancel or has successfully saved.
+   * Called when the user cancels or has successfully saved. This default
+   * implementation tells the {@link PlaceController} to show the details of the
+   * edited record, or clears the display if a creation was canceled.
+   * <p>
+   * If we're creating, a call to getRecord() from here will return a record
+   * with the correct id. However, other properties may be stale or unset.
+   * 
+   * @param saved true if changes were comitted
    */
-  protected abstract void exit();
+  protected void exit(boolean saved) {
+    if (!saved && creating) {
+      display.showActivityWidget(null);
+    } else {
+      placeController.goTo(new ProxyPlace(getRecord(), Operation.DETAILS));
+    }
+  }
 
   /**
    * Called to fetch the details of the edited record.
    */
-  protected abstract void fireFindRequest(Value<String> id, Receiver<R> callback);
+  protected abstract void fireFindRequest(Value<Long> id, Receiver<R> callback);
 
-  protected String getId() {
-    return id;
+  protected abstract RequestObject<Void> getPersistRequest(R record);
+
+  @SuppressWarnings("unchecked")
+  private R cast(Record syncRecord) {
+    return (R) syncRecord;
   }
 
-  /**
-   * Called to fetch the string token needed to get a new record via
-   * {@link DeltaValueStore#create}.
-   */
-  protected abstract Class getRecordClass();
-
   private void doStart(final Display display, R record) {
+    requestObject = getPersistRequest(record);
+    R editableRecord = requestObject.edit(record);
     view.setEnabled(true);
-    view.setValue(record);
+    view.setValue(editableRecord);
     view.showErrors(null);
     display.showActivityWidget(view);
   }

@@ -15,8 +15,6 @@
  */
 package com.google.gwt.requestfactory.server;
 
-import com.google.gwt.requestfactory.shared.RequestFactory;
-
 /**
  * <p>
  * <span style="color:red">Experimental API: This class is still under rapid
@@ -27,5 +25,7 @@ import com.google.gwt.requestfactory.shared.RequestFactory;
  */
 public interface OperationRegistry {
 
-  RequestFactory.RequestDefinition getOperation(String operationName);
+  RequestDefinition getOperation(String operationName);
+
+  RequestSecurityProvider getSecurityProvider();
 }

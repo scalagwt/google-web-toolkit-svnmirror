@@ -31,16 +31,18 @@ public class JArrayType extends JReferenceType {
   private int dims;
   private JType elementType;
   private JType leafType;
+  private JClassType typeObject;
 
   /**
    * These are only supposed to be constructed by JProgram.
    */
-  JArrayType(JType elementType, JType leafType, int dims) {
+  JArrayType(JType elementType, JType leafType, int dims, JClassType typeObject) {
     super(leafType.getSourceInfo().makeChild(JArrayType.class, "Array type"),
         calcName(leafType, dims));
     this.elementType = elementType;
     this.leafType = leafType;
     this.dims = dims;
+    this.typeObject = typeObject;
   }
 
   @Override
@@ -56,6 +58,7 @@ public class JArrayType extends JReferenceType {
     return elementType;
   }
 
+  @Override
   public String getJavahSignatureName() {
     String s = leafType.getJavahSignatureName();
     for (int i = 0; i < dims; ++i) {
@@ -64,6 +67,7 @@ public class JArrayType extends JReferenceType {
     return s;
   }
 
+  @Override
   public String getJsniSignatureName() {
     String s = leafType.getJsniSignatureName();
     for (int i = 0; i < dims; ++i) {
@@ -74,6 +78,11 @@ public class JArrayType extends JReferenceType {
 
   public JType getLeafType() {
     return leafType;
+  }
+
+  @Override
+  public JClassType getSuperClass() {
+    return typeObject;
   }
 
   public boolean isAbstract() {

@@ -21,34 +21,37 @@ import com.google.gwt.uibinder.rebind.UiBinderWriter;
 import com.google.gwt.uibinder.rebind.XMLElement;
 
 /**
- * Parser of all UIObject types. Provides parsing of debugId,
- * addStyleNames, addStyleDependentNames. Also handles
- * other setStyle* calls to ensure they happen before the addStyle* 
- * calls. 
+ * Parser of all UIObject types. Provides parsing of debugId, addStyleNames,
+ * addStyleDependentNames. Also handles other setStyle* calls to ensure they
+ * happen before the addStyle* calls.
  */
 public class UIObjectParser implements ElementParser {
 
   public void parse(XMLElement elem, String fieldName, JClassType type,
       UiBinderWriter writer) throws UnableToCompleteException {
 
+    writer.getDesignTime().handleUIObject(writer, elem, fieldName);
+
     String debugId = elem.consumeStringAttribute("debugId", null);
     if (null != debugId) {
       writer.addStatement("%s.ensureDebugId(%s);", fieldName, debugId);
     }
-    
+
     String styleName = elem.consumeStringAttribute("styleName", null);
-    String stylePrimaryName = elem.consumeStringAttribute("stylePrimaryName", null);
+    String stylePrimaryName = elem.consumeStringAttribute("stylePrimaryName",
+        null);
 
     if (null != styleName && null != stylePrimaryName) {
       writer.die(elem, "Cannot set both \"styleName\" "
           + "and \"stylePrimaryName\"");
     }
-    
+
     if (null != styleName) {
       writer.addStatement("%s.setStyleName(%s);", fieldName, styleName);
     }
     if (null != stylePrimaryName) {
-      writer.addStatement("%s.setStylePrimaryName(%s);", fieldName, stylePrimaryName);
+      writer.addStatement("%s.setStylePrimaryName(%s);", fieldName,
+          stylePrimaryName);
     }
 
     String[] extraStyleNames = elem.consumeStringArrayAttribute("addStyleNames");

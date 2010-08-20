@@ -21,56 +21,50 @@ import com.google.gwt.core.ext.TreeLogger.Type;
 import com.google.gwt.dev.util.Util;
 
 import org.eclipse.jdt.core.compiler.CategorizedProblem;
-import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 /**
  * Helper class to invalidate units in a set based on errors or references to
  * other invalidate units.
- * 
- * TODO: ClassFileReader#hasStructuralChanges(byte[]) could help us optimize
- * this process!
  */
 public class CompilationUnitInvalidator {
 
+  @SuppressWarnings("deprecation")
   public static void reportErrors(TreeLogger logger, CompilationUnit unit) {
-    reportErrors(logger, unit.getProblems(), unit.getDisplayLocation(),
-        unit.isError());
-  }
-
-  public static void reportErrors(TreeLogger logger,
-      CompilationUnitDeclaration cud, String sourceForDump) {
-    CategorizedProblem[] problems = cud.compilationResult().getProblems();
-    String fileName = String.valueOf(cud.getFileName());
-    boolean isError = cud.compilationResult().hasErrors();
-    TreeLogger branch = reportErrors(logger, problems, fileName, isError);
+    TreeLogger branch = reportErrors(logger, unit.getProblems(),
+        unit.getDisplayLocation(), unit.isError());
     if (branch != null) {
-      Util.maybeDumpSource(branch, fileName, sourceForDump,
-          String.valueOf(cud.getMainTypeName()));
+      Util.maybeDumpSource(branch, unit.getDisplayLocation(), unit.getSource(),
+          unit.getTypeName());
     }
   }
 
   public static void retainValidUnits(TreeLogger logger,
-      Collection<CompilationUnit> units) {
-    retainValidUnits(logger, units, Collections.<ContentId> emptySet());
-  }
-
-  public static void retainValidUnits(TreeLogger logger,
-      Collection<CompilationUnit> units, Set<ContentId> knownValidRefs) {
+      Collection<CompilationUnit> units, Map<String, CompiledClass> validClasses) {
     logger = logger.branch(TreeLogger.TRACE, "Removing invalidated units");
 
     // Assume all units are valid at first.
-    Set<CompilationUnit> currentlyValidUnits = new HashSet<CompilationUnit>();
-    Set<ContentId> currentlyValidRefs = new HashSet<ContentId>(knownValidRefs);
+    Set<CompilationUnit> currentlyValidUnits = new LinkedHashSet<CompilationUnit>();
+    Set<String> currentlyValidClasses = new HashSet<String>();
     for (CompilationUnit unit : units) {
-      if (unit.isCompiled()) {
+      if (!unit.isError()) {
         currentlyValidUnits.add(unit);
-        currentlyValidRefs.add(unit.getContentId());
+        for (CompiledClass cc : unit.getCompiledClasses()) {
+          currentlyValidClasses.add(cc.getSourceName());
+        }
+      }
+    }
+    for (Entry<String, CompiledClass> entry : validClasses.entrySet()) {
+      if (!entry.getValue().getUnit().isError()) {
+        currentlyValidClasses.add(entry.getKey());
       }
     }
 
@@ -79,17 +73,19 @@ public class CompilationUnitInvalidator {
       changed = false;
       for (Iterator<CompilationUnit> it = currentlyValidUnits.iterator(); it.hasNext();) {
         CompilationUnit unitToCheck = it.next();
-        TreeLogger branch = null;
-        for (ContentId ref : unitToCheck.getDependencies()) {
-          if (!currentlyValidRefs.contains(ref)) {
-            if (branch == null) {
-              branch = logger.branch(TreeLogger.DEBUG, "Compilation unit '"
-                  + unitToCheck + "' is removed due to invalid reference(s):");
-              it.remove();
-              currentlyValidRefs.remove(unitToCheck.getContentId());
-              changed = true;
-            }
-            branch.log(TreeLogger.DEBUG, ref.get());
+        List<String> invalidRefs = unitToCheck.getDependencies().findMissingApiRefs(
+            currentlyValidClasses);
+        if (invalidRefs.size() > 0) {
+          it.remove();
+          for (CompiledClass cc : unitToCheck.getCompiledClasses()) {
+            currentlyValidClasses.remove(cc.getSourceName());
+          }
+          changed = true;
+          TreeLogger branch = logger.branch(TreeLogger.DEBUG,
+              "Compilation unit '" + unitToCheck
+                  + "' is removed due to invalid reference(s):");
+          for (String ref : invalidRefs) {
+            branch.log(TreeLogger.DEBUG, ref);
           }
         }
       }

@@ -16,6 +16,14 @@
 package com.google.gwt.sample.showcase.client;
 
 import com.google.gwt.i18n.client.Constants;
+import com.google.gwt.sample.showcase.client.content.cell.CwCellBrowser;
+import com.google.gwt.sample.showcase.client.content.cell.CwCellList;
+import com.google.gwt.sample.showcase.client.content.cell.CwCellSampler;
+import com.google.gwt.sample.showcase.client.content.cell.CwCellTable;
+import com.google.gwt.sample.showcase.client.content.cell.CwCellTree;
+import com.google.gwt.sample.showcase.client.content.cell.CwCellValidation;
+import com.google.gwt.sample.showcase.client.content.i18n.CwBidiFormatting;
+import com.google.gwt.sample.showcase.client.content.i18n.CwBidiInput;
 import com.google.gwt.sample.showcase.client.content.i18n.CwConstantsExample;
 import com.google.gwt.sample.showcase.client.content.i18n.CwConstantsWithLookupExample;
 import com.google.gwt.sample.showcase.client.content.i18n.CwDateTimeFormat;
@@ -71,12 +79,15 @@ public interface ShowcaseConstants extends Constants,
     CwFlexTable.CwConstants, CwBasicText.CwConstants, CwRichText.CwConstants,
     CwFileUpload.CwConstants, CwAbsolutePanel.CwConstants,
     CwHyperlink.CwConstants, CwFrame.CwConstants, CwStackPanel.CwConstants,
-    CwCookies.CwConstants, CwNumberFormat.CwConstants,
-    CwDateTimeFormat.CwConstants, CwMessagesExample.CwConstants,
-    CwConstantsExample.CwConstants, CwConstantsWithLookupExample.CwConstants,
-    CwDictionaryExample.CwConstants, CwDecoratorPanel.CwConstants,
-    CwAnimation.CwConstants, CwDatePicker.CwConstants,
-    CwPluralFormsExample.CwConstants {
+    CwCookies.CwConstants, CwNumberFormat.CwConstants, CwBidiInput.CwConstants,
+    CwBidiFormatting.CwConstants, CwDateTimeFormat.CwConstants,
+    CwMessagesExample.CwConstants, CwConstantsExample.CwConstants,
+    CwConstantsWithLookupExample.CwConstants, CwDictionaryExample.CwConstants,
+    CwDecoratorPanel.CwConstants, CwAnimation.CwConstants,
+    CwDatePicker.CwConstants, CwPluralFormsExample.CwConstants,
+    CwCellList.CwConstants, CwCellTable.CwConstants, CwCellTree.CwConstants,
+    CwCellBrowser.CwConstants, CwCellValidation.CwConstants,
+    CwCellSampler.CwConstants {
 
   /**
    * The path to source code for examples, raw files, and style definitions.
@@ -112,6 +123,8 @@ public interface ShowcaseConstants extends Constants,
    * The available style themes that the user can select.
    */
   String[] STYLE_THEMES = {"standard", "chrome", "dark"};
+
+  String categoryCells();
 
   String categoryI18N();
 
@@ -154,3 +167,4 @@ public interface ShowcaseConstants extends Constants,
    */
   String mainTitle();
 }
+
