@@ -89,7 +89,7 @@ public abstract class Map<K, V> extends JavaScriptObject {
    */
   protected final String adapt(Object key) {
     if (!jsniIsAdapterPresent()) {
-      return key == null ? null : (String) key;
+      return key == null ? null : key.toString();
     }
     return jsniGetAdapter().applyTo(key);
   }

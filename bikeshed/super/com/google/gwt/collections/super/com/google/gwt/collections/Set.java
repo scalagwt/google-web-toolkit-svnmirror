@@ -123,7 +123,7 @@ public abstract class Set<E> extends JavaScriptObject {
    */
   protected final String adapt(Object key) {
     if (!jsniIsAdapterPresent()) {
-      return key == null ? null : (String) key;
+      return key == null ? null : key.toString();
     }
     return jsniGetAdapter().applyTo(key);
   }

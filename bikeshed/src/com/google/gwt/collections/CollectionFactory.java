@@ -27,7 +27,7 @@ public class CollectionFactory {
       if (value == null) {
         return null;
       }
-      return (String) value;
+      return value.toString();
     }
   };
 
