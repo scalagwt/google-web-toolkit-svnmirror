@@ -247,7 +247,6 @@ public class JsonRequestProcessor implements RequestProcessor<String> {
         int ordinal = Integer.parseInt(parameterValue);
         Method valuesMethod = parameterType.getDeclaredMethod("values",
             new Class[0]);
-        log.severe("Type is " + parameterType + " valuesMethod " + valuesMethod);
 
         if (valuesMethod != null) {
           valuesMethod.setAccessible(true);
@@ -321,7 +320,7 @@ public class JsonRequestProcessor implements RequestProcessor<String> {
     if (Boolean.class == type) {
       return value;
     }
-    if (Date.class == type) {
+    if (Date.class.isAssignableFrom(type)) {
       return String.valueOf(((Date) value).getTime());
     }
     if (Enum.class.isAssignableFrom(type)) {

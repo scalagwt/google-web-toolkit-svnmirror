@@ -24,7 +24,9 @@ import com.google.gwt.core.ext.SelectionProperty;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.core.ext.typeinfo.JClassType;
+import com.google.gwt.core.ext.typeinfo.JGenericType;
 import com.google.gwt.core.ext.typeinfo.JMethod;
+import com.google.gwt.core.ext.typeinfo.JParameterizedType;
 import com.google.gwt.core.ext.typeinfo.JType;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.dev.generator.NameFactory;
@@ -66,13 +68,25 @@ import java.util.Set;
  * }
  * // Other ResourceGenerator-defined fields
  * private static ResourceType resource;
+ * private static HashMap&lt;String, ResourcePrototype&gt; resourceMap;
  * static {
  *   new ClientBundle()._init0();
  * }
  * public ResourcePrototype[] getResources() {
  *   return new ResourcePrototype[] { resource() };
  * }
- * public native ResourcePrototype getResource(String name) /-{
+ * public ResourcePrototype getResource(String name) {
+ *   if (GWT.isScript()) {
+ *     return getResourceNative(name);
+ *   } else {
+ *     if (resourceMap == null) {
+ *       resourceMap = new HashMap<String, ResourcePrototype>();
+ *       resourceMap.put("resource", resource());
+ *     }
+ *     return resourceMap.get(name);
+ *   }
+ * }
+ * private native ResourcePrototype getResourceNative(String name) /-{
  *   switch (name) {
  *     case 'resource': return this.@...::resource()();
  *   }
@@ -96,10 +110,6 @@ public abstract class AbstractClientBundleGenerator extends Generator {
     private final Map<String, String> fieldsToDeclarations = new LinkedHashMap<String, String>();
     private final Map<String, String> fieldsToInitializers = new HashMap<String, String>();
 
-    public void addName(String name) {
-      factory.addName(name);
-    }
-
     public String define(JType type, String name) {
       return define(type, name, null, true, false);
     }
@@ -111,7 +121,6 @@ public abstract class AbstractClientBundleGenerator extends Generator {
           + " is not a valid Java identifier";
 
       String ident = factory.createName(name);
-      factory.addName(ident);
 
       StringBuilder sb = new StringBuilder();
       sb.append("private ");
@@ -124,7 +133,7 @@ public abstract class AbstractClientBundleGenerator extends Generator {
         sb.append("final ");
       }
 
-      sb.append(type.getQualifiedSourceName());
+      sb.append(type.getParameterizedQualifiedSourceName());
       sb.append(" ");
       sb.append(ident);
 
@@ -271,6 +280,9 @@ public abstract class AbstractClientBundleGenerator extends Generator {
       // Set the now-calculated simple source name
       resourceContext.setSimpleSourceName(generatedSimpleSourceName);
 
+      JParameterizedType hashMapStringResource = getHashMapStringResource(typeOracle);
+      String resourceMapField = fields.define(hashMapStringResource, "resourceMap");
+
       // Write the generated code to disk
       createFieldsAndAssignments(logger, sw, generators, resourceContext,
           fields);
@@ -289,7 +301,7 @@ public abstract class AbstractClientBundleGenerator extends Generator {
        * name, but should not include any sub-bundles.
        */
       taskList.remove(BundleResourceGenerator.class);
-      writeMapMethods(logger, createdClassName, sw, taskList);
+      writeMapMethods(sw, taskList, hashMapStringResource, resourceMapField);
 
       sw.commit(logger);
     }
@@ -559,11 +571,9 @@ public abstract class AbstractClientBundleGenerator extends Generator {
    * @throws UnableToCompleteException if an error occurs.
    */
   private String generateSimpleSourceName(TreeLogger logger,
-      ResourceContext context, RequirementsImpl requirements)
-      throws UnableToCompleteException {
+      ResourceContext context, RequirementsImpl requirements) {
     StringBuilder toReturn = new StringBuilder(
-        context.getClientBundleType().getQualifiedSourceName().replaceAll(
-            "[.$]", "_"));
+        context.getClientBundleType().getName().replaceAll("[.$]", "_"));
     Set<String> permutationAxes = new HashSet<String>(requirements.axes);
     permutationAxes.add("locale");
 
@@ -580,6 +590,21 @@ public abstract class AbstractClientBundleGenerator extends Generator {
     toReturn.append("_" + getClass().getSimpleName());
 
     return toReturn.toString();
+  }
+
+  /**
+   * Returns HashMap&lt;String, ResourcePrototype&gt;.
+   */
+  private JParameterizedType getHashMapStringResource(TypeOracle typeOracle) {
+    JGenericType hashMap = (JGenericType) typeOracle.findType(HashMap.class.getName());
+    assert hashMap != null;
+    JClassType string = typeOracle.findType(String.class.getName());
+    assert string != null;
+    JClassType resourcePrototype = typeOracle.findType(ResourcePrototype.class.getName());
+    assert resourcePrototype != null;
+    JParameterizedType mapStringRes = typeOracle.getParameterizedType(hashMap,
+        new JClassType[]{string, resourcePrototype});
+    return mapStringRes;
   }
 
   private boolean initAndPrepare(TreeLogger logger,
@@ -654,19 +679,16 @@ public abstract class AbstractClientBundleGenerator extends Generator {
     throw new UnableToCompleteException();
   }
 
-  // FIXME - document
   /**
-   * @param logger
-   * @param createdClassName
-   * @param sw
-   * @param taskList
+   * Emits getResources() and getResourceMap() implementations.
    * 
-   * @throws UnableToCompleteException if an error occurs
+   * @param sw the output writer
+   * @param taskList the list of methods to map by name
+   * @param resourceMapField field containing the Java String to Resource map
    */
-  private void writeMapMethods(TreeLogger logger, String createdClassName,
-      SourceWriter sw,
-      Map<Class<? extends ResourceGenerator>, List<JMethod>> taskList)
-      throws UnableToCompleteException {
+  private void writeMapMethods(SourceWriter sw,
+      Map<Class<? extends ResourceGenerator>, List<JMethod>> taskList,
+      JParameterizedType resourceMapType, String resourceMapField) {
 
     // Complete the IRB contract
     sw.println("public ResourcePrototype[] getResources() {");
@@ -683,9 +705,36 @@ public abstract class AbstractClientBundleGenerator extends Generator {
     sw.outdent();
     sw.println("}");
 
-    // Use a switch statement as a fast map
-    sw.println("public native ResourcePrototype "
-        + "getResource(String name) /*-{");
+    // Map implementation for dev mode.
+    sw.println("public ResourcePrototype getResource(String name) {");
+    sw.indent();
+    sw.println("if (GWT.isScript()) {");
+    sw.indent();
+    sw.println("return getResourceNative(name);");
+    sw.outdent();
+    sw.println("} else {");
+    sw.indent();
+    sw.println("if (" + resourceMapField + " == null) {");
+    sw.indent();
+    sw.println(resourceMapField + " = new "
+        + resourceMapType.getParameterizedQualifiedSourceName() + "();");
+    for (List<JMethod> list : taskList.values()) {
+      for (JMethod m : list) {
+        sw.println(resourceMapField + ".put(\"" + m.getName() + "\", "
+            + m.getName() + "());");
+      }
+    }
+    sw.outdent();
+    sw.println("}");
+    sw.println("return resourceMap.get(name);");
+    sw.outdent();
+    sw.println("}");
+    sw.outdent();
+    sw.println("}");
+
+    // Use a switch statement as a fast map for script mode.
+    sw.println("private native ResourcePrototype "
+        + "getResourceNative(String name) /*-{");
     sw.indent();
     sw.println("switch (name) {");
     sw.indent();
