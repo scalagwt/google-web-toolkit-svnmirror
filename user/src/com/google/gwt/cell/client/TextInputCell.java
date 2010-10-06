@@ -1,0 +1,204 @@
+/*
+ * Copyright 2010 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package com.google.gwt.cell.client;
+
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.InputElement;
+import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.safehtml.client.SafeHtmlTemplates;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.text.shared.SafeHtmlRenderer;
+import com.google.gwt.text.shared.SimpleSafeHtmlRenderer;
+
+/**
+ * A {@link AbstractCell} used to render a text input.
+ *
+ * <p>
+ * Note: This class is new and its interface subject to change.
+ * </p>
+ */
+public class TextInputCell extends
+    AbstractInputCell<String, TextInputCell.ViewData> {
+
+  interface Template extends SafeHtmlTemplates {
+    @Template("<input type=\"text\" value=\"{0}\" tabindex=\"-1\"></input>")
+    SafeHtml input(String value);
+  }
+
+  /**
+   * The ViewData for this cell.
+   */
+  public static class ViewData {
+    /**
+     * The last value that was updated.
+     */
+    private String lastValue;
+
+    /**
+     * The current value.
+     */
+    private String curValue;
+
+    public ViewData(String value) {
+      this.lastValue = value;
+      this.curValue = value;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+      if (other == null || !(other instanceof ViewData)) {
+        return false;
+      }
+      ViewData vd = (ViewData) other;
+      return equalsOrNull(lastValue, vd.lastValue)
+          && equalsOrNull(curValue, vd.curValue);
+    }
+
+    /**
+     * @return the current value of the input element
+     */
+    public String getCurrentValue() {
+      return curValue;
+    }
+
+    /**
+     * @return the last value sent to the {@link ValueUpdater}
+     */
+    public String getLastValue() {
+      return lastValue;
+    }
+
+    @Override
+    public int hashCode() {
+      return (lastValue + "_*!@HASH_SEPERATOR@!*_" + curValue).hashCode();
+    }
+
+    protected void setCurrentValue(String curValue) {
+      this.curValue = curValue;
+    }
+
+    protected void setLastValue(String lastValue) {
+      this.lastValue = lastValue;
+    }
+
+    private boolean equalsOrNull(Object a, Object b) {
+      return (a != null) ? a.equals(b) : ((b == null) ? true : false);
+    }
+  }
+
+  private static Template template;
+
+  private final SafeHtmlRenderer<String> renderer;
+
+  /**
+   * Constructs a TextInputCell that renders its text without HTML markup.
+   */
+  public TextInputCell() {
+    this(SimpleSafeHtmlRenderer.getInstance());
+  }
+
+  /**
+   * Constructs a TextInputCell that renders its text using the given
+   * {@link SafeHtmlRenderer}.
+   *
+   * @param renderer a non-null SafeHtmlRenderer
+   */
+  public TextInputCell(SafeHtmlRenderer<String> renderer) {
+    super("change", "keyup");
+    if (template == null) {
+      template = GWT.create(Template.class);
+    }
+    if (renderer == null) {
+      throw new IllegalArgumentException("renderer == null");
+    }
+    this.renderer = renderer;
+  }
+
+  @Override
+  public void onBrowserEvent(Element parent, String value, Object key,
+      NativeEvent event, ValueUpdater<String> valueUpdater) {
+    super.onBrowserEvent(parent, value, key, event, valueUpdater);
+
+    // Ignore events that don't target the input.
+    InputElement input = getInputElement(parent);
+    Element target = event.getEventTarget().cast();
+    if (!input.isOrHasChild(target)) {
+      return;
+    }
+
+    String eventType = event.getType();
+    if ("change".equals(eventType)) {
+      finishEditing(parent, value, key, valueUpdater);
+    } else if ("keyup".equals(eventType)) {
+      // Record keys as they are typed.
+      ViewData vd = getViewData(key);
+      if (vd == null) {
+        vd = new ViewData(value);
+        setViewData(key, vd);
+      }
+      vd.setCurrentValue(input.getValue());
+    }
+  }
+
+  @Override
+  public void render(String value, Object key, SafeHtmlBuilder sb) {
+    // Get the view data.
+    ViewData viewData = getViewData(key);
+    if (viewData != null && viewData.getCurrentValue().equals(value)) {
+      clearViewData(key);
+      viewData = null;
+    }
+
+    String s = (viewData != null) ? viewData.getCurrentValue() : value;
+    if (s != null) {
+      SafeHtml html = renderer.render(s);
+      // Note: template will not treat SafeHtml specially
+      sb.append(template.input(html.asString()));
+    } else {
+      sb.appendHtmlConstant("<input type=\"text\" tabindex=\"-1\"></input>");
+    }
+  }
+
+  @Override
+  protected void finishEditing(Element parent, String value, Object key,
+      ValueUpdater<String> valueUpdater) {
+    String newValue = getInputElement(parent).getValue();
+
+    // Get the view data.
+    ViewData vd = getViewData(key);
+    if (vd == null) {
+      vd = new ViewData(value);
+      setViewData(key, vd);
+    }
+    vd.setCurrentValue(newValue);
+
+    // Fire the value updater if the value has changed.
+    if (valueUpdater != null && !vd.getCurrentValue().equals(vd.getLastValue())) {
+      vd.setLastValue(newValue);
+      valueUpdater.update(newValue);
+    }
+
+    // Blur the element.
+    super.finishEditing(parent, newValue, key, valueUpdater);
+  }
+
+  @Override
+  protected InputElement getInputElement(Element parent) {
+    return super.getInputElement(parent).<InputElement> cast();
+  }
+}
